@@ -14,6 +14,7 @@ from ._quantrisk import (
     inverse_normal_cdf,
     normal_cdf,
     normal_pdf,
+    pricing,
     stats,
     version,
 )
@@ -28,6 +29,7 @@ __all__ = [
     "inverse_normal_cdf",
     "normal_cdf",
     "normal_pdf",
+    "pricing",
     "stats",
     "version",
 ]

@@ -66,7 +66,10 @@ add_library(quantrisk_core STATIC
   cpp/src/core/rng.cpp
   cpp/src/core/statistics.cpp
   cpp/src/core/version.cpp
-  cpp/src/math/normal.cpp)
+  cpp/src/math/normal.cpp
+  cpp/src/pricing/black_scholes.cpp
+  cpp/src/pricing/binomial_crr.cpp
+  cpp/src/pricing/finite_differences.cpp)
 
 target_include_directories(quantrisk_core PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cpp/include>"
@@ -114,7 +117,10 @@ if(QUANTRISK_BUILD_TESTS)
     tests/cpp/test_rng.cpp
     tests/cpp/test_statistics.cpp
     tests/cpp/test_normal.cpp
-    tests/cpp/test_build_info.cpp)
+    tests/cpp/test_build_info.cpp
+    tests/cpp/test_black_scholes.cpp
+    tests/cpp/test_greeks.cpp
+    tests/cpp/test_binomial.cpp)
 
   target_link_libraries(quantrisk_tests PRIVATE quantrisk_core Catch2::Catch2WithMain)
 

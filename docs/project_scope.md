@@ -121,15 +121,29 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | `docs/mathematical_specification.md` v0.1 | DONE (Phase 0, spec only) |
 | `docs/validation_protocol.md` | DONE (Phase 0) |
 | `docs/architecture.md` (+ diagram) | DONE (Phase 0) |
-| Phase 1 build/packaging/C++ core/bindings/tests/CI | DONE (see `docs/phase_reports/phase-01-engineering-foundation.md`) |
-| Pricing, simulation, risk, optimization, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
+| Phase 1 build/packaging/C++ core/bindings/tests/CI | DONE (`docs/phase_reports/phase-01-engineering-foundation.md`) |
+| Phase 2 Black-Scholes, Greeks, CRR lattice, QuantLib benchmark, experiment | DONE (`docs/phase_reports/phase-02-deterministic-pricing.md`) |
+| Monte Carlo, path-dependent/Heston, risk, optimisation, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
 
-## 10. Frozen Phase 1 surface
+## 10. Frozen surfaces
+
+### Phase 1
 
 - `namespace quantrisk`, `Real = double`, `Time/Rate/Volatility/Money/Count/Seed`.
 - `Rng` (instance-owned `std::mt19937_64`, explicit seed, no global state).
 - `normal_pdf`, `normal_cdf`, `inverse_normal_cdf`, `stats::*`, `version()`,
   `build_metadata()`, `ValidationError`.
 - Python smoke surface: `quantrisk.version()`, `quantrisk.normal_cdf(0.0)`.
+
+### Phase 2
+
+- `OptionType`, `ExerciseStyle`, `EuropeanOption`, `MarketParams`,
+  `PricingResult`, `Greeks`, `BumpPolicy`, `BinomialResult`.
+- `black_scholes`, `black_scholes_greeks`, `finite_difference_greeks`,
+  `crr_binomial`, `put_call_parity_residual`, `is_degenerate`.
+- Units: Theta per calendar year, Vega and Rho per unit (verified against
+  QuantLib 1.43 by measurement, not by assumption).
+
+Changing any of the above requires a written migration note.
 
 Eigen enters with Phase 6 (first real dense linear algebra), not Phase 1.

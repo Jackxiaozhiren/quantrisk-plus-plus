@@ -3,11 +3,23 @@
 > A Reproducible C++/Python Engine for Stochastic Pricing, Monte Carlo Simulation,
 > Portfolio Risk, Optimization and Stress Testing.
 
-**Current status: Phase 1 — Engineering Foundation (v0.1.0).**
-Only the numerical skeleton exists: input validation, RNG discipline, and normal
-distribution helpers in a C++20 core with Python bindings. No pricing, simulation,
-risk, or optimization models are implemented yet. See `docs/` for the frozen
-research scope, mathematical specification, and validation protocol.
+**Current status: Phase 2 — Deterministic Pricing Foundation (v0.1.0).**
+Implemented and validated: a C++20 numerical core (RNG discipline, statistics,
+normal distribution), Black-Scholes-Merton pricing with continuous dividends,
+analytic and finite-difference Greeks, and a Cox-Ross-Rubinstein lattice for
+European and American exercise. Monte Carlo, risk, optimisation, stress and data
+layers are specified in `docs/` but **not built yet**.
+
+Numbers quoted here come from committed artifacts, regenerate them with the
+commands in [Validation](#validation):
+
+| Claim | Value | Artifact |
+|---|---|---|
+| BS price vs live QuantLib (2 464 comparisons) | worst abs 1.49e-13, rel 3.46e-11 | `benchmarks/quantlib/results/pricing_vs_quantlib.json` |
+| Greeks vs QuantLib (delta/gamma/vega/theta/rho) | worst abs 5.12e-13 | same file |
+| Put-call parity residual | 8.0e-15 on notionals <= 200 | `experiments/pricing_validation/results/summary.json` |
+| CRR lattice order | fitted slopes -0.99 +/- 0.004 vs theory -1 | same file, `crr_convergence_slope` |
+| Test suite | 53 C++ (CTest) + 112 Python (pytest) | `docs/phase_reports/phase-02-deterministic-pricing.md` |
 
 ## 30-second example
 
@@ -36,9 +48,21 @@ ctest --preset dev           # C++ tests
 
 ## Validation
 
-Phase 1 validates `normal_cdf`/`normal_pdf` against closed-form identities
-(Level 1) and SciPy (Level 2, live oracle), RNG reproducibility across C++/Python,
-and input-validation errors. Full protocol: `docs/validation_protocol.md`.
+Three levels, defined in `docs/validation_protocol.md` and executed per phase:
+
+* **Level 1 - analytical**: parity identities, degenerate limits, `u*d == 1`,
+  the no-early-exercise theorem, analytic Greeks vs central differences with a
+  Richardson error estimate instead of a tuned tolerance.
+* **Level 2 - independent oracles, run live**: QuantLib 1.43
+  (`benchmarks/quantlib/pricing_validation.py`) and SciPy's normal
+  distribution/quantile. No oracle output is ever pasted into `tests/`.
+* **Level 3 - statistical**: lattice convergence fitted on log-log axes with
+  standard errors.
+
+```bash
+uv run python benchmarks/quantlib/pricing_validation.py   # needs the oracles extra
+uv run python experiments/pricing_validation/run.py
+```
 
 ## Limitations
 

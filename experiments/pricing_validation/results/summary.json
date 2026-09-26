@@ -1,0 +1,100 @@
+{
+  "artifact": "experiments/pricing_validation/run.py",
+  "artifacts": {
+    "csv": [
+      "experiments/pricing_validation/results/pricing_grid.csv",
+      "experiments/pricing_validation/results/lattice_convergence.csv",
+      "experiments/pricing_validation/results/greeks_by_moneyness.csv"
+    ],
+    "figures": [
+      "experiments/pricing_validation/results/price_vs_strike.png",
+      "experiments/pricing_validation/results/price_vs_maturity.png",
+      "experiments/pricing_validation/results/price_vs_volatility.png",
+      "experiments/pricing_validation/results/price_vs_rate.png",
+      "experiments/pricing_validation/results/lattice_convergence.png",
+      "experiments/pricing_validation/results/greeks_vs_moneyness.png"
+    ],
+    "sha256": {
+      "experiments/pricing_validation/results/greeks_by_moneyness.csv": "6a456538509586803beada0174cdf41eb9c0921a77124e857506d65681bbd4a4",
+      "experiments/pricing_validation/results/greeks_vs_moneyness.png": "20c815df2e2d311e58bb9b3f8324a2fb71e2c5dce76886d2c5b5040f2852ddae",
+      "experiments/pricing_validation/results/lattice_convergence.csv": "bd228143294208abe8dbbf6d170e41add1fd009b8819ee80c7998e845d39c28e",
+      "experiments/pricing_validation/results/lattice_convergence.png": "1cf47761a4930cc73acd00992043ed592fb7017fe3231f9fa92d924f8fd1cf80",
+      "experiments/pricing_validation/results/price_vs_maturity.png": "7e772aa4f79f454626d6d9b0dd86c68a8a6145dea5c3306a1c8e9ae5da19a89e",
+      "experiments/pricing_validation/results/price_vs_rate.png": "233af94a4e0b881b3f2c5ca6d739f7979b9ccdbd52959cc47e6a5c133d616b45",
+      "experiments/pricing_validation/results/price_vs_strike.png": "6eeb06537bfd080b2cf541009e01820bf29fff035b2fcfe26c2bc4bcc9ea888d",
+      "experiments/pricing_validation/results/price_vs_volatility.png": "a2e818ae1d7b5bf5d45b8f8c095a81e4845f31ff75b0a21c218db8c8e8f3e844",
+      "experiments/pricing_validation/results/pricing_grid.csv": "bf05cc80c0dac941ad290071b9ba881314456fd76ff65e1af3d2ea282a17263c"
+    }
+  },
+  "command": "uv run python pricing_validation run.py",
+  "crr_convergence_slope": {
+    "atm_call": {
+      "deviation_from_theory": 0.005949572201087161,
+      "deviations_in_standard_errors": 1.9029798278458296,
+      "expected_slope": -1.0,
+      "slope": -0.9940504277989128,
+      "standard_error": 0.0031264504825687343
+    },
+    "high_vol_call": {
+      "deviation_from_theory": 0.00755524288863707,
+      "deviations_in_standard_errors": 1.8640013389245027,
+      "expected_slope": -1.0,
+      "slope": -0.9924447571113629,
+      "standard_error": 0.004053238981575152
+    },
+    "otm_call": {
+      "deviation_from_theory": 0.005444993086392458,
+      "deviations_in_standard_errors": 0.03359328209996597,
+      "expected_slope": -1.0,
+      "slope": -1.0054449930863925,
+      "standard_error": 0.16208577269078372
+    },
+    "short_dated_atm_put": {
+      "deviation_from_theory": 0.0003264722378120144,
+      "deviations_in_standard_errors": 2.0812397788986434,
+      "expected_slope": -1.0,
+      "slope": -0.999673527762188,
+      "standard_error": 0.0001568643080542973
+    }
+  },
+  "environment": {
+    "cpp_arch": "arm64",
+    "cpp_build_type": "Release",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_flags": "(none)",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_standard": "C++20",
+    "generated_at_utc": "2026-09-26T05:50:43+00:00",
+    "git_commit": "bcadd60756b4",
+    "packages": {
+      "PyPortfolioOpt": "1.6.0",
+      "QuantLib": "1.43",
+      "cvxpy": "1.9.3",
+      "matplotlib": "3.11.2",
+      "numpy": "2.5.3",
+      "osqp": "1.1.3",
+      "pandas": "3.0.6",
+      "python": "3.12.14",
+      "quantrisk": "0.1.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "statsmodels": "0.15.0"
+    },
+    "python_machine": "arm64",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "quantrisk_version": "0.1.0"
+  },
+  "final_lattice_relative_error": {
+    "atm_call": 6.583723e-05,
+    "high_vol_call": 7.340565e-05,
+    "otm_call": 0.0001965329,
+    "short_dated_atm_put": 8.305456e-05
+  },
+  "generated_at_utc": "2026-09-26T05:50:43+00:00",
+  "greek_rows": 14,
+  "grid_rows": 112,
+  "lattice_rows": 32,
+  "reading": "Slopes of -0.99 to -1.01 against the theoretical -1 are the first-order (O(dt)) convergence claim of docs/mathematical_specification.md \u00a74. The short-dated at-the-money put fits so tightly (standard error ~1.6e-4) that its 0.0003 deviation exceeds two standard errors; that residual is the next term of the expansion, not a disagreement about the order, and is reported rather than smoothed over.",
+  "worst_analytic_vs_finite_difference_delta": 0.0001169601,
+  "worst_put_call_parity_residual": 7.993606e-15
+}

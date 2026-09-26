@@ -15,6 +15,10 @@
 #include "quantrisk/core/validation.hpp"
 #include "quantrisk/core/version.hpp"
 #include "quantrisk/math/normal.hpp"
+#include "quantrisk/pricing/binomial_crr.hpp"
+#include "quantrisk/pricing/black_scholes.hpp"
+#include "quantrisk/pricing/finite_differences.hpp"
+#include "quantrisk/pricing/instrument.hpp"
 
 namespace py = pybind11;
 
@@ -94,4 +98,90 @@ PYBIND11_MODULE(_quantrisk, module) {
         .def("autocorrelation", [](const std::vector<double> &data, const std::int64_t lag) {
             return quantrisk::stats::autocorrelation(data, lag);
         });
+
+    // --- pricing: instruments, Black-Scholes, CRR lattice, FD Greeks ----
+    py::module_ pricing = module.def_submodule("pricing", "Deterministic pricing (C++20 core).");
+
+    py::enum_<quantrisk::OptionType>(pricing, "OptionType")
+        .value("CALL", quantrisk::OptionType::Call)
+        .value("PUT", quantrisk::OptionType::Put)
+        .export_values();
+
+    py::enum_<quantrisk::ExerciseStyle>(pricing, "ExerciseStyle")
+        .value("EUROPEAN", quantrisk::ExerciseStyle::European)
+        .value("AMERICAN", quantrisk::ExerciseStyle::American)
+        .export_values();
+
+    py::class_<quantrisk::MarketParams>(
+        pricing, "MarketParams",
+        "Continuously compounded rates, annualised volatility, maturity in years.")
+        .def(py::init([](const double spot, const double rate, const double dividend_yield,
+                         const double volatility, const double maturity) {
+                 return quantrisk::MarketParams{.spot = spot,
+                                                .rate = rate,
+                                                .dividend_yield = dividend_yield,
+                                                .volatility = volatility,
+                                                .maturity = maturity};
+             }),
+             py::arg("spot"), py::arg("rate"), py::arg("dividend_yield") = 0.0,
+             py::arg("volatility") = 0.0, py::arg("maturity") = 0.0)
+        .def_readwrite("spot", &quantrisk::MarketParams::spot)
+        .def_readwrite("rate", &quantrisk::MarketParams::rate)
+        .def_readwrite("dividend_yield", &quantrisk::MarketParams::dividend_yield)
+        .def_readwrite("volatility", &quantrisk::MarketParams::volatility)
+        .def_readwrite("maturity", &quantrisk::MarketParams::maturity)
+        .def("validate", &quantrisk::MarketParams::validate)
+        .def("forward_at", &quantrisk::MarketParams::forward_at, py::arg("time"));
+
+    py::class_<quantrisk::EuropeanOption>(pricing, "EuropeanOption")
+        .def(py::init<const quantrisk::OptionType, double>(), py::arg("type"), py::arg("strike"))
+        .def_readwrite("type", &quantrisk::EuropeanOption::type)
+        .def_readwrite("strike", &quantrisk::EuropeanOption::strike)
+        .def("validate", &quantrisk::EuropeanOption::validate)
+        .def("payoff", &quantrisk::EuropeanOption::payoff, py::arg("underlying"));
+
+    py::class_<quantrisk::PricingResult>(pricing, "PricingResult")
+        .def_readonly("price", &quantrisk::PricingResult::price)
+        .def_readonly("d1", &quantrisk::PricingResult::d1)
+        .def_readonly("d2", &quantrisk::PricingResult::d2)
+        .def_readonly("method", &quantrisk::PricingResult::method)
+        .def_readonly("note", &quantrisk::PricingResult::note);
+
+    py::class_<quantrisk::Greeks>(pricing, "Greeks")
+        .def_readonly("delta", &quantrisk::Greeks::delta)
+        .def_readonly("gamma", &quantrisk::Greeks::gamma)
+        .def_readonly("vega", &quantrisk::Greeks::vega)
+        .def_readonly("theta", &quantrisk::Greeks::theta)
+        .def_readonly("rho", &quantrisk::Greeks::rho);
+
+    py::class_<quantrisk::BumpPolicy>(pricing, "BumpPolicy")
+        .def(py::init<>())
+        .def_readwrite("spot_relative", &quantrisk::BumpPolicy::spot_relative)
+        .def_readwrite("volatility_absolute", &quantrisk::BumpPolicy::volatility_absolute)
+        .def_readwrite("rate_absolute", &quantrisk::BumpPolicy::rate_absolute)
+        .def_readwrite("time_absolute", &quantrisk::BumpPolicy::time_absolute)
+        .def("validate", &quantrisk::BumpPolicy::validate);
+
+    py::class_<quantrisk::BinomialResult>(pricing, "BinomialResult")
+        .def_readonly("price", &quantrisk::BinomialResult::price)
+        .def_readonly("steps", &quantrisk::BinomialResult::steps)
+        .def_readonly("time_step", &quantrisk::BinomialResult::time_step)
+        .def_readonly("up", &quantrisk::BinomialResult::up)
+        .def_readonly("down", &quantrisk::BinomialResult::down)
+        .def_readonly("risk_neutral_up_probability",
+                      &quantrisk::BinomialResult::risk_neutral_up_probability)
+        .def_readonly("exercise_style", &quantrisk::BinomialResult::exercise_style)
+        .def_readonly("note", &quantrisk::BinomialResult::note);
+
+    pricing.def("black_scholes", &quantrisk::black_scholes, py::arg("option"), py::arg("market"));
+    pricing.def("black_scholes_greeks", &quantrisk::black_scholes_greeks, py::arg("option"),
+                py::arg("market"));
+    pricing.def("put_call_parity_residual", &quantrisk::put_call_parity_residual, py::arg("market"),
+                py::arg("strike"));
+    pricing.def("finite_difference_greeks", &quantrisk::finite_difference_greeks, py::arg("option"),
+                py::arg("market"), py::arg("policy") = quantrisk::BumpPolicy{});
+    pricing.def("crr_binomial", &quantrisk::crr_binomial, py::arg("option"), py::arg("market"),
+                py::arg("exercise_style"), py::arg("steps"));
+    pricing.def("crr_convergence_to_black_scholes", &quantrisk::crr_convergence_to_black_scholes,
+                py::arg("option"), py::arg("market"), py::arg("step_counts"));
 }

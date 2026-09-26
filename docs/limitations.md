@@ -35,3 +35,29 @@ never removed just because a later phase shipped.
    in advance.
 9. **No model cards yet.** `docs/model_cards/` starts in Phase 2, when the first
    financial model exists.
+
+## Phase 2 — deterministic pricing
+
+10. **No term structure.** One flat `r` and one flat continuous `q`. Forward
+    curves, discrete dividends and borrow costs are out of scope
+    (`docs/mathematical_specification.md` §11); pricing them with this code would
+    be a modelling error, not a rounding one.
+11. **Lattice values are `O(dt)` approximations.** No Richardson extrapolation is
+    applied, so a CRR price at N = 200 carries an error of the same order as the
+    difference between two lattice parameterisations.
+12. **Comparing two different lattices needs care.** QuantLib's
+    `BinomialVanillaEngine(..., "crr", N)` is a different discretisation of the
+    same dynamics. In the extreme corners of the benchmark grid (100 % volatility
+    over five years on a coarse tree) the mutual absolute gap reaches ~0.46 on
+    options worth tens of currency units, which is *smaller than each lattice's
+    own error against Black-Scholes* — the honest reading of that row, and the
+    reason `tests/python/test_pricing_vs_quantlib.py` asserts the normalised
+    property instead of a raw threshold.
+13. **Summary keys `lattice_error_ratio_*` are only informative away from
+    cancellation points**, where one implementation's error against the analytic
+    limit happens to be near zero (observed ratio range 1.2e-8 .. 766).
+14. **Early exercise is biased low on a coarse tree** and the σ = 0 American
+    value is found by searching 1001 exercise dates rather than solving exactly.
+15. **`MarketParams.validate()` guards the domain, not the economics.** Negative
+    rates and `r - q` far from zero are accepted because they are expressible;
+    the lattice then reports a `p` outside `[0, 1]` in `note` instead of refusing.
