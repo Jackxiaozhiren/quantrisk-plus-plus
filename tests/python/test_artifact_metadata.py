@@ -17,6 +17,7 @@ import quantrisk
 from quantrisk.experiments.metadata import (
     REPO_ROOT,
     artifact_manifest,
+    describe_provenance,
     environment,
     package_versions,
     parse_porcelain_status,
@@ -77,13 +78,24 @@ def test_environment_carries_every_fact_the_protocol_requires() -> None:
     assert facts["provenance"]
 
 
-def test_provenance_wording_matches_the_measured_tree_state() -> None:
+def test_provenance_states_which_commit_the_numbers_belong_to() -> None:
+    # The configure-time stamp is not the code that ran, so each of the four
+    # reachable situations has to be described differently rather than one
+    # confident sentence being reused for all of them.
+    assert "git is unavailable" in describe_provenance(None, "abc", None)
+    dirty = describe_provenance("abc", "abc", True)
+    assert "uncommitted" in dirty and "abc" in dirty
+    stale = describe_provenance("abc", "xyz", False)
+    assert "rebuild" in stale and "xyz" in stale and "abc" in stale
+    clean = describe_provenance("abc", "abc", False)
+    assert "clean working tree at abc" in clean and "rebuild" not in clean
+
+
+def test_environment_distinguishes_run_time_head_from_the_binary_stamp() -> None:
     facts = environment()
-    if facts["working_tree_dirty"]:
-        assert "uncommitted" in facts["provenance"]
-        assert facts["uncommitted_paths"]
-    else:
-        assert "exactly" in facts["provenance"]
+    assert facts["binary_git_commit"] == quantrisk.build_metadata()["git_commit"]
+    # Both are 12-character abbreviations, so a comparison is meaningful.
+    assert len(facts["git_commit"]) in (7, 12, len("unknown")) or facts["git_commit"] == "unknown"
 
 
 def test_uncommitted_paths_are_relative_and_never_escape_the_repository() -> None:

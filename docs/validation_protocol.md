@@ -68,10 +68,14 @@ Level 3 — Statistical convergence (rates, coverage, uncertainty, backtests)
 Every artifact additionally records its own provenance, because a commit hash
 captured at *configure* time is not the code that produced the numbers:
 
-- `working_tree_dirty` and `uncommitted_paths` from `git status --porcelain` at run
-  time, plus a `provenance` sentence that tells the reader how to interpret
-  `git_commit`. Before this existed, every phase's artifacts named the *previous*
-  phase's commit while the working tree held the real change.
+- `git_commit` (the run-time `HEAD`), `binary_git_commit` (the configure-time stamp
+  baked into the extension), `working_tree_dirty` and `uncommitted_paths` from
+  `git status --porcelain`, and a `provenance` sentence that differs for the four
+  reachable cases: clean and matching, clean but stale binary, dirty, and no Git at
+  all. Before this existed every phase's artifacts named the *previous* phase's
+  commit while the working tree held the real change -- and a clean tree turned that
+  into a confident false statement. The evidence chain has to be regenerated in the
+  order commit code, rebuild, regenerate artifacts, commit artifacts.
 - Artifact manifests list **repo-relative** paths, never absolute ones: a committed
   evidence file must read identically on every machine and must not publish a
   developer's home directory.

@@ -27,7 +27,7 @@ backtests statistically valid on synthetic distributions whose truth is known?*
   lists both work.
 - **Evidence**: `experiments/var_backtesting/` (3 CSVs, 2 PNGs, 1 JSON), 51 new pytest tests
   (two of them live-SciPy oracle files plus one for the evidence tooling itself), and
-  21 new C++ test cases. Suite: 111 CTest entries, 204 pytest tests.
+  21 new C++ test cases. Suite: 111 CTest entries, 205 pytest tests.
 
 ## 2. Mathematical assumptions
 
@@ -78,7 +78,7 @@ backtests statistically valid on synthetic distributions whose truth is known?*
 - `ctest --preset dev` — **111 / 111 passed** (110 Catch2 cases + the reference-tool
   case). Cross-checked against `./build/dev/quantrisk_tests --list-tests` (110 cases,
   545,465 assertions) so a partial run cannot be mistaken for a full one.
-- `uv run pytest -q` — **204 passed** (51 of them new in this phase).
+- `uv run pytest -q` — **205 passed** (52 of them new in this phase).
 - `uv run ruff check .` / `ruff format --check .` — clean.
 - `uv run python experiments/var_backtesting/run.py` — 5 artifacts regenerated.
 - `clang-format` applied to every touched C++ file, and the CI gate
@@ -109,7 +109,7 @@ first tests (`tests/python/test_artifact_metadata.py`):
 | Defect | Effect | Fix |
 | --- | --- | --- |
 | `artifact_manifest` stored absolute paths | every committed artifact published `/Users/jackson/...` and differed per machine | repo-relative paths |
-| `git_commit` is captured at configure time | every artifact from Phases 1–4 names the *previous* phase's commit while the real code was uncommitted | `working_tree_dirty`, `uncommitted_paths` and a `provenance` sentence recorded at run time |
+| `git_commit` was captured at configure time | every artifact from Phases 1–4 names the *previous* phase's commit while the real code was uncommitted, and a clean tree made that read as a confident false statement | run-time `git_commit` plus `binary_git_commit`, `working_tree_dirty`, `uncommitted_paths`, and a `provenance` sentence that differs for the four reachable cases |
 | a `!!`-prefix check applied to the path instead of the status column | dead branch written from a wrong model of `git status --porcelain`; the new parser test caught it before it shipped | removed, and the format documented in the parser |
 
 Two of the six C++ failures were **wrong expectations in my own tests**, not library bugs
@@ -117,7 +117,7 @@ Two of the six C++ failures were **wrong expectations in my own tests**, not lib
 `zip(..., strict=True)` misuse), and were corrected against the documented contract
 rather than by changing the contract.
 
-After the fixes: 111/111 CTest, 204/204 pytest, clang-format and ruff gates clean, a
+After the fixes: 111/111 CTest, 205/205 pytest, clang-format and ruff gates clean, a
 zero-warning clean rebuild, and all artifacts regenerated from the fixed code.
 
 ## 6. Numerical validation
@@ -208,8 +208,13 @@ Cornish-Fisher, EVT, filtered historical simulation, or ES backtest.
   or state why they stay off.
 - **Earlier phases' artifacts are stale in exactly the two ways fixed above**: they
   carry absolute paths and a `git_commit` that predates their own code. They must be
-  regenerated during the Phase 10 evidence freeze, at which point a re-run on a clean
-  tree will record `working_tree_dirty: false` and the hashes become auditable.
+  regenerated during the Phase 10 evidence freeze.
+- Provenance is only fully clean when the artifact is generated from a committed tree
+  *after* the binary was rebuilt from it, which needs the ordering
+  "commit code → rebuild → regenerate evidence → commit evidence". The Phase 5
+  artifacts now record `git_commit == binary_git_commit == 44f14fd` with only
+  themselves listed as uncommitted; the Phase 10 freeze should finish that loop so
+  `working_tree_dirty` reads `false`.
 - `docs/interview_defense.md` predates this phase and cites Phase 1–4 evidence only;
   it needs a Phase 5 pass before the portfolio audit.
 

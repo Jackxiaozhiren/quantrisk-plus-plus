@@ -27,7 +27,7 @@ commands in [Validation](#validation):
 | Greeks vs QuantLib (delta/gamma/vega/theta/rho) | worst abs 5.12e-13 | same file |
 | Put-call parity residual | 8.0e-15 on notionals <= 200 | `experiments/pricing_validation/results/summary.json` |
 | CRR lattice order | fitted slopes -0.99 +/- 0.004 vs theory -1 | same file, `crr_convergence_slope` |
-| Test suite | 111 C++ (CTest) + 204 Python (pytest) | `docs/phase_reports/phase-05-market-risk.md` |
+| Test suite | 111 C++ (CTest) + 205 Python (pytest) | `docs/phase_reports/phase-05-market-risk.md` |
 | Geometric Asian closed form vs QuantLib analytic engine | worst rel. error 5.5e-4 | `benchmarks/quantlib/results/path_dependent_vs_quantlib.json` |
 | Barrier monitoring bias and its correction | 14.0 % raw discrete -> 1.0 % with BGK | same artifact |
 | Heston (xi = 0) collapse to Black-Scholes | worst rel. error 2.1e-3 | same artifact |

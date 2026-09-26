@@ -89,47 +89,73 @@ def parse_porcelain_status(stdout: str) -> list[str]:
     return sorted(paths)
 
 
-def working_tree_state() -> dict[str, Any]:
-    """Uncommitted changes present at run time, as far as Git will tell us.
-
-    The commit stamped into the binary is captured at *configure* time, so an
-    artifact produced while a phase is still in progress records the previous
-    commit and looks as if it came from code it did not come from. These fields
-    make that visible instead of misleading, and `provenance` spells out what a
-    reader should conclude.
-    """
-    unavailable = {"working_tree_dirty": None, "uncommitted_paths": []}
+def _git(*arguments: str) -> str | None:
+    """Git output, or None when Git cannot answer (no repo, no binary, no perms)."""
     try:
         completed = subprocess.run(  # noqa: S603, S607
-            ["git", "status", "--porcelain"],
+            ["git", *arguments],
             cwd=REPO_ROOT,
             capture_output=True,
             text=True,
             check=False,
         )
     except OSError:
-        return unavailable
+        return None
     if completed.returncode != 0:
-        return unavailable
-    paths = parse_porcelain_status(completed.stdout)
+        return None
+    return completed.stdout
+
+
+def working_tree_state() -> dict[str, Any]:
+    """Uncommitted changes present at run time, as far as Git will tell us."""
+    status = _git("status", "--porcelain")
+    if status is None:
+        return {"working_tree_dirty": None, "uncommitted_paths": []}
+    paths = parse_porcelain_status(status)
     return {"working_tree_dirty": bool(paths), "uncommitted_paths": paths}
+
+
+def describe_provenance(head: str | None, binary_commit: str, dirty: bool | None) -> str:
+    """One sentence saying which commit the numbers actually belong to.
+
+    `build_metadata()["git_commit"]` is captured at *configure* time, so on its own
+    it credits whichever commit happened to be checked out when the build ran. A
+    clean working tree makes that actively misleading -- the artifact would claim a
+    commit that predates the code -- so the run-time HEAD and the binary's stamp are
+    reported separately and the difference is stated here.
+    """
+    if head is None:
+        return (
+            f"git is unavailable here, so provenance rests on the configure-time "
+            f"stamp alone: {binary_commit}"
+        )
+    if dirty:
+        return (
+            f"ran from {head} plus the uncommitted changes listed in uncommitted_paths; "
+            f"the extension binary was configured at {binary_commit}"
+        )
+    if head != binary_commit:
+        return (
+            f"the working tree is clean at {head} but the extension binary was configured "
+            f"at {binary_commit}; rebuild (uv pip install -e .) before trusting numbers "
+            f"that depend on C++ sources"
+        )
+    return f"ran from a clean working tree at {head}, which is what the binary was built from"
 
 
 def environment() -> dict[str, Any]:
     """Host facts that change numerical results or timings."""
     core = quantrisk.build_metadata()
     tree = working_tree_state()
+    raw_head = _git("rev-parse", "--short=12", "HEAD")
+    head = raw_head.strip() if raw_head else None
     return {
         "generated_at_utc": utc_timestamp(),
         "quantrisk_version": core["version"],
-        "git_commit": core["git_commit"],
+        "git_commit": head or core["git_commit"],
+        "binary_git_commit": core["git_commit"],
         **tree,
-        "provenance": (
-            "the code that produced this artifact is HEAD at git_commit plus the "
-            "listed uncommitted changes"
-            if tree["working_tree_dirty"]
-            else "the code that produced this artifact is exactly git_commit"
-        ),
+        "provenance": describe_provenance(head, core["git_commit"], tree["working_tree_dirty"]),
         "cpp_compiler": core["compiler"],
         "cpp_arch": core["arch"],
         "cpp_os": core["os"],
