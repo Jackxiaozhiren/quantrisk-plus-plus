@@ -61,3 +61,27 @@ never removed just because a later phase shipped.
 15. **`MarketParams.validate()` guards the domain, not the economics.** Negative
     rates and `r - q` far from zero are accepted because they are expressible;
     the lattice then reports a `p` outside `[0, 1]` in `note` instead of refusing.
+
+## Phase 3 — Monte Carlo engine
+
+16. **Single-threaded, and no variance-reduction technique beyond antithetic and
+    control variates.** No quasi-Monte Carlo (Sobol / lattice rules), no Brownian
+    bridge, no stratification or moment matching. A `1e6`-path run is a
+    wall-clock measurement away from being slow, and the speedup claims are
+    explicitly scoped to one thread.
+17. **Intervals are normal (CLT) approximations**, not exact. Their empirical
+    coverage is measured (12/12 combinations inside the exact Binomial band at
+    95 % and 99 %), which is the justification - but for heavy-tailed payoff
+    distributions the same reporting would need re-examination.
+18. **Path-dependent pricing is memory bound**: `price_path_payoff`
+    materialises `paths x (steps + 1)` doubles. There is no streaming buffer yet.
+19. **Control-variate `beta` is fitted in-sample**, so the engine's own reported
+    variance is mildly optimistic. Out-of-sample MSE ratios are reported in
+    `experiments/variance_reduction/results/realised_error.csv` instead.
+20. **No independent Monte Carlo implementation from QuantLib**: its
+    `MCEuropeanEngine` could not be constructed with the installed SWIG bindings
+    (every traits string rejected), recorded as `quantlib_mc_engine_used: false`
+    in the benchmark artifact. The independent yardsticks that *are* used are
+    QuantLib's analytic price (the exact limit) and a NumPy/PCG64 simulation.
+21. **Performance baseline uses a different random stream** (`random.gauss`),
+    so it measures cost per path, not equality of estimates.

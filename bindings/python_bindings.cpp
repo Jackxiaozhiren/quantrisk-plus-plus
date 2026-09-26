@@ -15,10 +15,12 @@
 #include "quantrisk/core/validation.hpp"
 #include "quantrisk/core/version.hpp"
 #include "quantrisk/math/normal.hpp"
+#include "quantrisk/monte_carlo/engine.hpp"
 #include "quantrisk/pricing/binomial_crr.hpp"
 #include "quantrisk/pricing/black_scholes.hpp"
 #include "quantrisk/pricing/finite_differences.hpp"
 #include "quantrisk/pricing/instrument.hpp"
+#include "quantrisk/stochastic/gbm.hpp"
 
 namespace py = pybind11;
 
@@ -184,4 +186,99 @@ PYBIND11_MODULE(_quantrisk, module) {
                 py::arg("exercise_style"), py::arg("steps"));
     pricing.def("crr_convergence_to_black_scholes", &quantrisk::crr_convergence_to_black_scholes,
                 py::arg("option"), py::arg("market"), py::arg("step_counts"));
+
+    // --- stochastic: GBM path generation --------------------------------
+    py::module_ stochastic =
+        module.def_submodule("stochastic", "GBM path generation (C++20 core).");
+    stochastic.def("terminal_prices", &quantrisk::gbm::terminal_prices, py::arg("market"),
+                   py::arg("paths"), py::arg("rng"));
+    stochastic.def("antithetic_terminal_prices", &quantrisk::gbm::antithetic_terminal_prices,
+                   py::arg("market"), py::arg("paths"), py::arg("rng"));
+    stochastic.def("paths_matrix", &quantrisk::gbm::paths_matrix, py::arg("market"),
+                   py::arg("paths"), py::arg("steps"), py::arg("rng"));
+    stochastic.def("antithetic_paths_matrix", &quantrisk::gbm::antithetic_paths_matrix,
+                   py::arg("market"), py::arg("paths"), py::arg("steps"), py::arg("rng"));
+    stochastic.def("terminal_prices_physical", &quantrisk::gbm::terminal_prices_physical,
+                   py::arg("market"), py::arg("mu"), py::arg("paths"), py::arg("rng"));
+    stochastic.def("expected_log_return", &quantrisk::gbm::expected_log_return, py::arg("market"));
+
+    // --- monte_carlo: engine and estimators ------------------------------
+    py::module_ monte_carlo =
+        module.def_submodule("monte_carlo", "Monte Carlo pricing engine (C++20 core).");
+
+    py::enum_<quantrisk::VarianceReduction>(monte_carlo, "VarianceReduction")
+        .value("NONE", quantrisk::VarianceReduction::None)
+        .value("ANTITHETIC", quantrisk::VarianceReduction::Antithetic)
+        .value("CONTROL_VARIATE", quantrisk::VarianceReduction::ControlVariate)
+        .export_values();
+
+    py::class_<quantrisk::MonteCarloResult>(monte_carlo, "MonteCarloResult")
+        .def_readonly("price", &quantrisk::MonteCarloResult::price)
+        .def_readonly("standard_error", &quantrisk::MonteCarloResult::standard_error)
+        .def_readonly("confidence_level", &quantrisk::MonteCarloResult::confidence_level)
+        .def_readonly("confidence_low", &quantrisk::MonteCarloResult::confidence_low)
+        .def_readonly("confidence_high", &quantrisk::MonteCarloResult::confidence_high)
+        .def_readonly("paths", &quantrisk::MonteCarloResult::paths)
+        .def_readonly("iid_units", &quantrisk::MonteCarloResult::iid_units)
+        .def_readonly("seed", &quantrisk::MonteCarloResult::seed)
+        .def_readonly("sample_variance", &quantrisk::MonteCarloResult::sample_variance)
+        .def_readonly("sample_stddev", &quantrisk::MonteCarloResult::sample_stddev)
+        .def_readonly("control_beta", &quantrisk::MonteCarloResult::control_beta)
+        .def_readonly("runtime_seconds", &quantrisk::MonteCarloResult::runtime_seconds)
+        .def_readonly("variance_reduction", &quantrisk::MonteCarloResult::variance_reduction)
+        .def_readonly("measure", &quantrisk::MonteCarloResult::measure)
+        .def_readonly("note", &quantrisk::MonteCarloResult::note)
+        .def("__repr__", [](const quantrisk::MonteCarloResult &result) {
+            return std::string("<MonteCarloResult price=") + std::to_string(result.price) +
+                   " se=" + std::to_string(result.standard_error) +
+                   " paths=" + std::to_string(result.paths) +
+                   " seed=" + std::to_string(result.seed) + ">";
+        });
+
+    py::class_<quantrisk::MonteCarloEngine>(
+        monte_carlo, "MonteCarloEngine",
+        "One engine owns one reproducible stream; no global RNG state.")
+        .def(py::init<quantrisk::Seed>(), py::arg("seed") = quantrisk::Rng::kDefaultSeed)
+        .def_property_readonly("seed", &quantrisk::MonteCarloEngine::seed)
+        .def_property_readonly("uniform_draws", &quantrisk::MonteCarloEngine::uniform_draws)
+        .def(
+            "price_european",
+            [](quantrisk::MonteCarloEngine &engine, const quantrisk::EuropeanOption &option,
+               const quantrisk::MarketParams &market, const std::int64_t paths,
+               const quantrisk::VarianceReduction method, const double confidence_level) {
+                return engine.price_european(option, market, paths, method, confidence_level);
+            },
+            py::arg("option"), py::arg("market"), py::arg("paths"),
+            py::arg("variance_reduction") = quantrisk::VarianceReduction::None,
+            py::arg("confidence_level") = 0.95)
+        .def(
+            "price_call",
+            [](quantrisk::MonteCarloEngine &engine, const quantrisk::MarketParams &market,
+               const double strike, const std::int64_t paths,
+               const quantrisk::VarianceReduction method, const double confidence_level) {
+                return engine.price_european(
+                    quantrisk::EuropeanOption{quantrisk::OptionType::Call, strike}, market, paths,
+                    method, confidence_level);
+            },
+            py::arg("market"), py::arg("strike"), py::arg("paths"),
+            py::arg("variance_reduction") = quantrisk::VarianceReduction::None,
+            py::arg("confidence_level") = 0.95)
+        .def(
+            "price_put",
+            [](quantrisk::MonteCarloEngine &engine, const quantrisk::MarketParams &market,
+               const double strike, const std::int64_t paths,
+               const quantrisk::VarianceReduction method, const double confidence_level) {
+                return engine.price_european(
+                    quantrisk::EuropeanOption{quantrisk::OptionType::Put, strike}, market, paths,
+                    method, confidence_level);
+            },
+            py::arg("market"), py::arg("strike"), py::arg("paths"),
+            py::arg("variance_reduction") = quantrisk::VarianceReduction::None,
+            py::arg("confidence_level") = 0.95);
+
+    monte_carlo.def("normal_confidence_multiplier", &quantrisk::normal_confidence_multiplier,
+                    py::arg("confidence_level"));
+    monte_carlo.def("variance_reduction_name", [](const quantrisk::VarianceReduction method) {
+        return std::string(quantrisk::to_string(method));
+    });
 }

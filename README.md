@@ -3,12 +3,15 @@
 > A Reproducible C++/Python Engine for Stochastic Pricing, Monte Carlo Simulation,
 > Portfolio Risk, Optimization and Stress Testing.
 
-**Current status: Phase 2 — Deterministic Pricing Foundation (v0.1.0).**
+**Current status: Phase 3 — Monte Carlo Simulation Engine (v0.1.0).**
 Implemented and validated: a C++20 numerical core (RNG discipline, statistics,
 normal distribution), Black-Scholes-Merton pricing with continuous dividends,
-analytic and finite-difference Greeks, and a Cox-Ross-Rubinstein lattice for
-European and American exercise. Monte Carlo, risk, optimisation, stress and data
-layers are specified in `docs/` but **not built yet**.
+analytic and finite-difference Greeks, a Cox-Ross-Rubinstein lattice for
+European and American exercise, and a Monte Carlo framework with antithetic and
+control-variate estimators whose convergence rate and interval coverage are
+measured rather than asserted. Path-dependent pricing, Heston, risk,
+optimisation, stress and data layers are specified in `docs/` but **not built
+yet**.
 
 Numbers quoted here come from committed artifacts, regenerate them with the
 commands in [Validation](#validation):
@@ -19,7 +22,11 @@ commands in [Validation](#validation):
 | Greeks vs QuantLib (delta/gamma/vega/theta/rho) | worst abs 5.12e-13 | same file |
 | Put-call parity residual | 8.0e-15 on notionals <= 200 | `experiments/pricing_validation/results/summary.json` |
 | CRR lattice order | fitted slopes -0.99 +/- 0.004 vs theory -1 | same file, `crr_convergence_slope` |
-| Test suite | 53 C++ (CTest) + 112 Python (pytest) | `docs/phase_reports/phase-02-deterministic-pricing.md` |
+| Test suite | 72 C++ (CTest) + 136 Python (pytest) | `docs/phase_reports/phase-03-monte-carlo.md` |
+| MC error decay (fitted log-log slope, theory -0.5) | -0.614 ± 0.089, -0.585 ± 0.096, -0.507 ± 0.118 | `experiments/monte_carlo_convergence/results/summary.json` |
+| 95 % / 99 % interval coverage vs exact Binomial band | 12/12 combinations inside the band | same artifact |
+| MC z-scores vs QuantLib analytic (pooled, 3 methods) | mean ≤ 0.05, std 0.92-1.01, ≥ 96 % within ±2 SE | `benchmarks/quantlib/results/monte_carlo_validation.json` |
+| C++ vs pure-Python Monte Carlo (measured, terminal-only) | 8.07x (46,210,785 vs 5,728,661 paths/s) | `benchmarks/performance/results/monte_carlo_speed.json` |
 
 ## 30-second example
 

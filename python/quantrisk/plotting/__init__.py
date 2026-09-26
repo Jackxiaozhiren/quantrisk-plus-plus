@@ -77,6 +77,11 @@ def line_plot(
 ) -> Path:
     figure, axis = plt.subplots(figsize=(6.0, 4.2))
     for label, values in series.items():
+        if len(values) != len(xs):
+            raise ValueError(
+                f"series {label!r} has {len(values)} points but xs has {len(xs)}; "
+                "x and y must come from the same filtered subset"
+            )
         axis.plot(xs, values, marker="o", label=label)
     if log_x:
         axis.set_xscale("log")

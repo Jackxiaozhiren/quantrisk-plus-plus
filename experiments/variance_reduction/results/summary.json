@@ -1,0 +1,101 @@
+{
+  "artifact": "experiments/variance_reduction/run.py",
+  "artifacts": {
+    "csv": [
+      "experiments/variance_reduction/results/variance_by_method.csv",
+      "experiments/variance_reduction/results/realised_error.csv"
+    ],
+    "figures": [
+      "experiments/variance_reduction/results/standard_error_by_method.png"
+    ],
+    "sha256": {
+      "experiments/variance_reduction/results/realised_error.csv": "56edcc2a682dbf5b376567159317e36c3e017fd843c633e57ab7c234918bcacc",
+      "experiments/variance_reduction/results/standard_error_by_method.png": "be1e346ba57154a040bea2db6b37e6dcee72964edd698233a12636441e7cc6ee",
+      "experiments/variance_reduction/results/variance_by_method.csv": "a202b5b31832f5bf90512866b435909af8057a721f6c5ff1612b2c2e0803267c"
+    }
+  },
+  "caveat": "Antithetic reporting divides by pair count, so its standard error is per pair; the comparison here is on realised MSE at equal path budget.",
+  "command": "uv run python run.py",
+  "environment": {
+    "cpp_arch": "arm64",
+    "cpp_build_type": "Release",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_flags": "(none)",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_standard": "C++20",
+    "generated_at_utc": "2026-09-26T06:12:49+00:00",
+    "git_commit": "6eaa3fdaab42",
+    "packages": {
+      "PyPortfolioOpt": "1.6.0",
+      "QuantLib": "1.43",
+      "cvxpy": "1.9.3",
+      "matplotlib": "3.11.2",
+      "numpy": "2.5.3",
+      "osqp": "1.1.3",
+      "pandas": "3.0.6",
+      "python": "3.12.14",
+      "quantrisk": "0.1.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "statsmodels": "0.15.0"
+    },
+    "python_machine": "arm64",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "quantrisk_version": "0.1.0"
+  },
+  "generated_at_utc": "2026-09-26T06:12:49+00:00",
+  "mse_reduction_vs_plain": {
+    "atm_call|100000|antithetic": 2.2415,
+    "atm_call|100000|control_variate": 7.1043,
+    "atm_call|100000|plain": 1.0,
+    "atm_call|10000|antithetic": 1.8452,
+    "atm_call|10000|control_variate": 7.1821,
+    "atm_call|10000|plain": 1.0,
+    "atm_call|1000|antithetic": 2.1064,
+    "atm_call|1000|control_variate": 7.3444,
+    "atm_call|1000|plain": 1.0,
+    "atm_put|100000|antithetic": 2.7741,
+    "atm_put|100000|control_variate": 3.0058,
+    "atm_put|100000|plain": 1.0,
+    "atm_put|10000|antithetic": 2.1546,
+    "atm_put|10000|control_variate": 2.829,
+    "atm_put|10000|plain": 1.0,
+    "atm_put|1000|antithetic": 1.9025,
+    "atm_put|1000|control_variate": 2.4149,
+    "atm_put|1000|plain": 1.0,
+    "itm_call_long|100000|antithetic": 2.0756,
+    "itm_call_long|100000|control_variate": 39.3374,
+    "itm_call_long|100000|plain": 1.0,
+    "itm_call_long|10000|antithetic": 1.8565,
+    "itm_call_long|10000|control_variate": 40.468,
+    "itm_call_long|10000|plain": 1.0,
+    "itm_call_long|1000|antithetic": 1.9892,
+    "itm_call_long|1000|control_variate": 40.1013,
+    "itm_call_long|1000|plain": 1.0,
+    "otm_call_short|100000|antithetic": 1.2851,
+    "otm_call_short|100000|control_variate": 1.9313,
+    "otm_call_short|100000|plain": 1.0,
+    "otm_call_short|10000|antithetic": 1.1155,
+    "otm_call_short|10000|control_variate": 2.3082,
+    "otm_call_short|10000|plain": 1.0,
+    "otm_call_short|1000|antithetic": 1.8912,
+    "otm_call_short|1000|control_variate": 2.0591,
+    "otm_call_short|1000|plain": 1.0
+  },
+  "path_counts": [
+    1000,
+    10000,
+    100000
+  ],
+  "reading": "mse_reduction_vs_plain > 1 means the method beat plain Monte Carlo on out-of-sample mean squared error across the seed ensemble, which is the claim worth making; the in-sample control-variate variance alone would overstate it because beta is fitted on the same sample.",
+  "realised_rows": 36,
+  "rows": 36,
+  "scenarios": [
+    "atm_call",
+    "atm_put",
+    "otm_call_short",
+    "itm_call_long"
+  ],
+  "seeds": 40,
+  "worst_mse_reduction_vs_plain": 1.0
+}

@@ -123,7 +123,8 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | `docs/architecture.md` (+ diagram) | DONE (Phase 0) |
 | Phase 1 build/packaging/C++ core/bindings/tests/CI | DONE (`docs/phase_reports/phase-01-engineering-foundation.md`) |
 | Phase 2 Black-Scholes, Greeks, CRR lattice, QuantLib benchmark, experiment | DONE (`docs/phase_reports/phase-02-deterministic-pricing.md`) |
-| Monte Carlo, path-dependent/Heston, risk, optimisation, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
+| Phase 3 Monte Carlo engine, variance reduction, convergence + coverage, speed benchmark | DONE (`docs/phase_reports/phase-03-monte-carlo.md`) |
+| Path-dependent/Heston, risk, optimisation, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
 
 ## 10. Frozen surfaces
 
@@ -143,6 +144,15 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
   `crr_binomial`, `put_call_parity_residual`, `is_degenerate`.
 - Units: Theta per calendar year, Vega and Rho per unit (verified against
   QuantLib 1.43 by measurement, not by assumption).
+
+### Phase 3
+
+- `VarianceReduction`, `MonteCarloResult`, `MonteCarloEngine`,
+  `gbm::{terminal_prices, antithetic_terminal_prices, paths_matrix,
+  antithetic_paths_matrix, terminal_prices_physical, expected_log_return}`,
+  `normal_confidence_multiplier`.
+- Convention: `mu` in the physical-measure generator is price appreciation
+  *excluding* the dividend yield, so `mu = r` reproduces the risk-neutral stream.
 
 Changing any of the above requires a written migration note.
 

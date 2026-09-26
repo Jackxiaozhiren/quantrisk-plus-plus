@@ -1,0 +1,286 @@
+{
+  "artifact": "experiments/monte_carlo_convergence/run.py",
+  "artifacts": {
+    "csv": [
+      "experiments/monte_carlo_convergence/results/convergence.csv",
+      "experiments/monte_carlo_convergence/results/z_scores.csv",
+      "experiments/monte_carlo_convergence/results/coverage.csv"
+    ],
+    "figures": [
+      "experiments/monte_carlo_convergence/results/convergence_slope.png",
+      "experiments/monte_carlo_convergence/results/se_versus_error.png"
+    ],
+    "sha256": {
+      "experiments/monte_carlo_convergence/results/convergence.csv": "0e76cd29c7a48411349cc4a29ddf71df19ea9f9ed2f380684221523ece494902",
+      "experiments/monte_carlo_convergence/results/convergence_slope.png": "cdbe4a20bfc3f96cbe535856bc5976b8e386d2ae02930b0363872a5f67837fa9",
+      "experiments/monte_carlo_convergence/results/coverage.csv": "3a16407caf5427827f0354b62b7c3598a3085cca5d2a1b541db0ee58c1dd1502",
+      "experiments/monte_carlo_convergence/results/se_versus_error.png": "64154a4b4409cbe20f7d326b9c3af0af27a6afb6b2855b438e43e9d59a05116d",
+      "experiments/monte_carlo_convergence/results/z_scores.csv": "12979935ecf785907f0ced49237447b2eacbe1fa29b723d1f5ce0d8fffe70671"
+    }
+  },
+  "base_seed": 42,
+  "command": "uv run python run.py",
+  "convergence_rows": 24,
+  "convergence_slope_fit": {
+    "atm_call": {
+      "deviations_from_theory_in_standard_errors": 1.2849600479895609,
+      "expected": -0.5,
+      "slope": -0.6140945056079952,
+      "standard_error": 0.08879225917296542
+    },
+    "deep_itm_call": {
+      "deviations_from_theory_in_standard_errors": 0.8878132347560198,
+      "expected": -0.5,
+      "slope": -0.5854618085006392,
+      "standard_error": 0.09626102107401564
+    },
+    "otm_put": {
+      "deviations_from_theory_in_standard_errors": 0.056067454865968196,
+      "expected": -0.5,
+      "slope": -0.506638005614985,
+      "standard_error": 0.11839320388010137
+    }
+  },
+  "coverage": [
+    {
+      "band_high": 197,
+      "band_low": 181,
+      "confidence_level": 0.95,
+      "covered": 191,
+      "empirical_coverage": "0.9550",
+      "inside_band": true,
+      "paths": 1000,
+      "replications": 200,
+      "scenario": "atm_call"
+    },
+    {
+      "band_high": 200,
+      "band_low": 194,
+      "confidence_level": 0.99,
+      "covered": 197,
+      "empirical_coverage": "0.9850",
+      "inside_band": true,
+      "paths": 1000,
+      "replications": 200,
+      "scenario": "atm_call"
+    },
+    {
+      "band_high": 197,
+      "band_low": 181,
+      "confidence_level": 0.95,
+      "covered": 190,
+      "empirical_coverage": "0.9500",
+      "inside_band": true,
+      "paths": 10000,
+      "replications": 200,
+      "scenario": "atm_call"
+    },
+    {
+      "band_high": 200,
+      "band_low": 194,
+      "confidence_level": 0.99,
+      "covered": 197,
+      "empirical_coverage": "0.9850",
+      "inside_band": true,
+      "paths": 10000,
+      "replications": 200,
+      "scenario": "atm_call"
+    },
+    {
+      "band_high": 197,
+      "band_low": 181,
+      "confidence_level": 0.95,
+      "covered": 190,
+      "empirical_coverage": "0.9500",
+      "inside_band": true,
+      "paths": 1000,
+      "replications": 200,
+      "scenario": "otm_put"
+    },
+    {
+      "band_high": 200,
+      "band_low": 194,
+      "confidence_level": 0.99,
+      "covered": 199,
+      "empirical_coverage": "0.9950",
+      "inside_band": true,
+      "paths": 1000,
+      "replications": 200,
+      "scenario": "otm_put"
+    },
+    {
+      "band_high": 197,
+      "band_low": 181,
+      "confidence_level": 0.95,
+      "covered": 192,
+      "empirical_coverage": "0.9600",
+      "inside_band": true,
+      "paths": 10000,
+      "replications": 200,
+      "scenario": "otm_put"
+    },
+    {
+      "band_high": 200,
+      "band_low": 194,
+      "confidence_level": 0.99,
+      "covered": 199,
+      "empirical_coverage": "0.9950",
+      "inside_band": true,
+      "paths": 10000,
+      "replications": 200,
+      "scenario": "otm_put"
+    },
+    {
+      "band_high": 197,
+      "band_low": 181,
+      "confidence_level": 0.95,
+      "covered": 194,
+      "empirical_coverage": "0.9700",
+      "inside_band": true,
+      "paths": 1000,
+      "replications": 200,
+      "scenario": "deep_itm_call"
+    },
+    {
+      "band_high": 200,
+      "band_low": 194,
+      "confidence_level": 0.99,
+      "covered": 199,
+      "empirical_coverage": "0.9950",
+      "inside_band": true,
+      "paths": 1000,
+      "replications": 200,
+      "scenario": "deep_itm_call"
+    },
+    {
+      "band_high": 197,
+      "band_low": 181,
+      "confidence_level": 0.95,
+      "covered": 191,
+      "empirical_coverage": "0.9550",
+      "inside_band": true,
+      "paths": 10000,
+      "replications": 200,
+      "scenario": "deep_itm_call"
+    },
+    {
+      "band_high": 200,
+      "band_low": 194,
+      "confidence_level": 0.99,
+      "covered": 198,
+      "empirical_coverage": "0.9900",
+      "inside_band": true,
+      "paths": 10000,
+      "replications": 200,
+      "scenario": "deep_itm_call"
+    }
+  ],
+  "coverage_intervals_inside_binomial_band": "12/12",
+  "coverage_rows": 12,
+  "environment": {
+    "cpp_arch": "arm64",
+    "cpp_build_type": "Release",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_flags": "(none)",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_standard": "C++20",
+    "generated_at_utc": "2026-09-26T06:10:33+00:00",
+    "git_commit": "6eaa3fdaab42",
+    "packages": {
+      "PyPortfolioOpt": "1.6.0",
+      "QuantLib": "1.43",
+      "cvxpy": "1.9.3",
+      "matplotlib": "3.11.2",
+      "numpy": "2.5.3",
+      "osqp": "1.1.3",
+      "pandas": "3.0.6",
+      "python": "3.12.14",
+      "quantrisk": "0.1.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "statsmodels": "0.15.0"
+    },
+    "python_machine": "arm64",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "quantrisk_version": "0.1.0"
+  },
+  "generated_at_utc": "2026-09-26T06:10:33+00:00",
+  "path_counts": [
+    1000,
+    3000,
+    10000,
+    30000,
+    100000,
+    300000,
+    1000000,
+    3000000
+  ],
+  "reading": "A fitted slope of about -0.5 confirms O(1/sqrt(N)); z-scores with mean near 0 and standard deviation near 1 confirm that the reported SE is the right yardstick; coverage counts inside the exact Binomial(n, level) band confirm the interval is neither optimistic nor needlessly wide.",
+  "scenarios": [
+    "atm_call",
+    "otm_put",
+    "deep_itm_call"
+  ],
+  "z_scores": [
+    {
+      "fraction_within_1_96": "0.965000",
+      "paths": 10000,
+      "replications": 200,
+      "scenario": "atm_call",
+      "z_max": "2.501927",
+      "z_mean": "-0.129362",
+      "z_min": "-2.352285",
+      "z_std": "0.911949"
+    },
+    {
+      "fraction_within_1_96": "0.960000",
+      "paths": 100000,
+      "replications": 200,
+      "scenario": "atm_call",
+      "z_max": "2.930193",
+      "z_mean": "-0.109774",
+      "z_min": "-2.605720",
+      "z_std": "0.962047"
+    },
+    {
+      "fraction_within_1_96": "0.980000",
+      "paths": 10000,
+      "replications": 200,
+      "scenario": "otm_put",
+      "z_max": "2.055642",
+      "z_mean": "0.047803",
+      "z_min": "-3.499867",
+      "z_std": "0.924046"
+    },
+    {
+      "fraction_within_1_96": "0.930000",
+      "paths": 100000,
+      "replications": 200,
+      "scenario": "otm_put",
+      "z_max": "2.475709",
+      "z_mean": "0.063801",
+      "z_min": "-2.629177",
+      "z_std": "0.999029"
+    },
+    {
+      "fraction_within_1_96": "0.980000",
+      "paths": 10000,
+      "replications": 200,
+      "scenario": "deep_itm_call",
+      "z_max": "2.168359",
+      "z_mean": "-0.111787",
+      "z_min": "-2.374962",
+      "z_std": "0.875069"
+    },
+    {
+      "fraction_within_1_96": "0.960000",
+      "paths": 100000,
+      "replications": 200,
+      "scenario": "deep_itm_call",
+      "z_max": "2.622688",
+      "z_mean": "-0.108901",
+      "z_min": "-2.677617",
+      "z_std": "0.927069"
+    }
+  ]
+}

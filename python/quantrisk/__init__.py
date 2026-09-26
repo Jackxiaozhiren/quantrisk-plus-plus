@@ -12,10 +12,12 @@ from ._quantrisk import (
     ValidationError,
     build_metadata,
     inverse_normal_cdf,
+    monte_carlo,
     normal_cdf,
     normal_pdf,
     pricing,
     stats,
+    stochastic,
     version,
 )
 
@@ -27,9 +29,11 @@ __all__ = [
     "__version__",
     "build_metadata",
     "inverse_normal_cdf",
+    "monte_carlo",
     "normal_cdf",
     "normal_pdf",
     "pricing",
     "stats",
+    "stochastic",
     "version",
 ]

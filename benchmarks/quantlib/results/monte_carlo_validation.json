@@ -1,0 +1,73 @@
+{
+  "artifact": "benchmarks/quantlib/monte_carlo_validation.py",
+  "command": "uv run python monte_carlo_validation.py --paths 200000",
+  "csv": "benchmarks/quantlib/results/monte_carlo_validation.csv",
+  "csv_sha256": "5b48decd9d6f3659513fdca896b3fa9e3e04a2dd2a63423f0eb5c1f31527df7e",
+  "environment": {
+    "cpp_arch": "arm64",
+    "cpp_build_type": "Release",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_flags": "(none)",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_standard": "C++20",
+    "generated_at_utc": "2026-09-26T06:13:23+00:00",
+    "git_commit": "6eaa3fdaab42",
+    "packages": {
+      "PyPortfolioOpt": "1.6.0",
+      "QuantLib": "1.43",
+      "cvxpy": "1.9.3",
+      "matplotlib": "3.11.2",
+      "numpy": "2.5.3",
+      "osqp": "1.1.3",
+      "pandas": "3.0.6",
+      "python": "3.12.14",
+      "quantrisk": "0.1.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "statsmodels": "0.15.0"
+    },
+    "python_machine": "arm64",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "quantrisk_version": "0.1.0"
+  },
+  "generated_at_utc": "2026-09-26T06:13:23+00:00",
+  "paths_per_run": 200000,
+  "quantlib_mc_engine_used": false,
+  "quantlib_mc_note": "MCEuropeanEngine could not be constructed with this build's SWIG signature; the analytic oracle and the NumPy stream still provide independent references",
+  "quantlib_version": "1.43",
+  "reading": "With a correct estimator and a correctly reported standard error, the pooled z-scores have mean near 0 and standard deviation near 1, and about 95 % of them fall inside +-2. A systematically understated standard error shows up first as std >> 1.",
+  "rows": 492,
+  "scenarios": [
+    "atm_call",
+    "atm_put",
+    "otm_call",
+    "itm_put_long"
+  ],
+  "seeds": 40,
+  "z_score_vs_quantlib_analytic": {
+    "antithetic": {
+      "count": 160,
+      "fraction_within_2": 0.9875,
+      "max": 2.06289934528015,
+      "mean": -0.022787123782423514,
+      "min": -2.0416660250182352,
+      "std": 1.0138512198218503
+    },
+    "control_variate": {
+      "count": 160,
+      "fraction_within_2": 0.98125,
+      "max": 1.7776385171022813,
+      "mean": 0.050331186730374435,
+      "min": -2.1084182243497738,
+      "std": 0.9231888363749086
+    },
+    "plain": {
+      "count": 160,
+      "fraction_within_2": 0.9625,
+      "max": 2.103070396610414,
+      "mean": 0.03095561077884958,
+      "min": -2.4015406654204496,
+      "std": 0.9304356360557189
+    }
+  }
+}
