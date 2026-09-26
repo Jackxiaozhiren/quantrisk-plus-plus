@@ -1,0 +1,5 @@
+block,data,bootstrap_design,block_length,sample_size,bootstrap_draws,interval_level,replications,true_unconditional_var,coverage,coverage_ci_low,coverage_ci_high,mean_interval_width
+C_bootstrap_coverage,iid_returns,iid,0,500,1500,0.9,400,0.032892109756124145,0.8725,0.8357879415626545,0.9035749266956374,0.0060380509414689
+C_bootstrap_coverage,iid_returns,moving_block,8,500,1500,0.9,400,0.032892109756124145,0.87,0.8330385711920393,0.9013642428711317,0.006030577253134457
+C_bootstrap_coverage,clustered_returns,iid,0,500,1500,0.9,400,0.03238225850621301,0.625,0.5755217886614249,0.6726137612704799,0.00668278434607412
+C_bootstrap_coverage,clustered_returns,moving_block,8,500,1500,0.9,400,0.03238225850621301,0.6925,0.6447228859748411,0.7374012645738481,0.007529011890577297

@@ -3,15 +3,19 @@
 > A Reproducible C++/Python Engine for Stochastic Pricing, Monte Carlo Simulation,
 > Portfolio Risk, Optimization and Stress Testing.
 
-**Current status: Phase 4 — Path-Dependent Pricing & Stochastic Volatility (v0.1.0).**
+**Current status: Phase 5 — Market Risk: VaR/ES, Bootstrap Intervals, Coverage
+Backtests (v0.1.0).**
 Implemented and validated: a C++20 numerical core (RNG discipline, statistics,
 normal distribution), Black-Scholes-Merton pricing with continuous dividends,
 analytic and finite-difference Greeks, a Cox-Ross-Rubinstein lattice for
 European and American exercise, a Monte Carlo framework with antithetic and
 control-variate estimators whose convergence rate and interval coverage are
 measured rather than asserted, arithmetic/geometric Asian and barrier pricing
-with a closed-form geometric-Asian oracle, and a full-truncation Euler Heston
-simulation validated against a semi-analytic engine. Risk, optimisation, stress
+with a closed-form geometric-Asian oracle, a full-truncation Euler Heston
+simulation validated against a semi-analytic engine, and a market-risk layer
+(historical/Gaussian/Monte Carlo VaR and ES, iid and moving-block bootstrap
+intervals, Kupiec and Christoffersen coverage tests) whose size, power and
+coverage are measured on synthetic data with known truth. Optimisation, stress
 and data layers are specified in `docs/` but **not built yet**.
 
 Numbers quoted here come from committed artifacts, regenerate them with the
@@ -23,7 +27,7 @@ commands in [Validation](#validation):
 | Greeks vs QuantLib (delta/gamma/vega/theta/rho) | worst abs 5.12e-13 | same file |
 | Put-call parity residual | 8.0e-15 on notionals <= 200 | `experiments/pricing_validation/results/summary.json` |
 | CRR lattice order | fitted slopes -0.99 +/- 0.004 vs theory -1 | same file, `crr_convergence_slope` |
-| Test suite | 90 C++ (CTest) + 153 Python (pytest) | `docs/phase_reports/phase-04-path-dependent-heston.md` |
+| Test suite | 111 C++ (CTest) + 204 Python (pytest) | `docs/phase_reports/phase-05-market-risk.md` |
 | Geometric Asian closed form vs QuantLib analytic engine | worst rel. error 5.5e-4 | `benchmarks/quantlib/results/path_dependent_vs_quantlib.json` |
 | Barrier monitoring bias and its correction | 14.0 % raw discrete -> 1.0 % with BGK | same artifact |
 | Heston (xi = 0) collapse to Black-Scholes | worst rel. error 2.1e-3 | same artifact |
@@ -32,30 +36,39 @@ commands in [Validation](#validation):
 | 95 % / 99 % interval coverage vs exact Binomial band | 12/12 combinations inside the band | same artifact |
 | MC z-scores vs QuantLib analytic (pooled, 3 methods) | mean ≤ 0.05, std 0.92-1.01, ≥ 96 % within ±2 SE | `benchmarks/quantlib/results/monte_carlo_validation.json` |
 | C++ vs pure-Python Monte Carlo (measured, terminal-only) | 8.07x (46,210,785 vs 5,728,661 paths/s) | `benchmarks/performance/results/monte_carlo_speed.json` |
+| Empirical VaR realised violation rate (synthetic, 200 blocks) | 5.014 % / 1.021 % against 5 % / 1 % nominal on t(3) data | `experiments/var_backtesting/results/estimator_convergence.csv` |
+| Gaussian-fit VaR on the same t(3) data | wrong in opposite directions: 3.29 % at 95 %, 1.39 % at 99 % | same artifact |
+| Kupiec size under a correct model (2 000 x 250 days) | 5.05 % rejection at the 5 % level, exact CI [4.13, 6.10] % | `experiments/var_backtesting/results/coverage_test_size_power.csv` |
+| Clustered violations with correct frequency | Kupiec rejects 12.0 %, independence test 55.4 % | same artifact |
+| Bootstrap coverage of the true VaR (nominal 90 %) | iid design 87.3 % on iid data; 62.5 % vs 69.3 % block design on GARCH data | `experiments/var_backtesting/results/bootstrap_coverage.csv` |
 
 ## 30-second example
 
 ```python
 import quantrisk
 
-quantrisk.version()        # '0.1.0'
+quantrisk.version()  # '0.1.0'
 quantrisk.normal_cdf(0.0)  # 0.5
 
 rng = quantrisk.Rng(seed=42)
-rng.uniform01()            # reproducible in [0, 1)
-rng.standard_normal()      # reproducible N(0, 1)
+rng.uniform01()  # reproducible in [0, 1)
+rng.standard_normal()  # reproducible N(0, 1)
 ```
 
 ## Install (developers, $0)
+
+Configure through `uv run` so CMake finds the same interpreter the tests use:
+a bare `cmake --preset dev` with no active virtualenv silently builds the
+extension against system Python.
 
 ```bash
 uv sync                      # create .venv (Python 3.12) + install deps
 uv pip install -e .          # build C++ core + bindings (editable)
 uv run pytest                # Python tests
 
-cmake --preset dev           # configure C++ (Release-with-debug)
-cmake --build --preset dev   # build core + tests
-ctest --preset dev           # C++ tests
+uv run cmake --preset dev           # configure C++ (Release-with-debug)
+uv run cmake --build --preset dev   # build core + tests
+uv run ctest --preset dev           # C++ tests
 ```
 
 ## Validation

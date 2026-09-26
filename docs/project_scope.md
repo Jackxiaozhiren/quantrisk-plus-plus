@@ -125,7 +125,8 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 2 Black-Scholes, Greeks, CRR lattice, QuantLib benchmark, experiment | DONE (`docs/phase_reports/phase-02-deterministic-pricing.md`) |
 | Phase 3 Monte Carlo engine, variance reduction, convergence + coverage, speed benchmark | DONE (`docs/phase_reports/phase-03-monte-carlo.md`) |
 | Phase 4 Asian + barrier + Heston, oracle benchmark, model cards | DONE (`docs/phase_reports/phase-04-path-dependent-heston.md`) |
-| Risk, optimisation, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
+| Phase 5 VaR/ES estimators, bootstrap intervals, Kupiec + Christoffersen backtests | DONE (`docs/phase_reports/phase-05-market-risk.md`) |
+| Portfolio optimisation, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
 
 ## 10. Frozen surfaces
 
@@ -165,6 +166,25 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
   `heston_step_refinement_gap`.
 - Convention frozen: the BGK correction moves the effective barrier **toward**
   the spot (an up-and-out barrier is lowered, a down-and-out barrier raised).
+
+### Phase 5
+
+- `quantrisk::log_gamma`, `regularized_lower_incomplete_gamma`,
+  `regularized_upper_incomplete_gamma`, `chi_square_sf`, `chi_square_isf`,
+  `log_binomial_coefficient`.
+- `returns::{arithmetic,log_returns}`; `risk::{historical_var, historical_es,
+  gaussian_var, gaussian_es, monte_carlo_var, monte_carlo_es,
+  quantile_standard_error, linear_pnl, sample_covariance}`; `RiskEstimate`.
+- `BootstrapKind`, `BootstrapEstimate`, `bootstrap_var`, `bootstrap_es`,
+  `suggested_block_length` (default `round(n^(1/3))`).
+- `ViolationSeries`, `TransitionCounts`, `CoverageTestResult`, `BacktestReport`,
+  `flag_violations`, `transition_counts`, `kupiec_pof_test`,
+  `christoffersen_independence_test`, `christoffersen_conditional_coverage_test`,
+  `backtest_var`.
+- Conventions frozen here: loss `L = -R`; a violation is a *strictly* greater loss
+  than the VaR level; `stats::*_sorted` primitives require ascending, finite input and
+  raise rather than guessing; chi-square critical values are solved from the same
+  survival function the p-value uses, never transcribed from a table.
 
 Changing any of the above requires a written migration note.
 

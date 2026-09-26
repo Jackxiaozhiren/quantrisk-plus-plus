@@ -36,6 +36,14 @@ Level 3 — Statistical convergence (rates, coverage, uncertainty, backtests)
   rounding, not by trial and error); lattice/MC (looser, justified by theory:
   binomial truncation, `SE ≈ s/√N`); statistical checks (hypothesis-test based:
   coverage within binomial CI, backtest p-values, slope tolerance bands).
+- **Expected values are derived, never transcribed.** A test's reference number
+  must come from a closed form, a live oracle call, or a numeric inversion of the
+  same function under test — not from a value written down from memory. Phase 5
+  caught two invented constants this way (a chi-square 5 % point for 4 dof filed
+  under 5 dof, and a tail probability that contradicted the `exp(-x / 2)` identity
+  for 2 dof); both looked plausible and both were wrong. Critical values are now
+  solved by `chi_square_isf` from the survival function that also produces the
+  p-value, so the two cannot drift apart.
 - Forbidden: lowering a tolerance or deleting a failing test to make CI green.
   A failing validation ⇒ fix code, widen tolerance **with written statistical
   justification**, or downgrade the claim — recorded in the Phase Report.
@@ -56,6 +64,17 @@ Level 3 — Statistical convergence (rates, coverage, uncertainty, backtests)
   input-data SHA256 where applicable.
 - Compiler metadata: Apple clang / GCC / Clang versions + `-O` level + C++20
   standard flag are part of the result, especially for performance claims.
+
+Every artifact additionally records its own provenance, because a commit hash
+captured at *configure* time is not the code that produced the numbers:
+
+- `working_tree_dirty` and `uncommitted_paths` from `git status --porcelain` at run
+  time, plus a `provenance` sentence that tells the reader how to interpret
+  `git_commit`. Before this existed, every phase's artifacts named the *previous*
+  phase's commit while the working tree held the real change.
+- Artifact manifests list **repo-relative** paths, never absolute ones: a committed
+  evidence file must read identically on every machine and must not publish a
+  developer's home directory.
 
 ## 4. Benchmark-integrity rules
 

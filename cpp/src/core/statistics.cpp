@@ -2,10 +2,30 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 
 #include "quantrisk/core/validation.hpp"
 
 namespace quantrisk::stats {
+
+namespace {
+
+/// The `*_sorted` primitives below are the fast path for callers that sort once
+/// and then read several statistics off the same array. An unsorted argument
+/// silently produced a plausible-looking wrong number, so the precondition is
+/// now checked instead of trusted. Written as one explicit pass rather than
+/// `ranges::is_sorted`, which reports `{1, NaN, 3}` as ordered because every
+/// comparison with a NaN is false.
+void require_sorted(std::span<const Real> data, const char *function) {
+    for (std::size_t i = 0; i < data.size(); ++i) {
+        if (!std::isfinite(data[i]) || (i > 0 && data[i] < data[i - 1])) {
+            throw ValidationError(std::string("quantrisk: ") + function +
+                                  " requires ascending-sorted, finite input");
+        }
+    }
+}
+
+} // namespace
 
 Real sum_compensated(std::span<const Real> data) {
     // Neumaier (KBN) compensated summation; index order is fixed so results do
@@ -52,6 +72,7 @@ Real quantile_linear(std::span<const Real> sorted_ascending, const Real p) {
         throw ValidationError("quantrisk: 'sorted_ascending' must be non-empty");
     }
     require_probability(p, "p");
+    require_sorted(sorted_ascending, "quantile_linear");
     const Real index = p * static_cast<Real>(sorted_ascending.size() - 1);
     const auto low = static_cast<std::size_t>(std::floor(index));
     const auto high = static_cast<std::size_t>(std::ceil(index));
@@ -74,6 +95,7 @@ Real mean_of_largest_sorted(std::span<const Real> sorted_ascending, const Count 
     if (static_cast<std::size_t>(k) > sorted_ascending.size()) {
         throw ValidationError("quantrisk: 'k' exceeds the number of observations available");
     }
+    require_sorted(sorted_ascending, "mean_of_largest_sorted");
     const std::size_t start = sorted_ascending.size() - static_cast<std::size_t>(k);
     return mean(sorted_ascending.subspan(start, static_cast<std::size_t>(k)));
 }

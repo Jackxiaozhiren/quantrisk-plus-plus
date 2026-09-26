@@ -108,3 +108,38 @@ never removed just because a later phase shipped.
     `xi = 0` collapse to Black-Scholes.
 27. **No Heston Greeks, no smile calibration, no path-dependent payoff under
     Heston**, and terminal/realised variance inherit the step discretisation.
+28. **The risk layer is validated on synthetic data whose truth is known.** No
+    real return series is used in `experiments/var_backtesting/`, so nothing there
+    licenses a claim about realised markets, and non-stationarity is out of reach
+    by construction.
+29. **Empirical 99 % VaR at 250 observations averages two or three order
+    statistics.** The estimate is dominated by which days happen to be in the
+    sample; `quantile_standard_error` returns NaN rather than a plausible zero
+    when the loss distribution has a tie (flat spot) at that level.
+30. **The Gaussian VaR/ES estimators are wrong by construction for fat tails, and
+    wrong in opposite directions at different levels**: measured realised rates on
+    t(3) returns were 3.29 % at a 5 % nominal level (over-stated) and 1.39 % at a
+    1 % nominal level (under-stated). They are kept as the reference case, not as a
+    defensible production choice.
+31. **Percentile bootstrap intervals are neither bias-corrected nor accelerated**,
+    so coverage sits under nominal even where the design matches the data (87.3 %
+    against a 90 % level at n = 500).
+32. **Under GARCH-type clustering neither bootstrap design reaches nominal
+    coverage** at n = 500: 62.5 % iid versus 69.3 % moving-block (exact intervals
+    that do not overlap, so the block design genuinely helps and still falls
+    ~21 points short). The `round(n^(1/3))` block default is a general-purpose rule
+    and was not tuned for tail quantiles; a stationary bootstrap or a conditional
+    model is not implemented.
+33. **The bootstrap estimand is the unconditional quantile**, taken from a
+    2 000 000-draw simulation. A daily re-estimated (conditional) VaR is a
+    different estimand and its coverage is untested here.
+34. **Coverage tests are marginal-frequency tests on a given VaR series.** They
+    cannot validate the model that produced it, have no power against an error that
+    preserves both the violation rate and its timing, are asymptotic (Kupiec is
+    conservative at the 1 % cutoff because the statistic is a function of an integer
+    count), and carry no multiple-comparison correction across the three tests. The
+    clustered-simulation result shows the practical consequence: an iid-frequency
+    test accepts a clustered model 88 % of the time.
+35. **No Cornish-Fisher expansion, extreme-value tail fit, filtered historical
+    simulation, or expected-shortfall backtest** (Bellini-Frittelli / Acerbi-Tasche
+    style) is implemented.

@@ -15,6 +15,7 @@
 #include "quantrisk/core/validation.hpp"
 #include "quantrisk/core/version.hpp"
 #include "quantrisk/math/normal.hpp"
+#include "quantrisk/math/special.hpp"
 #include "quantrisk/monte_carlo/engine.hpp"
 #include "quantrisk/monte_carlo/path_dependent.hpp"
 #include "quantrisk/pricing/binomial_crr.hpp"
@@ -22,6 +23,9 @@
 #include "quantrisk/pricing/finite_differences.hpp"
 #include "quantrisk/pricing/instrument.hpp"
 #include "quantrisk/pricing/path_dependent.hpp"
+#include "quantrisk/risk/backtest.hpp"
+#include "quantrisk/risk/bootstrap.hpp"
+#include "quantrisk/risk/measures.hpp"
 #include "quantrisk/stochastic/gbm.hpp"
 #include "quantrisk/stochastic/heston.hpp"
 
@@ -397,4 +401,209 @@ PYBIND11_MODULE(_quantrisk, module) {
     stochastic.def("heston_step_refinement_gap", &quantrisk::heston_step_refinement_gap,
                    py::arg("parameters"), py::arg("option"), py::arg("paths"), py::arg("steps"),
                    py::arg("reference_steps"), py::arg("seed"));
+
+    // --- special functions for hypothesis tests -------------------------
+    py::module_ special =
+        module.def_submodule("special", "Special functions used by test statistics.");
+    special.def("log_gamma", &quantrisk::log_gamma, py::arg("x"));
+    special.def("regularized_lower_incomplete_gamma",
+                &quantrisk::regularized_lower_incomplete_gamma, py::arg("a"), py::arg("x"));
+    special.def("regularized_upper_incomplete_gamma",
+                &quantrisk::regularized_upper_incomplete_gamma, py::arg("a"), py::arg("x"));
+    special.def("chi_square_sf", &quantrisk::chi_square_sf, py::arg("x"),
+                py::arg("degrees_of_freedom"));
+    special.def("chi_square_isf", &quantrisk::chi_square_isf, py::arg("probability"),
+                py::arg("degrees_of_freedom"));
+    special.def("log_binomial_coefficient", &quantrisk::log_binomial_coefficient, py::arg("n"),
+                py::arg("k"));
+
+    // --- risk: returns, VaR/ES, bootstrap, backtests --------------------
+    py::module_ risk = module.def_submodule("risk", "Market-risk measures (C++20 core).");
+    py::module_ returns = risk.def_submodule("returns", "Return definitions (arithmetic vs log).");
+    // The core takes non-owning `std::span` views; pybind11 materialises Python
+    // sequences (and NumPy arrays) as `std::vector<double>`, so every entry
+    // point below goes through a one-line adapter. No conversion logic beyond
+    // that lives here (docs/architecture.md §2).
+    returns.def(
+        "arithmetic",
+        [](const std::vector<double> &prices) { return quantrisk::returns::arithmetic(prices); },
+        py::arg("prices"));
+    returns.def(
+        "log_returns",
+        [](const std::vector<double> &prices) { return quantrisk::returns::log_returns(prices); },
+        py::arg("prices"));
+
+    py::class_<quantrisk::risk::RiskEstimate>(risk, "RiskEstimate")
+        .def_readonly("value", &quantrisk::risk::RiskEstimate::value)
+        .def_readonly("confidence_level", &quantrisk::risk::RiskEstimate::confidence_level)
+        .def_readonly("observations", &quantrisk::risk::RiskEstimate::observations)
+        .def_readonly("standard_error", &quantrisk::risk::RiskEstimate::standard_error)
+        .def_readonly("ci_low", &quantrisk::risk::RiskEstimate::ci_low)
+        .def_readonly("ci_high", &quantrisk::risk::RiskEstimate::ci_high)
+        .def_readonly("has_interval", &quantrisk::risk::RiskEstimate::has_interval)
+        .def_readonly("method", &quantrisk::risk::RiskEstimate::method)
+        .def_readonly("note", &quantrisk::risk::RiskEstimate::note);
+
+    risk.def(
+        "historical_var",
+        [](const std::vector<double> &sample, const double level) {
+            return quantrisk::risk::historical_var(sample, level);
+        },
+        py::arg("returns_sample"), py::arg("confidence_level"));
+    risk.def(
+        "historical_es",
+        [](const std::vector<double> &sample, const double level) {
+            return quantrisk::risk::historical_es(sample, level);
+        },
+        py::arg("returns_sample"), py::arg("confidence_level"));
+    risk.def(
+        "gaussian_var",
+        [](const std::vector<double> &sample, const double level) {
+            return quantrisk::risk::gaussian_var(sample, level);
+        },
+        py::arg("returns_sample"), py::arg("confidence_level"));
+    risk.def(
+        "gaussian_es",
+        [](const std::vector<double> &sample, const double level) {
+            return quantrisk::risk::gaussian_es(sample, level);
+        },
+        py::arg("returns_sample"), py::arg("confidence_level"));
+    risk.def(
+        "monte_carlo_var",
+        [](const std::vector<double> &pnl, const double level) {
+            return quantrisk::risk::monte_carlo_var(pnl, level);
+        },
+        py::arg("simulated_pnl"), py::arg("confidence_level"));
+    risk.def(
+        "monte_carlo_es",
+        [](const std::vector<double> &pnl, const double level) {
+            return quantrisk::risk::monte_carlo_es(pnl, level);
+        },
+        py::arg("simulated_pnl"), py::arg("confidence_level"));
+    risk.def(
+        "linear_pnl",
+        [](const std::vector<double> &weights, const std::vector<double> &rows,
+           const std::int64_t assets, const double capital) {
+            return quantrisk::risk::linear_pnl(weights, rows, assets, capital);
+        },
+        py::arg("weights"), py::arg("returns_rows"), py::arg("assets"), py::arg("capital"));
+    risk.def(
+        "sample_covariance",
+        [](const std::vector<double> &rows, const std::int64_t assets,
+           const std::int64_t observations) {
+            return quantrisk::risk::sample_covariance(rows, assets, observations);
+        },
+        py::arg("returns_rows"), py::arg("assets"), py::arg("observations"));
+
+    py::enum_<quantrisk::BootstrapKind>(risk, "BootstrapKind")
+        .value("IID", quantrisk::BootstrapKind::Iid)
+        .value("MOVING_BLOCK", quantrisk::BootstrapKind::MovingBlock)
+        .export_values();
+
+    py::class_<quantrisk::BootstrapEstimate>(risk, "BootstrapEstimate")
+        .def_readonly("point", &quantrisk::BootstrapEstimate::point)
+        .def_readonly("standard_error", &quantrisk::BootstrapEstimate::standard_error)
+        .def_readonly("ci_low", &quantrisk::BootstrapEstimate::ci_low)
+        .def_readonly("ci_high", &quantrisk::BootstrapEstimate::ci_high)
+        .def_readonly("confidence_level", &quantrisk::BootstrapEstimate::confidence_level)
+        .def_readonly("replicates", &quantrisk::BootstrapEstimate::replicates)
+        .def_readonly("block_length", &quantrisk::BootstrapEstimate::block_length)
+        .def_readonly("observations", &quantrisk::BootstrapEstimate::observations)
+        .def_readonly("kind", &quantrisk::BootstrapEstimate::kind)
+        .def_readonly("measure", &quantrisk::BootstrapEstimate::measure)
+        .def_readonly("note", &quantrisk::BootstrapEstimate::note);
+
+    risk.def(
+        "bootstrap_var",
+        [](const std::vector<double> &sample, const double confidence_level,
+           const std::int64_t replicates, const double interval_level,
+           const quantrisk::BootstrapKind kind, const std::int64_t block_length,
+           const std::uint64_t seed) {
+            return quantrisk::bootstrap_var(sample, confidence_level, replicates, interval_level,
+                                            kind, block_length, seed);
+        },
+        py::arg("returns_sample"), py::arg("confidence_level"), py::arg("replicates") = 2000,
+        py::arg("interval_level") = 0.90, py::arg("kind") = quantrisk::BootstrapKind::Iid,
+        py::arg("block_length") = 0, py::arg("seed") = quantrisk::Rng::kDefaultSeed);
+    risk.def(
+        "bootstrap_es",
+        [](const std::vector<double> &sample, const double confidence_level,
+           const std::int64_t replicates, const double interval_level,
+           const quantrisk::BootstrapKind kind, const std::int64_t block_length,
+           const std::uint64_t seed) {
+            return quantrisk::bootstrap_es(sample, confidence_level, replicates, interval_level,
+                                           kind, block_length, seed);
+        },
+        py::arg("returns_sample"), py::arg("confidence_level"), py::arg("replicates") = 2000,
+        py::arg("interval_level") = 0.90, py::arg("kind") = quantrisk::BootstrapKind::Iid,
+        py::arg("block_length") = 0, py::arg("seed") = quantrisk::Rng::kDefaultSeed);
+    risk.def("suggested_block_length", &quantrisk::suggested_block_length, py::arg("observations"));
+
+    py::class_<quantrisk::ViolationSeries>(risk, "ViolationSeries")
+        .def_readonly("flags", &quantrisk::ViolationSeries::flags)
+        .def_readonly("observations", &quantrisk::ViolationSeries::observations)
+        .def_readonly("exceptions", &quantrisk::ViolationSeries::exceptions)
+        .def_readonly("violation_rate", &quantrisk::ViolationSeries::violation_rate);
+
+    py::class_<quantrisk::TransitionCounts>(risk, "TransitionCounts")
+        .def_readonly("n00", &quantrisk::TransitionCounts::n00)
+        .def_readonly("n01", &quantrisk::TransitionCounts::n01)
+        .def_readonly("n10", &quantrisk::TransitionCounts::n10)
+        .def_readonly("n11", &quantrisk::TransitionCounts::n11)
+        .def_readonly("pi01", &quantrisk::TransitionCounts::pi01)
+        .def_readonly("pi11", &quantrisk::TransitionCounts::pi11)
+        .def_readonly("pi0", &quantrisk::TransitionCounts::pi0)
+        .def_readonly("estimable", &quantrisk::TransitionCounts::estimable);
+
+    py::class_<quantrisk::CoverageTestResult>(risk, "CoverageTestResult")
+        .def_readonly("observations", &quantrisk::CoverageTestResult::observations)
+        .def_readonly("exceptions", &quantrisk::CoverageTestResult::exceptions)
+        .def_readonly("nominal_violation_rate",
+                      &quantrisk::CoverageTestResult::nominal_violation_rate)
+        .def_readonly("observed_violation_rate",
+                      &quantrisk::CoverageTestResult::observed_violation_rate)
+        .def_readonly("statistic", &quantrisk::CoverageTestResult::statistic)
+        .def_readonly("p_value", &quantrisk::CoverageTestResult::p_value)
+        .def_readonly("degrees_of_freedom", &quantrisk::CoverageTestResult::degrees_of_freedom)
+        .def_readonly("critical_value_95", &quantrisk::CoverageTestResult::critical_value_95)
+        .def_readonly("rejected_at_5_percent",
+                      &quantrisk::CoverageTestResult::rejected_at_5_percent)
+        .def_readonly("degenerate", &quantrisk::CoverageTestResult::degenerate)
+        .def_readonly("test", &quantrisk::CoverageTestResult::test)
+        .def_readonly("interpretation", &quantrisk::CoverageTestResult::interpretation);
+
+    py::class_<quantrisk::BacktestReport>(risk, "BacktestReport")
+        .def_readonly("series", &quantrisk::BacktestReport::series)
+        .def_readonly("kupiec", &quantrisk::BacktestReport::kupiec)
+        .def_readonly("independence", &quantrisk::BacktestReport::independence)
+        .def_readonly("conditional", &quantrisk::BacktestReport::conditional)
+        .def_readonly("note", &quantrisk::BacktestReport::note);
+
+    risk.def(
+        "flag_violations",
+        [](const std::vector<double> &returns_sample, const std::vector<double> &levels) {
+            return quantrisk::flag_violations(returns_sample, levels);
+        },
+        py::arg("returns_sample"), py::arg("var_levels"));
+    risk.def(
+        "flag_violations",
+        [](const std::vector<double> &returns_sample, const double level) {
+            return quantrisk::flag_violations(returns_sample, level);
+        },
+        py::arg("returns_sample"), py::arg("var_level"));
+    risk.def("transition_counts", &quantrisk::transition_counts, py::arg("series"));
+    risk.def("kupiec_pof_test", &quantrisk::kupiec_pof_test, py::arg("series"),
+             py::arg("confidence_level"));
+    risk.def("christoffersen_independence_test", &quantrisk::christoffersen_independence_test,
+             py::arg("series"));
+    risk.def("christoffersen_conditional_coverage_test",
+             &quantrisk::christoffersen_conditional_coverage_test, py::arg("series"),
+             py::arg("confidence_level"));
+    risk.def(
+        "backtest_var",
+        [](const std::vector<double> &sample, const std::vector<double> &levels,
+           const double confidence_level) {
+            return quantrisk::backtest_var(sample, levels, confidence_level);
+        },
+        py::arg("returns_sample"), py::arg("var_levels"), py::arg("confidence_level"));
 }

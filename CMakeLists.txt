@@ -67,11 +67,15 @@ add_library(quantrisk_core STATIC
   cpp/src/core/statistics.cpp
   cpp/src/core/version.cpp
   cpp/src/math/normal.cpp
+  cpp/src/math/special.cpp
   cpp/src/pricing/black_scholes.cpp
   cpp/src/pricing/binomial_crr.cpp
   cpp/src/pricing/finite_differences.cpp
   cpp/src/pricing/path_dependent.cpp
   cpp/src/monte_carlo/path_dependent.cpp
+  cpp/src/risk/measures.cpp
+  cpp/src/risk/bootstrap.cpp
+  cpp/src/risk/backtest.cpp
   cpp/src/stochastic/gbm.cpp
   cpp/src/monte_carlo/engine.cpp
   cpp/src/stochastic/heston.cpp)
@@ -129,7 +133,9 @@ if(QUANTRISK_BUILD_TESTS)
     tests/cpp/test_gbm.cpp
     tests/cpp/test_monte_carlo.cpp
     tests/cpp/test_path_dependent.cpp
-    tests/cpp/test_heston.cpp)
+    tests/cpp/test_heston.cpp
+    tests/cpp/test_special_functions.cpp
+    tests/cpp/test_risk.cpp)
 
   target_link_libraries(quantrisk_tests PRIVATE quantrisk_core Catch2::Catch2WithMain)
 
@@ -149,6 +155,10 @@ if(QUANTRISK_BUILD_BINDINGS)
     set(Python_ROOT_DIR "$ENV{VIRTUAL_ENV}")
   endif()
   find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+  # Announce the interpreter, because `cmake --preset dev` without an active
+  # virtualenv silently builds the extension for whatever Python is on the system
+  # path -- which is then not the one `uv run pytest` imports. Use `uv run cmake`.
+  message(STATUS "QuantRisk++ bindings: Python ${Python_VERSION} at ${Python_EXECUTABLE}")
 
   # Prefer the pybind11 installed in the active Python environment (this is how
   # a scikit-build-core isolated build finds it); fall back to a pinned fetch

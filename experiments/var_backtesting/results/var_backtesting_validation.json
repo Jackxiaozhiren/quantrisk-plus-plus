@@ -1,0 +1,163 @@
+{
+  "phase": "5 - Market risk: VaR/ES estimators, bootstrap intervals, coverage backtests",
+  "generated_utc": "2026-09-26T12:39:29+00:00",
+  "command": "uv run python experiments/var_backtesting/run.py",
+  "purpose": "Level 1/3 statistical validation of the risk layer: estimator bias and realised violation rates, size and power of the Kupiec and Christoffersen tests, and measured bootstrap coverage under dependence.",
+  "parameters": {
+    "sigma": 0.02,
+    "student_t_df": 3.0,
+    "confidence_levels": [
+      0.95,
+      0.99
+    ],
+    "sample_sizes": [
+      250,
+      1000,
+      10000
+    ],
+    "estimator_replications": 400,
+    "calibration_block": 10000,
+    "out_of_sample_observations": 20000,
+    "backtest_replications": 2000,
+    "backtest_history_length": 250,
+    "power_history_lengths": [
+      250,
+      500,
+      1000,
+      2500
+    ],
+    "power_replications": 500,
+    "bootstrap_replications": 400,
+    "bootstrap_sample_size": 500,
+    "bootstrap_draws": 1500,
+    "bootstrap_interval_level": 0.9,
+    "bootstrap_truth_block": 2000000,
+    "out_of_sample_calibration_replications": 200
+  },
+  "generators": {
+    "student_t3": "standard_t(df=3) scaled so the unconditional standard deviation equals sigma, matching the Gaussian arm",
+    "clustered_returns": "GARCH(1,1) with alpha=0.10, beta=0.85 and omega chosen so the unconditional standard deviation equals sigma; started from its unconditional variance",
+    "clustered_right_marginal": "two-state Markov violation chain with stationary rate 0.05 and P(violate | violated) = 0.25, so the unconditional count is on target while the timing is clustered"
+  },
+  "seeds": "every stream is seeded explicitly (estimator 7000+r, backtest 100000+r, power 500000+r, bootstrap 200000+r with resample seed 31000+r), so reruns reproduce bit for bit",
+  "oracle": {
+    "tool": "SciPy, live: population quantiles, KS uniformity test, exact binomial interval",
+    "role": "reference only; the library never imports SciPy",
+    "versions": {
+      "python": "3.12.14",
+      "quantrisk": "0.1.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "environment": {
+    "generated_at_utc": "2026-09-26T12:39:30+00:00",
+    "quantrisk_version": "0.1.0",
+    "git_commit": "f9651784d0bc",
+    "working_tree_dirty": true,
+    "uncommitted_paths": [
+      "CMakeLists.txt",
+      "README.md",
+      "bindings/python_bindings.cpp",
+      "cpp/include/quantrisk/math/special.hpp",
+      "cpp/include/quantrisk/risk/",
+      "cpp/src/core/statistics.cpp",
+      "cpp/src/math/special.cpp",
+      "cpp/src/risk/",
+      "docs/limitations.md",
+      "docs/model_cards/var_es.md",
+      "docs/phase_reports/phase-05-market-risk.md",
+      "docs/project_scope.md",
+      "docs/validation_protocol.md",
+      "experiments/var_backtesting/",
+      "python/quantrisk/__init__.py",
+      "python/quantrisk/experiments/metadata.py",
+      "tests/cpp/test_risk.cpp",
+      "tests/cpp/test_special_functions.cpp",
+      "tests/cpp/test_statistics.cpp",
+      "tests/python/test_artifact_metadata.py",
+      "tests/python/test_risk_measures.py",
+      "tests/python/test_special_functions_vs_scipy.py"
+    ],
+    "provenance": "the code that produced this artifact is HEAD at git_commit plus the listed uncommitted changes",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_arch": "arm64",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_build_type": "Release",
+    "cpp_standard": "C++20",
+    "cpp_flags": "(none)",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "python_machine": "arm64",
+    "packages": {
+      "python": "3.12.14",
+      "quantrisk": "0.1.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "headline": {
+    "gaussian_95_var_bias_at_n250": -8.227841055168106e-05,
+    "t3_99_var_realised_rate_gaussian": 0.013888500000000002,
+    "t3_99_var_realised_rate_historical": 0.010212750000000001,
+    "calibrated_kupiec_reject_rate": 0.0505,
+    "calibrated_kupiec_reject_rate_at_1pct": 0.0075,
+    "calibrated_kupiec_ks_statistic": 0.1173996943306076,
+    "clustered_kupiec_reject_rate": 0.12,
+    "clustered_independence_reject_rate": 0.554,
+    "under_set_reject_rate_at_n250": 0.988,
+    "under_set_reject_rate_at_n2500": 1.0,
+    "iid_design_iid_data_coverage": 0.8725,
+    "iid_design_clustered_data_coverage": 0.625,
+    "block_design_clustered_data_coverage": 0.6925
+  },
+  "reading": {
+    "A_estimator": "bias is the mean estimate minus the population value; the Monte Carlo standard error over replications says how small it has to be to mean anything.",
+    "A_out_of_sample": "realised_violation_rate averaged over independent calibration blocks against nominal_violation_rate. Above nominal means the published VaR understated the risk. The t(3) rows are where a normal fit is expected to fail, and the min/max columns show how much a single block's sigma-hat can move the answer.",
+    "B_size_power": "reject_rate_at_0.01/0.05/0.10 with exact binomial intervals: a correctly specified continuous statistic tracks its nominal level at every cutoff. The Kupiec and Christoffersen statistics are functions of integer violation counts, so their p-values are step distributions and the ks_statistic column measures the residual distance to uniform rather than signalling a defect. The clustered arm is the discriminator: Kupiec largely accepts a clustered model while the independence test rejects it.",
+    "B_specificity_and_power": "for a purely unconditional error, power for Kupiec rises with history length while the independence test correctly keeps not rejecting: it is a specificity trace as much as a power curve.",
+    "C_bootstrap_coverage": "coverage of the nominal 90 % interval with its exact binomial interval. Where the design matches the data it should reach 0.90; the shortfall of the iid design on clustered data is the documented cost of assuming serial independence."
+  },
+  "artifacts": [
+    {
+      "path": "experiments/var_backtesting/results/estimator_convergence.csv",
+      "sha256": "5f66fea4f0f7fcac71c8c5713de870e8f01111fdcbaa21a2d8c669c231d33133",
+      "bytes": "11530"
+    },
+    {
+      "path": "experiments/var_backtesting/results/coverage_test_size_power.csv",
+      "sha256": "177e967e8ba55faae8ef4f2f0bcb8828fcfab59b2bbe9062efcf70803e38d8e1",
+      "bytes": "3041"
+    },
+    {
+      "path": "experiments/var_backtesting/results/bootstrap_coverage.csv",
+      "sha256": "586b13cf622d1d8e0c5b376f041d2a9b7e3aed2877900980070fc596aca4f85b",
+      "bytes": "781"
+    },
+    {
+      "path": "experiments/var_backtesting/results/estimator_convergence.png",
+      "sha256": "737b9cb14c76159a3afade7405a23f8ff839cac6c808d46829a957b97fb4ef30",
+      "bytes": "42874"
+    },
+    {
+      "path": "experiments/var_backtesting/results/pvalue_uniformity.png",
+      "sha256": "8396bfd6aab70d78ed98a2051724b16905c802309745f89284ac936c84780db7",
+      "bytes": "50304"
+    }
+  ]
+}

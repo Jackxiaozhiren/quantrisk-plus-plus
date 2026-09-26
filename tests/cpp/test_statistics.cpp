@@ -80,3 +80,20 @@ TEST_CASE("statistics helpers reject empty or underspecified samples") {
     CHECK_THROWS_AS(stats::quantile_linear(one, 1.5), ValidationError);
     CHECK_THROWS_AS(stats::autocorrelation(one, 1), ValidationError);
 }
+
+TEST_CASE("the *_sorted primitives refuse unsorted input instead of guessing") {
+    // Feeding an unsorted sample used to return a plausible-looking wrong number:
+    // a risk figure read off an arbitrary element of the array. The precondition
+    // is now enforced because a silently wrong number is worse than an exception.
+    const std::vector<Real> unsorted = {3.0, 1.0, 2.0};
+    const std::vector<Real> sorted = {1.0, 2.0, 3.0};
+    CHECK(stats::quantile_linear(sorted, 0.5) == Approx(2.0));
+    CHECK(stats::mean_of_largest_sorted(sorted, 2) == Approx(2.5));
+    CHECK_THROWS_AS(stats::quantile_linear(unsorted, 0.5), ValidationError);
+    CHECK_THROWS_AS(stats::mean_of_largest_sorted(unsorted, 1), ValidationError);
+    // A NaN breaks the ordering, so it is refused by the same guard.
+    const std::vector<Real> with_nan = {1.0, std::nan(""), 3.0};
+    CHECK_THROWS_AS(stats::quantile_linear(with_nan, 0.5), ValidationError);
+    // The sorting wrapper still accepts raw samples.
+    CHECK(stats::quantile(unsorted, 0.5) == Approx(2.0));
+}
