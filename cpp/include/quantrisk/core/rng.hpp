@@ -19,40 +19,39 @@ namespace quantrisk {
 ///   A pair of variates is produced per accepted draw and the partner is
 ///   cached, so a given seed yields the same sequence within one build.
 class Rng {
-public:
-  /// Default seed used by demos and documented experiment commands.
-  static constexpr Seed kDefaultSeed = 42;
+  public:
+    /// Default seed used by demos and documented experiment commands.
+    static constexpr Seed kDefaultSeed = 42;
 
-  explicit Rng(const Seed seed = kDefaultSeed)
-      : engine_(seed), seed_(seed) {}
+    explicit Rng(const Seed seed = kDefaultSeed) : engine_(seed), seed_(seed) {}
 
-  Rng(const Rng &) = delete;
-  Rng &operator=(const Rng &) = delete;
-  Rng(Rng &&) = default;
-  Rng &operator=(Rng &&) = default;
+    Rng(const Rng &) = delete;
+    Rng &operator=(const Rng &) = delete;
+    Rng(Rng &&) = default;
+    Rng &operator=(Rng &&) = default;
 
-  /// Uniform on [0, 1).
-  double uniform01();
+    /// Uniform on [0, 1).
+    double uniform01();
 
-  /// Standard normal variate, N(0, 1).
-  double standard_normal();
+    /// Standard normal variate, N(0, 1).
+    double standard_normal();
 
-  /// `n` independent N(0, 1) variates in one call (path generation).
-  std::vector<double> standard_normal_vector(std::size_t n);
+    /// `n` independent N(0, 1) variates in one call (path generation).
+    std::vector<double> standard_normal_vector(std::size_t n);
 
-  [[nodiscard]] Seed seed() const { return seed_; }
-  [[nodiscard]] std::uint64_t uniform_draws() const { return uniform_draws_; }
-  [[nodiscard]] bool has_cached_normal() const { return has_spare_; }
+    [[nodiscard]] Seed seed() const { return seed_; }
+    [[nodiscard]] std::uint64_t uniform_draws() const { return uniform_draws_; }
+    [[nodiscard]] bool has_cached_normal() const { return has_spare_; }
 
-  /// Integer uniform in [0, high) — used by bootstrap resampling.
-  std::uint64_t uniform_index(const std::uint64_t high);
+    /// Integer uniform in [0, high) — used by bootstrap resampling.
+    std::uint64_t uniform_index(const std::uint64_t high);
 
-private:
-  std::mt19937_64 engine_;
-  Seed seed_ = kDefaultSeed;
-  std::uint64_t uniform_draws_ = 0;
-  bool has_spare_ = false;
-  double spare_ = 0.0;
+  private:
+    std::mt19937_64 engine_;
+    Seed seed_ = kDefaultSeed;
+    std::uint64_t uniform_draws_ = 0;
+    bool has_spare_ = false;
+    double spare_ = 0.0;
 };
 
-}  // namespace quantrisk
+} // namespace quantrisk

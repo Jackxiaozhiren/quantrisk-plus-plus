@@ -20,4 +20,4 @@ inline constexpr Real kMachineEpsilon = std::numeric_limits<Real>::epsilon();
 /// number of `double` operations, not by trial and error.
 inline constexpr Real kAnalyticTolerance = 1.0e-12;
 
-}  // namespace quantrisk
+} // namespace quantrisk

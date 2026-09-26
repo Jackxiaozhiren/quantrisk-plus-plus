@@ -9,11 +9,10 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 import quantrisk
 
 scipy_stats = pytest.importorskip("scipy.stats")
-scipy.special = pytest.importorskip("scipy.special")
+scipy_special = pytest.importorskip("scipy.special")
 
 # Tolerance rationale: both sides evaluate the same mathematical function with
 # a handful of double operations, so agreement at the 1e-12 level is far looser
@@ -58,7 +57,7 @@ def test_inverse_normal_cdf_agrees_with_scipy_ppf() -> None:
 def test_erfc_identity_holds_for_the_library_definition() -> None:
     xs = np.linspace(-6.0, 6.0, 601)
     ours = np.array([quantrisk.normal_cdf(float(x)) for x in xs])
-    oracle = 0.5 * scipy.special.erfc(-xs / np.sqrt(2.0))
+    oracle = 0.5 * scipy_special.erfc(-xs / np.sqrt(2.0))
     # Cephes' erfc and libm's erfc agree to a few ulps; anything larger would
     # mean the core does not actually implement N(x) = 0.5 * erfc(-x / sqrt 2).
     max_error = float(np.max(np.abs(ours - oracle)))

@@ -29,4 +29,4 @@ using Seed = std::uint64_t;
 
 inline constexpr Real kHighestReal = std::numeric_limits<Real>::max();
 
-}  // namespace quantrisk
+} // namespace quantrisk

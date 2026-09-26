@@ -48,5 +48,5 @@ Real autocorrelation(std::span<const Real> data, Count lag);
 /// Standard error of a mean over `n` i.i.d. sample values: `s / sqrt(n)`.
 Real standard_error_of_mean(std::span<const Real> data);
 
-}  // namespace stats
-}  // namespace quantrisk
+} // namespace stats
+} // namespace quantrisk

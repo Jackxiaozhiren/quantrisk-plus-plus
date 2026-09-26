@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 import quantrisk
 
 scipy_stats = pytest.importorskip("scipy.stats")

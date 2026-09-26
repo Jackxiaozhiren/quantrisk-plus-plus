@@ -9,7 +9,6 @@ import tomllib
 from pathlib import Path
 
 import pytest
-
 import quantrisk
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -47,7 +46,7 @@ def test_normal_cdf_smoke_contract() -> None:
 
 def test_build_metadata_reports_the_environment_that_produced_the_numbers() -> None:
     metadata = quantrisk.build_metadata()
-    assert REQUIRED_METADATA_KEYS <= set(metadata), sorted(metadata)
+    assert set(metadata) >= REQUIRED_METADATA_KEYS, sorted(metadata)
     assert metadata["cxx_standard"] == "C++20"
     assert metadata["version"] == quantrisk.version()
     # A release artifact must not be built from a dirty/unknown tree.

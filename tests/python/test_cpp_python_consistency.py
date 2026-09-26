@@ -10,7 +10,6 @@ docs/architecture.md §2 is already broken.
 from __future__ import annotations
 
 import pytest
-
 import quantrisk
 
 
@@ -68,5 +67,6 @@ def test_statistics_helpers_match_the_cpp_side_exactly(cpp_reference: dict) -> N
 def test_statistics_module_is_not_a_python_reimplementation() -> None:
     # The submodule lives inside the compiled extension; if a pure-Python copy
     # ever appeared in python/quantrisk this import path would change.
-    assert getattr(quantrisk.stats, "__file__", None) is None
     assert quantrisk.stats.__name__.startswith("quantrisk._quantrisk")
+    origin = getattr(quantrisk.stats, "__file__", "") or ""
+    assert not origin.endswith(".py"), f"stats resolved to a Python file: {origin}"

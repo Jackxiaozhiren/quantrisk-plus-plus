@@ -112,7 +112,7 @@ Phase 0 (this doc set) → 1 engineering skeleton → 2 BS/binomial/Greeks →
 
 Rule: one phase at a time; each phase ends with a Phase Report and stops.
 
-## 9. Current status (honest, 2026-09-25)
+## 9. Current status (honest, 2026-09-26)
 
 | Item | Status |
 |---|---|
@@ -121,12 +121,15 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | `docs/mathematical_specification.md` v0.1 | DONE (Phase 0, spec only) |
 | `docs/validation_protocol.md` | DONE (Phase 0) |
 | `docs/architecture.md` (+ diagram) | DONE (Phase 0) |
-| C++ core / bindings / tests / benchmarks / experiments | NOT STARTED (Phase 1+) |
-| Any pricing, simulation, risk, or optimization result | DOES NOT EXIST — no numbers are claimed |
+| Phase 1 build/packaging/C++ core/bindings/tests/CI | DONE (see `docs/phase_reports/phase-01-engineering-foundation.md`) |
+| Pricing, simulation, risk, optimization, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
 
-## 10. Open items for Phase 1 (not claims)
+## 10. Frozen Phase 1 surface
 
-- `cmake` missing on this machine → install via Homebrew/Xcode CLT and pin version.
-- Python env bootstrapping via `uv` (system Python 3.14.7 is bare; project targets 3.12+).
-- Pin Eigen / pybind11 / Catch2 versions; decide FetchContent vs system packages.
-- `git init` + initial commit; minimal CI (configure → build → CTest → pytest).
+- `namespace quantrisk`, `Real = double`, `Time/Rate/Volatility/Money/Count/Seed`.
+- `Rng` (instance-owned `std::mt19937_64`, explicit seed, no global state).
+- `normal_pdf`, `normal_cdf`, `inverse_normal_cdf`, `stats::*`, `version()`,
+  `build_metadata()`, `ValidationError`.
+- Python smoke surface: `quantrisk.version()`, `quantrisk.normal_cdf(0.0)`.
+
+Eigen enters with Phase 6 (first real dense linear algebra), not Phase 1.

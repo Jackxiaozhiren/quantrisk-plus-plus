@@ -6,7 +6,6 @@ from __future__ import annotations
 import math
 
 import pytest
-
 import quantrisk
 
 
@@ -37,7 +36,7 @@ def test_empty_and_degenerate_samples_are_rejected() -> None:
         quantrisk.stats.sample_variance([1.0])
     with pytest.raises(quantrisk.ValidationError):
         quantrisk.stats.quantile([], 0.5)
-    with pytest.raises(quantrisk.ValidationError, match="k exceeds"):
+    with pytest.raises(quantrisk.ValidationError, match="'k' exceeds the number of observations"):
         quantrisk.stats.mean_of_largest_sorted([1.0, 2.0], 3)
 
 

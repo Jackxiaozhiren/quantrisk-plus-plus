@@ -20,4 +20,4 @@ Real normal_cdf(Real x);
 Real inverse_normal_cdf(Real probability);
 /// @}
 
-}  // namespace quantrisk
+} // namespace quantrisk

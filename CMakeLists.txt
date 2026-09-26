@@ -13,7 +13,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(QUANTRISK_BUILD_TESTS "Build the Catch2 C++ test suite" ${PROJECT_IS_TOP_LEVEL})
+# A wheel build (scikit-build-core) only needs the library and the extension
+# module; the C++ test suite belongs to the CMake/CTest developer path.
+if(SKBUILD OR skbuild OR DEFINED ENV{SKBUILD})
+  set(QUANTRISK_DEFAULT_BUILD_TESTS OFF)
+else()
+  set(QUANTRISK_DEFAULT_BUILD_TESTS ON)
+endif()
+
+option(QUANTRISK_BUILD_TESTS "Build the Catch2 C++ test suite" ${QUANTRISK_DEFAULT_BUILD_TESTS})
 option(QUANTRISK_BUILD_BINDINGS "Build the pybind11 Python extension module" ON)
 
 # --------------------------------------------------------------------------
