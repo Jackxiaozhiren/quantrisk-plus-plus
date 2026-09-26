@@ -3,15 +3,16 @@
 > A Reproducible C++/Python Engine for Stochastic Pricing, Monte Carlo Simulation,
 > Portfolio Risk, Optimization and Stress Testing.
 
-**Current status: Phase 3 — Monte Carlo Simulation Engine (v0.1.0).**
+**Current status: Phase 4 — Path-Dependent Pricing & Stochastic Volatility (v0.1.0).**
 Implemented and validated: a C++20 numerical core (RNG discipline, statistics,
 normal distribution), Black-Scholes-Merton pricing with continuous dividends,
 analytic and finite-difference Greeks, a Cox-Ross-Rubinstein lattice for
-European and American exercise, and a Monte Carlo framework with antithetic and
+European and American exercise, a Monte Carlo framework with antithetic and
 control-variate estimators whose convergence rate and interval coverage are
-measured rather than asserted. Path-dependent pricing, Heston, risk,
-optimisation, stress and data layers are specified in `docs/` but **not built
-yet**.
+measured rather than asserted, arithmetic/geometric Asian and barrier pricing
+with a closed-form geometric-Asian oracle, and a full-truncation Euler Heston
+simulation validated against a semi-analytic engine. Risk, optimisation, stress
+and data layers are specified in `docs/` but **not built yet**.
 
 Numbers quoted here come from committed artifacts, regenerate them with the
 commands in [Validation](#validation):
@@ -22,7 +23,11 @@ commands in [Validation](#validation):
 | Greeks vs QuantLib (delta/gamma/vega/theta/rho) | worst abs 5.12e-13 | same file |
 | Put-call parity residual | 8.0e-15 on notionals <= 200 | `experiments/pricing_validation/results/summary.json` |
 | CRR lattice order | fitted slopes -0.99 +/- 0.004 vs theory -1 | same file, `crr_convergence_slope` |
-| Test suite | 72 C++ (CTest) + 136 Python (pytest) | `docs/phase_reports/phase-03-monte-carlo.md` |
+| Test suite | 90 C++ (CTest) + 153 Python (pytest) | `docs/phase_reports/phase-04-path-dependent-heston.md` |
+| Geometric Asian closed form vs QuantLib analytic engine | worst rel. error 5.5e-4 | `benchmarks/quantlib/results/path_dependent_vs_quantlib.json` |
+| Barrier monitoring bias and its correction | 14.0 % raw discrete -> 1.0 % with BGK | same artifact |
+| Heston (xi = 0) collapse to Black-Scholes | worst rel. error 2.1e-3 | same artifact |
+| Heston vs `AnalyticHestonEngine` | worst rel. error 4.5e-3 (validation weaker than BS) | same artifact |
 | MC error decay (fitted log-log slope, theory -0.5) | -0.614 ± 0.089, -0.585 ± 0.096, -0.507 ± 0.118 | `experiments/monte_carlo_convergence/results/summary.json` |
 | 95 % / 99 % interval coverage vs exact Binomial band | 12/12 combinations inside the band | same artifact |
 | MC z-scores vs QuantLib analytic (pooled, 3 methods) | mean ≤ 0.05, std 0.92-1.01, ≥ 96 % within ±2 SE | `benchmarks/quantlib/results/monte_carlo_validation.json` |

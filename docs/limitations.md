@@ -85,3 +85,26 @@ never removed just because a later phase shipped.
     QuantLib's analytic price (the exact limit) and a NumPy/PCG64 simulation.
 21. **Performance baseline uses a different random stream** (`random.gauss`),
     so it measures cost per path, not equality of estimates.
+
+## Phase 4 — path-dependent pricing and Heston
+
+22. **Fixing and monitoring dates are year-fraction arithmetic only.** No
+    calendar, business-day or month-end convention (`t_i = i T / M`), so the
+    oracle residual for the geometric Asian is 5.5e-4 from day rounding rather
+    than a pricing difference.
+23. **Discrete barrier monitoring is biased upward** relative to continuous
+    monitoring: measured 14.0 % at 250 dates on a 30-vol at-the-money up-and-out
+    call. The Broadie-Glasserman-Kou correction reduces that to 1.0 % but is an
+    `O(sqrt(dt))` asymptotic result for a single barrier on a lognormal diffusion,
+    not an exact treatment.
+24. **The monitoring grid and the diffusion grid are the same grid**, so `steps`
+    cannot be refined for one purpose without the other.
+25. **Heston validation is weaker than the Black-Scholes section.** The oracle is
+    QuantLib's semi-analytic `AnalyticHestonEngine`, itself a quadrature, so the
+    measured 4.5e-3 combines our discretisation bias with the oracle's
+    integration tolerance.
+26. **Full-truncation Euler is biased**; no moment-matched, QE/bilinear or exact
+    CIR-transition scheme is implemented. The only exactness claimed is the
+    `xi = 0` collapse to Black-Scholes.
+27. **No Heston Greeks, no smile calibration, no path-dependent payoff under
+    Heston**, and terminal/realised variance inherit the step discretisation.

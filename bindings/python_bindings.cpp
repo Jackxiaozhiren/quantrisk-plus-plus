@@ -16,11 +16,14 @@
 #include "quantrisk/core/version.hpp"
 #include "quantrisk/math/normal.hpp"
 #include "quantrisk/monte_carlo/engine.hpp"
+#include "quantrisk/monte_carlo/path_dependent.hpp"
 #include "quantrisk/pricing/binomial_crr.hpp"
 #include "quantrisk/pricing/black_scholes.hpp"
 #include "quantrisk/pricing/finite_differences.hpp"
 #include "quantrisk/pricing/instrument.hpp"
+#include "quantrisk/pricing/path_dependent.hpp"
 #include "quantrisk/stochastic/gbm.hpp"
+#include "quantrisk/stochastic/heston.hpp"
 
 namespace py = pybind11;
 
@@ -281,4 +284,117 @@ PYBIND11_MODULE(_quantrisk, module) {
     monte_carlo.def("variance_reduction_name", [](const quantrisk::VarianceReduction method) {
         return std::string(quantrisk::to_string(method));
     });
+
+    // --- pricing: path-dependent instruments ---------------------------
+    py::enum_<quantrisk::AverageType>(pricing, "AverageType")
+        .value("ARITHMETIC", quantrisk::AverageType::Arithmetic)
+        .value("GEOMETRIC", quantrisk::AverageType::Geometric)
+        .export_values();
+    py::enum_<quantrisk::BarrierType>(pricing, "BarrierType")
+        .value("UP_AND_OUT", quantrisk::BarrierType::UpAndOut)
+        .value("DOWN_AND_OUT", quantrisk::BarrierType::DownAndOut)
+        .export_values();
+
+    py::class_<quantrisk::AsianOption>(pricing, "AsianOption")
+        .def(py::init<const quantrisk::OptionType, double, const quantrisk::AverageType,
+                      std::int64_t>(),
+             py::arg("type"), py::arg("strike"), py::arg("average_type"),
+             py::arg("monitoring_points"))
+        .def_readwrite("type", &quantrisk::AsianOption::type)
+        .def_readwrite("strike", &quantrisk::AsianOption::strike)
+        .def_readwrite("average_type", &quantrisk::AsianOption::average_type)
+        .def_readwrite("monitoring_points", &quantrisk::AsianOption::monitoring_points)
+        .def("validate", &quantrisk::AsianOption::validate)
+        .def("payoff", &quantrisk::AsianOption::payoff, py::arg("sampled"))
+        .def("payoff_from_average", &quantrisk::AsianOption::payoff_from_average,
+             py::arg("average"));
+
+    py::class_<quantrisk::BarrierOption>(pricing, "BarrierOption")
+        .def(py::init<const quantrisk::OptionType, double, const quantrisk::BarrierType, double,
+                      double>(),
+             py::arg("type"), py::arg("strike"), py::arg("barrier"), py::arg("barrier_level"),
+             py::arg("rebate") = 0.0)
+        .def_readwrite("type", &quantrisk::BarrierOption::type)
+        .def_readwrite("strike", &quantrisk::BarrierOption::strike)
+        .def_readwrite("barrier", &quantrisk::BarrierOption::barrier)
+        .def_readwrite("barrier_level", &quantrisk::BarrierOption::barrier_level)
+        .def_readwrite("rebate", &quantrisk::BarrierOption::rebate)
+        .def("validate", &quantrisk::BarrierOption::validate)
+        .def("survives", &quantrisk::BarrierOption::survives, py::arg("level"))
+        .def("payoff", &quantrisk::BarrierOption::payoff, py::arg("terminal"));
+
+    pricing.def("geometric_asian_price", &quantrisk::geometric_asian_price, py::arg("option"),
+                py::arg("market"));
+    pricing.def("barrier_continuity_constant", &quantrisk::barrier_continuity_constant);
+    pricing.def("continuity_corrected_barrier", &quantrisk::continuity_corrected_barrier,
+                py::arg("option"), py::arg("market"), py::arg("dt"));
+
+    // --- monte_carlo: path-dependent estimators -------------------------
+    monte_carlo.def("price_asian", &quantrisk::path_dependent::price_asian, py::arg("engine"),
+                    py::arg("option"), py::arg("market"), py::arg("paths"),
+                    py::arg("use_control_variate"), py::arg("confidence_level") = 0.95);
+    monte_carlo.def("price_geometric_asian", &quantrisk::path_dependent::price_geometric_asian,
+                    py::arg("engine"), py::arg("option"), py::arg("market"), py::arg("paths"),
+                    py::arg("confidence_level") = 0.95);
+    monte_carlo.def("price_barrier", &quantrisk::path_dependent::price_barrier, py::arg("engine"),
+                    py::arg("option"), py::arg("market"), py::arg("paths"), py::arg("steps"),
+                    py::arg("continuous_approximation") = false, py::arg("antithetic") = false,
+                    py::arg("confidence_level") = 0.95);
+
+    // --- stochastic: Heston --------------------------------------------
+    py::class_<quantrisk::HestonParams>(stochastic, "HestonParams")
+        .def(py::init<>())
+        .def_readwrite("spot", &quantrisk::HestonParams::spot)
+        .def_readwrite("rate", &quantrisk::HestonParams::rate)
+        .def_readwrite("dividend_yield", &quantrisk::HestonParams::dividend_yield)
+        .def_readwrite("initial_variance", &quantrisk::HestonParams::initial_variance)
+        .def_readwrite("kappa", &quantrisk::HestonParams::kappa)
+        .def_readwrite("theta", &quantrisk::HestonParams::theta)
+        .def_readwrite("xi", &quantrisk::HestonParams::xi)
+        .def_readwrite("rho", &quantrisk::HestonParams::rho)
+        .def_readwrite("maturity", &quantrisk::HestonParams::maturity)
+        .def("validate", &quantrisk::HestonParams::validate)
+        .def("feller_condition_satisfied", &quantrisk::HestonParams::feller_condition_satisfied)
+        .def("instantaneous_volatility", &quantrisk::HestonParams::instantaneous_volatility);
+
+    py::class_<quantrisk::HestonSimulation>(stochastic, "HestonSimulation")
+        .def_readonly("terminals", &quantrisk::HestonSimulation::terminals)
+        .def_readonly("terminal_variance", &quantrisk::HestonSimulation::terminal_variance)
+        .def_readonly("realised_variance", &quantrisk::HestonSimulation::realised_variance)
+        .def_readonly("paths", &quantrisk::HestonSimulation::paths)
+        .def_readonly("steps", &quantrisk::HestonSimulation::steps)
+        .def_readonly("seed", &quantrisk::HestonSimulation::seed)
+        .def_readonly("time_step", &quantrisk::HestonSimulation::time_step)
+        .def_readonly("negative_variances_clamped",
+                      &quantrisk::HestonSimulation::negative_variances_clamped)
+        .def_readonly("runtime_seconds", &quantrisk::HestonSimulation::runtime_seconds)
+        .def_readonly("note", &quantrisk::HestonSimulation::note);
+
+    py::class_<quantrisk::HestonPriceResult>(stochastic, "HestonPriceResult")
+        .def_readonly("price", &quantrisk::HestonPriceResult::price)
+        .def_readonly("standard_error", &quantrisk::HestonPriceResult::standard_error)
+        .def_readonly("confidence_low", &quantrisk::HestonPriceResult::confidence_low)
+        .def_readonly("confidence_high", &quantrisk::HestonPriceResult::confidence_high)
+        .def_readonly("paths", &quantrisk::HestonPriceResult::paths)
+        .def_readonly("steps", &quantrisk::HestonPriceResult::steps)
+        .def_readonly("seed", &quantrisk::HestonPriceResult::seed)
+        .def_readonly("mean_terminal_variance",
+                      &quantrisk::HestonPriceResult::mean_terminal_variance)
+        .def_readonly("realised_variance_mean",
+                      &quantrisk::HestonPriceResult::realised_variance_mean)
+        .def_readonly("negative_variances_clamped",
+                      &quantrisk::HestonPriceResult::negative_variances_clamped)
+        .def_readonly("feller_condition_satisfied",
+                      &quantrisk::HestonPriceResult::feller_condition_satisfied)
+        .def_readonly("runtime_seconds", &quantrisk::HestonPriceResult::runtime_seconds)
+        .def_readonly("note", &quantrisk::HestonPriceResult::note);
+
+    stochastic.def("simulate_heston", &quantrisk::simulate_heston, py::arg("parameters"),
+                   py::arg("paths"), py::arg("steps"), py::arg("rng"));
+    stochastic.def("price_heston_european", &quantrisk::price_heston_european,
+                   py::arg("parameters"), py::arg("option"), py::arg("paths"), py::arg("steps"),
+                   py::arg("rng"), py::arg("confidence_level") = 0.95);
+    stochastic.def("heston_step_refinement_gap", &quantrisk::heston_step_refinement_gap,
+                   py::arg("parameters"), py::arg("option"), py::arg("paths"), py::arg("steps"),
+                   py::arg("reference_steps"), py::arg("seed"));
 }

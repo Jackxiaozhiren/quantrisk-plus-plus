@@ -70,8 +70,11 @@ add_library(quantrisk_core STATIC
   cpp/src/pricing/black_scholes.cpp
   cpp/src/pricing/binomial_crr.cpp
   cpp/src/pricing/finite_differences.cpp
+  cpp/src/pricing/path_dependent.cpp
+  cpp/src/monte_carlo/path_dependent.cpp
   cpp/src/stochastic/gbm.cpp
-  cpp/src/monte_carlo/engine.cpp)
+  cpp/src/monte_carlo/engine.cpp
+  cpp/src/stochastic/heston.cpp)
 
 target_include_directories(quantrisk_core PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cpp/include>"
@@ -124,7 +127,9 @@ if(QUANTRISK_BUILD_TESTS)
     tests/cpp/test_greeks.cpp
     tests/cpp/test_binomial.cpp
     tests/cpp/test_gbm.cpp
-    tests/cpp/test_monte_carlo.cpp)
+    tests/cpp/test_monte_carlo.cpp
+    tests/cpp/test_path_dependent.cpp
+    tests/cpp/test_heston.cpp)
 
   target_link_libraries(quantrisk_tests PRIVATE quantrisk_core Catch2::Catch2WithMain)
 

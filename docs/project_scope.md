@@ -124,7 +124,8 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 1 build/packaging/C++ core/bindings/tests/CI | DONE (`docs/phase_reports/phase-01-engineering-foundation.md`) |
 | Phase 2 Black-Scholes, Greeks, CRR lattice, QuantLib benchmark, experiment | DONE (`docs/phase_reports/phase-02-deterministic-pricing.md`) |
 | Phase 3 Monte Carlo engine, variance reduction, convergence + coverage, speed benchmark | DONE (`docs/phase_reports/phase-03-monte-carlo.md`) |
-| Path-dependent/Heston, risk, optimisation, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
+| Phase 4 Asian + barrier + Heston, oracle benchmark, model cards | DONE (`docs/phase_reports/phase-04-path-dependent-heston.md`) |
+| Risk, optimisation, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
 
 ## 10. Frozen surfaces
 
@@ -153,6 +154,17 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
   `normal_confidence_multiplier`.
 - Convention: `mu` in the physical-measure generator is price appreciation
   *excluding* the dividend yield, so `mu = r` reproduces the risk-neutral stream.
+
+### Phase 4
+
+- `AsianOption`, `AverageType`, `BarrierOption`, `BarrierType`,
+  `geometric_asian_price`, `barrier_continuity_constant`,
+  `continuity_corrected_barrier`, `path_dependent::{price_asian,
+  price_geometric_asian, price_barrier}`, `HestonParams`, `HestonSimulation`,
+  `HestonPriceResult`, `simulate_heston`, `price_heston_european`,
+  `heston_step_refinement_gap`.
+- Convention frozen: the BGK correction moves the effective barrier **toward**
+  the spot (an up-and-out barrier is lowered, a down-and-out barrier raised).
 
 Changing any of the above requires a written migration note.
 
