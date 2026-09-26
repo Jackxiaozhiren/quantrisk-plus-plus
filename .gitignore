@@ -1,0 +1,26 @@
+# Build
+build/
+dist/
+*.egg-info/
+*.so
+*.dylib
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+uv.lock.bak
+
+# CMake / FetchContent
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+_deps/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

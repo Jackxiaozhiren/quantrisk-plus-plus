@@ -1,0 +1,67 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.13", "cmake>=3.26", "ninja>=1.11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "quantrisk"
+version = "0.1.0"
+description = "Reproducible C++/Python engine for stochastic pricing, Monte Carlo simulation, portfolio risk, optimization and stress testing"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "QuantRisk++ contributors" }]
+keywords = ["quantitative-finance", "monte-carlo", "risk", "reproducibility"]
+dependencies = ["numpy>=1.26", "pandas>=2.0"]
+
+[project.optional-dependencies]
+# Validation oracles. Tests that need them skip cleanly when they are absent,
+# so CI stays offline; the benchmark suite requires them.
+oracles = [
+  "scipy>=1.11",
+  "statsmodels>=0.14",
+  "QuantLib>=1.32",
+  "PyPortfolioOpt>=1.5",
+  "cvxpy>=1.4",
+  "scikit-learn>=1.4",
+]
+plot = ["matplotlib>=3.8"]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "cmake>=3.26",
+  "ninja>=1.11",
+  "clang-format>=18",
+  "pybind11>=2.13",
+  "scipy>=1.11",
+  "matplotlib>=3.8",
+]
+
+[tool.scikit-build]
+cmake.version = ">=3.26"
+ninja.version = ">=1.11"
+wheel.packages = ["python/quantrisk"]
+# Keeps the CMake tree between installs so a C++ edit only relinks instead of
+# re-fetching Catch2/pybind11 from scratch.
+build-dir = "build/wheel"
+wheel.cmake = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+addopts = "-ra --strict-markers"
+markers = [
+  "oracle: requires an external validation oracle (skipped when absent)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true

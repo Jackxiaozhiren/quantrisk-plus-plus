@@ -1,0 +1,23 @@
+# Static checks for the C++20 core. clang-tidy is optional in CI; the checks
+# below are the ones the numerical core is actually expected to satisfy.
+Checks: >
+  bugprone-*,
+  performance-*,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-equals-delete,
+  readability-redundant-*,
+  readability-inconsistent-declaration-parameter-name,
+  clang-analyzer-core.*,
+  clang-analyzer-optin.*,
+  clang-diagnostic-*,
+  -readability-magic-numbers,
+  -bugprone-easily-swappable-parameters,
+  -readability-identifier-length,
+  -performance-unnecessary-value-param
+WarningsAsErrors: ''
+HeaderFilterRegex: '(cpp|bindings)/.*'
+FormatStyle: file
+CheckOptions:
+  - key: readability-function-cognitive-complexity.IgnoreMacros
+    value: true

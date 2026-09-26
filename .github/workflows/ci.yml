@@ -1,0 +1,61 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Format and static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install dev environment
+        run: uv sync
+      - name: ruff
+        run: uv run ruff check .
+      - name: ruff format
+        run: uv run ruff format --check .
+      - name: clang-format
+        run: |
+          find cpp bindings tests/cpp -name '*.cpp' -o -name '*.hpp' | sort |
+            xargs uv run clang-format --dry-run --Werror
+      - name: mypy (where practical)
+        run: uv run mypy python/quantrisk || echo "::warning::mypy reported issues (not blocking in Phase 1)"
+
+  build-and-test:
+    name: Configure, build, C++ tests, Python tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install dev environment
+        run: uv sync
+      - name: Configure (CMake preset ci)
+        run: uv run cmake --preset ci
+      - name: Build core, tests and bindings
+        run: uv run cmake --build --preset ci
+      - name: C++ tests (CTest)
+        run: uv run ctest --preset ci
+      - name: Install the Python package from the same tree
+        run: uv pip install -e .
+      - name: Python tests (pytest, fully offline)
+        env:
+          QUANTRISK_REFERENCE_TOOL: ${{ github.workspace }}/build/ci/quantrisk_reference_tool
+        run: uv run pytest -q
