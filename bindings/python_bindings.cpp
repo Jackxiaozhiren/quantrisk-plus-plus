@@ -20,6 +20,7 @@
 #include "quantrisk/monte_carlo/path_dependent.hpp"
 #include "quantrisk/portfolio/covariance.hpp"
 #include "quantrisk/portfolio/mean_variance.hpp"
+#include "quantrisk/portfolio/risk_parity.hpp"
 #include "quantrisk/pricing/binomial_crr.hpp"
 #include "quantrisk/pricing/black_scholes.hpp"
 #include "quantrisk/pricing/finite_differences.hpp"
@@ -723,4 +724,30 @@ PYBIND11_MODULE(_quantrisk, module) {
         py::arg("inputs"), py::arg("target_returns"), py::arg("request"));
     portfolio.def("maximum_sharpe", &quantrisk::portfolio::maximum_sharpe, py::arg("inputs"),
                   py::arg("request"));
+    py::class_<quantrisk::portfolio::RiskParitySolution>(portfolio, "RiskParitySolution")
+        .def_readonly("assets", &quantrisk::portfolio::RiskParitySolution::assets)
+        .def_readonly("weights", &quantrisk::portfolio::RiskParitySolution::weights)
+        .def_readonly("variance", &quantrisk::portfolio::RiskParitySolution::variance)
+        .def_readonly("volatility", &quantrisk::portfolio::RiskParitySolution::volatility)
+        .def_readonly("contributions", &quantrisk::portfolio::RiskParitySolution::contributions)
+        .def_readonly("max_contribution_gap",
+                      &quantrisk::portfolio::RiskParitySolution::max_contribution_gap)
+        .def_readonly("cycles", &quantrisk::portfolio::RiskParitySolution::cycles)
+        .def_readonly("converged", &quantrisk::portfolio::RiskParitySolution::converged)
+        .def_readonly("positive_definite",
+                      &quantrisk::portfolio::RiskParitySolution::positive_definite)
+        .def_readonly("note", &quantrisk::portfolio::RiskParitySolution::note);
+    portfolio.def(
+        "risk_parity",
+        [](const std::vector<double> &covariance, const std::int64_t assets) {
+            return quantrisk::portfolio::risk_parity(covariance, assets);
+        },
+        py::arg("covariance"), py::arg("assets"));
+    portfolio.def(
+        "risk_parity",
+        [](const std::vector<double> &covariance, const std::int64_t assets,
+           const std::vector<double> &budget) {
+            return quantrisk::portfolio::risk_parity(covariance, assets, budget);
+        },
+        py::arg("covariance"), py::arg("assets"), py::arg("starting_weights"));
 }
