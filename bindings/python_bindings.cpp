@@ -33,6 +33,10 @@
 #include "quantrisk/risk/measures.hpp"
 #include "quantrisk/stochastic/gbm.hpp"
 #include "quantrisk/stochastic/heston.hpp"
+#include "quantrisk/stress/engine.hpp"
+#include "quantrisk/stress/factor.hpp"
+#include "quantrisk/stress/scenario.hpp"
+#include "quantrisk/stress/simulation.hpp"
 
 namespace py = pybind11;
 
@@ -795,4 +799,208 @@ PYBIND11_MODULE(_quantrisk, module) {
         .def_readonly("certified", &quantrisk::portfolio::CvarSolution::certified)
         .def_readonly("note", &quantrisk::portfolio::CvarSolution::note);
     portfolio.def("minimise_cvar", &quantrisk::portfolio::minimise_cvar, py::arg("request"));
+    // --- stress: factors, exposures, scenarios, attribution --------------
+    py::module_ stress = module.def_submodule("stress", "Scenario and stress engine (C++20 core).");
+    namespace s = quantrisk::stress;
+
+    py::enum_<s::FactorClass>(stress, "FactorClass")
+        .value("equity_index", s::FactorClass::equity_index)
+        .value("rate", s::FactorClass::rate)
+        .value("volatility", s::FactorClass::volatility)
+        .value("credit_spread", s::FactorClass::credit_spread)
+        .export_values();
+
+    py::enum_<s::ScenarioKind>(stress, "ScenarioKind")
+        .value("deterministic", s::ScenarioKind::deterministic)
+        .value("historical", s::ScenarioKind::historical)
+        .value("monte_carlo", s::ScenarioKind::monte_carlo)
+        .export_values();
+
+    py::class_<s::RiskFactor>(stress, "RiskFactor")
+        .def(py::init<>())
+        .def(py::init<const std::string &, s::FactorClass, quantrisk::Real, const std::string &>(),
+             py::arg("id"), py::arg("asset_class"), py::arg("level"), py::arg("units"))
+        .def_readwrite("id", &s::RiskFactor::id)
+        .def_readwrite("asset_class", &s::RiskFactor::asset_class)
+        .def_readwrite("level", &s::RiskFactor::level)
+        .def_readwrite("units", &s::RiskFactor::units);
+
+    py::class_<s::FactorSet>(stress, "FactorSet")
+        .def(py::init<>())
+        .def_readwrite("factors", &s::FactorSet::factors)
+        .def("index_of", &s::FactorSet::index_of, py::arg("id"))
+        .def("size", &s::FactorSet::size);
+
+    py::class_<s::ExposureVector>(stress, "ExposureVector")
+        .def(py::init<>())
+        .def_readwrite("delta", &s::ExposureVector::delta)
+        .def_readwrite("gamma", &s::ExposureVector::gamma)
+        .def_readwrite("duration", &s::ExposureVector::duration)
+        .def_readwrite("vega", &s::ExposureVector::vega)
+        .def_readwrite("credit", &s::ExposureVector::credit)
+        .def("size", &s::ExposureVector::size)
+        .def("empty", &s::ExposureVector::empty);
+
+    py::class_<s::Position>(stress, "Position")
+        .def(py::init<>())
+        .def_readwrite("name", &s::Position::name)
+        .def_readwrite("exposures", &s::Position::exposures);
+
+    py::class_<s::Portfolio>(stress, "Portfolio")
+        .def(py::init<>())
+        .def_readwrite("factors", &s::Portfolio::factors)
+        .def_readwrite("positions", &s::Portfolio::positions)
+        .def("aggregate", &s::Portfolio::aggregate);
+
+    py::class_<s::Shock>(stress, "Shock")
+        .def(py::init<>())
+        .def(py::init<const std::string &, quantrisk::Real, quantrisk::Real>(),
+             py::arg("factor_id"), py::arg("relative") = 0.0, py::arg("absolute") = 0.0)
+        .def_readwrite("factor_id", &s::Shock::factor_id)
+        .def_readwrite("relative", &s::Shock::relative)
+        .def_readwrite("absolute", &s::Shock::absolute);
+
+    py::class_<s::DistributionShift>(stress, "DistributionShift")
+        .def(py::init<>())
+        .def_readwrite("volatility_multiplier", &s::DistributionShift::volatility_multiplier)
+        .def_readwrite("correlation_increment", &s::DistributionShift::correlation_increment);
+
+    py::class_<s::Scenario>(stress, "Scenario")
+        .def(py::init<>())
+        .def_readwrite("name", &s::Scenario::name)
+        .def_readwrite("kind", &s::Scenario::kind)
+        .def_readwrite("assumptions", &s::Scenario::assumptions)
+        .def_readwrite("shocks", &s::Scenario::shocks)
+        .def_readwrite("distribution", &s::Scenario::distribution)
+        .def_readwrite("seed", &s::Scenario::seed)
+        .def_readwrite("paths", &s::Scenario::paths)
+        .def_readwrite("horizon", &s::Scenario::horizon);
+
+    py::class_<s::FactorContribution>(stress, "FactorContribution")
+        .def_readonly("factor_id", &s::FactorContribution::factor_id)
+        .def_readonly("asset_class", &s::FactorContribution::asset_class)
+        .def_readonly("relative_move", &s::FactorContribution::relative_move)
+        .def_readonly("absolute_move", &s::FactorContribution::absolute_move)
+        .def_readonly("linear", &s::FactorContribution::linear)
+        .def_readonly("convexity", &s::FactorContribution::convexity)
+        .def_readonly("rate", &s::FactorContribution::rate)
+        .def_readonly("volatility", &s::FactorContribution::volatility)
+        .def_readonly("credit", &s::FactorContribution::credit)
+        .def("total", &s::FactorContribution::total);
+
+    py::class_<s::PositionContribution>(stress, "PositionContribution")
+        .def_readonly("name", &s::PositionContribution::name)
+        .def_readonly("pnl", &s::PositionContribution::pnl);
+
+    py::class_<s::ScenarioResult>(stress, "ScenarioResult")
+        .def_readonly("scenario_name", &s::ScenarioResult::scenario_name)
+        .def_readonly("kind", &s::ScenarioResult::kind)
+        .def_readonly("assumptions", &s::ScenarioResult::assumptions)
+        .def_readonly("horizon", &s::ScenarioResult::horizon)
+        .def_readonly("pnl_change", &s::ScenarioResult::pnl_change)
+        .def_readonly("by_factor", &s::ScenarioResult::by_factor)
+        .def_readonly("by_position", &s::ScenarioResult::by_position)
+        .def_readonly("factor_attribution_residual",
+                      &s::ScenarioResult::factor_attribution_residual)
+        .def_readonly("position_attribution_residual",
+                      &s::ScenarioResult::position_attribution_residual)
+        .def_readonly("has_risk_metrics", &s::ScenarioResult::has_risk_metrics)
+        .def_readonly("base_volatility", &s::ScenarioResult::base_volatility)
+        .def_readonly("stressed_volatility", &s::ScenarioResult::stressed_volatility)
+        .def_readonly("base_var", &s::ScenarioResult::base_var)
+        .def_readonly("stressed_var", &s::ScenarioResult::stressed_var)
+        .def_readonly("base_es", &s::ScenarioResult::base_es)
+        .def_readonly("stressed_es", &s::ScenarioResult::stressed_es)
+        .def_readonly("var_change", &s::ScenarioResult::var_change)
+        .def_readonly("var_change_from_level", &s::ScenarioResult::var_change_from_level)
+        .def_readonly("var_change_from_distribution",
+                      &s::ScenarioResult::var_change_from_distribution)
+        .def_readonly("var_decomposition_residual", &s::ScenarioResult::var_decomposition_residual)
+        .def_readonly("es_change", &s::ScenarioResult::es_change)
+        .def_readonly("volatility_change", &s::ScenarioResult::volatility_change)
+        .def_readonly("var_components_stressed", &s::ScenarioResult::var_components_stressed)
+        .def_readonly("var_component_residual", &s::ScenarioResult::var_component_residual)
+        .def_readonly("note", &s::ScenarioResult::note);
+
+    stress.def(
+        "run_scenario",
+        [](const s::Portfolio &portfolio, const s::Scenario &scenario,
+           const std::vector<double> &factor_move_covariance, const double confidence) {
+            return s::run_scenario(portfolio, scenario, factor_move_covariance, confidence);
+        },
+        py::arg("portfolio"), py::arg("scenario"),
+        py::arg("factor_move_covariance") = std::vector<double>{}, py::arg("confidence") = 0.95);
+
+    stress.def(
+        "shift_covariance",
+        [](const std::vector<double> &covariance, const quantrisk::Count assets,
+           const s::DistributionShift &shift) {
+            std::string note;
+            std::vector<quantrisk::Real> out = s::shift_covariance(covariance, assets, shift, note);
+            return std::make_tuple(out, note);
+        },
+        py::arg("covariance"), py::arg("assets"), py::arg("shift"));
+
+    py::class_<s::ScenarioSample>(stress, "ScenarioSample")
+        .def_readonly("moves", &s::ScenarioSample::moves)
+        .def_readonly("paths", &s::ScenarioSample::paths)
+        .def_readonly("assets", &s::ScenarioSample::assets)
+        .def_readonly("seed", &s::ScenarioSample::seed)
+        .def_readonly("note", &s::ScenarioSample::note);
+
+    py::class_<s::FactorSummary>(stress, "FactorSummary")
+        .def_readonly("factor_id", &s::FactorSummary::factor_id)
+        .def_readonly("mean_contribution", &s::FactorSummary::mean_contribution)
+        .def_readonly("worst_contribution", &s::FactorSummary::worst_contribution);
+
+    py::class_<s::ScenarioSetResult>(stress, "ScenarioSetResult")
+        .def_readonly("scenario_name", &s::ScenarioSetResult::scenario_name)
+        .def_readonly("kind", &s::ScenarioSetResult::kind)
+        .def_readonly("assumptions", &s::ScenarioSetResult::assumptions)
+        .def_readonly("generator", &s::ScenarioSetResult::generator)
+        .def_readonly("scenarios", &s::ScenarioSetResult::scenarios)
+        .def_readonly("pnl", &s::ScenarioSetResult::pnl)
+        .def_readonly("mean_pnl", &s::ScenarioSetResult::mean_pnl)
+        .def_readonly("volatility", &s::ScenarioSetResult::volatility)
+        .def_readonly("worst_pnl", &s::ScenarioSetResult::worst_pnl)
+        .def_readonly("best_pnl", &s::ScenarioSetResult::best_pnl)
+        .def_readonly("var", &s::ScenarioSetResult::var)
+        .def_readonly("es", &s::ScenarioSetResult::es)
+        .def_readonly("by_position", &s::ScenarioSetResult::by_position)
+        .def_readonly("by_factor", &s::ScenarioSetResult::by_factor)
+        .def_readonly("position_attribution_residual",
+                      &s::ScenarioSetResult::position_attribution_residual)
+        .def_readonly("factor_attribution_residual",
+                      &s::ScenarioSetResult::factor_attribution_residual)
+        .def_readonly("note", &s::ScenarioSetResult::note);
+
+    stress.def(
+        "sample_factor_moves",
+        [](const std::vector<double> &covariance, const quantrisk::Count assets,
+           const quantrisk::Count paths, const quantrisk::Seed seed) {
+            return s::sample_factor_moves(covariance, assets, paths, seed);
+        },
+        py::arg("covariance"), py::arg("assets"), py::arg("paths"), py::arg("seed"));
+
+    stress.def(
+        "run_historical_scenarios",
+        [](const s::Portfolio &portfolio, const s::Scenario &scenario,
+           const std::vector<double> &observed_moves, const quantrisk::Count observations,
+           const double confidence) {
+            return s::run_historical_scenarios(portfolio, scenario, observed_moves, observations,
+                                               confidence);
+        },
+        py::arg("portfolio"), py::arg("scenario"), py::arg("observed_moves"),
+        py::arg("observations"), py::arg("confidence") = 0.95);
+
+    stress.def(
+        "run_monte_carlo_scenarios",
+        [](const s::Portfolio &portfolio, const s::Scenario &scenario,
+           const std::vector<double> &covariance, const quantrisk::Count paths,
+           const quantrisk::Seed seed, const double confidence) {
+            return s::run_monte_carlo_scenarios(portfolio, scenario, covariance, paths, seed,
+                                                confidence);
+        },
+        py::arg("portfolio"), py::arg("scenario"), py::arg("covariance"), py::arg("paths"),
+        py::arg("seed"), py::arg("confidence") = 0.95);
 }

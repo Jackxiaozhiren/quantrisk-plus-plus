@@ -21,6 +21,7 @@ from ._quantrisk import (
     special,
     stats,
     stochastic,
+    stress,
     version,
 )
 
@@ -41,5 +42,6 @@ __all__ = [
     "special",
     "stats",
     "stochastic",
+    "stress",
     "version",
 ]
