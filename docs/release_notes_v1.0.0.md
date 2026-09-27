@@ -89,7 +89,7 @@ All worst-case, over every row of each benchmark, measured against a live oracle
 | `evidence/manifest.json` | SHA-256, generating command, revision and environment for every artifact |
 | `benchmarks/suite/results/` | `suite_run.json`, `suite_headline.csv`, `suite_summary.md`, `validation_envelope.png` |
 | `CITATION.cff` | software citation metadata |
-| `docs/` | validation matrix, protocol, limitations, reproducibility, 8 model cards, 10 phase reports |
+| `docs/` | validation matrix, protocol, limitations, reproducibility, findings, integrity audit, 8 model cards, 11 phase reports |
 
 ## Reproducing this release
 

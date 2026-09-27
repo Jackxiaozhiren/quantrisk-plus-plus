@@ -252,6 +252,7 @@ and explicit approval, and the new CI lane needs one run on a runner before "run
 fact rather than a configuration. Both are stated in the README and the release notes rather
 than quietly assumed.
 
-The integrity audit's five passes are recorded in §6 and in `docs/reproducibility.md`. The
-most consequential finding was not in the code: two documents written this cycle described an
-older repository, and would have been believed.
+The integrity audit's five passes are recorded in **`docs/integrity_audit.md`**, which lists
+the ten defects found and fixed, the checks that came back clean with the command that proved
+each, and the four items still open. The most consequential finding was not in the code: two
+documents written this cycle described an older repository, and would have been believed.

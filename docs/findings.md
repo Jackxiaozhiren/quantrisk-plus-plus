@@ -4,6 +4,17 @@ Three results worth ninety seconds. Each is a number, the confound that makes it
 something, and the artifact that regenerates it. Everything here is measured; nothing is
 asserted from a model's reputation.
 
+**On uncertainty, since three of the numbers below are ratios and none carries a ± sign.**
+They are not estimates from a sample, and pretending otherwise would be a different error.
+Findings 1 and 2 are deterministic functions of a fully specified, seeded data-generating
+process: given the same build, every figure reproduces to the last digit, and the ranges quoted
+(1.13×–1.26×, 1.57×–1.60×) are the spread *across window lengths and estimators*, which is the
+substantive variation being reported, not sampling noise. Finding 3's residuals are identities,
+so their only uncertainty is floating-point. Where sampling error *is* the question —
+convergence slopes, coverage rates, backtest size — the standard errors are in
+`docs/validation_matrix.md`, and they are the reason two of those claims are stated as
+"−0.99405 ± 0.00313 against a theory value of −1" rather than as a match.
+
 For a reader who wants the reasoning rather than the result: the technical report
 (`paper/technical_report.pdf`) covers each in its own chapter, and
 `docs/validation_matrix.md` lists every bound against every measurement.
