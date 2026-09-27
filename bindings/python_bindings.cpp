@@ -19,6 +19,7 @@
 #include "quantrisk/monte_carlo/engine.hpp"
 #include "quantrisk/monte_carlo/path_dependent.hpp"
 #include "quantrisk/portfolio/covariance.hpp"
+#include "quantrisk/portfolio/mean_variance.hpp"
 #include "quantrisk/pricing/binomial_crr.hpp"
 #include "quantrisk/pricing/black_scholes.hpp"
 #include "quantrisk/pricing/finite_differences.hpp"
@@ -674,4 +675,52 @@ PYBIND11_MODULE(_quantrisk, module) {
             return quantrisk::portfolio::solve(symmetric, assets, right_hand_side);
         },
         py::arg("symmetric"), py::arg("assets"), py::arg("right_hand_side"));
+
+    py::class_<quantrisk::portfolio::OptimizerInputs>(portfolio, "OptimizerInputs")
+        .def(py::init<>())
+        .def_readwrite("assets", &quantrisk::portfolio::OptimizerInputs::assets)
+        .def_readwrite("covariance", &quantrisk::portfolio::OptimizerInputs::covariance)
+        .def_readwrite("expected_returns", &quantrisk::portfolio::OptimizerInputs::expected_returns)
+        .def_readwrite("scenario_returns", &quantrisk::portfolio::OptimizerInputs::scenario_returns)
+        .def_readwrite("scenario_count", &quantrisk::portfolio::OptimizerInputs::scenario_count);
+
+    py::class_<quantrisk::portfolio::OptimizationRequest>(portfolio, "OptimizationRequest")
+        .def(py::init<>())
+        .def_readwrite("long_only", &quantrisk::portfolio::OptimizationRequest::long_only)
+        .def_readwrite("target_return", &quantrisk::portfolio::OptimizationRequest::target_return)
+        .def_readwrite("risk_free_rate", &quantrisk::portfolio::OptimizationRequest::risk_free_rate)
+        .def_readwrite("cvar_confidence",
+                       &quantrisk::portfolio::OptimizationRequest::cvar_confidence);
+
+    py::class_<quantrisk::portfolio::PortfolioSolution>(portfolio, "PortfolioSolution")
+        .def_readonly("assets", &quantrisk::portfolio::PortfolioSolution::assets)
+        .def_readonly("weights", &quantrisk::portfolio::PortfolioSolution::weights)
+        .def_readonly("expected_return", &quantrisk::portfolio::PortfolioSolution::expected_return)
+        .def_readonly("variance", &quantrisk::portfolio::PortfolioSolution::variance)
+        .def_readonly("volatility", &quantrisk::portfolio::PortfolioSolution::volatility)
+        .def_readonly("sharpe_ratio", &quantrisk::portfolio::PortfolioSolution::sharpe_ratio)
+        .def_readonly("value_at_risk", &quantrisk::portfolio::PortfolioSolution::value_at_risk)
+        .def_readonly("conditional_var", &quantrisk::portfolio::PortfolioSolution::conditional_var)
+        .def_readonly("budget_residual", &quantrisk::portfolio::PortfolioSolution::budget_residual)
+        .def_readonly("weight_bound_violation",
+                      &quantrisk::portfolio::PortfolioSolution::weight_bound_violation)
+        .def_readonly("target_residual", &quantrisk::portfolio::PortfolioSolution::target_residual)
+        .def_readonly("tolerance", &quantrisk::portfolio::PortfolioSolution::tolerance)
+        .def_readonly("feasible", &quantrisk::portfolio::PortfolioSolution::feasible)
+        .def_readonly("verified_optimal",
+                      &quantrisk::portfolio::PortfolioSolution::verified_optimal)
+        .def_readonly("method", &quantrisk::portfolio::PortfolioSolution::method)
+        .def_readonly("note", &quantrisk::portfolio::PortfolioSolution::note);
+
+    portfolio.def("minimum_variance", &quantrisk::portfolio::minimum_variance, py::arg("inputs"),
+                  py::arg("request"));
+    portfolio.def(
+        "efficient_frontier",
+        [](const quantrisk::portfolio::OptimizerInputs &inputs, const std::vector<double> &targets,
+           const quantrisk::portfolio::OptimizationRequest &request) {
+            return quantrisk::portfolio::efficient_frontier(inputs, targets, request);
+        },
+        py::arg("inputs"), py::arg("target_returns"), py::arg("request"));
+    portfolio.def("maximum_sharpe", &quantrisk::portfolio::maximum_sharpe, py::arg("inputs"),
+                  py::arg("request"));
 }

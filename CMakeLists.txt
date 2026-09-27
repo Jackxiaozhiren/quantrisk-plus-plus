@@ -100,7 +100,8 @@ add_library(quantrisk_core STATIC
   cpp/src/stochastic/gbm.cpp
   cpp/src/monte_carlo/engine.cpp
   cpp/src/stochastic/heston.cpp
-  cpp/src/portfolio/covariance.cpp)
+  cpp/src/portfolio/covariance.cpp
+  cpp/src/portfolio/mean_variance.cpp)
 
 target_include_directories(quantrisk_core PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cpp/include>"
@@ -159,7 +160,8 @@ if(QUANTRISK_BUILD_TESTS)
     tests/cpp/test_heston.cpp
     tests/cpp/test_special_functions.cpp
     tests/cpp/test_risk.cpp
-    tests/cpp/test_covariance.cpp)
+    tests/cpp/test_covariance.cpp
+    tests/cpp/test_mean_variance.cpp)
 
   target_link_libraries(quantrisk_tests PRIVATE quantrisk_core Catch2::Catch2WithMain)
 
