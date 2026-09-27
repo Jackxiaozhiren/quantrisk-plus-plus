@@ -94,7 +94,7 @@ All worst-case, over every row of each benchmark, measured against a live oracle
 ## Reproducing this release
 
 ```bash
-git clone <repository> && cd QuantRisk++ && git checkout v1.0.0
+git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus && git checkout v1.0.0
 uv sync --extra oracles && uv pip install -e .
 uv run pytest -q && uv run ctest --preset dev
 uv run python scripts/run_benchmark_suite.py --require-all

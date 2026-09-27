@@ -241,6 +241,10 @@ That file is the honest boundary of this project, and three entries matter more 
 
 ## Install (developers, $0)
 
+```bash
+git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
+```
+
 Configure through `uv run` so CMake finds the same interpreter the tests use: a bare
 `cmake --preset dev` with no active virtualenv silently builds the extension against system
 Python.

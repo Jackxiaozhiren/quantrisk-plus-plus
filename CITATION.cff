@@ -26,7 +26,7 @@ authors:
   - name: Zhiren Xiao
     author-affiliation:
       name: School of Applied Statistics, Guangdong University of Finance
-repository-code: # set when the public remote exists
+repository-code: https://github.com/Jackxiaozhiren/quantrisk-plus-plus
 version: 1.0.0
 date-released: 2026-09-27
 license: MIT
@@ -47,6 +47,7 @@ references:
     authors:
       - name: Zhiren Xiao
     database: repository
-    repository-code: # shipped as paper/technical_report.pdf in the release
+    repository-code: https://github.com/Jackxiaozhiren/quantrisk-plus-plus
+    release-notes: https://github.com/Jackxiaozhiren/quantrisk-plus-plus/releases/tag/v1.0.0
     path: paper/technical_report.tex
     version: 1.0.0

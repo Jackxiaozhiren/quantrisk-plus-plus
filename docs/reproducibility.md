@@ -66,7 +66,7 @@ that strips too eagerly would pass the re-run test and silently rubber-stamp a c
 ## How to reproduce from a fresh clone
 
 ```bash
-git clone <repository> && cd QuantRisk++
+git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
 uv sync --extra oracles          # interpreter 3.12, deps, and the validation oracles
 uv pip install -e .              # builds the C++ core and the pybind11 module
 uv run pytest -q                 # the full Python suite
