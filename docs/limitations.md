@@ -273,3 +273,14 @@ never removed just because a later phase shipped.
     compares in units of the last place rather than demanding bit equality. Exact,
     platform-independent equality is claimed only where both sides come from the same binary —
     the Python-to-C++ consistency checks — and nowhere across compilers.
+
+## Phase 10 — typing the extension boundary
+
+60. **The generated stubs declare names, not signatures.** `python/quantrisk/<submodule>.pyi`
+    lists all 151 public re-exports as `Any`, because the pybind11 extension publishes no
+    callable signatures to Python and a stub asserting one would be an unverifiable claim about
+    C++. Static tools therefore confirm that `quantrisk.stress.FactorSet` exists and that it is
+    imported from a module that really exports it; they do not check how you call it. Argument
+    correctness at that boundary is guarded by the runtime tests and by the C++ validation
+    suite, not by the type checker. Real signatures would have to be generated from
+    `cpp/include`, which is a larger project and deliberately not claimed here.

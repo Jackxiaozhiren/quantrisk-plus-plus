@@ -14,7 +14,7 @@ Revision audited: `v1.0.0` → `9aef2d2`. Date: 2026-09-27.
 | Check | How it was tested | Result |
 |---|---|---|
 | No fake implementation | Scan `*.py`, `*.cpp`, `*.hpp` for `TODO`, `FIXME`, `NotImplementedError`, `placeholder` outside tests | 3 hits, all prose in comments explaining a deliberate design choice; no stubbed routine |
-| No dead feature | Enumerate all 159 public Python symbols and `git grep` each for a use outside the binding that declares it | 4 unmatched: `portfolio.OPTIMAL / INFEASIBLE / UNBOUNDED / NUMERICAL_FAILURE`. All four are produced by `linear_program.cpp` and asserted in `tests/cpp/test_linear_program.cpp`; the binding exposes the complete enum. **Not dead.** |
+| No dead feature | Enumerate the public Python symbols and `git grep` each for a use outside the binding that declares it | 4 unmatched enum members, all produced by `linear_program.cpp` and asserted in C++ — part of a complete enum, legitimately. **But this row originally read "clean" and was wrong.** The check asked only whether anything calls a symbol; `PortfolioOptimizer.sample_covariance` has no callers *and* raises on every documented input, so it satisfied a check designed to catch the first half only. See finding 12. |
 | No secret | Scan every tracked file for key-shaped literals, `password=`, `AKIA…`, PEM headers | 8 files match on the word `api_key`; all are `FRED_API_KEY` **documentation or an `os.environ` read**. `fred.py:87` is the only accessor. No value is committed, cached or logged — enforced by the planted-key test in `test_data_layer_offline.py`. |
 | No hardcoded benchmark | Search tests for a comparison against a long float literal | Zero matches. Oracle tests call the oracle at run time; `test_pricing_vs_quantlib.py` additionally runs the published benchmark script so the artifact cannot rot out of coverage. |
 | No machine path in evidence | `test_no_committed_artifact_leaks_a_machine_specific_path` | **Failed initially.** The suite runner passed absolute script paths, so `sys.argv[0]` — recorded by `pricing_validation.py` as its own generating command — wrote a username into a frozen artifact and the manifest hashed it. Fixed in the runner; guard now green. |
@@ -48,7 +48,7 @@ Revision audited: `v1.0.0` → `9aef2d2`. Date: 2026-09-27.
 | No trading recommendation | Same scan for `we recommend`, `should buy`, plus check that no expected-return model ships | Clean. `expected_returns` is an input; limitation #37 states that any use treating a sample mean as skill inherits the consequence. |
 | No misleading backtest | Check every VaR backtest for a stated data-generating process and a disclosure that it is synthetic | Clean. Limitation #28 is explicit: no real return series is used, so nothing licenses a claim about realised markets. Look-ahead is refused rather than degraded — `fred.fetch_vintage` raises when `FRED_API_KEY` is absent instead of substituting a current-revision series, "because the result still looks like a backtest" (`python/quantrisk/data/fred.py:149-151`), pinned by `test_vintage_needs_a_key_and_says_so_without_touching_the_network` |
 | Measure used for risk | Confirm VaR/ES run on the physical measure | Clean, per §2 above |
-| Model limitations disclosed | 59 numbered entries in `docs/limitations.md`, grouped by phase | Clean; the two `partially validated` matrix rows point into it |
+| Model limitations disclosed | 60 numbered entries in `docs/limitations.md`, grouped by phase | Clean; the two `partially validated` matrix rows point into it |
 
 ## 5. Reproducibility
 
@@ -106,19 +106,31 @@ done if published as-is:
 9. `docs/findings.md` made comparative claims with no uncertainty disclosure.
 10. The validation matrix's first draft named thirteen API symbols that do not exist.
 11. A test asserted the README's Black-Scholes price bit-for-bit and failed on the first Linux runner, 1.7 ULP out — the platform's libm, not our arithmetic.
+12. **`PortfolioOptimizer.sample_covariance` raised on both documented input forms** — `TypeError` on nested rows, `ValueError` on flat — and its error message told the caller to pass `assets=`, a parameter the method does not accept. It shipped in v1.0.0. Found only by finally running the `mypy` step that had been advisory since Phase 1, which also invalidated this audit's own row 1.2: the dead-feature check asked "does anything call this?" and never "does this work if something does?". Deleted rather than fixed, since the tested module-level function is its working equivalent and nothing called the wrapper.
 
-**The pattern is worth naming.** None of these were bugs in the numerical core. Nine of ten
-were documents describing a state of the repository that had already changed, or claims whose
-scope was wider than the evidence. The code was in better shape than the prose about it — which
-is the opposite of what an integrity audit is usually expected to find, and the reason the
-fixes went into documents, tests and tooling rather than into `cpp/`.
+**The pattern is worth naming.** None of these were bugs in the numerical core. Ten of the
+twelve were documents describing a state of the repository that had already changed, or claims
+whose scope was wider than the evidence. The eleventh was a tool that could not tell a re-run
+from a change, and the twelfth was a defect that a gate nobody had enabled was the only thing
+between the project and a user. The code was in better shape than the prose about it — which is
+the opposite of what an integrity audit usually expects to find, and the reason the fixes went
+into documents, tests and tooling rather than into `cpp/`.
+
+Finding 12 indicts the audit itself, and is recorded here rather than quietly corrected in
+place: a negative check that has never been observed to fail is not evidence, and "no dead
+features" was reported on the strength of a query that could only ever answer half the question.
 
 ## Still open, stated plainly
 
 - The `benchmark-suite` CI lane is now proven: it passed on `ubuntu-latest` on its first run.
   What that first run instead caught was a cross-platform floating-point assumption in a test,
   which is the outcome the lane exists to produce.
-- No remote, no published release, no DOI.
+- `mypy` is now a blocking gate, and it is what surfaced finding 12. The generalisable part is
+  that a check which cannot fail a build is decoration; it sat configured-and-warning for nine
+  phases while holding three real defects.
+- The release is published at `github.com/Jackxiaozhiren/quantrisk-plus-plus` with the report,
+  manifest and suite results attached. There is still no DOI and no PyPI publication, which is
+  a deliberate boundary rather than an omission.
 - Test counts and the limitations count are quoted in dated documents; the living documents no
   longer quote a mutable count, and the limitations figure is now guarded by a test.
 - The suite's member registry is hand-maintained: a new benchmark that is never registered is

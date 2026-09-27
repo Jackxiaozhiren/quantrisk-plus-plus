@@ -28,6 +28,12 @@ def utc_now() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
 
 
+# The record's `bytes` field is a count, and inside the class body that name shadows the
+# builtin — so a parameter annotated `bytes` there resolves to the field, not to a byte
+# string. The alias is the byte string, and mypy was right to complain.
+BytePayload = bytes
+
+
 @dataclass(frozen=True)
 class Provenance:
     """What was fetched, from where, when, and what it hashed to."""
@@ -49,7 +55,7 @@ class Provenance:
         source: str,
         url: str,
         series_id: str,
-        data: bytes,
+        data: BytePayload,
         license: str,  # noqa: A002 - the spec's word for this field, and clearer than a rename
         retrieved_at_utc: str | None = None,
         request_policy: str = "",
@@ -76,7 +82,7 @@ class Provenance:
     def from_dict(payload: dict[str, Any]) -> Provenance:
         return Provenance(**payload)
 
-    def verify(self, data: bytes) -> bool:
+    def verify(self, data: BytePayload) -> bool:
         """Does this record still describe these bytes?
 
         Returns a bool rather than raising so a caller can use it as a cache-validity

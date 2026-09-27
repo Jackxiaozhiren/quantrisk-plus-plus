@@ -208,13 +208,29 @@ New entries are recorded in `docs/limitations.md` #56–#58. The phase's own bou
 - **No DOI and no PyPI publication.** The release is a tagged repository with assets, which is
   what an application portfolio needs; it is not a distribution channel, and claiming a
   registry presence would be a different and larger commitment.
-- **The `mypy` CI step is advisory and currently reports 25 errors**, all of the form
-  `Module has no attribute` against the compiled `_quantrisk` extension. They are type-checker
-  blindness to a C extension without stubs, not runtime defects — the same attributes are
-  exercised by 319 passing tests and by `quantrisk validate`. But a permanently-warning gate is
-  a gate nobody reads, and it has been `|| echo "::warning::"` since Phase 1. The fix is a
-  generated stub or a scoped `ignore_missing_imports` for that module, then removing the `||`.
-  Deliberately left undone here rather than papered over at release time.
+- **Resolved: the `mypy` step is now blocking, and enabling it was not free of charge.** It had
+  been `|| echo "::warning::"` since Phase 1, reporting 25 errors that nobody read. My written
+  diagnosis at release time was that all 25 were type-checker blindness to a stubless C
+  extension. **That diagnosis was wrong.** 22 were; 3 were real defects, and the count is the
+  interesting part — a gate left advisory for nine phases hid three bugs that one run of the
+  tool it was already configured to run would have surfaced:
+  * `PortfolioOptimizer.sample_covariance` raised `TypeError: object of type 'float' has no
+    len()` on nested rows and `ValueError` on flat input, so **both documented input forms
+    crashed**; its error message told the caller to pass `assets=`, a parameter the method did
+    not have. Root cause: matrix-shape inference copied from `__init__`, where a covariance
+    really is square, into a returns sample, where it is T×N. No test covered it. Deleted
+    rather than fixed — the working, tested module-level `quantrisk.portfolio.sample_covariance`
+    is the right home and nothing called the classmethod.
+  * `Provenance.bytes` is an `int` field, which shadows the builtin inside the class body, so
+    `data: bytes` in `record()` and `verify()` annotated a *field*, not a byte string. Two
+    public signatures were wrong in a way every downstream type checker inherits.
+  The 22 remaining errors were genuine tooling blindness: the shims fill themselves with
+  `setattr` at import time, so nothing in the source text names `FactorSet`. Fixed by
+  `scripts/generate_shim_stubs.py`, which reads `__all__` from the **imported** modules and
+  writes a `.pyi` per shim — 151 names, every one `Any`, because the extension publishes no
+  signatures and a stub claiming one would be unverifiable. `tests/python/test_shim_stubs.py`
+  regenerates and compares, so a binding change without a regeneration fails CI; both
+  directions are falsified. `py.typed` ships, and the built wheel was checked to contain it.
 - **The suite's member registry is hand-maintained.** Adding a benchmark does not add it to the
   suite; the key-path guard makes a *renamed* field fail loudly, but an *unregistered* member is
   simply absent. The `--list` output and the artifact index in the summary are the check.
@@ -232,7 +248,8 @@ Carried forward from earlier phases, unchanged by this one:
 - Rewrite max-Sharpe via the unit-excess reformulation so it stops being a ternary search over
   a frontier whose flatness forces a 1e-7 weight tolerance.
 - Extend `-Wall -Wextra -Wpedantic` to `tests/` and `bindings/`.
-- A canonical fixture-name accessor, and a lazy `__getattr__` for the shim re-exports.
+- A canonical fixture-name accessor. (The shim re-export item is closed: the generated
+  `.pyi` files give static tools the names, which was the point of the `__getattr__` idea.)
 - Fix or delete `describe_environment()`'s weak `cache_writable` proxy.
 - Scenario-set-level attribution of the quantile rather than the mean.
 

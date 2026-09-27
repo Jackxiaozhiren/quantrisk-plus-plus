@@ -24,7 +24,7 @@ Concretely, in this release:
 - **`docs/validation_matrix.md`** — the twelve-component table: method, oracle, the bound the
   test asserts, the error actually measured, and the artifact. Two components are marked
   `partially validated` and say why.
-- **59 numbered limitations** in `docs/limitations.md`, grouped by phase.
+- **60 numbered limitations** in `docs/limitations.md`, grouped by phase.
 - **A 12-chapter technical report** (`paper/technical_report.pdf`) and **`CITATION.cff`**.
 
 ## Headline validation results

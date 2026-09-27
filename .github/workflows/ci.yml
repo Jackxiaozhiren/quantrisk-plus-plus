@@ -18,8 +18,8 @@ jobs:
     name: Format and static checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
         with:
           python-version: "3.12"
           enable-cache: true
@@ -33,15 +33,20 @@ jobs:
         run: |
           find cpp bindings tests/cpp -name '*.cpp' -o -name '*.hpp' | sort |
             xargs uv run clang-format --dry-run --Werror
-      - name: mypy (where practical)
-        run: uv run mypy python/quantrisk || echo "::warning::mypy reported issues (not blocking in Phase 1)"
+      # Blocking. It was `|| echo "::warning::"` from Phase 1 through v1.0.0, which let 25
+      # errors sit in the log permanently -- and three of them were real: a facade method that
+      # raised TypeError on every documented input, and two public signatures whose `bytes`
+      # annotation resolved to a dataclass field rather than the builtin. A gate that cannot
+      # fail is not a gate.
+      - name: mypy
+        run: uv run mypy python/quantrisk
 
   build-and-test:
     name: Configure, build, C++ tests, Python tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
         with:
           python-version: "3.12"
           enable-cache: true
@@ -71,8 +76,8 @@ jobs:
     name: Benchmark suite against live oracles
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
         with:
           python-version: "3.12"
           enable-cache: true
@@ -90,7 +95,7 @@ jobs:
         run: cat benchmarks/suite/results/suite_summary.md
       - name: Upload the suite artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-suite
           path: benchmarks/suite/results/

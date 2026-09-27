@@ -285,15 +285,6 @@ class PortfolioOptimizer:
         request.confidence = float(confidence)
         return _portfolio.minimise_cvar(request)
 
-    @staticmethod
-    def sample_covariance(
-        returns: Sequence[Sequence[float]], *, observations: int | None = None
-    ) -> Any:
-        flat = _flatten(returns)
-        assets = len(flat[0]) if isinstance(returns[0], (list, tuple)) else _square_size(flat)
-        count = int(observations) if observations is not None else len(flat) // assets
-        return _portfolio.sample_covariance(flat, assets, count)
-
 
 class RiskEngine:
     """One loss-convention-aware entry point to the Phase 5 measures.

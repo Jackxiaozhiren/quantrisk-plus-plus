@@ -29,7 +29,7 @@ Python facades and the three-command CLI.
 of unbuilt phases: no real-market empirical claim (every statistical result runs on synthetic
 data whose truth is known), no expected-return model, no term structure, no Heston Greeks or
 smile calibration, no multi-period rebalancing, no short positions or leverage, no reverse
-stress testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 59
+stress testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 60
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -811,7 +811,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 
 | Claim in this file | Source to check |
 |---|---|
-| What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (59 entries) |
+| What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (60 entries) |
 | 190 C++ / 319 Python tests at v1.0.0; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
 | BS worst abs 1.49e-13 / rel 3.46e-11; Greeks abs 7.97e-15 … 5.12e-13; rel rho 1.07e-07; 18,816 rows; floors 1e-4 / 1e-6; oracle config (AnalyticEuropeanEngine, Actual365Fixed, day → `days/365`) | `benchmarks/quantlib/results/pricing_vs_quantlib.json` |
 | Put-call parity worst residual 7.99e-15; worst analytic-vs-FD delta 1.17e-4 | `experiments/pricing_validation/results/summary.json` (`worst_*` keys) |

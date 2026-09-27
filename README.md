@@ -233,7 +233,7 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 59 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 60 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
 - **Nothing here has been tested against real markets.** Every statistical claim runs on

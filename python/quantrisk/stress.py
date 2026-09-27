@@ -4,7 +4,6 @@ Re-exports the extension's public names so `from quantrisk.stress import X` work
 extension only binds them as attributes, which leaves `sys.modules["quantrisk.stress"]`
 unpopulated. ScenarioEngine is layered on top; it delegates to these
 same functions and adds no arithmetic of its own.
-no arithmetic of its own.
 """
 
 from __future__ import annotations
