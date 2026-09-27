@@ -242,16 +242,19 @@ never removed just because a later phase shipped.
 
 ## Phase 10 — validation matrix, benchmark suite and release
 
-56. **The `benchmark-suite` CI job has never run on a GitHub-hosted runner.** It is
-    configured, its YAML parses, and the suite passes locally in ~60 s. A runner is a
-    different machine: the `oracles` extra's wheel resolution, cvxpy/OSQP and QuantLib
-    availability on `ubuntu-latest`, and the runner's toolchain are all unverified. Local
-    green is not evidence about CI, and this entry is the difference between "runs in CI"
-    and "configured to run in CI".
-57. **There is no published release.** The repository has no remote, so `v1.0.0` is a local
-    annotated tag and the release notes are a file. `CITATION.cff` correspondingly carries no
-    `repository-code` and no DOI; those fields are left empty rather than filled with a URL
-    that does not resolve.
+56. **Resolved on first contact: the CI lane is proven on a runner, and the runner disagreed
+    with the laptop.** `benchmark-suite` passes on `ubuntu-latest` in ~5m46s with
+    `--require-all`, so all eleven members execute against live oracles and none can be skipped
+    silently. What the same runner caught was not in the new lane at all: the pre-existing
+    `build-and-test` lane failed on a README assertion that demanded bit-exact agreement with a
+    transcribed price, and glibc's libm is 1.7 ULP from Apple's. Local green said nothing about
+    that. See limitation #59.
+57. **The release is published, but it is a personal-portfolio release, not a distribution.**
+    `v1.0.0` is a tag on a public repository with release notes, the technical report and the
+    frozen evidence attached, and `CITATION.cff` now names the real URL. There is no package on
+    PyPI and no DOI, so nobody can `pip install quantrisk` and a citation cannot be resolved
+    through a registry. That is a deliberate boundary: packaging for distribution was not in
+    scope, and an unclaimed name on an index is a worse outcome than an honest absence.
 58. **The suite's member registry is hand-maintained.** The key-path guard makes a *renamed*
     headline field fail loudly, but a benchmark script that was never registered is simply
     absent from the suite and nothing notices — absence produces no output to check.

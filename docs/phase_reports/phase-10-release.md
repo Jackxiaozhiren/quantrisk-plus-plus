@@ -201,14 +201,20 @@ worth recording because they are exactly the failure mode the project exists to 
 
 New entries are recorded in `docs/limitations.md` #56–#58. The phase's own boundaries:
 
-- **The `benchmark-suite` CI job has never run on a GitHub-hosted runner.** It is configured
-  and its YAML parses, and locally it passes in 60 s, but a runner is a different machine:
-  cvxpy/OSQP and QuantLib wheels, `uv sync --extra oracles` resolution order, and the
-  `ubuntu-latest` toolchain are all unverified. Local green is not evidence about CI.
-- **No GitHub release exists.** The repository has no remote configured, so the tag is local
-  and the release notes are a file. Publishing requires a remote and explicit approval.
-- **`CITATION.cff` has no `repository-code` or DOI**, because neither exists yet. A citation
-  file pointing at an unpublished URL is worse than one that says the URL is pending.
+- **The CI lanes are now proven on `ubuntu-latest`, and the exercise paid for itself.** The
+  new `benchmark-suite` lane passes with `--require-all`; the pre-existing lane failed on a
+  cross-platform floating-point assumption that no local run could surface. See finding 11 in
+  §6 and limitation #59.
+- **No DOI and no PyPI publication.** The release is a tagged repository with assets, which is
+  what an application portfolio needs; it is not a distribution channel, and claiming a
+  registry presence would be a different and larger commitment.
+- **The `mypy` CI step is advisory and currently reports 25 errors**, all of the form
+  `Module has no attribute` against the compiled `_quantrisk` extension. They are type-checker
+  blindness to a C extension without stubs, not runtime defects — the same attributes are
+  exercised by 319 passing tests and by `quantrisk validate`. But a permanently-warning gate is
+  a gate nobody reads, and it has been `|| echo "::warning::"` since Phase 1. The fix is a
+  generated stub or a scoped `ignore_missing_imports` for that module, then removing the `||`.
+  Deliberately left undone here rather than papered over at release time.
 - **The suite's member registry is hand-maintained.** Adding a benchmark does not add it to the
   suite; the key-path guard makes a *renamed* field fail loudly, but an *unregistered* member is
   simply absent. The `--list` output and the artifact index in the summary are the check.
@@ -252,7 +258,7 @@ Added by this phase:
 
 ## 9. Gate
 
-**Phase 10: PASS, with the CI lane and the remote release explicitly open.**
+**Phase 10: PASS.** CI verified on `ubuntu-latest`; release published.
 
 Everything PROJECT_SPEC.md §Phase 10 asks for exists and was verified by execution rather than
 assertion: the twelve-component validation matrix, an auto-generated benchmark suite in four

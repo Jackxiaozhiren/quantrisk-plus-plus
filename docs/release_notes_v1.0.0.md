@@ -59,9 +59,11 @@ All worst-case, over every row of each benchmark, measured against a live oracle
   oracle's integration tolerance are not separable at 4.5e-3) and the bootstrap interval under
   clustering (0.693 coverage against 0.900 nominal — a real failure of the method, published
   as the finding rather than smoothed over).
-- **The new `benchmark-suite` CI job has not yet completed on a GitHub-hosted runner.** It is
-  configured with `--require-all`, so a missing oracle fails the job instead of skipping
-  quietly, but "configured" is not "proven".
+- **Three CI lanes now run on `ubuntu-latest` on every push**, and the first real run earned
+  its keep: the new benchmark lane passes with `--require-all` (no member may be skipped), and
+  the long-standing build lane failed on a test that demanded bit-exact agreement with a
+  transcribed price — glibc's libm is 1.7 ULP from Apple's. That was fixed, and is now
+  limitation #59.
 
 ## Findings worth reading before the code
 

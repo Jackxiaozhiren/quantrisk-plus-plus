@@ -109,13 +109,19 @@ which is reserved for a number that actually moved. Verified end to end: after a
 re-run in a fresh clone, 12 artifacts reported VOLATILE with zero canonical differences and the
 rest reported OK.
 
-**Compiler and platform.** The core is C++20 and builds with the toolchain above. Nothing
-here has been compiled by CI on a runner yet — the `benchmark-suite` job in
-`.github/workflows/ci.yml` is new and unproven on GitHub-hosted hardware, which is recorded
-as open technical debt rather than assumed away. Floating-point results are reproducible on a
-given platform; across platforms, the last one or two digits of an iterative solve may differ,
-which is why the oracle tolerances in `docs/validation_matrix.md` have margin rather than
-sitting on the measured value.
+**Compiler and platform.** The core is C++20 and builds with the toolchain above, and three CI
+lanes now compile and test it on `ubuntu-latest` with GCC on every push. That runner is where
+the first genuine cross-platform difference surfaced: `black_scholes(spot=100, strike=100,
+rate=0.04, vol=0.20, maturity=1.0)` returns `9.925053717274434` on Apple's libm and
+`9.925053717274437` on glibc — 1.7 ULP, about 1e-14, and a difference in the system's
+transcendentals rather than in this code.
+
+So: floating-point results are reproducible on a given platform, and agree across platforms to
+within the last one or two digits wherever a `libm` function is on the path. This is why every
+oracle tolerance in `docs/validation_matrix.md` has margin rather than sitting on the measured
+value, why `test_the_readme_black_scholes_example_runs_as_written` compares in units of the
+last place, and why bit-exact equality is claimed only between two views of the *same* binary —
+the Python-to-C++ consistency checks — and never between compilers. See limitation #59.
 
 **Network data.** `data/fixtures/` holds real, committed SEC EDGAR, FRED and CFTC responses,
 so the offline path is deterministic. Anything fetched live is not: EDGAR and FRED revise
