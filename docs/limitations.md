@@ -203,3 +203,21 @@ never removed just because a later phase shipped.
     VaR while the largest stress-induced multiplier spread was 16.8 %, so the stability is a
     near miss, not evidence that optimiser rankings are robust to stress. Ranked by
     multiplier rather than by level, all four books do change rank under an equity crash.
+
+## Phase 8 — optional public data
+
+49. **No analysis in this project consumes the data layer yet.** The adapters deliver
+    observations with provenance; no number in `docs/`, `experiments/` or `benchmarks/`
+    cites EDGAR, FRED or CFTC. Wiring real data into a real study is not done, and nothing
+    here implies it was.
+50. **One filer per concept is exercised.** The ordered tag fallback in `SPEC_ITEMS` is
+    tested against Apple (CIK 320193) and Madison Square Garden (CIK 1652044). A filer using
+    an unusual tag lands in `Financials.missing`, which is the correct behaviour but is not
+    tested across industries, foreign private issuers, or banks.
+51. **`companyconcept` per tag, not `companyfacts`.** Six quantities means six requests per
+    company, and there is no multi-company or industry screen. The bulk endpoint is not
+    wrapped, so a broad fundamental study would need it.
+52. **The CFTC fixture is a three-report-date excerpt**, enough to exercise date and market
+    handling and nothing more. It is labelled as an excerpt in its own provenance, with the
+    full archive's digest recorded separately, but it is not a positioning dataset and must
+    not be used as one.

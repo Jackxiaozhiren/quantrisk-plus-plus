@@ -1,0 +1,25 @@
+{
+  "source": "CFTC annual Disaggregated COT archive, EXCERPT of the decompressed CSV",
+  "url": "https://www.cftc.gov/files/dea/history/com_disagg_txt_2024.zip",
+  "series_id": "CFTC_COT_DISAGG_2024",
+  "retrieved_at_utc": "2026-09-27T05:47:52+00:00",
+  "sha256": "e8405ac34c7ff3a6beb5d00250968f4c2f68ed560072fb7f071409b160fdacf5",
+  "bytes": 8228,
+  "license": "CFTC data is a work of the US government and is not copyrighted",
+  "request_policy": "",
+  "note": "EXCERPT, not the full archive: 3 of 13878 rows kept. The sha256 covers this excerpt, not the 2445082-byte compressed source, because the archive is too large to commit; re-run this script against the URL to reproduce the original bytes.",
+  "extra": {
+    "year": 2024,
+    "rows_kept": 3,
+    "rows_available": 13878,
+    "markets_kept": 1,
+    "report_dates_kept": [
+      "2024-12-31",
+      "2024-12-24",
+      "2024-12-17"
+    ],
+    "excerpt": true,
+    "archive_bytes": 2445082,
+    "archive_sha256": "711b1b8da84dc3ba1bf8c76e743197569f7cd88b9bb3fedb7225e78a7fb7f570"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "source": "SEC EDGAR companyconcept (live response)",
+  "url": "https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/CashAndCashEquivalentsAtCarryingValue.json",
+  "series_id": "CIK0000320193:us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "retrieved_at_utc": "2026-09-27T05:45:27+00:00",
+  "sha256": "0d7146e8db9c12ecb46e6c5e4caee0a21f6e0a469bfb66fbdaab8dc9ed27e7bb",
+  "bytes": 30428,
+  "license": "SEC EDGAR data is disclosed to the public and is not subject to copyright",
+  "request_policy": "User-Agent naming a contact required; <=10 requests/second per IP, per https://www.sec.gov/os/accessing-edgar-data",
+  "note": "",
+  "extra": {
+    "cik": "0000320193",
+    "tag": "CashAndCashEquivalentsAtCarryingValue",
+    "entity_name": "Apple Inc.",
+    "observations": 228
+  }
+}

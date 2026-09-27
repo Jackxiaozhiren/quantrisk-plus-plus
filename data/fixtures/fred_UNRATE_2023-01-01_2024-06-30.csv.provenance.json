@@ -1,0 +1,15 @@
+{
+  "source": "FRED fredgraph.csv (live response, current revision)",
+  "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=UNRATE&cosd=2023-01-01&coed=2024-06-30",
+  "series_id": "UNRATE",
+  "retrieved_at_utc": "2026-09-27T05:45:35+00:00",
+  "sha256": "6faebe76e1704ac7bb3a8f8a08dcd327ca689c9dd9ea100174674884d7ff3868",
+  "bytes": 294,
+  "license": "St. Louis Federal Reserve terms of use; attribution requested",
+  "request_policy": "",
+  "note": "current revision, not the vintage known at the observation date; a backtest on these values can see later revisions",
+  "extra": {
+    "observation_start": "2023-01-01",
+    "observation_end": "2024-06-30"
+  }
+}

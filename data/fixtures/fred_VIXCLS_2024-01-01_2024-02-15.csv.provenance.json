@@ -1,0 +1,15 @@
+{
+  "source": "FRED fredgraph.csv (live response, current revision)",
+  "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=VIXCLS&cosd=2024-01-01&coed=2024-02-15",
+  "series_id": "VIXCLS",
+  "retrieved_at_utc": "2026-09-27T05:45:34+00:00",
+  "sha256": "2035b7c892337b4531e340c892cd2e2d7ac9cf50e0f56113cd5a018cfee8bcda",
+  "bytes": 585,
+  "license": "St. Louis Federal Reserve terms of use; attribution requested",
+  "request_policy": "",
+  "note": "current revision, not the vintage known at the observation date; a backtest on these values can see later revisions",
+  "extra": {
+    "observation_start": "2024-01-01",
+    "observation_end": "2024-02-15"
+  }
+}

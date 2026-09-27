@@ -128,7 +128,8 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 5 VaR/ES estimators, bootstrap intervals, Kupiec + Christoffersen backtests | DONE (`docs/phase_reports/phase-05-market-risk.md`) |
 | Phase 6 covariance estimators, mean-variance, max-Sharpe, ERC, CVaR, PyPortfolioOpt + cvxpy benchmark | DONE (`docs/phase_reports/phase-06-portfolio-optimisation.md`) |
 | Phase 7 scenario/stress subsystem, three scenario kinds, attribution with residuals | DONE (`docs/phase_reports/phase-07-stress-testing.md`) |
-| Public data layer, research API facades and CLI, release | NOT IMPLEMENTED — no such numbers exist yet |
+| Phase 8 optional public data layer (EDGAR, FRED/ALFRED, CFTC) with provenance and offline fixtures | DONE (`docs/phase_reports/phase-08-public-data.md`) |
+| Research API facades, CLI, release | NOT IMPLEMENTED — no such numbers exist yet |
 
 ## 10. Frozen surfaces
 
@@ -237,5 +238,25 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
   quantile, are each announced in `note` rather than silently tolerated.
 - `sample_factor_moves` refuses a matrix with no Cholesky factor. No jitter, no
   projection, no silent shrinkage.
+
+### Phase 8
+
+- `quantrisk.data` and its modules: `http`, `provenance`, `edgar`, `fred`, `cftc`,
+  `fixtures`. Python-only; the extension and `cpp/` gained nothing at all.
+- Frozen semantics, not just names:
+  * a SHA-256 in a provenance record covers the **bytes as served**, before parsing;
+  * `Financials.missing` distinguishes "this filer does not use that tag" from "the value
+    is zero", and the two are never conflated;
+  * FRED's `"."` placeholder becomes `None`, never a dropped row and never a zero;
+  * a current-revision series and an ALFRED vintage are different datasets, and
+    `fetch_vintage` refuses without a key rather than degrading to the current revision.
+- Credentials: `FRED_API_KEY` and `QUANTRISK_DATA_USER_AGENT` are read from the environment
+  only. A key never enters a provenance record, a cache filename, or a fixture — enforced by
+  `http.fetch`'s `record_url` parameter and pinned by a test that plants a key and asserts
+  its absence everywhere the record can be serialised.
+- `data/fixtures/` is committed and is real data (plus one labelled synthetic file and one
+  labelled excerpt). `data/cache/` is git-ignored and per-machine.
+- The dependency direction is frozen: `quantrisk.data` may use `quantrisk`; no pricing,
+  risk, portfolio or stress code may import `quantrisk.data`.
 
 Changing any of the above requires a written migration note.

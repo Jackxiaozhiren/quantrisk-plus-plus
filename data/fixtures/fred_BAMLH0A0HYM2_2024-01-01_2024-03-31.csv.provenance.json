@@ -1,0 +1,15 @@
+{
+  "source": "FRED fredgraph.csv (live response, current revision)",
+  "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2&cosd=2024-01-01&coed=2024-03-31",
+  "series_id": "BAMLH0A0HYM2",
+  "retrieved_at_utc": "2026-09-27T05:45:37+00:00",
+  "sha256": "c68cf568fc7704f82bd394a5d073bacd8de241cc029ed01c6e36c1327e0ec399",
+  "bytes": 1066,
+  "license": "St. Louis Federal Reserve terms of use; attribution requested",
+  "request_policy": "",
+  "note": "current revision, not the vintage known at the observation date; a backtest on these values can see later revisions",
+  "extra": {
+    "observation_start": "2024-01-01",
+    "observation_end": "2024-03-31"
+  }
+}

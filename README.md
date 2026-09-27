@@ -3,7 +3,7 @@
 > A Reproducible C++/Python Engine for Stochastic Pricing, Monte Carlo Simulation,
 > Portfolio Risk, Optimization and Stress Testing.
 
-**Current status: Phase 7 — Scenario and Stress Testing (v0.1.0).**
+**Current status: Phase 8 — Optional Public Data Integration (v0.1.0).**
 Implemented and validated: a C++20 numerical core (RNG discipline, statistics,
 normal distribution), Black-Scholes-Merton pricing with continuous dividends,
 analytic and finite-difference Greeks, a Cox-Ross-Rubinstein lattice for
@@ -21,7 +21,9 @@ certificate checked against its own inputs, and a stress layer that maps factor
 shocks and deformed covariances onto those books, attributes the result per factor
 and per position with residuals that must close, and measures its own linearisation
 error against a full Black-Scholes re-pricing. The public data layer, research API
-facades and CLI are specified in `docs/` but **not built yet**.
+facades and CLI are specified in `docs/` but **not built yet**. An optional public-data layer (SEC EDGAR,
+FRED/ALFRED, CFTC) is implemented in `quantrisk.data` with real committed fixtures, so the
+core never depends on a network.
 
 Numbers quoted here come from committed artifacts, regenerate them with the
 commands in [Validation](#validation):
@@ -32,7 +34,7 @@ commands in [Validation](#validation):
 | Greeks vs QuantLib (delta/gamma/vega/theta/rho) | worst abs 5.12e-13 | same file |
 | Put-call parity residual | 8.0e-15 on notionals <= 200 | `experiments/pricing_validation/results/summary.json` |
 | CRR lattice order | fitted slopes -0.99 +/- 0.004 vs theory -1 | same file, `crr_convergence_slope` |
-| Test suite | 190 C++ (CTest) + 265 Python (pytest) | `docs/phase_reports/phase-07-stress-testing.md` |
+| Test suite | 190 C++ (CTest) + 291 Python (pytest) | `docs/phase_reports/phase-07-stress-testing.md` |
 | Geometric Asian closed form vs QuantLib analytic engine | worst rel. error 5.5e-4 | `benchmarks/quantlib/results/path_dependent_vs_quantlib.json` |
 | Barrier monitoring bias and its correction | 14.0 % raw discrete -> 1.0 % with BGK | same artifact |
 | Heston (xi = 0) collapse to Black-Scholes | worst rel. error 2.1e-3 | same artifact |
@@ -112,9 +114,8 @@ uv run pytest -m oracle                                         # live-oracle te
 
 ## Limitations
 
-`docs/limitations.md` carries 48 entries grouped by phase, and
+`docs/limitations.md` carries 52 entries grouped by phase, and
 `docs/project_scope.md` §9-§10 records status and the frozen public surface.
-The public data layer, the research API facades and the CLI are specified but **not
-built**; the portfolio layer is long-only, single-period and ships no expected-return
+The research API facades and the CLI are specified but **not built**; the portfolio layer is long-only, single-period and ships no expected-return
 model of its own, and the stress layer maps exposures rather than re-pricing
 instruments.

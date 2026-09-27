@@ -24,3 +24,6 @@ _deps/
 .vscode/
 .idea/
 .DS_Store
+
+# Downloaded public-data cache: per-machine, re-fetchable, never committed (data/README.md)
+data/cache/

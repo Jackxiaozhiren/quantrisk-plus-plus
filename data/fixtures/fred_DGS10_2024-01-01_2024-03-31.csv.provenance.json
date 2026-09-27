@@ -1,0 +1,15 @@
+{
+  "source": "FRED fredgraph.csv (live response, current revision)",
+  "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10&cosd=2024-01-01&coed=2024-03-31",
+  "series_id": "DGS10",
+  "retrieved_at_utc": "2026-09-27T05:45:33+00:00",
+  "sha256": "c4bdcf1e7c70988b5bd7525f321bcfd0e0e5b347edeee32102fe0a72ae71d24b",
+  "bytes": 1035,
+  "license": "St. Louis Federal Reserve terms of use; attribution requested",
+  "request_policy": "",
+  "note": "current revision, not the vintage known at the observation date; a backtest on these values can see later revisions",
+  "extra": {
+    "observation_start": "2024-01-01",
+    "observation_end": "2024-03-31"
+  }
+}

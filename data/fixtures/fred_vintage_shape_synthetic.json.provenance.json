@@ -1,0 +1,15 @@
+{
+  "source": "SYNTHETIC - shaped like a FRED ALFRED API response, authored for this repo",
+  "url": "file://synthetic",
+  "series_id": "DFF:synthetic-vintage-fixture",
+  "retrieved_at_utc": "2026-09-27T05:47:51+00:00",
+  "sha256": "2af59c233911ff8132a4cd0376b908c8e2f2c653797341960162d1b57f2e4293",
+  "bytes": 1078,
+  "license": "Not applicable: contains no third-party data",
+  "request_policy": "",
+  "note": "NOT REAL DATA. Shaped like the ALFRED JSON response so the vintage parser can be tested without an API key. No number in this file describes any economy.",
+  "extra": {
+    "synthetic": true,
+    "vintage_date": "2024-02-01"
+  }
+}

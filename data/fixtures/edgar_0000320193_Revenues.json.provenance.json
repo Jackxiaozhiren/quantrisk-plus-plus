@@ -1,0 +1,17 @@
+{
+  "source": "SEC EDGAR companyconcept (live response)",
+  "url": "https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/Revenues.json",
+  "series_id": "CIK0000320193:us-gaap:Revenues",
+  "retrieved_at_utc": "2026-09-27T05:45:28+00:00",
+  "sha256": "ae228f6e452e9dd051b876be882802379f3a8a1569297ba4a8474ee437308c05",
+  "bytes": 2252,
+  "license": "SEC EDGAR data is disclosed to the public and is not subject to copyright",
+  "request_policy": "User-Agent naming a contact required; <=10 requests/second per IP, per https://www.sec.gov/os/accessing-edgar-data",
+  "note": "",
+  "extra": {
+    "cik": "0000320193",
+    "tag": "Revenues",
+    "entity_name": "Apple Inc.",
+    "observations": 11
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "source": "SEC EDGAR companyconcept (live response)",
+  "url": "https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/Liabilities.json",
+  "series_id": "CIK0000320193:us-gaap:Liabilities",
+  "retrieved_at_utc": "2026-09-27T05:45:25+00:00",
+  "sha256": "9973b1cb5c000160128d73b99b8cdb09fa11f15ab6a613eade252ce85ee33f61",
+  "bytes": 19769,
+  "license": "SEC EDGAR data is disclosed to the public and is not subject to copyright",
+  "request_policy": "User-Agent naming a contact required; <=10 requests/second per IP, per https://www.sec.gov/os/accessing-edgar-data",
+  "note": "",
+  "extra": {
+    "cik": "0000320193",
+    "tag": "Liabilities",
+    "entity_name": "Apple Inc.",
+    "observations": 144
+  }
+}

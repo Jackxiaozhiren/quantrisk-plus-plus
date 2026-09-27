@@ -1,0 +1,17 @@
+{
+  "source": "SEC EDGAR companyconcept (live response)",
+  "url": "https://data.sec.gov/api/xbrl/companyconcept/CIK0001652044/us-gaap/Assets.json",
+  "series_id": "CIK0001652044:us-gaap:Assets",
+  "retrieved_at_utc": "2026-09-27T05:45:31+00:00",
+  "sha256": "b682c1a98895cb342f4de9d4eb0176572153f32827b7750ba9f01a09ef9148fe",
+  "bytes": 12496,
+  "license": "SEC EDGAR data is disclosed to the public and is not subject to copyright",
+  "request_policy": "User-Agent naming a contact required; <=10 requests/second per IP, per https://www.sec.gov/os/accessing-edgar-data",
+  "note": "",
+  "extra": {
+    "cik": "0001652044",
+    "tag": "Assets",
+    "entity_name": "Alphabet Inc.",
+    "observations": 90
+  }
+}

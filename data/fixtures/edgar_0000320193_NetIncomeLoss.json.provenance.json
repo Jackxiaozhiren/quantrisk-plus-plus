@@ -1,0 +1,17 @@
+{
+  "source": "SEC EDGAR companyconcept (live response)",
+  "url": "https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/NetIncomeLoss.json",
+  "series_id": "CIK0000320193:us-gaap:NetIncomeLoss",
+  "retrieved_at_utc": "2026-09-27T05:45:29+00:00",
+  "sha256": "9b6ac23b024662c95dc7b4088a448bf60a31ff672e2f328161c5ceda6a8b9915",
+  "bytes": 50767,
+  "license": "SEC EDGAR data is disclosed to the public and is not subject to copyright",
+  "request_policy": "User-Agent naming a contact required; <=10 requests/second per IP, per https://www.sec.gov/os/accessing-edgar-data",
+  "note": "",
+  "extra": {
+    "cik": "0000320193",
+    "tag": "NetIncomeLoss",
+    "entity_name": "Apple Inc.",
+    "observations": 338
+  }
+}
