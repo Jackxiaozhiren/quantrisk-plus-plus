@@ -27,3 +27,12 @@ _deps/
 
 # Downloaded public-data cache: per-machine, re-fetchable, never committed (data/README.md)
 data/cache/
+
+# LaTeX build products (the .tex/.bib/.pdf are committed; these are not)
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.synctex.gz

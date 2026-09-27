@@ -8,7 +8,11 @@ chain of Phase 10 would be quietly unverifiable.
 
 from __future__ import annotations
 
+import csv
 import hashlib
+import json
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -148,3 +152,137 @@ def test_package_versions_records_the_running_interpreter() -> None:
     versions = package_versions()
     assert versions["python"] == sys.version.split()[0]
     assert versions["quantrisk"] == quantrisk.version()
+
+
+SUITE = REPO_ROOT / "scripts" / "run_benchmark_suite.py"
+
+
+def _aggregate(tmp_path: Path) -> subprocess.CompletedProcess[str]:
+    """Run the suite in aggregate-only mode, writing outside the tracked tree.
+
+    `--no-run` is what makes this affordable in CI: no benchmark executes, so the test
+    costs milliseconds and still covers the whole claim that matters — that every headline
+    number the summary publishes can still be found at the key path it names. When a
+    benchmark script renames a field, this is what fails, rather than the summary quietly
+    losing a row.
+    """
+    return subprocess.run(
+        [sys.executable, str(SUITE), "--no-run", "--out", str(tmp_path)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def test_suite_aggregates_every_member_from_the_artifacts_on_disk(tmp_path: Path) -> None:
+    completed = _aggregate(tmp_path)
+    assert completed.returncode == 0, completed.stderr[-4000:]
+    assert "0 failed, 0 skipped" in completed.stdout, completed.stdout
+    for name in ("suite_run.json", "suite_headline.csv", "suite_summary.md"):
+        assert (tmp_path / name).exists(), f"{name} was not written"
+    assert (tmp_path / "validation_envelope.png").stat().st_size > 1000
+
+
+def test_suite_run_json_records_a_member_for_each_registered_script(tmp_path: Path) -> None:
+    completed = _aggregate(tmp_path)
+    assert completed.returncode == 0, completed.stderr[-4000:]
+    suite = json.loads((tmp_path / "suite_run.json").read_text(encoding="utf-8"))
+    keys = [member["key"] for member in suite["members"]]
+    assert len(keys) == len(set(keys)) == suite["totals"]["members"]
+    kinds = {member["kind"] for member in suite["members"]}
+    assert kinds == {"correctness_benchmark", "performance_benchmark", "statistical_experiment"}
+    for member in suite["members"]:
+        assert Path(REPO_ROOT / member["script"]).exists()
+        assert Path(REPO_ROOT / member["artifact"]).exists()
+        assert member["metrics"], f"{member['key']} publishes nothing"
+        assert member["artifact_sha256"] == sha256_file(REPO_ROOT / member["artifact"])
+
+
+def test_suite_headline_csv_is_machine_readable_and_points_at_its_source(
+    tmp_path: Path,
+) -> None:
+    completed = _aggregate(tmp_path)
+    assert completed.returncode == 0, completed.stderr[-4000:]
+    with (tmp_path / "suite_headline.csv").open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    assert rows
+    for row in rows:
+        # Re-walk the key path here, independently of the runner's own `dig`. If the two
+        # ever disagree, the published number is not the number the artifact holds.
+        node: object = json.loads((REPO_ROOT / row["artifact"]).read_text(encoding="utf-8"))
+        for key in row["source_keys"].split(" / "):
+            assert isinstance(node, dict) and key in node, f"{row['member']}: {key} missing"
+            node = node[key]
+        assert json.dumps(node, sort_keys=True) == row["value_json"], row
+        assert json.loads(row["value_json"]) == node
+
+
+def test_unknown_member_is_an_error_rather_than_an_empty_run(tmp_path: Path) -> None:
+    completed = subprocess.run(
+        [sys.executable, str(SUITE), "--no-run", "--only", "not_a_member", "--out", str(tmp_path)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 2
+    assert "unknown member" in completed.stderr
+    assert not (tmp_path / "suite_run.json").exists()
+
+
+def _numbered_limitation_entries() -> int:
+    text = (REPO_ROOT / "docs" / "limitations.md").read_text(encoding="utf-8")
+    numbers = [int(m.group(1)) for m in re.finditer(r"^(\d+)\. \*\*", text, flags=re.M)]
+    assert numbers == list(range(1, len(numbers) + 1)), "limitation numbering has a gap"
+    return len(numbers)
+
+
+def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
+    """`docs/limitations.md` is cited by count in five other documents.
+
+    A count repeated by hand in five places is a fact with five chances to go stale, and it
+    does: adding Phase 10's entries left every one of them reading "55". This test makes the
+    file the single source, so the next entry added without updating the prose fails here
+    rather than shipping a wrong number in the README.
+    """
+    total = _numbered_limitation_entries()
+    claims = {
+        "README.md": r"carries (\d+) numbered entries",
+        "docs/validation_matrix.md": r"The (\d+) numbered limitations",
+        "docs/release_notes_v1.0.0.md": r"\*\*(\d+) numbered limitations\*\*",
+        "docs/interview_defense.md": r"has all (\d+)\s*\n?numbered entries",
+        "paper/technical_report.tex": r"contains (\d+) numbered entries",
+    }
+    for name, pattern in claims.items():
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        found = re.findall(pattern, text)
+        assert found, f"{name} no longer states the limitation count in the expected form"
+        assert all(int(value) == total for value in found), (
+            f"{name} says {found}, docs/limitations.md has {total}"
+        )
+
+
+def test_no_committed_artifact_leaks_a_machine_specific_path() -> None:
+    """Frozen evidence must name its inputs as repository paths, not as this machine's.
+
+    The generating command recorded in each artifact comes from `sys.argv[0]`, so it is
+    whatever the caller happened to pass. Running the suite with absolute script paths put
+    `/Users/<name>/QuantRisk++/benchmarks/...` into `pricing_vs_quantlib.json` — a username in
+    a public artifact, and one the manifest then hashed as if it were evidence.
+    """
+    home = str(Path.home())
+    offenders: list[str] = []
+    patterns = (
+        "benchmarks/**/*.json",
+        "benchmarks/**/*.csv",
+        "experiments/**/*.json",
+        "experiments/**/*.csv",
+        "evidence/**/*.json",
+    )
+    for pattern in patterns:
+        for path in REPO_ROOT.glob(pattern):
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            if str(REPO_ROOT) in text or home in text or "/Users/" in text or "/home/" in text:
+                offenders.append(repo_relative(path))
+    assert not offenders, f"machine-specific paths in: {sorted(offenders)}"

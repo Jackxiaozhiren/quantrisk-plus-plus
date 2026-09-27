@@ -1,0 +1,52 @@
+# CITATION.cff — https://citation-file-format.github.io/
+#
+# `repository-code` and `doi` are deliberately absent. The repository has no remote
+# configured yet, and a citation file that points at a URL nobody has published is worse
+# than one that admits the URL is pending: a reader would follow it, find nothing, and
+# reasonably distrust the rest of the metadata. Add them when the remote exists, and change
+# nothing else here — every other field is true as written.
+
+cff-version: 1.2.0
+message: >-
+  If you use QuantRisk++ in your research, please cite the software and the technical
+  report. Every numerical claim in the report traces to an artifact hashed in
+  evidence/manifest.json.
+title: "QuantRisk++: A Reproducible C++/Python Engine for Stochastic Pricing, Monte Carlo Simulation, Portfolio Risk, Optimization and Stress Testing"
+abstract: >-
+  A from-scratch C++20 numerical core with Python facades, covering Black-Scholes-Merton
+  pricing, analytic and finite-difference Greeks, a Cox-Ross-Rubinstein lattice, Monte Carlo
+  simulation with antithetic and control-variate variance reduction, Asian and barrier
+  payoffs, Heston stochastic volatility, historical/Gaussian/Monte Carlo VaR and expected
+  shortfall with bootstrap intervals, Kupiec and Christoffersen coverage backtests, three
+  covariance estimators, six portfolio optimisers, and a scenario and stress layer with
+  Euler attribution. Validation is the product: each component is checked against a closed
+  form, a live independent oracle, or a statistical property measured over many
+  replications, and 55 numbered limitations record where the claims stop.
+authors:
+  - name: Zhiren Xiao
+    author-affiliation:
+      name: School of Applied Statistics, Guangdong University of Finance
+repository-code: # set when the public remote exists
+version: 1.0.0
+date-released: 2026-09-27
+license: MIT
+type: software
+keywords:
+  - quantitative-finance
+  - monte-carlo
+  - value-at-risk
+  - expected-shortfall
+  - portfolio-optimization
+  - stress-testing
+  - reproducibility
+  - cxx20
+references:
+  - type: software
+    title: >-
+      Design and Validation of a Reproducible C++/Python Stochastic Risk Engine
+    authors:
+      - name: Zhiren Xiao
+    database: repository
+    repository-code: # shipped as paper/technical_report.pdf in the release
+    path: paper/technical_report.tex
+    version: 1.0.0

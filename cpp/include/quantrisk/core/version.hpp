@@ -20,7 +20,7 @@ struct BuildMetadata {
     std::string cxx_flags;
 };
 
-/// Library version, e.g. "0.1.0".
+/// Library version, e.g. "1.0.0".
 const std::string &version();
 
 BuildMetadata build_metadata();

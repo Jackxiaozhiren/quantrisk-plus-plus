@@ -1,0 +1,613 @@
+{
+  "schema": "quantrisk-evidence-manifest/1",
+  "generated_utc": "2026-09-27T07:17:23+00:00",
+  "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
+  "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with scripts/verify_evidence_manifest.py.",
+  "repository": {
+    "git_commit": "02fea3a1847f217b1bfcf0b299a5f38fd9eb55ef",
+    "git_describe": "02fea3a",
+    "working_tree_dirty": true,
+    "uncommitted_paths": [
+      "CITATION.cff",
+      "CMakeLists.txt",
+      "README.md",
+      "benchmarks/performance/results/monte_carlo_speed.json",
+      "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
+      "benchmarks/quantlib/results/monte_carlo_validation.json",
+      "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
+      "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "benchmarks/suite/",
+      "cpp/include/quantrisk/core/version.hpp",
+      "docs/interview_defense.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-10-release.md",
+      "docs/project_scope.md",
+      "docs/release_notes_v1.0.0.md",
+      "docs/reproducibility.md",
+      "docs/validation_matrix.md",
+      "evidence/",
+      "experiments/monte_carlo_convergence/results/convergence.csv",
+      "experiments/monte_carlo_convergence/results/summary.json",
+      "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
+      "experiments/pricing_validation/results/summary.json",
+      "experiments/stress_testing/results/stress_testing_study.json",
+      "experiments/var_backtesting/results/var_backtesting_validation.json",
+      "experiments/variance_reduction/results/summary.json",
+      "experiments/variance_reduction/results/variance_by_method.csv",
+      "experiments/variance_reduction/run.py",
+      "github/workflows/ci.yml",
+      "paper/",
+      "pyproject.toml",
+      "scripts/build_evidence_manifest.py",
+      "scripts/run_benchmark_suite.py",
+      "scripts/verify_evidence_manifest.py",
+      "tests/python/test_artifact_metadata.py",
+      "uv.lock"
+    ]
+  },
+  "environment": {
+    "quantrisk_version": "1.0.0",
+    "git_commit_at_run": "02fea3a1847f",
+    "binary_git_commit": "02fea3a1847f",
+    "provenance": "ran from 02fea3a1847f plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 02fea3a1847f",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_arch": "arm64",
+    "packages": {
+      "python": "3.12.14",
+      "quantrisk": "1.0.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "categories": {
+    "correctness_benchmark": "comparison against an independent implementation, run live",
+    "performance_benchmark": "measured throughput and runtime on one machine",
+    "statistical_experiment": "a distributional or convergence claim checked over many random trials",
+    "offline_fixture": "a real response from a public source, with its own provenance sidecar"
+  },
+  "artifacts": [
+    {
+      "path": "benchmarks/quantlib/results/monte_carlo_validation.csv",
+      "category": "correctness_benchmark",
+      "sha256": "5b48decd9d6f3659513fdca896b3fa9e3e04a2dd2a63423f0eb5c1f31527df7e",
+      "bytes": 68261,
+      "generated_by_command": "uv run python monte_carlo_validation.py --paths 200000",
+      "generated_utc": "2026-09-27T07:16:24+00:00",
+      "command_recorded_in": "benchmarks/quantlib/results/monte_carlo_validation.json"
+    },
+    {
+      "path": "benchmarks/quantlib/results/monte_carlo_validation.json",
+      "category": "correctness_benchmark",
+      "sha256": "5f43488b67652cb13a160001f5763e148257e32c2f68abb5554e04bb4f366670",
+      "bytes": 4328,
+      "generated_by_command": "uv run python monte_carlo_validation.py --paths 200000",
+      "generated_utc": "2026-09-27T07:16:24+00:00",
+      "command_recorded_in": "benchmarks/quantlib/results/monte_carlo_validation.json"
+    },
+    {
+      "path": "benchmarks/quantlib/results/path_dependent_vs_quantlib.csv",
+      "category": "correctness_benchmark",
+      "sha256": "426680b4267bdea39eca564961a993e9a66850277c24dd102e00f8c491f29fda",
+      "bytes": 6478,
+      "generated_by_command": "uv run python monte_carlo_validation.py --paths 200000",
+      "generated_utc": "2026-09-27T07:16:24+00:00",
+      "command_recorded_in": "benchmarks/quantlib/results/monte_carlo_validation.json"
+    },
+    {
+      "path": "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
+      "category": "correctness_benchmark",
+      "sha256": "8e92f9bf6ba5fc69063443202081d4b20d20385c9611c823cfeabd13b194ed96",
+      "bytes": 4007,
+      "generated_by_command": "uv run python path_dependent_validation.py",
+      "generated_utc": "2026-09-27T07:16:44+00:00",
+      "command_recorded_in": "benchmarks/quantlib/results/path_dependent_vs_quantlib.json"
+    },
+    {
+      "path": "benchmarks/quantlib/results/pricing_vs_quantlib.csv",
+      "category": "correctness_benchmark",
+      "sha256": "5afc4db2f2d32882acecf832a5a3eade5dd1e2564c6df7706d586ad88d0babd8",
+      "bytes": 3891484,
+      "generated_by_command": "uv run python monte_carlo_validation.py --paths 200000",
+      "generated_utc": "2026-09-27T07:16:24+00:00",
+      "command_recorded_in": "benchmarks/quantlib/results/monte_carlo_validation.json"
+    },
+    {
+      "path": "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "category": "correctness_benchmark",
+      "sha256": "e57b8e4437b68004c8e4a04685f1c07727ee9160f926b958c2ee1e3d1b4a32f8",
+      "bytes": 5033,
+      "generated_by_command": "benchmarks/quantlib/pricing_validation.py",
+      "generated_utc": "2026-09-27T07:16:22+00:00",
+      "command_recorded_in": "benchmarks/quantlib/results/pricing_vs_quantlib.json"
+    },
+    {
+      "path": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.csv",
+      "category": "correctness_benchmark",
+      "sha256": "c380198f432eec1c5f0426b670b68077e42412b6ef11a8188e77c03b3d0477a6",
+      "bytes": 79615,
+      "generated_by_command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
+      "generated_utc": "2026-09-27T07:16:48+00:00",
+      "command_recorded_in": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json"
+    },
+    {
+      "path": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
+      "category": "correctness_benchmark",
+      "sha256": "6f5f2fa9114d9932df1cd81da659322120516aed9591d9ee60494b0cdb07e24b",
+      "bytes": 8264,
+      "generated_by_command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
+      "generated_utc": "2026-09-27T07:16:48+00:00",
+      "command_recorded_in": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json"
+    },
+    {
+      "path": "benchmarks/performance/results/monte_carlo_speed.json",
+      "category": "performance_benchmark",
+      "sha256": "7bea41a6f6a5e5b661114689731070859fd56ee15500b835820d16b0ced2c381",
+      "bytes": 5806,
+      "generated_by_command": "uv run python performance monte_carlo_speed.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "benchmarks/performance/results/monte_carlo_speed.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/greeks_by_moneyness.csv",
+      "category": "statistical_experiment",
+      "sha256": "6a456538509586803beada0174cdf41eb9c0921a77124e857506d65681bbd4a4",
+      "bytes": 3742,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/greeks_vs_moneyness.png",
+      "category": "statistical_experiment",
+      "sha256": "20c815df2e2d311e58bb9b3f8324a2fb71e2c5dce76886d2c5b5040f2852ddae",
+      "bytes": 31357,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/lattice_convergence.csv",
+      "category": "statistical_experiment",
+      "sha256": "bd228143294208abe8dbbf6d170e41add1fd009b8819ee80c7998e845d39c28e",
+      "bytes": 4450,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/lattice_convergence.png",
+      "category": "statistical_experiment",
+      "sha256": "1cf47761a4930cc73acd00992043ed592fb7017fe3231f9fa92d924f8fd1cf80",
+      "bytes": 77385,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/price_vs_maturity.png",
+      "category": "statistical_experiment",
+      "sha256": "7e772aa4f79f454626d6d9b0dd86c68a8a6145dea5c3306a1c8e9ae5da19a89e",
+      "bytes": 33205,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/price_vs_rate.png",
+      "category": "statistical_experiment",
+      "sha256": "233af94a4e0b881b3f2c5ca6d739f7979b9ccdbd52959cc47e6a5c133d616b45",
+      "bytes": 39412,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/price_vs_strike.png",
+      "category": "statistical_experiment",
+      "sha256": "6eeb06537bfd080b2cf541009e01820bf29fff035b2fcfe26c2bc4bcc9ea888d",
+      "bytes": 36799,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/price_vs_volatility.png",
+      "category": "statistical_experiment",
+      "sha256": "a2e818ae1d7b5bf5d45b8f8c095a81e4845f31ff75b0a21c218db8c8e8f3e844",
+      "bytes": 42708,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/pricing_grid.csv",
+      "category": "statistical_experiment",
+      "sha256": "bf05cc80c0dac941ad290071b9ba881314456fd76ff65e1af3d2ea282a17263c",
+      "bytes": 10734,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/pricing_validation/results/summary.json",
+      "category": "statistical_experiment",
+      "sha256": "7febe0bbf7bbf8e31d7b5576e2659f35b44bd70cb6d2fb3f761c593cf6e5060c",
+      "bytes": 6577,
+      "generated_by_command": "uv run python pricing_validation run.py",
+      "generated_utc": "2026-09-27T07:16:49+00:00",
+      "command_recorded_in": "experiments/pricing_validation/results/summary.json"
+    },
+    {
+      "path": "experiments/monte_carlo_convergence/results/convergence.csv",
+      "category": "statistical_experiment",
+      "sha256": "3f3aaad631c1157261e22f1c2865a075bc0406b2c61876b054d3400c67f38865",
+      "bytes": 4521,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:52+00:00",
+      "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
+    },
+    {
+      "path": "experiments/monte_carlo_convergence/results/convergence_slope.png",
+      "category": "statistical_experiment",
+      "sha256": "cdbe4a20bfc3f96cbe535856bc5976b8e386d2ae02930b0363872a5f67837fa9",
+      "bytes": 66850,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:52+00:00",
+      "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
+    },
+    {
+      "path": "experiments/monte_carlo_convergence/results/coverage.csv",
+      "category": "statistical_experiment",
+      "sha256": "3a16407caf5427827f0354b62b7c3598a3085cca5d2a1b541db0ee58c1dd1502",
+      "bytes": 702,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:52+00:00",
+      "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
+    },
+    {
+      "path": "experiments/monte_carlo_convergence/results/se_versus_error.png",
+      "category": "statistical_experiment",
+      "sha256": "64154a4b4409cbe20f7d326b9c3af0af27a6afb6b2855b438e43e9d59a05116d",
+      "bytes": 41391,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:52+00:00",
+      "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
+    },
+    {
+      "path": "experiments/monte_carlo_convergence/results/summary.json",
+      "category": "statistical_experiment",
+      "sha256": "9a55d43abaafe0f84161dbb99af252a43f2611558603ec95320cf2ff7e4d455f",
+      "bytes": 9775,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:52+00:00",
+      "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
+    },
+    {
+      "path": "experiments/monte_carlo_convergence/results/z_scores.csv",
+      "category": "statistical_experiment",
+      "sha256": "12979935ecf785907f0ced49237447b2eacbe1fa29b723d1f5ce0d8fffe70671",
+      "bytes": 486,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:52+00:00",
+      "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
+    },
+    {
+      "path": "experiments/variance_reduction/results/realised_error.csv",
+      "category": "statistical_experiment",
+      "sha256": "56edcc2a682dbf5b376567159317e36c3e017fd843c633e57ab7c234918bcacc",
+      "bytes": 2849,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:54+00:00",
+      "command_recorded_in": "experiments/variance_reduction/results/summary.json"
+    },
+    {
+      "path": "experiments/variance_reduction/results/standard_error_by_method.png",
+      "category": "statistical_experiment",
+      "sha256": "be1e346ba57154a040bea2db6b37e6dcee72964edd698233a12636441e7cc6ee",
+      "bytes": 47936,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:54+00:00",
+      "command_recorded_in": "experiments/variance_reduction/results/summary.json"
+    },
+    {
+      "path": "experiments/variance_reduction/results/summary.json",
+      "category": "statistical_experiment",
+      "sha256": "90ea30a1a39c6daf932b7a70e76d728309eb0f6ce920703c6056ed71c69efdd6",
+      "bytes": 5915,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:54+00:00",
+      "command_recorded_in": "experiments/variance_reduction/results/summary.json"
+    },
+    {
+      "path": "experiments/variance_reduction/results/variance_by_method.csv",
+      "category": "statistical_experiment",
+      "sha256": "9c5cd8c2da95f93c6bb526841443015704ee5b0c8b58d4f928bed3a331cde5a2",
+      "bytes": 3711,
+      "generated_by_command": "uv run python run.py",
+      "generated_utc": "2026-09-27T07:16:54+00:00",
+      "command_recorded_in": "experiments/variance_reduction/results/summary.json"
+    },
+    {
+      "path": "experiments/var_backtesting/results/bootstrap_coverage.csv",
+      "category": "statistical_experiment",
+      "sha256": "586b13cf622d1d8e0c5b376f041d2a9b7e3aed2877900980070fc596aca4f85b",
+      "bytes": 781,
+      "generated_by_command": "uv run python experiments/var_backtesting/run.py",
+      "generated_utc": "2026-09-27T07:17:17+00:00",
+      "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
+    },
+    {
+      "path": "experiments/var_backtesting/results/coverage_test_size_power.csv",
+      "category": "statistical_experiment",
+      "sha256": "177e967e8ba55faae8ef4f2f0bcb8828fcfab59b2bbe9062efcf70803e38d8e1",
+      "bytes": 3041,
+      "generated_by_command": "uv run python experiments/var_backtesting/run.py",
+      "generated_utc": "2026-09-27T07:17:17+00:00",
+      "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
+    },
+    {
+      "path": "experiments/var_backtesting/results/estimator_convergence.csv",
+      "category": "statistical_experiment",
+      "sha256": "5f66fea4f0f7fcac71c8c5713de870e8f01111fdcbaa21a2d8c669c231d33133",
+      "bytes": 11530,
+      "generated_by_command": "uv run python experiments/var_backtesting/run.py",
+      "generated_utc": "2026-09-27T07:17:17+00:00",
+      "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
+    },
+    {
+      "path": "experiments/var_backtesting/results/estimator_convergence.png",
+      "category": "statistical_experiment",
+      "sha256": "737b9cb14c76159a3afade7405a23f8ff839cac6c808d46829a957b97fb4ef30",
+      "bytes": 42874,
+      "generated_by_command": "uv run python experiments/var_backtesting/run.py",
+      "generated_utc": "2026-09-27T07:17:17+00:00",
+      "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
+    },
+    {
+      "path": "experiments/var_backtesting/results/pvalue_uniformity.png",
+      "category": "statistical_experiment",
+      "sha256": "8396bfd6aab70d78ed98a2051724b16905c802309745f89284ac936c84780db7",
+      "bytes": 50304,
+      "generated_by_command": "uv run python experiments/var_backtesting/run.py",
+      "generated_utc": "2026-09-27T07:17:17+00:00",
+      "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
+    },
+    {
+      "path": "experiments/var_backtesting/results/var_backtesting_validation.json",
+      "category": "statistical_experiment",
+      "sha256": "81c160e02650446c144a7f34ab2c5c0c4458eac46650c8d63968da8e183d137d",
+      "bytes": 8226,
+      "generated_by_command": "uv run python experiments/var_backtesting/run.py",
+      "generated_utc": "2026-09-27T07:17:17+00:00",
+      "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
+    },
+    {
+      "path": "experiments/portfolio_optimization/results/estimator_cost_by_window.png",
+      "category": "statistical_experiment",
+      "sha256": "4714c124ad499c14987d031a46c23ba2163cc3f7b40d0f734ebf06fcb4210d5e",
+      "bytes": 64942,
+      "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
+      "generated_utc": "2026-09-27T07:17:19+00:00",
+      "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
+    },
+    {
+      "path": "experiments/portfolio_optimization/results/estimator_out_of_sample.csv",
+      "category": "statistical_experiment",
+      "sha256": "5d8aba9a1e3c9e3d35abddd895f99a55351344c66b3f8e126f0cab9cc46e99c0",
+      "bytes": 404029,
+      "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
+      "generated_utc": "2026-09-27T07:17:19+00:00",
+      "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
+    },
+    {
+      "path": "experiments/portfolio_optimization/results/objective_comparison.csv",
+      "category": "statistical_experiment",
+      "sha256": "764fb22c8b7f3f94521c94b4cb683ef8596b6c3c68d03f6c9a58d3765879d77b",
+      "bytes": 40865,
+      "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
+      "generated_utc": "2026-09-27T07:17:19+00:00",
+      "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
+    },
+    {
+      "path": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
+      "category": "statistical_experiment",
+      "sha256": "6fb1188b4dedf3c22e88137ac26f1073ac0c03ac5b13425eab8c5b4a4ab268a9",
+      "bytes": 28835,
+      "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
+      "generated_utc": "2026-09-27T07:17:19+00:00",
+      "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
+    },
+    {
+      "path": "experiments/portfolio_optimization/results/solver_robustness.csv",
+      "category": "statistical_experiment",
+      "sha256": "b9b9bd4a34700d544c91b2a79b39e38414cf7da66fb8e48fb02f66d1a8c12ea7",
+      "bytes": 5887,
+      "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
+      "generated_utc": "2026-09-27T07:17:19+00:00",
+      "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
+    },
+    {
+      "path": "experiments/stress_testing/results/linearisation_error.csv",
+      "category": "statistical_experiment",
+      "sha256": "21f7700ebda56c47d41fa5b3935f05cbdf64e25190462c8e8427c2b8fd63fcfe",
+      "bytes": 1210,
+      "generated_by_command": "uv run python experiments/stress_testing/run.py",
+      "generated_utc": "2026-09-27T07:17:22+00:00",
+      "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
+    },
+    {
+      "path": "experiments/stress_testing/results/linearisation_error.png",
+      "category": "statistical_experiment",
+      "sha256": "bf781c077aa6d034b61e1d492a1b46c9b10f6356962305c55b5c52f2da6a5d1d",
+      "bytes": 43839,
+      "generated_by_command": "uv run python experiments/stress_testing/run.py",
+      "generated_utc": "2026-09-27T07:17:22+00:00",
+      "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
+    },
+    {
+      "path": "experiments/stress_testing/results/scenario_ranking.csv",
+      "category": "statistical_experiment",
+      "sha256": "7837a1819bc495c2451b8b52d84717104b191b59529bc843de3b28e7474eed2c",
+      "bytes": 7772,
+      "generated_by_command": "uv run python experiments/stress_testing/run.py",
+      "generated_utc": "2026-09-27T07:17:22+00:00",
+      "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
+    },
+    {
+      "path": "experiments/stress_testing/results/stress_testing_study.json",
+      "category": "statistical_experiment",
+      "sha256": "3296bace26d6814b7116499b0484b0bef5ac2cb9d1d1177be4d25646d8bf9431",
+      "bytes": 11274,
+      "generated_by_command": "uv run python experiments/stress_testing/run.py",
+      "generated_utc": "2026-09-27T07:17:22+00:00",
+      "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
+    },
+    {
+      "path": "experiments/stress_testing/results/var_decomposition.csv",
+      "category": "statistical_experiment",
+      "sha256": "81ef765b89d657cd1ae8d4fbed66b3758da729ed3b0bc467ba07998424ff009e",
+      "bytes": 2693,
+      "generated_by_command": "uv run python experiments/stress_testing/run.py",
+      "generated_utc": "2026-09-27T07:17:22+00:00",
+      "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
+    },
+    {
+      "path": "data/fixtures/cftc_disagg_cot_2024_excerpt.csv",
+      "category": "offline_fixture",
+      "sha256": "e8405ac34c7ff3a6beb5d00250968f4c2f68ed560072fb7f071409b160fdacf5",
+      "bytes": 8228,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: CFTC annual Disaggregated COT archive, EXCERPT of the decompressed CSV)",
+      "generated_utc": "2026-09-27T05:47:52+00:00",
+      "command_recorded_in": "data/fixtures/cftc_disagg_cot_2024_excerpt.csv.provenance.json"
+    },
+    {
+      "path": "data/fixtures/edgar_0000320193_Assets.json",
+      "category": "offline_fixture",
+      "sha256": "4378cc0249e20299870f7471471e05367f5c0faafdcc6addf739cd9f17648145",
+      "bytes": 19972,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: SEC EDGAR companyconcept (live response))",
+      "generated_utc": "2026-09-27T05:45:24+00:00",
+      "command_recorded_in": "data/fixtures/edgar_0000320193_Assets.json.provenance.json"
+    },
+    {
+      "path": "data/fixtures/edgar_0000320193_CashAndCashEquivalentsAtCarryingValue.json",
+      "category": "offline_fixture",
+      "sha256": "0d7146e8db9c12ecb46e6c5e4caee0a21f6e0a469bfb66fbdaab8dc9ed27e7bb",
+      "bytes": 30428,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: SEC EDGAR companyconcept (live response))",
+      "generated_utc": "2026-09-27T05:45:27+00:00",
+      "command_recorded_in": "data/fixtures/edgar_0000320193_CashAndCashEquivalentsAtCarryingValue.json.provenance.json"
+    },
+    {
+      "path": "data/fixtures/edgar_0000320193_Liabilities.json",
+      "category": "offline_fixture",
+      "sha256": "9973b1cb5c000160128d73b99b8cdb09fa11f15ab6a613eade252ce85ee33f61",
+      "bytes": 19769,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: SEC EDGAR companyconcept (live response))",
+      "generated_utc": "2026-09-27T05:45:25+00:00",
+      "command_recorded_in": "data/fixtures/edgar_0000320193_Liabilities.json.provenance.json"
+    },
+    {
+      "path": "data/fixtures/edgar_0000320193_NetIncomeLoss.json",
+      "category": "offline_fixture",
+      "sha256": "9b6ac23b024662c95dc7b4088a448bf60a31ff672e2f328161c5ceda6a8b9915",
+      "bytes": 50767,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: SEC EDGAR companyconcept (live response))",
+      "generated_utc": "2026-09-27T05:45:29+00:00",
+      "command_recorded_in": "data/fixtures/edgar_0000320193_NetIncomeLoss.json.provenance.json"
+    },
+    {
+      "path": "data/fixtures/edgar_0000320193_Revenues.json",
+      "category": "offline_fixture",
+      "sha256": "ae228f6e452e9dd051b876be882802379f3a8a1569297ba4a8474ee437308c05",
+      "bytes": 2252,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: SEC EDGAR companyconcept (live response))",
+      "generated_utc": "2026-09-27T05:45:28+00:00",
+      "command_recorded_in": "data/fixtures/edgar_0000320193_Revenues.json.provenance.json"
+    },
+    {
+      "path": "data/fixtures/edgar_0001652044_Assets.json",
+      "category": "offline_fixture",
+      "sha256": "b682c1a98895cb342f4de9d4eb0176572153f32827b7750ba9f01a09ef9148fe",
+      "bytes": 12496,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: SEC EDGAR companyconcept (live response))",
+      "generated_utc": "2026-09-27T05:45:31+00:00",
+      "command_recorded_in": "data/fixtures/edgar_0001652044_Assets.json.provenance.json"
+    },
+    {
+      "path": "data/fixtures/fred_BAMLH0A0HYM2_2024-01-01_2024-03-31.csv",
+      "category": "offline_fixture",
+      "sha256": "c68cf568fc7704f82bd394a5d073bacd8de241cc029ed01c6e36c1327e0ec399",
+      "bytes": 1066,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: FRED fredgraph.csv (live response, current revision))",
+      "generated_utc": "2026-09-27T05:45:37+00:00",
+      "command_recorded_in": "data/fixtures/fred_BAMLH0A0HYM2_2024-01-01_2024-03-31.csv.provenance.json"
+    },
+    {
+      "path": "data/fixtures/fred_DFF_2024-01-01_2024-01-31.csv",
+      "category": "offline_fixture",
+      "sha256": "2a22a34203a26c256faa7fabd3cbe6d1e870583fa26703f676ffd9a3a5533641",
+      "bytes": 517,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: FRED fredgraph.csv (live response, current revision))",
+      "generated_utc": "2026-09-27T05:45:32+00:00",
+      "command_recorded_in": "data/fixtures/fred_DFF_2024-01-01_2024-01-31.csv.provenance.json"
+    },
+    {
+      "path": "data/fixtures/fred_DGS10_2024-01-01_2024-03-31.csv",
+      "category": "offline_fixture",
+      "sha256": "c4bdcf1e7c70988b5bd7525f321bcfd0e0e5b347edeee32102fe0a72ae71d24b",
+      "bytes": 1035,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: FRED fredgraph.csv (live response, current revision))",
+      "generated_utc": "2026-09-27T05:45:33+00:00",
+      "command_recorded_in": "data/fixtures/fred_DGS10_2024-01-01_2024-03-31.csv.provenance.json"
+    },
+    {
+      "path": "data/fixtures/fred_UNRATE_2023-01-01_2024-06-30.csv",
+      "category": "offline_fixture",
+      "sha256": "6faebe76e1704ac7bb3a8f8a08dcd327ca689c9dd9ea100174674884d7ff3868",
+      "bytes": 294,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: FRED fredgraph.csv (live response, current revision))",
+      "generated_utc": "2026-09-27T05:45:35+00:00",
+      "command_recorded_in": "data/fixtures/fred_UNRATE_2023-01-01_2024-06-30.csv.provenance.json"
+    },
+    {
+      "path": "data/fixtures/fred_VIXCLS_2024-01-01_2024-02-15.csv",
+      "category": "offline_fixture",
+      "sha256": "2035b7c892337b4531e340c892cd2e2d7ac9cf50e0f56113cd5a018cfee8bcda",
+      "bytes": 585,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: FRED fredgraph.csv (live response, current revision))",
+      "generated_utc": "2026-09-27T05:45:34+00:00",
+      "command_recorded_in": "data/fixtures/fred_VIXCLS_2024-01-01_2024-02-15.csv.provenance.json"
+    },
+    {
+      "path": "data/fixtures/fred_vintage_shape_synthetic.json",
+      "category": "offline_fixture",
+      "sha256": "2af59c233911ff8132a4cd0376b908c8e2f2c653797341960162d1b57f2e4293",
+      "bytes": 1078,
+      "generated_by_command": "uv run python scripts/record_data_fixtures.py (source: SYNTHETIC - shaped like a FRED ALFRED API response, authored for this repo)",
+      "generated_utc": "2026-09-27T05:47:51+00:00",
+      "command_recorded_in": "data/fixtures/fred_vintage_shape_synthetic.json.provenance.json"
+    }
+  ],
+  "totals": {
+    "artifacts": 58,
+    "bytes": 5420370,
+    "by_category": {
+      "correctness_benchmark": 8,
+      "performance_benchmark": 1,
+      "statistical_experiment": 36,
+      "offline_fixture": 13
+    }
+  },
+  "warnings": [],
+  "integrity_note": "A hash proves the file has not changed since this manifest was written. It does not prove the number inside it is right \u2014 that is what the oracle comparisons and the phase reports' test output are for. Where the working tree was dirty at generation time, `repository.uncommitted_paths` lists what was not yet committed, and the evidence should be re-frozen after the commit that introduces it."
+}

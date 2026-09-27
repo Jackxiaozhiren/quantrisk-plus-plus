@@ -130,7 +130,7 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 7 scenario/stress subsystem, three scenario kinds, attribution with residuals | DONE (`docs/phase_reports/phase-07-stress-testing.md`) |
 | Phase 8 optional public data layer (EDGAR, FRED/ALFRED, CFTC) with provenance and offline fixtures | DONE (`docs/phase_reports/phase-08-public-data.md`) |
 | Phase 9 research API facades, Python faces of all eight submodules, `quantrisk` CLI | DONE (`docs/phase_reports/phase-09-research-api.md`) |
-| Phase 10 validation matrix, evidence manifest, technical report, release | NOT IMPLEMENTED — no such numbers exist yet |
+| Phase 10 validation matrix, benchmark suite, evidence manifest, technical report, README, v1.0.0 release | DONE (`docs/phase_reports/phase-10-release.md`, `docs/validation_matrix.md`, `docs/reproducibility.md`) |
 
 ## 10. Frozen surfaces
 
@@ -259,5 +259,35 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
   labelled excerpt). `data/cache/` is git-ignored and per-machine.
 - The dependency direction is frozen: `quantrisk.data` may use `quantrisk`; no pricing,
   risk, portfolio or stress code may import `quantrisk.data`.
+
+### Phase 10
+
+- `scripts/run_benchmark_suite.py` is an **orchestrator, not an implementation**. It holds no
+  financial or statistical formula and computes no result; it executes each member's own script
+  and reads headline numbers out of the JSON that script writes, by key path.
+- A renamed or removed field **aborts the run** rather than dropping a row. This is the
+  load-bearing property: an aggregation that silently lost a metric would look identical to one
+  that passed. `tests/python/test_artifact_metadata.py` pins it by re-walking each published key
+  path independently of the runner's own lookup.
+- `aggregated` is not `passed`. `--no-run` reads artifacts from disk and reports the weaker
+  status, because "this file exists and has the fields" is not "this benchmark ran".
+- A member whose oracle package is missing is `skipped`, never `passed`; `--require-all` turns
+  any skip into a non-zero exit, which is what the CI job uses so it cannot go green by
+  measuring nothing.
+- `benchmarks/suite/results/` is written **beside**, never inside, the members' own result
+  directories, so summarising the evidence cannot overwrite the evidence it summarises.
+- `validation_envelope.png` is drawn from the same extracted metrics as the summary table, not
+  from a second pass over the CSVs. A figure built by its own extraction can disagree with the
+  table printed next to it.
+- `evidence/manifest.json` recovers each artifact's generating command **from the artifact**,
+  not from a hand-maintained list, and records the revision plus whether the tree was dirty.
+  For committed data fixtures the correct provenance is a source URL and retrieval time, read
+  from the `.provenance.json` sidecar.
+- `scripts/verify_evidence_manifest.py` reports OK / CHANGED / MISSING / unlisted separately and
+  exits non-zero on the last three. "Nothing is missing" and "nothing was edited" are different
+  claims.
+- The library version is declared in two places (`pyproject.toml` and `CMakeLists.txt`) because
+  the C++ core needs it at compile time; `tests/python/test_smoke.py` asserts they agree, so the
+  duplication is guarded rather than trusted.
 
 Changing any of the above requires a written migration note.

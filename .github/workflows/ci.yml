@@ -59,3 +59,39 @@ jobs:
         env:
           QUANTRISK_REFERENCE_TOOL: ${{ github.workspace }}/build/ci/quantrisk_reference_tool
         run: uv run pytest -q
+
+  benchmark-suite:
+    # The published artifacts in benchmarks/ and experiments/ are the evidence the README
+    # and docs/validation_matrix.md quote. This job re-executes all eleven members against
+    # live oracles so that evidence cannot rot into something nothing runs.
+    #
+    # --require-all is the load-bearing flag. Without it a missing oracle would mark members
+    # SKIPPED and the suite would still exit 0, turning "we measured everything" into a job
+    # that passes by measuring nothing.
+    name: Benchmark suite against live oracles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install with the validation oracles
+        run: uv sync --extra oracles
+      - name: Configure (CMake preset ci)
+        run: uv run cmake --preset ci
+      - name: Build core and bindings
+        run: uv run cmake --build --preset ci
+      - name: Install the Python package from the same tree
+        run: uv pip install -e .
+      - name: Run every benchmark and experiment
+        run: uv run python scripts/run_benchmark_suite.py --require-all
+      - name: Show the generated summary
+        run: cat benchmarks/suite/results/suite_summary.md
+      - name: Upload the suite artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-suite
+          path: benchmarks/suite/results/
+          if-no-files-found: error

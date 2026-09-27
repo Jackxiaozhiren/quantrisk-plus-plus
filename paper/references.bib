@@ -1,0 +1,191 @@
+# References for the QuantRisk++ technical report (paper/technical_report.tex).
+#
+# Scope note, in keeping with the project's own rule (PROJECT_SPEC.md section 4):
+# this file carries bibliographic details for the external publications and libraries
+# named in the repository's documents. No *measured* number in the report is taken
+# from here; every measured figure is copied from a committed artifact under
+# benchmarks/, experiments/, docs/phase_reports/ or docs/model_cards/, and the
+# report names that artifact inline.
+#
+# Every key defined below is cited at least once in technical_report.tex.
+
+@article{black1973pricing,
+  author  = {Black, Fischer and Scholes, Myron},
+  title   = {The Pricing of Options and Corporate Liabilities},
+  journal = {Journal of Political Economy},
+  volume  = {81},
+  number  = {3},
+  year    = {1973}
+}
+
+@article{cox1979binomial,
+  author  = {Cox, John C. and Ross, Stephen and Rubinstein, Mark},
+  title   = {Option Pricing: A Simplified Approach},
+  journal = {Journal of Financial Economics},
+  volume  = {7},
+  number  = {3},
+  year    = {1979}
+}
+
+@article{heston1993closed,
+  author  = {Heston, Steven L.},
+  title   = {A Closed-Form Specification for Market Volatility},
+  journal = {The Review of Financial Studies},
+  volume  = {6},
+  number  = {1},
+  year    = {1993}
+}
+
+@article{broadie1997continuity,
+  author  = {Broadie, Mark and Glasserman, Paul and Kou, Steven G.},
+  title   = {A Continuity Correction for Discrete Barrier Options},
+  journal = {Mathematical Finance},
+  volume  = {7},
+  number  = {4},
+  year    = {1997}
+}
+
+@article{artzner1999coherent,
+  author  = {Artzner, Philippe and Delbaen, Freddy and Eber, Jean-Marc and Heath, David},
+  title   = {Coherent Measures of Risk},
+  journal = {Mathematical Finance},
+  volume  = {9},
+  number  = {3},
+  year    = {1999}
+}
+
+@article{rockafellar2000optimization,
+  author  = {Rockafellar, R. Tyrrell and Uryasev, Stanislav},
+  title   = {Optimization of Conditional Value-at-Risk},
+  journal = {The Journal of Risk},
+  volume  = {2},
+  number  = {3},
+  year    = {2000}
+}
+
+@article{kupiec1995performance,
+  author  = {Kupiec, Peter H.},
+  title   = {Techniques for Verifying the Accuracy of Risk Measurement Models},
+  journal = {The Journal of Derivatives},
+  volume  = {3},
+  number  = {2},
+  year    = {1995}
+}
+
+@book{christoffersen2003elements,
+  author    = {Christoffersen, Peter F.},
+  title     = {Elements of Financial Risk Management},
+  publisher = {Cambridge University Press},
+  year      = {2003}
+}
+
+@article{ledoit2004well,
+  author  = {Ledoit, Olivier and Wolf, Michael},
+  title   = {A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices},
+  journal = {Journal of Multivariate Analysis},
+  volume  = {88},
+  number  = {2},
+  year    = {2004}
+}
+
+@article{spinu2013efficient,
+  author  = {Spinu, Florin},
+  title   = {An Efficient Numerical Algorithm for Computing Risk Parity Weights},
+  journal = {SIAM Journal on Optimization},
+  volume  = {23},
+  number  = {2},
+  year    = {2013}
+}
+
+@article{bollerslev1986generalized,
+  author  = {Bollerslev, Tim},
+  title   = {Generalized Autoregressive Conditional Heteroskedasticity},
+  journal = {Journal of Econometrics},
+  volume  = {31},
+  number  = {3},
+  year    = {1986}
+}
+
+@article{matsumoto1998mersenne,
+  author  = {Matsumoto, Makoto and Nishimura, Takuji},
+  title   = {Mersenne Twister: A 623-Dimensionally Equidistributed Uniform Pseudo-Random
+             Number Generator},
+  journal = {ACM Transactions on Modeling and Computer Simulation},
+  volume  = {8},
+  number  = {1},
+  year    = {1998}
+}
+
+@misc{iso2020cpp,
+  author       = {{International Organization for Standardization}},
+  title        = {{ISO/IEC 14882:2020}: Programming Language {C++}},
+  howpublished = {International Standard},
+  year         = {2020},
+  note         = {Numerics library clause: the random number engines, including the 64-bit Mersenne Twister}
+}
+
+@misc{pybind11,
+  author       = {Jakob, Wenzel and Rhinelander, Jason and Moldovan, Dean and {the pybind11 contributors}},
+  title        = {pybind11: Seamless Operability Between {C++} and {Python}},
+  year         = {2024},
+  howpublished = {\url{https://github.com/pybind/pybind11}},
+  note         = {Pinned at v2.13.6 by the build; see docs/phase\_reports/phase-01-engineering-foundation.md}
+}
+
+@misc{scikitbuildcore,
+  author       = {{the scikit-build maintainers}},
+  title        = {scikit-build-core: {Python} build backend for extended {CMake} modules},
+  year         = {2024},
+  howpublished = {\url{https://github.com/scikit-build/scikit-build-core}},
+  note         = {Required at version >= 0.10 by pyproject.toml}
+}
+
+@techreport{jpmorgan1996riskmetrics,
+  author      = {{J.P. Morgan/Reuters}},
+  title       = {{RiskMetrics} --- Technical Document},
+  institution = {J.P. Morgan},
+  year        = {1996},
+  note        = {The zero-mean EWMA convention named in docs/model\_cards/portfolio\_covariance\_and\_optimisation.md}
+}
+
+@misc{quantlib,
+  author       = {{the QuantLib contributors}},
+  title        = {{QuantLib}: a free/open-source library for quantitative finance},
+  year         = {2024},
+  howpublished = {\url{https://www.quantlib.org}},
+  note         = {Version 1.43; used as a Level-2 correctness oracle and imported by no library code}
+}
+
+@article{scipy2020,
+  author  = {Virtanen, Pauli and Gommers, Ralf and Oliphant, Travis E. and others},
+  title   = {{SciPy} 1.0: Fundamental Algorithms for Scientific Computing in {Python}},
+  journal = {Nature Methods},
+  volume  = {17},
+  year    = {2020},
+  note    = {Version 1.18.1 in the recorded benchmark environments}
+}
+
+@misc{pyportfolioopt,
+  author       = {Martin, Robert Andrew},
+  title        = {{PyPortfolioOpt}: Portfolio Optimisation in {Python}},
+  year         = {2024},
+  howpublished = {\url{https://github.com/robertmartin8/PyPortfolioOpt}},
+  note         = {Version 1.6.0; a Level-2 oracle only, and it is the SciPy SLSQP route inside that library}
+}
+
+@misc{cvxpy,
+  author       = {{the cvxpy development team}},
+  title        = {cvxpy: A {Python}-embedded modeling language for convex optimization},
+  year         = {2024},
+  howpublished = {\url{https://www.cvxpy.org}},
+  note         = {Version 1.9.3 with OSQP 1.1.3 and SCS, recorded in benchmarks/pyportfolioopt/results/optimisation\_vs\_oracles.json}
+}
+
+@misc{sklearn2011,
+  author       = {Pedregosa, Fabian and Varoquaux, Ga{\"e}l and Gramfort, Alexandre and others},
+  title        = {Scikit-learn: Machine Learning in {Python}},
+  journal      = {Journal of Machine Learning Research},
+  volume       = {12},
+  year         = {2011},
+  note         = {Version 1.9.1 in the recorded environments; its LedoitWolf and EmpiricalCovariance estimators serve as Level-2 references}
+}

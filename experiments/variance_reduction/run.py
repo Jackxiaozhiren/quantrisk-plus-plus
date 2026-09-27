@@ -149,6 +149,9 @@ def main() -> int:
         for row in realised
     }
     worst_reduction = min(reductions.values())
+    worst_reduction = min(reductions.values())
+    reduced = {key: value for key, value in reductions.items() if not key.endswith("|plain")}
+    worst_reduced_reduction = min(reduced.values())
     summary = {
         "artifact": "experiments/variance_reduction/run.py",
         "generated_at_utc": utc_timestamp(),
@@ -160,7 +163,13 @@ def main() -> int:
         "rows": len(rows),
         "realised_rows": len(realised),
         "mse_reduction_vs_plain": dict(sorted(reductions.items())),
-        "worst_mse_reduction_vs_plain": worst_reduction,
+        # The minimum over *every* row is always 1.0, because each plain-MC cell divides by
+        # itself. Publishing it as "worst" would look like a method that barely broke even.
+        "worst_mse_reduction_all_rows": worst_reduction,
+        "worst_mse_reduction_vs_plain": worst_reduced_reduction,
+        "worst_reduction_scope": (
+            "antithetic and control-variate cells only; every plain cell is 1.0 by construction"
+        ),
         "reading": (
             "mse_reduction_vs_plain > 1 means the method beat plain Monte Carlo on "
             "out-of-sample mean squared error across the seed ensemble, which is the "

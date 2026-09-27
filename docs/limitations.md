@@ -108,6 +108,9 @@ never removed just because a later phase shipped.
     `xi = 0` collapse to Black-Scholes.
 27. **No Heston Greeks, no smile calibration, no path-dependent payoff under
     Heston**, and terminal/realised variance inherit the step discretisation.
+
+## Phase 5 — market risk estimation and backtesting
+
 28. **The risk layer is validated on synthetic data whose truth is known.** No
     real return series is used in `experiments/var_backtesting/`, so nothing there
     licenses a claim about realised markets, and non-stationarity is out of reach
@@ -236,3 +239,21 @@ never removed just because a later phase shipped.
     the oracle comparisons live in `benchmarks/` with committed artifacts and provenance,
     and a CLI printing a second uncited figure beside them would create two sources of truth
     for one claim. The numbers it prints are valid only for the machine and moment it ran.
+
+## Phase 10 — validation matrix, benchmark suite and release
+
+56. **The `benchmark-suite` CI job has never run on a GitHub-hosted runner.** It is
+    configured, its YAML parses, and the suite passes locally in ~60 s. A runner is a
+    different machine: the `oracles` extra's wheel resolution, cvxpy/OSQP and QuantLib
+    availability on `ubuntu-latest`, and the runner's toolchain are all unverified. Local
+    green is not evidence about CI, and this entry is the difference between "runs in CI"
+    and "configured to run in CI".
+57. **There is no published release.** The repository has no remote, so `v1.0.0` is a local
+    annotated tag and the release notes are a file. `CITATION.cff` correspondingly carries no
+    `repository-code` and no DOI; those fields are left empty rather than filled with a URL
+    that does not resolve.
+58. **The suite's member registry is hand-maintained.** The key-path guard makes a *renamed*
+    headline field fail loudly, but a benchmark script that was never registered is simply
+    absent from the suite and nothing notices — absence produces no output to check.
+    `--list` against `find benchmarks experiments -name 'run.py' -o -name '*.py'` is the
+    manual reconciliation.

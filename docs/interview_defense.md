@@ -1,7 +1,7 @@
 # Interview defense — self-test sheet
 
-Date: 2026-09-26 · Repository state: Phases 0–3 shipped, `quantrisk` 0.1.0 (engineering
-foundation, deterministic pricing, Monte Carlo engine).
+Date: 2026-09-27 · Repository state: **Phases 0–10 shipped, `quantrisk` 1.0.0** — the full
+surface this sheet describes is implemented, validated and frozen in `evidence/manifest.json`.
 Question set: `PROJECT_SPEC.md`, section 最终面试准备材料 — 22 questions in four groups,
 reproduced here one for one and in order. Nothing added, nothing dropped.
 
@@ -12,20 +12,30 @@ regenerate a figure, do not say the figure — say the property instead. Answers
 only as memorised prose are the ones that fail first.
 
 **Status boundary (state this before any risk or portfolio answer).**
-`docs/project_scope.md` §9 is the authority. Built: the C++ core (instance-owned
-`std::mt19937_64` with our own Marsaglia polar normals, normal PDF/CDF/quantile, Neumaier
-compensated statistics), Black-Scholes-Merton with continuous dividends plus five analytic
-Greeks and central-difference Greeks, the CRR lattice for European and American exercise,
-exact-GBM terminal and path generation, and a Monte Carlo engine with antithetic and
-control-variate estimators, together with live QuantLib/SciPy benchmarks and convergence,
-coverage, variance-reduction and speed artifacts.
-**Not built:** path-dependent pricing beyond the generic `price_path_payoff` entry point,
-Heston, VaR/ES and their bootstrap and backtests, covariance estimators, mean-variance /
-max-Sharpe / CVaR / risk-parity optimisers, the stress engine, the data layer, and the
-typed Python facades and CLI. For those, the honest tense is "the definition is frozen in
-`docs/mathematical_specification.md` §…, it is Phase … work, and it does not exist in this
-tree yet."
-Current suite as measured in Phase 3: 72 C++ tests under CTest, 136 pytest tests.
+`docs/project_scope.md` §9 is the authority. Built and validated: the C++ core
+(instance-owned `std::mt19937_64` with our own Marsaglia polar normals, normal
+PDF/CDF/quantile, Neumaier compensated statistics), Black-Scholes-Merton with continuous
+dividends plus five analytic Greeks and central-difference Greeks, the CRR lattice for
+European and American exercise, exact-GBM terminal and path generation, a Monte Carlo engine
+with antithetic and control-variate estimators, geometric and arithmetic Asians and barrier
+payoffs with the Broadie-Glasserman-Kou correction, full-truncation Euler Heston, the
+market-risk layer (historical / Gaussian / Monte Carlo VaR and ES, iid and moving-block
+bootstrap, Kupiec and Christoffersen tests), three covariance estimators, six portfolio
+solvers each carrying a certificate checked against its own inputs, the stress engine with
+Euler attribution, the optional public-data layer with real committed fixtures, the typed
+Python facades and the three-command CLI.
+
+**What is genuinely not here** — and this is the list to reach for under pressure, not a list
+of unbuilt phases: no real-market empirical claim (every statistical result runs on synthetic
+data whose truth is known), no expected-return model, no term structure, no Heston Greeks or
+smile calibration, no multi-period rebalancing, no short positions or leverage, no reverse
+stress testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 58
+numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
+says why.
+
+Current suite as measured at v1.0.0: 190 C++ tests under CTest (546,943 assertions in 189
+Catch2 cases), 316 pytest tests, 11/11 benchmark-suite members executed, `quantrisk validate`
+7/7.
 
 ---
 
@@ -77,7 +87,8 @@ statistics are interpretable.
 **2 min.** Each assumption has a specific way of being wrong, and the model card states them as
 claims that can fail rather than as background. (1) Lognormality: realised returns are skewed
 and fat-tailed; the implied-volatility smile is the market's testimony against it. (2) Constant
-`σ`: volatility clusters and mean-reverts — that is Heston territory, Phase 4, not built.
+`σ`: volatility clusters and mean-reverts — which is what the Phase 4 Heston implementation
+adds, at a measured cost of 4.5e-3 worst-case relative error against a semi-analytic oracle.
 (3) Constant `r`: no term structure, one flat rate and one flat `q` (limitation #10), so
 pricing a forward curve with this code is a modelling error. (4) Continuous trading: no price
 gaps, which is why a barrier is only exactly defined under continuous monitoring and discrete
@@ -168,8 +179,9 @@ at equal path budget rather than on reported SE.
 **30 s.** `VaR_α` is the `α`-quantile of the loss distribution — a threshold. `ES_α` is the
 mean loss given that the threshold is breached — a tail average. VaR answers "how bad is it at
 confidence level α"; ES answers "how bad is it in the states worse than that". ES is a coherent
-measure, VaR is not. Neither is implemented in this repository yet; the definitions are frozen
-in `docs/mathematical_specification.md` §6 and the engine is Phase 5 work.
+measure, VaR is not. Both are implemented here, three ways each — historical, Gaussian and
+Monte Carlo (`risk.historical_var` / `_es`, `risk.gaussian_var` / `_es`,
+`risk.monte_carlo_var` / `_es`) — with bootstrap intervals and coverage backtests.
 
 **2 min.** The estimation behaviour differs, and that matters more than the definitional
 difference. A quantile is one order statistic: it is jumpy as weights move, high-variance in the
@@ -201,7 +213,10 @@ portfolio's VaR can exceed the sum of its components and "diversification" can b
 it. It carries no information about the size of the breach, which is the part of the tail that
 actually destroys capital. And it is a single order statistic, so it is both unstable to estimate
 and easy to flatter by choosing α or a window. ES is the fix for the first two; honest reporting
-is the fix for the third. Not built here — Phase 5, and spec §6 already states the limitation.
+is the fix for the third. The measurement that makes this concrete is in
+`experiments/var_backtesting/`: on t(3) data a Gaussian 99% VaR realises 1.389% violations
+against 1% nominal, where the historical estimator lands at 1.021%. The misfit is 39%, and it
+is invisible unless you backtest.
 
 **2 min.** Add the consequences that show up in practice. Non-convexity in weights means a
 VaR-minimising optimiser can sit in local minima, so "optimal" portfolios are path-dependent
@@ -231,8 +246,11 @@ lists the risk engine as NOT IMPLEMENTED.
 **30 s.** A second state variable: variance follows a mean-reverting CIR process, and its
 correlation `ρ` with the asset drives a leverage effect. That gives stochastic volatility,
 skew in the implied surface, fat tails from volatility clustering, and surface dynamics that a
-constant-`σ` GBM cannot represent at any calibration. Heston is Phase 4 and is not built in this
-repository; the dynamics are written in spec §10.
+constant-`σ` GBM cannot represent at any calibration. This repository implements Heston
+(`stochastic.simulate_heston`, full-truncation Euler) and validates it two ways: against
+QuantLib's `AnalyticHestonEngine` to 4.5e-3 worst-case relative, and against the exact `ξ = 0`
+collapse to Black-Scholes at 2.1e-3 — the second is the sharper test, because there the oracle
+is a closed form rather than another numerical scheme.
 
 **2 min.** Under GBM the risk-neutral terminal density is exactly lognormal, which implies a
 flat implied-volatility surface; observed surfaces have a put skew and a level that moves with
@@ -372,8 +390,8 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 72 C++ tests and 136 Python tests with committed artifacts for
-every published number.
+variance reduction. Today that is 190 C++ tests (546,943 assertions in 189 cases) and 316
+Python tests, with committed artifacts for every published number and a manifest that hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -413,8 +431,9 @@ faster than Python".
 
 **2 min.** Three reasons the boundary is where it is. (1) The regime where C++ genuinely wins is
 per-path state and `O(paths)` memory: a path-dependent payoff carries a running maximum or
-running average per path, which NumPy either materialises as `paths × steps` doubles or loses
-entirely; that is Phase 4 territory and it is measured separately. (2) Determinism and typing:
+running average per path — which is exactly what `monte_carlo.price_barrier` and
+`monte_carlo.price_asian` carry — and NumPy either materialises `paths × steps` doubles or loses
+that state entirely. (2) Determinism and typing:
 our own Marsaglia polar normal generator, frozen numeric types with `Real = double`, and
 domain-validation on the way in — none of which depends on a library whose output can differ
 between builds. (3) Python stays the research layer: experiment drivers, CSV/JSON artifacts,
@@ -532,16 +551,18 @@ vector and no in-sample Sharpe to discuss.
 **30 s.** Minimising Conditional Value-at-Risk — the expected loss in the worst `(1−β)` of
 scenarios — over the portfolio weights. Rockafellar-Uryasev makes it tractable: introduce a level
 `α` and non-negative auxiliaries `uᵢ`, and the problem becomes linear in them, so CVaR
-minimisation is a convex program, unlike VaR minimisation. It is the tail measure Phase 6 will
-implement. It is not built here.
+minimisation is a convex program, unlike VaR minimisation. It is implemented here as
+`portfolio.minimise_cvar`, solved by our own two-phase dense primal simplex with Bland's rule
+(Phase 6) — no external solver in the library.
 
 **2 min.** Why bother: VaR is a single order statistic, so minimising it is non-convex and can be
 gamed by thinning the tail below the cutoff; CVaR averages past the cutoff, so it is convex in
 `w` for linear loss maps and it is coherent. Intuition for the formulation: `α` *is* the VaR at
 the optimum, and the `uᵢ` are the linearised positive parts `(Lᵢ(w) − α)⁺`; the `1/((1−β)M)`
 weighting turns their sum into the conditional tail mean. Whatever is hard about the problem is
-the scenario count `M` and the loss model `L(w)` — including the fact that scenario construction
-depends on the data and stress layers, which are Phases 7–8.
+the scenario count `M` and the loss model `L(w)` — including the fact that scenario construction is supplied by the stress layer (Phase 7)
+rather than inferred, which is why the LP is validated against cvxpy and PyPortfolioOpt on
+75 problems rather than against a market outcome: worst relative objective gap 4.48e-9.
 
 **Deeper.** The exact program, as frozen in spec §8 for scenario losses `Lᵢ(w)`, `i = 1..M`, and
 confidence `β`:
@@ -565,8 +586,12 @@ spec §9 for Phase 6; not built.
 
 **2 min.** Consequences worth stating before anyone asks: high-volatility assets get small
 weights and low-volatility assets get large ones, so the natural leverage differs per sleeve and
-a 60/40 comparison is not meaningful without adjusting for it. Because `μ̂` is absent there is no
-error maximisation, which is the main empirical argument for the approach. Its failure modes:
+a 60/40 comparison is not meaningful without adjusting for it. Implemented as
+`portfolio.risk_parity` by cyclic coordinate descent. Because `μ̂` is absent there is no
+error maximisation, which is the main empirical argument for the approach — and the reason it
+agrees with the Spinu log formulation to 1.4e-11 on weights, the same order as plain
+minimum-variance, while max-Sharpe only reaches 7e-9 because its frontier is flat.
+Its failure modes:
 assets with low volatility and negative real carry attract large weights; the solution is highly
 sensitive to the correlation estimate, and correlations rise in exactly the regimes risk parity is
 supposed to defend; and "equal risk contribution" is defined with respect to a variance model, so
@@ -773,9 +798,9 @@ already writes.
 Regenerate, then compare. Commands are the ones recorded in the phase reports.
 
 ```bash
-cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 72 C++ tests
+cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 190 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 136 Python tests
+  .venv/bin/python -m pytest -q                                          # 316 Python tests
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
 uv run python experiments/variance_reduction/run.py
@@ -786,8 +811,8 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 
 | Claim in this file | Source to check |
 |---|---|
-| What exists vs. what does not (Phase 5–9 unbuilt) | `docs/project_scope.md` §9 status table; `README.md` status paragraph |
-| 72 C++ / 136 Python tests; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
+| What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (58 entries) |
+| 190 C++ / 316 Python tests at v1.0.0; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
 | BS worst abs 1.49e-13 / rel 3.46e-11; Greeks abs 7.97e-15 … 5.12e-13; rel rho 1.07e-07; 18,816 rows; floors 1e-4 / 1e-6; oracle config (AnalyticEuropeanEngine, Actual365Fixed, day → `days/365`) | `benchmarks/quantlib/results/pricing_vs_quantlib.json` |
 | Put-call parity worst residual 7.99e-15; worst analytic-vs-FD delta 1.17e-4 | `experiments/pricing_validation/results/summary.json` (`worst_*` keys) |
 | CRR slopes −0.99405 / −1.00544 / −0.99244 / −0.999674 with SEs; relative errors at N = 3200 | `experiments/pricing_validation/results/summary.json` (`crr_convergence_slope`, `final_lattice_relative_error`) |
