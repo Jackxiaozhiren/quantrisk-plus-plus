@@ -79,6 +79,24 @@ struct ScenarioResult {
     std::string note;
 };
 
+namespace detail {
+
+/// A resolved pair of per-factor move vectors: relative and absolute, both aligned to
+/// the factor set. Exposed so the scenario-set runners map moves with exactly the same
+/// arithmetic as the single-scenario path — two implementations of one formula is how a
+/// stress report ends up disagreeing with itself.
+struct Moves {
+    std::vector<Real> relative;
+    std::vector<Real> absolute;
+};
+
+[[nodiscard]] Moves resolve_moves(const FactorSet &factors, const Scenario &scenario);
+
+[[nodiscard]] FactorContribution contribute(const RiskFactor &factor, std::size_t at, Real relative,
+                                            Real absolute, const ExposureVector &exposures);
+
+} // namespace detail
+
 /// Map a scenario onto a portfolio.
 ///
 /// With `factor_move_covariance` empty only the P&L and its attributions are produced;

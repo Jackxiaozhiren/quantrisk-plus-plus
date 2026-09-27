@@ -107,7 +107,8 @@ add_library(quantrisk_core STATIC
   cpp/src/portfolio/cvar.cpp
   cpp/src/stress/factor.cpp
   cpp/src/stress/scenario.cpp
-  cpp/src/stress/engine.cpp)
+  cpp/src/stress/engine.cpp
+  cpp/src/stress/simulation.cpp)
 
 target_include_directories(quantrisk_core PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cpp/include>"
@@ -171,7 +172,8 @@ if(QUANTRISK_BUILD_TESTS)
     tests/cpp/test_risk_parity.cpp
     tests/cpp/test_linear_program.cpp
     tests/cpp/test_cvar.cpp
-    tests/cpp/test_stress_engine.cpp)
+    tests/cpp/test_stress_engine.cpp
+    tests/cpp/test_stress_simulation.cpp)
 
   target_link_libraries(quantrisk_tests PRIVATE quantrisk_core Catch2::Catch2WithMain)
 

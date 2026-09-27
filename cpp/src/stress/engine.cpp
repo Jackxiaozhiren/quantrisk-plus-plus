@@ -58,18 +58,10 @@ Real gaussian_es_from(Real mean_pnl, Real sigma, Real confidence) {
     return -mean_pnl + sigma * (normal_pdf(z) / (1.0 - confidence));
 }
 
-struct Moves {
-    std::vector<Real> relative;
-    std::vector<Real> absolute;
-};
+} // namespace
 
-/// Resolve every shock into both a relative and an absolute move per factor.
-///
-/// A shock quoted in one unit is converted into the other wherever the factor's quoted
-/// level makes that possible, because delta is read against the relative move and
-/// duration against the absolute one. A conversion needing a level of zero is an error
-/// rather than a zero: silently reading "the index is quoted at 0" as "the relative move
-/// is 0" would report no equity loss on a book that is fully exposed.
+namespace detail {
+
 Moves resolve_moves(const FactorSet &factors, const Scenario &scenario) {
     const std::size_t assets = static_cast<std::size_t>(factors.size());
     Moves moves{std::vector<Real>(assets, 0.0), std::vector<Real>(assets, 0.0)};
@@ -78,15 +70,6 @@ Moves resolve_moves(const FactorSet &factors, const Scenario &scenario) {
         const RiskFactor &factor = factors.factors[at];
         Real relative = shock.relative;
         Real absolute = shock.absolute;
-        const auto cross_check = [&shock](Real relative, Real absolute, Real implied) {
-            if (std::abs(implied - absolute) > 1.0e-8 * std::max(Real{1.0}, std::abs(absolute))) {
-                throw ValidationError("quantrisk: shock '" + shock.factor_id +
-                                      "' states both units and they disagree (relative " +
-                                      std::to_string(relative) + " implies absolute " +
-                                      std::to_string(implied) + ", given " +
-                                      std::to_string(absolute) + ")");
-            }
-        };
         if (relative != 0.0 && absolute == 0.0) {
             if (factor.level == 0.0) {
                 throw ValidationError("quantrisk: shock '" + shock.factor_id +
@@ -102,7 +85,14 @@ Moves resolve_moves(const FactorSet &factors, const Scenario &scenario) {
             }
             relative = absolute / factor.level;
         } else if (absolute != 0.0 && relative != 0.0) {
-            cross_check(relative, absolute, relative * factor.level);
+            const Real implied = relative * factor.level;
+            if (std::abs(implied - absolute) > 1.0e-8 * std::max(Real{1.0}, std::abs(absolute))) {
+                throw ValidationError("quantrisk: shock '" + shock.factor_id +
+                                      "' states both units and they disagree (relative " +
+                                      std::to_string(relative) + " implies absolute " +
+                                      std::to_string(implied) + ", given " +
+                                      std::to_string(absolute) + ")");
+            }
         }
         moves.relative[at] += relative;
         moves.absolute[at] += absolute;
@@ -110,12 +100,6 @@ Moves resolve_moves(const FactorSet &factors, const Scenario &scenario) {
     return moves;
 }
 
-/// Read one factor's P&L out of one set of exposures.
-///
-/// Each term is quoted in the units its sensitivity type is defined against, which is
-/// why `relative` drives delta and gamma while `absolute` drives the rest. Blocks may be
-/// empty — a position that carries no vega block genuinely has no vega, and that is not
-/// the same as a zero-length vector being an error.
 FactorContribution contribute(const RiskFactor &factor, std::size_t at, Real relative,
                               Real absolute, const ExposureVector &exposures) {
     FactorContribution out;
@@ -133,6 +117,14 @@ FactorContribution contribute(const RiskFactor &factor, std::size_t at, Real rel
     out.credit = term(exposures.credit) * absolute;
     return out;
 }
+
+} // namespace detail
+
+namespace {
+
+using detail::contribute;
+using detail::Moves;
+using detail::resolve_moves;
 
 } // namespace
 
