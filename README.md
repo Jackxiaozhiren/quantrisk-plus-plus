@@ -16,6 +16,8 @@ estimators with bootstrap intervals, Kupiec and Christoffersen coverage tests, t
 covariance estimators, six portfolio solvers, a scenario and stress layer with attribution,
 and an optional public-data layer that never touches the core.
 
+The three results worth reading are in [`docs/findings.md`](docs/findings.md).
+
 It is not a trading system, not a market-data product, and not a forecast. It ships no
 expected-return model, makes no recommendation, and has never been run against live prices.
 Total monetary cost of building and validating it: $0.
@@ -37,12 +39,15 @@ writing down, the specific ways a plausible number goes wrong:
 - A documentation line claiming the sample and Ledoit-Wolf estimators matched scikit-learn
   to 2e-15. scikit-learn's `EmpiricalCovariance` divides by `T`, not `T-1`, so the honest
   gap was 6.1e-6; against `numpy.cov(ddof=1)` it is 7.2e-16.
-- A stress engine that allocated exactly zero risk to a position holding only a vega block,
-  because the beta vector was sized from the delta block. The Euler residual was −21,451
-  against a 355k VaR, and nothing raised an error.
-- A Monte Carlo path payoff that looked like a 100% linearisation error, because a bound
-  `std::vector` member returns a *copy* — `exposures.delta[0] = x` edits a temporary and is
-  silently lost.
+- A stress engine that allocated exactly zero risk to a position holding only a vega block
+  (sensitivity to volatility, with no equity delta), because the beta vector was sized from
+  the delta block and so came out empty. The Euler attribution still summed to a number and
+  reported a residual of −21,451 against a 355k VaR. Nothing raised an error; the identity
+  check did.
+- A Monte Carlo path payoff that appeared to have a 100% linearisation error, which would have
+  been an engine bug if it were real. It was not: a bound `std::vector` member returns a copy
+  to Python, so `exposures.delta[0] = x` edits a temporary that is immediately discarded, and
+  the exposure never reached the engine at all.
 
 Each of those was caught by a check, not by reading the code. That is the argument for the
 project: correctness in numerical finance is a property of your instrumentation, and the
@@ -117,22 +122,16 @@ Three levels, defined in [`docs/validation_protocol.md`](docs/validation_protoco
 
 [`docs/validation_matrix.md`](docs/validation_matrix.md) is the full twelve-component table:
 method, oracle, the bound the test asserts, the error actually measured, and the artifact.
-The strongest results in it:
+The four that carry a first reading:
 
-| Component | Bound asserted | Worst measured | Artifact |
-|---|---|---|---|
-| Black-Scholes vs QuantLib, 2,464 price comparisons | 1.0e-10 rel | 3.46e-11 rel, 1.49e-13 abs | `pricing_vs_quantlib.json` |
-| Greeks vs QuantLib | 1.0e-8 rel | 5.12e-13 abs | same |
-| Put-call parity | exact identity | 7.99e-15 | `pricing_validation/summary.json` |
-| Analytic delta vs central differences | error falls as `O(h²)` | ratios 4.00 and 4.00 across two halvings | `quantrisk validate` |
-| CRR convergence order | slope −1 | −0.99405 ± 0.00313 (1.90 SE) | `lattice_convergence.csv` |
-| Monte Carlo z, pooled over 160 runs | mean 0, std 1 | mean ≤ 0.05, std 0.92–1.01 | `monte_carlo_validation.json` |
-| CI coverage vs exact binomial band | inside band | 12/12 | `coverage.csv` |
-| Covariance vs `numpy.cov` / scikit-learn | 1.0e-12 rel | 7.2e-16 / 7e-19 | `test_covariance_vs_oracles.py` |
-| Six solvers vs cvxpy + PyPortfolioOpt, 75 problems | per-problem, 1e-11 to 1e-5 | objective 4.48e-9, weights 4.66e-7, budget 1.45e-12, bound violation exactly 0 | `optimisation_vs_oracles.json` |
-| Stress attribution | residual 0 | exactly 0.0 across 28 scenario-book pairs | `stress_testing_study.json` |
+| Component | Bound asserted | Worst measured |
+|---|---|---|
+| Black-Scholes vs QuantLib, 2,464 price comparisons | 1.0e-10 rel | 3.46e-11 rel, 1.49e-13 abs |
+| CRR convergence order | slope −1 | −0.99405 ± 0.00313 (1.90 SE) |
+| Monte Carlo z, pooled over 160 runs | mean 0, std 1 | mean ≤ 0.05, std 0.92–1.01 |
+| Six solvers vs cvxpy + PyPortfolioOpt, 75 problems | per-problem 1e-11 to 1e-5 | objective 4.48e-9, bound violation exactly 0 |
 
-Two of those rows are the ones to interrogate, because they are where a weaker project
+Two rows in the full matrix are the ones to interrogate, because they are where a weaker project
 would have stopped. The Heston comparison reaches 4.5e-3 relative, and that number is *our
 discretisation bias plus the oracle's own integration tolerance* — recorded as
 `partially validated` rather than rounded into a pass. The bootstrap interval coverage on
