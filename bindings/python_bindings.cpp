@@ -19,6 +19,8 @@
 #include "quantrisk/monte_carlo/engine.hpp"
 #include "quantrisk/monte_carlo/path_dependent.hpp"
 #include "quantrisk/portfolio/covariance.hpp"
+#include "quantrisk/portfolio/cvar.hpp"
+#include "quantrisk/portfolio/linear_program.hpp"
 #include "quantrisk/portfolio/mean_variance.hpp"
 #include "quantrisk/portfolio/risk_parity.hpp"
 #include "quantrisk/pricing/binomial_crr.hpp"
@@ -750,4 +752,47 @@ PYBIND11_MODULE(_quantrisk, module) {
             return quantrisk::portfolio::risk_parity(covariance, assets, budget);
         },
         py::arg("covariance"), py::arg("assets"), py::arg("starting_weights"));
+    py::enum_<quantrisk::portfolio::LpStatus>(portfolio, "LpStatus")
+        .value("OPTIMAL", quantrisk::portfolio::LpStatus::Optimal)
+        .value("INFEASIBLE", quantrisk::portfolio::LpStatus::Infeasible)
+        .value("UNBOUNDED", quantrisk::portfolio::LpStatus::Unbounded)
+        .value("NUMERICAL_FAILURE", quantrisk::portfolio::LpStatus::NumericalFailure)
+        .export_values();
+
+    py::class_<quantrisk::portfolio::LinearProgramResult>(portfolio, "LinearProgramResult")
+        .def_readonly("status", &quantrisk::portfolio::LinearProgramResult::status)
+        .def_readonly("values", &quantrisk::portfolio::LinearProgramResult::values)
+        .def_readonly("objective", &quantrisk::portfolio::LinearProgramResult::objective)
+        .def_readonly("pivots", &quantrisk::portfolio::LinearProgramResult::pivots)
+        .def_readonly("residual", &quantrisk::portfolio::LinearProgramResult::residual)
+        .def_readonly("dual_gap", &quantrisk::portfolio::LinearProgramResult::dual_gap)
+        .def_readonly("note", &quantrisk::portfolio::LinearProgramResult::note);
+    portfolio.def("solve_linear_program", &quantrisk::portfolio::solve_linear_program,
+                  py::arg("objective"), py::arg("constraint_rows"), py::arg("rhs"),
+                  py::arg("variables"), py::arg("constraints"));
+
+    py::class_<quantrisk::portfolio::CvarRequest>(portfolio, "CvarRequest")
+        .def(py::init<>())
+        .def_readwrite("assets", &quantrisk::portfolio::CvarRequest::assets)
+        .def_readwrite("scenarios", &quantrisk::portfolio::CvarRequest::scenarios)
+        .def_readwrite("scenario_returns", &quantrisk::portfolio::CvarRequest::scenario_returns)
+        .def_readwrite("expected_returns", &quantrisk::portfolio::CvarRequest::expected_returns)
+        .def_readwrite("confidence", &quantrisk::portfolio::CvarRequest::confidence)
+        .def_readwrite("target_return", &quantrisk::portfolio::CvarRequest::target_return);
+
+    py::class_<quantrisk::portfolio::CvarSolution>(portfolio, "CvarSolution")
+        .def_readonly("weights", &quantrisk::portfolio::CvarSolution::weights)
+        .def_readonly("alpha", &quantrisk::portfolio::CvarSolution::alpha)
+        .def_readonly("cvar", &quantrisk::portfolio::CvarSolution::cvar)
+        .def_readonly("recomputed_cvar", &quantrisk::portfolio::CvarSolution::recomputed_cvar)
+        .def_readonly("budget_residual", &quantrisk::portfolio::CvarSolution::budget_residual)
+        .def_readonly("weight_bound_violation",
+                      &quantrisk::portfolio::CvarSolution::weight_bound_violation)
+        .def_readonly("target_residual", &quantrisk::portfolio::CvarSolution::target_residual)
+        .def_readonly("pivots", &quantrisk::portfolio::CvarSolution::pivots)
+        .def_readonly("status", &quantrisk::portfolio::CvarSolution::status)
+        .def_readonly("solved", &quantrisk::portfolio::CvarSolution::solved)
+        .def_readonly("certified", &quantrisk::portfolio::CvarSolution::certified)
+        .def_readonly("note", &quantrisk::portfolio::CvarSolution::note);
+    portfolio.def("minimise_cvar", &quantrisk::portfolio::minimise_cvar, py::arg("request"));
 }

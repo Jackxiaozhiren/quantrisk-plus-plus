@@ -102,7 +102,9 @@ add_library(quantrisk_core STATIC
   cpp/src/stochastic/heston.cpp
   cpp/src/portfolio/covariance.cpp
   cpp/src/portfolio/mean_variance.cpp
-  cpp/src/portfolio/risk_parity.cpp)
+  cpp/src/portfolio/risk_parity.cpp
+  cpp/src/portfolio/linear_program.cpp
+  cpp/src/portfolio/cvar.cpp)
 
 target_include_directories(quantrisk_core PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cpp/include>"
@@ -163,7 +165,9 @@ if(QUANTRISK_BUILD_TESTS)
     tests/cpp/test_risk.cpp
     tests/cpp/test_covariance.cpp
     tests/cpp/test_mean_variance.cpp
-    tests/cpp/test_risk_parity.cpp)
+    tests/cpp/test_risk_parity.cpp
+    tests/cpp/test_linear_program.cpp
+    tests/cpp/test_cvar.cpp)
 
   target_link_libraries(quantrisk_tests PRIVATE quantrisk_core Catch2::Catch2WithMain)
 
