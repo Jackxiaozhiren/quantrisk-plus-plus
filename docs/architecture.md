@@ -77,6 +77,25 @@ Optional data (one-way, cached): SEC EDGAR, FRED/ALFRED, CFTC
 | Data (`data/`) | cached downloads + metadata + offline fixtures | large binaries in git; key/secrets in repo |
 | Docs/paper (`docs/`, `paper/`) | scope, math spec, protocol, model cards, limitations, technical report | claims without artifacts |
 
+### The Python face of each C++ submodule (Phase 9)
+
+`_quantrisk` binds its submodules as *attributes* only, so `sys.modules["quantrisk.risk"]`
+is never populated and `from quantrisk.risk import X` cannot resolve. Phase 9 gave each of
+the eight submodules a small Python file that re-exports the extension's public names and,
+for `pricing`/`risk`/`portfolio`/`stress`, carries the facade class. The files contain no
+arithmetic and no control flow — a `test_statistics_module_is_not_a_python_reimplementation`
+AST walk enforces that structurally, which is a stronger guard than the module-identity
+check it replaced.
+
+Two consequences are intentional and load-bearing:
+
+* `module.__core__` on each face names the extension object it mirrors, so a test can
+  assert a value came from C++ rather than from a Python approximation.
+* `import quantrisk` does **not** import `quantrisk.data`. The data layer reaches the
+  network, and pulling it in at package import would make every numerical user carry that
+  surface and its failure modes. Verified in a fresh interpreter, not by inspecting the
+  current one.
+
 ## 3. Dependency direction (one-way, frozen)
 
 ```text

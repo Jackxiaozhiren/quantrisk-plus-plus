@@ -129,7 +129,8 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 6 covariance estimators, mean-variance, max-Sharpe, ERC, CVaR, PyPortfolioOpt + cvxpy benchmark | DONE (`docs/phase_reports/phase-06-portfolio-optimisation.md`) |
 | Phase 7 scenario/stress subsystem, three scenario kinds, attribution with residuals | DONE (`docs/phase_reports/phase-07-stress-testing.md`) |
 | Phase 8 optional public data layer (EDGAR, FRED/ALFRED, CFTC) with provenance and offline fixtures | DONE (`docs/phase_reports/phase-08-public-data.md`) |
-| Research API facades, CLI, release | NOT IMPLEMENTED — no such numbers exist yet |
+| Phase 9 research API facades, Python faces of all eight submodules, `quantrisk` CLI | DONE (`docs/phase_reports/phase-09-research-api.md`) |
+| Phase 10 validation matrix, evidence manifest, technical report, release | NOT IMPLEMENTED — no such numbers exist yet |
 
 ## 10. Frozen surfaces
 

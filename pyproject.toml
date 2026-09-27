@@ -13,6 +13,11 @@ authors = [{ name = "QuantRisk++ contributors" }]
 keywords = ["quantitative-finance", "monte-carlo", "risk", "reproducibility"]
 dependencies = ["numpy>=1.26", "pandas>=2.0"]
 
+[project.scripts]
+# The CLI is three commands over the same functions the library exposes, so `validate`
+# checks the installed build rather than a source checkout.
+quantrisk = "quantrisk.cli:main"
+
 [project.optional-dependencies]
 # Validation oracles. Tests that need them skip cleanly when they are absent,
 # so CI stays offline; the benchmark suite requires them.

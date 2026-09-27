@@ -65,8 +65,34 @@ def test_statistics_helpers_match_the_cpp_side_exactly(cpp_reference: dict) -> N
 
 
 def test_statistics_module_is_not_a_python_reimplementation() -> None:
-    # The submodule lives inside the compiled extension; if a pure-Python copy
-    # ever appeared in python/quantrisk this import path would change.
-    assert quantrisk.stats.__name__.startswith("quantrisk._quantrisk")
-    origin = getattr(quantrisk.stats, "__file__", "") or ""
-    assert not origin.endswith(".py"), f"stats resolved to a Python file: {origin}"
+    """The Python face must add no numerics of its own.
+
+    Phase 9 gave each C++ submodule a real Python file so `from quantrisk.risk import X`
+    resolves. That makes a `__name__`-prefix check useless — the module *is* a .py file
+    now — so the guard moved to the invariant that actually matters: every callable still
+    comes from the compiled extension, and the shim contains no arithmetic at all.
+
+    The AST check is stronger than the test it replaces. A future edit that quietly
+    computed a mean in Python would have passed the old assertion; it cannot pass this one.
+    """
+    import ast
+    import inspect
+    import pathlib
+
+    core = quantrisk._quantrisk.stats
+    assert quantrisk.stats.__core__ is core
+
+    for name in dir(quantrisk.stats):
+        if name.startswith("_"):
+            continue
+        value = getattr(quantrisk.stats, name)
+        if callable(value) and hasattr(value, "__module__"):
+            assert str(value.__module__).startswith("quantrisk._quantrisk"), (
+                f"quantrisk.stats.{name} is implemented in Python, not the C++ core"
+            )
+
+    source = pathlib.Path(inspect.getfile(quantrisk.stats)).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    forbidden = (ast.BinOp, ast.AugAssign, ast.Compare, ast.For, ast.While)
+    offenders = [type(node).__name__ for node in ast.walk(tree) if isinstance(node, forbidden)]
+    assert not offenders, f"the shim performs control flow or arithmetic: {offenders}"

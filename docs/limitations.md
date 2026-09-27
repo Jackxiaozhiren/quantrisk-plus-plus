@@ -221,3 +221,18 @@ never removed just because a later phase shipped.
     handling and nothing more. It is labelled as an excerpt in its own provenance, with the
     full archive's digest recorded separately, but it is not a positioning dataset and must
     not be used as one.
+
+## Phase 9 — Python research API and CLI
+
+53. **The facades cover the documented entry points, not the whole core.** Heston, Asian
+    and barrier pricing and the generic LP solver are reachable only through the submodule
+    functions (`quantrisk.monte_carlo.price_asian`, `quantrisk.stress.solve_linear_program`
+    and friends), not through a facade with its own defaults.
+54. **`quantrisk validate` checks seven identities, not the suite.** It is a smoke test that
+    an *installed wheel* is wired up correctly — including that the compiled extension
+    reports the commit it was configured at. Correctness at breadth is what the 190 CTest
+    entries and 310 pytest tests are for, and `validate` passing does not imply they would.
+55. **`quantrisk benchmark` measures one machine and compares against nothing.** Deliberate:
+    the oracle comparisons live in `benchmarks/` with committed artifacts and provenance,
+    and a CLI printing a second uncited figure beside them would create two sources of truth
+    for one claim. The numbers it prints are valid only for the machine and moment it ran.

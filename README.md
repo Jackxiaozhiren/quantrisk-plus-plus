@@ -3,7 +3,7 @@
 > A Reproducible C++/Python Engine for Stochastic Pricing, Monte Carlo Simulation,
 > Portfolio Risk, Optimization and Stress Testing.
 
-**Current status: Phase 8 — Optional Public Data Integration (v0.1.0).**
+**Current status: Phase 9 — Python Research API and CLI (v0.1.0).**
 Implemented and validated: a C++20 numerical core (RNG discipline, statistics,
 normal distribution), Black-Scholes-Merton pricing with continuous dividends,
 analytic and finite-difference Greeks, a Cox-Ross-Rubinstein lattice for
@@ -34,7 +34,7 @@ commands in [Validation](#validation):
 | Greeks vs QuantLib (delta/gamma/vega/theta/rho) | worst abs 5.12e-13 | same file |
 | Put-call parity residual | 8.0e-15 on notionals <= 200 | `experiments/pricing_validation/results/summary.json` |
 | CRR lattice order | fitted slopes -0.99 +/- 0.004 vs theory -1 | same file, `crr_convergence_slope` |
-| Test suite | 190 C++ (CTest) + 291 Python (pytest) | `docs/phase_reports/phase-07-stress-testing.md` |
+| Test suite | 190 C++ (CTest) + 310 Python (pytest) | `docs/phase_reports/phase-09-research-api.md` |
 | Geometric Asian closed form vs QuantLib analytic engine | worst rel. error 5.5e-4 | `benchmarks/quantlib/results/path_dependent_vs_quantlib.json` |
 | Barrier monitoring bias and its correction | 14.0 % raw discrete -> 1.0 % with BGK | same artifact |
 | Heston (xi = 0) collapse to Black-Scholes | worst rel. error 2.1e-3 | same artifact |
@@ -70,6 +70,32 @@ quantrisk.normal_cdf(0.0)  # 0.5
 rng = quantrisk.Rng(seed=42)
 rng.uniform01()  # reproducible in [0, 1)
 rng.standard_normal()  # reproducible N(0, 1)
+```
+
+The research API is keyword-argument shaped, and every method delegates to the C++ core:
+
+```python
+from quantrisk import BlackScholes, MonteCarloEngine
+
+model = BlackScholes(spot=100, strike=100, rate=0.04, vol=0.20, maturity=1.0)
+model.call_price()  # 9.925053717274434
+model.greeks().delta  # 0.6179114221889526
+
+engine = MonteCarloEngine(seed=42)
+result = engine.price_european_call(
+    spot=100, strike=100, rate=0.04, vol=0.20, maturity=1.0, paths=200_000
+)
+result.price, result.standard_error
+
+from quantrisk.portfolio import PortfolioOptimizer
+from quantrisk.risk import RiskEngine
+from quantrisk.stress import ScenarioEngine
+```
+
+```bash
+quantrisk validate    # 7 identity checks against the installed build
+quantrisk benchmark   # timings measured on this machine, now
+quantrisk demo        # the examples above, run end to end
 ```
 
 ## Install (developers, $0)
@@ -114,8 +140,8 @@ uv run pytest -m oracle                                         # live-oracle te
 
 ## Limitations
 
-`docs/limitations.md` carries 52 entries grouped by phase, and
+`docs/limitations.md` carries 55 entries grouped by phase, and
 `docs/project_scope.md` §9-§10 records status and the frozen public surface.
-The research API facades and the CLI are specified but **not built**; the portfolio layer is long-only, single-period and ships no expected-return
+Release engineering — validation matrix, evidence manifest, technical report and tag — is specified but **not done**; the portfolio layer is long-only, single-period and ships no expected-return
 model of its own, and the stress layer maps exposures rather than re-pricing
 instruments.
