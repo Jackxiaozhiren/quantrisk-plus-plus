@@ -34,6 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "python"))
 
 from quantrisk.data.provenance import sha256_of  # noqa: E402
+from quantrisk.experiments.evidence import content_digest  # noqa: E402
 from quantrisk.experiments.metadata import environment  # noqa: E402
 
 OUTPUT = ROOT / "evidence" / "manifest.json"
@@ -151,6 +152,9 @@ def artefact_entries(
                     "path": str(path.relative_to(ROOT)),
                     "category": category,
                     "sha256": sha256_of(path.read_bytes()),
+                    # The byte hash answers "has this file been edited?"; this one answers
+                    # "did the numbers move?", which is the question a re-run leaves ambiguous.
+                    "content_sha256": content_digest(path),
                     "bytes": path.stat().st_size,
                     "generated_by_command": command,
                     "generated_utc": generated,

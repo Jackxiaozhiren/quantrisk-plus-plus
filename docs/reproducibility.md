@@ -39,9 +39,29 @@ uv run python scripts/build_evidence_manifest.py    # write the manifest
 uv run python scripts/verify_evidence_manifest.py   # check the tree against it
 ```
 
-`verify` reports `OK`, `CHANGED`, `MISSING` and unlisted-but-present separately and exits
-non-zero on any of the last three. Conflating them would let a *deleted* artifact pass a
-check that was only ever asking "is everything listed still correct?".
+`verify` reports `OK`, `VOLATILE`, `CHANGED`, `MISSING` and unlisted-but-present separately, and
+exits non-zero on the last three. Each class answers a different question:
+
+| Verdict | Question it answers |
+|---|---|
+| OK | are the bytes exactly what was frozen? |
+| VOLATILE | was the file re-run, with every result field unchanged? |
+| CHANGED | did a **number** move? |
+| MISSING | did evidence disappear? |
+| unlisted | does the manifest simply describe an older world? |
+
+The VOLATILE/CHANGED split is what makes the tool usable rather than merely strict. A manifest
+of byte hashes reports CHANGED on every re-run, which trains the reader to ignore it; and
+collapsing the two would let a real regression hide among the noise of a legitimate
+reproduction. `content_sha256` is therefore a second hash over the artifact with run metadata
+(`generated_at_utc`, `git_commit`, `environment`, nested digests) and wall-clock CSV columns
+removed, while result fields — including seeded Monte Carlo prices in the timing benchmark —
+stay under it. `--strict` promotes VOLATILE back to a failure for when the evidence is meant to
+be byte-frozen rather than reproducible.
+
+The volatile set is a judgement, so it is a tested one: `test_content_digest_ignores_run_
+metadata_but_not_results` and its CSV counterpart assert **both** directions, because a filter
+that strips too eagerly would pass the re-run test and silently rubber-stamp a changed number.
 
 ## How to reproduce from a fresh clone
 
@@ -83,10 +103,11 @@ roughly an order of magnitude, and loses to vectorised NumPy for terminal-only p
 reproducible part, and it held on every run.
 
 **Metadata.** Every artifact records its own `generated_at_utc` and the running `git_commit`, so
-a re-run always produces a `CHANGED` entry in the manifest even when the mathematics is
-bit-identical. That is the check working: it says "this file was rewritten at this time from
-this revision", which is a different claim from "the result changed", and the two are not
-conflated anywhere in this repository.
+a re-run always rewrites them. The manifest carries a content hash alongside the byte hash
+precisely so that this reads as VOLATILE — regenerated, results identical — and not as CHANGED,
+which is reserved for a number that actually moved. Verified end to end: after a full suite
+re-run in a fresh clone, 12 artifacts reported VOLATILE with zero canonical differences and the
+rest reported OK.
 
 **Compiler and platform.** The core is C++20 and builds with the toolchain above. Nothing
 here has been compiled by CI on a runner yet — the `benchmark-suite` job in

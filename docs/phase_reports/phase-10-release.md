@@ -85,12 +85,12 @@ uv run python scripts/verify_evidence_manifest.py
 - clang-format: clean. Build: no compiler warnings.
 - CTest: **190/190 passed**, 7.4 s. Direct Catch2 run: **546,943 assertions in 189 test
   cases**, all passed.
-- pytest: **316 passed** in 8.7 s (was 310: +4 suite runner, +1 limitations-count guard,
-  +1 machine-path guard).
+- pytest: **319 passed** in 9.7 s (was 310: +4 suite runner, +1 limitations-count guard,
+  +1 machine-path guard, +3 content-digest guards).
 - `quantrisk validate`: **7/7**.
 - Benchmark suite: **11/11 executed and passed, 0 failed, 0 skipped**, 64.8 s wall.
-- Evidence manifest: **58 artifacts, 5,420,396 bytes**; verify reports `58 OK, 0 CHANGED,
-  0 MISSING, 0 unlisted`, exit 0.
+- Evidence manifest: **58 artifacts**, each with a byte hash and a content hash; verify
+  reports `58 OK, 0 CHANGED, 0 VOLATILE, 0 MISSING, 0 unlisted`, exit 0.
 
 ## 6. Numerical validation
 
@@ -172,6 +172,18 @@ worth recording because they are exactly the failure mode the project exists to 
    the results, and non-zero only in timing columns plus each file's own `generated_at_utc` and
    `git_commit`. `docs/reproducibility.md` and the README now say exactly that, and name the
    three files.
+
+10. **The manifest could not tell a re-run from a change, and now can.** `verify` compared
+    byte hashes, so regenerating the evidence reported ten-plus `CHANGED` entries whose numbers
+    were identical — which trains a reader to ignore the tool, and would let a genuine
+    regression hide in that noise. Found by actually running the reproducibility check the
+    document claims: a fresh clone at `v1.0.0`, full build, `uv run pytest` (319 passed), CMake
+    build (160 targets), `ctest` (190/190), then the suite and the verifier. Fixed with
+    `quantrisk.experiments.evidence.content_digest`, a second hash over each artifact with run
+    metadata and wall-clock columns removed, and a fifth verdict `VOLATILE`. After the fix the
+    same re-run reports 12 VOLATILE / 0 CHANGED, and diffing the canonical forms directly
+    confirms zero result differences. Both directions are tested: a stripped timestamp reads as
+    VOLATILE, and a changed `worst_relative_error` does not.
 
 ## 7. Remaining limitations
 

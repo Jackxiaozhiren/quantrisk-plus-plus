@@ -17,7 +17,7 @@ Measurements used throughout:
 | Benchmarks, experiments, scripts | 6,331 lines |
 | Documentation | 5,016 lines + 37-page report |
 | Public Python API symbols | 159 across 8 modules |
-| Test totals | 190 CTest / 546,943 C++ assertions / 316 pytest |
+| Test totals | 190 CTest / 546,943 C++ assertions / 319 pytest |
 | Frozen artifacts | 58, hashed, with generating commands |
 
 **The ratio that matters: 8,675 lines of test against 6,946 lines of implementation.** More
@@ -203,8 +203,9 @@ as calibration; hidden, it would have read as either naivety or dishonesty.
 - `evidence/manifest.json`: 58 artifacts, each with a SHA-256, the generating command
   recovered *from the artifact itself*, the repository revision, the dirty flag, and the full
   compiler and package environment.
-- `verify_evidence_manifest.py` reports OK / CHANGED / MISSING / unlisted separately and exits
-  non-zero on any of the last three.
+- `verify_evidence_manifest.py` reports OK / VOLATILE / CHANGED / MISSING / unlisted separately
+  and exits non-zero on the last three. VOLATILE is the useful one: the bytes moved but every
+  result field is identical, so a re-run is never confused with a change.
 - One command regenerates everything in ~60 s; a CI job runs it with `--require-all` so a
   missing oracle fails the build instead of skipping quietly.
 - The suite runner holds no number of its own and aborts if a key path moves, so a renamed

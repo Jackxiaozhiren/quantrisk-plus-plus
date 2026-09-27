@@ -34,7 +34,7 @@ numbered entries; `docs/validation_matrix.md` marks two components `partially va
 says why.
 
 Current suite as measured at v1.0.0: 190 C++ tests under CTest (546,943 assertions in 189
-Catch2 cases), 316 pytest tests, 11/11 benchmark-suite members executed, `quantrisk validate`
+Catch2 cases), 319 pytest tests, 11/11 benchmark-suite members executed, `quantrisk validate`
 7/7.
 
 ---
@@ -390,7 +390,7 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 190 C++ tests (546,943 assertions in 189 cases) and 316
+variance reduction. Today that is 190 C++ tests (546,943 assertions in 189 cases) and 319
 Python tests, with committed artifacts for every published number and a manifest that hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
@@ -800,7 +800,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 ```bash
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 190 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 316 Python tests
+  .venv/bin/python -m pytest -q                                          # 319 Python tests
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
 uv run python experiments/variance_reduction/run.py
@@ -812,7 +812,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | Claim in this file | Source to check |
 |---|---|
 | What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (58 entries) |
-| 190 C++ / 316 Python tests at v1.0.0; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
+| 190 C++ / 319 Python tests at v1.0.0; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
 | BS worst abs 1.49e-13 / rel 3.46e-11; Greeks abs 7.97e-15 … 5.12e-13; rel rho 1.07e-07; 18,816 rows; floors 1e-4 / 1e-6; oracle config (AnalyticEuropeanEngine, Actual365Fixed, day → `days/365`) | `benchmarks/quantlib/results/pricing_vs_quantlib.json` |
 | Put-call parity worst residual 7.99e-15; worst analytic-vs-FD delta 1.17e-4 | `experiments/pricing_validation/results/summary.json` (`worst_*` keys) |
 | CRR slopes −0.99405 / −1.00544 / −0.99244 / −0.999674 with SEs; relative errors at N = 3200 | `experiments/pricing_validation/results/summary.json` (`crr_convergence_slope`, `final_lattice_relative_error`) |

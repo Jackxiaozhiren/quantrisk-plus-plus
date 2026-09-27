@@ -207,9 +207,12 @@ uv run python scripts/verify_evidence_manifest.py    # prove nothing changed sin
 `evidence/manifest.json` records, for each artifact, its SHA-256, the command that generated
 it (recovered from the artifact itself, not retyped), the repository revision, whether the
 working tree was dirty, and the full environment — compiler, build type, and the version of
-every oracle package. The verify script reports OK, CHANGED, MISSING and UNLISTED separately
-and exits non-zero on any of the last three, because "nothing is missing" and "nothing has
-been edited" are different claims that a single pass/fail would conflate.
+every oracle package. The verify script reports OK, VOLATILE, CHANGED, MISSING and UNLISTED
+separately and exits non-zero on the last three. VOLATILE is the distinction that makes the
+tool worth writing: a re-run changes an artifact's bytes — its timestamp, its commit, its
+environment block, and for three files its wall-clock columns — without changing a single
+result, and reporting that as CHANGED would make legitimate reproduction indistinguishable
+from tampering.
 
 Determinism is checked by measurement, not by eye: re-running the whole suite and diffing every
 numeric leaf of the new artifacts against the committed ones returns zero differences, and the

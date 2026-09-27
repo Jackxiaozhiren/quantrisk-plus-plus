@@ -12,14 +12,15 @@ published number traces to a script, and that the boundary of each claim is writ
 
 Concretely, in this release:
 
-- **190 C++ tests** (546,943 assertions in 189 Catch2 cases) and **316 Python tests**, all
+- **190 C++ tests** (546,943 assertions in 189 Catch2 cases) and **319 Python tests**, all
   green, all offline by default.
 - **11 benchmark and experiment members** that re-execute end to end in ~60 seconds via
   `scripts/run_benchmark_suite.py`, emitting JSON, CSV, Markdown and figures.
 - **`evidence/manifest.json`** hashing every artifact with its generating command, the
   repository revision, whether the tree was dirty, and the full compiler and package
-  environment. `scripts/verify_evidence_manifest.py` reports OK / CHANGED / MISSING / unlisted
-  separately and fails on any of the last three.
+  environment. `scripts/verify_evidence_manifest.py` reports OK / VOLATILE / CHANGED / MISSING /
+  unlisted separately and fails on the last three, where VOLATILE means the bytes moved and the
+  results did not.
 - **`docs/validation_matrix.md`** — the twelve-component table: method, oracle, the bound the
   test asserts, the error actually measured, and the artifact. Two components are marked
   `partially validated` and say why.

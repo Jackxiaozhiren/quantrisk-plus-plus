@@ -283,9 +283,11 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
   not from a hand-maintained list, and records the revision plus whether the tree was dirty.
   For committed data fixtures the correct provenance is a source URL and retrieval time, read
   from the `.provenance.json` sidecar.
-- `scripts/verify_evidence_manifest.py` reports OK / CHANGED / MISSING / unlisted separately and
-  exits non-zero on the last three. "Nothing is missing" and "nothing was edited" are different
-  claims.
+- `scripts/verify_evidence_manifest.py` reports OK / VOLATILE / CHANGED / MISSING / unlisted
+  separately and exits non-zero on the last three. "Nothing is missing" and "nothing was edited"
+  are different claims, and so is "the numbers moved" from "the file was re-run": the manifest
+  carries a byte hash for tamper detection and a content hash, over the artifact with run
+  metadata and wall-clock columns removed, for reproducibility.
 - The library version is declared in two places (`pyproject.toml` and `CMakeLists.txt`) because
   the C++ core needs it at compile time; `tests/python/test_smoke.py` asserts they agree, so the
   duplication is guarded rather than trusted.

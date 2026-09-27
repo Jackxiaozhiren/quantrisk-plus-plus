@@ -18,6 +18,7 @@ from pathlib import Path
 
 import pytest
 import quantrisk
+from quantrisk.experiments.evidence import content_digest
 from quantrisk.experiments.metadata import (
     REPO_ROOT,
     artifact_manifest,
@@ -286,3 +287,60 @@ def test_no_committed_artifact_leaks_a_machine_specific_path() -> None:
             if str(REPO_ROOT) in text or home in text or "/Users/" in text or "/home/" in text:
                 offenders.append(repo_relative(path))
     assert not offenders, f"machine-specific paths in: {sorted(offenders)}"
+
+
+def test_content_digest_ignores_run_metadata_but_not_results(tmp_path: Path) -> None:
+    """The whole point of the content hash is that the two kinds of change are not confused.
+
+    A re-run must not look like tampering, and tampering must not look like a re-run. Both
+    directions are asserted here, because a filter that strips too much would pass the first
+    test and silently fail the second.
+    """
+    original = {
+        "generated_at_utc": "2026-09-27T00:00:00+00:00",
+        "git_commit": "abcdef123456",
+        "environment": {"cpp_compiler": "AppleClang 21.0.0"},
+        "worst_relative_error": 3.46e-11,
+        "rows": [{"scenario": "atm_call", "error": 1e-13}, {"scenario": "otm", "error": 2e-13}],
+    }
+    rerun = {
+        **original,
+        "generated_at_utc": "2026-09-27T09:30:00+00:00",
+        "git_commit": "999999ffff00",
+        "environment": {"cpp_compiler": "GNU 14.2.0"},
+    }
+    tampered = {**original, "worst_relative_error": 1.0}
+
+    def digest(payload: dict[str, object], name: str) -> str | None:
+        path = tmp_path / name
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        return content_digest(path)
+
+    base = digest(original, "a.json")
+    assert base == digest(rerun, "b.json"), "a re-run must not read as a content change"
+    assert base != digest(tampered, "c.json"), "a changed result must not read as a re-run"
+
+
+def test_content_digest_treats_wall_clock_csv_columns_as_volatile(tmp_path: Path) -> None:
+    header = "scenario,error,mean_runtime_seconds\n"
+    kept = tmp_path / "kept.csv"
+    moved = tmp_path / "moved.csv"
+    tampered = tmp_path / "tampered.csv"
+    kept.write_text(header + "atm_call,1e-13,0.004322\n", encoding="utf-8")
+    moved.write_text(header + "atm_call,1e-13,0.036184\n", encoding="utf-8")
+    tampered.write_text(header + "atm_call,9.99,0.004322\n", encoding="utf-8")
+    assert content_digest(kept) == content_digest(moved)
+    assert content_digest(kept) != content_digest(tampered)
+
+
+def test_manifest_records_both_a_byte_hash_and_a_content_hash(tmp_path: Path) -> None:
+    """`--strict` is only meaningful if the manifest carries the content digest to compare to."""
+    payload = json.loads((REPO_ROOT / "evidence" / "manifest.json").read_text(encoding="utf-8"))
+    assert payload["artifacts"], "the manifest lists nothing"
+    for entry in payload["artifacts"]:
+        assert "sha256" in entry
+        path = REPO_ROOT / entry["path"]
+        if path.suffix in {".json", ".csv"}:
+            assert entry["content_sha256"], f"{entry['path']} has no content digest"
+        else:
+            assert entry["content_sha256"] is None, "binary evidence has no canonical form"
