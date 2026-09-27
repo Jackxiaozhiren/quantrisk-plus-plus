@@ -108,7 +108,7 @@ first tests (`tests/python/test_artifact_metadata.py`):
 
 | Defect | Effect | Fix |
 | --- | --- | --- |
-| `artifact_manifest` stored absolute paths | every committed artifact published `/Users/jackson/...` and differed per machine | repo-relative paths |
+| `artifact_manifest` stored absolute paths | every committed artifact published the host's absolute path prefix and differed per machine | repo-relative paths |
 | `git_commit` was captured at configure time | every artifact from Phases 1–4 names the *previous* phase's commit while the real code was uncommitted, and a clean tree made that read as a confident false statement | run-time `git_commit` plus `binary_git_commit`, `working_tree_dirty`, `uncommitted_paths`, and a `provenance` sentence that differs for the four reachable cases |
 | a `!!`-prefix check applied to the path instead of the status column | dead branch written from a wrong model of `git status --porcelain`; the new parser test caught it before it shipped | removed, and the format documented in the parser |
 

@@ -4,11 +4,14 @@ The gate is `clean clone → install → build → import → test`, executed in
 scratch directory against the committed tree (not the working tree), so nothing
 untracked can hide a failure.
 
+> The clone source is written as `$HOME/QuantRisk++` rather than the literal host
+> path it used; the path was generalised when this repository was published.
+
 Command (run 2026-09-26, macOS arm64, Apple clang 21.0.0, CMake 4.4.3,
 uv 0.11.7, CPython 3.12.14):
 
 ```bash
-rm -rf /tmp/qr-clone && git clone /Users/jackson/QuantRisk++ /tmp/qr-clone
+rm -rf /tmp/qr-clone && git clone "$HOME/QuantRisk++" /tmp/qr-clone
 cd /tmp/qr-clone
 uv sync
 uv pip install -e .
