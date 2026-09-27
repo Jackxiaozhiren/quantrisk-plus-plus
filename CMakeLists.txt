@@ -60,6 +60,27 @@ configure_file(
   @ONLY)
 
 # --------------------------------------------------------------------------
+# Eigen: dense linear algebra for the portfolio layer (Phase 6). Header-only, so
+# it is an include path and a target, not a linked library. A system install wins
+# when present; otherwise the pinned release archive is fetched, mirroring the
+# pybind11 strategy. Hand-rolled factorisations are a correctness risk and the
+# project_scope.md freeze says Eigen enters here, not earlier.
+# --------------------------------------------------------------------------
+find_package(Eigen3 3.4 QUIET NO_MODULE)
+if(NOT Eigen3_FOUND)
+  FetchContent_Declare(Eigen
+    URL https://gitlab.com/libeigen/eigen/-/archive/5.0.0/eigen-5.0.0.tar.gz
+    URL_HASH SHA256=315c881e19e17542a7d428c5aa37d113c89b9500d350c433797b730cd449c056
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    SYSTEM)
+  FetchContent_MakeAvailable(Eigen)
+  set(QUANTRISK_EIGEN_SOURCE "fetched 5.0.0")
+else()
+  set(QUANTRISK_EIGEN_SOURCE "system ${Eigen3_VERSION}")
+endif()
+message(STATUS "QuantRisk++ linear algebra: Eigen (${QUANTRISK_EIGEN_SOURCE})")
+
+# --------------------------------------------------------------------------
 # C++20 numerical core
 # --------------------------------------------------------------------------
 add_library(quantrisk_core STATIC
@@ -78,13 +99,15 @@ add_library(quantrisk_core STATIC
   cpp/src/risk/backtest.cpp
   cpp/src/stochastic/gbm.cpp
   cpp/src/monte_carlo/engine.cpp
-  cpp/src/stochastic/heston.cpp)
+  cpp/src/stochastic/heston.cpp
+  cpp/src/portfolio/covariance.cpp)
 
 target_include_directories(quantrisk_core PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cpp/include>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>")
 
 target_compile_features(quantrisk_core PUBLIC cxx_std_20)
+target_link_libraries(quantrisk_core PUBLIC Eigen3::Eigen)
 
 if(MSVC)
   target_compile_options(quantrisk_core PRIVATE /W4)
@@ -135,7 +158,8 @@ if(QUANTRISK_BUILD_TESTS)
     tests/cpp/test_path_dependent.cpp
     tests/cpp/test_heston.cpp
     tests/cpp/test_special_functions.cpp
-    tests/cpp/test_risk.cpp)
+    tests/cpp/test_risk.cpp
+    tests/cpp/test_covariance.cpp)
 
   target_link_libraries(quantrisk_tests PRIVATE quantrisk_core Catch2::Catch2WithMain)
 

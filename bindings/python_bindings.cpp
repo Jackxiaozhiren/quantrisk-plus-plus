@@ -18,6 +18,7 @@
 #include "quantrisk/math/special.hpp"
 #include "quantrisk/monte_carlo/engine.hpp"
 #include "quantrisk/monte_carlo/path_dependent.hpp"
+#include "quantrisk/portfolio/covariance.hpp"
 #include "quantrisk/pricing/binomial_crr.hpp"
 #include "quantrisk/pricing/black_scholes.hpp"
 #include "quantrisk/pricing/finite_differences.hpp"
@@ -606,4 +607,71 @@ PYBIND11_MODULE(_quantrisk, module) {
             return quantrisk::backtest_var(sample, levels, confidence_level);
         },
         py::arg("returns_sample"), py::arg("var_levels"), py::arg("confidence_level"));
+
+    // --- portfolio: covariance estimation --------------------------------
+    py::module_ portfolio = module.def_submodule("portfolio", "Portfolio layer (C++20 core).");
+
+    py::class_<quantrisk::portfolio::CovarianceEstimate>(portfolio, "CovarianceEstimate")
+        .def_readonly("assets", &quantrisk::portfolio::CovarianceEstimate::assets)
+        .def_readonly("observations", &quantrisk::portfolio::CovarianceEstimate::observations)
+        .def_readonly("values", &quantrisk::portfolio::CovarianceEstimate::values)
+        .def_readonly("estimator", &quantrisk::portfolio::CovarianceEstimate::estimator)
+        .def_readonly("decay", &quantrisk::portfolio::CovarianceEstimate::decay)
+        .def_readonly("half_life", &quantrisk::portfolio::CovarianceEstimate::half_life)
+        .def_readonly("shrinkage_intensity",
+                      &quantrisk::portfolio::CovarianceEstimate::shrinkage_intensity)
+        .def_readonly("target_scale", &quantrisk::portfolio::CovarianceEstimate::target_scale)
+        .def_readonly("largest_eigenvalue",
+                      &quantrisk::portfolio::CovarianceEstimate::largest_eigenvalue)
+        .def_readonly("smallest_eigenvalue",
+                      &quantrisk::portfolio::CovarianceEstimate::smallest_eigenvalue)
+        .def_readonly("positive_semidefinite",
+                      &quantrisk::portfolio::CovarianceEstimate::positive_semidefinite)
+        .def_readonly("note", &quantrisk::portfolio::CovarianceEstimate::note);
+
+    portfolio.def(
+        "sample_covariance",
+        [](const std::vector<double> &rows, const std::int64_t assets,
+           const std::int64_t observations) {
+            return quantrisk::portfolio::sample_covariance(rows, assets, observations);
+        },
+        py::arg("returns_rows"), py::arg("assets"), py::arg("observations"));
+    portfolio.def(
+        "ewma_covariance",
+        [](const std::vector<double> &rows, const std::int64_t assets,
+           const std::int64_t observations, const double lambda) {
+            return quantrisk::portfolio::ewma_covariance(rows, assets, observations, lambda);
+        },
+        py::arg("returns_rows"), py::arg("assets"), py::arg("observations"), py::arg("lambda"));
+    portfolio.def(
+        "shrinkage_covariance",
+        [](const std::vector<double> &rows, const std::int64_t assets,
+           const std::int64_t observations) {
+            return quantrisk::portfolio::shrinkage_covariance(rows, assets, observations);
+        },
+        py::arg("returns_rows"), py::arg("assets"), py::arg("observations"));
+    portfolio.def(
+        "condition_number",
+        [](const quantrisk::portfolio::CovarianceEstimate &covariance) {
+            return quantrisk::portfolio::condition_number(covariance);
+        },
+        py::arg("covariance"));
+    portfolio.def(
+        "eigenvalues",
+        [](const std::vector<double> &symmetric, const std::int64_t assets) {
+            return quantrisk::portfolio::eigenvalues(symmetric, assets);
+        },
+        py::arg("symmetric"), py::arg("assets"));
+
+    py::class_<quantrisk::portfolio::LinearSolve>(portfolio, "LinearSolve")
+        .def_readonly("values", &quantrisk::portfolio::LinearSolve::values)
+        .def_readonly("solved", &quantrisk::portfolio::LinearSolve::solved)
+        .def_readonly("note", &quantrisk::portfolio::LinearSolve::note);
+    portfolio.def(
+        "solve",
+        [](const std::vector<double> &symmetric, const std::int64_t assets,
+           const std::vector<double> &right_hand_side) {
+            return quantrisk::portfolio::solve(symmetric, assets, right_hand_side);
+        },
+        py::arg("symmetric"), py::arg("assets"), py::arg("right_hand_side"));
 }

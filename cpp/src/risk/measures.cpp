@@ -8,6 +8,7 @@
 #include "quantrisk/core/statistics.hpp"
 #include "quantrisk/core/validation.hpp"
 #include "quantrisk/math/normal.hpp"
+#include "quantrisk/portfolio/covariance.hpp"
 
 namespace quantrisk::returns {
 
@@ -237,44 +238,10 @@ std::vector<Real> linear_pnl(std::span<const Real> weights, std::span<const Real
 
 std::vector<Real> sample_covariance(std::span<const Real> returns_rows, const Count assets,
                                     const Count observations) {
-    if (assets <= 0) {
-        detail::reject("assets", "a positive count", detail::format_value(assets));
-    }
-    if (observations < 2) {
-        throw ValidationError("quantrisk: covariance needs at least 2 observations, got " +
-                              detail::format_value(observations));
-    }
-    if (static_cast<Count>(returns_rows.size()) != assets * observations) {
-        throw ValidationError(
-            "quantrisk: the returns matrix size must equal assets * observations");
-    }
-    std::vector<Real> means(static_cast<std::size_t>(assets), 0.0);
-    for (Count i = 0; i < assets; ++i) {
-        std::vector<Real> column(static_cast<std::size_t>(observations));
-        for (Count t = 0; t < observations; ++t) {
-            column[static_cast<std::size_t>(t)] =
-                returns_rows[static_cast<std::size_t>(t * assets + i)];
-        }
-        means[static_cast<std::size_t>(i)] = stats::mean(column);
-    }
-    std::vector<Real> covariance(static_cast<std::size_t>(assets * assets), 0.0);
-    const Real scale = 1.0 / static_cast<Real>(observations - 1);
-    for (Count i = 0; i < assets; ++i) {
-        for (Count j = i; j < assets; ++j) {
-            Real total = 0.0;
-            for (Count t = 0; t < observations; ++t) {
-                const Real di = returns_rows[static_cast<std::size_t>(t * assets + i)] -
-                                means[static_cast<std::size_t>(i)];
-                const Real dj = returns_rows[static_cast<std::size_t>(t * assets + j)] -
-                                means[static_cast<std::size_t>(j)];
-                total += di * dj;
-            }
-            const Real value = total * scale;
-            covariance[static_cast<std::size_t>(i * assets + j)] = value;
-            covariance[static_cast<std::size_t>(j * assets + i)] = value;
-        }
-    }
-    return covariance;
+    // The canonical implementation lives in portfolio/covariance.cpp and is
+    // Eigen-backed. This is the frozen Phase 5 entry point, kept as a thin view of
+    // the same matrix so no formula exists twice in the core.
+    return portfolio::sample_covariance(returns_rows, assets, observations).values;
 }
 
 } // namespace quantrisk::risk
