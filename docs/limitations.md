@@ -175,3 +175,31 @@ never removed just because a later phase shipped.
     window of 8 assets). But the binding failure in the experiment is non-stationarity,
     which no estimator here addresses: forward slices crossing the regime break cost
     1.57–1.60x for all three estimators, against 1.07–1.22x inside a single regime.
+
+## Phase 7 — scenario and stress testing
+
+43. **Delta-gamma only, and its error is not monotone in the size of the move.** The
+    stress layer maps exposures and never re-prices. Measured against a full Black-Scholes
+    re-pricing of a three-strike call book, the relative error is 1.35e-6 at a 0.1 % fall,
+    1.33e-4 at 1 %, then **falls** from 9.75e-3 at 10 % to 5.37e-3 at 20 % before exploding
+    to 0.49 at 40 % — the cubic term changes sign through the strike region and partially
+    cancels. A bound read off one point of that curve is wrong at another, so no single
+    "validity range" is claimed.
+44. **Scenario moves are gaussian.** No t-copula, jump component or stochastic volatility
+    in the sampler. A convex book drawn through gaussian moves produces a right-skewed P&L
+    — which the test suite measures and requires — and the engine models no further of it.
+45. **The level/dispersion split of the VaR change telescopes only for a gaussian
+    measure.** It is exact because the Gaussian quantile is affine in (mean, sigma). For a
+    historical or Cornish-Fisher estimator the two legs would not add back to the total, and
+    no such estimator is wired into the decomposition.
+46. **No term structure.** One factor per asset class, so a rate shock is parallel by
+    construction and a butterfly or steepener cannot be expressed. Credit is a single
+    spread, not a curve or a ladder of seniorities.
+47. **No reverse stress testing.** The engine answers "what does this shock do to the
+    book"; it does not solve "what shock would produce this loss", which is the direction
+    most supervisory use of the word actually means.
+48. **The rank-stability result is a property of this fixture.** Across seven scenarios no
+    book changed its absolute risk rank — but the four books started 20.8 % apart in base
+    VaR while the largest stress-induced multiplier spread was 16.8 %, so the stability is a
+    near miss, not evidence that optimiser rankings are robust to stress. Ranked by
+    multiplier rather than by level, all four books do change rank under an equity crash.

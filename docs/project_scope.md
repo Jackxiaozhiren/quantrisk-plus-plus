@@ -127,7 +127,8 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 4 Asian + barrier + Heston, oracle benchmark, model cards | DONE (`docs/phase_reports/phase-04-path-dependent-heston.md`) |
 | Phase 5 VaR/ES estimators, bootstrap intervals, Kupiec + Christoffersen backtests | DONE (`docs/phase_reports/phase-05-market-risk.md`) |
 | Phase 6 covariance estimators, mean-variance, max-Sharpe, ERC, CVaR, PyPortfolioOpt + cvxpy benchmark | DONE (`docs/phase_reports/phase-06-portfolio-optimisation.md`) |
-| Stress testing, public data layer, research API, release | NOT IMPLEMENTED — no such numbers exist yet |
+| Phase 7 scenario/stress subsystem, three scenario kinds, attribution with residuals | DONE (`docs/phase_reports/phase-07-stress-testing.md`) |
+| Public data layer, research API facades and CLI, release | NOT IMPLEMENTED — no such numbers exist yet |
 
 ## 10. Frozen surfaces
 
@@ -212,5 +213,29 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
   program; the linear-fractional transformation is stated in the returned `note`.
 - Eigen is now a real build dependency (v5.0.0 pinned by SHA-256, with
   `find_package(Eigen3 3.4)` preferred when the system provides one).
+
+### Phase 7
+
+- `quantrisk::stress` and its Python submodule `quantrisk.stress`: `RiskFactor`,
+  `FactorClass`, `FactorSet`, `ExposureVector`, `Position`, `Portfolio`, `Shock`,
+  `DistributionShift`, `Scenario`, `ScenarioKind`, `FactorContribution`,
+  `PositionContribution`, `ScenarioResult`, `ScenarioSample`, `FactorSummary`,
+  `ScenarioSetResult`.
+- `run_scenario`, `shift_covariance`, `sample_factor_moves`,
+  `run_historical_scenarios`, `run_monte_carlo_scenarios`.
+- Conventions frozen here: `delta`/`gamma` answer to a **relative** factor move and
+  `duration`/`vega`/`credit` to an **absolute** one; `gamma` is quoted with the 1/2
+  already absorbed; an empty exposure block means "no sensitivity of that type recorded",
+  which is not the same as a block of zeros and is preserved through aggregation.
+- Portfolio dispersion uses the **first-order** beta only. Convexity moves the mean, never
+  the variance, so the second moment cannot depend on the scenario's direction.
+- Every result carries its own residuals (`factor_attribution_residual`,
+  `position_attribution_residual`, `var_decomposition_residual`,
+  `var_component_residual`). They are exact identities, so a non-zero value is an
+  implementation defect and is reported rather than absorbed.
+- A scenario with no `assumptions` or no `horizon`, and a single-scenario set asked for a
+  quantile, are each announced in `note` rather than silently tolerated.
+- `sample_factor_moves` refuses a matrix with no Cholesky factor. No jitter, no
+  projection, no silent shrinkage.
 
 Changing any of the above requires a written migration note.

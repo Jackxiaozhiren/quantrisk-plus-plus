@@ -376,3 +376,20 @@ def test_misshaped_inputs_are_refused() -> None:
     broken.positions = [position]
     with pytest.raises(quantrisk.ValidationError):
         STRESS.run_scenario(broken, scenario("any"))
+
+
+def test_bound_exposure_blocks_are_value_semantic() -> None:
+    """A bound ``std::vector`` member comes back as a copy, so item assignment is lost.
+
+    Found the hard way: an experiment that built ``exposures.delta[0] = value`` reported a
+    P&L of exactly zero and looked like an engine bug. It is pybind11's value semantics,
+    and it is silent, so the behaviour is pinned here rather than left to be rediscovered.
+    Blocks must be replaced wholesale.
+    """
+    exposures = STRESS.ExposureVector()
+    exposures.delta = [1.0e6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    exposures.delta[0] = 9.9e6  # edits a temporary, not the stored block
+    assert exposures.delta[0] == 1.0e6
+
+    exposures.delta = [9.9e6] + [0.0] * 8  # the form that works
+    assert exposures.delta[0] == 9.9e6

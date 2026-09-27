@@ -3,7 +3,7 @@
 > A Reproducible C++/Python Engine for Stochastic Pricing, Monte Carlo Simulation,
 > Portfolio Risk, Optimization and Stress Testing.
 
-**Current status: Phase 6 — Portfolio Covariance and Optimisation (v0.1.0).**
+**Current status: Phase 7 — Scenario and Stress Testing (v0.1.0).**
 Implemented and validated: a C++20 numerical core (RNG discipline, statistics,
 normal distribution), Black-Scholes-Merton pricing with continuous dividends,
 analytic and finite-difference Greeks, a Cox-Ross-Rubinstein lattice for
@@ -14,11 +14,14 @@ with a closed-form geometric-Asian oracle, a full-truncation Euler Heston
 simulation validated against a semi-analytic engine, a market-risk layer
 (historical/Gaussian/Monte Carlo VaR and ES, iid and moving-block bootstrap
 intervals, Kupiec and Christoffersen coverage tests) whose size, power and
-coverage are measured on synthetic data with known truth, and a portfolio layer
+coverage are measured on synthetic data with known truth, a portfolio layer
 (sample/EWMA/Ledoit-Wolf covariance, mean-variance with target return, max-Sharpe,
 equal-risk-contribution and Rockafellar-Uryasev CVaR) where every solver carries a
-certificate checked against its own inputs. Stress testing and the public data
-layer are specified in `docs/` but **not built yet**.
+certificate checked against its own inputs, and a stress layer that maps factor
+shocks and deformed covariances onto those books, attributes the result per factor
+and per position with residuals that must close, and measures its own linearisation
+error against a full Black-Scholes re-pricing. The public data layer, research API
+facades and CLI are specified in `docs/` but **not built yet**.
 
 Numbers quoted here come from committed artifacts, regenerate them with the
 commands in [Validation](#validation):
@@ -29,7 +32,7 @@ commands in [Validation](#validation):
 | Greeks vs QuantLib (delta/gamma/vega/theta/rho) | worst abs 5.12e-13 | same file |
 | Put-call parity residual | 8.0e-15 on notionals <= 200 | `experiments/pricing_validation/results/summary.json` |
 | CRR lattice order | fitted slopes -0.99 +/- 0.004 vs theory -1 | same file, `crr_convergence_slope` |
-| Test suite | 158 C++ (CTest) + 252 Python (pytest) | `docs/phase_reports/phase-06-portfolio-optimisation.md` |
+| Test suite | 190 C++ (CTest) + 265 Python (pytest) | `docs/phase_reports/phase-07-stress-testing.md` |
 | Geometric Asian closed form vs QuantLib analytic engine | worst rel. error 5.5e-4 | `benchmarks/quantlib/results/path_dependent_vs_quantlib.json` |
 | Barrier monitoring bias and its correction | 14.0 % raw discrete -> 1.0 % with BGK | same artifact |
 | Heston (xi = 0) collapse to Black-Scholes | worst rel. error 2.1e-3 | same artifact |
@@ -49,6 +52,10 @@ commands in [Validation](#validation):
 | Cost of estimating the covariance (synthetic, truth known) | 1.13x-1.26x the forward variance an informed solver would carry | `experiments/portfolio_optimization/results/portfolio_optimisation_study.json` |
 | Shrinkage vs raw sample at a 40-observation window | variance ratio 1.218 -> 1.169, turnover 0.207 -> 0.138 | same artifact |
 | Non-stationarity vs estimation error | windows crossing the regime break cost 1.57-1.60x for every estimator | same artifact |
+| Stress attribution closes exactly | worst factor / position / decomposition residual 0.0 across 28 scenario-book pairs | `experiments/stress_testing/results/scenario_ranking.csv` |
+| Euler VaR components vs a central-difference gradient | agree to 3e-10 against a 1e-6 bound | `tests/python/test_stress_vs_oracles.py` |
+| Delta-gamma map vs full Black-Scholes revaluation | rel. error 1.3e-4 at -1 %, 5.4e-3 at -20 %, 0.49 at -40 % (non-monotone) | `experiments/stress_testing/results/linearisation_error.csv` |
+| Stress sensitivity inverts the safety ranking | the min-variance book is the most stress-sensitive (6.11x against 5.23x for equal weight) | `experiments/stress_testing/results/stress_testing_study.json` |
 
 ## 30-second example
 
@@ -99,13 +106,15 @@ uv run python experiments/pricing_validation/run.py
 uv run python experiments/var_backtesting/run.py                # needs the oracles extra
 uv run python benchmarks/pyportfolioopt/optimisation_validation.py
 uv run python experiments/portfolio_optimization/run.py
+uv run python experiments/stress_testing/run.py
 uv run pytest -m oracle                                         # live-oracle tests only
 ```
 
 ## Limitations
 
-`docs/limitations.md` carries 42 entries grouped by phase, and
+`docs/limitations.md` carries 48 entries grouped by phase, and
 `docs/project_scope.md` §9-§10 records status and the frozen public surface.
-Stress testing, the public data layer, the research API facades and the CLI are
-specified but **not built**; the portfolio layer is long-only, single-period, and
-ships no expected-return model of its own.
+The public data layer, the research API facades and the CLI are specified but **not
+built**; the portfolio layer is long-only, single-period and ships no expected-return
+model of its own, and the stress layer maps exposures rather than re-pricing
+instruments.
