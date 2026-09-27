@@ -9,6 +9,9 @@ recomputed a price in Python could still match to 1e-12; matching exactly is the
 from __future__ import annotations
 
 import json
+import math
+import re
+from pathlib import Path
 
 import pytest
 import quantrisk
@@ -18,10 +21,34 @@ from quantrisk import cli
 
 
 def test_the_readme_black_scholes_example_runs_as_written() -> None:
+    """The README's printed value must be the value the code produces.
+
+    The expected number is read out of `README.md` rather than duplicated here, because a
+    second copy of a literal is a second thing that can go stale — and `docs/
+    validation_protocol.md` §2 forbids transcribing an expected value in the first place.
+
+    The comparison is in units of the last place, not bit-exact. Black-Scholes evaluates
+    `log`, `exp` and the normal CDF, and those are libm implementations rather than ours:
+    the same source gives 9.925053717274434 on macOS/AppleClang and 9.925053717274437 on
+    Linux/glibc, 1.7 ULP apart. Demanding bit equality would pin the README to one vendor's
+    math library, while demanding nothing at all would let the documented example drift.
+    Eight ULP — about 1e-14 — is far tighter than any modelling tolerance and still
+    comfortably above the observed platform spread.
+    """
     from quantrisk import BlackScholes
 
+    readme = (Path(__file__).resolve().parents[2] / "README.md").read_text(encoding="utf-8")
+    documented = re.search(r"model\.call_price\(\)\s*#\s*([0-9.]+)", readme)
+    assert documented, "README.md no longer prints a call_price() value"
+    published = float(documented.group(1))
+
     model = BlackScholes(spot=100, strike=100, rate=0.04, vol=0.20, maturity=1.0)
-    assert model.call_price() == pytest.approx(9.925053717274434, rel=0, abs=0.0)
+    computed = model.call_price()
+    ulp = math.ulp(published)
+    assert abs(computed - published) <= 8.0 * ulp, (
+        f"README says {published!r}, the build gives {computed!r} "
+        f"({abs(computed - published) / ulp:.1f} ULP apart)"
+    )
     greeks = model.greeks()
     assert greeks.delta > 0 and greeks.gamma > 0
     assert repr(model).startswith("BlackScholes(spot=100.0, strike=100.0")

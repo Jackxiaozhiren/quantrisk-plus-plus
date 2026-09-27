@@ -253,7 +253,8 @@ def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
         "docs/validation_matrix.md": r"The (\d+) numbered limitations",
         "docs/release_notes_v1.0.0.md": r"\*\*(\d+) numbered limitations\*\*",
         "docs/interview_defense.md": r"has all (\d+)\s*\n?numbered entries",
-        "paper/technical_report.tex": r"contains (\d+) numbered entries",
+        "paper/technical_report.tex": r"(?:contains|holds) (\d+) numbered entries",
+        "docs/integrity_audit.md": r"(\d+) numbered entries in `docs/limitations.md`",
     }
     for name, pattern in claims.items():
         text = (REPO_ROOT / name).read_text(encoding="utf-8")

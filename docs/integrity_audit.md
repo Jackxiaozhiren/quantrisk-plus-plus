@@ -48,7 +48,7 @@ Revision audited: `v1.0.0` → `9aef2d2`. Date: 2026-09-27.
 | No trading recommendation | Same scan for `we recommend`, `should buy`, plus check that no expected-return model ships | Clean. `expected_returns` is an input; limitation #37 states that any use treating a sample mean as skill inherits the consequence. |
 | No misleading backtest | Check every VaR backtest for a stated data-generating process and a disclosure that it is synthetic | Clean. Limitation #28 is explicit: no real return series is used, so nothing licenses a claim about realised markets. Look-ahead is refused rather than degraded — `fred.fetch_vintage` raises when `FRED_API_KEY` is absent instead of substituting a current-revision series, "because the result still looks like a backtest" (`python/quantrisk/data/fred.py:149-151`), pinned by `test_vintage_needs_a_key_and_says_so_without_touching_the_network` |
 | Measure used for risk | Confirm VaR/ES run on the physical measure | Clean, per §2 above |
-| Model limitations disclosed | 58 numbered entries in `docs/limitations.md`, grouped by phase | Clean; the two `partially validated` matrix rows point into it |
+| Model limitations disclosed | 59 numbered entries in `docs/limitations.md`, grouped by phase | Clean; the two `partially validated` matrix rows point into it |
 
 ## 5. Reproducibility
 
@@ -78,7 +78,7 @@ differences.
 | Fixed experiment commands work | Yes — every command in README, `docs/reproducibility.md` and the matrix was run as written |
 | README numbers reproducible | Yes — the suite reads them from artifacts by key path and aborts if a path moves; 319 tests cover the bindings |
 | Evidence verifiable by a third party | Yes — `evidence/manifest.json`, 58 artifacts, byte + content digests, built from a clean tree at `146058c` |
-| CI lane proven on a runner | **No.** `benchmark-suite` is configured and its YAML parses, but has never executed on GitHub-hosted hardware. Open. |
+| CI lane proven on a runner | **Yes.** `benchmark-suite` passed on `ubuntu-latest` in 4m10s with `--require-all` (11/11 executed, 0 skipped). The `build-and-test` lane failed on its first run — a README assertion that pinned one vendor's libm to the last bit, found and fixed. See finding 11 in §6 of the phase report and limitation #59. |
 | Published release | **No.** No remote is configured; the tag is local and `CITATION.cff` has no URL or DOI. Open. |
 
 ---
@@ -105,6 +105,7 @@ done if published as-is:
 8. The README quoted a single speedup ratio that four runs had already disagreed about by 5%.
 9. `docs/findings.md` made comparative claims with no uncertainty disclosure.
 10. The validation matrix's first draft named thirteen API symbols that do not exist.
+11. A test asserted the README's Black-Scholes price bit-for-bit and failed on the first Linux runner, 1.7 ULP out — the platform's libm, not our arithmetic.
 
 **The pattern is worth naming.** None of these were bugs in the numerical core. Nine of ten
 were documents describing a state of the repository that had already changed, or claims whose
@@ -114,7 +115,9 @@ fixes went into documents, tests and tooling rather than into `cpp/`.
 
 ## Still open, stated plainly
 
-- The `benchmark-suite` CI lane is unproven on a runner.
+- The `benchmark-suite` CI lane is now proven: it passed on `ubuntu-latest` on its first run.
+  What that first run instead caught was a cross-platform floating-point assumption in a test,
+  which is the outcome the lane exists to produce.
 - No remote, no published release, no DOI.
 - Test counts and the limitations count are quoted in dated documents; the living documents no
   longer quote a mutable count, and the limitations figure is now guarded by a test.

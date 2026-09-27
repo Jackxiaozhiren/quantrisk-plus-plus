@@ -257,3 +257,16 @@ never removed just because a later phase shipped.
     absent from the suite and nothing notices — absence produces no output to check.
     `--list` against `find benchmarks experiments -name 'run.py' -o -name '*.py'` is the
     manual reconciliation.
+
+## Phase 10 — cross-platform numerics
+
+59. **The last one or two digits of a closed-form price are the platform's, not ours.**
+    Black-Scholes evaluates `log`, `exp` and the normal CDF through the system `libm`. The
+    same source and the same inputs give `9.925053717274434` on macOS/AppleClang and
+    `9.925053717274437` on Linux/glibc — 1.7 ULP, about 1e-14. This was found by the CI run,
+    not by review: a test that asserted the README's value bit-for-bit passed locally and
+    failed on the runner. Any tolerance in this project is therefore set at least an order of
+    magnitude above the platform spread, and `test_the_readme_black_scholes_example_runs_as_written`
+    compares in units of the last place rather than demanding bit equality. Exact,
+    platform-independent equality is claimed only where both sides come from the same binary —
+    the Python-to-C++ consistency checks — and nowhere across compilers.

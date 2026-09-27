@@ -83,6 +83,13 @@ result.price  # 9.990522972178022
 result.standard_error  # 0.03372491930330562   — the analytic value is 1.94 SE away
 ```
 
+The trailing digits of `call_price()` are the last place a library, not this project, decides:
+`log`, `exp` and the normal CDF come from the platform's `libm`, so Linux/glibc prints
+`9.925053717274437` where macOS/AppleClang prints `9.925053717274434`. That is 1.7 ULP — about
+1e-14, and far below any tolerance that matters in finance. The test that guards this example
+compares against the README in units of the last place rather than demanding bit equality, so
+the documentation cannot silently pin itself to one vendor's math library.
+
 ```bash
 quantrisk validate    # 7 identity checks against the installed build
 quantrisk benchmark   # timings measured on this machine, now
@@ -226,7 +233,7 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 58 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 59 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
 - **Nothing here has been tested against real markets.** Every statistical claim runs on

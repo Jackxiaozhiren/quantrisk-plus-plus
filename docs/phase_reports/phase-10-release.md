@@ -185,6 +185,18 @@ worth recording because they are exactly the failure mode the project exists to 
     confirms zero result differences. Both directions are tested: a stripped timestamp reads as
     VOLATILE, and a changed `worst_relative_error` does not.
 
+11. **A test that passed on every Mac and failed on the first Linux runner.**
+    `test_the_readme_black_scholes_example_runs_as_written` asserted the README's price
+    bit-for-bit (`rel=0, abs=0.0`). Black-Scholes calls `log`, `exp` and the normal CDF from
+    the system libm, and glibc's answer differs from Apple's by 1.7 ULP —
+    `9.925053717274437` vs `9.925053717274434`. The assertion was also a transcribed literal,
+    which §2 of the validation protocol forbids for exactly this reason. Fixed by reading the
+    expected value out of `README.md` and comparing in units of the last place with an 8-ULP
+    bound, so the test no longer duplicates the number and no longer pins it to one vendor's
+    math library. Recorded as limitation #59, and the README now says so. This is the
+    strongest argument in the whole phase for running CI on a runner at all: local green said
+    nothing, and the failure was not in code anyone had just changed.
+
 ## 7. Remaining limitations
 
 New entries are recorded in `docs/limitations.md` #56–#58. The phase's own boundaries:
