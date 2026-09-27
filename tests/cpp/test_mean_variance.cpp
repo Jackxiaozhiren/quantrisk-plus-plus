@@ -298,3 +298,40 @@ TEST_CASE("a perfectly collinear pair is solvable and the certificate still hold
                                    .epsilon(1.0e-9));
     CHECK(variance_of(solution, covariance) == Approx(solution.variance).epsilon(1.0e-9));
 }
+
+TEST_CASE("an unreachable target is reported as unreachable, not as a portfolio") {
+    // Long-only on two assets caps the achievable return at the best single asset.
+    // Asking for more has an equality solution - it just requires shorting - and the
+    // answer must say so in the fields *and* in the note, because the note is what
+    // gets printed in a report while the residual is what gets asserted in a test.
+    const std::vector<Real> covariance = {0.0004, 0.0, 0.0, 0.0009};
+    portfolio::OptimizationRequest request;
+    request.target_return = 0.5;
+    const auto solution =
+        portfolio::minimum_variance(problem(covariance, {0.001, 0.002}, 2), request);
+
+    CHECK_FALSE(solution.feasible);
+    CHECK_FALSE(solution.verified_optimal);
+    CHECK(solution.expected_return == Approx(0.5).epsilon(1.0e-6)); // reached, but not
+    CHECK(solution.weight_bound_violation > 1.0);                   // by a long portfolio
+    CHECK_THAT(solution.note, Catch::Matchers::ContainsSubstring("bounds are violated"));
+}
+
+TEST_CASE("a negative opportunity set still returns the least-bad Sharpe") {
+    // Every asset below the risk-free rate makes the maximum Sharpe negative, and the
+    // maximum is then a corner rather than a tangency. The solver must find the corner
+    // and certify it, not refuse: -1.6 beats -2.45, and both are honest answers about
+    // a set with no positive excess return in it.
+    const std::vector<Real> covariance = {0.0004, 0.0, 0.0, 0.0009};
+    portfolio::OptimizationRequest request;
+    request.risk_free_rate = 0.05;
+    const auto solution =
+        portfolio::maximum_sharpe(problem(covariance, {0.001, 0.002}, 2), request);
+
+    CHECK(solution.feasible);
+    CHECK(solution.weight_bound_violation < 1.0e-9);
+    // w = (0, 1): (0.002 - 0.05) / 0.03 = -1.6, better than (0.001 - 0.05) / 0.02.
+    CHECK(solution.sharpe_ratio == Approx(-1.6).epsilon(1.0e-6));
+    CHECK(solution.weights[1] == Approx(1.0).epsilon(1.0e-6));
+    CHECK(solution.weights[0] == Approx(0.0).margin(1.0e-8));
+}

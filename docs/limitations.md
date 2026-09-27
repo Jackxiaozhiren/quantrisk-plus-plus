@@ -143,3 +143,35 @@ never removed just because a later phase shipped.
 35. **No Cornish-Fisher expansion, extreme-value tail fit, filtered historical
     simulation, or expected-shortfall backtest** (Bellini-Frittelli / Acerbi-Tasche
     style) is implemented.
+
+## Phase 6 — portfolio covariance and optimisation
+
+36. **Long-only and fully invested, and nothing else.** `sum(w) = 1`, `w ≥ 0` are the
+    only constraints implemented. The max-position, sector and turnover constraints
+    PROJECT_SPEC.md lists as later options are absent, so nothing here can express a
+    realistic mandate.
+37. **No expected-return model exists in this project.** `expected_returns` is an input
+    the caller supplies. The Phase 6 experiment measures the consequence of the only
+    available substitute — a window's sample mean — and it is not flattering: max-Sharpe
+    is the worst of the four objectives on every forward metric (0.0186 against 0.0117
+    forward volatility). Any use that treats a sample mean as skill inherits that.
+38. **Single-period.** There is no multi-period rebalancing policy, and the turnover
+    column in `estimator_out_of_sample.csv` is descriptive. No transaction cost is
+    netted against return anywhere, so nothing in this phase is a P&L claim.
+39. **EWMA is filtered about zero, not about the sample mean.** That is the RiskMetrics
+    convention and it is asserted in the oracle test as a bridge rather than derived;
+    the two definitions disagree whenever the mean is material, which for daily returns
+    or a trending window it is not.
+40. **The estimator ranking is a property of the tested process.** The Phase 6 DGP has a
+    step change in factor volatility and *no* volatility clustering, which is precisely
+    the case an EWMA filter is built for and did not get. `ewma` placing last on every
+    window is evidence about this process, not a verdict against RiskMetrics.
+41. **The simplex is dense, two-phase, and exponential in the worst case.** It was
+    validated at ≤12 assets and 250 scenarios (a few thousand pivots, sub-millisecond).
+    It is not a production LP and has no refactorisation, no sparsity and no warm start.
+42. **Covariance instability is detected, refused and measured — not solved.** `solve`
+    refuses below `rcond 1e-12`, and shrinkage measurably costs less forward than the
+    singular answer it replaces (0.0086 against 0.0111 volatility on a 5-observation
+    window of 8 assets). But the binding failure in the experiment is non-stationarity,
+    which no estimator here addresses: forward slices crossing the regime break cost
+    1.57–1.60x for all three estimators, against 1.07–1.22x inside a single regime.

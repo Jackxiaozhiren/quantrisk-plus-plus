@@ -1,0 +1,176 @@
+{
+  "phase": "6 - Portfolio optimisation",
+  "generated_utc": "2026-09-27T04:22:17+00:00",
+  "command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
+  "purpose": "Level 2 validation of the covariance estimators' consumers: do the mean-variance, max-Sharpe, frontier, risk-parity and CVaR solvers in the C++ core agree with PyPortfolioOpt (SciPy SLSQP) and cvxpy (OSQP/SCS) on identical inputs, and are their constraints actually satisfied?",
+  "oracles": {
+    "pypfopt": {
+      "solver": "SciPy SLSQP behind PyPortfolioOpt",
+      "tolerance": "the library default (ftol ~1e-9, its own reported slack)",
+      "versions": {
+        "numpy": "2.5.3",
+        "scipy": "1.18.1",
+        "PyPortfolioOpt": "1.6.0",
+        "osqp": "1.1.3"
+      }
+    },
+    "cvxpy": {
+      "solver": "OSQP for quadratic programs, SCS for the log and second-order-conic forms",
+      "tolerance": "eps_abs = eps_rel = 1e-11 (OSQP), 1e-10..1e-11 (SCS)"
+    },
+    "not_applicable": "risk parity has no PyPortfolioOpt implementation in 1.6.0, and CVaR is solved by PyPortfolioOpt through cvxpy, so the duplicated column is labelled rather than presented as two independent references"
+  },
+  "our_side": {
+    "certificate": "each of our answers carries a KKT or LP optimality certificate checked against the original data, so `verified_optimal` is a proof, not a convergence message",
+    "version": "0.1.0"
+  },
+  "parameters": {
+    "asset_counts": [
+      2,
+      3,
+      5,
+      8,
+      12
+    ],
+    "seeds": [
+      7,
+      8,
+      9
+    ],
+    "risk_free_rate": 0.002,
+    "cvar_confidence": 0.95,
+    "scenarios": 250
+  },
+  "agreement": {
+    "per_problem": {
+      "efficient_return": {
+        "cases": 15,
+        "optimises": "volatility",
+        "max_weight_difference_pypfopt": 4.0323300254385686e-13,
+        "max_weight_difference_cvxpy": 2.4151791677695655e-12,
+        "max_relative_objective_gap_pypfopt": 6.48256903876284e-14,
+        "max_relative_objective_gap_cvxpy": 6.104419178168317e-14,
+        "max_relative_volatility_difference_pypfopt": 6.48256903876284e-14,
+        "max_relative_volatility_difference_cvxpy": 6.10441917816834e-14,
+        "worst_budget_residual": 8.881784197001252e-16,
+        "worst_bound_violation": 0.0
+      },
+      "max_sharpe": {
+        "cases": 15,
+        "optimises": "sharpe_ratio",
+        "max_weight_difference_pypfopt": 7.012935253347674e-09,
+        "max_weight_difference_cvxpy": 7.0129313536893e-09,
+        "max_relative_objective_gap_pypfopt": 1.156482931556496e-11,
+        "max_relative_objective_gap_cvxpy": 1.156482931556496e-11,
+        "max_relative_volatility_difference_pypfopt": 1.0885785382297327e-08,
+        "max_relative_volatility_difference_cvxpy": 1.1025891784956633e-08,
+        "worst_budget_residual": 6.661338147750939e-16,
+        "worst_bound_violation": 0.0
+      },
+      "min_cvar": {
+        "cases": 15,
+        "optimises": "cvar",
+        "max_weight_difference_pypfopt": 4.662630543883495e-07,
+        "max_weight_difference_cvxpy": 4.662630543883495e-07,
+        "max_relative_objective_gap_pypfopt": 4.484265322230011e-09,
+        "max_relative_objective_gap_cvxpy": 4.484265322230011e-09,
+        "max_relative_volatility_difference_pypfopt": 5.4533041763680855e-08,
+        "max_relative_volatility_difference_cvxpy": 5.4533041763680855e-08,
+        "worst_budget_residual": 1.4495071809506044e-12,
+        "worst_bound_violation": 0.0
+      },
+      "min_variance": {
+        "cases": 15,
+        "optimises": "volatility",
+        "max_weight_difference_pypfopt": 3.523847880160247e-13,
+        "max_weight_difference_cvxpy": 2.4285851107919143e-12,
+        "max_relative_objective_gap_pypfopt": 7.285443170576383e-16,
+        "max_relative_objective_gap_cvxpy": 6.086327523304816e-16,
+        "max_relative_volatility_difference_pypfopt": 7.285443170576383e-16,
+        "max_relative_volatility_difference_cvxpy": 6.086327523304818e-16,
+        "worst_budget_residual": 4.440892098500626e-16,
+        "worst_bound_violation": 0.0
+      },
+      "risk_parity": {
+        "cases": 15,
+        "optimises": "volatility",
+        "max_weight_difference_pypfopt": 1.4139467374718606e-11,
+        "max_weight_difference_cvxpy": 1.4139467374718606e-11,
+        "max_relative_objective_gap_pypfopt": 2.846057620984562e-12,
+        "max_relative_objective_gap_cvxpy": 2.846057620984562e-12,
+        "max_relative_volatility_difference_pypfopt": 2.846057620984562e-12,
+        "max_relative_volatility_difference_cvxpy": 2.846057620984562e-12,
+        "worst_budget_residual": 1.1102230246251565e-16,
+        "worst_bound_violation": 0.0
+      }
+    },
+    "worst_weight_difference_pypfopt": {
+      "value": 4.662630543883495e-07,
+      "problem": "min_cvar",
+      "assets": 12,
+      "seed": 7
+    },
+    "worst_weight_difference_cvxpy": {
+      "value": 4.662630543883495e-07,
+      "problem": "min_cvar",
+      "assets": 12,
+      "seed": 7
+    },
+    "worst_relative_objective_gap_pypfopt": {
+      "value": 4.484265322230011e-09,
+      "problem": "min_cvar",
+      "assets": 12,
+      "seed": 7
+    },
+    "worst_relative_objective_gap_cvxpy": {
+      "value": 4.484265322230011e-09,
+      "problem": "min_cvar",
+      "assets": 12,
+      "seed": 7
+    },
+    "worst_budget_residual": 1.4495071809506044e-12,
+    "worst_bound_violation": 0.0,
+    "problems_solved": 75
+  },
+  "environment": {
+    "generated_at_utc": "2026-09-27T04:22:17+00:00",
+    "quantrisk_version": "0.1.0",
+    "git_commit": "7ed4f1e6f0ba",
+    "binary_git_commit": "e029d3df2b60",
+    "working_tree_dirty": true,
+    "uncommitted_paths": [
+      "benchmarks/pyportfolioopt/",
+      "tests/python/test_portfolio_optimisation_vs_oracles.py"
+    ],
+    "provenance": "ran from 7ed4f1e6f0ba plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at e029d3df2b60",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_arch": "arm64",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_build_type": "Release",
+    "cpp_standard": "C++20",
+    "cpp_flags": "(none)",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "python_machine": "arm64",
+    "packages": {
+      "python": "3.12.14",
+      "quantrisk": "0.1.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.csv",
+      "sha256": "c380198f432eec1c5f0426b670b68077e42412b6ef11a8188e77c03b3d0477a6",
+      "bytes": "79615"
+    }
+  ]
+}

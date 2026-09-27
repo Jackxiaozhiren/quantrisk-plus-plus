@@ -112,7 +112,7 @@ Phase 0 (this doc set) → 1 engineering skeleton → 2 BS/binomial/Greeks →
 
 Rule: one phase at a time; each phase ends with a Phase Report and stops.
 
-## 9. Current status (honest, 2026-09-26)
+## 9. Current status (honest, 2026-09-27)
 
 | Item | Status |
 |---|---|
@@ -126,7 +126,8 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 3 Monte Carlo engine, variance reduction, convergence + coverage, speed benchmark | DONE (`docs/phase_reports/phase-03-monte-carlo.md`) |
 | Phase 4 Asian + barrier + Heston, oracle benchmark, model cards | DONE (`docs/phase_reports/phase-04-path-dependent-heston.md`) |
 | Phase 5 VaR/ES estimators, bootstrap intervals, Kupiec + Christoffersen backtests | DONE (`docs/phase_reports/phase-05-market-risk.md`) |
-| Portfolio optimisation, stress, data layers | NOT IMPLEMENTED — no such numbers exist yet |
+| Phase 6 covariance estimators, mean-variance, max-Sharpe, ERC, CVaR, PyPortfolioOpt + cvxpy benchmark | DONE (`docs/phase_reports/phase-06-portfolio-optimisation.md`) |
+| Stress testing, public data layer, research API, release | NOT IMPLEMENTED — no such numbers exist yet |
 
 ## 10. Frozen surfaces
 
@@ -186,6 +187,30 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
   raise rather than guessing; chi-square critical values are solved from the same
   survival function the p-value uses, never transcribed from a table.
 
-Changing any of the above requires a written migration note.
+### Phase 6
 
-Eigen enters with Phase 6 (first real dense linear algebra), not Phase 1.
+- `quantrisk::portfolio` and its Python submodule: `CovarianceEstimate`, `LinearSolve`,
+  `OptimizerInputs`, `OptimizationRequest`, `PortfolioSolution`, `RiskParitySolution`,
+  `LpStatus`, `LinearProgramResult`, `CvarRequest`, `CvarSolution`.
+- `sample_covariance`, `ewma_covariance`, `shrinkage_covariance`, `eigenvalues`,
+  `condition_number`, `solve`, `minimum_variance`, `efficient_frontier`,
+  `maximum_sharpe`, `risk_parity`, `solve_linear_program`, `minimise_cvar`.
+- Conventions frozen here: the sample estimator is unbiased (`ddof = 1`); EWMA is
+  filtered **about zero** with `half_life = ln 0.5 / ln λ` reported beside `λ`;
+  shrinkage is Ledoit–Wolf 2004 with divisor `T` and a scaled-identity target.
+- `solve` **refuses** (returns `NaN` plus a reason) when the matrix is not positive
+  definite or `rcond < 1e-12`. There is no hidden ridge, no silent pseudo-inverse and no
+  automatic shrinkage anywhere in the layer.
+- Equality-constrained solves go through the **saddle-point KKT system**, never through
+  `Σ⁻¹`: the normal equations return the minimum-norm stationary point, which on a flat
+  asset is not the optimum. The KKT multiplier convention is `ν = Σw − Aλ`, frozen
+  because the certificate is checked against it.
+- Every solution carries its own proof (`verified_optimal`, `certified`, `converged`)
+  computed from the original inputs, and the residuals (`budget_residual`,
+  `weight_bound_violation`, `target_residual`) are always populated, feasible or not.
+- Max-Sharpe is documented as a **frontier search over the §7 QP**, not as a quadratic
+  program; the linear-fractional transformation is stated in the returned `note`.
+- Eigen is now a real build dependency (v5.0.0 pinned by SHA-256, with
+  `find_package(Eigen3 3.4)` preferred when the system provides one).
+
+Changing any of the above requires a written migration note.

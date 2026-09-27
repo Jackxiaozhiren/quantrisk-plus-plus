@@ -1,0 +1,559 @@
+{
+  "phase": "6 - Portfolio optimisation",
+  "generated_utc": "2026-09-27T04:28:31+00:00",
+  "command": "uv run python experiments/portfolio_optimization/run.py",
+  "question": "Every covariance matrix the optimisers consume is an estimate. How much forward variance does each estimator cost a long-only minimum-variance portfolio, and does the documented handling of ill-conditioned inputs actually protect the result?",
+  "data": {
+    "kind": "synthetic",
+    "statement": "Simulated monthly returns from the two-regime factor process in regime_covol(); no market data is used or implied. The seed is fixed and the forward covariance is analytic, so the ratios below are measured against ground truth rather than against another estimate.",
+    "assets": 8,
+    "observations": 600,
+    "regime_break_at": 300,
+    "regime_2_change": "both factor volatilities doubled, loadings shifted by 0.35",
+    "estimation_windows": [
+      40,
+      60,
+      125,
+      250
+    ],
+    "forecast_horizon": 20,
+    "step": 5,
+    "ewma_lambda": 0.94,
+    "windows_solved": 373,
+    "portfolios_evaluated": 1119
+  },
+  "estimation_cost": {
+    "metric": "variance_ratio_vs_informed = the frozen window portfolio's variance under the true forward covariance divided by the variance of the portfolio an informed solver would have held over the same slice",
+    "by_window_and_estimator": {
+      "window_40/sample": {
+        "variance_ratio_vs_informed": 1.2176440346127797,
+        "excess_volatility_pct": 10.079942567910622,
+        "realised_volatility": 0.009256337988946024,
+        "weight_l2_distance_to_informed": 0.1805234853168439,
+        "effective_assets": 5.096591590707081,
+        "max_weight": 0.285383149721184,
+        "turnover": 0.20667154039523572,
+        "condition_number": 52.71680042499013
+      },
+      "window_40/ewma": {
+        "variance_ratio_vs_informed": 1.2559687119351408,
+        "excess_volatility_pct": 11.808995870703592,
+        "realised_volatility": 0.009407403445557305,
+        "weight_l2_distance_to_informed": 0.2014843150320515,
+        "effective_assets": 4.9657498136613505,
+        "max_weight": 0.2954206477654707,
+        "turnover": 0.3039202713750468,
+        "condition_number": 60.85968823136447
+      },
+      "window_40/shrinkage": {
+        "variance_ratio_vs_informed": 1.1685770349617919,
+        "excess_volatility_pct": 7.866793152949513,
+        "realised_volatility": 0.008979733578220978,
+        "weight_l2_distance_to_informed": 0.13682975561436603,
+        "effective_assets": 5.970199139261032,
+        "max_weight": 0.23830362334093771,
+        "turnover": 0.13814577896710495,
+        "condition_number": 22.29063549176746
+      },
+      "window_60/sample": {
+        "variance_ratio_vs_informed": 1.1626049229221798,
+        "excess_volatility_pct": 7.50616813087204,
+        "realised_volatility": 0.009218702591116984,
+        "weight_l2_distance_to_informed": 0.14108467391329055,
+        "effective_assets": 5.402295061986676,
+        "max_weight": 0.26735956836579966,
+        "turnover": 0.13681781289244643,
+        "condition_number": 45.091072363673725
+      },
+      "window_60/ewma": {
+        "variance_ratio_vs_informed": 1.228711722332224,
+        "excess_volatility_pct": 10.613173439945406,
+        "realised_volatility": 0.009435133236169482,
+        "weight_l2_distance_to_informed": 0.1894797765128921,
+        "effective_assets": 5.048338242457623,
+        "max_weight": 0.289743952674785,
+        "turnover": 0.27987371540427686,
+        "condition_number": 57.430583654769016
+      },
+      "window_60/shrinkage": {
+        "variance_ratio_vs_informed": 1.1462893063685462,
+        "excess_volatility_pct": 6.7669832651701585,
+        "realised_volatility": 0.009088564107609467,
+        "weight_l2_distance_to_informed": 0.11977675750655882,
+        "effective_assets": 5.9225490061683885,
+        "max_weight": 0.23711947958169174,
+        "turnover": 0.10323774472751655,
+        "condition_number": 25.096814907178576
+      },
+      "window_125/sample": {
+        "variance_ratio_vs_informed": 1.1326097624215163,
+        "excess_volatility_pct": 6.049041375477337,
+        "realised_volatility": 0.00931702536321674,
+        "weight_l2_distance_to_informed": 0.11004250726947372,
+        "effective_assets": 5.6786846614364235,
+        "max_weight": 0.24646412114651267,
+        "turnover": 0.06616362750839372,
+        "condition_number": 38.175803698938424
+      },
+      "window_125/ewma": {
+        "variance_ratio_vs_informed": 1.2333505010122139,
+        "excess_volatility_pct": 10.826192291815639,
+        "realised_volatility": 0.009757902193080575,
+        "weight_l2_distance_to_informed": 0.19307970044157755,
+        "effective_assets": 4.929732724381751,
+        "max_weight": 0.29642311946933814,
+        "turnover": 0.27588450877138204,
+        "condition_number": 59.6773276252075
+      },
+      "window_125/shrinkage": {
+        "variance_ratio_vs_informed": 1.1331078253762565,
+        "excess_volatility_pct": 6.049445582700519,
+        "realised_volatility": 0.009287219670476346,
+        "weight_l2_distance_to_informed": 0.10083676835564485,
+        "effective_assets": 5.912900662038276,
+        "max_weight": 0.23258317312016355,
+        "turnover": 0.05659697223191972,
+        "condition_number": 28.384790005083698
+      },
+      "window_250/sample": {
+        "variance_ratio_vs_informed": 1.2194150759155915,
+        "excess_volatility_pct": 9.852146054909534,
+        "realised_volatility": 0.010250673720580302,
+        "weight_l2_distance_to_informed": 0.11028026912940242,
+        "effective_assets": 5.877914566638719,
+        "max_weight": 0.2326071303121034,
+        "turnover": 0.03687883004318448,
+        "condition_number": 34.644389093072924
+      },
+      "window_250/ewma": {
+        "variance_ratio_vs_informed": 1.245317436351191,
+        "excess_volatility_pct": 11.316018691129573,
+        "realised_volatility": 0.010390534946611213,
+        "weight_l2_distance_to_informed": 0.19477987833894514,
+        "effective_assets": 4.7606057214516815,
+        "max_weight": 0.29705246228193544,
+        "turnover": 0.2730722208291471,
+        "condition_number": 68.3485008850655
+      },
+      "window_250/shrinkage": {
+        "variance_ratio_vs_informed": 1.2264631906416066,
+        "excess_volatility_pct": 10.16665702624707,
+        "realised_volatility": 0.010260044996035816,
+        "weight_l2_distance_to_informed": 0.11251777640537054,
+        "effective_assets": 6.003228412136571,
+        "max_weight": 0.22473169119021583,
+        "turnover": 0.03431811052936447,
+        "condition_number": 29.825749621790777
+      }
+    },
+    "by_forward_regime": {
+      "sample/regime_1": {
+        "variance_ratio_vs_informed": 1.1198530102072812,
+        "weight_l2_distance_to_informed": 0.13193960822092263,
+        "turnover": 0.1373946422760255
+      },
+      "ewma/regime_1": {
+        "variance_ratio_vs_informed": 1.2223308806557573,
+        "weight_l2_distance_to_informed": 0.19176885489207807,
+        "turnover": 0.2752546104243644
+      },
+      "shrinkage/regime_1": {
+        "variance_ratio_vs_informed": 1.0747723538822278,
+        "weight_l2_distance_to_informed": 0.09768383932606751,
+        "turnover": 0.0940947277135346
+      },
+      "sample/regime_2": {
+        "variance_ratio_vs_informed": 1.1951704635985154,
+        "weight_l2_distance_to_informed": 0.13958483865141508,
+        "turnover": 0.11460671965491571
+      },
+      "ewma/regime_2": {
+        "variance_ratio_vs_informed": 1.232945984271195,
+        "weight_l2_distance_to_informed": 0.19482893239202725,
+        "turnover": 0.2961571052235913
+      },
+      "shrinkage/regime_2": {
+        "variance_ratio_vs_informed": 1.1947010419423088,
+        "weight_l2_distance_to_informed": 0.12691792895865867,
+        "turnover": 0.08827637375035813
+      },
+      "sample/straddling": {
+        "variance_ratio_vs_informed": 1.6048590708930062,
+        "weight_l2_distance_to_informed": 0.21919402124897433,
+        "turnover": 0.087265341368415
+      },
+      "ewma/straddling": {
+        "variance_ratio_vs_informed": 1.5948452694515867,
+        "weight_l2_distance_to_informed": 0.2287080729710946,
+        "turnover": 0.17154834353582524
+      },
+      "shrinkage/straddling": {
+        "variance_ratio_vs_informed": 1.5681389214960968,
+        "weight_l2_distance_to_informed": 0.1981198479243812,
+        "turnover": 0.06353966280216324
+      }
+    }
+  },
+  "robustness": {
+    "cases": {
+      "near_collinear_twins": [
+        {
+          "estimator": "sample",
+          "observations": 600,
+          "condition_number": 420221775.1418326,
+          "smallest_eigenvalue": 1.914487905653763e-12,
+          "solve_succeeded": true,
+          "solve_note": "solved by Cholesky factorisation (matrix is positive definite)",
+          "forward_volatility_under_truth": 0.00839008088998935,
+          "realised_volatility": 0.008872805782441148,
+          "worst_realised_loss": 0.01835368037482867,
+          "max_weight": 0.19364175010249557,
+          "effective_assets": 7.15164344073412,
+          "estimator_note": "unbiased sample covariance, divisor n - 1, per-asset means subtracted; condition number 420221813.21098483 exceeds 100000000, so weights on this estimate are unstable under small perturbations of the sample"
+        },
+        {
+          "estimator": "ewma",
+          "observations": 600,
+          "condition_number": 633922256.3383598,
+          "smallest_eigenvalue": 1.6424652176502654e-12,
+          "solve_succeeded": true,
+          "solve_note": "solved by Cholesky factorisation (matrix is positive definite)",
+          "forward_volatility_under_truth": 0.008770421255174203,
+          "realised_volatility": 0.008780522524457482,
+          "worst_realised_loss": 0.01989186596304788,
+          "max_weight": 0.327353303981154,
+          "effective_assets": 5.577422904802948,
+          "estimator_note": "exponentially weighted second moment about zero (no mean subtracted), newest observation weight 1, normalised to sum to 1; condition number 633922266.3885833 exceeds 100000000, so weights on this estimate are unstable under small perturbations of the sample"
+        },
+        {
+          "estimator": "shrinkage",
+          "observations": 600,
+          "condition_number": 56.87674456002875,
+          "smallest_eigenvalue": 1.3852249605396945e-05,
+          "solve_succeeded": true,
+          "solve_note": "solved by Cholesky factorisation (matrix is positive definite)",
+          "forward_volatility_under_truth": 0.008402808708970316,
+          "realised_volatility": 0.009299224952889765,
+          "worst_realised_loss": 0.021060367124238397,
+          "max_weight": 0.19130674884600563,
+          "effective_assets": 7.203531789190262,
+          "estimator_note": "Ledoit-Wolf (2004) linear shrinkage toward tr(S)/p * I, divisor T as in the paper's own derivation, intensity solved in closed form (not cross-validated)"
+        }
+      ],
+      "sample_only_zero_variance_asset": [
+        {
+          "estimator": "sample",
+          "observations": 600,
+          "condition_number": 1.2975624314421317e+17,
+          "smallest_eigenvalue": 4.9330905580086514e-20,
+          "solve_succeeded": false,
+          "solve_note": "not solved: the matrix is singular or indefinite, so no unique solution exists; the robustness suite covers the alternatives this call refuses to guess",
+          "forward_volatility_under_truth": 0.025846353897018823,
+          "realised_volatility": 0.023060216350925578,
+          "worst_realised_loss": 0.06808834374404546,
+          "max_weight": 0.999999999999882,
+          "effective_assets": 1.000000000000236,
+          "estimator_note": "unbiased sample covariance, divisor n - 1, per-asset means subtracted; singular or numerically rank-deficient (smallest eigenvalue within tolerance of zero): do not invert this matrix, the optimisers report failure rather than guess"
+        },
+        {
+          "estimator": "ewma",
+          "observations": 600,
+          "condition_number": 4.9710664153623917e+17,
+          "smallest_eigenvalue": -2.4470839128320693e-20,
+          "solve_succeeded": false,
+          "solve_note": "not solved: the matrix is singular or indefinite, so no unique solution exists; the robustness suite covers the alternatives this call refuses to guess",
+          "forward_volatility_under_truth": 0.0258463538970248,
+          "realised_volatility": 0.02396295851341023,
+          "worst_realised_loss": 0.05798110555671696,
+          "max_weight": 1.0000000000001177,
+          "effective_assets": 0.9999999999997646,
+          "estimator_note": "exponentially weighted second moment about zero (no mean subtracted), newest observation weight 1, normalised to sum to 1; singular or numerically rank-deficient (smallest eigenvalue within tolerance of zero): do not invert this matrix, the optimisers report failure rather than guess"
+        },
+        {
+          "estimator": "shrinkage",
+          "observations": 600,
+          "condition_number": 86.39621589602244,
+          "smallest_eigenvalue": 7.582720211816027e-06,
+          "solve_succeeded": true,
+          "solve_note": "solved by Cholesky factorisation (matrix is positive definite)",
+          "forward_volatility_under_truth": 0.02274406288698728,
+          "realised_volatility": 0.020032976450405412,
+          "worst_realised_loss": 0.05439483725982045,
+          "max_weight": 0.8837836748317345,
+          "effective_assets": 1.2768572152378526,
+          "estimator_note": "Ledoit-Wolf (2004) linear shrinkage toward tr(S)/p * I, divisor T as in the paper's own derivation, intensity solved in closed form (not cross-validated)"
+        }
+      ],
+      "singular_short_window": [
+        {
+          "estimator": "sample",
+          "observations": 5,
+          "condition_number": 6.740102728401322e+17,
+          "smallest_eigenvalue": 6.984663262861369e-21,
+          "solve_succeeded": false,
+          "solve_note": "not solved: the matrix is singular or indefinite, so no unique solution exists; the robustness suite covers the alternatives this call refuses to guess",
+          "forward_volatility_under_truth": 0.011141003114294517,
+          "realised_volatility": 0.010309127571036537,
+          "worst_realised_loss": 0.03030315138691333,
+          "max_weight": 0.30814967901235846,
+          "effective_assets": 3.9273439324957855,
+          "estimator_note": "unbiased sample covariance, divisor n - 1, per-asset means subtracted; singular or numerically rank-deficient (smallest eigenvalue within tolerance of zero): do not invert this matrix, the optimisers report failure rather than guess"
+        },
+        {
+          "estimator": "ewma",
+          "observations": 5,
+          "condition_number": 4.5864919844708456e+16,
+          "smallest_eigenvalue": -1.4425233199151695e-19,
+          "solve_succeeded": false,
+          "solve_note": "not solved: the matrix is singular or indefinite, so no unique solution exists; the robustness suite covers the alternatives this call refuses to guess",
+          "forward_volatility_under_truth": 0.012046888470203217,
+          "realised_volatility": 0.012636130313657826,
+          "worst_realised_loss": 0.026987769283626135,
+          "max_weight": 0.3772157439507673,
+          "effective_assets": 3.659732156753152,
+          "estimator_note": "exponentially weighted second moment about zero (no mean subtracted), newest observation weight 1, normalised to sum to 1; singular or numerically rank-deficient (smallest eigenvalue within tolerance of zero): do not invert this matrix, the optimisers report failure rather than guess"
+        },
+        {
+          "estimator": "shrinkage",
+          "observations": 5,
+          "condition_number": 7.988579798063586,
+          "smallest_eigenvalue": 0.00025202337179061846,
+          "solve_succeeded": true,
+          "solve_note": "solved by Cholesky factorisation (matrix is positive definite)",
+          "forward_volatility_under_truth": 0.008649404500751046,
+          "realised_volatility": 0.0074981785435041665,
+          "worst_realised_loss": 0.016044151067008534,
+          "max_weight": 0.20777860743439336,
+          "effective_assets": 5.8787040038623255,
+          "estimator_note": "Ledoit-Wolf (2004) linear shrinkage toward tr(S)/p * I, divisor T as in the paper's own derivation, intensity solved in closed form (not cross-validated)"
+        }
+      ],
+      "well_conditioned_full_sample": [
+        {
+          "estimator": "sample",
+          "observations": 600,
+          "condition_number": 15.89884550370353,
+          "smallest_eigenvalue": 0.00014209635836240578,
+          "solve_succeeded": true,
+          "solve_note": "solved by Cholesky factorisation (matrix is positive definite)",
+          "forward_volatility_under_truth": 0.007351297853365155,
+          "realised_volatility": 0.008470079862292224,
+          "worst_realised_loss": 0.019306933510654947,
+          "max_weight": 0.20741093310922357,
+          "effective_assets": 6.240841637987424,
+          "estimator_note": "unbiased sample covariance, divisor n - 1, per-asset means subtracted"
+        },
+        {
+          "estimator": "ewma",
+          "observations": 600,
+          "condition_number": 17.231005375570998,
+          "smallest_eigenvalue": 0.00011708050408689233,
+          "solve_succeeded": true,
+          "solve_note": "solved by Cholesky factorisation (matrix is positive definite)",
+          "forward_volatility_under_truth": 0.007564799378110812,
+          "realised_volatility": 0.006254681195603313,
+          "worst_realised_loss": 0.018532564967684573,
+          "max_weight": 0.20516545272174092,
+          "effective_assets": 6.338750683276805,
+          "estimator_note": "exponentially weighted second moment about zero (no mean subtracted), newest observation weight 1, normalised to sum to 1"
+        },
+        {
+          "estimator": "shrinkage",
+          "observations": 600,
+          "condition_number": 15.093227121500478,
+          "smallest_eigenvalue": 0.0001479129559460109,
+          "solve_succeeded": true,
+          "solve_note": "solved by Cholesky factorisation (matrix is positive definite)",
+          "forward_volatility_under_truth": 0.007347418056412758,
+          "realised_volatility": 0.007878012568574202,
+          "worst_realised_loss": 0.020363702245337963,
+          "max_weight": 0.20582195743002962,
+          "effective_assets": 6.263019941541445,
+          "estimator_note": "Ledoit-Wolf (2004) linear shrinkage toward tr(S)/p * I, divisor T as in the paper's own derivation, intensity solved in closed form (not cross-validated)"
+        }
+      ]
+    }
+  },
+  "objective_comparison": {
+    "note": "all four objectives fitted on the same shrinkage-estimated windows and scored on the same forward slice; max-Sharpe uses the window's sample mean return, which is stated rather than assumed to be forecast skill",
+    "by_objective": {
+      "max_sharpe": {
+        "forward_volatility": 0.018558320175127506,
+        "realised_volatility": 0.016334136154583914,
+        "realised_worst_loss": 0.026912637432647414
+      },
+      "min_cvar": {
+        "forward_volatility": 0.0118802242468864,
+        "realised_volatility": 0.009897044271231704,
+        "realised_worst_loss": 0.015482753048882076
+      },
+      "min_variance": {
+        "forward_volatility": 0.01165689285264364,
+        "realised_volatility": 0.009287219670476346,
+        "realised_worst_loss": 0.014410296188606873
+      },
+      "risk_parity": {
+        "forward_volatility": 0.012044311703105232,
+        "realised_volatility": 0.009854071877250247,
+        "realised_worst_loss": 0.015402708873551661
+      }
+    }
+  },
+  "headline": {
+    "worst_cell": [
+      "window_40/ewma",
+      1.2559687119351408
+    ],
+    "best_cell": [
+      "window_125/sample",
+      1.1326097624215163
+    ]
+  },
+  "findings": {
+    "estimation_is_the_dominant_cost": {
+      "claim": "a long-only minimum-variance portfolio built on an estimate carries more forward variance than the same solver handed the truth. The smallest penalty measured across all window/estimator cells is about 13 % in variance, against the benchmark's worst *objective* disagreement of ~4.5e-9 relative - roughly seven and a half orders of magnitude, which is why the estimator rather than the solver is the thing under study",
+      "best_cell": [
+        "window_125/sample",
+        1.1326097624215163
+      ],
+      "worst_cell": [
+        "window_40/ewma",
+        1.2559687119351408
+      ],
+      "solver_agreement_for_contrast": "worst relative objective gap 4.48e-9, worst weight gap 4.66e-7; see benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json"
+    },
+    "shrinkage_wins_where_instability_bites": {
+      "claim": "at the shortest window shrinkage lowers both the forward variance cost and the rebalance turnover relative to the raw sample matrix",
+      "window": 40,
+      "sample_ratio": 1.2176440346127797,
+      "shrinkage_ratio": 1.1685770349617919,
+      "sample_turnover": 0.20667154039523572,
+      "shrinkage_turnover": 0.13814577896710495,
+      "sample_effective_assets": 5.096591590707081,
+      "shrinkage_effective_assets": 5.970199139261032
+    },
+    "more_history_is_not_monotonically_better": {
+      "claim": "the longest window is worse than a shorter one for every estimator, because it straddles the regime break and pools two different joint distributions",
+      "sample_ratio_window_125": 1.1326097624215163,
+      "sample_ratio_window_250": 1.2194150759155915,
+      "ratio_delta": 0.08680531349407516
+    },
+    "non_stationarity_dominates_estimation_error": {
+      "claim": "forward slices that cross the break cost far more than slices inside one regime, and shrinkage narrows that gap only slightly; the binding problem is the regime, not the estimator",
+      "straddling_ratio_by_estimator": {
+        "sample": 1.6048590708930062,
+        "ewma": 1.5948452694515867,
+        "shrinkage": 1.5681389214960968
+      },
+      "regime_1_ratio_by_estimator": {
+        "sample": 1.1198530102072812,
+        "ewma": 1.2223308806557573,
+        "shrinkage": 1.0747723538822278
+      }
+    },
+    "the_refusal_is_the_point": {
+      "claim": "on a singular window the sample estimator produces a matrix the linear solve refuses and the optimiser still answers, while shrinkage produces a matrix that both solves and costs less forward",
+      "sample_condition_number": 6.740102728401322e+17,
+      "sample_solve_succeeded": false,
+      "sample_forward_volatility": 0.011141003114294517,
+      "shrinkage_condition_number": 7.988579798063586,
+      "shrinkage_solve_succeeded": true,
+      "shrinkage_forward_volatility": 0.008649404500751046
+    },
+    "an_optimiser_is_only_as_honest_as_its_input": {
+      "claim": "with an asset that is flat in the sample but not in the truth, the solver does the correct thing with the wrong matrix and concentrates the portfolio; the resulting forward cost is a property of the input, not of the optimisation",
+      "sample_effective_assets": 1.000000000000236,
+      "sample_forward_volatility": 0.025846353897018823,
+      "well_conditioned_forward_volatility": 0.007351297853365155
+    },
+    "each_objective_wins_its_own_metric": {
+      "claim": "min-variance is best on variance, and the CVaR and ERC portfolios are close behind; max-Sharpe, which leans on the window's sample mean return, is the worst of the four on every forward metric, which is the error-maximisation cost of consuming an estimated mean",
+      "by_objective": {
+        "max_sharpe": {
+          "forward_volatility": 0.018558320175127506,
+          "realised_volatility": 0.016334136154583914,
+          "realised_worst_loss": 0.026912637432647414
+        },
+        "min_cvar": {
+          "forward_volatility": 0.0118802242468864,
+          "realised_volatility": 0.009897044271231704,
+          "realised_worst_loss": 0.015482753048882076
+        },
+        "min_variance": {
+          "forward_volatility": 0.01165689285264364,
+          "realised_volatility": 0.009287219670476346,
+          "realised_worst_loss": 0.014410296188606873
+        },
+        "risk_parity": {
+          "forward_volatility": 0.012044311703105232,
+          "realised_volatility": 0.009854071877250247,
+          "realised_worst_loss": 0.015402708873551661
+        }
+      }
+    }
+  },
+  "caveats": [
+    "the DGP has a step change in factor volatility and no volatility clustering, which is the case an EWMA filter is not designed for; its consistently weaker showing here must not be read as a general verdict against RiskMetrics, only against this process",
+    "EWMA's turnover barely moves with window length because its effective window is set by the decay factor, not by how many rows it is handed",
+    "the robustness arm's realised_volatility column is one 80-day draw and is noisy by construction; forward_volatility_under_truth is the exact figure",
+    "the realised_worst_loss column in the objective arm averages one or two observations, since 5 % of a 20-day horizon is barely a tail at all",
+    "every number describes synthetic returns from a process chosen by the author; no claim is made about realised markets"
+  ],
+  "environment": {
+    "generated_at_utc": "2026-09-27T04:28:31+00:00",
+    "quantrisk_version": "0.1.0",
+    "git_commit": "7ed4f1e6f0ba",
+    "binary_git_commit": "e029d3df2b60",
+    "working_tree_dirty": true,
+    "uncommitted_paths": [
+      "benchmarks/pyportfolioopt/",
+      "experiments/portfolio_optimization/",
+      "tests/python/test_portfolio_optimisation_vs_oracles.py"
+    ],
+    "provenance": "ran from 7ed4f1e6f0ba plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at e029d3df2b60",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_arch": "arm64",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_build_type": "Release",
+    "cpp_standard": "C++20",
+    "cpp_flags": "(none)",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "python_machine": "arm64",
+    "packages": {
+      "python": "3.12.14",
+      "quantrisk": "0.1.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "experiments/portfolio_optimization/results/estimator_out_of_sample.csv",
+      "sha256": "5d8aba9a1e3c9e3d35abddd895f99a55351344c66b3f8e126f0cab9cc46e99c0",
+      "bytes": "404029"
+    },
+    {
+      "path": "experiments/portfolio_optimization/results/solver_robustness.csv",
+      "sha256": "b9b9bd4a34700d544c91b2a79b39e38414cf7da66fb8e48fb02f66d1a8c12ea7",
+      "bytes": "5887"
+    },
+    {
+      "path": "experiments/portfolio_optimization/results/objective_comparison.csv",
+      "sha256": "764fb22c8b7f3f94521c94b4cb683ef8596b6c3c68d03f6c9a58d3765879d77b",
+      "bytes": "40865"
+    },
+    {
+      "path": "experiments/portfolio_optimization/results/estimator_cost_by_window.png",
+      "sha256": "4714c124ad499c14987d031a46c23ba2163cc3f7b40d0f734ebf06fcb4210d5e",
+      "bytes": "64942"
+    }
+  ]
+}

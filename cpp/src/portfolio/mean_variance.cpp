@@ -448,6 +448,16 @@ struct ActiveSetResult {
         note += "; the KKT certificate did NOT hold, so this point is reported as "
                 "unverified rather than presented as optimal";
     }
+    // An unreachable target still has an equality solution — it just needs short
+    // positions to get there. `feasible` already says false and the residual already
+    // carries the number, but the note is what ends up printed in a report, and a
+    // reader of the note alone should not come away thinking they hold a long portfolio.
+    if (active.certificate.bound_violation > active.certificate.tolerance) {
+        note += "; the weight bounds are violated by " +
+                std::to_string(active.certificate.bound_violation) +
+                ", so no portfolio satisfying the constraints reaches the requested "
+                "target and this answer is not investable as given";
+    }
     solution.note = note;
     return solution;
 }
@@ -521,7 +531,6 @@ PortfolioSolution maximum_sharpe(const OptimizerInputs &inputs,
     }
     const Real risk_free = request.risk_free_rate.value_or(0.0);
     auto [sigma, mu] = validated(inputs);
-    const Count assets = inputs.assets;
 
     // Bracket the frontier segment worth searching. The minimum-variance portfolio
     // is its left end; no long-only portfolio can return more than the best single
