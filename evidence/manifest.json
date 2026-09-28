@@ -1,21 +1,19 @@
 {
   "schema": "quantrisk-evidence-manifest/1",
-  "generated_utc": "2026-09-28T10:55:47+00:00",
+  "generated_utc": "2026-09-28T11:20:27+00:00",
   "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
   "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with scripts/verify_evidence_manifest.py.",
   "repository": {
-    "git_commit": "e91ce106fc528946f9542fa15d4187bcb3bc4f88",
-    "git_describe": "v1.2.0-5-ge91ce10",
-    "working_tree_dirty": true,
-    "uncommitted_paths": [
-      "vidence/manifest.json"
-    ]
+    "git_commit": "ca42464dfadde4160e6c84702cc01098440011b7",
+    "git_describe": "v1.2.0-7-gca42464",
+    "working_tree_dirty": false,
+    "uncommitted_paths": []
   },
   "environment": {
     "quantrisk_version": "1.3.0",
-    "git_commit_at_run": "e91ce106fc52",
+    "git_commit_at_run": "ca42464dfadd",
     "binary_git_commit": "45b550974fa3",
-    "provenance": "ran from e91ce106fc52 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
+    "provenance": "the working tree is clean at ca42464dfadd but the extension binary was configured at 45b550974fa3; rebuild (uv pip install -e .) before trusting numbers that depend on C++ sources",
     "python_platform": "macOS-27.0-arm64-arm-64bit",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
@@ -569,7 +567,7 @@
       "content_sha256": "9522536ec7c0e271df3fcbadc21ac30aa4a18dc2c0d56785572adc7dcfdfb2f0",
       "bytes": 554,
       "generated_by_command": "uv run python experiments/two_factor_error_bound/run.py",
-      "generated_utc": "2026-09-28T10:47:07+00:00",
+      "generated_utc": "2026-09-28T11:18:46+00:00",
       "command_recorded_in": "experiments/two_factor_error_bound/results/two_factor_bound.json"
     },
     {
@@ -579,17 +577,17 @@
       "content_sha256": "880906a8416ec22c00b6e63d2743816c33fe96d020493b3ee444a01ec9a18876",
       "bytes": 57268,
       "generated_by_command": "uv run python experiments/two_factor_error_bound/run.py",
-      "generated_utc": "2026-09-28T10:47:07+00:00",
+      "generated_utc": "2026-09-28T11:18:46+00:00",
       "command_recorded_in": "experiments/two_factor_error_bound/results/two_factor_bound.json"
     },
     {
       "path": "experiments/two_factor_error_bound/results/two_factor_bound.json",
       "category": "statistical_experiment",
-      "sha256": "ec2882f9a4c1ab621462c4faa321d64797afa26e9eab62606172652599c3affa",
+      "sha256": "52811881730e8d411c657aae78762932f0e15eae76e1d3eed1456de1fc9b6447",
       "content_sha256": "74636d5718cb28618525fb6134b439198aae4fb0091197b6e7fcdc51940860f1",
-      "bytes": 189005,
+      "bytes": 188284,
       "generated_by_command": "uv run python experiments/two_factor_error_bound/run.py",
-      "generated_utc": "2026-09-28T10:47:07+00:00",
+      "generated_utc": "2026-09-28T11:18:46+00:00",
       "command_recorded_in": "experiments/two_factor_error_bound/results/two_factor_bound.json"
     },
     {
@@ -599,7 +597,7 @@
       "content_sha256": null,
       "bytes": 145572,
       "generated_by_command": "uv run python experiments/two_factor_error_bound/run.py",
-      "generated_utc": "2026-09-28T10:47:07+00:00",
+      "generated_utc": "2026-09-28T11:18:46+00:00",
       "command_recorded_in": "experiments/two_factor_error_bound/results/two_factor_bound.json"
     },
     {
@@ -805,7 +803,7 @@
   ],
   "totals": {
     "artifacts": 76,
-    "bytes": 6869756,
+    "bytes": 6869035,
     "by_category": {
       "correctness_benchmark": 8,
       "performance_benchmark": 1,
