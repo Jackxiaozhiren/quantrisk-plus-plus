@@ -192,7 +192,27 @@ frozen evidence remains unavailable, and this phase added 3 more artifacts to th
 
 ## 9. Gate
 
-**Phase 12: PASS.**
+**Phase 12: PASS.** Released as `v1.2.0` on 2026-09-28 at commit `dc15846`, marked latest, with the
+40-page technical report, `evidence/manifest.json`, `CITATION.cff` and a zip of the four suite
+artifacts attached; `v1.0.0` and `v1.1.0` are untouched. Every asset was downloaded back and
+compared by SHA-256 against the committed file it claims to be — the four inside the zip
+individually — because a release asset that differs from the tree it names would undercut the one
+thing this project sells. The first upload's zip came out named `p12-suite.zip`, after the local
+temporary file rather than the label intended for it, and was deleted and re-uploaded as
+`quantrisk-suite-results.zip` to match the convention of the earlier releases.
+
+All three CI lanes are green on that commit on `ubuntu-latest`: lint; build + 194 CTest + the
+Python lane, which prints **`297 passed, 4 skipped`** — the figure `docs/limitations.md` #63 and
+three documents now quote for this revision, and the environment-aware guard checked it on the
+runner rather than on this laptop; and the 13-member suite with `--require-all` in 121.9 s.
+
+The question this phase was asked is whether a bound can be stronger than a measurement. It can,
+in the specific way that matters here: the trap on `c = 6R/h^3` is an inequality between a computed
+remainder and the range of a computed function over a segment, so neither side is a tolerance, and
+the sign change it predicts was checked against data already frozen and hashed. Two of the four
+falsifications that failed first (§4) were of assertions that would have passed on wrong data — a
+pooled fit with meaningless sigma, and a magnitude-only stencil check that accepted a sign error.
+That is the argument for running the analysis before writing it down.
 
 The audit's third ranked item is delivered: a derivation with a statement, hypotheses, proof and
 consequences, checked by execution, with the failure of the naive version — a pooled slope eleven
