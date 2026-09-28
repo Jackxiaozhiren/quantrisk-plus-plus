@@ -618,6 +618,50 @@ def test_documents_that_count_the_validation_matrix_rows_agree_with_the_table() 
         )
 
 
+def test_the_validation_matrix_numbers_its_rows_once_and_in_order() -> None:
+    """Row *labels* are cited by other documents, so a duplicated number is a broken pointer.
+
+    The sibling test above counts rows, and counting cannot see a duplicate: two rows numbered 13
+    still make eighteen rows, and the phase that shipped that pair also shipped a prose reference
+    to "row 14" that pointed at the wrong table entry. Uniqueness and an unbroken sequence are
+    therefore separate facts, and the sequence has to be checked on the numeric prefix because
+    lettered sub-rows (`4b`, `9b`) are deliberate: they exist so a component can carry one row with
+    an oracle and one that admits it has none.
+    """
+    table = (REPO_ROOT / "docs" / "validation_matrix.md").read_text(encoding="utf-8")
+    labels = [match.group(1) for match in re.finditer(r"^\| (\d+[a-z]?) \|", table, flags=re.M)]
+    assert labels, "no rows found; the table's shape changed"
+    duplicates = sorted({label for label in labels if labels.count(label) > 1})
+    assert not duplicates, f"validation_matrix.md numbers more than one row {duplicates}"
+    bases = sorted({int(re.match(r"\d+", label).group(0)) for label in labels})
+    assert bases == list(range(1, len(bases) + 1)), (
+        f"row numbers skip: {bases}"
+    )
+    for reference in re.finditer(r"row (\d+)\b", table):
+        target = reference.group(1)
+        assert any(label.rstrip("abcdefghijklmnopqrstuvwxyz") == target for label in labels), (
+            f"the matrix cites row {target}, which it does not contain"
+        )
+
+
+def test_the_validation_matrix_heading_counts_its_own_caveat_paragraphs() -> None:
+    """"N rows that need the prose to be honest" is a count of the paragraphs under it.
+
+    A heading like that is the same kind of fact as a row total, and it rotted once already: the
+    section carried three paragraphs under a heading that said four. Deriving it from the body is
+    the only way the number stays true without someone remembering to recount.
+    """
+    table = (REPO_ROOT / "docs" / "validation_matrix.md").read_text(encoding="utf-8")
+    match = re.search(
+        r"^## (\w+) rows that need the prose to be honest$(.*?)^## ", table, flags=re.M | re.S
+    )
+    assert match, "the caveat section's heading no longer matches the counted form"
+    paragraphs = len(re.findall(r"^\*\*[^*\n]+\*\*", match.group(2), flags=re.M))
+    assert _as_int(match.group(1)) == paragraphs, (
+        f"the heading says {match.group(1)} rows and the section has {paragraphs} paragraphs"
+    )
+
+
 def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
     """The C++ totals are quoted in six places and changed under everyone this phase.
 

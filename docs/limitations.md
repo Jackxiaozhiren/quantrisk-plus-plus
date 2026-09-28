@@ -246,7 +246,7 @@ never removed just because a later phase shipped.
 
 56. **Resolved on first contact: the CI lane is proven on a runner, and the runner disagreed
     with the laptop.** `benchmark-suite` passes on `ubuntu-latest` in ~5m46s with
-    `--require-all`, so all thirteen members execute against live oracles and none can be skipped
+    `--require-all`, so all fourteen members execute against live oracles and none can be skipped
     silently. What the same runner caught was not in the new lane at all: the pre-existing
     `build-and-test` lane failed on a README assertion that demanded bit-exact agreement with a
     transcribed price, and glibc's libm is 1.7 ULP from Apple's. Local green said nothing about
@@ -304,15 +304,17 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 366 pytest tests with the
-    `oracles` extra installed, and the same tree collects 297 tests without it — the CI lane runs a
-    plain `uv sync`; its own full run printed `284 passed, 4 skipped` at the 353-test commit and
-    `295 passed, 4 skipped` at this one. Note that the two 284s are
-    different quantities that happen to coincide: `--collect-only` counts 284 test items, while the
-    run reports those 284 as passed plus four *additional* module-level skip records, so 288 outcomes
-    come from 284 collected items. Reading the numbers off the machine that produces them beats
-    deriving either by arithmetic on a laptop. The gap is 69 cases inside four modules that gate on a
-    module-level `pytest.importorskip` (for `sklearn`, `QuantLib` twice and `pypfopt`), and a module
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 388 pytest tests with
+    the `oracles` extra installed, and the same tree collects 319 tests without it — the CI lane
+    runs a plain `uv sync`, and that lane's own full run at this commit reports `319 passed, 4
+    skipped` where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
+    readings of that older commit are different quantities which happen to coincide:
+    `--collect-only` counted 284 test items while the run reported those 284 as passed plus
+    four *additional* module-level skip records, so 288 outcomes came from 284 collected items.
+    The same shape holds here — 323 outcomes from the 319 items `--collect-only` counts — which
+    is why neither number should be derived by arithmetic on the other. The gap is unchanged at
+    69 cases inside four modules that gate on a module-level `pytest.importorskip` (for
+    `sklearn`, `QuantLib` twice and `pypfopt`), and a module
     that skips at import reports **one** skip instead of the cases it holds. Those 69 are oracle
     comparisons a no-extra run never attempts. Both counts are honest; neither is "the" count.
     `v1.0.0`'s own documents quoted 330 and 319 for the same tag with no environment stated; 330 was
@@ -335,7 +337,7 @@ never removed just because a later phase shipped.
     no conclusion moved. The consequence is stated rather than smoothed: `verify_evidence_manifest.py`
     is a same-platform tamper check, and running it on a different libm would report CHANGED on
     result fields that are in fact the same result. CI therefore verifies *execution* on Linux (the
-    `benchmark-suite` lane runs all thirteen members with `--require-all`) and *byte equality* only on
+    `benchmark-suite` lane runs all fourteen members with `--require-all`) and *byte equality* only on
     the platform that produced the artifacts. `test_a_fresh_run_reproduces_the_committed_artifact_exactly`
     encodes the split: relative slack of 1e-12 on floats, exact equality on everything else. Making
     the chain platform-independent would require storing results at a stated precision rather than at
@@ -367,3 +369,52 @@ never removed just because a later phase shipped.
     the arithmetic floor of the analysis itself -- near a relative move of 3e-5 for the
     book used there -- scales with the size of the position, so it has to be re-measured
     for any other book rather than reused as a constant.
+## Phase 13 — the two-factor bound
+
+67. **The bound covers the factor pair it names.** It bounds the equity-index × volatility-level
+    interaction on a Black–Scholes European option book. The published `risk_off` scenario also
+    moves rates by −50bp and credit by +100bp, each mapped linearly by a duration and a credit
+    sensitivity; the convexity the map omits in *those* factors is a different set of derivatives
+    and is not bounded anywhere in this repository. Nor does the result travel to the Heston book:
+    the four third partials are closed forms of Black–Scholes, and the same argument there would
+    need a numerically differentiated `g'''` and would inherit its error.
+
+68. **"The error is quadratic" is a statement about the limit, and on this book the leading term
+    is not the largest term.** The quadratic `vanna*h*k + 0.5*volga*k^2` is what survives division
+    by `t^2` as the joint shock shrinks, and the fitted slope confirms it (1.9975 on the narrowest
+    crash window). At the size the published scenario actually uses it is a minority: the mixed
+    cubic `0.5*V_SSsigma*h^2*k` is 7.4× the entire quadratic and the quadratic alone predicts the
+    error with the wrong sign. Worse, the ranking is book-specific for a reason that has nothing to
+    do with the algebra: on the 90/100/110 book the K=90 and K=110 legs contribute −5089.09 and
+    +5628.57 of vanna and nearly cancel, leaving an aggregate of 192.33, so the quadratic is small
+    *here* by coincidence of the strikes. A concentrated book would rank differently, and the
+    `dominance_counts` field of the artifact is the only honest guide.
+
+69. **The direction along which the quadratic vanishes is predicted and not verified.** The form
+    `k*(vanna*h + 0.5*volga*k)` is zero at `k/h = -2*vanna/volga`, which is a closed-form claim
+    about a direction where the map should be unusually accurate. Its empirical counterpart is the
+    root of the full error, whose displacement from the prediction is `O(t)` in the shock size: a
+    bracket that locates it must have a width that shrinks with the very parameter being sent to
+    zero. The scan shipped in `ridge_probe` finds the root at 0.87× the prediction at scale 1, at
+    1.81× at scale 0.5, and not at all at scale 0.1 — which says something about the scan and
+    nothing about the ridge, so neither agreement nor disagreement is claimed anywhere.
+
+70. **No oracle in this project's dependency set publishes a vanna, a volga or a mixed third
+    partial.** QuantLib 1.43 as installed here exposes `delta`, `gamma`, `vega`, `theta`, `rho` and
+    `impliedVolatility` on `VanillaOption`, and stops there: `vanna`, `volga` and `speed` are not
+    wrapped in its Python surface. The five new closed forms are therefore validated by finite
+    differences taken along the *other* factor (Schwarz's theorem makes two such routes
+    independent of each other), by exact identities derived from the homogeneity relation
+    `vega = gamma*S^2*sigma*T`, and by call/put parity — which is L1 evidence plus a numerical
+    route, not an L2 comparison. `docs/validation_matrix.md` row 15 records that distinction rather
+    than letting the row read as benchmarked against a library.
+
+71. **The independent check of the third directional derivative works only at published shock
+    sizes.** Rebuilding `g'''` as the third derivative of the price along the ray needs a step
+    whose round-off is amplified by `1/h^3` against a book value near 1.09e5. At a large ray the
+    reconstruction agrees with the closed-form assembly to 3.9e-8 relative; on a ray where the
+    third derivative is a handful of units it does not converge at any step, because the quantity
+    being resolved is some orders of magnitude below the function it is differentiated from. The
+    inclusion is therefore re-checked at four published-size shocks and not along the shrinking
+    windows that carry the order claim, and `tests/python/test_two_factor_bound.py` says so beside
+    the constant.

@@ -7,7 +7,7 @@ key path they came from.
 
 This is the table PROJECT_SPEC.md §Phase 10 asks for: **Component · Method · Oracle ·
 Tolerance · Status · Evidence artifact**, over the twelve components §2.2 requires us to
-own an implementation of. It has eighteen rows rather than twelve because a component validated
+own an implementation of. It has twenty rows rather than twelve because a component validated
 two ways gets two rows — Black-Scholes has its oracle comparison and its identity checks, Monte
 Carlo has its price and its coverage, the backtest machinery has its synthetic arm and its
 real-data arm — and collapsing those would hide exactly the difference that matters: which rows
@@ -61,9 +61,11 @@ watching a number is marked *(measured)*.
 | 12 | **Stress engine** | `stress.run_scenario` (delta-gamma P&L map), `run_historical_scenarios`, `run_monte_carlo_scenarios`, `shift_covariance`; attribution and the level/dispersion split are fields on `ScenarioResult` | full Black-Scholes re-pricing of the same book (L2); accounting identity and Euler allocation (L1); parametric vs simulated VaR (L3) | `1.0e-9` rel on the Gaussian closed form, `abs 1e-8` on attribution residuals (`test_stress_vs_oracles.py:35`); MC arm `2%` rel. **Measured** factor and position attribution residuals `0.0`, VaR decomposition residual `0.0`; linearisation error `1.33e-4` at a 1% shock → `0.488` at 40% | validated for the map and the accounting; the *scenario set* has no oracle — it is a choice, not a computation | `experiments/stress_testing/results/stress_testing_study.json`, `linearisation_error.csv` + `.png` |
 | 13 | **Same estimators on real market data** | rows 7, 9, 9b and 10 re-run on 586 out-of-sample days of three FRED series (10y par yield, 10y breakeven, VIX), trailing 250-day windows | **none, by construction.** A sample carries no independent truth, which is why this row reports realised violation rates with exact binomial intervals rather than an error against an oracle | no tolerance: the interval *is* the claim. **Measured** Gaussian 99 % realised `2.048 %` `[1.062 %, 3.550 %]` — excludes nominal; historical 99 % `1.365 %` `[0.591 %, 2.672 %]` — covers it. Kupiec `0.160`, independence `0.287`, conditional coverage `0.211`: no test rejects | validated (L1 only) — the arithmetic and the intervals are checkable, the calibration claim is an empirical one and is labelled as such | `experiments/real_data_risk_study/results/real_data_risk_study.json`, `real_data_violation_coverage.png`; limitations #61–62 |
 
-| 13 | **Third and fourth spot sensitivities** | `pricing.black_scholes_spot_derivatives` (closed forms `V^{(3)} = -(\Gamma/S)(1 + d_1/v)` and `V^{(4)} = (\Gamma/S^2)(A^2 + A - 1/v^2)`) | a five-point central difference of this project's own gamma (and of the closed third derivative), plus a difference of QuantLib's delta for the third | asserted in C++ and Python at `abs 1e-9` with the step justified next to the tolerance. **Measured** `2.0e-15` / `1.0e-15` at the reference point, worst over the 7-rung ladder `5.0e-14` / `1.3e-13`; call/put equality exact | validated, with the caveat in limitation #65: no reference library in this dependency set publishes either derivative, so the anchor is a difference scheme and a shared-gamma risk remains | `tests/cpp/test_black_scholes.cpp`, `tests/python/test_linearisation_bound.py` |
-| 14 | **Stress-map truncation bound** | `stress.run_scenario`'s delta-gamma map against its own Taylor remainder: `|R| <= (1/6) sup|V^{(3)}| |h|^3`, and the sharp Lagrange trapping of `c = 6R/h^3` between the path's extremes of `V^{(3)}` | none available in the oracle sense: a remainder is not a second implementation of a price. The check is that the coefficient must lie inside a range computed from the same closed forms along the segment | **Measured** 0 violations over 618 shocks (18 swept, 600 dense); `|R|/bound` from 0.9962 to 0.2842; slope `2.9710 -> 2.9988` down and `3.0253 -> 3.0012` up as the window shrinks; remainder zero at a 21.1446 % move, inside the published 20-30 % sign-change bracket | validated (L1 only) — an identity and an inequality, checked against data frozen before the derivation | `experiments/linearisation_error_bound/results/linearisation_error_bound.json`, `docs/analysis/delta_gamma_error_bound.md` |
-## Four rows that need the prose to be honest
+| 14 | **Third and fourth spot sensitivities** | `pricing.black_scholes_spot_derivatives` (closed forms `V^{(3)} = -(\Gamma/S)(1 + d_1/v)` and `V^{(4)} = (\Gamma/S^2)(A^2 + A - 1/v^2)`) | a five-point central difference of this project's own gamma (and of the closed third derivative), plus a difference of QuantLib's delta for the third | asserted in C++ and Python at `abs 1e-9` with the step justified next to the tolerance. **Measured** `2.0e-15` / `1.0e-15` at the reference point, worst over the 7-rung ladder `5.0e-14` / `1.3e-13`; call/put equality exact | validated, with the caveat in limitation #65: no reference library in this dependency set publishes either derivative, so the anchor is a difference scheme and a shared-gamma risk remains | `tests/cpp/test_black_scholes.cpp`, `tests/python/test_linearisation_bound.py` |
+| 15 | **Stress-map truncation bound** | `stress.run_scenario`'s delta-gamma map against its own Taylor remainder: `|R| <= (1/6) sup|V^{(3)}| |h|^3`, and the sharp Lagrange trapping of `c = 6R/h^3` between the path's extremes of `V^{(3)}` | none available in the oracle sense: a remainder is not a second implementation of a price. The check is that the coefficient must lie inside a range computed from the same closed forms along the segment | **Measured** 0 violations over 618 shocks (18 swept, 600 dense); `|R|/bound` from 0.9962 to 0.2842; slope `2.9710 -> 2.9988` down and `3.0253 -> 3.0012` up as the window shrinks; remainder zero at a 21.1446 % move, inside the published 20-30 % sign-change bracket | validated (L1 only) — an identity and an inequality, checked against data frozen before the derivation | `experiments/linearisation_error_bound/results/linearisation_error_bound.json`, `docs/analysis/delta_gamma_error_bound.md` |
+| 16 | **Mixed spot/volatility sensitivities** | `pricing.black_scholes_vol_cross_derivatives` (vanna `= -e^{-qT} phi(d1) d2 / sigma`, volga `= vega d1 d2 / sigma`) and `black_scholes_mixed_third_derivatives` (`V_SSsigma`, `V_Sssigma`, `V_Sssss`) | **no oracle exists in this dependency set**: QuantLib 1.43's `VanillaOption` surface stops at delta/gamma/vega/theta/rho. The checks are five-point differences taken along the *other* factor (Schwarz makes the two vanna routes independent of each other), the exact identities obtained by differentiating `vega = gamma S^2 sigma T`, and call/put parity | slope routes `1e-8` relative + `1e-13` absolute, curvature routes `1e-4` + `1e-8` because a second stencil cannot share a band with a first. **Measured** worst residual 1.6e-2 of its own band over a 9-rung ladder; the two vanna routes agree to 1.4e-7 with no formula on either side; identities to 1.1e-16 / 4.3e-14; call/put equality exact; 9 deliberate transcription slips all caught | validated (L1 only) — differences and identities, not a second implementation; limitation #70 names the gap | `tests/cpp/test_black_scholes.cpp`, `tests/python/test_two_factor_bound.py` |
+| 17 | **Two-factor truncation bound** | the map's joint-shock error against `vanna*h*k + 0.5*volga*k^2` plus `(1/6) g'''(xi)`, where `g'''` is the third directional derivative along the ray `(h, k)` | none in the oracle sense — a remainder is not a second price. The check is that `6*(error - quadratic)` must lie inside the segment's own range of `g'''`, re-derived in Python as a third difference of the *price* | **Measured** 0 violations over 132 joint shocks up to a 30 % equity move with +20 vol points; fitted slope of the error against shock size converges to 2.0 on all four joint rays (1.9975 narrowest) and stays 3.0 on a pure-spot ray; on the published `risk_off` the error −5320.79 lies in [−6063.95, −4135.87], which excludes zero | validated (L1 only) — an inequality plus an identity, and the leading term is *not* the largest term at published sizes (limitation #68) | `experiments/two_factor_error_bound/results/two_factor_bound.json`, `docs/analysis/two_factor_error_bound.md` |
+## Five rows that need the prose to be honest
 
 **The rho tolerance is not one number.** `test_pricing_vs_quantlib.py` asserts `1e-8`
 relative on five curated cases and passes. The benchmark sweeps 18,816 rows including
@@ -90,6 +92,24 @@ independent implementation of a management assumption. The attribution and decom
 residuals are exactly zero, which is an identity check on our own algebra — necessary, and
 not evidence about markets.
 
+**The new sensitivities have no oracle, and the row says so.** QuantLib 1.43 as installed here
+exposes `delta`, `gamma`, `vega`, `theta`, `rho` and nothing second-order in two factors: `vanna`,
+`volga` and `speed` are not in its Python surface. So row 16 is validated by finite differences
+taken along the *other* factor, by identities derived from `vega = gamma S^2 sigma T`, and by
+parity — which is stronger than it sounds (the two routes to vanna share no formula, and agree to
+`1.4e-7` with no closed form on either side) but is still L1, not a comparison against someone
+else's implementation. A wrong gamma would contaminate both sides of some of these checks, which
+is limitation #70 rather than a footnote here.
+
+**On the two-factor row the leading term is not the largest term.** Row 17's claim is that the
+map's joint-shock error is quadratic, and the fitted slope confirms it (2.0 on four rays, 3.0 on a
+pure-spot ray). At the size the published `risk_off` scenario uses, the quadratic is `+788` and the
+error is `−5321`: the leading term of the limit points the wrong way, because a cubic term
+`0.5 V_SSsigma h^2 k` — gamma applied at a volatility the move has already changed — is 7.4× larger.
+What survives at every size is the *inequality*, which holds on 132/132 swept shocks. Quoting the
+order without the size would read as "expect ~800 of error" where the defensible statement is
+"between 4136 and 6064, and the sign is negative".
+
 ## What this matrix does not cover
 
 - **No component is validated against real market data.** Every statistical claim in rows
@@ -103,13 +123,13 @@ not evidence about markets.
   workload — that is, slower than a vectorised NumPy path at 200k paths. The speedup moves
   by several percent between runs, so no single figure from that file should be quoted as
   if it were a constant.
-- **The 66 numbered limitations in `docs/limitations.md` are the complete list of what is
+- **The 71 numbered limitations in `docs/limitations.md` are the complete list of what is
   not claimed.** Where a row above says "weaker" or "partially", it points into that file.
 
 ## Regenerating
 
 ```bash
-uv run python scripts/run_benchmark_suite.py            # all 13 members
+uv run python scripts/run_benchmark_suite.py            # all 14 members
 uv run python scripts/run_benchmark_suite.py --no-run   # re-check the artifact bindings only
 uv run python scripts/build_evidence_manifest.py        # re-hash into evidence/manifest.json
 uv run python scripts/verify_evidence_manifest.py       # prove nothing changed since

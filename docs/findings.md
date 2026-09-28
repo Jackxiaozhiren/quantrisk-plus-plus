@@ -1,10 +1,10 @@
 # Findings
 
-Five results worth ninety seconds. Each is a number, the confound that makes it mean
+Six results worth ninety seconds. Each is a number, the confound that makes it mean
 something, and the artifact that regenerates it. Everything here is measured; nothing is
 asserted from a model's reputation.
 
-**On uncertainty, because the first three numbers are deterministic, the fourth is an interval, and the fifth is exact analysis against floating-point data.**
+**On uncertainty, because the first three numbers are deterministic, the fourth is an interval, and the fifth and sixth are exact analysis against floating-point data.**
 Findings 1 and 2 are functions of a fully specified, seeded data-generating process: given the
 same build, every figure reproduces to the last digit, and the ranges quoted
 (1.13×–1.26×, 1.57×–1.60×) are the spread *across window lengths and estimators*, which is the
@@ -194,6 +194,52 @@ a stress number is truncation is computable, how much is management choice is no
 - **Artifact:** `experiments/linearisation_error_bound/results/linearisation_error_bound.json`
   (`headline`, `rows`, `proposition`, `asymptotics`), `linearisation_bound.csv`,
   `linearisation_bound.png`; derivation in `docs/analysis/delta_gamma_error_bound.md`.
+
+## 6. Two factors make the stress map wrong in a different way, and it is not the way the theory names
+
+Phase 12 bounded the map's error when one factor moves. The published stress set does not contain
+one-factor scenarios: `risk_off` moves equity −15 % **and** volatility +6 points. The map treats
+volatility to first order — `out.volatility = vega * absolute` at `cpp/src/stress/engine.cpp:116`,
+with no convexity and no cross term — so a joint shock costs it `vanna·h·k + ½·volga·k²`, and the
+error stops being cubic in the shock size and becomes **quadratic**.
+
+`experiments/two_factor_error_bound/` checks that rather than asserting it, against
+`stress.run_scenario`'s own output on the published book with the published scenario imported from
+`experiments/stress_testing/run.py`. Fitted over four successively narrower windows, the log-log
+slope of the error against shock size runs **1.9098 → 1.9762 → 1.9929 → 1.9975** on a crash ray and
+settles at 2 on all four joint directions, while a pure-spot ray on the same book holds at
+**3.0009** — which is Phase 12's answer, reconciled rather than replaced. The sharp Lagrange form,
+that `6·(error − quadratic)` must lie inside the segment's own range of the third directional
+derivative, holds on **132 of 132** swept joint shocks, out to a 30 % equity move with +20
+volatility points.
+
+Then the result that changes a decision. At the published `risk_off` sizes the closed-form quadratic
+is **+787.96** and the error is **−5320.79**: the leading term of the limit is not merely
+under-sized, it points the opposite way. The largest omitted piece is `½·V_{SSσ}·h²·k` =
+**−8402.16**, which is gamma evaluated at the base volatility and applied across a move that has
+already changed it — 7.4× the entire quadratic. So the cheap improvement to this map is not vanna
+and volga; it is re-striking gamma at the shocked volatility. Counted across the whole grid the
+ranking splits three ways — mixed-cubic 64 cells, spot-cubic 36, volga 32, and the mixed `vanna·h·k`
+term that the order argument singles out is the largest **nowhere**.
+
+What survives from the inequality is a sign, not a magnitude estimate: on `risk_off` the error lies
+in **[−6063.95, −4135.87]**, which excludes zero, so the map is *provably* reporting the loss too
+high there, by between 4136 and 6064 on a book of 108,911. The interval's width is 36 % of the
+error it bounds, which is what keeps it a bound rather than a tautology.
+
+Two limits are stated rather than buried. The near-cancellation of the quadratic is a property of
+*this* book — its K=90 and K=110 legs contribute −5089.09 and +5628.57 of vanna, leaving 192.33 —
+so a concentrated book would rank the terms differently, and `dominance_counts` in the artifact is
+the only honest guide. And the direction where the quadratic vanishes is a closed-form prediction
+whose empirical counterpart cannot be located without a bracket that shrinks with the shock: the
+probe ships in the artifact precisely so that this refusal is checkable rather than trusted.
+
+- **Confound identified:** "second order" describes a limit, and a limit statement quoted at
+  published shock sizes can carry the wrong sign while being asymptotically correct.
+- **Artifact:** `experiments/two_factor_error_bound/results/two_factor_bound.json` (`headline`,
+  `slopes`, `dominance_counts`, `published_scenario_bound`, `ridge_probe`), `two_factor_bound.csv`,
+  `published_scenario_bound.csv`, `two_factor_bound.png`; derivation in
+  `docs/analysis/two_factor_error_bound.md`.
 
 ---
 
