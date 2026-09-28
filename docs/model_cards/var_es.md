@@ -1,7 +1,8 @@
 # Model card — market risk: VaR, expected shortfall, bootstrap intervals, coverage backtests
 
 Phase 5 · written 2026-09-26 · status: implemented, validated on synthetic data with
-known population values. No real return series is used anywhere in this card.
+known population values. No real return series is used anywhere in this card — the real-data
+arm is Phase 11's `experiments/real_data_risk_study/`, summarised under limitations below.
 
 ## What is implemented
 
@@ -84,8 +85,16 @@ explanation that promises a one-sided safety margin from a normal fit is false.
 
 ## Known limitations
 
-1. Everything here is validated on synthetic data whose truth is known. Real asset
-   returns are not stationary, and nothing in this card licenses a claim about them.
+1. Everything *in this card* is validated on synthetic data whose truth is known, because
+   a bias can only be measured against an answer. Phase 11 added the out-of-sample check on real
+   daily market observations (`experiments/real_data_risk_study/`): Gaussian 99 % VaR realised
+   **2.048 %** against 1 % nominal over 586 scored days, exact interval **[1.062 %, 3.550 %]** —
+   which excludes nominal — while historical simulation realised 1.365 %, [0.591 %, 2.672 %],
+   covering it. That reproduces limitation 3's prediction on data nobody generated. It does not
+   make this card empirical: the factor *moves* there are observations and the exposures are an
+   assumption (`docs/limitations.md` #61), the inputs are FRED's current revision rather than the
+   vintage of each date (#62), and real asset returns are still not stationary, which nothing here
+   addresses.
 2. Empirical VaR at 99 % with 250 observations averages 2 or 3 order statistics; the
    estimate is dominated by which days happened to be in the sample. Use the interval,
    not the point.

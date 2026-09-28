@@ -91,7 +91,9 @@ a failure.
 **The pytest count depends on which extras you installed, and a document that prints one number
 without saying which is wrong.** The sequence above yields **353 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — no `oracles` extra — and the same
-tree collects 284 tests without it, and the runner's own full run prints `284 passed, 4 skipped`.
+tree collects 284 tests without it, and the runner's own full run prints `284 passed, 4 skipped` —
+two different quantities that happen to share a number, since the four skips are module-level records
+reported *in addition to* the 284 collected items.
 That figure is read off the machine that produces it, and the difference of 69 is four modules that gate on
 a module-level `pytest.importorskip` (for `sklearn`, `QuantLib` twice and `pypfopt`). 69 oracle
 comparison cases go unattempted there, and nothing is broken when they do — what would be broken is

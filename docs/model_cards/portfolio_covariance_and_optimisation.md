@@ -2,7 +2,8 @@
 
 Phase 6 · written 2026-09-27 · status: implemented, validated against live reference
 solvers, studied on synthetic returns with an analytically known forward covariance.
-No real return series is used anywhere in this card.
+No real return series is used anywhere in this card — Phase 11 ranks the same three estimators on
+real factor series and the ordering reverses; see the limitation below.
 
 ## What is implemented
 
@@ -100,7 +101,15 @@ measured value beside the asserted bound.
   mistaken for skill — it is the worst of the four objectives on every forward metric.
 - Not a trading system. No transaction costs, no capacity limits, no borrow costs; the
   turnover column is descriptive, not a P&L.
-- Not validated on real returns. Every figure above comes from synthetic processes whose
+- Not validated on real returns *in this card*. Phase 11's
+  `experiments/real_data_risk_study/` ranks sample, EWMA and shrinkage covariance by realised
+  out-of-sample portfolio variance over 582 rolling windows of three real FRED factor series and
+  gets **ewma < sample < shrinkage** — the two ends of this card's mean forward-variance ratio
+  (**shrinkage 1.169 < sample 1.183 < ewma 1.241**) exchange places. Neither result is a bug:
+  shrinkage wins where a short window makes the sample covariance unstable, which is the regime the
+  synthetic process was built to create. Read as: an estimator ranking is a property of the process
+  it was measured on, which is why this card publishes a ratio against an informed solver rather
+  than a winner. Cost $0; the series are committed offline fixtures. Every figure above comes from synthetic processes whose
   truth is known analytically, which is what makes the ratios meaningful and also what
   makes them silent about actual markets.
 - Not a portfolio for a live book: long-only, fully invested, single-period, and the
