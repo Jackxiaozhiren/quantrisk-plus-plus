@@ -287,7 +287,13 @@ Still open after the phase:
 
 ## 9. Gate
 
-**Phase 11: PASS.**
+**Phase 11: PASS.** Released as `v1.1.0` on 2026-09-28 at commit `c5b8c5b`, with the 38-page
+technical report, `evidence/manifest.json`, `CITATION.cff` and a zip of the four suite artifacts
+attached; `v1.0.0` is left untouched and `v1.1.0` is the repository's latest release. Every asset
+was downloaded back and compared by SHA-256 against the committed file it claims to be, including
+the four inside the zip. All three CI lanes are green on that commit on `ubuntu-latest`: lint, then
+build + 190 CTest + the pytest lane (`284 passed, 4 skipped`), then the 12-member suite with
+`--require-all` in 163 s.
 
 The audit question was "which of the synthetic conclusions survive real data", and the answer is
 recorded with the parts that did not survive intact: one prediction confirmed with a significant
