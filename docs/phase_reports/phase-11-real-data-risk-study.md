@@ -181,6 +181,30 @@ CI's own log for that commit prints **261 passed, 4 skipped**. Four guards now b
 their sources: the registry (`len(MEMBERS)` and the per-kind breakdown), the limitations file, the
 frozen roll-up's recorded command, and a `pytest --collect-only` subprocess for the test count.
 
+**9. A test suite that damaged the evidence it was measuring.** The real-data study's offline
+tests executed `run.py` with `cwd=REPO_ROOT`, and the script writes to
+`Path(__file__).parent / "results"` — so every `pytest` rewrote a committed artifact: new
+timestamp, new `environment` block, tree left dirty, and `verify_evidence_manifest.py` answering
+VOLATILE for a file nothing had regenerated on purpose. Reproduced deliberately to falsify the new
+guard: pointing the reproducibility test back at the in-repo script makes it fail with
+`the test run modified a committed artifact`. Fixed by running a *copy* of the script placed in
+`tmp_path`, so the results directory it writes is elsewhere, and by adding a session-scoped
+autouse fixture in `tests/python/conftest.py` that hashes every file under `benchmarks/`,
+`experiments/`, `data/fixtures/` and `evidence/` before the session and asserts at teardown that
+none of them moved. Verified: a full `pytest` run now leaves `git status` clean.
+
+**10. Two destructive edits by the author of this phase, both recoverable, both worth recording.**
+Mid-phase, `git checkout README.md` — typed as a convenience undo of one experimental edit —
+discarded nine uncommitted documentation edits, because in a tree deliberately left dirty for a
+whole phase `HEAD` is not where the work is. Later, a `Write` to `tests/python/conftest.py`
+overwrote an existing tracked file on the mistaken premise that it did not exist; an earlier `ls`
+in the same session had proved it did. Both were recovered (the first from the session transcript,
+the second exactly, from `git show HEAD:...`). Neither should have been possible: the rule they
+teach is that restoring a file needs a copy made *before* the experiment, and that a whole-file
+write requires confirming the path is absent first. Recorded here rather than in the limitations
+file because it is a process defect in the tooling that produces the evidence, not a property of
+the models.
+
 **The results themselves.**
 
 | Question | Measured | Against |
@@ -233,12 +257,9 @@ Still open after the phase:
   inside the session that is asserting about them.
 - **`MEMBERS` is still hand-registered** (#58). Phase 11 added the key-path, kind-breakdown and
   skippable-count guards, but a benchmark script that was never registered is still simply absent.
-- **A process note worth keeping.** Mid-phase, a `git checkout README.md` used to undo one
-  experimental edit discarded nine uncommitted documentation edits made earlier the same session.
-  They were recoverable only because they existed verbatim in the transcript. The rule it teaches:
-  in a tree that is deliberately left dirty for a whole phase, restore a file from a copy made
-  before the experiment (`cp f f.bak`), never from git — `git checkout` resolves to HEAD, and HEAD
-  is not where the work is.
+- **Author behaviour is part of the harness.** See §6 findings 9 and 10. The evidence chain now
+  detects a test that writes into it, but nothing detects an agent that restores the wrong
+  revision of a document; that remains a manual discipline.
 
 ## 9. Gate
 

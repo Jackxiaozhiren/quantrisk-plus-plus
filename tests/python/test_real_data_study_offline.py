@@ -12,6 +12,7 @@ asserted directly.
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -24,6 +25,25 @@ SCRIPT = REPO_ROOT / "experiments" / "real_data_risk_study" / "run.py"
 ARTIFACT = (
     REPO_ROOT / "experiments" / "real_data_risk_study" / "results" / "real_data_risk_study.json"
 )
+
+
+def _script_copy(destination: Path) -> Path:
+    """The experiment, relocated so running it cannot overwrite frozen evidence.
+
+    `run.py` writes to `Path(__file__).parent / "results"`, so a copy placed in a temporary
+    directory writes there instead. This matters: the first version of these tests executed the
+    script in the repository, and a normal `pytest` run therefore rewrote a committed artifact
+    on every invocation — new timestamp, new provenance block, tree left dirty, and the evidence
+    manifest reporting VOLATILE for a file nothing had deliberately regenerated. A test that
+    mutates the evidence it is meant to verify is not a test of reproducibility, it is a source
+    of variation.
+    """
+    directory = destination / "real_data_risk_study"
+    directory.mkdir(parents=True, exist_ok=True)
+    copy = directory / "run.py"
+    shutil.copyfile(SCRIPT, copy)
+    return copy
+
 
 HISTORY_SERIES = ("DGS10", "T10YIE", "VIXCLS")
 WINDOW = "2014-01-01_2026-09-26"
@@ -78,7 +98,7 @@ def test_the_experiment_runs_with_sockets_disabled(tmp_path: Path) -> None:
     )
     environment = {"PYTHONPATH": str(tmp_path), "PATH": "/usr/bin:/bin", "HOME": str(tmp_path)}
     completed = subprocess.run(
-        [sys.executable, str(SCRIPT)],
+        [sys.executable, str(_script_copy(tmp_path))],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -114,27 +134,24 @@ def test_a_fresh_run_reproduces_the_committed_artifact_exactly(tmp_path: Path) -
     live source, so there is no legitimate source of variation left to allow for.
     """
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
-    backup = tmp_path / "committed.json"
-    backup.write_text(json.dumps(committed), encoding="utf-8")
-    try:
-        completed = subprocess.run(
-            [sys.executable, str(SCRIPT)],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
-            timeout=900,
-            check=False,
-        )
-        assert completed.returncode == 0, completed.stderr[-3000:]
-        fresh = json.loads(ARTIFACT.read_text(encoding="utf-8"))
-        assert _results_only(fresh) == _results_only(committed), (
-            "a fresh run of the real-data study does not reproduce the committed results"
-        )
-    finally:
-        ARTIFACT.write_text(
-            json.dumps(json.loads(backup.read_text(encoding="utf-8")), indent=2) + "\n",
-            encoding="utf-8",
-        )
+    before = ARTIFACT.read_bytes()
+    script = _script_copy(tmp_path)
+    completed = subprocess.run(
+        [sys.executable, str(script)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=900,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr[-3000:]
+    fresh = json.loads((script.parent / "results" / "real_data_risk_study.json").read_text())
+    assert _results_only(fresh) == _results_only(committed), (
+        "a fresh run of the real-data study does not reproduce the committed results"
+    )
+    # The committed artifact is the evidence; a test that regenerated it would make the next
+    # assertion below about the test rather than about the experiment.
+    assert ARTIFACT.read_bytes() == before, "the test run modified a committed artifact"
 
 
 def test_headline_finding_gaussian_99_miscalibrates_on_real_data() -> None:

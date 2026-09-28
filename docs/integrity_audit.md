@@ -182,6 +182,19 @@ falsification run that needed it should have used the copy it already had in `/t
 because the audit's subject is the reliability of what this repository asserts, and an agent that
 loses a day of documentation and notices only afterwards is part of that subject.
 
+**18. The test suite wrote into the frozen evidence on every run.** The real-data study's offline
+tests executed `experiments/real_data_risk_study/run.py` in place, and the script writes beside
+itself, so `pytest` regenerated a committed artifact — new timestamp, new provenance block, dirty
+tree — and `verify_evidence_manifest.py` then reported it VOLATILE for a change nothing had
+deliberately made. A check that cries wolf because the *test runner* moved a file is the same
+failure this audit already documented in §4, where byte hashes could not distinguish a re-run from
+tampering; this time the re-run was coming from inside the verification suite. Fixed by running a
+copy of the script in `tmp_path`, and structurally by a session fixture in
+`tests/python/conftest.py` that hashes every file under `benchmarks/`, `experiments/`,
+`data/fixtures/` and `evidence/` at session start and fails the session if any of them moved.
+Falsified by planting a test that appends a newline to a stress artifact: the session assertion
+fires. A full run now leaves `git status` clean, which it did not before.
+
 **What the new study itself established.** `experiments/real_data_risk_study/` is the twelfth suite
 member; its artifact refuses three questions rather than proxying them; and finding 4 in
 `docs/findings.md` now carries the project's first empirical result *and* its first result that
