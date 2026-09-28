@@ -85,7 +85,7 @@ This phase pays part of that debt and reports what survived the exchange.
 
 ```bash
 uv run pytest -q                                            # 353 passed with the oracles extra
-uv run pytest -q                                            # 284 collected without it (CI lane)
+uv run pytest -q                                            # 284 passed, 4 skipped in the CI lane
 uv run pytest tests/python/test_real_data_study_offline.py  # 11 passed
 uv run pytest tests/python/test_real_data_findings_prose.py # 7 passed
 uv run ctest --test-dir build/dev                           # 190 passed (core unchanged)
@@ -116,8 +116,9 @@ Every new assertion was **falsified before being trusted**:
 | Gate | Result |
 |---|---|
 | pytest, with the `oracles` extra | **353 passed**, 0 failed, 0 skipped |
-| pytest in the `build-and-test` CI lane (no `oracles` extra) | **284 collected**, of which four oracle-gated modules skip as four records — see #63 |
+| pytest in the `build-and-test` CI lane (no `oracles` extra) | **284 passed, 4 skipped** — the four are whole oracle-gated modules, not four cases; see #63 |
 | First CI run of this phase | **2 failed** — the two cross-platform assertions in finding 11 |
+| Final CI run, on `26110b8` | **all three lanes green** — lint, build + C++ tests + Python tests, and the 12-member suite with `--require-all` (163.4 s on the runner) |
 | CTest | **190 passed**, unchanged; the C++ core was not touched this phase |
 | `quantrisk validate` | **7/7**, worst residual 2.22e-16 |
 | Benchmark suite | **12/12 executed and passed, 0 failed, 0 skipped**, 62–69 s |

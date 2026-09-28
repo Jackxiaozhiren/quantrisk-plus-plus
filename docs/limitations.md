@@ -306,8 +306,8 @@ never removed just because a later phase shipped.
 63. **The test count is a property of the environment, and a document quoting one number
     without saying which is now wrong.** `uv run pytest -q` at HEAD gives 353 pytest tests with the
     `oracles` extra installed, and the same tree collects 284 tests without it — the CI lane runs a
-    plain `uv sync`, and the 284 is what that runner's own `pytest --collect-only` printed rather
-    than arithmetic done on a laptop. The gap is 69 cases inside four modules that gate on a
+    plain `uv sync`, and its own full run prints `284 passed, 4 skipped`, so the 284 is read off the
+    machine that produces it rather than derived by arithmetic on a laptop. The gap is 69 cases inside four modules that gate on a
     module-level `pytest.importorskip` (for `sklearn`, `QuantLib` twice and `pypfopt`), and a module
     that skips at import reports **one** skip instead of the cases it holds. Those 69 are oracle
     comparisons a no-extra run never attempts. Both counts are honest; neither is "the" count.
