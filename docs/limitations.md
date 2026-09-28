@@ -435,3 +435,16 @@ never removed just because a later phase shipped.
     into a boolean. The lesson is not "CI is flaky": a stricter-looking assertion felt more
     rigorous and was in fact testing the platform, and two rounds of weakening it locally would
     have hidden that. Related: #59, #64, #71.
+
+73. **The reproduction test for this experiment was itself the third instance of the cross-platform
+    float mistake, and the runner caught it.** It re-ran the experiment in a temporary tree and
+    compared the result against the committed artifact with plain equality — which passed here and
+    failed on Linux at `1.9998100833` against `1.9998084571`, 8e-7 relative in a *fitted slope*.
+    The slack that works for the inputs to a regression does not work for its output: the tightest
+    sample whose residual is 1281x the double spacing of the values subtracted to produce it
+    (#71, #72) drags the fitted exponent around at the 1e-6 level. Fixed by a comparator that gives
+    floats `1e-5` relative plus `1e-12` absolute and nothing else any slack at all — counts,
+    booleans, strings and structure must match exactly — and calibrated by feeding it both a
+    difference below the slack (tolerated) and eight kinds of real change (each rejected). Recorded
+    because the project already had limitations #64 and #71 saying this, and a freshly written test
+    repeated the error anyway: a lesson filed is not a lesson applied to the next file.

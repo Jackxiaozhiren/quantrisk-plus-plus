@@ -322,10 +322,23 @@ in a document whose entire purpose is saying how large the error is. The order s
 bundled with the sentence that names its limits, and the practical recommendation moved from adding
 vanna and volga to re-striking gamma.
 
+**29. My own reproduction test repeated the mistake the phase had just documented twice.** By the
+time the third CI run went red the pattern was unmistakable: the experiment's guards, then their
+replacement, then a test whose whole job was checking reproducibility, each in turn asserted
+something that only holds on the libm that produced the committed bytes. The third failure was an
+8e-7 relative difference in a *fitted slope* compared for bit-equality, and the fix is a comparator
+that gives floats documented slack and everything else none — proven on both sides, eight kinds of
+real change rejected for one tolerated float drift. Limitation #73 is written in the past tense on
+purpose. The lesson is not that cross-platform floats need slack, which the repository already said
+in #64, #71 and #72, but that a new file does not inherit the old file's understanding; the check
+that catches it is a green run on the machine that is not this one.
+
 **Verified at this addendum, by execution.** 388 pytest with the `oracles` extra and 319 collected
 without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite members under
 `--require-all`, `verify_evidence_manifest.py` at 76 artifacts with 0 CHANGED / 0 VOLATILE / 0
 MISSING / 0 unlisted, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the 41-page report
 rebuilt and text-verified. Nine deliberate formula mutations were compiled and all nine were caught.
-The first two CI runs on this revision were both red, and both are recorded rather than re-run
-away: PyPI answered 503 mid-install on one lane, and the guard above failed on the other, twice.
+The first four CI runs on this revision were red, and each is recorded rather than re-run away: PyPI
+answered 503 mid-install on one lane, the convergence guard failed on the other twice over, and then
+the reproduction test failed in the same way. The fifth run is the first that was green on both
+platforms.

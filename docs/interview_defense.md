@@ -28,7 +28,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 72
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 73
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 

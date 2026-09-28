@@ -80,6 +80,26 @@ pure-spot windows compares noise. Convergence is now claimed only where the cond
 meaningful, every window is published rather than reduced to a boolean, and **no numerical band was
 moved** — 2 % on the ratio and 0.15 on the narrowest slope are the values the first commit carried.
 
+## Four CI runs, all red before the last, and each red was real
+
+This release reached the runner four times before it passed. Run 1: PyPI answered 503 mid-install on
+one lane, and on the other the convergence guard failed at a *stepwise* ordering of fit windows. Run
+2: the same lane failed on the replacement guard, which compared only the endpoints. Run 3: the
+experiment was green and the **reproduction test** — the check whose entire purpose is verifying
+reproducibility — failed on an 8e-7 relative difference in a fitted slope, compared for bit-equality.
+Run 4: both lanes green.
+
+Nothing was relaxed to get there, and the distinction matters, so it is stated concretely: every
+numerical band in this release carries the values from the first commit — 2 % on the
+error-to-quadratic ratio, 0.15 on the narrowest slope, 1e-8 and 1e-4 on the two stencil orders — and
+what changed is which comparisons are *claimed at all*. A fitted exponent over residuals that are
+themselves cancellation products carries noise at the 1e-6 level; asserting an ordering finer than
+that is testing the platform, not the model. The comparator now gives floats documented slack and
+gives counts, booleans, strings and structure none, and it is calibrated by being shown both a
+difference to tolerate and eight kinds of difference to reject. Limitations #71–73 and audit findings
+28–29 record all three rounds; the repository had already written this lesson down twice before a
+new file repeated it, which is the actual finding.
+
 ## Two documentation defects this release found in itself
 
 - **The validation matrix had carried two rows numbered 13** since `v1.2.0` added its row on top of
@@ -118,5 +138,5 @@ No oracle in this dependency set publishes a vanna, a volga or a mixed third par
 Python surface stops at vega — so the new closed forms rest on differences, exact identities and
 parity rather than an external comparison. A bound still says nothing about whether a scenario is
 plausible. And the wider gaps survive unchanged: no expected-return model, no term structure, no
-live feed, no re-pricing inside the stress layer, no PyPI package, no DOI — all **72 entries** in
+live feed, no re-pricing inside the stress layer, no PyPI package, no DOI — all **73 entries** in
 `docs/limitations.md`.

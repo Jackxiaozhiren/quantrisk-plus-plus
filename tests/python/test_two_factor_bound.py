@@ -552,7 +552,45 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
     for key in volatile:
         mine.pop(key, None)
         theirs.pop(key, None)
-    assert mine == theirs, "the reproduction differs from the committed artifact"
+    _assert_same_result(mine, theirs)
+
+
+def _assert_same_result(mine: object, theirs: object, path: str = "") -> None:
+    """Same result, allowing for the platform's last digits and nothing else.
+
+    Asserting plain equality passed on this laptop and failed on the Linux runner, where a fitted
+    slope came out 1.9998100833 against the committed 1.9998084571 — a relative difference of
+    8e-7, which is a few ulps of libm disagreement amplified through a log-log regression over
+    residuals that are themselves cancellation products. That is the fact limitations #64 and #71
+    already record about the numbers this experiment publishes, so the reproduction check has to
+    state it too rather than demand what only one platform can supply.
+
+    Floats therefore get 1e-5 relative slack with a 1e-12 absolute floor. Everything that carries a
+    conclusion still has to match exactly: integers (the 132 swept shocks, the zero inclusion
+    violations, the dominance counts), booleans (the interval excluding zero), strings (the scenario
+    name, the dominant term) and the shape of the structures themselves.
+    """
+    if isinstance(mine, bool) or isinstance(theirs, bool):
+        assert mine is theirs, f"{path}: {mine!r} is not {theirs!r}"
+        return
+    if isinstance(mine, float) and isinstance(theirs, float):
+        assert abs(mine - theirs) <= 1.0e-5 * abs(mine) + 1.0e-12, (
+            f"{path}: {mine!r} vs {theirs!r} differ by more than the cross-platform slack"
+        )
+        return
+    assert type(mine) is type(theirs), f"{path}: {type(mine).__name__} vs {type(theirs).__name__}"
+    if isinstance(mine, dict):
+        assert mine.keys() == theirs.keys(), (
+            f"{path}: keys differ, in one only: {sorted(set(mine) ^ set(theirs))}"
+        )
+        for key in mine:
+            _assert_same_result(mine[key], theirs[key], f"{path}.{key}")
+    elif isinstance(mine, list):
+        assert len(mine) == len(theirs), f"{path}: {len(mine)} vs {len(theirs)} entries"
+        for index, (left, right) in enumerate(zip(mine, theirs, strict=True)):
+            _assert_same_result(left, right, f"{path}[{index}]")
+    else:
+        assert mine == theirs, f"{path}: {mine!r} != {theirs!r}"
 
 
 def test_the_refusals_say_what_the_experiment_did_not_estimate() -> None:
