@@ -1,22 +1,19 @@
 {
   "schema": "quantrisk-evidence-manifest/1",
-  "generated_utc": "2026-09-28T02:35:08+00:00",
+  "generated_utc": "2026-09-28T02:35:22+00:00",
   "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
   "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with scripts/verify_evidence_manifest.py.",
   "repository": {
-    "git_commit": "c1e874cd707d0b58b1fb288a2f378a36fae0d990",
-    "git_describe": "v1.0.0-2-gc1e874c",
-    "working_tree_dirty": true,
-    "uncommitted_paths": [
-      "ocs/release_notes_v1.0.0.md",
-      "paper/technical_report.pdf"
-    ]
+    "git_commit": "ebdb520e2e1558a4a8a2bcf35927ceea4e9b1d18",
+    "git_describe": "v1.0.0-3-gebdb520",
+    "working_tree_dirty": false,
+    "uncommitted_paths": []
   },
   "environment": {
     "quantrisk_version": "1.0.0",
-    "git_commit_at_run": "c1e874cd707d",
+    "git_commit_at_run": "ebdb520e2e15",
     "binary_git_commit": "02fea3a1847f",
-    "provenance": "ran from c1e874cd707d plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 02fea3a1847f",
+    "provenance": "the working tree is clean at ebdb520e2e15 but the extension binary was configured at 02fea3a1847f; rebuild (uv pip install -e .) before trusting numbers that depend on C++ sources",
     "python_platform": "macOS-27.0-arm64-arm-64bit",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
