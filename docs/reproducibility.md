@@ -106,6 +106,16 @@ which is the same class of error as the one it was written to prevent. The C++ s
 CTest either way, because the C++ suite has no optional dependencies.
 
 ## What is *not* reproducible
+**The PDF of the technical report is built by hand, and CI does not check it.** `paper/technical_report.pdf`
+is committed as a release asset because a reviewer should not have to install a TeX distribution to read
+the work, and it is regenerated with `latexmk -pdf technical_report.tex` in `paper/`. Nothing on the
+runner verifies that the committed PDF matches the committed `.tex`: doing so needs a PDF text extractor,
+which is not a project dependency, and installing one to satisfy a documentation check would be the wrong
+trade. The consequence is real and happened once during Phase 11 — a failed `latexmk` invocation left a
+PDF asserting the old limitations count for one commit — so the rule the phase adopted is that the PDF is
+rebuilt in the same commit that changes any number the report quotes. The `.tex` itself is the source of
+truth, and every figure inside it is a reference to an artifact path, not a retyped value.
+
 
 **Timings, and only timings.** Three artifacts carry wall-clock columns and therefore change on
 every run: `benchmarks/performance/results/monte_carlo_speed.json` entirely, and the
