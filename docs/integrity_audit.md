@@ -260,6 +260,16 @@ sensitivities arrived as a separate struct and function rather than as fields on
 the only kind of change available here, which is worth knowing before someone tries to extend the
 Greeks struct and finds the bindings, the shims, the stubs and three documents in the way.
 
+**28. The runner caught a claim that was only true on one libm.** The convergence guard that was
+supposed to prove the error is quadratic asserted, in addition, that each narrower fit window beats
+the one before it. It passed on this laptop and failed on `benchmark-suite` with
+`3.000121 -> 2.996952` on the pure-spot ray — every value within 0.003 of the theory number 3, so
+the estimate was fine and only the ordering broke. The ordering compared ~1e-4 gaps against fits
+built from price differences that differ across libm by ~1e-14, amplified by a log-log regression
+into the 1e-3 range. Nothing was weakened about the numerical bands; the assertion was the wrong
+kind of strict, and this repository's own rule that local green proves nothing about the runner is
+what surfaced it (limitation #72).
+
 **Verified at this addendum, by execution.** 366 pytest with the `oracles` extra (297 collected
 without it), 194 CTest (547,331 assertions in 193 Catch2 cases), 13/13 suite members with
 `--require-all`, `verify_evidence_manifest.py` at 72 artifacts with 0 CHANGED / 0 VOLATILE / 0
@@ -314,3 +324,5 @@ without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite memb
 `--require-all`, `verify_evidence_manifest.py` at 76 artifacts with 0 CHANGED / 0 VOLATILE / 0
 MISSING / 0 unlisted, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the 41-page report
 rebuilt and text-verified. Nine deliberate formula mutations were compiled and all nine were caught.
+The first CI run on this revision was red in two places, and both are recorded rather than
+re-run away: PyPI returned 503 mid-install on one lane, and the guard above failed on the other.

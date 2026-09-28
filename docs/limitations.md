@@ -418,3 +418,18 @@ never removed just because a later phase shipped.
     inclusion is therefore re-checked at four published-size shocks and not along the shrinking
     windows that carry the order claim, and `tests/python/test_two_factor_bound.py` says so beside
     the constant.
+
+72. **A guard written this phase asserted a strict ordering between successive fit windows, and
+    that is not a property of the model.** The claim it meant to make — narrowing the window brings
+    the log-log slope closer to the theory value — is sound and is still asserted, but between
+    October's version and this one each step inward also had to beat the step before it. The
+    distances being ordered differ by ~1e-4 while the price differences beneath them differ across
+    libm by ~1e-14, and a log-log regression over residuals that small amplifies the difference to
+    ~1e-3 in the slope. On the Linux runner the pure-spot series stepped 3.000121 -> 2.996952 and
+    the guard failed; on macOS it stepped 3.0010 -> 3.0009 and passed. Every value on both platforms
+    sits within 0.003 of the theory value of 3, so the estimate never was in doubt — the ordering
+    was the thing that broke, and it broke because it was comparing noise. Fixed by asserting the
+    endpoints and publishing the whole series in `slopes` and `asymptotics` rather than summarising
+    it into a boolean. Recorded because the failure mode is attractive: a stricter assertion feels
+    more rigorous, and here it was simply the wrong kind of strict — red on a machine that is not
+    wrong. Related: #59, #64.

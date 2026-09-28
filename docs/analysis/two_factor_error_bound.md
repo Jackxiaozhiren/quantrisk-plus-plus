@@ -146,10 +146,20 @@ windows:
 | pure volatility: `0, +0.06` | 1.9944 | 1.9981 | 1.9994 | **1.9998** |
 | pure spot: `-0.15, 0` | 3.0061 | 3.0023 | 3.0010 | **3.0009** |
 
-Every joint ray converges monotonically to 2 and the pure-spot ray holds at 3, which is where
-Phase 12 put it. The ratio of error to the closed-form quadratic at the smallest scale reaches
-0.9937, 1.0062, 0.9891 and 0.9997 respectively. Held to 2% on all four, and each narrower window
-is required to land closer than the last: one window that reads 2.0 is evidence about the window.
+Every joint ray converges to 2 and the pure-spot ray holds at 3, which is where Phase 12 put it. The
+ratio of error to the closed-form quadratic at the smallest scale reaches 0.9937, 1.0062, 0.9891 and
+0.9997 respectively, held to 2% on all four.
+
+What is asserted is that the **narrowest** window lands inside the band and closer than the widest
+was — not that every step inward beats the last. That weaker statement is the correct one, and the
+runner is what taught it: these fits differ from one another by ~1e-4 while the price differences
+underneath them differ across libm by ~1e-14, which a log-log regression over tiny residuals
+amplifies to ~1e-3 in the slope. On Linux the pure-spot series stepped `3.000121 -> 2.996952` and a
+stepwise guard failed there; on macOS the same series stepped `3.0010 -> 3.0009` and passed. Every
+value on both platforms is within 0.003 of the theory number 3, so the estimate was never in doubt —
+only the ordering was, and an ordering that a different libm can violate is not a property of the
+model. All four windows are published in `slopes` and `asymptotics` so the trend is visible rather
+than summarised into a boolean.
 
 **P2.** Across the swept grid of 12 equity shocks by 11 volatility shocks — 132 joint shocks, the
 largest being a 30% equity move with a 20-point vol rise — the inclusion holds on **132/132**. It
