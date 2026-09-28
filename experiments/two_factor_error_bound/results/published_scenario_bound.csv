@@ -1,0 +1,2 @@
+scenario,delta,vol_move,revalued_pnl,engine_pnl,error,error_interval_low,error_interval_high,interval_excludes_zero,quadratic_term,dominant_omitted_term,term_quadratic_vanna,term_quadratic_volga,term_cubic_speed,term_cubic_gamma_sigma,term_cubic_vanna_sigma,term_cubic_volga_sigma
+risk_off,-0.15,0.06,-71559.17843755687,-66238.38606998569,-5320.792367571179,-6063.953417326707,-4135.867903348355,True,787.9617154164823,cubic_gamma_sigma,-173.09541736813787,961.0571327846202,3893.8577137224243,-8402.162800790202,-175.0665063036767,-240.45802539338294

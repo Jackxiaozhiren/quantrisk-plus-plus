@@ -355,6 +355,40 @@ MEMBERS: tuple[Member, ...] = (
         ),
     ),
     Member(
+        key="two_factor_error_bound",
+        title="What a joint spot-and-volatility shock costs the delta-gamma-vega stress map",
+        kind=EXPERIMENT,
+        script="experiments/two_factor_error_bound/run.py",
+        artifact="experiments/two_factor_error_bound/results/two_factor_bound.json",
+        # No `plot` labels, for the same reason as the member above: this publishes a bound,
+        # not a value against an oracle, and panel A of the envelope figure is labelled
+        # |our value - oracle| / |oracle|.
+        headline=(
+            ("joint shocks swept", ("headline", "joint_shocks_swept")),
+            ("Lagrange inclusion violations", ("headline", "inclusions_violated")),
+            (
+                "error-vs-shock-size slope, crash ray, narrowest window",
+                ("headline", "slope_of_error_against_shock_size", "crash (equity down, vol up)"),
+            ),
+            (
+                "error-vs-shock-size slope, aligned ray, narrowest window",
+                ("headline", "slope_of_error_against_shock_size", "aligned (equity up, vol up)"),
+            ),
+            ("slope for a pure spot shock", ("headline", "slope_for_a_pure_spot_shock")),
+            ("published risk_off error", ("headline", "published_error")),
+            ("risk_off interval excludes zero", ("headline", "published_interval_excludes_zero")),
+            (
+                "largest cubic over quadratic at risk_off",
+                ("headline", "largest_cubic_over_quadratic"),
+            ),
+            ("dominant omitted term", ("headline", "dominant_omitted_term")),
+            (
+                "error over the closed-form quadratic at risk_off",
+                ("headline", "quadratic_prediction_ratio_at_published_size"),
+            ),
+        ),
+    ),
+    Member(
         key="stress_testing",
         title="Stress reversals, attribution closure and delta-gamma linearisation error",
         kind=EXPERIMENT,
