@@ -29,10 +29,12 @@ MarketParams: Any
 OptionType: Any
 PUT: Any
 PricingResult: Any
+SpotDerivatives: Any
 UP_AND_OUT: Any
 barrier_continuity_constant: Any
 black_scholes: Any
 black_scholes_greeks: Any
+black_scholes_spot_derivatives: Any
 continuity_corrected_barrier: Any
 crr_binomial: Any
 crr_convergence_to_black_scholes: Any

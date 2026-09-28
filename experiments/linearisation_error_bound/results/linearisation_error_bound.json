@@ -1,0 +1,690 @@
+{
+  "phase": "12 - linearisation error bound",
+  "generated_utc": "2026-09-28T08:20:58+00:00",
+  "command": "uv run python experiments/linearisation_error_bound/run.py",
+  "question": "The stress layer's delta-gamma map has a published error curve, and the prose shipped with it said the error grows with the shock. Is there a Lagrange remainder bound that does better than restate the curve -- that traps the coefficient, and that predicts the feature the prose got wrong?",
+  "result": "yes. The coefficient 6R/h^3 stays inside the path's range of V''' at every shock tested, and the sign change of V''' down the path predicts the remainder's own zero inside the bracket the published sweep already contains",
+  "book": {
+    "spot": 100.0,
+    "rate": 0.03,
+    "dividend_yield": 0.0,
+    "volatility": 0.2,
+    "maturity": 0.5,
+    "strikes": [
+      90.0,
+      100.0,
+      110.0
+    ],
+    "quantity": 5000.0,
+    "statement": "the same three-call ladder as experiments/stress_testing's linearisation sweep, deliberately: the remainder measured here must be the published error and not a fresh derivation of it"
+  },
+  "proposition": {
+    "map": "m(delta) = book_delta(S) * S*delta + 0.5 * book_gamma(S) * (S*delta)^2",
+    "lagrange_form": "R(delta) = (1/6) * V'''(xi) * (S*delta)^3 for some xi strictly between S and S(1+delta)",
+    "sharp_inclusion": "min_[S,M] V''' <= 6R/(S*delta)^3 <= max_[S,M] V'''",
+    "absolute_form": "|R| <= (1/6) * sup_[S,M] |V'''| * |S*delta|^3",
+    "closed_forms": {
+      "third": "V''' = -(Gamma/S) * (1 + d1/(sigma*sqrt(T)))",
+      "fourth": "V'''' = (Gamma/S^2) * (A^2 + A - 1/v^2), where A = 1 + d1/v and v = sigma*sqrt(T)"
+    },
+    "regularity": "S > 0, strike > 0, sigma*sqrt(T) > 0, delta > -1, segment bounded away from S = 0. In the sigma -> 0 / T -> 0 limits the core returns zero for every higher derivative and the bound becomes 0 <= 0: true, vacuous, and the map is exact off the kink anyway",
+    "proof": "docs/analysis/delta_gamma_error_bound.md section 3"
+  },
+  "headline": {
+    "all_predictions_held": true,
+    "fitted_cubic_slope_widest_window_down": 2.97101650088727,
+    "fitted_cubic_slope_widest_window_up": 3.0252808520093306,
+    "fitted_cubic_slope_narrowest_window_down": 2.9987851879029637,
+    "fitted_cubic_slope_narrowest_window_up": 3.0012094238933376,
+    "slope_converges_to_theory_as_the_window_shrinks": true,
+    "theory_slope": 3.0,
+    "quartic_correction_predicted_S_V4_over_4_V3": 3.7523607134282404,
+    "quartic_correction_measured_at_delta_1e-3": {
+      "down": 3.7592891664497974,
+      "up": 3.7453790038238766
+    },
+    "leading_term_relative_error_at_smallest_move": 0.003759289166449742,
+    "smallest_swept_move": 0.001,
+    "lagrange_inclusion_violations_swept": 0,
+    "lagrange_inclusion_violations_dense": 0,
+    "dense_shocks_tested": 600,
+    "bound_tightest_ratio_away_from_the_remainder_zero": 0.28415443429907494,
+    "bound_loosest_ratio": 0.9962407108335503,
+    "bound_ratio_collapses_near_the_remainder_zero": 0.022882472333406043,
+    "book_speed_at_base_spot": -6.92241371328431,
+    "aggregate_speed_crosses_zero_at_move": 0.05451264134239392,
+    "aggregate_speed_crosses_zero_at_spot": 94.5487358657606,
+    "predicted_remainder_zero_at_move": 0.21144665599988494,
+    "published_bracket_containing_that_zero": [
+      0.3,
+      0.2
+    ]
+  },
+  "asymptotics": {
+    "widest_fit_window": [
+      0.002,
+      0.02
+    ],
+    "narrowest_fit_window": [
+      0.0002,
+      0.0005
+    ],
+    "slope_windows": {
+      "down": [
+        {
+          "window": [
+            0.002,
+            0.02
+          ],
+          "slope": 2.97101650088727,
+          "standard_error": 0.0005542432447358759,
+          "observations": 265
+        },
+        {
+          "window": [
+            0.001,
+            0.005
+          ],
+          "slope": 2.9909081647728635,
+          "standard_error": 0.00014099657395247976,
+          "observations": 185
+        },
+        {
+          "window": [
+            0.0005,
+            0.002
+          ],
+          "slope": 2.996030132850296,
+          "standard_error": 5.6660204435213735e-05,
+          "observations": 159
+        },
+        {
+          "window": [
+            0.0002,
+            0.001
+          ],
+          "slope": 2.998210508725768,
+          "standard_error": 2.729933728811672e-05,
+          "observations": 185
+        },
+        {
+          "window": [
+            0.0002,
+            0.0005
+          ],
+          "slope": 2.9987851879029637,
+          "standard_error": 1.4028168783835238e-05,
+          "observations": 106
+        }
+      ],
+      "up": [
+        {
+          "window": [
+            0.002,
+            0.02
+          ],
+          "slope": 3.0252808520093306,
+          "standard_error": 0.00042863702383954546,
+          "observations": 265
+        },
+        {
+          "window": [
+            0.001,
+            0.005
+          ],
+          "slope": 3.0087340542595267,
+          "standard_error": 0.00013046158992006417,
+          "observations": 185
+        },
+        {
+          "window": [
+            0.0005,
+            0.002
+          ],
+          "slope": 3.0039021301827376,
+          "standard_error": 5.479206733303916e-05,
+          "observations": 159
+        },
+        {
+          "window": [
+            0.0002,
+            0.001
+          ],
+          "slope": 3.001775543531226,
+          "standard_error": 2.6869252406732864e-05,
+          "observations": 185
+        },
+        {
+          "window": [
+            0.0002,
+            0.0005
+          ],
+          "slope": 3.0012094238933376,
+          "standard_error": 1.398522304959078e-05,
+          "observations": 106
+        }
+      ]
+    },
+    "why_the_window_starts_there": "R is a difference of nearly equal numbers, so below some shock size its own round-off swamps it. Measured on this book: |R| at delta = 1e-5 is 1.13e-9 against a value near 9.8e4, about 1e-14 relative -- tens of ulp -- and the ratio of R to the predicted cubic term has already drifted from 0.99958 at delta = 1e-4 to 0.98191 at 1e-5. So the floor is near delta = 3e-5, an order of magnitude below the narrowest window used here, and the fits are not contaminated by it. An earlier draft of this analysis put the floor at 1e-3; that figure came from a single-option test using absolute price increments rather than relative moves, so it was the wrong unit on the wrong scale. Recorded because the correction is the interesting part: an arithmetic floor is a property of the book, not a constant",
+    "why_the_window_ends_there": "beyond about 2e-2 the fourth-order term is not negligible, so a fitted slope there measures a mixture of orders rather than the cubic -- which is why the windows are reported as a sequence"
+  },
+  "the_feature_the_prose_got_wrong": {
+    "published_claim": "the linearisation error grows with the shock size",
+    "narrowest_window_slope_by_direction": {
+      "down": 2.9987851879029637,
+      "up": 3.0012094238933376
+    },
+    "refuted_by": "experiments/stress_testing/results/linearisation_error.csv, whose abs_error is -528.5 at a 20% down move and +12526.9 at 30% -- it changes sign there, magnitude at 20% is smaller than at 10%",
+    "mechanism": "the ladder's V''' crosses zero at spot 94.5487358657606, a down move of 0.0545, so segments beyond that contain both signs and their cubic contributions cancel. The cancellation drives the Lagrange coefficient through zero, which drives the remainder through zero, which is the dip",
+    "prediction": "R = 0 at a down move of 0.2114",
+    "bracketed_in_published_data_by": [
+      0.3,
+      0.2
+    ],
+    "up_moves": "no crossing anywhere in the swept range, and |R| monotone there -- the asymmetry between the directions follows from (5), not from where the sweep landed"
+  },
+  "rows": [
+    {
+      "direction": "down",
+      "move": 0.001,
+      "delta": -0.001,
+      "mapped_pnl": -848.9082173791268,
+      "revalued_pnl": -848.9070679807337,
+      "remainder_signed": 0.0011493983930677132,
+      "mapped_minus_revalued": -0.0011493983930677132,
+      "abs_remainder": 0.0011493983930677132,
+      "lagrange_coefficient": -6.896390358406277,
+      "segment_speed_min": -6.92241371328431,
+      "segment_speed_max": -6.818028339802957,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 0.0011537356188807187,
+      "remainder_over_bound": 0.9962407108335503,
+      "cubic_prediction_at_base_spot": 0.0011537356188807187,
+      "remainder_over_cubic_prediction": 0.9962407108335503,
+      "quartic_prediction_at_base_spot": -4.329232209970826e-06,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -6.818028339802957
+    },
+    {
+      "direction": "down",
+      "move": 0.005,
+      "delta": -0.005,
+      "mapped_pnl": -4208.967377121611,
+      "revalued_pnl": -4208.825891076369,
+      "remainder_signed": 0.14148604524234543,
+      "mapped_minus_revalued": -0.14148604524234543,
+      "abs_remainder": 0.14148604524234543,
+      "lagrange_coefficient": -6.7913301716325805,
+      "segment_speed_min": -6.92241371328431,
+      "segment_speed_max": -6.39089004866226,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 0.1442169523600898,
+      "remainder_over_bound": 0.9810638966289783,
+      "cubic_prediction_at_base_spot": 0.1442169523600898,
+      "remainder_over_cubic_prediction": 0.9810638966289783,
+      "quartic_prediction_at_base_spot": -0.002705770131231766,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -6.39089004866226
+    },
+    {
+      "direction": "down",
+      "move": 0.01,
+      "delta": -0.01,
+      "mapped_pnl": -8329.000479808166,
+      "revalued_pnl": -8327.890837525512,
+      "remainder_signed": 1.109642282654022,
+      "mapped_minus_revalued": -1.109642282654022,
+      "abs_remainder": 1.109642282654022,
+      "lagrange_coefficient": -6.657853695924132,
+      "segment_speed_min": -6.92241371328431,
+      "segment_speed_max": -5.835760433110858,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 1.1537356188807184,
+      "remainder_over_bound": 0.9617821141125269,
+      "cubic_prediction_at_base_spot": 1.1537356188807184,
+      "remainder_over_cubic_prediction": 0.9617821141125269,
+      "quartic_prediction_at_base_spot": -0.04329232209970826,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -5.835760433110858
+    },
+    {
+      "direction": "down",
+      "move": 0.02,
+      "delta": -0.02,
+      "mapped_pnl": -16302.26386187611,
+      "revalued_pnl": -16293.752055705525,
+      "remainder_signed": 8.51180617058526,
+      "mapped_minus_revalued": -8.51180617058526,
+      "abs_remainder": 8.51180617058526,
+      "lagrange_coefficient": -6.383854627938945,
+      "segment_speed_min": -6.92241371328431,
+      "segment_speed_max": -4.657637665163631,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 9.229884951045747,
+      "remainder_over_bound": 0.9222006791775742,
+      "cubic_prediction_at_base_spot": 9.229884951045747,
+      "remainder_over_cubic_prediction": 0.9222006791775742,
+      "quartic_prediction_at_base_spot": -0.6926771535953321,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -4.657637665163631
+    },
+    {
+      "direction": "down",
+      "move": 0.05,
+      "delta": -0.05,
+      "mapped_pnl": -38087.63142163861,
+      "revalued_pnl": -37972.87314283736,
+      "remainder_signed": 114.75827880125144,
+      "mapped_minus_revalued": -114.75827880125144,
+      "abs_remainder": 114.75827880125144,
+      "lagrange_coefficient": -5.5083973824600685,
+      "segment_speed_min": -6.92241371328431,
+      "segment_speed_max": -0.6520744292914149,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 144.2169523600898,
+      "remainder_over_bound": 0.7957336285592547,
+      "cubic_prediction_at_base_spot": 144.2169523600898,
+      "remainder_over_cubic_prediction": 0.7957336285592547,
+      "quartic_prediction_at_base_spot": -27.05770131231766,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -0.6520744292914149
+    },
+    {
+      "direction": "down",
+      "move": 0.1,
+      "delta": -0.1,
+      "mapped_pnl": -67281.83539977163,
+      "revalued_pnl": -66632.29398537203,
+      "remainder_signed": 649.5414143996022,
+      "mapped_minus_revalued": -649.5414143996022,
+      "abs_remainder": 649.5414143996022,
+      "lagrange_coefficient": -3.897248486397613,
+      "segment_speed_min": -6.92241371328431,
+      "segment_speed_max": 6.880709460831487,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 1153.7356188807184,
+      "remainder_over_bound": 0.5629898251990749,
+      "cubic_prediction_at_base_spot": 1153.7356188807184,
+      "remainder_over_cubic_prediction": 0.5629898251990749,
+      "quartic_prediction_at_base_spot": -432.9232209970826,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": 6.880709460831487
+    },
+    {
+      "direction": "down",
+      "move": 0.2,
+      "delta": -0.2,
+      "mapped_pnl": -98989.96102552096,
+      "revalued_pnl": -98461.42589560557,
+      "remainder_signed": 528.5351299153845,
+      "mapped_minus_revalued": -528.5351299153845,
+      "abs_remainder": 528.5351299153845,
+      "lagrange_coefficient": -0.3964013474365383,
+      "segment_speed_min": -6.92241371328431,
+      "segment_speed_max": 17.323361814266608,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 23097.815752355476,
+      "remainder_over_bound": 0.022882472333406043,
+      "cubic_prediction_at_base_spot": 9229.884951045748,
+      "remainder_over_cubic_prediction": 0.057263458073277644,
+      "quartic_prediction_at_base_spot": -6926.771535953321,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": 17.323361814266608
+    },
+    {
+      "direction": "down",
+      "move": 0.3,
+      "delta": -0.3,
+      "mapped_pnl": -95124.37687724794,
+      "revalued_pnl": -107651.27113910495,
+      "remainder_signed": -12526.894261857014,
+      "mapped_minus_revalued": 12526.894261857014,
+      "abs_remainder": 12526.894261857014,
+      "lagrange_coefficient": 2.78375428041267,
+      "segment_speed_min": -6.92241371328431,
+      "segment_speed_max": 17.544878701203846,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 78951.9541554173,
+      "remainder_over_bound": 0.15866477778621874,
+      "cubic_prediction_at_base_spot": 31150.861709779398,
+      "remainder_over_cubic_prediction": -0.40213636394926316,
+      "quartic_prediction_at_base_spot": -35066.78090076369,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": 11.733473682654255
+    },
+    {
+      "direction": "down",
+      "move": 0.4,
+      "delta": -0.4,
+      "mapped_pnl": -55685.08295495267,
+      "revalued_pnl": -108863.23235607275,
+      "remainder_signed": -53178.149401120085,
+      "mapped_minus_revalued": 53178.149401120085,
+      "abs_remainder": 53178.149401120085,
+      "lagrange_coefficient": 4.985451506355008,
+      "segment_speed_min": -6.92241371328431,
+      "segment_speed_max": 17.544866117091026,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 187145.23858230427,
+      "remainder_over_bound": 0.28415443429907494,
+      "cubic_prediction_at_base_spot": 73839.07960836598,
+      "remainder_over_cubic_prediction": -0.7201897651375248,
+      "quartic_prediction_at_base_spot": -110828.34457525314,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": 2.1669450597467144
+    },
+    {
+      "direction": "up",
+      "move": 0.001,
+      "delta": 0.001,
+      "mapped_pnl": 852.4655883565291,
+      "revalued_pnl": 852.4644302997331,
+      "remainder_signed": -0.0011580567960436383,
+      "mapped_minus_revalued": 0.0011580567960436383,
+      "abs_remainder": 0.0011580567960436383,
+      "lagrange_coefficient": -6.948340776261828,
+      "segment_speed_min": -7.025829979805603,
+      "segment_speed_max": -6.92241371328431,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 0.001170971663300934,
+      "remainder_over_bound": 0.9889708114533796,
+      "cubic_prediction_at_base_spot": -0.0011537356188807187,
+      "remainder_over_cubic_prediction": 1.0037453790038238,
+      "quartic_prediction_at_base_spot": -4.329232209970826e-06,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -7.025829979805603
+    },
+    {
+      "direction": "up",
+      "move": 0.005,
+      "delta": 0.005,
+      "mapped_pnl": 4297.901651556667,
+      "revalued_pnl": 4297.7547541671665,
+      "remainder_signed": -0.1468973895007366,
+      "mapped_minus_revalued": 0.1468973895007366,
+      "abs_remainder": 0.1468973895007366,
+      "lagrange_coefficient": -7.051074696035357,
+      "segment_speed_min": -7.429717483470646,
+      "segment_speed_max": -6.92241371328431,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 0.15478578090563846,
+      "remainder_over_bound": 0.9490367179805047,
+      "cubic_prediction_at_base_spot": -0.1442169523600898,
+      "remainder_over_cubic_prediction": 1.0185861446714954,
+      "quartic_prediction_at_base_spot": -0.002705770131231766,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -7.429717483470638
+    },
+    {
+      "direction": "up",
+      "move": 0.01,
+      "delta": 0.01,
+      "mapped_pnl": 8684.73757754839,
+      "revalued_pnl": 8683.541363175682,
+      "remainder_signed": -1.1962143727087096,
+      "mapped_minus_revalued": 1.1962143727087096,
+      "abs_remainder": 1.1962143727087096,
+      "lagrange_coefficient": -7.177286236252257,
+      "segment_speed_min": -7.912284627773741,
+      "segment_speed_max": -6.92241371328431,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 1.3187141046289568,
+      "remainder_over_bound": 0.9071066795370976,
+      "cubic_prediction_at_base_spot": -1.1537356188807184,
+      "remainder_over_cubic_prediction": 1.036818447079931,
+      "quartic_prediction_at_base_spot": -0.04329232209970826,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -7.912284627773741
+    },
+    {
+      "direction": "up",
+      "move": 0.02,
+      "delta": 0.02,
+      "mapped_pnl": 17725.212252837002,
+      "revalued_pnl": 17715.315896508546,
+      "remainder_signed": -9.896356328456022,
+      "mapped_minus_revalued": 9.896356328456022,
+      "abs_remainder": 9.896356328456022,
+      "lagrange_coefficient": -7.422267246342017,
+      "segment_speed_min": -8.8016137175688,
+      "segment_speed_max": -6.92241371328431,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 11.7354849567584,
+      "remainder_over_bound": 0.8432848207740036,
+      "cubic_prediction_at_base_spot": -9.229884951045747,
+      "remainder_over_cubic_prediction": 1.0722079831921159,
+      "quartic_prediction_at_base_spot": -0.6926771535953321,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -8.8016137175688
+    },
+    {
+      "direction": "up",
+      "move": 0.05,
+      "delta": 0.05,
+      "mapped_pnl": 46981.05886514418,
+      "revalued_pnl": 46812.38266879039,
+      "remainder_signed": -168.6761963537865,
+      "mapped_minus_revalued": 168.6761963537865,
+      "abs_remainder": 168.6761963537865,
+      "lagrange_coefficient": -8.096457424981752,
+      "segment_speed_min": -10.85030589477883,
+      "segment_speed_max": -6.92241371328431,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 226.04803947455895,
+      "remainder_over_bound": 0.7461962366312428,
+      "cubic_prediction_at_base_spot": -144.2169523600898,
+      "remainder_over_cubic_prediction": 1.1696003388882144,
+      "quartic_prediction_at_base_spot": -27.05770131231766,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -10.85030589477883
+    },
+    {
+      "direction": "up",
+      "move": 0.1,
+      "delta": 0.1,
+      "mapped_pnl": 102855.54517379394,
+      "revalued_pnl": 101353.04935037954,
+      "remainder_signed": -1502.4958234143996,
+      "mapped_minus_revalued": 1502.4958234143996,
+      "abs_remainder": 1502.4958234143996,
+      "lagrange_coefficient": -9.014974940486399,
+      "segment_speed_min": -12.285352166747995,
+      "segment_speed_max": -6.92241371328431,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 2047.558694457999,
+      "remainder_over_bound": 0.7337986586079864,
+      "cubic_prediction_at_base_spot": -1153.7356188807184,
+      "remainder_over_cubic_prediction": 1.3022878021847208,
+      "quartic_prediction_at_base_spot": -432.9232209970826,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -12.285352166748003
+    },
+    {
+      "direction": "up",
+      "move": 0.2,
+      "delta": 0.2,
+      "mapped_pnl": 241284.8001216102,
+      "revalued_pnl": 227780.01556306385,
+      "remainder_signed": -13504.784558546351,
+      "mapped_minus_revalued": 13504.784558546351,
+      "abs_remainder": 13504.784558546351,
+      "lagrange_coefficient": -10.128588418909763,
+      "segment_speed_min": -12.310900047718318,
+      "segment_speed_max": -6.92241371328431,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 16414.53339695776,
+      "remainder_over_bound": 0.8227333809591751,
+      "cubic_prediction_at_base_spot": -9229.884951045748,
+      "remainder_over_cubic_prediction": 1.4631584933262094,
+      "quartic_prediction_at_base_spot": -6926.771535953321,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -9.94001624283904
+    },
+    {
+      "direction": "up",
+      "move": 0.3,
+      "delta": 0.3,
+      "mapped_pnl": 415287.76484344876,
+      "revalued_pnl": 368169.8623610625,
+      "remainder_signed": -47117.90248238627,
+      "mapped_minus_revalued": 47117.90248238627,
+      "abs_remainder": 47117.90248238627,
+      "lagrange_coefficient": -10.470644996085838,
+      "segment_speed_min": -12.310900047718318,
+      "segment_speed_max": -5.510907150181337,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 55399.05021473243,
+      "remainder_over_bound": 0.8505182363190781,
+      "cubic_prediction_at_base_spot": -31150.861709779398,
+      "remainder_over_cubic_prediction": 1.512571399191639,
+      "quartic_prediction_at_base_spot": -35066.78090076369,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -5.510907150181337
+    },
+    {
+      "direction": "up",
+      "move": 0.4,
+      "delta": 0.4,
+      "mapped_pnl": 624864.4393393097,
+      "revalued_pnl": 514813.748247909,
+      "remainder_signed": -110050.69109140069,
+      "mapped_minus_revalued": 110050.69109140069,
+      "abs_remainder": 110050.69109140069,
+      "lagrange_coefficient": -10.317252289818814,
+      "segment_speed_min": -12.310900047718318,
+      "segment_speed_max": -2.3508473150835147,
+      "coefficient_inside_segment_range": true,
+      "abs_bound": 131316.26717566207,
+      "remainder_over_bound": 0.8380583263472272,
+      "cubic_prediction_at_base_spot": -73839.07960836598,
+      "remainder_over_cubic_prediction": 1.4904125522026677,
+      "quartic_prediction_at_base_spot": -110828.34457525314,
+      "book_speed_at_base_spot": -6.92241371328431,
+      "book_speed_at_shocked_spot": -2.3508473150835147
+    }
+  ],
+  "refusals": [
+    {
+      "question": "is the scenario plausible?",
+      "refused": "a bound on the map says how much of a stress number is Taylor truncation and nothing about how much is choice. The scenario set has no oracle and this experiment does not manufacture one (docs/validation_matrix.md row 12)."
+    },
+    {
+      "question": "does the cubic bound cover the multi-factor scenarios?",
+      "refused": "no, and implying otherwise would be the sloppiest move available here. Once a scenario ties a volatility bump to a spot move, the omitted mixed partials and the vol convexity enter at order delta^2, so the leading remainder is quadratic with a different constant. The swept shock is single-factor and vol-fixed so that the cubic statement is the right one; the two-variable case is the same style of algebra and this script does not do it."
+    },
+    {
+      "question": "does the bound hold in the zero-volatility limit?",
+      "refused": "it degenerates. The core returns zero for every higher spot derivative when sigma*sqrt(T) -> 0, so (4) reads 0 <= 0 and the map is exact off the strike kink anyway. A bound on a C^2 function is not a statement about a step function."
+    }
+  ],
+  "environment": {
+    "generated_at_utc": "2026-09-28T08:20:58+00:00",
+    "quantrisk_version": "1.2.0",
+    "git_commit": "e413ae67c250",
+    "binary_git_commit": "e413ae67c250",
+    "working_tree_dirty": true,
+    "uncommitted_paths": [
+      ".github/workflows/ci.yml",
+      "CITATION.cff",
+      "CMakeLists.txt",
+      "README.md",
+      "benchmarks/performance/results/monte_carlo_speed.json",
+      "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
+      "benchmarks/quantlib/results/monte_carlo_validation.json",
+      "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
+      "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "benchmarks/suite/results/suite_headline.csv",
+      "benchmarks/suite/results/suite_run.json",
+      "benchmarks/suite/results/suite_summary.md",
+      "bindings/python_bindings.cpp",
+      "cpp/include/quantrisk/pricing/black_scholes.hpp",
+      "cpp/src/pricing/black_scholes.cpp",
+      "docs/analysis/",
+      "docs/findings.md",
+      "docs/inbox/",
+      "docs/integrity_audit.md",
+      "docs/interview_defense.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-12-remainder-bound.md",
+      "docs/portfolio_audit.md",
+      "docs/release_notes_v1.1.0.md",
+      "docs/release_notes_v1.2.0.md",
+      "docs/reproducibility.md",
+      "docs/validation_matrix.md",
+      "evidence/manifest.json",
+      "experiments/linearisation_error_bound/",
+      "experiments/monte_carlo_convergence/results/convergence.csv",
+      "experiments/monte_carlo_convergence/results/summary.json",
+      "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
+      "experiments/pricing_validation/results/summary.json",
+      "experiments/real_data_risk_study/results/real_data_risk_study.json",
+      "experiments/stress_testing/results/stress_testing_study.json",
+      "experiments/var_backtesting/results/var_backtesting_validation.json",
+      "experiments/variance_reduction/results/summary.json",
+      "experiments/variance_reduction/results/variance_by_method.csv",
+      "paper/technical_report.pdf",
+      "paper/technical_report.tex",
+      "pyproject.toml",
+      "python/quantrisk/pricing.pyi",
+      "scripts/build_evidence_manifest.py",
+      "scripts/run_benchmark_suite.py",
+      "tests/cpp/test_black_scholes.cpp",
+      "tests/python/test_artifact_metadata.py",
+      "tests/python/test_linearisation_bound.py",
+      "uv.lock"
+    ],
+    "provenance": "ran from e413ae67c250 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at e413ae67c250",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_arch": "arm64",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_build_type": "Release",
+    "cpp_standard": "C++20",
+    "cpp_flags": "(none)",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "python_machine": "arm64",
+    "packages": {
+      "python": "3.12.14",
+      "quantrisk": "1.2.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "oracles": {
+    "tool": "none used; a bound is not a second implementation of a price",
+    "versions": {
+      "python": "3.12.14",
+      "quantrisk": "1.2.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "figure_status": "generated",
+  "artifacts": [
+    {
+      "path": "experiments/linearisation_error_bound/results/linearisation_bound.csv",
+      "sha256": "52b5b9666c193e070291e5fc2bacf789ece42d624b349321dba90d3b9d7ef0e6",
+      "bytes": "5863"
+    },
+    {
+      "path": "experiments/linearisation_error_bound/results/linearisation_bound.png",
+      "sha256": "78c28e042a523a8294eb320c62b57ec029beca484cff73f3ef9888fa73b6485f",
+      "bytes": "224162"
+    }
+  ]
+}

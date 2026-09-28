@@ -135,10 +135,10 @@ set (\src{README.md}; \src{docs/architecture.md}). The functional coverage is
       (\src{docs/phase_reports/phase-09-research-api.md}).
 \end{itemize}
 
-This report describes the repository at \textbf{v1.1.0}. Phases 1 to 10 are recorded complete
+This report describes the repository at \textbf{v1.2.0}. Phases 1 to 10 are recorded complete
 with their phase gates passed, and Phase 11 --- the real-data study of Section
 \ref{sec:realdata} --- is complete and is not a PROJECT\_SPEC phase but the top-ranked item of
-\src{docs/portfolio_audit.md}. Two release tags exist, \code{v1.0.0} and \code{v1.1.0}, both with
+\src{docs/portfolio_audit.md}, and Phase 12 --- the worked analysis result of Section \ref{sec:bound} --- completes the third of that list's three items. Three release tags exist, \code{v1.0.0}, \code{v1.1.0} and \code{v1.2.0}, each with
 the report, the evidence manifest and the suite results attached. The suite is 190 CTest entries and
 546{,}943 assertions in 189 Catch2 cases on the C++ side, and 353 pytest tests with the validation
 oracles installed, 284 without them (\src{docs/limitations.md}, item 63, explains why one command
@@ -147,7 +147,7 @@ benchmark-suite members execute under \code{--require-all}, and the frozen manif
 artifacts with nothing changed, missing or unlisted (\src{evidence/manifest.json}). The
 \emph{end-of-Phase-9} baseline, for contrast, was the same 190 CTest entries and 310 pytest tests
 with no release tag at all (\src{docs/phase_reports/phase-09-research-api.md}). The limitations
-register contains 64 numbered entries (\src{docs/limitations.md}).
+register contains 66 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -1244,6 +1244,84 @@ butterfly or steepener is inexpressible, and no reverse stress testing --- the e
 ``what does this shock do'' and not ``what shock would produce this loss'', which is the
 direction most supervisory use of the word means (\src{docs/limitations.md}, items 44, 46, 47).
 
+\subsection{A remainder bound that predicts a sign change}
+\label{sec:bound}
+The stress layer maps a shock to P\&L with delta and gamma, \code{m(\delta) = \Delta S\delta +
+\tfrac12 \Gamma S^2\delta^2}, and \S\ref{sec:stress} measured how far that sits from a full
+re-pricing. The published account said the error grows with the shock; the published \emph{data}
+refutes it, reaching 649.5 at a 10\,\% down move, 528.5 at 20\,\%, and 12{,}527 at 30\,\%. A trend
+sentence was the wrong shape for the object. The right object is a bound, and it predicts.
+
+\noindent\fbox{\parbox{\textwidth}{
+\textbf{Proposition.} \emph{With $S,K,\sigma,T > 0$, $\delta > -1$, $h = S\delta$ and $R(\delta)$ the
+difference between the re-priced and mapped P\&L, there is $\xi$ strictly between $S$ and $S + h$
+with $R(\delta) = \tfrac16 V'''(\xi) h^3$. Hence}
+$\;|R| \le \tfrac16 \bigl(\sup_{[S,S+h]} |V'''|\bigr)|h|^3$ \emph{and}
+$\;\min_{[S,S+h]} V''' \;\le\; 6R/h^3 \;\le\; \max_{[S,S+h]} V'''$.
+\emph{Moreover $V''' = -(\Gamma/S)(1 + d_1/v)$ and
+$V'''' = (\Gamma/S^2)\bigl[(1+d_1/v)^2 + (1+d_1/v) - v^{-2}\bigr]$ with $v = \sigma\sqrt{T}$, both
+identical for calls and puts.}
+}}
+
+\paragraph{Proof.}
+Taylor's theorem on $u \mapsto V(u)$ between $S$ and $S + h$ gives the first display after
+substituting $V' = \Delta$ and $V'' = \Gamma$; dividing by $h^3/6$ and using that $V'''$ attains its
+extremes on the compact segment gives the second. For the closed forms, $\Gamma = e^{-qT}\varphi(d_1)/(Sv)$
+with $\partial d_1/\partial S = 1/(Sv)$ and $\varphi'(x) = -x\varphi(x)$ yields
+\[
+  \frac{d\Gamma}{dS}
+  = \frac{e^{-qT}}{v}\cdot\frac{\varphi'(d_1)S/(Sv) - \varphi(d_1)}{S^2}
+  = -\frac{\Gamma}{S}\Bigl(1 + \frac{d_1}{v}\Bigr),
+\]
+and one further differentiation, with $A = 1 + d_1/v$, $A' = 1/(Sv^2)$, gives $V''''$. Call/put
+equality for every order $\ge 2$ is put--call parity, $V_{\text{call}} - V_{\text{put}} =
+Se^{-qT} - Ke^{-rT}$, which is affine in $S$.
+
+
+\begin{table}[t]
+\caption[The Lagrange coefficient trapped by the path's own range of V''']{The sharp form, on the
+same three-call ladder as Table \ref{tab:linear}. $c = 6R/h^3$ must lie between the extremes
+of $V'''$ along the segment; it does, at every shock tested. Source: the committed run of
+\src{experiments/linearisation_error_bound/results/linearisation_error_bound.json}.}
+\label{tab:bound}
+\centering\small
+\begin{tabular}{rrrrr}
+\toprule
+Down move & $R$ & $c = 6R/h^3$ & $V'''$ along the path & $\lvert R\rvert/\text{bound}$ \\
+\midrule
+0.1\,\%  & $-1.149\cdot10^{-3}$ & $-6.8964$ & $[-6.9224,\,-6.8180]$ & 0.9962 \\
+1\,\%    & $-1.110$             & $-6.6579$ & $[-6.9224,\,-5.8358]$ & 0.9618 \\
+5\,\%    & $-114.8$             & $-5.5084$ & $[-6.9224,\,-0.6521]$ & 0.7957 \\
+10\,\%   & $-649.5$             & $-3.8972$ & $[-6.9224,\,+6.8807]$ & 0.5630 \\
+20\,\%   & $-528.5$             & $-0.3964$ & $[-6.9224,\,17.3234]$ & 0.0229 \\
+30\,\%   & $+12{,}527$          & $+2.7838$ & $[-6.9224,\,17.5449]$ & 0.1587 \\
+40\,\%   & $+53{,}178$          & $+4.9855$ & $[-6.9224,\,17.5449]$ & 0.2842 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Four consequences, each checked before being believed (\src{docs/analysis/delta_gamma_error_bound.md}).
+The \emph{asymptotics}: fitted per direction over shrinking windows, the log-log slope of $\lvert R\rvert$
+converges on the theoretical three from both sides, $2.9710 \to 2.9988$ down and
+$3.0253 \to 3.0012$ up, and at the smallest swept shock $R$ equals $\tfrac16 V'''(S)h^3$ to
+0.38\,\%. The \emph{inequality}: 618 shocks in both directions give no violation and no vacuity,
+$\lvert R\rvert/\text{bound}$ running 0.9962 to 0.2842. The \emph{sign change}: this ladder's
+$V'''$ crosses zero at spot 94.55, a 5.45\,\% down move, which puts the remainder's own zero at a
+\textbf{21.1446\,\%} move --- inside the single 20--30\,\% bracket where the older artifact changes
+sign, data frozen in the manifest before this derivation existed. And the \emph{fourth derivative}
+is confirmed a second way: the departure from cubic behaviour per unit of $\delta$ tends to
+$S V''''/(4V''') = 3.752361$, measured $3.759289$ and $3.745379$ from the two directions, which
+reaches $V''''$ through the price surface rather than through a difference table.
+
+Three limits are recorded rather than tuned away. The arithmetic floor is a property of the book's
+magnitude --- near $\delta = 3\cdot10^{-5}$ here --- and an earlier draft of the analysis took it
+from a similar-looking single-option test, at the wrong unit and the wrong scale. A single fitted
+slope is not evidence of order three: pooling the two directions yields $3.037 \pm 0.003$, eleven
+standard errors from theory, where those sigma are the up/down separation appearing as curvature.
+And the bound bounds the \emph{map}: it says nothing about whether the scenario is plausible, and once
+a shock ties volatility to spot the omitted mixed partials make the leading remainder quadratic
+rather than cubic (\src{docs/limitations.md}, items 65--66).
+
 % ===========================================================================
 \section{Numerical Validation}
 \label{sec:validation}
@@ -1558,7 +1636,7 @@ stress artifacts are byte-identical between executions
 \label{sec:limitations}
 % ===========================================================================
 
-\src{docs/limitations.md} holds 64 numbered entries, grouped by the phase that introduced them,
+\src{docs/limitations.md} holds 66 numbered entries, grouped by the phase that introduced them,
 with the rule that entries are never removed because a later phase shipped. This section
 summarises them faithfully; the file remains the authority.
 

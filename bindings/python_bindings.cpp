@@ -172,6 +172,12 @@ PYBIND11_MODULE(_quantrisk, module) {
         .def_readonly("theta", &quantrisk::Greeks::theta)
         .def_readonly("rho", &quantrisk::Greeks::rho);
 
+    // A plain value struct, exactly like `Greeks`: bound containers come back as
+    // copies in this project, so nothing here holds one.
+    py::class_<quantrisk::SpotDerivatives>(pricing, "SpotDerivatives")
+        .def_readonly("third", &quantrisk::SpotDerivatives::third)
+        .def_readonly("fourth", &quantrisk::SpotDerivatives::fourth);
+
     py::class_<quantrisk::BumpPolicy>(pricing, "BumpPolicy")
         .def(py::init<>())
         .def_readwrite("spot_relative", &quantrisk::BumpPolicy::spot_relative)
@@ -194,6 +200,8 @@ PYBIND11_MODULE(_quantrisk, module) {
     pricing.def("black_scholes", &quantrisk::black_scholes, py::arg("option"), py::arg("market"));
     pricing.def("black_scholes_greeks", &quantrisk::black_scholes_greeks, py::arg("option"),
                 py::arg("market"));
+    pricing.def("black_scholes_spot_derivatives", &quantrisk::black_scholes_spot_derivatives,
+                py::arg("option"), py::arg("market"));
     pricing.def("put_call_parity_residual", &quantrisk::put_call_parity_residual, py::arg("market"),
                 py::arg("strike"));
     pricing.def("finite_difference_greeks", &quantrisk::finite_difference_greeks, py::arg("option"),

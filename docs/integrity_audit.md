@@ -217,5 +217,51 @@ and a figure panel labelled "as documented" that was not.
 
 **Verified at this addendum, by execution:** 353 pytest with the `oracles` extra (261 passed / 4
 skipped in the CI lane without it), 190 CTest unchanged, 12/12 suite members executed with
-`--require-all`, `verify_evidence_manifest.py` reporting 69 artifacts with 0 CHANGED, 0 MISSING, 0
+`--require-all`, `verify_evidence_manifest.py` reporting 72 artifacts with 0 CHANGED, 0 MISSING, 0
 unlisted and 0 warnings, `quantrisk validate` 7/7, mypy/ruff/clang-format clean.
+
+## Addendum — Phase 12, the analysis the audit asked for (2026-09-28)
+
+`docs/portfolio_audit.md` §10 ranked three improvements. The first became Phase 11; this phase is
+the third, "one worked analysis result", and the audit's own warning about it turned out to be the
+interesting part: *"the only one that risks being wrong in a way a specialist notices"*. Four things
+were found by trying, all recorded here rather than quietly corrected.
+
+**20. A summary sentence in this repository was false of the data beside it, and nobody had
+noticed.** The stress layer's prose said the linearisation error "grows with the shock size" while
+its own committed CSV shows 649.5 at a 10 % down move, 528.5 at 20 %, and 12,527 at 30 %. The
+Taylor remainder explains the shape -- the book's third spot derivative crosses zero at spot 94.55,
+so segments past that cancel internally, and the remainder itself has a zero at a 21.1446 % move,
+inside the single sign change the older artifact already contains. That prediction was computed
+before the bracket was checked, and the check is in
+`tests/python/test_linearisation_bound.py`. An audit that only asks "is the code right" misses this
+class entirely; the question that finds it is "does the prose say what the artifact shows".
+
+**21. Two of the new tests passed while measuring the wrong thing.** A pooled log-log fit over up
+and down moves returned `3.037 +/- 0.003` and passed a `3 +/- 0.1` band: eleven "standard errors"
+from theory, where the sigma were computed from three points and the deviation *was* the
+up/down separation. And `fit_slope` indexed errors by `abs(move)` instead of by `move`, which made
+the two directions identical to sixteen digits -- a duplicate result is far more convincing than a
+wrong one. Both were caught only by printing the per-direction numbers and asking whether they
+should differ. The guards are now that the slope must *converge* to 3 as the fit window shrinks,
+per direction, over hundreds of points.
+
+**22. A finite-difference tolerance was set by hope.** The stencil checks disagreed by 3.6e-9 at a
+step of 1e-5 and agree to 4e-11 at 2e-3; the test asserted 1e-9. The step and the tolerance are now
+justified next to each other, and the same lesson is limitation #66. Related, and worse: an earlier
+draft of the analysis put the arithmetic floor at a relative move of 1e-3, taken from a
+single-option test in *absolute* price increments -- wrong unit, wrong scale, stated with four
+significant figures that made it look measured. The floor for that book is near 3e-5 and has to be
+re-measured per book.
+
+**23. Interface freeze held, and that was worth testing rather than assuming.** The new
+sensitivities arrived as a separate struct and function rather than as fields on `Greeks`, because
+`Greeks` is a frozen surface and a released version has shipped with it. The added API is therefore
+the only kind of change available here, which is worth knowing before someone tries to extend the
+Greeks struct and finds the bindings, the shims, the stubs and three documents in the way.
+
+**Verified at this addendum, by execution.** 366 pytest with the `oracles` extra (297 collected
+without it), 194 CTest (547,331 assertions in 193 Catch2 cases), 13/13 suite members with
+`--require-all`, `verify_evidence_manifest.py` at 72 artifacts with 0 CHANGED / 0 VOLATILE / 0
+MISSING / 0 unlisted / 0 warnings, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the
+40-page report rebuilt and text-verified.

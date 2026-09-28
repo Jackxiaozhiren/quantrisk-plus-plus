@@ -246,7 +246,7 @@ never removed just because a later phase shipped.
 
 56. **Resolved on first contact: the CI lane is proven on a runner, and the runner disagreed
     with the laptop.** `benchmark-suite` passes on `ubuntu-latest` in ~5m46s with
-    `--require-all`, so all twelve members execute against live oracles and none can be skipped
+    `--require-all`, so all thirteen members execute against live oracles and none can be skipped
     silently. What the same runner caught was not in the new lane at all: the pre-existing
     `build-and-test` lane failed on a README assertion that demanded bit-exact agreement with a
     transcribed price, and glibc's libm is 1.7 ULP from Apple's. Local green said nothing about
@@ -304,9 +304,10 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 353 pytest tests with the
-    `oracles` extra installed, and the same tree collects 284 tests without it — the CI lane runs a
-    plain `uv sync`, and its own full run prints `284 passed, 4 skipped`. Note that the two 284s are
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 366 pytest tests with the
+    `oracles` extra installed, and the same tree collects 297 tests without it — the CI lane runs a
+    plain `uv sync`; its own full run printed `284 passed, 4 skipped` at the 353-test commit and
+    `295 passed, 4 skipped` at this one. Note that the two 284s are
     different quantities that happen to coincide: `--collect-only` counts 284 test items, while the
     run reports those 284 as passed plus four *additional* module-level skip records, so 288 outcomes
     come from 284 collected items. Reading the numbers off the machine that produces them beats
@@ -334,8 +335,35 @@ never removed just because a later phase shipped.
     no conclusion moved. The consequence is stated rather than smoothed: `verify_evidence_manifest.py`
     is a same-platform tamper check, and running it on a different libm would report CHANGED on
     result fields that are in fact the same result. CI therefore verifies *execution* on Linux (the
-    `benchmark-suite` lane runs all twelve members with `--require-all`) and *byte equality* only on
+    `benchmark-suite` lane runs all thirteen members with `--require-all`) and *byte equality* only on
     the platform that produced the artifacts. `test_a_fresh_run_reproduces_the_committed_artifact_exactly`
     encodes the split: relative slack of 1e-12 on floats, exact equality on everything else. Making
     the chain platform-independent would require storing results at a stated precision rather than at
     full double resolution, which was not done here.
+
+## Phase 12 — the remainder bound
+
+65. **The higher-order sensitivities are closed forms, and the checks that validate them
+    validate them against a finite difference of the order below.**
+    `black_scholes_spot_derivatives` returns the third and fourth spot derivatives in
+    closed form. Each is compared against a five-point central difference of the function
+    one order beneath it, which catches a wrong differentiation (the stencil shares no code
+    with the formula) but would not catch a wrong gamma, because both sides then inherit
+    the same error. The independent anchor for the whole chain remains QuantLib on delta
+    and gamma, and the third derivative is additionally checked against a difference of
+    QuantLib's delta. What is *not* covered: neither new derivative is compared against an
+    oracle that publishes one, because none of the reference libraries in this project's
+    dependency set does. `docs/analysis/delta_gamma_error_bound.md` section 5 adds a
+    second, independent route -- the fourth derivative is confirmed through its effect on
+    the price surface -- but that is a consistency check between two closed forms and one
+    price function, not an external reference.
+
+66. **A finite-difference tolerance is a property of the step and the book, not of the
+    algebra.** The stencil checks above agree to about 4e-11 at a step of 2e-3 and the
+    tests assert 1e-9. At the intuitive smaller step of 1e-5 the *same* comparison
+    disagreed by 3.6e-9 at the at-the-money strike, entirely from the stencil's own
+    truncation-versus-round-off balance. Two consequences are recorded rather than tuned
+    away: the step and the tolerance are justified next to each other in the test, and
+    the arithmetic floor of the analysis itself -- near a relative move of 3e-5 for the
+    book used there -- scales with the size of the position, so it has to be re-measured
+    for any other book rather than reused as a constant.

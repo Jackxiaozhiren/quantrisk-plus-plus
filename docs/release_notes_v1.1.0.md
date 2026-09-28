@@ -89,8 +89,9 @@ return, and it has none.
 | pytest, `oracles` extra installed | **353 passed**, 0 failed, 0 skipped |
 | pytest in the CI lane without it | 261 passed / 4 skipped at `v1.0.0`; the split is explained in `docs/limitations.md` #63 |
 | CTest | **190 passed** (core unchanged since `v1.0.0`) |
+| CTest at the following phase | **194 passed** — `v1.1.0`'s successor added the higher-order spot sensitivities |
 | Benchmark suite, `--require-all` | **12/12 executed, 0 failed, 0 skipped**, ~62 s |
-| `verify_evidence_manifest.py` | **69 artifacts, 0 CHANGED, 0 VOLATILE, 0 MISSING, 0 unlisted, 0 warnings** |
+| `verify_evidence_manifest.py` | **72 artifacts, 0 CHANGED, 0 VOLATILE, 0 MISSING, 0 unlisted, 0 warnings** |
 | `quantrisk validate` | **7/7**, worst residual 2.22e-16 |
 | mypy / ruff / ruff format / clang-format | clean |
 | Technical report | 12 chapters, **38 pages**, new §5.4 "Do the conclusions survive real data?" |
@@ -102,4 +103,4 @@ No expected-return model, no term structure, no live market feed, no re-pricing 
 layer, no multi-period rebalancing, no short positions or leverage, no PyPI package and no DOI.
 The real-data arm remains one sample of three factor series with assumed exposures on FRED's current
 revision rather than its vintages (`docs/limitations.md` #61–#62). The full boundary is
-**64 numbered entries** in `docs/limitations.md`.
+**66 numbered entries** in `docs/limitations.md`.

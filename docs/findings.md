@@ -1,10 +1,10 @@
 # Findings
 
-Four results worth ninety seconds. Each is a number, the confound that makes it mean
+Five results worth ninety seconds. Each is a number, the confound that makes it mean
 something, and the artifact that regenerates it. Everything here is measured; nothing is
 asserted from a model's reputation.
 
-**On uncertainty, because the first three numbers are deterministic and the fourth is not.**
+**On uncertainty, because the first three numbers are deterministic, the fourth is an interval, and the fifth is exact analysis against floating-point data.**
 Findings 1 and 2 are functions of a fully specified, seeded data-generating process: given the
 same build, every figure reproduces to the last digit, and the ranges quoted
 (1.13×–1.26×, 1.57×–1.60×) are the spread *across window lengths and estimators*, which is the
@@ -153,6 +153,47 @@ return in it).
 - **Artifact:** `experiments/real_data_risk_study/results/real_data_risk_study.json`
   (`headline`, `A_estimator_validity`, `B_coverage_tests`, `D_covariance`, `refusals`),
   `real_data_violation_coverage.png`, `real_data_violations.csv`.
+
+## 5. The stress map's error has a sign change, and the theory says where
+
+The stress layer maps a shock to P&L with delta and gamma and then re-prices the same book with
+full Black-Scholes. `experiments/stress_testing/` published that error and the summary said it grows
+with the shock size. It does not, and its own table is the refutation: at a 10 % down move the error
+is 649.5, at 20 % it is 528.5, and then it is 12,527 at 30 %. A monotone story was told about a
+non-monotone curve.
+
+A Taylor remainder explains it, and `experiments/linearisation_error_bound/` checks the explanation
+rather than illustrating it. For a map that keeps terms through order two the remainder is
+`R = (1/6)·V‴(ξ)·h³` for some `ξ` on the shocked path, which is not merely an inequality: the
+coefficient `c(δ) = 6R/h³` must lie **between the minimum and maximum of V‴ along the path**. That
+holds at all 618 shocks tested in both directions, and the envelope is tight — the ratio runs
+0.9962 at the smallest shock to 0.2842 at the largest — so it is a bound and not a vacuous one.
+
+The closed form is `V‴ = −(Γ/S)(1 + d₁/(σ√T))`, and for this three-strike ladder it **crosses zero
+at spot 94.55**, a 5.45 % down move. Once the segment straddles that point the cubic contributions
+cancel, `c(δ)` falls through zero, and so does `R` — at a **21.1446 %** down move. The published
+curve, frozen in the evidence manifest a phase before this derivation existed, brackets that with
+its single sign change between 20 % and 30 %. Two artifacts produced by different code agreeing on a
+location is the check; one agreeing with itself is not.
+
+The asymptotics are reported as a convergence rather than a number, because at any fixed window the
+quartic term biases the slope: fitted per direction over shrinking windows the estimate runs
+**2.9710 → 2.9988** down and **3.0253 → 3.0012** up against theory 3. And the same departure
+confirms the fourth derivative by a second route — `S·V⁗/(4V‴) = 3.752361` predicted, measured
+3.759289 down and 3.745379 up at a 0.1 % shock, bracketing it from both sides.
+
+Three limits are stated rather than smoothed. The arithmetic floor is a property of the book's
+magnitude, near `δ = 3·10⁻⁵` here, and an earlier draft of this note took it from a similar-looking
+single-option test at the wrong unit and the wrong scale. A single pooled fit over up and down moves
+returns `3.037 ± 0.003` — eleven sigma from theory, and the sigma are meaningless, because the
+deviation *is* the up/down separation. And the bound is about the map, not the scenario: how much of
+a stress number is truncation is computable, how much is management choice is not.
+
+- **Confound identified:** an absolute-value bound cannot see a cancellation; the Lagrange form can,
+  and only that form predicts the sign change.
+- **Artifact:** `experiments/linearisation_error_bound/results/linearisation_error_bound.json`
+  (`headline`, `rows`, `proposition`, `asymptotics`), `linearisation_bound.csv`,
+  `linearisation_bound.png`; derivation in `docs/analysis/delta_gamma_error_bound.md`.
 
 ---
 

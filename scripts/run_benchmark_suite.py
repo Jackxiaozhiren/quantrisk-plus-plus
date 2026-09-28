@@ -303,6 +303,58 @@ MEMBERS: tuple[Member, ...] = (
         ),
     ),
     Member(
+        key="linearisation_error_bound",
+        title="Taylor remainder bound for the delta-gamma stress map, and its sign change",
+        kind=EXPERIMENT,
+        script="experiments/linearisation_error_bound/run.py",
+        artifact="experiments/linearisation_error_bound/results/linearisation_error_bound.json",
+        # No `plot` labels. This member publishes no error against an oracle, and panel A
+        # of the envelope figure is labelled |our value - oracle| / |oracle|. A remainder
+        # bound is not such a quantity; adding it would relabel the figure into a lie.
+        headline=(
+            ("all predictions held", ("headline", "all_predictions_held")),
+            (
+                "tightest |R|/bound away from the remainder zero",
+                ("headline", "bound_tightest_ratio_away_from_the_remainder_zero"),
+            ),
+            ("loosest |R|/bound", ("headline", "bound_loosest_ratio")),
+            ("dense shocks tested", ("headline", "dense_shocks_tested")),
+            (
+                "Lagrange inclusion violations, dense sweep",
+                ("headline", "lagrange_inclusion_violations_dense"),
+            ),
+            (
+                "cubic slope, widest window, down",
+                ("headline", "fitted_cubic_slope_widest_window_down"),
+            ),
+            (
+                "cubic slope, narrowest window, down",
+                ("headline", "fitted_cubic_slope_narrowest_window_down"),
+            ),
+            (
+                "cubic slope, narrowest window, up",
+                ("headline", "fitted_cubic_slope_narrowest_window_up"),
+            ),
+            (
+                "leading-term error at the smallest swept move",
+                ("headline", "leading_term_relative_error_at_smallest_move"),
+            ),
+            (
+                "quartic correction predicted by the closed forms",
+                ("headline", "quartic_correction_predicted_S_V4_over_4_V3"),
+            ),
+            ("book third derivative at the base spot", ("headline", "book_speed_at_base_spot")),
+            (
+                "third derivative crosses zero at down move",
+                ("headline", "aggregate_speed_crosses_zero_at_move"),
+            ),
+            (
+                "remainder crosses zero at down move",
+                ("headline", "predicted_remainder_zero_at_move"),
+            ),
+        ),
+    ),
+    Member(
         key="stress_testing",
         title="Stress reversals, attribution closure and delta-gamma linearisation error",
         kind=EXPERIMENT,

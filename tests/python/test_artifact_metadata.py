@@ -328,6 +328,13 @@ SPELLED_NUMBERS = {
     "eleven": 11,
     "twelve": 12,
     "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
+    "twenty": 20,
 }
 
 
@@ -584,3 +591,71 @@ def test_manifest_records_both_a_byte_hash_and_a_content_hash(tmp_path: Path) ->
             assert entry["content_sha256"], f"{entry['path']} has no content digest"
         else:
             assert entry["content_sha256"] is None, "binary evidence has no canonical form"
+
+
+MATRIX_DOCUMENTS = {
+    "README.md": r"is the full table . (\w+) rows over",
+    "docs/validation_matrix.md": r"It has (\w+) rows rather than twelve",
+}
+
+
+def test_documents_that_count_the_validation_matrix_rows_agree_with_the_table() -> None:
+    """The matrix is the project's answer to "what is validated", and two documents count it.
+
+    Rows are counted from the table itself rather than from any summary, because a row is a
+    component-and-oracle pairing rather than a component: twelve components produce more rows than
+    twelve, and the difference is precisely the content (a component validated two ways gets two
+    rows so that one row can admit it has no oracle). Prose that repeats the row count is repeating
+    a fact about the file, so the file owns it.
+    """
+    table = (REPO_ROOT / "docs" / "validation_matrix.md").read_text(encoding="utf-8")
+    rows = re.findall(r"^\| \d+[a-z]? \|", table, flags=re.M)
+    for name, pattern in MATRIX_DOCUMENTS.items():
+        found = re.search(pattern, (REPO_ROOT / name).read_text(encoding="utf-8"))
+        assert found, f"{name} no longer states the validation-matrix row count"
+        assert _as_int(found.group(1)) == len(rows), (
+            f"{name} says {found.group(1)!r} rows, docs/validation_matrix.md has {len(rows)}"
+        )
+
+
+def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
+    """The C++ totals are quoted in six places and changed under everyone this phase.
+
+    Counted from CTest's own list rather than from a document, and skipped only where nothing
+    has been built: in CI the lane that runs pytest runs immediately after the build, so the check
+    is live there, which is where a stale count would otherwise survive. Only living documents are
+    checked -- `docs/release_notes_v1.0.0.md` and the phase reports record the count at their own
+    revision, and forcing them to track a moving binary would rewrite history to keep a test green.
+    """
+    build_dirs = sorted((REPO_ROOT / "build").glob("*")) if (REPO_ROOT / "build").is_dir() else []
+    ctest = next(
+        (
+            directory / "CTestTestfile.cmake"
+            for directory in build_dirs
+            if (directory / "CTestTestfile.cmake").is_file()
+        ),
+        None,
+    )
+    if ctest is None:  # pragma: no cover - depends on whether the tree has been built
+        pytest.skip("no CMake build directory; the C++ totals cannot be counted")
+    listed = subprocess.run(
+        ["ctest", "--test-dir", str(ctest.parent), "-N"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    counted = re.findall(r"^\s*Test +#", listed.stdout, flags=re.M)
+    assert counted, f"ctest -N produced no test list: {listed.stdout[:300]!r}"
+    total = len(counted)
+
+    claims = {
+        "README.md": r"# (\d+) C\+\+ tests",
+        "docs/interview_defense.md": r"(\d+) C\+\+ tests under CTest",
+        "docs/reproducibility.md": r"# (\d+) C\+\+ tests",
+    }
+    for name, pattern in claims.items():
+        found = re.findall(pattern, (REPO_ROOT / name).read_text(encoding="utf-8"))
+        assert found, f"{name} no longer states the C++ test count"
+        assert all(int(value) == total for value in found), (
+            f"{name} says {found}, CTest lists {total}"
+        )

@@ -28,7 +28,7 @@ Measurements used throughout:
 | C++ tests (`tests/cpp`) | 4,508 lines |
 | Python tests (`tests/python`) | 4,167 lines |
 | Benchmarks, experiments, scripts | 6,331 lines |
-| Documentation | 5,016 lines + 37-page report (38 now — see the addendum) |
+| Documentation | 5,016 lines + 37-page report (40 now — see the addendum) |
 | Public Python API symbols | 159 across 8 modules |
 | Test totals | 190 CTest / 546,943 C++ assertions / 319 pytest (see the warning above) |
 | Frozen artifacts | 58, hashed, with generating commands |
@@ -350,14 +350,14 @@ Phase 11 addressed it.
 | Quantity | At `v1.0.0` | Now |
 |---|---|---|
 | C++ implementation lines | 6,946 | 6,946 (the core was not touched) |
-| C++ test lines | 4,508 | 4,508 |
+| C++ test lines | 4,508 | grew with Phase 12's four new cases |
 | Python test lines | 4,167 | 5,042 |
-| pytest, with `oracles` | 330 | 353 |
-| pytest in the CI lane (no extra) | 261 passed, 4 skipped | unchanged |
-| Suite members | 11 | 12 |
-| Frozen artifacts | 58 | 69 |
-| Numbered limitations | 60 | 63 |
-| Technical report | 37 pages | 38 pages |
+| pytest, with `oracles` | 330 | 366 |
+| pytest in the CI lane (no extra) | 261 passed, 4 skipped | 297 collected, of which four are module-level skips |
+| Suite members | 11 | 13 |
+| Frozen artifacts | 58 | 72 |
+| Numbered limitations | 60 | 66 |
+| Technical report | 37 pages | 40 pages |
 | `quantrisk validate` | 7/7 | 7/7 |
 
 The 319 in the table at the head of this document is dealt with in the warning there. The line

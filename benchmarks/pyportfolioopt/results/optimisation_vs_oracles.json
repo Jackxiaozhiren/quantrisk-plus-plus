@@ -1,6 +1,6 @@
 {
   "phase": "6 - Portfolio optimisation",
-  "generated_utc": "2026-09-28T06:05:56+00:00",
+  "generated_utc": "2026-09-28T08:20:14+00:00",
   "command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
   "purpose": "Level 2 validation of the covariance estimators' consumers: do the mean-variance, max-Sharpe, frontier, risk-parity and CVaR solvers in the C++ core agree with PyPortfolioOpt (SciPy SLSQP) and cvxpy (OSQP/SCS) on identical inputs, and are their constraints actually satisfied?",
   "oracles": {
@@ -22,7 +22,7 @@
   },
   "our_side": {
     "certificate": "each of our answers carries a KKT or LP optimality certificate checked against the original data, so `verified_optimal` is a proof, not a convergence message",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "parameters": {
     "asset_counts": [
@@ -133,12 +133,13 @@
     "problems_solved": 75
   },
   "environment": {
-    "generated_at_utc": "2026-09-28T06:05:56+00:00",
-    "quantrisk_version": "1.1.0",
-    "git_commit": "c76478d2b3c8",
-    "binary_git_commit": "c76478d2b3c8",
+    "generated_at_utc": "2026-09-28T08:20:14+00:00",
+    "quantrisk_version": "1.2.0",
+    "git_commit": "e413ae67c250",
+    "binary_git_commit": "e413ae67c250",
     "working_tree_dirty": true,
     "uncommitted_paths": [
+      ".github/workflows/ci.yml",
       "CITATION.cff",
       "CMakeLists.txt",
       "README.md",
@@ -150,9 +151,23 @@
       "benchmarks/suite/results/suite_headline.csv",
       "benchmarks/suite/results/suite_run.json",
       "benchmarks/suite/results/suite_summary.md",
-      "docs/project_scope.md",
+      "bindings/python_bindings.cpp",
+      "cpp/include/quantrisk/pricing/black_scholes.hpp",
+      "cpp/src/pricing/black_scholes.cpp",
+      "docs/analysis/",
+      "docs/findings.md",
+      "docs/inbox/",
+      "docs/integrity_audit.md",
+      "docs/interview_defense.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-12-remainder-bound.md",
+      "docs/portfolio_audit.md",
       "docs/release_notes_v1.1.0.md",
+      "docs/release_notes_v1.2.0.md",
+      "docs/reproducibility.md",
+      "docs/validation_matrix.md",
       "evidence/manifest.json",
+      "experiments/linearisation_error_bound/",
       "experiments/monte_carlo_convergence/results/convergence.csv",
       "experiments/monte_carlo_convergence/results/summary.json",
       "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
@@ -162,10 +177,18 @@
       "experiments/var_backtesting/results/var_backtesting_validation.json",
       "experiments/variance_reduction/results/summary.json",
       "experiments/variance_reduction/results/variance_by_method.csv",
+      "paper/technical_report.pdf",
+      "paper/technical_report.tex",
       "pyproject.toml",
+      "python/quantrisk/pricing.pyi",
+      "scripts/build_evidence_manifest.py",
+      "scripts/run_benchmark_suite.py",
+      "tests/cpp/test_black_scholes.cpp",
+      "tests/python/test_artifact_metadata.py",
+      "tests/python/test_linearisation_bound.py",
       "uv.lock"
     ],
-    "provenance": "ran from c76478d2b3c8 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at c76478d2b3c8",
+    "provenance": "ran from e413ae67c250 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at e413ae67c250",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",
@@ -176,7 +199,7 @@
     "python_machine": "arm64",
     "packages": {
       "python": "3.12.14",
-      "quantrisk": "1.1.0",
+      "quantrisk": "1.2.0",
       "numpy": "2.5.3",
       "scipy": "1.18.1",
       "pandas": "3.0.6",

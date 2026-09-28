@@ -180,7 +180,39 @@ Greeks black_scholes_greeks(const EuropeanOption &option, const MarketParams &ma
     return greeks;
 }
 
+SpotDerivatives black_scholes_spot_derivatives(const EuropeanOption &option,
+                                               const MarketParams &market) {
+    market.validate();
+    option.validate();
+
+    SpotDerivatives derivatives;
+    if (is_degenerate(market)) {
+        /// The same sigma -> 0+ / T -> 0+ limit the Greeks take above, where Gamma is
+        /// set to zero: with no volatility the value is piecewise linear in the
+        /// forward, so it has no third or fourth spot derivative away from the strike
+        /// kink, and an expired contract has none anywhere. Zero is the limit, not a
+        /// stand-in for a division by `sigma * sqrt(T)` that would report inf.
+        return derivatives;
+    }
+
+    const Terms terms = terms_of(market, option.strike);
+    const Real first = d1(option, market);
+    const Real sigma_root_t = market.volatility * std::sqrt(market.maturity);
+
+    /// Gamma exactly as §3 and `black_scholes_greeks` define it, so the two
+    /// derivatives below are the derivative of the published number rather than a
+    /// second implementation of the same density.
+    const Real gamma = terms.growth_discount * normal_pdf(first) / (market.spot * sigma_root_t);
+    const Real a = 1.0 + first / sigma_root_t;
+
+    derivatives.third = -(gamma / market.spot) * a;
+    derivatives.fourth =
+        (gamma / (market.spot * market.spot)) * (a * a + a - 1.0 / (sigma_root_t * sigma_root_t));
+    return derivatives;
+}
+
 Real put_call_parity_residual(const MarketParams &market, const Real strike) {
+
     const Terms terms = terms_of(market, strike);
     return black_scholes_call(market, strike) - black_scholes_put(market, strike) -
            (terms.forward_spot - terms.discounted_strike);

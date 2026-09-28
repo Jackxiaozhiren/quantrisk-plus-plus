@@ -63,6 +63,7 @@ SOURCES: list[tuple[str, str, tuple[str, ...]]] = [
             "experiments/portfolio_optimization/results",
             "experiments/stress_testing/results",
             "experiments/real_data_risk_study/results",
+            "experiments/linearisation_error_bound/results",
         ),
     ),
     (
