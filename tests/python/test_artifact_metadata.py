@@ -264,15 +264,24 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
     assert collected, f"could not read a test count out of pytest: {completed.stdout[-500:]}"
     total = int(collected.group(1))
 
-    claims = {
-        "docs/interview_defense.md": r"(\d+) pytest tests with the `oracles` extra",
-        "docs/limitations.md": r"collects (\d+) tests at HEAD",
-    }
-    for name, pattern in claims.items():
-        found = re.findall(pattern, (REPO_ROOT / name).read_text(encoding="utf-8"))
-        assert found, f"{name} no longer states the Python test count in the expected form"
-        assert all(int(value) == total for value in found), (
-            f"{name} says {found}, pytest collects {total}"
+    # Both environments are documented, and each one checks its own figure. The CI
+    # `build-and-test` lane installs without the `oracles` extra, four oracle-gated modules
+    # collapse into four skip records instead of the 69 cases they hold, and the run collects
+    # 284 rather than 353 -- so a guard that asserted only the with-oracles number would either
+    # fail on the runner or have to be told to ignore it, which is how the two figures drifted
+    # apart in the first place.
+    with_oracles = r"(\d+)\s+pytest\s+tests\s+with\s+the\s+`oracles`\s+extra"
+    without_oracles = r"collects\s+(\d+)\s+tests\s+without\s+it"
+    documents = ("docs/interview_defense.md", "docs/limitations.md", "docs/reproducibility.md")
+    for name in documents:
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        high = re.search(with_oracles, text)
+        low = re.search(without_oracles, text)
+        assert high and low, f"{name} does not state both Python test counts"
+        documented = int(high.group(1)) if _oracles_present() else int(low.group(1))
+        assert documented == total, (
+            f"{name} says {documented} for this environment; pytest collects {total}. "
+            f"oracles present: {_oracles_present()}"
         )
 
 
@@ -327,6 +336,21 @@ def _as_int(token: str) -> int:
     if token.isdigit():
         return int(token)
     return SPELLED_NUMBERS[token.lower()]
+
+
+ORACLE_MODULES = ("QuantLib", "pypfopt", "cvxpy", "sklearn")
+
+
+def _oracles_present() -> bool:
+    """Whether this environment installed the `oracles` extra.
+
+    The test count is a property of the environment (limitation #63), so a guard about that
+    number has to know which environment it is running in. Importing the optional packages is
+    the only honest way to ask.
+    """
+    import importlib.util
+
+    return all(importlib.util.find_spec(module) is not None for module in ORACLE_MODULES)
 
 
 def _load_suite_members() -> list[Any]:
@@ -438,11 +462,11 @@ def test_documents_that_count_the_suite_members_agree_with_the_registry() -> Non
     skippable = sum(1 for m in members if m.requires)
 
     claims = {
-        "README.md": r"runs all (\w+) members",
-        "docs/limitations.md": r"so all (\w+) members execute against live oracles",
-        "docs/reproducibility.md": r"all (\d+) members",
-        "docs/validation_matrix.md": r"all (\d+) members",
-        ".github/workflows/ci.yml": r"re-executes all (\w+) members",
+        "README.md": r"runs\s+all\s+(\w+)\s+members",
+        "docs/limitations.md": r"so\s+all\s+(\w+)\s+members\s+execute\s+against\s+live\s+oracles",
+        "docs/reproducibility.md": r"all\s+(\d+)\s+members",
+        "docs/validation_matrix.md": r"all\s+(\d+)\s+members",
+        ".github/workflows/ci.yml": r"re-executes\s+all\s+(\w+)\s+members",
     }
     for name, pattern in claims.items():
         text = (REPO_ROOT / name).read_text(encoding="utf-8")
@@ -454,8 +478,8 @@ def test_documents_that_count_the_suite_members_agree_with_the_registry() -> Non
 
     readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     breakdown = re.search(
-        r"(\w+) correctness\nbenchmarks, (\w+) statistical experiments, "
-        r"(\w+) performance benchmark",
+        r"(\w+)\s+correctness\s+benchmarks,\s+(\w+)\s+statistical\s+experiments,\s+"
+        r"(\w+)\s+performance\s+benchmark",
         readme,
     )
     assert breakdown, "README no longer breaks the suite down by kind"
@@ -465,7 +489,7 @@ def test_documents_that_count_the_suite_members_agree_with_the_registry() -> Non
     assert sum(by_kind.values()) == total, "a member kind is not one of the three the suite claims"
 
     reproducibility = (REPO_ROOT / "docs" / "reproducibility.md").read_text(encoding="utf-8")
-    skips = re.search(r"(\w+) of the (\w+) members report `skipped`", reproducibility)
+    skips = re.search(r"(\w+)\s+of\s+the\s+(\w+)\s+members\s+report\s+`skipped`", reproducibility)
     assert skips, "docs/reproducibility.md no longer states how many members need oracles"
     assert _as_int(skips.group(1)) == skippable, (
         f"the note says {skips.group(1)} members skip without the extra; "
@@ -474,7 +498,7 @@ def test_documents_that_count_the_suite_members_agree_with_the_registry() -> Non
     assert _as_int(skips.group(2)) == total
 
     defense = (REPO_ROOT / "docs" / "interview_defense.md").read_text(encoding="utf-8")
-    executed = re.search(r"(\d+)/(\d+) benchmark-suite members executed", defense)
+    executed = re.search(r"(\d+)/(\d+)\s+benchmark-suite\s+members\s+executed", defense)
     assert executed and int(executed.group(2)) == total, (
         "interview_defense.md counts a different suite than the registry has"
     )

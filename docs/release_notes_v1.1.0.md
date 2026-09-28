@@ -102,4 +102,4 @@ No expected-return model, no term structure, no live market feed, no re-pricing 
 layer, no multi-period rebalancing, no short positions or leverage, no PyPI package and no DOI.
 The real-data arm remains one sample of three factor series with assumed exposures on FRED's current
 revision rather than its vintages (`docs/limitations.md` #61–#62). The full boundary is
-**63 numbered entries** in `docs/limitations.md`.
+**64 numbered entries** in `docs/limitations.md`.

@@ -195,6 +195,18 @@ copy of the script in `tmp_path`, and structurally by a session fixture in
 Falsified by planting a test that appends a newline to a stress artifact: the session assertion
 fires. A full run now leaves `git status` clean, which it did not before.
 
+**19. The runner caught the new phase repeating the defect this audit was written about.** Two
+Phase 11 assertions failed on `ubuntu-latest`: one demanded bit-for-bit agreement between a
+macOS-frozen artifact and a Linux re-run (glibc moved the last digits by ~1e-14 — precisely
+`docs/limitations.md` #59, which the same author had written), and the other asserted a
+with-oracles test count inside a CI lane that installs without them. Both were fixed by encoding the
+boundary instead of the wish: relative slack of 1e-12 on floats with exact equality on integers,
+verdicts and rankings, and a count guard that asks which environment it is running in. Ten
+perturbations confirm the comparator rejects a 1e-6 change, a sign flip, a count change and a
+verdict flip while tolerating 1e-14. See `docs/limitations.md` #64 and §6 finding 11 of the Phase 11
+report. The lesson is the one this audit keeps re-learning: a check written on one machine is a
+claim about that machine, and the only way to find out is to run it somewhere else.
+
 **What the new study itself established.** `experiments/real_data_risk_study/` is the twelfth suite
 member; its artifact refuses three questions rather than proxying them; and finding 4 in
 `docs/findings.md` now carries the project's first empirical result *and* its first result that

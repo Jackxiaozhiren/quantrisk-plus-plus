@@ -89,20 +89,20 @@ in that state would be claiming a measurement it did not make. The flag turns th
 a failure.
 
 **The pytest count depends on which extras you installed, and a document that prints one number
-without saying which is wrong.** The sequence above, with `--extra oracles`, ends in **353 passed**.
-The CI `build-and-test` lane runs `uv sync` *without* that extra, and at `v1.0.0` it printed
-**261 passed, 4 skipped** where the same tree locally printed 330, because four test modules gate
-on a module-level
-`pytest.importorskip` — for `sklearn`, `QuantLib` twice and `pypfopt` — and a module that skips at
-import reports **one** skip, not the 69 cases inside it. At `v1.0.0` that means 330 collected with
-the extra against **265** without it — a difference of 65, which is 69 cases replaced by four
-module-level skip records. Those 69 are oracle comparisons a no-extra run never attempts, and
-nothing is broken when they do not appear; what would be broken is quoting either number as
-"the" test count. The pair moves with the tree — it is
-quoted from the runner's log at `v1.0.0`, not predicted for HEAD — so only the with-oracles number
-is guarded. `docs/limitations.md` #63 records this,
-and `test_the_documents_that_count_python_tests_count_the_ones_that_exist` re-collects the suite in
-a subprocess and fails if the prose disagrees. The C++ side has no such split: 190 tests under
+without saying which is wrong.** The sequence above yields **353 pytest tests with the `oracles`
+extra** installed. Run the same tree after a plain `uv sync` — no `oracles` extra — and the same
+tree collects 284 tests without it. That figure is not arithmetic from this laptop: it is what the
+runner's own `pytest --collect-only` printed, and the difference of 69 is four modules that gate on
+a module-level `pytest.importorskip` (for `sklearn`, `QuantLib` twice and `pypfopt`). 69 oracle
+comparison cases go unattempted there, and nothing is broken when they do — what would be broken is
+quoting either figure as "the" test count. At `v1.0.0` the pair was 330 and 261-passed-4-skipped.
+
+Both numbers are guarded now.
+`test_the_documents_that_count_python_tests_count_the_ones_that_exist` re-collects the suite in a
+subprocess, asks whether the optional oracle packages are importable, and checks the figure that
+belongs to *that* environment — so the runner validates its own 284 instead of being asked to agree
+with a laptop. The first version of that guard asserted only the local number and failed on CI,
+which is the same class of error as the one it was written to prevent. The C++ side has no such split: 190 tests under
 CTest either way, because the C++ suite has no optional dependencies.
 
 ## What is *not* reproducible

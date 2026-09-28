@@ -84,7 +84,8 @@ This phase pays part of that debt and reports what survived the exchange.
 ## 4. Tests executed
 
 ```bash
-uv run pytest -q                                            # 353 passed
+uv run pytest -q                                            # 353 passed with the oracles extra
+uv run pytest -q                                            # 284 collected without it (CI lane)
 uv run pytest tests/python/test_real_data_study_offline.py  # 11 passed
 uv run pytest tests/python/test_real_data_findings_prose.py # 7 passed
 uv run ctest --test-dir build/dev                           # 190 passed (core unchanged)
@@ -114,8 +115,9 @@ Every new assertion was **falsified before being trusted**:
 
 | Gate | Result |
 |---|---|
-| pytest, with the `oracles` extra | **353 passed**, 0 failed, 0 skipped, 26.8 s |
-| pytest in the `build-and-test` CI lane (no `oracles` extra) | **261 passed, 4 skipped** — see #63 |
+| pytest, with the `oracles` extra | **353 passed**, 0 failed, 0 skipped |
+| pytest in the `build-and-test` CI lane (no `oracles` extra) | **284 collected**, of which four oracle-gated modules skip as four records — see #63 |
+| First CI run of this phase | **2 failed** — the two cross-platform assertions in finding 11 |
 | CTest | **190 passed**, unchanged; the C++ core was not touched this phase |
 | `quantrisk validate` | **7/7**, worst residual 2.22e-16 |
 | Benchmark suite | **12/12 executed and passed, 0 failed, 0 skipped**, 62–69 s |
@@ -123,7 +125,8 @@ Every new assertion was **falsified before being trusted**:
 | mypy / ruff / clang-format | clean |
 
 330 tests existed at the `v1.0.0` tag, 331 at the phase's first commit, 353 at its last. The 22
-added are the two new files plus the four registry and count guards.
+added are the two new files plus the registry, command and count guards. The session fixture in
+`tests/python/conftest.py` is not a test and does not change that count.
 
 ## 6. Numerical validation
 
@@ -205,6 +208,25 @@ write requires confirming the path is absent first. Recorded here rather than in
 file because it is a process defect in the tooling that produces the evidence, not a property of
 the models.
 
+**11. The runner caught this phase re-committing the exact defect Phase 10 documented.** Two of
+the new tests failed on `ubuntu-latest` and both were assertions about equality across platforms:
+`test_a_fresh_run_reproduces_the_committed_artifact_exactly` demanded bit-for-bit agreement with an
+artifact frozen on macOS, and glibc's libm moved the last digits by ~1e-14 (`0.0006136533643794436`
+against the committed `0.0006136533643794354`);
+`test_the_documents_that_count_python_tests_count_the_ones_that_exist` asserted the local
+with-oracles test count in a CI lane that installs without them. The first test's docstring even
+read "the comparison is exact, not approximate: nothing here is sampled from a live source, so there
+is no legitimate source of variation left to allow for" — which overlooked the one source of
+variation `docs/limitations.md` #59 had already named, and I had written that entry. Fixed by
+comparing floats with a documented 1e-12 relative slack (two orders above the observed spread, six
+below anything a reader would call a different number) while holding integers, verdicts and the
+ranking exact, and by making the count guard ask which environment it is in before choosing which
+figure to check. Recorded as limitation #64: **the frozen evidence is a record of one platform's
+last digits**, so `verify_evidence_manifest.py` is a same-platform tamper check and CI verifies
+*execution* on Linux rather than byte equality there. Ten perturbations of the comparator were run
+to confirm it tolerates 1e-14 and rejects a 1e-6 change, a sign flip, a count change, a verdict
+flip, a ranking permutation and a zero-against-nonzero comparison.
+
 **The results themselves.**
 
 | Question | Measured | Against |
@@ -227,8 +249,9 @@ the method, not the process: an estimator ranking is a property of the process i
 
 Recorded as `docs/limitations.md` **#61** (the book is assumed, not held; rates are invariant to
 uniform scaling but not to the factor mix), **#62** (current revision, not vintage — `fetch_vintage`
-exists and is unused), and **#63** (the test count is a property of the environment, and a document
-quoting one number without saying which is wrong). #28 was **re-scoped rather than deleted**: the
+exists and is unused), **#63** (the test count is a property of the environment, and a document
+quoting one number without saying which is wrong) and **#64** (the frozen evidence records one
+platform's last digits, so byte verification is same-platform only). #28 was **re-scoped rather than deleted**: the
 instrumented synthetic validation it describes is still exactly that, and the new arm is narrower
 than it, not a replacement for it.
 

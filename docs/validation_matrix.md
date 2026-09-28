@@ -101,7 +101,7 @@ not evidence about markets.
   workload — that is, slower than a vectorised NumPy path at 200k paths. The speedup moves
   by several percent between runs, so no single figure from that file should be quoted as
   if it were a constant.
-- **The 63 numbered limitations in `docs/limitations.md` are the complete list of what is
+- **The 64 numbered limitations in `docs/limitations.md` are the complete list of what is
   not claimed.** Where a row above says "weaker" or "partially", it points into that file.
 
 ## Regenerating

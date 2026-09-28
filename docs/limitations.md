@@ -304,13 +304,35 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` with the `oracles` extra installed
-    collects 353 tests at HEAD. The `build-and-test` CI lane runs `uv sync` *without* that extra;
-    at `v1.0.0` it printed `261 passed, 4 skipped` where the same tree locally collected 330,
-    because four test modules gate
-    themselves on a module-level `pytest.importorskip` (for `sklearn`, `QuantLib` ×2 and
-    `pypfopt`) and a module that skips at import reports **one** skip, not the 69 test cases
-    inside it. Both counts are honest; neither is "the" count, and the difference is not
-    quality — it is 69 oracle-comparison cases that a no-extra run never attempts. Before this
-    entry, `v1.0.0`'s own documents quoted 330 and 319 for the same tag with no environment
-    stated; 330 was the number that was right, 319 was stale, and the runner printed 261.
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 353 pytest tests with the
+    `oracles` extra installed, and the same tree collects 284 tests without it — the CI lane runs a
+    plain `uv sync`, and the 284 is what that runner's own `pytest --collect-only` printed rather
+    than arithmetic done on a laptop. The gap is 69 cases inside four modules that gate on a
+    module-level `pytest.importorskip` (for `sklearn`, `QuantLib` twice and `pypfopt`), and a module
+    that skips at import reports **one** skip instead of the cases it holds. Those 69 are oracle
+    comparisons a no-extra run never attempts. Both counts are honest; neither is "the" count.
+    `v1.0.0`'s own documents quoted 330 and 319 for the same tag with no environment stated; 330 was
+    the number that was right, 319 was stale, and the runner printed 261 passed with 4 skipped. The
+    guard is `test_the_documents_that_count_python_tests_count_the_ones_that_exist`, and it asks
+    which environment it is in before deciding which figure to check — because the first version of
+    that guard asserted only the with-oracles number and promptly failed on the runner, which is the
+    same mistake this entry describes, made again by the tool written to prevent it.
+
+## Phase 11 — cross-platform evidence
+
+64. **The frozen evidence is a record of one platform's last digits.** `evidence/manifest.json`
+    byte-hashes 69 artifacts produced on macOS/AppleClang/arm64, and a fresh run of the real-data
+    study on the Linux runner did not reproduce them bit for bit: `mean_realised_variance` came out
+    0.0006136533643794436 against the committed 0.0006136533643794354, `mean_effective_assets`
+    1.669464392772778 against 1.6694643927727641, the iid bootstrap standard error
+    3796.595675506823 against 3796.595675506824 — spreads of about 1e-14 relative, which is
+    limitation #59 propagating through 586 chained windows of differences, exponentials and quantile
+    interpolation. Every integer, every boolean and the whole covariance ranking matched exactly, so
+    no conclusion moved. The consequence is stated rather than smoothed: `verify_evidence_manifest.py`
+    is a same-platform tamper check, and running it on a different libm would report CHANGED on
+    result fields that are in fact the same result. CI therefore verifies *execution* on Linux (the
+    `benchmark-suite` lane runs all twelve members with `--require-all`) and *byte equality* only on
+    the platform that produced the artifacts. `test_a_fresh_run_reproduces_the_committed_artifact_exactly`
+    encodes the split: relative slack of 1e-12 on floats, exact equality on everything else. Making
+    the chain platform-independent would require storing results at a stated precision rather than at
+    full double resolution, which was not done here.

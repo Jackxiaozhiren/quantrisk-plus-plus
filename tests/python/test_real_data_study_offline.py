@@ -110,12 +110,27 @@ def test_the_experiment_runs_with_sockets_disabled(tmp_path: Path) -> None:
     assert completed.returncode == 0, completed.stderr[-3000:]
 
 
+#: Relative slack allowed between a committed result and a fresh run of it, on another platform.
+#:
+#: Measured, not guessed: the Linux runner's first fresh run of this study disagreed with the
+#: macOS-committed artifact by at most 1.3e-14 relative (0.0006136533643794436 against
+#: 0.0006136533643794354 in `mean_realised_variance`; 1.669464392772778 against
+#: 1.6694643927727641 in `mean_effective_assets`; 3796.595675506823 against
+#: 3796.595675506824 in the iid bootstrap standard error), while every integer, every boolean and
+#: the whole covariance ranking matched exactly. That is `docs/limitations.md` #59 — the platform
+#: libm owns the last one or two digits — reappearing here because the study chains differences,
+#: exponentials and quantile interpolations across 586 windows. So the slack sits two orders of
+#: magnitude above the observed spread and six below anything a reader would call a different
+#: number, and it is applied to floats only: counts, verdicts and rankings must still match bit
+#: for bit.
+CROSS_PLATFORM_RELATIVE_SLACK = 1e-12
+
+
 def _results_only(payload: dict) -> dict:
     """Strip the fields that legitimately differ between runs.
 
     Same rule as the evidence manifest's content digest: a re-run changes when it ran, from
-    which revision, on which machine, and how long the clock said it took. Everything else
-    has to be byte-identical or the published artifact is a snapshot of drift.
+    which revision, on which machine, and how long the clock said it took.
     """
     stripped = {
         key: value
@@ -125,13 +140,55 @@ def _results_only(payload: dict) -> dict:
     return json.loads(json.dumps(stripped))
 
 
+def _assert_results_agree(fresh: object, committed: object, path: str = "") -> None:
+    """Every number agrees within the platform slack; every non-number agrees exactly."""
+    if isinstance(committed, bool) or isinstance(fresh, bool):
+        if fresh != committed:
+            raise AssertionError(f"{path}: {fresh!r} != {committed!r} (a verdict changed)")
+        return
+    if isinstance(committed, (int,)) and isinstance(fresh, int):
+        if fresh != committed:
+            raise AssertionError(f"{path}: {fresh} != {committed} (a count changed)")
+        return
+    if isinstance(committed, float) and isinstance(fresh, (int, float)):
+        # Relative, with an absolute floor only for the two cases where a magnitude of zero makes
+        # a ratio meaningless: 0.0 against 0.0 must be equal, and 0.0 against something tiny is
+        # already caught by the first branch.
+        scale = max(abs(committed), abs(fresh))
+        slack = CROSS_PLATFORM_RELATIVE_SLACK * scale if scale else 0.0
+        if abs(fresh - committed) > slack:
+            raise AssertionError(
+                f"{path}: {fresh!r} differs from the committed {committed!r} by more than "
+                f"{CROSS_PLATFORM_RELATIVE_SLACK:.0e} relative — that is a changed result, "
+                "not the platform's last digits"
+            )
+        return
+    if isinstance(committed, dict) and isinstance(fresh, dict):
+        assert set(fresh) == set(committed), (
+            f"{path}: keys differ — only in fresh: {sorted(set(fresh) - set(committed))}, "
+            f"only in committed: {sorted(set(committed) - set(fresh))}"
+        )
+        for key in committed:
+            _assert_results_agree(fresh[key], committed[key], f"{path}/{key}")
+        return
+    if isinstance(committed, list) and isinstance(fresh, list):
+        assert len(fresh) == len(committed), f"{path}: lengths differ"
+        for index, (left, right) in enumerate(zip(fresh, committed, strict=True)):
+            _assert_results_agree(left, right, f"{path}[{index}]")
+        return
+    assert fresh == committed, f"{path}: {fresh!r} != {committed!r}"
+
+
 def test_a_fresh_run_reproduces_the_committed_artifact_exactly(tmp_path: Path) -> None:
     """Re-running must reproduce every number, or the artifact is a dated accident.
 
-    This is the reproducibility claim of the whole project applied to the one experiment
-    that reasons about real markets, where a silent dependence on when it ran would be
-    most damaging. The comparison is exact, not approximate: nothing here is sampled from a
-    live source, so there is no legitimate source of variation left to allow for.
+    This is the reproducibility claim of the whole project applied to the one experiment that
+    reasons about real markets, where a silent dependence on when it ran would be most damaging.
+    Integers, verdicts and rankings are compared bit for bit. Floats get the platform slack
+    documented on `CROSS_PLATFORM_RELATIVE_SLACK`, because the first version of this test demanded
+    exact equality and the Linux runner immediately failed it over 1e-14 differences in the last
+    digits -- `docs/limitations.md` #59, re-learned the expensive way. Nothing here is sampled from
+    a live source, so the only legitimate variation left is which libm computed it.
     """
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
     before = ARTIFACT.read_bytes()
@@ -146,9 +203,7 @@ def test_a_fresh_run_reproduces_the_committed_artifact_exactly(tmp_path: Path) -
     )
     assert completed.returncode == 0, completed.stderr[-3000:]
     fresh = json.loads((script.parent / "results" / "real_data_risk_study.json").read_text())
-    assert _results_only(fresh) == _results_only(committed), (
-        "a fresh run of the real-data study does not reproduce the committed results"
-    )
+    _assert_results_agree(_results_only(fresh), _results_only(committed))
     # The committed artifact is the evidence; a test that regenerated it would make the next
     # assertion below about the test rather than about the experiment.
     assert ARTIFACT.read_bytes() == before, "the test run modified a committed artifact"

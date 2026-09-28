@@ -28,7 +28,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 63
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 64
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -41,12 +41,13 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 190 C++ tests under CTest (546,943 assertions in 189 Catch2
-cases), 353 pytest tests with the `oracles` extra, 12/12 benchmark-suite members executed,
-`quantrisk validate` 7/7. The CI lane installs without the extra and collects far less: at
-`v1.0.0` it printed 261 passed / 4 skipped against 330 locally, because four oracle-gated modules
-collapse into four skip records instead of the 69 cases they hold (limitation #63). At the tag
-itself the suite was 11/11. A test now asserts the 353, because two documents used to quote two
-different numbers for that tag and neither matched the runner.
+cases), 353 pytest tests with the `oracles` extra and the same tree collects 284 tests without
+it. 12/12 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
+difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
+hold (limitation #63). At the `v1.0.0` tag the same commands gave 330 and 261-passed-4-skipped, and
+the suite was 11/11. A guard asserts both figures and asks which environment it is running in
+before choosing — because two documents used to quote two different numbers for one tag, and the
+first version of the guard itself failed on the runner for asserting only the local one.
 
 ---
 
