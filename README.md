@@ -59,7 +59,7 @@ instrumentation is the hard part.
 ```python
 import quantrisk
 
-quantrisk.version()  # '1.0.0'
+quantrisk.version()  # '1.1.0'
 quantrisk.normal_cdf(0.0)  # 0.5
 
 rng = quantrisk.Rng(seed=42)

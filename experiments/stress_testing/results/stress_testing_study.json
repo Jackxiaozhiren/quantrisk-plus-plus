@@ -1,6 +1,6 @@
 {
   "phase": "7 - Stress testing",
-  "generated_utc": "2026-09-28T05:52:56+00:00",
+  "generated_utc": "2026-09-28T06:06:30+00:00",
   "command": "uv run python experiments/stress_testing/run.py",
   "question": "A portfolio chosen to be least risky under normal dispersion is optimal for that dispersion. Does a stress change which portfolio is the risky one, and can the attribution say why?",
   "market": {
@@ -25,17 +25,6 @@
     ]
   },
   "ranking": {
-    "credit_+150bp": {
-      "books": 4,
-      "books_that_changed_absolute_rank": 0,
-      "books_that_changed_sensitivity_rank": 4,
-      "max_var_multiplier": 1.000360436228923,
-      "min_var_multiplier": 1.000184247021596,
-      "base_var_spread": 0.207671223472964,
-      "multiplier_spread": 0.00017615675097015782,
-      "most_stress_sensitive": "risk_parity",
-      "least_stress_sensitive": "min_cvar"
-    },
     "equity_-20pct": {
       "books": 4,
       "books_that_changed_absolute_rank": 0,
@@ -44,17 +33,6 @@
       "min_var_multiplier": 5.233863659955977,
       "base_var_spread": 0.207671223472964,
       "multiplier_spread": 0.16799284494318978,
-      "most_stress_sensitive": "min_variance",
-      "least_stress_sensitive": "equal_weight"
-    },
-    "risk_off": {
-      "books": 4,
-      "books_that_changed_absolute_rank": 0,
-      "books_that_changed_sensitivity_rank": 4,
-      "max_var_multiplier": 5.6058064260464455,
-      "min_var_multiplier": 4.933851866996343,
-      "base_var_spread": 0.207671223472964,
-      "multiplier_spread": 0.13619269024774727,
       "most_stress_sensitive": "min_variance",
       "least_stress_sensitive": "equal_weight"
     },
@@ -69,6 +47,17 @@
       "most_stress_sensitive": "risk_parity",
       "least_stress_sensitive": "min_cvar"
     },
+    "rates_+200bp": {
+      "books": 4,
+      "books_that_changed_absolute_rank": 0,
+      "books_that_changed_sensitivity_rank": 4,
+      "max_var_multiplier": 1.0096116327712743,
+      "min_var_multiplier": 1.0049132539092294,
+      "base_var_spread": 0.207671223472964,
+      "multiplier_spread": 0.0046754073983676925,
+      "most_stress_sensitive": "risk_parity",
+      "least_stress_sensitive": "min_cvar"
+    },
     "rates_-100bp": {
       "books": 4,
       "books_that_changed_absolute_rank": 0,
@@ -79,6 +68,17 @@
       "multiplier_spread": 0.0023605337226657586,
       "most_stress_sensitive": "min_cvar",
       "least_stress_sensitive": "risk_parity"
+    },
+    "credit_+150bp": {
+      "books": 4,
+      "books_that_changed_absolute_rank": 0,
+      "books_that_changed_sensitivity_rank": 4,
+      "max_var_multiplier": 1.000360436228923,
+      "min_var_multiplier": 1.000184247021596,
+      "base_var_spread": 0.207671223472964,
+      "multiplier_spread": 0.00017615675097015782,
+      "most_stress_sensitive": "risk_parity",
+      "least_stress_sensitive": "min_cvar"
     },
     "vol_x2": {
       "books": 4,
@@ -91,16 +91,16 @@
       "most_stress_sensitive": "min_variance",
       "least_stress_sensitive": "min_variance"
     },
-    "rates_+200bp": {
+    "risk_off": {
       "books": 4,
       "books_that_changed_absolute_rank": 0,
       "books_that_changed_sensitivity_rank": 4,
-      "max_var_multiplier": 1.0096116327712743,
-      "min_var_multiplier": 1.0049132539092294,
+      "max_var_multiplier": 5.6058064260464455,
+      "min_var_multiplier": 4.933851866996343,
       "base_var_spread": 0.207671223472964,
-      "multiplier_spread": 0.0046754073983676925,
-      "most_stress_sensitive": "risk_parity",
-      "least_stress_sensitive": "min_cvar"
+      "multiplier_spread": 0.13619269024774727,
+      "most_stress_sensitive": "min_variance",
+      "least_stress_sensitive": "equal_weight"
     }
   },
   "linearisation": {
@@ -213,26 +213,39 @@
     "scenarios_evaluated": 28
   },
   "environment": {
-    "generated_at_utc": "2026-09-28T05:52:56+00:00",
-    "quantrisk_version": "1.0.0",
-    "git_commit": "ac928733b31f",
-    "binary_git_commit": "02fea3a1847f",
+    "generated_at_utc": "2026-09-28T06:06:30+00:00",
+    "quantrisk_version": "1.1.0",
+    "git_commit": "c76478d2b3c8",
+    "binary_git_commit": "c76478d2b3c8",
     "working_tree_dirty": true,
     "uncommitted_paths": [
+      "CITATION.cff",
+      "CMakeLists.txt",
+      "README.md",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
       "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
       "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "benchmarks/suite/results/suite_headline.csv",
+      "benchmarks/suite/results/suite_run.json",
+      "benchmarks/suite/results/suite_summary.md",
+      "docs/project_scope.md",
+      "docs/release_notes_v1.1.0.md",
+      "evidence/manifest.json",
       "experiments/monte_carlo_convergence/results/convergence.csv",
       "experiments/monte_carlo_convergence/results/summary.json",
       "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
       "experiments/pricing_validation/results/summary.json",
+      "experiments/real_data_risk_study/results/real_data_risk_study.json",
+      "experiments/stress_testing/results/stress_testing_study.json",
       "experiments/var_backtesting/results/var_backtesting_validation.json",
       "experiments/variance_reduction/results/summary.json",
-      "experiments/variance_reduction/results/variance_by_method.csv"
+      "experiments/variance_reduction/results/variance_by_method.csv",
+      "pyproject.toml",
+      "uv.lock"
     ],
-    "provenance": "ran from ac928733b31f plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 02fea3a1847f",
+    "provenance": "ran from c76478d2b3c8 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at c76478d2b3c8",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",
@@ -243,7 +256,7 @@
     "python_machine": "arm64",
     "packages": {
       "python": "3.12.14",
-      "quantrisk": "1.0.0",
+      "quantrisk": "1.1.0",
       "numpy": "2.5.3",
       "scipy": "1.18.1",
       "pandas": "3.0.6",

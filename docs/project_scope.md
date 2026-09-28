@@ -131,6 +131,7 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 8 optional public data layer (EDGAR, FRED/ALFRED, CFTC) with provenance and offline fixtures | DONE (`docs/phase_reports/phase-08-public-data.md`) |
 | Phase 9 research API facades, Python faces of all eight submodules, `quantrisk` CLI | DONE (`docs/phase_reports/phase-09-research-api.md`) |
 | Phase 10 validation matrix, benchmark suite, evidence manifest, technical report, README, v1.0.0 release | DONE (`docs/phase_reports/phase-10-release.md`, `docs/validation_matrix.md`, `docs/reproducibility.md`) |
+| Phase 11 real-data risk study: long-window FRED fixtures, out-of-sample VaR backtest on market data, coverage tests, bootstrap SE comparison, out-of-sample covariance ranking, three recorded refusals | DONE (`docs/phase_reports/phase-11-real-data-risk-study.md`, `experiments/real_data_risk_study/`) — not a PROJECT_SPEC phase; it is the top-ranked item of `docs/portfolio_audit.md` §10 |
 
 ## 10. Frozen surfaces
 
