@@ -60,6 +60,58 @@ struct SpotDerivatives {
 [[nodiscard]] SpotDerivatives black_scholes_spot_derivatives(const EuropeanOption &option,
                                                              const MarketParams &market);
 
+/// The two mixed second partials: `vanna` = d2V/dS dsigma, `volga` = d2V/dsigma^2.
+/// New value structs rather than more fields on the frozen `Greeks`.
+///
+/// They exist because of a specific gap in the published evidence. The stress map
+/// (`stress/engine.cpp`) is second order in the equity factor and *strictly linear*
+/// in the volatility factor — `volatility = vega * absolute_move`, with no convexity
+/// term and no cross term — so the delta-gamma-vega map's error under a joint shock
+/// is quadratic rather than the cubic error bounded in `docs/analysis/`. Its leading
+/// form is exactly `vanna * h * k + 0.5 * volga * k^2` for spot move `h` and vol move
+/// `k`, which is why these two numbers, and not merely a larger vega, are what a
+/// two-factor scenario costs.
+///
+/// With `v = sigma sqrt(T)` and `phi` the standard normal density, `d d1 / d sigma =
+/// -d2 / sigma` and `d v / d sigma = v / sigma` collapse the whole sigma-dependence
+/// onto the density:
+///     vanna = -e^{-qT} phi(d1) d2 / sigma = d(vega)/dS
+///     volga = vega * d1 * d2 / sigma      = d(vega)/dsigma
+/// Both are also pinned without any numerical bump by differentiating the homogeneity
+/// relation `vega = gamma S^2 sigma T` (§3) once in each factor:
+///     vanna = V_SSS * S^2 sigma T + 2 S sigma T gamma
+///     volga = V_SSsigma * S^2 sigma T + gamma S^2 T
+/// which is how the Catch2 cases check them against the spot derivatives above.
+struct VolCrossDerivatives {
+    Real vanna = 0.0;
+    Real volga = 0.0;
+};
+
+[[nodiscard]] VolCrossDerivatives black_scholes_vol_cross_derivatives(const EuropeanOption &option,
+                                                                      const MarketParams &market);
+
+/// The three mixed third partials that complete the two-variable expansion. Paired
+/// with `SpotDerivatives::third` they are the four coefficients of the third
+/// directional derivative
+///     d3V/du3 = V_SSS h^3 + 3 V_SSsigma h^2 k + 3 V_Sssigma h k^2 + V_Sssss k^3
+/// along the joint shock `(h, k)`, which is what bounds the residual left after the
+/// quadratic cross terms above are subtracted.
+///
+/// Same regularity as everywhere else in this file: `S, K, sigma, T > 0`, and every
+/// formula below divides by `sigma`, so the degenerate case returns the limit rather
+/// than an overflow.
+struct MixedThirdDerivatives {
+    /// V_SSsigma, which is both d(gamma)/dsigma and d(vanna)/dS.
+    Real spot_spot_sigma = 0.0;
+    /// V_Sssigma, which is both d(volga)/dS and d(vanna)/dsigma.
+    Real spot_sigma_sigma = 0.0;
+    /// V_Sssss, the third derivative in volatility alone: d(volga)/dsigma.
+    Real sigma_sigma_sigma = 0.0;
+};
+
+[[nodiscard]] MixedThirdDerivatives
+black_scholes_mixed_third_derivatives(const EuropeanOption &option, const MarketParams &market);
+
 /// Put-call parity residual `C - P - (S e^{-qT} - K e^{-rT})`, which must be
 /// zero for any correct implementation of the same model.
 [[nodiscard]] Real put_call_parity_residual(const MarketParams &market, Real strike);

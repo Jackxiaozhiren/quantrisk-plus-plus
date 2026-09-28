@@ -211,6 +211,69 @@ SpotDerivatives black_scholes_spot_derivatives(const EuropeanOption &option,
     return derivatives;
 }
 
+VolCrossDerivatives black_scholes_vol_cross_derivatives(const EuropeanOption &option,
+                                                        const MarketParams &market) {
+    market.validate();
+    option.validate();
+
+    VolCrossDerivatives cross;
+    if (is_degenerate(market)) {
+        /// Zero is the sigma -> 0+ limit of both, for the same reason Gamma is set to
+        /// zero there: with no volatility the value has no curvature in either factor to
+        /// cross. Anything else here would be the `sigma` in each denominator reporting
+        /// inf rather than a statement about the model.
+        return cross;
+    }
+
+    const Terms terms = terms_of(market, option.strike);
+    const Real first = d1(option, market);
+    const Real root_t = std::sqrt(market.maturity);
+    const Real sigma_root_t = market.volatility * root_t;
+    const Real second = first - sigma_root_t;
+    const Real density = normal_pdf(first);
+
+    /// Vega exactly as §3 and `black_scholes_greeks` define it, so volga below is the
+    /// derivative of the published number and not a second implementation of the density.
+    const Real vega = market.spot * terms.growth_discount * density * root_t;
+
+    cross.vanna = -terms.growth_discount * density * second / market.volatility;
+    cross.volga = vega * first * second / market.volatility;
+    return cross;
+}
+
+MixedThirdDerivatives black_scholes_mixed_third_derivatives(const EuropeanOption &option,
+                                                            const MarketParams &market) {
+    market.validate();
+    option.validate();
+
+    MixedThirdDerivatives mixed;
+    if (is_degenerate(market)) {
+        /// The same limit as above, one order further in.
+        return mixed;
+    }
+
+    const Terms terms = terms_of(market, option.strike);
+    const Real first = d1(option, market);
+    const Real root_t = std::sqrt(market.maturity);
+    const Real sigma = market.volatility;
+    const Real sigma_root_t = sigma * root_t;
+    const Real second = first - sigma_root_t;
+    const Real density = normal_pdf(first);
+
+    const Real gamma = terms.growth_discount * density / (market.spot * sigma_root_t);
+    const Real vega = market.spot * terms.growth_discount * density * root_t;
+
+    /// Each line is the derivative of the published Gamma, Vega or Vanna in one of the
+    /// two factors, which is what makes the homogeneity identities asserted in
+    /// `tests/cpp/test_black_scholes.cpp` cross-checks rather than restatements.
+    mixed.spot_spot_sigma = gamma * (first * second - 1.0) / sigma;
+    mixed.spot_sigma_sigma = terms.growth_discount * density *
+                             (second * (2.0 - first * second) / (sigma * sigma) + root_t / sigma);
+    mixed.sigma_sigma_sigma = (vega / (sigma * sigma)) * (second * second * (first * first - 1.0) -
+                                                          first * second - first * first);
+    return mixed;
+}
+
 Real put_call_parity_residual(const MarketParams &market, const Real strike) {
 
     const Terms terms = terms_of(market, strike);

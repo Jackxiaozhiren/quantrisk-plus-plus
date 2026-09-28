@@ -178,6 +178,15 @@ PYBIND11_MODULE(_quantrisk, module) {
         .def_readonly("third", &quantrisk::SpotDerivatives::third)
         .def_readonly("fourth", &quantrisk::SpotDerivatives::fourth);
 
+    py::class_<quantrisk::VolCrossDerivatives>(pricing, "VolCrossDerivatives")
+        .def_readonly("vanna", &quantrisk::VolCrossDerivatives::vanna)
+        .def_readonly("volga", &quantrisk::VolCrossDerivatives::volga);
+
+    py::class_<quantrisk::MixedThirdDerivatives>(pricing, "MixedThirdDerivatives")
+        .def_readonly("spot_spot_sigma", &quantrisk::MixedThirdDerivatives::spot_spot_sigma)
+        .def_readonly("spot_sigma_sigma", &quantrisk::MixedThirdDerivatives::spot_sigma_sigma)
+        .def_readonly("sigma_sigma_sigma", &quantrisk::MixedThirdDerivatives::sigma_sigma_sigma);
+
     py::class_<quantrisk::BumpPolicy>(pricing, "BumpPolicy")
         .def(py::init<>())
         .def_readwrite("spot_relative", &quantrisk::BumpPolicy::spot_relative)
@@ -202,6 +211,12 @@ PYBIND11_MODULE(_quantrisk, module) {
                 py::arg("market"));
     pricing.def("black_scholes_spot_derivatives", &quantrisk::black_scholes_spot_derivatives,
                 py::arg("option"), py::arg("market"));
+    pricing.def("black_scholes_vol_cross_derivatives",
+                &quantrisk::black_scholes_vol_cross_derivatives, py::arg("option"),
+                py::arg("market"));
+    pricing.def("black_scholes_mixed_third_derivatives",
+                &quantrisk::black_scholes_mixed_third_derivatives, py::arg("option"),
+                py::arg("market"));
     pricing.def("put_call_parity_residual", &quantrisk::put_call_parity_residual, py::arg("market"),
                 py::arg("strike"));
     pricing.def("finite_difference_greeks", &quantrisk::finite_difference_greeks, py::arg("option"),
