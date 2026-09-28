@@ -634,9 +634,7 @@ def test_the_validation_matrix_numbers_its_rows_once_and_in_order() -> None:
     duplicates = sorted({label for label in labels if labels.count(label) > 1})
     assert not duplicates, f"validation_matrix.md numbers more than one row {duplicates}"
     bases = sorted({int(re.match(r"\d+", label).group(0)) for label in labels})
-    assert bases == list(range(1, len(bases) + 1)), (
-        f"row numbers skip: {bases}"
-    )
+    assert bases == list(range(1, len(bases) + 1)), f"row numbers skip: {bases}"
     for reference in re.finditer(r"row (\d+)\b", table):
         target = reference.group(1)
         assert any(label.rstrip("abcdefghijklmnopqrstuvwxyz") == target for label in labels), (
@@ -645,7 +643,7 @@ def test_the_validation_matrix_numbers_its_rows_once_and_in_order() -> None:
 
 
 def test_the_validation_matrix_heading_counts_its_own_caveat_paragraphs() -> None:
-    """"N rows that need the prose to be honest" is a count of the paragraphs under it.
+    """ "N rows that need the prose to be honest" is a count of the paragraphs under it.
 
     A heading like that is the same kind of fact as a row total, and it rotted once already: the
     section carried three paragraphs under a heading that said four. Deriving it from the body is

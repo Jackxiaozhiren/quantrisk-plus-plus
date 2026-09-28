@@ -68,6 +68,7 @@ as a risk measure.
 | L1 | both attributions close on every scenario; Euler components sum to VaR; level/dispersion split telescopes; zero shocks → zero change; single-day replay ≡ deterministic scenario | all residuals exactly 0.0 |
 | L2 | P&L mapping, covariance shift, historical replay and its quantile recomputed in NumPy; stressed VaR against SciPy's own normal quantile; Euler allocation against a **central-difference gradient** of the VaR formula | mapping to 1e-9 relative; VaR to 1e-9; Euler to **3e-10** against a 1e-6 bound |
 | L2 | delta-gamma map against a full Black-Scholes re-pricing of a three-strike call book | 1.35e-6 relative at a 0.1 % move, 1.33e-4 at 1 %, 5.4e-3 at 20 %, 0.49 at 40 % |
+| L1 + FD | the same map under a **joint** spot-and-volatility shock, against `vanna·h·k + ½·volga·k²` plus the Lagrange term `⅙·g‴(ξ)` along the shock ray | inclusion holds on 132/132 joint shocks out to −30 % equity with +20 vol points; error slope → 2.0 on four joint rays while a pure-spot ray holds at 3.0; on the published `risk_off` the interval [−6063.95, −4135.87] excludes zero |
 | L3 | Monte-Carlo stress VaR against the parametric number, on the same book and covariance | within 1 % at 400k paths, and the longer run is the closer one |
 | L3 | sampled dispersion recovered by an independent estimator, and by NumPy's Generator (different RNG, different normal transform) | within 2 % of the supplied covariance |
 | — | reproducibility | identical across runs; all four artifacts byte-identical between independent executions |
@@ -87,6 +88,14 @@ as a risk measure.
 - **Not a source of factor moves.** The engine consumes shocks, observed windows or a
   covariance. Where those come from — calibration, supervisor guidance, judgement — is
   outside it, and is the part that determines whether the answer matters.
+- **Not a two-factor map.** The volatility factor is carried to *first* order
+  (`out.volatility = vega * absolute`), with no vol convexity and no spot-vol cross term, so a
+  scenario that moves equity and volatility together has a **quadratic** error rather than the
+  cubic one a single-factor move has. `experiments/two_factor_error_bound/` bounds it and finds
+  that at published sizes the largest omitted piece is `½·V_{SSσ}·h²·k` — gamma applied at a
+  volatility the move has already changed — which on `risk_off` is 7.4× the whole second-order
+  term and points the other way. Quoting the quadratic correction as "the multi-factor error"
+  would therefore be wrong in sign, not just in size.
 - **Not linear-in-risk beyond the Gaussian case.** Stressed VaR and ES are the Phase 5
   Gaussian closed forms applied to a shocked beta; the CVaR and historical estimators from
   Phase 5/6 are not wired into the decomposition, because the telescoping split does not

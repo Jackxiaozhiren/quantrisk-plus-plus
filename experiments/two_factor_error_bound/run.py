@@ -33,8 +33,9 @@ failed and all of which are checked against `stress.run_scenario` rather than a 
      Checked on a dense grid at and beyond published shock sizes, where the *ratio* in A is
      nowhere near 1: the inclusion holds where the asymptotics stop helping.
   C. At published sizes the largest single omitted piece is neither quadratic term. For the
-     repo's own named `risk_off` scenario it is `1/2 V_SSsigma h**2 k` - gamma applied at the
-     wrong volatility - which exceeds the whole quadratic by an order of magnitude. That ranks
+     repo's own named `risk_off` scenario it is `1/2 V_SSsigma h**2 k` - gamma evaluated at the
+     base volatility and then applied across a move that changed the volatility - and it exceeds
+     the whole quadratic by 7.4x. That ranks
      what a future map improvement is worth, from closed forms and without re-pricing.
   D. Because the trapped interval excludes zero at that scenario, the *sign* of the map's error
      on the published scenario set is proved rather than estimated: the map is reported too
@@ -631,8 +632,11 @@ def main() -> int:
             "counterpart is not located here: as the ray shrinks, the window in which the full "
             "error dips below zero narrows in proportion to the shock size, so bracketing it needs "
             "a resolution that scales with the very parameter being sent to zero. A coarse scan "
-            f"locates it at {str(sorted(located)) if located else 'nowhere'} of the predicted "
-            "ratio across three scales, which is a fact about the scan and not about the ridge. "
+            "coarse scan of three scales locates it at "
+            + (", ".join(f"{value:.2f}x" for value in sorted(located)) if located else "nowhere")
+            + " of the predicted ratio and misses it at "
+            f"{len(ridge['coarse_scan_root_as_multiple_of_prediction']) - len(located)} of them, "
+            "which is a fact about the scan and not about the ridge. "
             "Claiming the agreement, or its absence, from that would be the sloppiest move "
             "available here, so neither is claimed.",
         },

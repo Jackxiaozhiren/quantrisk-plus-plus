@@ -803,6 +803,37 @@ satisfy protocol §4 rule 4: compiler, CPU architecture, path count, repetitions
 pure-Python baseline on the same machine — the exact shape of the JSON the Phase 3 benchmark
 already writes.
 
+### Q23. What is the hardest thing the stress layer gets wrong?
+
+**30 s.** The map carries volatility to first order only — `out.volatility = vega * absolute` — so
+the moment a scenario moves equity *and* volatility its error stops being cubic and becomes
+quadratic. Phase 12 recorded that as a refusal. Phase 13 turned the refusal into a measured bound:
+the omitted second-order piece is `vanna·h·k + ½·volga·k²` in closed form, and what remains is
+`⅙·g‴(ξ)` along the shock ray, which must lie inside the segment's own range of `g‴`. That
+inclusion holds on 132 of 132 joint shocks, out to −30 % equity with +20 volatility points.
+
+**2 min.** The interesting part is what the order argument gets wrong in practice. "Second order"
+describes the limit. At the size the repo's own `risk_off` scenario uses, the quadratic term is
++787.96 while the error is −5320.79 — the leading term has the *opposite sign*. What dominates is
+`½·V_{SSσ}·h²·k`: gamma evaluated at the base volatility and applied across a move that has already
+changed the volatility gamma depends on. It is 7.4× the whole quadratic. Across the grid the largest
+omitted piece is that term in 64 cells, the pure-spot cubic in 36 and volga in 32, while the mixed
+`vanna·h·k` the order argument singles out is largest *nowhere*. So the cheap fix to this map is
+re-striking gamma, not adding vanna and volga — a prioritisation you only get by deriving the terms.
+
+**Deeper.** What I would defend: the interval for `risk_off` is [−6063.95, −4135.87], which excludes
+zero, so the *sign* of the published error is proved rather than estimated, and the scenario's
+shocks are imported from the stress experiment rather than re-typed so the bound cannot drift from
+the thing it bounds. What I would not: the near-cancellation that makes the quadratic small here is
+a property of this three-strike ladder — K=90 and K=110 carry vanna of −5089.09 and +5628.57,
+leaving 192.33 — so a concentrated book ranks differently. And the direction where the quadratic
+vanishes is predicted in closed form but deliberately not verified: locating its empirical
+counterpart needs a bracket whose useful width shrinks with the shock, and the shipped scan found
+the root at 0.87× the prediction at one scale, 1.81× at another and not at all at a third, which is
+a fact about the scan. The probe is in the artifact so the refusal can be checked, not trusted.
+Sources: `docs/analysis/two_factor_error_bound.md`, `docs/limitations.md` #67–71,
+`experiments/two_factor_error_bound/results/two_factor_bound.json`.
+
 ---
 
 ## How to verify each claim in this file
@@ -824,7 +855,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | Claim in this file | Source to check |
 |---|---|
 | What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (66 entries) |
-| 190 C++ / 330 Python tests at `v1.0.0`, 198 / 386 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
+| 190 C++ / 330 Python tests at `v1.0.0`, 198 / 388 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
 | BS worst abs 1.49e-13 / rel 3.46e-11; Greeks abs 7.97e-15 … 5.12e-13; rel rho 1.07e-07; 18,816 rows; floors 1e-4 / 1e-6; oracle config (AnalyticEuropeanEngine, Actual365Fixed, day → `days/365`) | `benchmarks/quantlib/results/pricing_vs_quantlib.json` |
 | Put-call parity worst residual 7.99e-15; worst analytic-vs-FD delta 1.17e-4 | `experiments/pricing_validation/results/summary.json` (`worst_*` keys) |
 | CRR slopes −0.99405 / −1.00544 / −0.99244 / −0.999674 with SEs; relative errors at N = 3200 | `experiments/pricing_validation/results/summary.json` (`crr_convergence_slope`, `final_lattice_relative_error`) |

@@ -133,6 +133,7 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 10 validation matrix, benchmark suite, evidence manifest, technical report, README, v1.0.0 release | DONE (`docs/phase_reports/phase-10-release.md`, `docs/validation_matrix.md`, `docs/reproducibility.md`) |
 | Phase 11 real-data risk study: long-window FRED fixtures, out-of-sample VaR backtest on market data, coverage tests, bootstrap SE comparison, out-of-sample covariance ranking, three recorded refusals | DONE (`docs/phase_reports/phase-11-real-data-risk-study.md`, `experiments/real_data_risk_study/`) — not a PROJECT_SPEC phase; it is the top-ranked item of `docs/portfolio_audit.md` §10 |
 | Phase 12 worked analysis result: closed-form third and fourth spot derivatives, a Lagrange remainder bound for the delta-gamma stress map, five falsified-before-published predictions, and the correction of a false claim in this repository's own published prose | DONE (`docs/phase_reports/phase-12-remainder-bound.md`, `docs/analysis/delta_gamma_error_bound.md`, `experiments/linearisation_error_bound/`) |
+| Phase 13 two-factor truncation bound: five mixed spot/volatility closed forms added to the core as new value types, the joint-shock remainder derived and measured, the published `risk_off` scenario bounded with a proved sign, and a Phase 12 refusal converted into a result | DONE (`docs/phase_reports/phase-13-two-factor-bound.md`, `docs/analysis/two_factor_error_bound.md`, `experiments/two_factor_error_bound/`) |
 
 ## 10. Frozen surfaces
 

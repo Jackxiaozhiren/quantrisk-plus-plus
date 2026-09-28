@@ -265,3 +265,52 @@ without it), 194 CTest (547,331 assertions in 193 Catch2 cases), 13/13 suite mem
 `--require-all`, `verify_evidence_manifest.py` at 72 artifacts with 0 CHANGED / 0 VOLATILE / 0
 MISSING / 0 unlisted / 0 warnings, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the
 40-page report rebuilt and text-verified.
+
+## Addendum — Phase 13, the refusal converted into a result (2026-09-28)
+
+The paragraph above records Phase 12's state and is left as written: it was true of that revision,
+and correcting a historical print to match a moving file is how a release note becomes fiction.
+
+**24. The validation matrix had two rows numbered 13, and the guard designed to catch exactly that
+could not see it.** Phase 12 added its row without noticing Phase 11's had already taken the number.
+`test_documents_that_count_the_validation_matrix_rows_agree_with_the_table` counts *rows*, and two
+rows numbered 13 still make eighteen rows, so the count stayed true while the numbering broke -- and
+the numbering is what prose cites, so a reader following "row 14" landed on the wrong entry. Fixed by
+renumbering, and the class is closed by a new guard that asserts labels are unique, that the numeric
+prefixes are contiguous, and that every in-file `row N` citation resolves to a row that exists.
+Adjacent to it, a section heading claimed "Four rows that need the prose to be honest" over three
+paragraphs, now derived from the body instead of typed.
+
+**25. Two of my own harnesses reported success while doing nothing.** A mutation sweep intended to
+prove the new tests can fail printed `NEEDLE NOT FOUND` for two of nine cases because clang-format
+had reflowed the expression between the time I read it and the time I patched it -- a mutation that
+never applied is a passing test that proves nothing, and the count in the analysis note now says
+seven-then-two rather than a single confident number. Separately, a background sweep died part-way
+with a mutated source file left in the tree, because I ran other commands against the same virtualenv
+while it was reinstalling the extension. Both are recorded as process facts rather than quietly
+redone: verify a control actually fired, and do not touch an environment a harness owns.
+
+**26. A `uv pip install -e .` that succeeds can install a stale build.** An editable reinstall after
+editing `bindings/python_bindings.cpp` completed in 13 ms and the new functions were simply absent
+from the imported module, because uv had cached the wheel built before the edit. The symptom is a
+missing attribute, which reads as "my binding is wrong" rather than "I am importing an older binary".
+Documented with its fix (`--no-cache`) in `docs/reproducibility.md`, alongside two neighbouring traps
+found the same day: configuring outside the venv builds the extension against a different
+interpreter, and raising the library version invalidates committed artifacts because each records
+`environment.quantrisk_version`.
+
+**27. A correct asymptotic claim, quoted at the size a report uses, pointed the wrong way.** The
+headline of this phase was going to be "the map's joint-shock error is quadratic, and here is the
+correction". It is quadratic -- the fitted slope converges to 2.0 on four rays while a pure-spot ray
+holds at 3.0. And at the published `risk_off` the closed-form quadratic is +787.96 against an actual
+error of −5320.79, because a cubic term `½V_{SSσ}h²k` is 7.4× larger. Had I published the order claim
+without the size decomposition, the repository would have shipped a correction with the wrong sign,
+in a document whose entire purpose is saying how large the error is. The order statement survives only
+bundled with the sentence that names its limits, and the practical recommendation moved from adding
+vanna and volga to re-striking gamma.
+
+**Verified at this addendum, by execution.** 388 pytest with the `oracles` extra and 319 collected
+without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite members under
+`--require-all`, `verify_evidence_manifest.py` at 76 artifacts with 0 CHANGED / 0 VOLATILE / 0
+MISSING / 0 unlisted, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the 41-page report
+rebuilt and text-verified. Nine deliberate formula mutations were compiled and all nine were caught.

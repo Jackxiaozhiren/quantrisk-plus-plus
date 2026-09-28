@@ -69,7 +69,7 @@ that strips too eagerly would pass the re-run test and silently rubber-stamp a c
 git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
 uv sync --extra oracles          # interpreter 3.12, deps, and the validation oracles
 uv pip install -e .              # builds the C++ core and the pybind11 module
-uv run pytest -q                 # 353 tests here; see the note below — the count is not one number
+uv run pytest -q                 # 388 tests here; see the note below — the count is not one number
 uv run cmake --preset dev && uv run cmake --build --preset dev
 uv run ctest --preset dev        # 198 C++ tests, 547,845 assertions
 uv run python scripts/run_benchmark_suite.py --require-all   # all 14 members
@@ -80,7 +80,25 @@ Three things in that sequence are load-bearing and easy to get wrong.
 
 Configure through `uv run`, not a bare `cmake --preset dev`. With no active virtualenv,
 CMake finds system Python and builds the extension against an interpreter the tests do not
-use — silently, and successfully.
+use — silently, and successfully. This bites on a *re*configure too, not only a first one: after
+`rm -rf build/dev` outside the venv the tree builds a `cpython-314` module while `.venv` is 3.12,
+every import still works because the installed copy is separate, and the C++ you just changed is
+not the C++ the tests are running.
+
+**`uv pip install -e .` can be served from uv's wheel cache, and then it installs a stale
+extension.** An editable reinstall after editing `bindings/python_bindings.cpp` completed in 13 ms,
+`import quantrisk` still worked, and the new functions were simply absent — the wheel had been
+built before the edit and cached. `--no-cache` (or `--refresh`) is what makes an editable reinstall
+mean it. The symptom is not an error but a missing attribute, so it reads as "my binding was never
+registered" rather than "I am importing an older build".
+
+**Raising the library version invalidates committed artifacts, not just the package metadata.**
+Every experiment records `environment.quantrisk_version`, and
+`test_the_study_uses_no_oracle_for_its_risk_numbers` asserts that the committed record equals the
+imported library. So a version bump is: bump `pyproject.toml`, `CMakeLists.txt` and `CITATION.cff`,
+run `uv lock` (the lockfile carries the project version too), rebuild, reinstall, re-run the whole
+suite with `--require-all`, then re-freeze `evidence/manifest.json` — in that order, because the
+manifest records the commit and the artifacts record the version.
 
 `--require-all` on the suite is what stops the run meaning anything. Without the `oracles`
 extra installed, six of the fourteen members report `skipped` and the suite still exits 0,
@@ -91,10 +109,9 @@ a failure.
 **The pytest count depends on which extras you installed, and a document that prints one number
 without saying which is wrong.** The sequence above yields **388 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — no `oracles` extra — and the same
-tree collects 319 tests without it, and the runner's own full run prints `284 passed, 4 skipped` —
-two different quantities that happen to share a number, since the four skips are module-level records
-reported *in addition to* the 284 collected items.
-That figure is read off the machine that produces it, and the difference of 69 is four modules that gate on
+tree collects 319 tests without it; its full run reports `319 passed, 4 skipped`: 323 outcomes from 319 collected items,
+because the four skips are module-level records reported *in addition to* the items that ran.
+Both figures are read off the machine that produces them, and the difference of 69 is four modules that gate on
 a module-level `pytest.importorskip` (for `sklearn`, `QuantLib` twice and `pypfopt`). 69 oracle
 comparison cases go unattempted there, and nothing is broken when they do — what would be broken is
 quoting either figure as "the" test count. At `v1.0.0` the pair was 330 and 261-passed-4-skipped.

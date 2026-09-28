@@ -24,9 +24,26 @@ from quantrisk import stress as STRESS
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 SPELLIED = {
-    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8,
-    "nine": 9, "ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
-    "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19, "twenty": 20,
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
+    "twenty": 20,
 }
 
 
@@ -35,6 +52,8 @@ def _word_to_int(word: str) -> int:
         return SPELLIED[word.lower()]
     except KeyError:  # a digits spelling is also a spelling of a number
         return int(word)
+
+
 EXPERIMENT = REPO_ROOT / "experiments" / "two_factor_error_bound"
 RESULTS = EXPERIMENT / "results"
 ARTIFACT = RESULTS / "two_factor_bound.json"
@@ -570,9 +589,10 @@ def test_every_figure_the_finding_and_the_note_quote_is_in_the_artifact() -> Non
     }
     crash = headline["slope_of_error_against_shock_size"]["crash (equity down, vol up)"]
     pure_spot = headline["slope_for_a_pure_spot_shock"]
-    quadratic = published["omitted_terms_at_base"]["quadratic_vanna"] + published[
-        "omitted_terms_at_base"
-    ]["quadratic_volga"]
+    quadratic = (
+        published["omitted_terms_at_base"]["quadratic_vanna"]
+        + published["omitted_terms_at_base"]["quadratic_volga"]
+    )
     mixed_cubic = published["omitted_terms_at_base"]["cubic_gamma_sigma"]
     expected = {
         "error": f"{published['error']:,.2f}".replace(",", ""),
@@ -597,11 +617,13 @@ def test_every_figure_the_finding_and_the_note_quote_is_in_the_artifact() -> Non
 
 
 def test_the_findings_are_counted_wherever_they_are_counted() -> None:
-    """"N results worth reading" is a fact about `docs/findings.md`, and two files repeat it."""
+    """ "N results worth reading" is a fact about `docs/findings.md`, and two files repeat it."""
     text = (REPO_ROOT / "docs" / "findings.md").read_text(encoding="utf-8")
     sections = re.findall(r"^## (\d+)\. ", text, flags=re.M)
     numbers = [int(number) for number in sections]
-    assert numbers == list(range(1, len(numbers) + 1)), f"the findings are not numbered 1..N: {numbers}"
+    assert numbers == list(range(1, len(numbers) + 1)), (
+        f"the findings are not numbered 1..N: {numbers}"
+    )
     intro = re.search(r"^# Findings\n\n(\w+) results worth", text, flags=re.M)
     assert intro, "docs/findings.md no longer opens with a counted lead-in"
     assert _word_to_int(intro.group(1)) == len(numbers), (
