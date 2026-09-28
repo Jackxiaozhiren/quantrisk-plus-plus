@@ -1,0 +1,18 @@
+{
+  "source": "FRED fredgraph.csv (live response, current revision)",
+  "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10YIE&cosd=2014-01-01&coed=2026-09-26",
+  "series_id": "T10YIE",
+  "retrieved_at_utc": "2026-09-28T04:44:49+00:00",
+  "sha256": "65b09b1ee4835ef1518609af33af26299dc528bdaf269c8deb0af84daee56007",
+  "bytes": 52628,
+  "license": "St. Louis Federal Reserve terms of use; attribution requested",
+  "request_policy": "",
+  "note": "TIPS breakeven inflation, market-observed. Current revision, not the vintage as published at each observation date: an ALFRED key would be needed to remove that exposure entirely. Market observations of this kind are revised to correct data errors rather than re-estimated, which is why these three and not a macro aggregate.",
+  "extra": {
+    "observation_start": "2014-01-01",
+    "observation_end": "2026-09-26",
+    "observation_kind": "TIPS breakeven inflation, market-observed",
+    "revised_in_place": "unlikely; these are prints, not estimates",
+    "used_by": "experiments/real_data_risk_study"
+  }
+}

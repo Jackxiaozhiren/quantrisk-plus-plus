@@ -111,10 +111,12 @@ never removed just because a later phase shipped.
 
 ## Phase 5 — market risk estimation and backtesting
 
-28. **The risk layer is validated on synthetic data whose truth is known.** No
-    real return series is used in `experiments/var_backtesting/`, so nothing there
-    licenses a claim about realised markets, and non-stationarity is out of reach
-    by construction.
+28. **The risk layer's *instrumented* validation is on synthetic data whose truth is known.**
+    No real return series is used in `experiments/var_backtesting/`, so nothing there licenses
+    a claim about realised markets, and non-stationarity is out of reach by construction.
+    `experiments/real_data_risk_study/` (Phase 11) is the real-data arm and is where the
+    empirical claims come from; it is narrower, because a sample has no independent truth to
+    check against — see #61 and #62 and the `refusals` block in that artifact.
 29. **Empirical 99 % VaR at 250 observations averages two or three order
     statistics.** The estimate is dominated by which days happen to be in the
     sample; `quantile_standard_error` returns NaN rather than a plausible zero
@@ -244,7 +246,7 @@ never removed just because a later phase shipped.
 
 56. **Resolved on first contact: the CI lane is proven on a runner, and the runner disagreed
     with the laptop.** `benchmark-suite` passes on `ubuntu-latest` in ~5m46s with
-    `--require-all`, so all eleven members execute against live oracles and none can be skipped
+    `--require-all`, so all twelve members execute against live oracles and none can be skipped
     silently. What the same runner caught was not in the new lane at all: the pre-existing
     `build-and-test` lane failed on a README assertion that demanded bit-exact agreement with a
     transcribed price, and glibc's libm is 1.7 ULP from Apple's. Local green said nothing about
@@ -284,3 +286,31 @@ never removed just because a later phase shipped.
     correctness at that boundary is guarded by the runtime tests and by the C++ validation
     suite, not by the type checker. Real signatures would have to be generated from
     `cpp/include`, which is a larger project and deliberately not claimed here.
+
+## Phase 11 — real-data risk study
+
+61. **The real-data study's book is assumed, not held.** `experiments/real_data_risk_study/`
+    scores three FRED series as risk factors against a fixed set of notional exposures that were
+    chosen, not traded. The factor *moves* are observations; the *exposures* are an assumption;
+    no number in that artifact describes a position anyone carried. Because VaR is positively
+    homogeneous, the violation rates are invariant to scaling all three exposures at once — the
+    script asserts that rather than claiming it — but they are not invariant to the *mix* of
+    factors, and no sensitivity to the mix is published there.
+62. **The real-data inputs are FRED's current revision, not the vintage published on each
+    date.** The three series were selected because they are prints (a Treasury par yield, a
+    breakeven rate, an index level) rather than revised macro aggregates, which removes the
+    worst look-ahead exposure available without credentials. It does not remove all of it: a
+    correction to a historical print would be invisible to this study, and closing that residue
+    needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
+    unused by the study). The artifact states this in `look_ahead.residual_exposure`.
+63. **The test count is a property of the environment, and a document quoting one number
+    without saying which is now wrong.** `uv run pytest -q` with the `oracles` extra installed
+    collects 353 tests at HEAD. The `build-and-test` CI lane runs `uv sync` *without* that extra;
+    at `v1.0.0` it printed `261 passed, 4 skipped` where the same tree locally collected 330,
+    because four test modules gate
+    themselves on a module-level `pytest.importorskip` (for `sklearn`, `QuantLib` ×2 and
+    `pypfopt`) and a module that skips at import reports **one** skip, not the 69 test cases
+    inside it. Both counts are honest; neither is "the" count, and the difference is not
+    quality — it is 69 oracle-comparison cases that a no-extra run never attempts. Before this
+    entry, `v1.0.0`'s own documents quoted 330 and 319 for the same tag with no environment
+    stated; 330 was the number that was right, 319 was stale, and the runner printed 261.

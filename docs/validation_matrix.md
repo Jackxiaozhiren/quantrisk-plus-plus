@@ -7,7 +7,11 @@ key path they came from.
 
 This is the table PROJECT_SPEC.md §Phase 10 asks for: **Component · Method · Oracle ·
 Tolerance · Status · Evidence artifact**, over the twelve components §2.2 requires us to
-own an implementation of.
+own an implementation of. It has sixteen rows rather than twelve because a component validated
+two ways gets two rows — Black-Scholes has its oracle comparison and its identity checks, Monte
+Carlo has its price and its coverage, the backtest machinery has its synthetic arm and its
+real-data arm — and collapsing those would hide exactly the difference that matters: which rows
+have an independent implementation on the other side and which do not.
 
 ## How to read the columns
 
@@ -55,6 +59,7 @@ watching a number is marked *(measured)*.
 | 10 | **Covariance** | `portfolio.sample_covariance`, `portfolio.ewma_covariance` (RiskMetrics, about zero), `portfolio.shrinkage_covariance` (Ledoit–Wolf 2004 target) | `numpy.cov(ddof=1)`; scikit-learn `LedoitWolf`; PyPortfolioOpt EWMA after a convention bridge | `1.0e-12` rel (`test_covariance_vs_oracles.py:22`) — **measured** sample `7.2e-16`, Ledoit–Wolf `7e-19` abs, EWMA `<1e-13`, shrinkage intensity `<1e-9` | validated | `tests/python/test_covariance_vs_oracles.py`; `docs/model_cards/portfolio_covariance_and_optimisation.md` |
 | 11 | **Optimization** | `portfolio.minimum_variance`, `efficient_frontier`, `maximum_sharpe`, `risk_parity`, `minimise_cvar` | cvxpy (OSQP `eps_abs=eps_rel=1e-11`, SCS) and PyPortfolioOpt SLSQP on identical inputs, 75 problems | per problem, all *(measured)*: quadratic weights `1e-11` / value `1e-13`; Sharpe weights `1e-7`; ERC `1e-9`; CVaR weights `1e-5` / value `1e-6` (`test_portfolio_optimisation_vs_oracles.py:50-56`). **Worst observed** objective gap `4.484e-9`, weight gap `4.663e-7`, budget residual `1.450e-12`, bound violation `0` | validated | `benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json`, `.csv` |
 | 12 | **Stress engine** | `stress.run_scenario` (delta-gamma P&L map), `run_historical_scenarios`, `run_monte_carlo_scenarios`, `shift_covariance`; attribution and the level/dispersion split are fields on `ScenarioResult` | full Black-Scholes re-pricing of the same book (L2); accounting identity and Euler allocation (L1); parametric vs simulated VaR (L3) | `1.0e-9` rel on the Gaussian closed form, `abs 1e-8` on attribution residuals (`test_stress_vs_oracles.py:35`); MC arm `2%` rel. **Measured** factor and position attribution residuals `0.0`, VaR decomposition residual `0.0`; linearisation error `1.33e-4` at a 1% shock → `0.488` at 40% | validated for the map and the accounting; the *scenario set* has no oracle — it is a choice, not a computation | `experiments/stress_testing/results/stress_testing_study.json`, `linearisation_error.csv` + `.png` |
+| 13 | **Same estimators on real market data** | rows 7, 9, 9b and 10 re-run on 586 out-of-sample days of three FRED series (10y par yield, 10y breakeven, VIX), trailing 250-day windows | **none, by construction.** A sample carries no independent truth, which is why this row reports realised violation rates with exact binomial intervals rather than an error against an oracle | no tolerance: the interval *is* the claim. **Measured** Gaussian 99 % realised `2.048 %` `[1.062 %, 3.550 %]` — excludes nominal; historical 99 % `1.365 %` `[0.591 %, 2.672 %]` — covers it. Kupiec `0.160`, independence `0.287`, conditional coverage `0.211`: no test rejects | validated (L1 only) — the arithmetic and the intervals are checkable, the calibration claim is an empirical one and is labelled as such | `experiments/real_data_risk_study/results/real_data_risk_study.json`, `real_data_violation_coverage.png`; limitations #61–62 |
 
 ## Three rows that need the prose to be honest
 
@@ -96,13 +101,13 @@ not evidence about markets.
   workload — that is, slower than a vectorised NumPy path at 200k paths. The speedup moves
   by several percent between runs, so no single figure from that file should be quoted as
   if it were a constant.
-- **The 60 numbered limitations in `docs/limitations.md` are the complete list of what is
+- **The 63 numbered limitations in `docs/limitations.md` are the complete list of what is
   not claimed.** Where a row above says "weaker" or "partially", it points into that file.
 
 ## Regenerating
 
 ```bash
-uv run python scripts/run_benchmark_suite.py            # all 11 members, ~60 s
+uv run python scripts/run_benchmark_suite.py            # all 12 members
 uv run python scripts/run_benchmark_suite.py --no-run   # re-check the artifact bindings only
 uv run python scripts/build_evidence_manifest.py        # re-hash into evidence/manifest.json
 uv run python scripts/verify_evidence_manifest.py       # prove nothing changed since

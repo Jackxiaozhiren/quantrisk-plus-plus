@@ -1,0 +1,697 @@
+{
+  "phase": "11 - real-data risk study",
+  "generated_utc": "2026-09-28T05:50:29+00:00",
+  "command": "uv run python experiments/real_data_risk_study/run.py",
+  "question": "The Phase 5 and Phase 6 conclusions were measured on synthetic data whose truth is known. Which of them survive on real daily market observations?",
+  "headline": {
+    "evaluation_rows": 586,
+    "gaussian_99_realised_violation_rate": 0.020477815699658702,
+    "gaussian_99_exact_interval_excludes_nominal": true,
+    "historical_99_realised_violation_rate": 0.013651877133105802,
+    "violations": 37,
+    "kupiec_p_value": 0.16008251975226917,
+    "christoffersen_independence_p_value": 0.2865326755746017,
+    "christoffersen_conditional_coverage_p_value": 0.21126454823489627,
+    "run_test_z": -1.1694010458450064,
+    "block_over_iid_bootstrap_se_ratio": 1.0720316821453646,
+    "covariance_ranking_best_to_worst": [
+      "ewma",
+      "sample",
+      "shrinkage"
+    ],
+    "derived_from": [
+      "A_estimator_validity.per_estimator.<estimator>[confidence=0.99]",
+      "B_coverage_tests",
+      "B_clustering_evidence.run_test_z",
+      "C_bootstrap_standard_errors.block_over_iid",
+      "D_covariance.ranked_best_to_worst_by_realised_variance"
+    ]
+  },
+  "data": {
+    "kind": "real, market-observed, current revision",
+    "factors": [
+      {
+        "series_id": "DGS10",
+        "name": "10y treasury nominal yield",
+        "move_definition": "level difference in percentage points",
+        "class": "rate"
+      },
+      {
+        "series_id": "T10YIE",
+        "name": "10y TIPS breakeven inflation",
+        "move_definition": "level difference in percentage points",
+        "class": "inflation"
+      },
+      {
+        "series_id": "VIXCLS",
+        "name": "CBOE volatility index",
+        "move_definition": "log difference",
+        "class": "volatility"
+      }
+    ],
+    "observations": 3177,
+    "first_date": "2014-01-03",
+    "last_date": "2026-09-22",
+    "window": 250,
+    "step": 5,
+    "book": {
+      "exposures": {
+        "DGS10": -400000.0,
+        "T10YIE": -200000.0,
+        "VIXCLS": -250000.0
+      },
+      "statement": "the factor moves are observations; the exposures are an assumption. No number in this artifact describes a trade that happened"
+    },
+    "fixture_sha256": {
+      "fred_DGS10_2014-01-01_2026-09-26.csv": "0017855e5af8a5abef7e6132cf084d4d9b250bbd48092da72819d2eea2db92fb",
+      "fred_T10YIE_2014-01-01_2026-09-26.csv": "65b09b1ee4835ef1518609af33af26299dc528bdaf269c8deb0af84daee56007",
+      "fred_VIXCLS_2014-01-01_2026-09-26.csv": "57f92b6a43942c4d1cdeb413644bc1f154b113126a8f5d21a1cd2eb28069ad27"
+    }
+  },
+  "look_ahead": {
+    "mitigation": "series chosen because they are prints rather than estimates: FRED revises macro aggregates, which would let a current-revision backtest see the future",
+    "residual_exposure": "values are the current revision, not the vintage published on each date. A correction to a historical print would be invisible here; removing that residue needs an ALFRED key and fetch_vintage"
+  },
+  "A_estimator_validity": {
+    "per_estimator": {
+      "historical": [
+        {
+          "confidence": 0.95,
+          "nominal_violation_rate": 0.050000000000000044,
+          "realised_violation_rate": 0.06313993174061433,
+          "violations": 37,
+          "exact_95_interval_low": 0.04484231096723494,
+          "exact_95_interval_high": 0.08598283563504497,
+          "covers_nominal": true,
+          "trials": 586
+        },
+        {
+          "confidence": 0.99,
+          "nominal_violation_rate": 0.010000000000000009,
+          "realised_violation_rate": 0.013651877133105802,
+          "violations": 8,
+          "exact_95_interval_low": 0.005911844966629629,
+          "exact_95_interval_high": 0.026721689473725822,
+          "covers_nominal": true,
+          "trials": 586
+        }
+      ],
+      "gaussian": [
+        {
+          "confidence": 0.95,
+          "nominal_violation_rate": 0.050000000000000044,
+          "realised_violation_rate": 0.05631399317406143,
+          "violations": 33,
+          "exact_95_interval_low": 0.03907734067193766,
+          "exact_95_interval_high": 0.078179905116173,
+          "covers_nominal": true,
+          "trials": 586
+        },
+        {
+          "confidence": 0.99,
+          "nominal_violation_rate": 0.010000000000000009,
+          "realised_violation_rate": 0.020477815699658702,
+          "violations": 12,
+          "exact_95_interval_low": 0.010624870605781694,
+          "exact_95_interval_high": 0.03549719853397053,
+          "covers_nominal": false,
+          "trials": 586
+        }
+      ]
+    },
+    "evaluation_rows": 586
+  },
+  "B_coverage_tests": {
+    "observations": 586,
+    "violations": 37,
+    "kupiec": {
+      "statistic": 1.973446409404346,
+      "p_value": 0.16008251975226917,
+      "reject_at_5_percent": false
+    },
+    "christoffersen_independence": {
+      "statistic": 1.135841886059609,
+      "p_value": 0.2865326755746017,
+      "reject_at_5_percent": false
+    },
+    "christoffersen_conditional_coverage": {
+      "statistic": 3.109288295463955,
+      "p_value": 0.21126454823489627,
+      "reject_at_5_percent": false
+    }
+  },
+  "B_clustering_evidence": {
+    "violations": 37,
+    "observations": 586,
+    "runs": 67,
+    "expected_runs_if_independent": 70.32764505119454,
+    "run_test_z": -1.1694010458450064,
+    "reading": "fewer runs than expected means violations arrive in bursts, which is what the Christoffersen independence test looks for; the run count is a direct measure and does not depend on the sample being large"
+  },
+  "C_bootstrap_standard_errors": {
+    "subsample": 500,
+    "replicate_studies": 60,
+    "iid": {
+      "mean_standard_error": 3796.595675506823
+    },
+    "moving_block": {
+      "mean_standard_error": 4070.0708484393967,
+      "block_length": 10
+    },
+    "block_over_iid": 1.0720316821453646,
+    "reading": "a ratio above 1 means the iid design reports a tighter interval than the block design on the same data; how far above 1 is how much the iid assumption understates the uncertainty of a real VaR estimate"
+  },
+  "D_covariance": {
+    "per_estimator": {
+      "sample": {
+        "windows": 582,
+        "mean_realised_variance": 0.0006136533643794436,
+        "median_realised_variance": 0.00046982195771705327,
+        "mean_prediction_error": -6.343373937784908e-05,
+        "mean_effective_assets": 1.7048249160264333
+      },
+      "ewma": {
+        "windows": 582,
+        "mean_realised_variance": 0.0006022412690390052,
+        "median_realised_variance": 0.0004442529005401172,
+        "mean_prediction_error": -0.00010003750742360531,
+        "mean_effective_assets": 1.669464392772778
+      },
+      "shrinkage": {
+        "windows": 582,
+        "mean_realised_variance": 0.000625617749941425,
+        "median_realised_variance": 0.0004840745619808497,
+        "mean_prediction_error": 3.23872656835175e-05,
+        "mean_effective_assets": 2.002838420601681
+      }
+    },
+    "ranked_best_to_worst_by_realised_variance": [
+      "ewma",
+      "sample",
+      "shrinkage"
+    ],
+    "note": "lower realised portfolio variance is better. This is a relative ranking of the estimators as inputs to one objective; it is not a claim that any of them is close to a true covariance, because no such object is observable."
+  },
+  "exposure_sensitivity": {
+    "as_documented": {
+      "per_estimator": {
+        "historical": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.06313993174061433,
+            "violations": 37,
+            "exact_95_interval_low": 0.04484231096723494,
+            "exact_95_interval_high": 0.08598283563504497,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.013651877133105802,
+            "violations": 8,
+            "exact_95_interval_low": 0.005911844966629629,
+            "exact_95_interval_high": 0.026721689473725822,
+            "covers_nominal": true,
+            "trials": 586
+          }
+        ],
+        "gaussian": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.05631399317406143,
+            "violations": 33,
+            "exact_95_interval_low": 0.03907734067193766,
+            "exact_95_interval_high": 0.078179905116173,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.020477815699658702,
+            "violations": 12,
+            "exact_95_interval_low": 0.010624870605781694,
+            "exact_95_interval_high": 0.03549719853397053,
+            "covers_nominal": false,
+            "trials": 586
+          }
+        ]
+      },
+      "headline": {
+        "historical_95%": 0.06313993174061433,
+        "historical_99%": 0.013651877133105802,
+        "gaussian_95%": 0.05631399317406143,
+        "gaussian_99%": 0.020477815699658702
+      }
+    },
+    "half_documented": {
+      "per_estimator": {
+        "historical": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.06313993174061433,
+            "violations": 37,
+            "exact_95_interval_low": 0.04484231096723494,
+            "exact_95_interval_high": 0.08598283563504497,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.013651877133105802,
+            "violations": 8,
+            "exact_95_interval_low": 0.005911844966629629,
+            "exact_95_interval_high": 0.026721689473725822,
+            "covers_nominal": true,
+            "trials": 586
+          }
+        ],
+        "gaussian": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.05631399317406143,
+            "violations": 33,
+            "exact_95_interval_low": 0.03907734067193766,
+            "exact_95_interval_high": 0.078179905116173,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.020477815699658702,
+            "violations": 12,
+            "exact_95_interval_low": 0.010624870605781694,
+            "exact_95_interval_high": 0.03549719853397053,
+            "covers_nominal": false,
+            "trials": 586
+          }
+        ]
+      },
+      "headline": {
+        "historical_95%": 0.06313993174061433,
+        "historical_99%": 0.013651877133105802,
+        "gaussian_95%": 0.05631399317406143,
+        "gaussian_99%": 0.020477815699658702
+      }
+    },
+    "double_documented": {
+      "per_estimator": {
+        "historical": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.06313993174061433,
+            "violations": 37,
+            "exact_95_interval_low": 0.04484231096723494,
+            "exact_95_interval_high": 0.08598283563504497,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.013651877133105802,
+            "violations": 8,
+            "exact_95_interval_low": 0.005911844966629629,
+            "exact_95_interval_high": 0.026721689473725822,
+            "covers_nominal": true,
+            "trials": 586
+          }
+        ],
+        "gaussian": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.05631399317406143,
+            "violations": 33,
+            "exact_95_interval_low": 0.03907734067193766,
+            "exact_95_interval_high": 0.078179905116173,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.020477815699658702,
+            "violations": 12,
+            "exact_95_interval_low": 0.010624870605781694,
+            "exact_95_interval_high": 0.03549719853397053,
+            "covers_nominal": false,
+            "trials": 586
+          }
+        ]
+      },
+      "headline": {
+        "historical_95%": 0.06313993174061433,
+        "historical_99%": 0.013651877133105802,
+        "gaussian_95%": 0.05631399317406143,
+        "gaussian_99%": 0.020477815699658702
+      }
+    },
+    "rate_only": {
+      "per_estimator": {
+        "historical": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.05802047781569966,
+            "violations": 34,
+            "exact_95_interval_low": 0.04051182331744184,
+            "exact_95_interval_high": 0.08013714758250647,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.017064846416382253,
+            "violations": 10,
+            "exact_95_interval_low": 0.008212817649014976,
+            "exact_95_interval_high": 0.031158376637844563,
+            "covers_nominal": true,
+            "trials": 586
+          }
+        ],
+        "gaussian": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.051194539249146756,
+            "violations": 30,
+            "exact_95_interval_low": 0.03480373879691974,
+            "exact_95_interval_high": 0.07227951602019557,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.01877133105802048,
+            "violations": 11,
+            "exact_95_interval_low": 0.009406902374381187,
+            "exact_95_interval_high": 0.033338433465003606,
+            "covers_nominal": true,
+            "trials": 586
+          }
+        ]
+      },
+      "headline": {
+        "historical_95%": 0.05802047781569966,
+        "historical_99%": 0.017064846416382253,
+        "gaussian_95%": 0.051194539249146756,
+        "gaussian_99%": 0.01877133105802048
+      }
+    },
+    "inflation_only": {
+      "per_estimator": {
+        "historical": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.040955631399317405,
+            "violations": 24,
+            "exact_95_interval_low": 0.026414336116095352,
+            "exact_95_interval_high": 0.060327970695415546,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.01877133105802048,
+            "violations": 11,
+            "exact_95_interval_low": 0.009406902374381187,
+            "exact_95_interval_high": 0.033338433465003606,
+            "covers_nominal": true,
+            "trials": 586
+          }
+        ],
+        "gaussian": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.04436860068259386,
+            "violations": 26,
+            "exact_95_interval_low": 0.029184543268876935,
+            "exact_95_interval_high": 0.06433681535802002,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.02218430034129693,
+            "violations": 13,
+            "exact_95_interval_low": 0.011863835085412257,
+            "exact_95_interval_high": 0.037637079116965275,
+            "covers_nominal": false,
+            "trials": 586
+          }
+        ]
+      },
+      "headline": {
+        "historical_95%": 0.040955631399317405,
+        "historical_99%": 0.01877133105802048,
+        "gaussian_95%": 0.04436860068259386,
+        "gaussian_99%": 0.02218430034129693
+      }
+    },
+    "volatility_only": {
+      "per_estimator": {
+        "historical": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.042662116040955635,
+            "violations": 25,
+            "exact_95_interval_low": 0.027795850313979416,
+            "exact_95_interval_high": 0.06233579924135653,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.010238907849829351,
+            "violations": 6,
+            "exact_95_interval_low": 0.0037665077879787357,
+            "exact_95_interval_high": 0.02215178170843318,
+            "covers_nominal": true,
+            "trials": 586
+          }
+        ],
+        "gaussian": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.040955631399317405,
+            "violations": 24,
+            "exact_95_interval_low": 0.026414336116095352,
+            "exact_95_interval_high": 0.060327970695415546,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.020477815699658702,
+            "violations": 12,
+            "exact_95_interval_low": 0.010624870605781694,
+            "exact_95_interval_high": 0.03549719853397053,
+            "covers_nominal": false,
+            "trials": 586
+          }
+        ]
+      },
+      "headline": {
+        "historical_95%": 0.042662116040955635,
+        "historical_99%": 0.010238907849829351,
+        "gaussian_95%": 0.040955631399317405,
+        "gaussian_99%": 0.020477815699658702
+      }
+    },
+    "sign_flipped": {
+      "per_estimator": {
+        "historical": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.05802047781569966,
+            "violations": 34,
+            "exact_95_interval_low": 0.04051182331744184,
+            "exact_95_interval_high": 0.08013714758250647,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.01877133105802048,
+            "violations": 11,
+            "exact_95_interval_low": 0.009406902374381187,
+            "exact_95_interval_high": 0.033338433465003606,
+            "covers_nominal": true,
+            "trials": 586
+          }
+        ],
+        "gaussian": [
+          {
+            "confidence": 0.95,
+            "nominal_violation_rate": 0.050000000000000044,
+            "realised_violation_rate": 0.051194539249146756,
+            "violations": 30,
+            "exact_95_interval_low": 0.03480373879691974,
+            "exact_95_interval_high": 0.07227951602019557,
+            "covers_nominal": true,
+            "trials": 586
+          },
+          {
+            "confidence": 0.99,
+            "nominal_violation_rate": 0.010000000000000009,
+            "realised_violation_rate": 0.015358361774744027,
+            "violations": 9,
+            "exact_95_interval_low": 0.007046244010049844,
+            "exact_95_interval_high": 0.02895404913227255,
+            "covers_nominal": true,
+            "trials": 586
+          }
+        ]
+      },
+      "headline": {
+        "historical_95%": 0.05802047781569966,
+        "historical_99%": 0.01877133105802048,
+        "gaussian_95%": 0.051194539249146756,
+        "gaussian_99%": 0.015358361774744027
+      }
+    }
+  },
+  "refusals": [
+    {
+      "question": "how much does estimating the covariance cost versus an informed solver?",
+      "refused": "Phase 6 could answer this because the forward covariance was known in closed form. Real data has no observable true covariance, and substituting the full-sample estimate would smuggle the future into the comparison. Question D reports a relative ranking instead, and says it is one."
+    },
+    {
+      "question": "does the block bootstrap reach its nominal coverage on real data, as it was shown not to on clustered synthetic data?",
+      "refused": "coverage needs a truth independent of the sample being resampled. The Phase 5 arm had one because the process was known analytically. Here the only candidate is the full-sample VaR, and intervals built by resampling that same series cover it by construction -- a measured 1.000 coverage was produced this way and discarded as an artifact. Question C compares the two designs' standard errors instead, which needs no truth."
+    },
+    {
+      "question": "is this portfolio profitable?",
+      "refused": "there is no return here. The exposures are assumed, not traded, and the project makes no profitability claim anywhere (PROJECT_SPEC.md \u00a74)."
+    }
+  ],
+  "environment": {
+    "generated_at_utc": "2026-09-28T05:50:29+00:00",
+    "quantrisk_version": "1.0.0",
+    "git_commit": "473ac1004512",
+    "binary_git_commit": "02fea3a1847f",
+    "working_tree_dirty": true,
+    "uncommitted_paths": [
+      ".github/workflows/ci.yml",
+      "README.md",
+      "benchmarks/performance/results/monte_carlo_speed.json",
+      "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
+      "benchmarks/quantlib/results/monte_carlo_validation.json",
+      "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
+      "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "benchmarks/suite/results/suite_headline.csv",
+      "benchmarks/suite/results/suite_run.json",
+      "benchmarks/suite/results/suite_summary.md",
+      "data/fixtures/fred_BAMLH0A0HYM2_2014-01-01_2026-09-26.csv",
+      "data/fixtures/fred_BAMLH0A0HYM2_2014-01-01_2026-09-26.csv.provenance.json",
+      "data/fixtures/fred_T10YIE_2014-01-01_2026-09-26.csv",
+      "data/fixtures/fred_T10YIE_2014-01-01_2026-09-26.csv.provenance.json",
+      "docs/findings.md",
+      "docs/integrity_audit.md",
+      "docs/interview_defense.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-11-real-data-risk-study.md",
+      "docs/portfolio_audit.md",
+      "docs/release_notes_v1.0.0.md",
+      "docs/reproducibility.md",
+      "docs/validation_matrix.md",
+      "evidence/manifest.json",
+      "experiments/monte_carlo_convergence/results/convergence.csv",
+      "experiments/monte_carlo_convergence/results/summary.json",
+      "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
+      "experiments/pricing_validation/results/summary.json",
+      "experiments/real_data_risk_study/",
+      "experiments/stress_testing/results/stress_testing_study.json",
+      "experiments/var_backtesting/results/var_backtesting_validation.json",
+      "experiments/variance_reduction/results/summary.json",
+      "experiments/variance_reduction/results/variance_by_method.csv",
+      "paper/technical_report.pdf",
+      "paper/technical_report.tex",
+      "scripts/build_evidence_manifest.py",
+      "scripts/record_data_fixtures.py",
+      "scripts/run_benchmark_suite.py",
+      "tests/python/test_artifact_metadata.py",
+      "tests/python/test_real_data_findings_prose.py",
+      "tests/python/test_real_data_study_offline.py"
+    ],
+    "provenance": "ran from 473ac1004512 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 02fea3a1847f",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_arch": "arm64",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_build_type": "Release",
+    "cpp_standard": "C++20",
+    "cpp_flags": "(none)",
+    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "python_machine": "arm64",
+    "packages": {
+      "python": "3.12.14",
+      "quantrisk": "1.0.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "oracles": {
+    "tool": "none used; every number comes from the C++ core",
+    "versions": {
+      "python": "3.12.14",
+      "quantrisk": "1.0.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "figure_status": "generated",
+  "artifacts": [
+    {
+      "path": "experiments/real_data_risk_study/results/real_data_violations.csv",
+      "sha256": "9404d67d4def63260bde88a9444fafafc02395a73ec6c1f1a7413b7607f04e61",
+      "bytes": "255605"
+    },
+    {
+      "path": "experiments/real_data_risk_study/results/real_data_book_pnl.csv",
+      "sha256": "fcf8b3b0afce53e721629d00bcba9e25c750e68cd6c64d93bed63718eb75716a",
+      "bytes": "79811"
+    },
+    {
+      "path": "experiments/real_data_risk_study/results/real_data_violation_coverage.png",
+      "sha256": "f8a2845087328cd6afb5af5442c5820651b18f528872e32c85df8b052fa5bd2c",
+      "bytes": "74454"
+    }
+  ]
+}

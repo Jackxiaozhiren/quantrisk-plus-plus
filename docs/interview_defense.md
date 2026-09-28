@@ -26,16 +26,27 @@ Euler attribution, the optional public-data layer with real committed fixtures, 
 Python facades and the three-command CLI.
 
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
-of unbuilt phases: no real-market empirical claim (every statistical result runs on synthetic
-data whose truth is known), no expected-return model, no term structure, no Heston Greeks or
-smile calibration, no multi-period rebalancing, no short positions or leverage, no reverse
-stress testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 60
+of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
+calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 63
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
-Current suite as measured at v1.0.0: 190 C++ tests under CTest (546,943 assertions in 189
-Catch2 cases), 319 pytest tests, 11/11 benchmark-suite members executed, `quantrisk validate`
-7/7.
+The one item that changed is the empirical claim. Until Phase 11 every statistical result ran
+on synthetic data whose truth is known. `experiments/real_data_risk_study/` is now the
+real-data arm: 586 out-of-sample days of three FRED factor series, and it both confirmed the
+synthetic prediction (Gaussian 99 % VaR over-rejects; the exact interval excludes nominal) and
+contradicted it (the shrinkage covariance that won on synthetic data ranks *worst* here). What
+it cannot do is answer the questions that needed a known truth — those are recorded as
+`refusals` inside the artifact rather than proxied.
+
+Current suite as measured at HEAD: 190 C++ tests under CTest (546,943 assertions in 189 Catch2
+cases), 353 pytest tests with the `oracles` extra, 12/12 benchmark-suite members executed,
+`quantrisk validate` 7/7. The CI lane installs without the extra and collects far less: at
+`v1.0.0` it printed 261 passed / 4 skipped against 330 locally, because four oracle-gated modules
+collapse into four skip records instead of the 69 cases they hold (limitation #63). At the tag
+itself the suite was 11/11. A test now asserts the 353, because two documents used to quote two
+different numbers for that tag and neither matched the runner.
 
 ---
 

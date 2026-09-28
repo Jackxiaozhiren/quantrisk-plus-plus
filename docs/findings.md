@@ -1,19 +1,23 @@
 # Findings
 
-Three results worth ninety seconds. Each is a number, the confound that makes it mean
+Four results worth ninety seconds. Each is a number, the confound that makes it mean
 something, and the artifact that regenerates it. Everything here is measured; nothing is
 asserted from a model's reputation.
 
-**On uncertainty, since three of the numbers below are ratios and none carries a ± sign.**
-They are not estimates from a sample, and pretending otherwise would be a different error.
-Findings 1 and 2 are deterministic functions of a fully specified, seeded data-generating
-process: given the same build, every figure reproduces to the last digit, and the ranges quoted
+**On uncertainty, because the first three numbers are deterministic and the fourth is not.**
+Findings 1 and 2 are functions of a fully specified, seeded data-generating process: given the
+same build, every figure reproduces to the last digit, and the ranges quoted
 (1.13×–1.26×, 1.57×–1.60×) are the spread *across window lengths and estimators*, which is the
 substantive variation being reported, not sampling noise. Finding 3's residuals are identities,
 so their only uncertainty is floating-point. Where sampling error *is* the question —
 convergence slopes, coverage rates, backtest size — the standard errors are in
 `docs/validation_matrix.md`, and they are the reason two of those claims are stated as
 "−0.99405 ± 0.00313 against a theory value of −1" rather than as a match.
+
+Finding 4 is the exception in kind, not just in magnitude: it is the only one measured on a
+sample nobody generated, so it carries no ± because the interval *is* the result — an exact
+binomial interval around a realised violation rate, quoted with its endpoints. That is also why
+it can contradict a synthetic finding without either one being a bug.
 
 For a reader who wants the reasoning rather than the result: the technical report
 (`paper/technical_report.pdf`) covers each in its own chapter, and
@@ -100,12 +104,66 @@ not evidence; an identity that must close, and a negative control that must fail
 
 ---
 
+## 4. Real data confirms the fat-tail prediction and overturns the covariance one
+
+Everything above is measured on processes whose truth is known. That is what makes a bias
+measurable — and it is also what keeps every one of those conclusions one step away from an
+empirical claim. `experiments/real_data_risk_study/` closes part of that gap: three FRED series
+used as risk factors (10-year Treasury par yield, 10-year breakeven, VIX), a fixed set of notional
+exposures, trailing 250-day calibration, and **586 out-of-sample days** scored one step at a time.
+
+**The Gaussian tail failure reproduces.** Phase 5's synthetic t(3) arm predicted that a Gaussian
+99% VaR would over-reject; on real data it realised **2.048%** violations against 1% nominal, with
+an exact binomial interval of **[1.062%, 3.550%]** — which excludes the nominal rate. Historical
+simulation at the same level realised **1.365%** with interval **[0.591%, 2.672%]**, which covers
+it. The prediction was right, and it is right for the reason it was made for.
+
+**The covariance ranking does not survive — its two ends trade places.** Phase 6 scored the same
+three estimators on synthetic data by mean forward-variance ratio against an informed solver and
+got **shrinkage 1.169 < sample 1.183 < ewma 1.241**. Scored here on realised out-of-sample
+portfolio variance over 582 rolling windows, the ordering is **ewma < sample < shrinkage**: the
+estimator that was worst in the generated world is best on market data, and the one that was best
+is worst. Neither result is a bug. Shrinkage wins where a short window makes the sample covariance
+*unstable*, which is the regime the synthetic DGP was built to create; on a twelve-year record of
+three highly persistent rate and index series, that structured target is instead the thing that
+lags. The finding is not "shrinkage is bad" — it is that an estimator ranking is a property of the
+process it was measured on, and a benchmark that does not name its process says nothing.
+
+**The backtest machinery, however, does not discriminate here.** Three violations-per-day tests on
+the same 586 days — Kupiec **p = 0.160**, Christoffersen independence **0.287**, conditional
+coverage **0.211** — and *none rejects*. The Phase 5 synthetic arm showed the independence test
+rejecting 55.4% of clustered series, so the machinery works; on this particular sample the
+clustering is mild enough to miss (a runs test gives z = **−1.17**, the right sign, no power). The
+truth-free bootstrap check agrees: the moving-block standard error is only **1.072×** the iid one.
+
+A negative result of that kind is the easiest thing in a portfolio to bury, and it is published
+rather than dropped: the same experiment that produced the confirmation produced the non-detection.
+
+**Three questions it refuses.** The artifact records them explicitly instead of proxying them:
+how much estimating covariance costs against an informed solver (real data has no observable true
+covariance, and substituting the full-sample estimate would smuggle the future into the
+comparison); whether the block bootstrap reaches nominal coverage on real data (coverage needs a
+truth independent of the series being resampled — an earlier version measured exactly 1.000 this way
+and the number was circular, so it was discarded); and whether the book is profitable (there is no
+return in it).
+
+- **Confound identified:** the exposures are assumed, not traded, so the violation *rate* is
+  invariant to scaling the whole book at once — the script asserts that invariance rather than
+  claiming it — but not to the mix of factors, and no sensitivity to the mix is published.
+- **Artifact:** `experiments/real_data_risk_study/results/real_data_risk_study.json`
+  (`headline`, `A_estimator_validity`, `B_coverage_tests`, `D_covariance`, `refusals`),
+  `real_data_violation_coverage.png`, `real_data_violations.csv`.
+
+---
+
 ## What is *not* a finding
 
 Stated because overclaiming is the failure mode this project exists to avoid:
 
-- No real market data was used anywhere. Every result above is about estimators on synthetic
-  processes whose truth is known, and none of them licenses a statement about markets.
+- The real-data arm is one arm. Six of the seven experiments still run on synthetic processes whose
+  truth is known, `docs/limitations.md` #28 says so, and finding 4's exposures are an assumption —
+  no number there describes a position anyone held, and a single 12.7-year sample of three factor
+  series does not license a statement about markets in general.
 - No performance improvement is claimed over any library. The measured result is that the C++
   core is roughly 8× an interpreted loop and **slower** than vectorised NumPy (0.42×–0.48×)
   on the benchmarked workload.

@@ -12,9 +12,11 @@ import csv
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 import quantrisk
@@ -239,22 +241,60 @@ def _numbered_limitation_entries() -> int:
     return len(numbers)
 
 
-def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
-    """`docs/limitations.md` is cited by count in five other documents.
+def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> None:
+    """A test count is the third number this repository restates in prose and gets stale.
 
-    A count repeated by hand in five places is a fact with five chances to go stale, and it
+    `docs/integrity_audit.md` records `v1.0.0` quoting both 330 and 319 for the same tag while
+    the runner printed a third number, so this closes it the way the limitation count was
+    closed: re-collect the suite in a subprocess and compare. Collect-only, because the
+    subprocess must not run the 342 benchmarks it would otherwise be counting.
+
+    The CI figure is not asserted here — reproducing it would mean uninstalling the oracles
+    from inside the test session — but it is quoted from the runner's own log, and
+    `docs/limitations.md` #63 explains why the two numbers differ.
+    """
+    completed = subprocess.run(
+        [sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    collected = re.search(r"^(\d+) tests? collected", completed.stdout, flags=re.M)
+    assert collected, f"could not read a test count out of pytest: {completed.stdout[-500:]}"
+    total = int(collected.group(1))
+
+    claims = {
+        "docs/interview_defense.md": r"(\d+) pytest tests with the `oracles` extra",
+        "docs/limitations.md": r"collects (\d+) tests at HEAD",
+    }
+    for name, pattern in claims.items():
+        found = re.findall(pattern, (REPO_ROOT / name).read_text(encoding="utf-8"))
+        assert found, f"{name} no longer states the Python test count in the expected form"
+        assert all(int(value) == total for value in found), (
+            f"{name} says {found}, pytest collects {total}"
+        )
+
+
+def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
+    """`docs/limitations.md` is cited by count in four other documents.
+
+    A count repeated by hand in four places is a fact with four chances to go stale, and it
     does: adding Phase 10's entries left every one of them reading "55". This test makes the
     file the single source, so the next entry added without updating the prose fails here
     rather than shipping a wrong number in the README.
+
+    `docs/release_notes_v1.0.0.md` and `docs/integrity_audit.md` are deliberately *not* in
+    this set. They are records of a revision, and their counts were true of `v1.0.0`; forcing
+    them to track a moving file would rewrite the historical claim to keep a test green, which
+    is the opposite of what an evidence document is for. They state the revision they describe.
     """
     total = _numbered_limitation_entries()
     claims = {
         "README.md": r"carries (\d+) numbered entries",
         "docs/validation_matrix.md": r"The (\d+) numbered limitations",
-        "docs/release_notes_v1.0.0.md": r"\*\*(\d+) numbered limitations\*\*",
         "docs/interview_defense.md": r"has all (\d+)\s*\n?numbered entries",
         "paper/technical_report.tex": r"(?:contains|holds) (\d+) numbered entries",
-        "docs/integrity_audit.md": r"(\d+) numbered entries in `docs/limitations.md`",
     }
     for name, pattern in claims.items():
         text = (REPO_ROOT / name).read_text(encoding="utf-8")
@@ -263,6 +303,181 @@ def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
         assert all(int(value) == total for value in found), (
             f"{name} says {found}, docs/limitations.md has {total}"
         )
+
+
+SPELLED_NUMBERS = {
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "thirteen": 13,
+}
+
+
+def _as_int(token: str) -> int:
+    """`12` and `twelve` are the same claim about the same registry."""
+    if token.isdigit():
+        return int(token)
+    return SPELLED_NUMBERS[token.lower()]
+
+
+def _load_suite_members() -> list[Any]:
+    """The suite's own registry, so a document can be checked against it rather than a guess.
+
+    Loaded by path because `scripts/` is not an importable package, and loaded rather than
+    grepped because the thing being asserted is the count of Python objects the runner holds.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "run_benchmark_suite", REPO_ROOT / "scripts" / "run_benchmark_suite.py"
+    )
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    # `@dataclass` resolves the module of a class through `sys.modules`, and a module created
+    # by `module_from_spec` is not in there until it is put there. Without this the load dies
+    # inside dataclasses, on the Member definition, with an AttributeError about None.
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        del sys.modules[spec.name]
+    return list(module.MEMBERS)
+
+
+def test_the_suite_records_a_pasteable_command_with_no_machine_path(tmp_path: Path) -> None:
+    """The roll-up is evidence now, so it names its own invocation like the others do.
+
+    `--out` is the argument that would break this: argv is the caller's, and a caller who
+    passed an absolute output directory would have their own path written into a committed
+    artifact and hashed by the manifest as if it were part of the evidence. The recorded
+    command is rebuilt from the parsed flags instead, with the output directory made
+    repo-relative. Both directions are asserted, because the safe case (an in-repo `--out`,
+    which is the only one that can ever be committed) and the harmless-but-still-absolute case
+    (an out-of-repo `--out`, which `repo_relative` necessarily leaves alone) are different
+    branches, and a test that only exercised the second would pass while the first leaked.
+    """
+    in_repo = REPO_ROOT / "build" / "suite-command-test"
+    first = subprocess.run(
+        [sys.executable, str(SUITE), "--no-run", "--require-all", "--out", str(in_repo)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert first.returncode == 0, first.stderr[-4000:]
+    command = json.loads((in_repo / "suite_run.json").read_text(encoding="utf-8"))["command"]
+
+    assert command.startswith("uv run python scripts/run_benchmark_suite.py")
+    assert "--no-run" in command and "--require-all" in command
+    assert f"--out {repo_relative(in_repo)}" in command, (
+        f"--out was not made repo-relative: {command}"
+    )
+    assert str(Path.home()) not in command
+    assert (in_repo / "suite_summary.md").read_text(encoding="utf-8").count(f"`{command}`") == 1
+    shutil.rmtree(in_repo)
+
+    outside = _aggregate(tmp_path)
+    assert outside.returncode == 0, outside.stderr[-4000:]
+    outside_command = json.loads((tmp_path / "suite_run.json").read_text(encoding="utf-8"))[
+        "command"
+    ]
+    # An output directory outside the repository cannot be expressed relative to it, so the
+    # path stays absolute. That is not a leak: nothing under /private/var is ever committed.
+    assert str(Path.home()) not in outside_command
+
+
+def test_the_frozen_suite_roll_up_records_the_command_that_made_it() -> None:
+    """The committed aggregate must describe itself the way the README quotes it.
+
+    `docs/reproducibility.md` says the frozen suite ran with `--require-all`, and that flag is
+    the difference between "12/12 executed" and "12 rows, some of them skipped". If the
+    artifact on disk was made without it, the document is describing a run that did not happen.
+    """
+    suite = json.loads(
+        (REPO_ROOT / "benchmarks" / "suite" / "results" / "suite_run.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    command = suite["command"]
+    assert "--require-all" in command, f"the frozen suite was run without it: {command!r}"
+    assert "--out" not in command, (
+        "the frozen aggregate was written somewhere other than RESULTS_DIR"
+    )
+    assert "--no-run" not in command, "the frozen aggregate was read off disk, not executed"
+    assert suite["totals"]["members"] == len(_load_suite_members())
+    assert suite["totals"]["skipped"] == 0
+
+
+def test_documents_that_count_the_suite_members_agree_with_the_registry() -> None:
+    """The suite's member count is quoted in six documents, and the registry owns it.
+
+    `scripts/run_benchmark_suite.py` registers members by hand (limitation #58), so the only
+    thing that turns "we run everything" into a checkable claim is a reader counting the
+    registry. Six documents count it for that reader, and a count repeated by hand is a fact
+    with six chances to go stale — which is how `docs/reproducibility.md` came to say that
+    four members skip without the `oracles` extra when the registry already had five with a
+    `requires` clause. Assert against the registry itself, including the per-kind breakdown
+    the README prints and the skippable count the reproducibility note prints.
+    """
+    members = _load_suite_members()
+    total = len(members)
+    by_kind = {
+        "correctness benchmarks": sum(1 for m in members if m.kind == "correctness_benchmark"),
+        "statistical experiments": sum(1 for m in members if m.kind == "statistical_experiment"),
+        "performance benchmark": sum(1 for m in members if m.kind == "performance_benchmark"),
+    }
+    skippable = sum(1 for m in members if m.requires)
+
+    claims = {
+        "README.md": r"runs all (\w+) members",
+        "docs/limitations.md": r"so all (\w+) members execute against live oracles",
+        "docs/reproducibility.md": r"all (\d+) members",
+        "docs/validation_matrix.md": r"all (\d+) members",
+        ".github/workflows/ci.yml": r"re-executes all (\w+) members",
+    }
+    for name, pattern in claims.items():
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        found = re.search(pattern, text)
+        assert found, f"{name} no longer states the suite member count in the expected form"
+        assert _as_int(found.group(1)) == total, (
+            f"{name} says {found.group(1)!r}, the registry has {total} members"
+        )
+
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    breakdown = re.search(
+        r"(\w+) correctness\nbenchmarks, (\w+) statistical experiments, "
+        r"(\w+) performance benchmark",
+        readme,
+    )
+    assert breakdown, "README no longer breaks the suite down by kind"
+    assert _as_int(breakdown.group(1)) == by_kind["correctness benchmarks"]
+    assert _as_int(breakdown.group(2)) == by_kind["statistical experiments"]
+    assert _as_int(breakdown.group(3)) == by_kind["performance benchmark"]
+    assert sum(by_kind.values()) == total, "a member kind is not one of the three the suite claims"
+
+    reproducibility = (REPO_ROOT / "docs" / "reproducibility.md").read_text(encoding="utf-8")
+    skips = re.search(r"(\w+) of the (\w+) members report `skipped`", reproducibility)
+    assert skips, "docs/reproducibility.md no longer states how many members need oracles"
+    assert _as_int(skips.group(1)) == skippable, (
+        f"the note says {skips.group(1)} members skip without the extra; "
+        f"{skippable} have a `requires` clause"
+    )
+    assert _as_int(skips.group(2)) == total
+
+    defense = (REPO_ROOT / "docs" / "interview_defense.md").read_text(encoding="utf-8")
+    executed = re.search(r"(\d+)/(\d+) benchmark-suite members executed", defense)
+    assert executed and int(executed.group(2)) == total, (
+        "interview_defense.md counts a different suite than the registry has"
+    )
 
 
 def test_no_committed_artifact_leaks_a_machine_specific_path() -> None:

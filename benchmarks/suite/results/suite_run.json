@@ -1,4 +1,5 @@
 {
+  "command": "uv run python scripts/run_benchmark_suite.py --require-all",
   "environment": {
     "cpp_build_type": "Release",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
@@ -21,13 +22,13 @@
     "platform": "macOS-27.0-arm64-arm-64bit",
     "python": "3.12.14"
   },
-  "generated_at_utc": "2026-09-27T07:34:04+00:00",
+  "generated_at_utc": "2026-09-28T05:32:04+00:00",
   "members": [
     {
       "artifact": "benchmarks/quantlib/results/pricing_vs_quantlib.json",
-      "artifact_sha256": "a47773cb732ad6b82b65d0f0b223fea6257468febf9d180404cdf5bda2ed2a70",
+      "artifact_sha256": "8b320cb202c18e3095e0c90c71f3efc636c632243349fbe4885ec208ac85bfa3",
       "command": "benchmarks/quantlib/pricing_validation.py",
-      "generated_at_utc": "2026-09-27T07:33:04+00:00",
+      "generated_at_utc": "2026-09-28T05:31:03+00:00",
       "key": "pricing_vs_quantlib",
       "kind": "correctness_benchmark",
       "metrics": [
@@ -115,15 +116,15 @@
       ],
       "reason": "",
       "script": "benchmarks/quantlib/pricing_validation.py",
-      "seconds": 1.807,
+      "seconds": 1.788,
       "status": "passed",
       "title": "Black-Scholes, Greeks and CRR lattice vs QuantLib (18,816 rows)"
     },
     {
       "artifact": "benchmarks/quantlib/results/monte_carlo_validation.json",
-      "artifact_sha256": "8d58555f83358586459b3e5cadd891a7a5f5147f8eeb5b3c42c5c999449be276",
+      "artifact_sha256": "0b1dfeace388b88c42a16dc15d885e57125c4f9bfa4e189fc0e239cf773ff6f3",
       "command": "uv run python monte_carlo_validation.py --paths 200000",
-      "generated_at_utc": "2026-09-27T07:33:06+00:00",
+      "generated_at_utc": "2026-09-28T05:31:05+00:00",
       "key": "monte_carlo_vs_analytic",
       "kind": "correctness_benchmark",
       "metrics": [
@@ -198,15 +199,15 @@
       ],
       "reason": "",
       "script": "benchmarks/quantlib/monte_carlo_validation.py",
-      "seconds": 2.059,
+      "seconds": 2.077,
       "status": "passed",
       "title": "Monte Carlo, antithetic and control variate vs the analytic oracle"
     },
     {
       "artifact": "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
-      "artifact_sha256": "0dd9323a7f9c87688eb634091bd5e34829a04b32c6e87e7783e144c44d9edfa8",
+      "artifact_sha256": "67b60623be3037bcdda3cf2dbbc93a6d1bfeaad13cc593b59c232caf8ddd0959",
       "command": "uv run python path_dependent_validation.py",
-      "generated_at_utc": "2026-09-27T07:33:26+00:00",
+      "generated_at_utc": "2026-09-28T05:31:25+00:00",
       "key": "path_dependent_vs_quantlib",
       "kind": "correctness_benchmark",
       "metrics": [
@@ -275,15 +276,15 @@
       ],
       "reason": "",
       "script": "benchmarks/quantlib/path_dependent_validation.py",
-      "seconds": 20.041,
+      "seconds": 19.947,
       "status": "passed",
       "title": "Asian and barrier options, and Heston against closed forms and QuantLib"
     },
     {
       "artifact": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
-      "artifact_sha256": "0b9101bc177b8611cc7baf3a9c1acd5f3e45d1f9a7810f6506e248d2401cdd96",
+      "artifact_sha256": "3beabfe48ef391a77bb326d89b0897529e24694e27c59acd3710ef32957435f7",
       "command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
-      "generated_at_utc": "2026-09-27T07:33:30+00:00",
+      "generated_at_utc": "2026-09-28T05:31:29+00:00",
       "key": "optimisation_vs_oracles",
       "kind": "correctness_benchmark",
       "metrics": [
@@ -363,15 +364,15 @@
       ],
       "reason": "",
       "script": "benchmarks/pyportfolioopt/optimisation_validation.py",
-      "seconds": 3.277,
+      "seconds": 3.231,
       "status": "passed",
       "title": "Mean-variance, max-Sharpe, risk parity and CVaR vs PyPortfolioOpt and cvxpy"
     },
     {
       "artifact": "benchmarks/performance/results/monte_carlo_speed.json",
-      "artifact_sha256": "f6c6c065f0cebe26211fe6fc1510bec99c83cf7d9176d8976af6225bf4dbb1b7",
+      "artifact_sha256": "cd7845421f176dcb7924e0deae0fa82d586aba2deff12c223aff4d93a5991ada",
       "command": "uv run python performance monte_carlo_speed.py",
-      "generated_at_utc": "2026-09-27T07:33:30+00:00",
+      "generated_at_utc": "2026-09-28T05:31:30+00:00",
       "key": "mc_speed",
       "kind": "performance_benchmark",
       "metrics": [
@@ -381,7 +382,7 @@
           "source_keys": [
             "speedup_vs_pure_python"
           ],
-          "value": 8.668149692433214
+          "value": 7.95862299023749
         },
         {
           "artifact": "benchmarks/performance/results/monte_carlo_speed.json",
@@ -389,7 +390,7 @@
           "source_keys": [
             "speedup_vs_numpy"
           ],
-          "value": 0.4499916270154368
+          "value": 0.5065755998569531
         },
         {
           "artifact": "benchmarks/performance/results/monte_carlo_speed.json",
@@ -404,15 +405,15 @@
       "plot": [],
       "reason": "",
       "script": "benchmarks/performance/monte_carlo_speed.py",
-      "seconds": 0.43,
+      "seconds": 0.405,
       "status": "passed",
       "title": "C++ Monte Carlo throughput against NumPy and pure Python on one machine"
     },
     {
       "artifact": "experiments/pricing_validation/results/summary.json",
-      "artifact_sha256": "5aaeac35643ebfc7b149d7abc6f6debf8d82fe4e3a0bcef9b6462908be06d206",
+      "artifact_sha256": "44503c0bfb69ce5d92a7b27a050b2c0bfc5e020445eb4d7f7b6391c8510fd836",
       "command": "uv run python pricing_validation run.py",
-      "generated_at_utc": "2026-09-27T07:33:31+00:00",
+      "generated_at_utc": "2026-09-28T05:31:30+00:00",
       "key": "pricing_grid",
       "kind": "statistical_experiment",
       "metrics": [
@@ -459,15 +460,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/pricing_validation/run.py",
-      "seconds": 0.679,
+      "seconds": 0.663,
       "status": "passed",
       "title": "Pricing surface, put-call parity and lattice convergence order"
     },
     {
       "artifact": "experiments/monte_carlo_convergence/results/summary.json",
-      "artifact_sha256": "73716cc582d66fe1f7711316c2f45d2ec4cf84efe02c531269d5db6732fcd9e9",
+      "artifact_sha256": "8ac3ae1e832dbd8e41ae2279348a39c0b531adf8a30c1f60dfee3153b9c34bcb",
       "command": "uv run python run.py",
-      "generated_at_utc": "2026-09-27T07:33:34+00:00",
+      "generated_at_utc": "2026-09-28T05:31:33+00:00",
       "key": "mc_convergence",
       "kind": "statistical_experiment",
       "metrics": [
@@ -509,15 +510,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/monte_carlo_convergence/run.py",
-      "seconds": 3.009,
+      "seconds": 2.802,
       "status": "passed",
       "title": "1/sqrt(N) convergence and confidence-interval coverage of the MC engine"
     },
     {
       "artifact": "experiments/variance_reduction/results/summary.json",
-      "artifact_sha256": "5147060179a47af9615a2104400b9c66081e00cf1bac885cff57511575c9a302",
+      "artifact_sha256": "e3a59c5b9add3cd57d45ef427f897d5a6808d3ef99e7c1b1f03b7a23f4950e43",
       "command": "uv run python run.py",
-      "generated_at_utc": "2026-09-27T07:33:36+00:00",
+      "generated_at_utc": "2026-09-28T05:31:34+00:00",
       "key": "variance_reduction",
       "kind": "statistical_experiment",
       "metrics": [
@@ -541,15 +542,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/variance_reduction/run.py",
-      "seconds": 1.441,
+      "seconds": 1.41,
       "status": "passed",
       "title": "Antithetic and control-variate gains on out-of-sample mean squared error"
     },
     {
       "artifact": "experiments/var_backtesting/results/var_backtesting_validation.json",
-      "artifact_sha256": "7f46a53ab588a8962a08f99721b3910625ca44ef17c17eb156df87f6c2c26311",
+      "artifact_sha256": "19d800f64f2197153ab8275bd46ef6c6beebdd343879163475cdd7a8ca35d477",
       "command": "uv run python experiments/var_backtesting/run.py",
-      "generated_at_utc": "2026-09-27T07:33:59+00:00",
+      "generated_at_utc": "2026-09-28T05:31:57+00:00",
       "key": "var_backtesting",
       "kind": "statistical_experiment",
       "metrics": [
@@ -593,15 +594,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/var_backtesting/run.py",
-      "seconds": 23.179,
+      "seconds": 22.426,
       "status": "passed",
       "title": "VaR/ES estimator bias, Kupiec and Christoffersen size and power, bootstrap coverage"
     },
     {
       "artifact": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
-      "artifact_sha256": "9b92ce8876a095ce674db8fb1cfef25d85b7a3f89529decb70263b427ea82a73",
+      "artifact_sha256": "cc200960469a83fbc17ae8a1e6877bf7a505c70556d8563654c5306a05ea6ce4",
       "command": "uv run python experiments/portfolio_optimization/run.py",
-      "generated_at_utc": "2026-09-27T07:34:01+00:00",
+      "generated_at_utc": "2026-09-28T05:31:59+00:00",
       "key": "portfolio_estimation_cost",
       "kind": "statistical_experiment",
       "metrics": [
@@ -651,15 +652,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/portfolio_optimization/run.py",
-      "seconds": 2.206,
+      "seconds": 2.214,
       "status": "passed",
       "title": "Rolling-origin forward variance each covariance estimator costs an optimiser"
     },
     {
       "artifact": "experiments/stress_testing/results/stress_testing_study.json",
-      "artifact_sha256": "02a59d458cd16a42ef8bf73014f227de5484582a123f906d2eb916c2bee30a95",
+      "artifact_sha256": "be1faffe0e5bcf68da776c89cef64e9910c6c6d076595096c56f246bc6dddcc1",
       "command": "uv run python experiments/stress_testing/run.py",
-      "generated_at_utc": "2026-09-27T07:34:04+00:00",
+      "generated_at_utc": "2026-09-28T05:32:02+00:00",
       "key": "stress_testing",
       "kind": "statistical_experiment",
       "metrics": [
@@ -703,9 +704,128 @@
       "plot": [],
       "reason": "",
       "script": "experiments/stress_testing/run.py",
-      "seconds": 3.351,
+      "seconds": 3.29,
       "status": "passed",
       "title": "Stress reversals, attribution closure and delta-gamma linearisation error"
+    },
+    {
+      "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+      "artifact_sha256": "0a5d21a5379f6e90444f3f8712702bad8c2f40aa2f21f3f60d40d804edc5d650",
+      "command": "uv run python experiments/real_data_risk_study/run.py",
+      "generated_at_utc": "2026-09-28T05:32:04+00:00",
+      "key": "real_data_risk_study",
+      "kind": "statistical_experiment",
+      "metrics": [
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "out-of-sample evaluation rows",
+          "source_keys": [
+            "headline",
+            "evaluation_rows"
+          ],
+          "value": 586
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "Gaussian 99% realised violation rate",
+          "source_keys": [
+            "headline",
+            "gaussian_99_realised_violation_rate"
+          ],
+          "value": 0.020477815699658702
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "Gaussian 99% exact interval excludes nominal",
+          "source_keys": [
+            "headline",
+            "gaussian_99_exact_interval_excludes_nominal"
+          ],
+          "value": true
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "historical 99% realised violation rate",
+          "source_keys": [
+            "headline",
+            "historical_99_realised_violation_rate"
+          ],
+          "value": 0.013651877133105802
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "violations",
+          "source_keys": [
+            "headline",
+            "violations"
+          ],
+          "value": 37
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "Kupiec p-value",
+          "source_keys": [
+            "headline",
+            "kupiec_p_value"
+          ],
+          "value": 0.16008251975226917
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "Christoffersen independence p-value",
+          "source_keys": [
+            "headline",
+            "christoffersen_independence_p_value"
+          ],
+          "value": 0.2865326755746017
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "Christoffersen conditional coverage p-value",
+          "source_keys": [
+            "headline",
+            "christoffersen_conditional_coverage_p_value"
+          ],
+          "value": 0.21126454823489627
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "violation run-test z",
+          "source_keys": [
+            "headline",
+            "run_test_z"
+          ],
+          "value": -1.1694010458450064
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "block/iid bootstrap SE ratio",
+          "source_keys": [
+            "headline",
+            "block_over_iid_bootstrap_se_ratio"
+          ],
+          "value": 1.0720316821453646
+        },
+        {
+          "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+          "label": "covariance ranking, best to worst",
+          "source_keys": [
+            "headline",
+            "covariance_ranking_best_to_worst"
+          ],
+          "value": [
+            "ewma",
+            "sample",
+            "shrinkage"
+          ]
+        }
+      ],
+      "plot": [],
+      "reason": "",
+      "script": "experiments/real_data_risk_study/run.py",
+      "seconds": 1.81,
+      "status": "passed",
+      "title": "Phase 5/6 estimator conclusions re-run on real daily market observations"
     }
   ],
   "outputs": {
@@ -713,26 +833,44 @@
   },
   "repository": {
     "binary_git_commit": "02fea3a1847f",
-    "git_commit": "55a8b4a6072f",
-    "provenance": "ran from 55a8b4a6072f plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 02fea3a1847f",
+    "git_commit": "473ac1004512",
+    "provenance": "ran from 473ac1004512 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 02fea3a1847f",
     "uncommitted_paths": [
+      ".github/workflows/ci.yml",
+      "README.md",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
       "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
       "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "benchmarks/suite/results/suite_headline.csv",
+      "benchmarks/suite/results/suite_run.json",
+      "benchmarks/suite/results/suite_summary.md",
+      "data/fixtures/fred_BAMLH0A0HYM2_2014-01-01_2026-09-26.csv",
+      "data/fixtures/fred_BAMLH0A0HYM2_2014-01-01_2026-09-26.csv.provenance.json",
+      "data/fixtures/fred_T10YIE_2014-01-01_2026-09-26.csv",
+      "data/fixtures/fred_T10YIE_2014-01-01_2026-09-26.csv.provenance.json",
+      "docs/interview_defense.md",
+      "docs/limitations.md",
+      "docs/release_notes_v1.0.0.md",
+      "docs/reproducibility.md",
+      "docs/validation_matrix.md",
       "evidence/manifest.json",
       "experiments/monte_carlo_convergence/results/convergence.csv",
       "experiments/monte_carlo_convergence/results/summary.json",
       "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
       "experiments/pricing_validation/results/summary.json",
+      "experiments/real_data_risk_study/",
       "experiments/stress_testing/results/stress_testing_study.json",
       "experiments/var_backtesting/results/var_backtesting_validation.json",
       "experiments/variance_reduction/results/summary.json",
       "experiments/variance_reduction/results/variance_by_method.csv",
-      "python/quantrisk/experiments/evidence.py",
+      "paper/technical_report.tex",
       "scripts/build_evidence_manifest.py",
-      "scripts/verify_evidence_manifest.py"
+      "scripts/record_data_fixtures.py",
+      "scripts/run_benchmark_suite.py",
+      "tests/python/test_artifact_metadata.py",
+      "tests/python/test_real_data_study_offline.py"
     ],
     "working_tree_dirty": true
   },
@@ -740,10 +878,10 @@
   "totals": {
     "aggregated_only": 0,
     "failed": 0,
-    "members": 11,
-    "passed": 11,
+    "members": 12,
+    "passed": 12,
     "skipped": 0,
-    "wall_seconds": 61.5
+    "wall_seconds": 62.1
   },
   "trigger": "run"
 }

@@ -1,8 +1,21 @@
 # Graduate Admissions Portfolio Audit
 
 Written from the perspective of six admissions committees, against the repository as of
-`v1.0.0` (commit `06836d2`). Every claim below cites a file or a measurement, including the
-unflattering ones — an audit that only lists strengths is advertising.
+`v1.0.0`. Every claim below cites a file or a measurement, including the unflattering ones — an
+audit that only lists strengths is advertising.
+
+> **This document is a record, and two things about it are now known to be wrong.** It names
+> commit `06836d2`, which is five commits *before* the `v1.0.0` tag, and its table quotes 319
+> pytest tests for that revision. Re-measured in clean worktrees with the `oracles` extra
+> installed, the same command collects **316** at `06836d2` and **330** at `v1.0.0` — so the
+> figure in the table matches neither commit it could have been taken from, and it is a *passed*
+> count quoted where a *collected* count belongs. Running the tag's tests against a built C++
+> reference tool gives 328 passed and 2 failures that are artifacts of that hybrid environment
+> (the tag's `test_sec_requests_refuse_to_identify_nobody` predates the User-Agent policy added
+> after the tag), so 330 is the number that stands. The rest of the table below was written from
+> the repository at the tag and is left as it was, because that is what an audit is for; the
+> corrections, and the work this audit prompted, are in **§Addendum: what changed after this
+> audit** at the end.
 
 The committee lenses: **Financial Engineering · Financial Mathematics · Quantitative
 Finance · Applied Mathematics · Statistics · Data Science**.
@@ -15,9 +28,9 @@ Measurements used throughout:
 | C++ tests (`tests/cpp`) | 4,508 lines |
 | Python tests (`tests/python`) | 4,167 lines |
 | Benchmarks, experiments, scripts | 6,331 lines |
-| Documentation | 5,016 lines + 37-page report |
+| Documentation | 5,016 lines + 37-page report (38 now — see the addendum) |
 | Public Python API symbols | 159 across 8 modules |
-| Test totals | 190 CTest / 546,943 C++ assertions / 319 pytest |
+| Test totals | 190 CTest / 546,943 C++ assertions / 319 pytest (see the warning above) |
 | Frozen artifacts | 58, hashed, with generating commands |
 
 **The ratio that matters: 8,675 lines of test against 6,946 lines of implementation.** More
@@ -294,3 +307,64 @@ addition*. Concretely, and applied in this same pass:
 
 Improvements 1 and 3 from the ranked list above are *not* applied here. They are the next
 phase of work, not a simplification, and the instruction was explicitly to stop adding.
+
+---
+
+## Addendum: what changed after this audit
+
+Written 2026-09-28, after Phase 11. Recorded separately rather than by editing the sections above,
+because an audit is evidence about a moment and rewriting it in place destroys that.
+
+**Ranked improvement 1 — the real-data empirical study — is done.** `experiments/real_data_risk_study/`
+is the twelfth suite member, and it did what the audit predicted it would do for the application: it
+converted a synthetic-methods project into one that has also measured something. Four results, all
+from the committed artifact:
+
+| | Measured on real data |
+|---|---|
+| Gaussian 99 % VaR over-rejects | realised **2.048 %**, exact CI **[1.062 %, 3.550 %]** — excludes 1 % |
+| Historical 99 % VaR | realised **1.365 %**, CI [0.591 %, 2.672 %] — covers it |
+| The coverage tests | Kupiec **0.160**, independence **0.287**, conditional **0.211** — **none rejects** |
+| The covariance ranking | **ewma < sample < shrinkage**, reversing the synthetic arm's ends |
+
+The audit's own framing was right about the risk and wrong about the outcome. It said a real-data
+study was "highest value, moderate effort" and implied the result would be a confirmation. Half of it
+was: the fat-tail prediction reproduced almost exactly, and the estimator ranking reversed. That is
+the more interesting outcome and the one a committee should weigh, because a project that only ever
+confirms itself has not tested its conclusions, it has tested its fixtures.
+
+The audit also specified "with ALFRED vintages to avoid look-ahead". That part was **not** done.
+Three market *prints* (a par yield, a breakeven rate, an index level) were chosen instead because
+prints are not revised the way macro aggregates are, which removes the exposure a vintage database
+would have closed without needing an API key. `fetch_vintage` exists in `python/quantrisk/data/fred.py`
+and is unused. `docs/limitations.md` #62 states the residue: these are FRED's current revision, so a
+correction to a historical print would be invisible here.
+
+**Ranked improvements 2 and 3.** Improvement 2 (`docs/findings.md`) shipped in Phase 10 and gained a
+fourth finding here. Improvement 3 — one worked analysis result — is **still open**, and it remains
+the binding constraint for Financial Mathematics and Applied Mathematics programmes. Nothing in
+Phase 11 addressed it.
+
+**Numbers that moved, with the command that measures each.**
+
+| Quantity | At `v1.0.0` | Now |
+|---|---|---|
+| C++ implementation lines | 6,946 | 6,946 (the core was not touched) |
+| C++ test lines | 4,508 | 4,508 |
+| Python test lines | 4,167 | 5,042 |
+| pytest, with `oracles` | 330 | 353 |
+| pytest in the CI lane (no extra) | 261 passed, 4 skipped | unchanged |
+| Suite members | 11 | 12 |
+| Frozen artifacts | 58 | 69 |
+| Numbered limitations | 60 | 63 |
+| Technical report | 37 pages | 38 pages |
+| `quantrisk validate` | 7/7 | 7/7 |
+
+The 319 in the table at the head of this document is dealt with in the warning there. The line
+counts in that table were taken at the tag and have not been re-measured since; the C++ figures
+above are unchanged because the core was not touched this phase, and the Python test-line count
+is not. Four new guards in `tests/python/test_artifact_metadata.py` bind
+the member count, the kind breakdown, the skippable count and the pytest count to their sources, and
+`tests/python/test_real_data_findings_prose.py` re-derives every figure the README and finding 4
+print from the artifact that produced them — so the class of error this audit contained is now
+checked rather than trusted.

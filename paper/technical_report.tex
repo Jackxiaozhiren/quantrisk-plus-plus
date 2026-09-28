@@ -142,7 +142,7 @@ manifest and suite aggregation now exist only as uncommitted files in the workin
 (Section \ref{sec:reproducibility}); no release tag exists. The test suite at the end of Phase 9 is 190 CTest entries
 and 546{,}943 assertions in 189 Catch2 cases on the C++ side, with 310 pytest tests on the
 Python side (\src{docs/phase_reports/phase-09-research-api.md}). The limitations register
-contains 60 numbered entries (\src{docs/limitations.md}).
+contains 63 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -863,6 +863,68 @@ expected-shortfall backtest of the Bellini--Frittelli or Acerbi--Tasche style na
 register is implemented, and the estimand here is the unconditional quantile, not a
 daily re-estimated conditional one (\src{docs/limitations.md}, items 33, 35).
 
+\subsection{Do the conclusions survive real data?}
+\label{sec:realdata}
+Everything above is measured on processes whose truth is known, which is what makes a bias
+measurable and also what keeps each conclusion one step from an empirical claim. The study in
+\src{experiments/real_data_risk_study/} re-runs the same estimators and the same tests on real
+daily market observations: three FRED series used as risk factors --- $DGS10$, the 10-year
+Treasury par yield; $T10YIE$, the 10-year breakeven inflation rate; $VIXCLS$, the CBOE volatility
+index --- 3{,}177 aligned observations spanning 2014-01-03 to 2026-09-22, against an assumed book
+of fixed notional exposures. The factor moves are observations; the exposures are assumptions; no
+number describes a trade. Each VaR is calibrated on the 250 observations \emph{preceding} the
+return it scores, stepping by 5, giving 586 scored days (Table \ref{tab:realdata}).
+
+\begin{table}[t]
+\caption[Out-of-sample VaR on real daily factor moves]{Out-of-sample violation rates on 586 real
+daily observations, trailing 250-day calibration, with exact binomial intervals. Source: the
+committed run of \src{experiments/real_data_risk_study/results/real_data_risk_study.json}. The
+Gaussian 99\,\% interval excludes the nominal rate; that is the finding.}
+\label{tab:realdata}
+\centering\small
+\begin{tabular}{lllrl}
+\toprule
+Estimator & Level & Nominal & Realised & Exact 95\,\% interval \\
+\midrule
+Historical & 95\,\% & 0.05000 & 0.06314 & [0.04484, 0.08598] \\
+Gaussian   & 95\,\% & 0.05000 & 0.05631 & [0.03908, 0.07818] \\
+Historical & 99\,\% & 0.01000 & 0.01365 & [0.00591, 0.02672] \\
+Gaussian   & 99\,\% & 0.01000 & \textbf{0.02048} & [\textbf{0.01062}, \textbf{0.03550}] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three results, one of them negative. \textbf{The fat-tail prediction reproduces}: the synthetic
+$t(3)$ arm of \S\ref{sec:risk} forecast that a Gaussian 99\,\% VaR would over-reject, and
+on data nobody generated it realised 2.048\,\% against 1\,\% nominal with an interval that excludes
+the nominal rate, while historical simulation at 1.365\,\% covers it. \textbf{The coverage tests do
+not discriminate on this sample}: Kupiec $p = 0.160$, Christoffersen independence $0.287$,
+conditional coverage $0.211$ --- none rejects, and a runs test gives $z = -1.17$ (67 runs against
+70.33 expected), the right sign with no power. The machinery was shown to reject 55.4\,\% of
+clustered synthetic series, so this is evidence about the sample, not against the tests, and it is
+published rather than dropped. \textbf{The truth-free version of the bootstrap question agrees}:
+the moving-block standard error is 1.072$\times$ the iid one, a mild 7\,\% understatement
+consistent with the weak clustering.
+
+The covariance conclusion does not survive, and the way it fails is instructive. Rolling
+minimum-variance books from each estimator, scored on realised portfolio variance over 582
+windows, rank \emph{ewma $<$ sample $<$ shrinkage}. The synthetic study of
+\S\ref{sec:portfolio} ranked the same three by mean forward-variance ratio as shrinkage 1.169
+$<$ sample 1.183 $<$ ewma 1.241: the two ends exchange places while the middle holds. Shrinkage
+wins where a short window makes the sample covariance \emph{unstable}, which is the regime the
+synthetic process was built to create; over a twelve-year record of three persistent series the
+structured target is what lags. Neither number is wrong. An estimator ranking is a property of the
+process it was measured on, which is the reason \S\ref{sec:portfolio} reports the ratio against an
+informed solver rather than a bare winner.
+
+Three questions are refused inside the artifact rather than proxied. The cost of estimating
+covariance against an informed solver needs an observable true forward covariance, which real data
+does not have. Bootstrap \emph{coverage} needs a truth independent of the series being resampled;
+the only candidate is the full-sample VaR, and intervals built by resampling that series cover it
+by construction --- an earlier version measured exactly 1.000 this way and the figure was discarded
+and named as discarded. Whether the book is profitable needs a return, which it does not have
+(\src{docs/limitations.md}, items 61--62; \src{docs/phase_reports/phase-11-real-data-risk-study.md}).
+
 % ===========================================================================
 \section{Portfolio Optimization}
 \label{sec:portfolio}
@@ -1491,7 +1553,7 @@ stress artifacts are byte-identical between executions
 \label{sec:limitations}
 % ===========================================================================
 
-\src{docs/limitations.md} holds 60 numbered entries, grouped by the phase that introduced them,
+\src{docs/limitations.md} holds 63 numbered entries, grouped by the phase that introduced them,
 with the rule that entries are never removed because a later phase shipped. This section
 summarises them faithfully; the file remains the authority.
 

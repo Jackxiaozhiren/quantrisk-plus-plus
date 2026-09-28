@@ -16,10 +16,11 @@ estimators with bootstrap intervals, Kupiec and Christoffersen coverage tests, t
 covariance estimators, six portfolio solvers, a scenario and stress layer with attribution,
 and an optional public-data layer that never touches the core.
 
-The three results worth reading are in [`docs/findings.md`](docs/findings.md).
+The four results worth reading are in [`docs/findings.md`](docs/findings.md).
 
 It is not a trading system, not a market-data product, and not a forecast. It ships no
-expected-return model, makes no recommendation, and has never been run against live prices.
+expected-return model, makes no recommendation, and has never been run against live prices —
+the real-data study scores *historical* daily prints, and no code here places an order.
 Total monetary cost of building and validating it: $0.
 
 ## Why it exists
@@ -127,8 +128,9 @@ Three levels, defined in [`docs/validation_protocol.md`](docs/validation_protoco
   coverage against exact binomial bands; backtest size and power over thousands of
   replications on synthetic data whose truth is known.
 
-[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full twelve-component table:
-method, oracle, the bound the test asserts, the error actually measured, and the artifact.
+[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full table — sixteen rows over
+those twelve components: method, oracle, the bound the test asserts, the error actually measured,
+and the artifact.
 The four that carry a first reading:
 
 | Component | Bound asserted | Worst measured |
@@ -138,18 +140,21 @@ The four that carry a first reading:
 | Monte Carlo z, pooled over 160 runs | mean 0, std 1 | mean ≤ 0.05, std 0.92–1.01 |
 | Six solvers vs cvxpy + PyPortfolioOpt, 75 problems | per-problem 1e-11 to 1e-5 | objective 4.48e-9, bound violation exactly 0 |
 
-Two rows in the full matrix are the ones to interrogate, because they are where a weaker project
-would have stopped. The Heston comparison reaches 4.5e-3 relative, and that number is *our
+Three rows in the full matrix are the ones to interrogate, because they are where a weaker
+project would have stopped. The Heston comparison reaches 4.5e-3 relative, and that number is *our
 discretisation bias plus the oracle's own integration tolerance* — recorded as
 `partially validated` rather than rounded into a pass. The bootstrap interval coverage on
 clustered data is 0.693 against a nominal 0.900, which is a real failure of the method and
-not of the implementation; it is published as the finding.
+not of the implementation; it is published as the finding. And row 13, the real-data arm, has
+**no oracle at all** — a sample carries no independent truth to check against, so it reports
+realised violation rates with exact binomial intervals and is labelled `validated (L1 only)`
+rather than being quietly promoted into the oracle-validated block.
 
 ## Benchmark
 
-`uv run python scripts/run_benchmark_suite.py` runs all eleven members — four correctness
-benchmarks, six statistical experiments, one performance benchmark — in about 60 seconds, and
-writes JSON, CSV, Markdown and a figure under `benchmarks/suite/results/`.
+`uv run python scripts/run_benchmark_suite.py` runs all twelve members — four correctness
+benchmarks, seven statistical experiments, one performance benchmark — in about seventy
+seconds, and writes JSON, CSV, Markdown and a figure under `benchmarks/suite/results/`.
 
 The runner holds no number of its own. It executes each member's script, reads the headline
 figures out of the JSON that script writes, by key path, and aborts if a path has moved. The
@@ -191,7 +196,7 @@ in [`docs/project_scope.md`](docs/project_scope.md) §10.
 
 ## Experiments
 
-Six experiments, each answering one question with a distribution rather than a point. Each
+Seven experiments, each answering one question with a distribution rather than a point. Each
 writes its own JSON, CSV and figures, and each reports its own caveats in the artifact.
 
 | Experiment | Finding |
@@ -202,11 +207,12 @@ writes its own JSON, CSV and figures, and each reports its own caveats in the ar
 | `var_backtesting` | Kupiec rejects at 5.05% under a correct model and 12.0% on clustered data, where the independence test rejects 55.4% — the discriminator works, and the unconditional test's blindness is quantified. |
 | `portfolio_optimization` | Estimating the covariance costs 1.13–1.26× the forward variance an informed solver would carry; a regime break costs more than any estimator choice (1.57–1.60× for all three). |
 | `stress_testing` | Optimiser rankings do not invert under stress — but only because the books started 20.8% apart and the stress spread is 16.8%. The *stress-sensitivity* ranking inverts completely: the minimum-variance book is the most stress-sensitive (6.11× against 5.23× for equal weight). |
+| `real_data_risk_study` | On 586 out-of-sample days of three real FRED factor series, the synthetic prediction survives — Gaussian 99% VaR over-rejects at 2.048%, exact interval [1.062%, 3.550%] excluding the 1% nominal — while the covariance ranking does not: shrinkage, best on generated data by mean variance ratio (1.169 against sample's 1.183 and EWMA's 1.241), ranks *worst* here (ewma < sample < shrinkage on realised variance over 582 rolling windows). Three coverage tests fail to reject anything (Kupiec 0.160, independence 0.287, conditional 0.211), and the three questions the data cannot answer are recorded as refusals inside the artifact. |
 
 ## Reproducibility
 
 ```bash
-uv run python scripts/run_benchmark_suite.py         # regenerate every artifact, ~60 s
+uv run python scripts/run_benchmark_suite.py         # regenerate every artifact
 uv run python scripts/build_evidence_manifest.py     # SHA-256 everything into evidence/manifest.json
 uv run python scripts/verify_evidence_manifest.py    # prove nothing changed since
 ```
@@ -233,12 +239,15 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 60 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 63 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
-- **Nothing here has been tested against real markets.** Every statistical claim runs on
-  synthetic data whose truth is known. No number in this repository licenses a statement
-  about realised markets, and non-stationarity is out of reach by construction (#28).
+- **The risk layer's instrumented validation is synthetic; only one arm is real.** Six of the
+  seven experiments run on generated data whose truth is known, which is what makes a bias
+  measurable at all. `real_data_risk_study` is the single empirical arm, its book is an assumed
+  set of factor exposures rather than a portfolio anyone held (#61), and its inputs are FRED's
+  *current revision* rather than the vintage published on each date (#62). Non-stationarity
+  remains out of reach by construction (#28).
 - **The portfolio layer is long-only, single-period, and has no expected-return model.**
   `expected_returns` is an input, and the optimiser is only as honest as the person who
   supplied it (#36–37).

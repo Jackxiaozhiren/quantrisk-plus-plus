@@ -62,8 +62,8 @@ FRED_SERIES = [
 # are revised only to correct an error.
 FRED_HISTORY = [
     ("DGS10", "2014-01-01", "2026-09-26", "Treasury par yield, market-observed"),
+    ("T10YIE", "2014-01-01", "2026-09-26", "TIPS breakeven inflation, market-observed"),
     ("VIXCLS", "2014-01-01", "2026-09-26", "CBOE index, market-observed"),
-    ("BAMLH0A0HYM2", "2014-01-01", "2026-09-26", "ICE BofA HY OAS, index-observed"),
 ]
 
 

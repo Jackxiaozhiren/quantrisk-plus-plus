@@ -62,7 +62,13 @@ SOURCES: list[tuple[str, str, tuple[str, ...]]] = [
             "experiments/var_backtesting/results",
             "experiments/portfolio_optimization/results",
             "experiments/stress_testing/results",
+            "experiments/real_data_risk_study/results",
         ),
+    ),
+    (
+        "suite_aggregate",
+        "the suite's own roll-up, which is the artifact a published count is read from",
+        ("benchmarks/suite/results",),
     ),
     (
         "offline_fixture",

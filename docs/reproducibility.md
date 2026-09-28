@@ -69,24 +69,41 @@ that strips too eagerly would pass the re-run test and silently rubber-stamp a c
 git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
 uv sync --extra oracles          # interpreter 3.12, deps, and the validation oracles
 uv pip install -e .              # builds the C++ core and the pybind11 module
-uv run pytest -q                 # the full Python suite
+uv run pytest -q                 # 353 tests here; see the note below — the count is not one number
 uv run cmake --preset dev && uv run cmake --build --preset dev
 uv run ctest --preset dev        # 190 C++ tests, 546,943 assertions
-uv run python scripts/run_benchmark_suite.py --require-all   # all 11 members, ~60 s
+uv run python scripts/run_benchmark_suite.py --require-all   # all 12 members, ~70 s
 uv run quantrisk validate        # 7 identity checks against the build you just made
 ```
 
-Two things in that sequence are load-bearing and easy to get wrong.
+Three things in that sequence are load-bearing and easy to get wrong.
 
 Configure through `uv run`, not a bare `cmake --preset dev`. With no active virtualenv,
 CMake finds system Python and builds the extension against an interpreter the tests do not
 use — silently, and successfully.
 
 `--require-all` on the suite is what stops the run meaning anything. Without the `oracles`
-extra installed, four of the eleven members report `skipped` and the suite still exits 0,
+extra installed, six of the twelve members report `skipped` and the suite still exits 0,
 because skipping is the honest status for a missing dependency. A CI job that reported green
 in that state would be claiming a measurement it did not make. The flag turns that state into
 a failure.
+
+**The pytest count depends on which extras you installed, and a document that prints one number
+without saying which is wrong.** The sequence above, with `--extra oracles`, ends in **353 passed**.
+The CI `build-and-test` lane runs `uv sync` *without* that extra, and at `v1.0.0` it printed
+**261 passed, 4 skipped** where the same tree locally printed 330, because four test modules gate
+on a module-level
+`pytest.importorskip` — for `sklearn`, `QuantLib` twice and `pypfopt` — and a module that skips at
+import reports **one** skip, not the 69 cases inside it. At `v1.0.0` that means 330 collected with
+the extra against **265** without it — a difference of 65, which is 69 cases replaced by four
+module-level skip records. Those 69 are oracle comparisons a no-extra run never attempts, and
+nothing is broken when they do not appear; what would be broken is quoting either number as
+"the" test count. The pair moves with the tree — it is
+quoted from the runner's log at `v1.0.0`, not predicted for HEAD — so only the with-oracles number
+is guarded. `docs/limitations.md` #63 records this,
+and `test_the_documents_that_count_python_tests_count_the_ones_that_exist` re-collects the suite in
+a subprocess and fails if the prose disagrees. The C++ side has no such split: 190 tests under
+CTest either way, because the C++ suite has no optional dependencies.
 
 ## What is *not* reproducible
 

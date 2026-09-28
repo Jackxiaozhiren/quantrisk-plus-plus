@@ -321,6 +321,52 @@ MEMBERS: tuple[Member, ...] = (
             ("worst VaR decomposition residual", ("decomposition", "worst_residual")),
         ),
     ),
+    Member(
+        key="real_data_risk_study",
+        title="Phase 5/6 estimator conclusions re-run on real daily market observations",
+        kind=EXPERIMENT,
+        script="experiments/real_data_risk_study/run.py",
+        artifact="experiments/real_data_risk_study/results/real_data_risk_study.json",
+        requires=("scipy",),
+        # Aggregated through the artifact's own `headline` block, which the experiment writes
+        # as references to the per-estimator rows rather than as paths into a list ordered by
+        # confidence level. A path like ("A_estimator_validity", "per_estimator", "gaussian")
+        # returns a *list*, `dig` cannot index it, and the first element is the 95 % row — so
+        # the suite would print a 95 % rate under a label saying 99 % and nothing would fail.
+        # No `plot`: this member publishes no error against an oracle, and panel A of the
+        # envelope figure is labelled |our value - oracle| / |oracle|.
+        headline=(
+            ("out-of-sample evaluation rows", ("headline", "evaluation_rows")),
+            (
+                "Gaussian 99% realised violation rate",
+                ("headline", "gaussian_99_realised_violation_rate"),
+            ),
+            (
+                "Gaussian 99% exact interval excludes nominal",
+                ("headline", "gaussian_99_exact_interval_excludes_nominal"),
+            ),
+            (
+                "historical 99% realised violation rate",
+                ("headline", "historical_99_realised_violation_rate"),
+            ),
+            ("violations", ("headline", "violations")),
+            ("Kupiec p-value", ("headline", "kupiec_p_value")),
+            (
+                "Christoffersen independence p-value",
+                ("headline", "christoffersen_independence_p_value"),
+            ),
+            (
+                "Christoffersen conditional coverage p-value",
+                ("headline", "christoffersen_conditional_coverage_p_value"),
+            ),
+            ("violation run-test z", ("headline", "run_test_z")),
+            ("block/iid bootstrap SE ratio", ("headline", "block_over_iid_bootstrap_se_ratio")),
+            (
+                "covariance ranking, best to worst",
+                ("headline", "covariance_ranking_best_to_worst"),
+            ),
+        ),
+    ),
 )
 
 
@@ -622,6 +668,7 @@ def markdown(entries: list[dict[str, Any]], suite: dict[str, Any], out_dir: Path
             if suite["repository"]["working_tree_dirty"]
             else ""
         ),
+        f"- command: `{suite['command']}`",
         f"- run: {suite['generated_at_utc']}",
         f"- core build: {suite['environment']['cpp_build_type']}, "
         f"{suite['environment']['cpp_compiler']}, Python {suite['environment']['python']}",
@@ -706,7 +753,36 @@ def markdown(entries: list[dict[str, Any]], suite: dict[str, Any], out_dir: Path
     return "\n".join(lines)
 
 
-def build(entries: list[dict[str, Any]], *, ran: bool, out_dir: Path) -> dict[str, Any]:
+def command_line(arguments: argparse.Namespace) -> str:
+    """The invocation, spelled so it can be pasted on another machine.
+
+    Every other artifact in the evidence chain names the command that produced it, and the
+    manifest now reads the suite's roll-up too, so the aggregate needed one as well. argv is
+    not used directly: it would carry `--out /Users/<name>/...` into a committed artifact, and
+    a relative `scripts/...` differs from however the caller actually typed it. The flags here
+    are the ones that change what the run *claims* — `--require-all` is the difference between
+    "12/12 executed" and "12 reported, some of them skipped" — so they are recorded verbatim.
+    """
+    parts = ["uv run python scripts/run_benchmark_suite.py"]
+    for key in sorted(set(arguments.only)):
+        parts.append(f"--only {key}")
+    if arguments.require_all:
+        parts.append("--require-all")
+    if arguments.no_run:
+        parts.append("--no-run")
+    if arguments.out is not None:
+        relative = (
+            repo_relative(arguments.out.resolve())
+            if arguments.out.is_absolute()
+            else str(arguments.out)
+        )
+        parts.append(f"--out {relative}")
+    return " ".join(parts)
+
+
+def build(
+    entries: list[dict[str, Any]], *, ran: bool, out_dir: Path, command: str
+) -> dict[str, Any]:
     env = environment()
     out_dir.mkdir(parents=True, exist_ok=True)
     figure = out_dir / "validation_envelope.png"
@@ -714,6 +790,7 @@ def build(entries: list[dict[str, Any]], *, ran: bool, out_dir: Path) -> dict[st
 
     suite = {
         "schema": "quantrisk-benchmark-suite/1",
+        "command": command,
         "generated_at_utc": env["generated_at_utc"],
         "trigger": "run" if ran else "aggregate-only",
         "repository": {
@@ -794,7 +871,12 @@ def main() -> int:
             print(f"  {member.key}: {run['status']} in {run['seconds']:.1f}s", flush=True)
         entries.append(collect(member, run))
 
-    suite = build(entries, ran=not arguments.no_run, out_dir=out_dir)
+    suite = build(
+        entries,
+        ran=not arguments.no_run,
+        out_dir=out_dir,
+        command=command_line(arguments),
+    )
     json_path = out_dir / "suite_run.json"
     json_path.write_text(json.dumps(suite, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     rows = headline_rows(entries)

@@ -135,3 +135,62 @@ features" was reported on the strength of a query that could only ever answer ha
   longer quote a mutable count, and the limitations figure is now guarded by a test.
 - The suite's member registry is hand-maintained: a new benchmark that is never registered is
   simply absent, and absence produces no output to check.
+
+---
+
+## Addendum — the phase this audit prompted (2026-09-28)
+
+The audit above found twelve defects and recommended one substantive change: a real-data empirical
+study (`docs/portfolio_audit.md` §10, ranked first). Phase 11 built it, and the audit's own
+method — run the check the document claims, rather than read the document — kept finding things
+after the study itself was finished. Five are worth recording, because three of them were defects
+*in this audit's own numbers*.
+
+**13. This document's central measurement was not reproducible from the revision it names.** §4
+reports a fresh clone at `v1.0.0` giving "319 passed". Re-measured in a clean worktree at the tag
+with the `oracles` extra, `pytest --collect-only -q` collects **330**; at `06836d2` — the commit
+this audit's header names, which is five commits *before* the tag — it collects **316**. Neither is
+319. The header also calls `06836d2` "`v1.0.0`", which it is not. Nothing about the audit's
+conclusions changes, and that is precisely the problem: a reader who tried to reproduce the number
+would have concluded the repository was broken rather than that the note was imprecise. Fixed by
+naming both measurements and deleting the commit equivalence. The generalisable part: a *passed*
+count and a *collected* count are different quantities, and a document that prints one where the
+other is meant cannot be checked by a reader who does not know which it is.
+
+**14. `docs/reproducibility.md` said four suite members skip without the `oracles` extra; the
+registry had five, and Phase 11 made it six.** Counted from `requires=` clauses rather than
+remembered. Guarded now by `test_documents_that_count_the_suite_members_agree_with_the_registry`,
+which loads the registry as Python objects and checks the total, the three-way kind breakdown the
+README prints, and the skippable count — so this class of drift fails a test instead of shipping a
+paragraph.
+
+**15. The evidence chain did not contain the artifact the README's headline count comes from.**
+`evidence/manifest.json` hashed 58 files, none of them `benchmarks/suite/results/`, while
+"11/11 benchmark-suite members executed" is read out of `suite_run.json`. The aggregate the project
+quotes was outside the mechanism that protects quoted numbers. Added as a fifth category, which
+then exposed **16**: the roll-up recorded no generating command at all, so it could not be
+reproduced from itself. `command_line()` now rebuilds it from the parsed flags — not from `argv`,
+which would have written the caller's absolute `--out` path into a committed artifact and had the
+manifest hash it as evidence, exactly the Phase 10 `sys.argv[0]` leak in a new place.
+
+**17. A `git checkout` in the middle of this phase destroyed nine uncommitted documentation edits
+to `README.md`.** They were recovered from the session transcript, which is not a method. The
+command was typed as a convenience undo of one experimental edit made seconds earlier, in a working
+tree that had been deliberately left dirty for the whole phase — where `HEAD` is not where the work
+is, and "restore the file" silently means "restore the file as it was five commits ago". The
+falsification run that needed it should have used the copy it already had in `/tmp`. Recorded
+because the audit's subject is the reliability of what this repository asserts, and an agent that
+loses a day of documentation and notices only afterwards is part of that subject.
+
+**What the new study itself established.** `experiments/real_data_risk_study/` is the twelfth suite
+member; its artifact refuses three questions rather than proxying them; and finding 4 in
+`docs/findings.md` now carries the project's first empirical result *and* its first result that
+contradicts an earlier phase — the covariance ranking whose two ends exchange places between
+synthetic and real data. §6 of `docs/phase_reports/phase-11-real-data-risk-study.md` lists seven
+defects the phase found on the way, including a hand-rolled exact interval that came out inverted
+and a figure panel labelled "as documented" that was not.
+
+**Verified at this addendum, by execution:** 353 pytest with the `oracles` extra (261 passed / 4
+skipped in the CI lane without it), 190 CTest unchanged, 12/12 suite members executed with
+`--require-all`, `verify_evidence_manifest.py` reporting 69 artifacts with 0 CHANGED, 0 MISSING, 0
+unlisted and 0 warnings, `quantrisk validate` 7/7, mypy/ruff/clang-format clean.
