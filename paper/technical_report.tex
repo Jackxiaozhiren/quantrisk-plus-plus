@@ -135,14 +135,19 @@ set (\src{README.md}; \src{docs/architecture.md}). The functional coverage is
       (\src{docs/phase_reports/phase-09-research-api.md}).
 \end{itemize}
 
-At the revision this report describes, Phases 1 to 9 are recorded complete with phase gates
-passed; Phase 10 --- validation matrix, evidence manifest, this report and a release tag --- is
-in progress. \src{docs/project_scope.md}~\S9 still records it as ``NOT IMPLEMENTED'', and the
-manifest and suite aggregation now exist only as uncommitted files in the working tree
-(Section \ref{sec:reproducibility}); no release tag exists. The test suite at the end of Phase 9 is 190 CTest entries
-and 546{,}943 assertions in 189 Catch2 cases on the C++ side, with 310 pytest tests on the
-Python side (\src{docs/phase_reports/phase-09-research-api.md}). The limitations register
-contains 64 numbered entries (\src{docs/limitations.md}).
+This report describes the repository at \textbf{v1.1.0}. Phases 1 to 10 are recorded complete
+with their phase gates passed, and Phase 11 --- the real-data study of Section
+\ref{sec:realdata} --- is complete and is not a PROJECT\_SPEC phase but the top-ranked item of
+\src{docs/portfolio_audit.md}. Two release tags exist, \code{v1.0.0} and \code{v1.1.0}, both with
+the report, the evidence manifest and the suite results attached. The suite is 190 CTest entries and
+546{,}943 assertions in 189 Catch2 cases on the C++ side, and 353 pytest tests with the validation
+oracles installed, 284 without them (\src{docs/limitations.md}, item 63, explains why one command
+gives two numbers); twelve
+benchmark-suite members execute under \code{--require-all}, and the frozen manifest hashes 69
+artifacts with nothing changed, missing or unlisted (\src{evidence/manifest.json}). The
+\emph{end-of-Phase-9} baseline, for contrast, was the same 190 CTest entries and 310 pytest tests
+with no release tag at all (\src{docs/phase_reports/phase-09-research-api.md}). The limitations
+register contains 64 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -1650,15 +1655,15 @@ microstructure --- is deferred, and adding any of it requires extending the spec
 (\src{docs/mathematical_specification.md}~\S11; \src{docs/project_scope.md}).
 
 Where the release engineering is incomplete, this report says so rather than anticipating it.
-The frozen manifest and the tagged release that \src{PROJECT_SPEC.md} asks for are Phase 10 work;
-at the time of writing \srcin{evidence/manifest.json} exists as a generated file in the working
-tree --- 58 artifacts, 5{,}401{,}093 bytes, of which 8 correctness benchmarks, 1 performance
-benchmark, 36 statistical experiments and 13 offline fixtures, with no warnings --- but it is not
-committed, its own provenance field reports the working tree as dirty and the extension binary as
-configured at an earlier commit, and no release tag exists
-(\src{evidence/manifest.json}; \src{docs/project_scope.md}~\S9). The status line in
-\src{README.md} still describes Phase 9 as current, and \src{docs/project_scope.md} records
-Phase 10 as not implemented, which is the honest state of the release effort.
+The manifest is committed and verified: 69 artifacts, 6{,}208{,}835 bytes, of which 8 correctness
+benchmarks, 1 performance benchmark, 40 statistical experiment files, 4 suite-aggregate files and 16
+offline fixtures, generated from a clean tree with no warnings
+(\src{evidence/manifest.json}). What remains incomplete is distribution rather than evidence: the
+release is a tagged public repository with assets and a \src{CITATION.cff} naming it, and there is
+no package on an index and no DOI, so nobody can install it by name and a citation cannot be resolved
+through a registry (\src{docs/limitations.md}, item 57). The fifth category is itself a Phase 11
+correction: the suite's own roll-up is what \src{README.md} quotes for ``twelve members executed'',
+and until this phase it was outside the chain that exists to protect quoted numbers.
 
 % ===========================================================================
 \section{Reproducibility}
@@ -1668,6 +1673,16 @@ Phase 10 as not implemented, which is the honest state of the release effort.
 Reproducibility here means something narrower than it usually does.
 
 \subsection{Per-platform, not bit-identical everywhere}
+The consequence for the \emph{evidence chain} is stated rather than glossed: the frozen manifest
+hashes artifacts produced on one platform, so \code{verify\_evidence\_manifest.py} is a
+same-platform tamper check. A fresh run of the real-data study on the Linux runner disagreed with the
+macOS-committed artifact in the last digits of eight float fields --- spreads of about
+$10^{-14}$ relative, for example 0.0006136533643794436 against the committed
+0.0006136533643794354 --- while every integer, every boolean and the whole covariance ranking
+matched exactly. Byte equality of a result field across libms was never a claim, and CI
+therefore verifies \emph{execution} on Linux rather than byte equality there
+(\src{docs/limitations.md}, item 64).
+
 Identical $(\text{seed}, N, \text{parameters}, \text{code version})$ produces bit-identical
 output \emph{on the same platform family}; it does not across libms, because \code{log},
 \code{sqrt} and \code{erfc} are not required to be bit-identical between implementations. The
