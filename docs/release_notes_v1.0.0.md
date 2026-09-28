@@ -12,7 +12,7 @@ published number traces to a script, and that the boundary of each claim is writ
 
 Concretely, in this release:
 
-- **190 C++ tests** (546,943 assertions in 189 Catch2 cases) and **319 Python tests**, all
+- **190 C++ tests** (546,943 assertions in 189 Catch2 cases) and **330 Python tests**, all
   green, all offline by default.
 - **11 benchmark and experiment members** that re-execute end to end in ~60 seconds via
   `scripts/run_benchmark_suite.py`, emitting JSON, CSV, Markdown and figures.
@@ -59,11 +59,14 @@ All worst-case, over every row of each benchmark, measured against a live oracle
   oracle's integration tolerance are not separable at 4.5e-3) and the bootstrap interval under
   clustering (0.693 coverage against 0.900 nominal — a real failure of the method, published
   as the finding rather than smoothed over).
-- **Three CI lanes now run on `ubuntu-latest` on every push**, and the first real run earned
-  its keep: the new benchmark lane passes with `--require-all` (no member may be skipped), and
-  the long-standing build lane failed on a test that demanded bit-exact agreement with a
-  transcribed price — glibc's libm is 1.7 ULP from Apple's. That was fixed, and is now
-  limitation #59.
+- **Three CI lanes now pass on `ubuntu-latest` on every push**, and the first real runs earned
+  their keep twice. The new benchmark lane passes with `--require-all` (no member may be
+  skipped). The long-standing build lane failed on a test that demanded bit-exact agreement
+  with a transcribed price — glibc's libm is 1.7 ULP from Apple's (limitation #59). And
+  switching `mypy` from advisory to blocking, where it had printed warnings nobody read since
+  Phase 1, surfaced a public method that raised on **both** of its documented input forms and
+  shipped in this release. It had no callers and no test, so it was deleted rather than
+  patched; the tested module-level function is its working equivalent.
 
 ## Findings worth reading before the code
 
