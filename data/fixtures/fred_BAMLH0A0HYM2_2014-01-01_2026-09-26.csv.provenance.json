@@ -1,0 +1,18 @@
+{
+  "source": "FRED fredgraph.csv (live response, current revision)",
+  "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2&cosd=2014-01-01&coed=2026-09-26",
+  "series_id": "BAMLH0A0HYM2",
+  "retrieved_at_utc": "2026-09-28T04:34:12+00:00",
+  "sha256": "4f878e84be12db32facb4389696e83a302c770dc69f15ff3eb3b6747e16baeb1",
+  "bytes": 12718,
+  "license": "St. Louis Federal Reserve terms of use; attribution requested",
+  "request_policy": "",
+  "note": "ICE BofA HY OAS, index-observed. Current revision, not the vintage as published at each observation date: an ALFRED key would be needed to remove that exposure entirely. Market observations of this kind are revised to correct data errors rather than re-estimated, which is why these three and not a macro aggregate.",
+  "extra": {
+    "observation_start": "2014-01-01",
+    "observation_end": "2026-09-26",
+    "observation_kind": "ICE BofA HY OAS, index-observed",
+    "revised_in_place": "unlikely; these are prints, not estimates",
+    "used_by": "experiments/real_data_risk_study"
+  }
+}

@@ -37,7 +37,13 @@ from urllib.parse import urlparse
 # inside that and leaves headroom for a script that retries.
 DEFAULT_MIN_INTERVAL_SECONDS = 1.0
 DEFAULT_TIMEOUT_SECONDS = 30.0
-SEC_HOSTS = ("sec.gov",)
+# Both the SEC and the St. Louis Fed expect a User-Agent that names a contact. The SEC
+# publishes that requirement; FRED enforces it silently, which is far worse: a contactless
+# UA is dropped without any response, so the request dies as a read timeout instead of a
+# 403 and looks like a network fault. Measured on 2026-09-28 -- `QuantRisk/0.1 (research)`
+# times out against fredgraph.csv while the same string with a contact returns in 0.7 s,
+# order-independent across two paired trials.
+CONTACT_REQUIRED_HOSTS = ("sec.gov", "stlouisfed.org")
 
 # Overridable so a user can put their own address in without editing source, and so tests
 # can prove the guard fires when it is absent.
@@ -81,18 +87,38 @@ def user_agent_for(url: str) -> str:
     """
     configured = os.environ.get(USER_AGENT_ENVIRONMENT_VARIABLE, "").strip()
     host = urlparse(url).hostname or ""
-    requires_contact = any(host == suffix or host.endswith("." + suffix) for suffix in SEC_HOSTS)
+    requires_contact = any(
+        host == suffix or host.endswith("." + suffix) for suffix in CONTACT_REQUIRED_HOSTS
+    )
     if configured:
         return configured
     if requires_contact:
         raise RequestPolicyError(
-            f"requests to {host} need a User-Agent naming a contact, per "
-            "https://www.sec.gov/os/accessing-edgar-data. Set "
+            f"requests to {host} need a User-Agent naming a contact. The SEC states this at "
+            "https://www.sec.gov/os/accessing-edgar-data; FRED does not state it but enforces "
+            "it silently, dropping the request until it times out. Set "
             f"{USER_AGENT_ENVIRONMENT_VARIABLE} to something like "
-            '"QuantRisk/0.1 (research; contact: you@example.com)" and retry. '
+            f'"{example_user_agent()}" and retry. '
             "Nothing was sent."
         )
-    return "QuantRisk/0.1 (research)"
+    return _default_user_agent()
+
+
+def _product_token() -> str:
+    # Read from the package rather than writing "0.1" down here, so the string cannot
+    # outlive the version it claims to be.
+    from .. import version as _version
+
+    return f"QuantRisk/{_version()}"
+
+
+def example_user_agent() -> str:
+    """A well-formed agent with a placeholder contact, for error messages."""
+    return f"{_product_token()} (research; contact: you@example.com)"
+
+
+def _default_user_agent() -> str:
+    return f"{_product_token()} (research)"
 
 
 def _rate_stamp(cache_dir: Path, host: str) -> Path:

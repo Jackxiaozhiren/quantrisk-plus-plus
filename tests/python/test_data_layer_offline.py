@@ -314,12 +314,45 @@ def test_the_cftc_fixture_admits_being_an_excerpt() -> None:
 # --- http policy and caching -----------------------------------------------
 
 
-def test_sec_requests_refuse_to_identify_nobody(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_contact_requiring_hosts_refuse_to_identify_nobody(monkeypatch: pytest.MonkeyPatch) -> None:
+    """SEC and FRED both require a named contact; neither tolerates a silent agent.
+
+    This test used to assert the opposite for FRED -- "a non-SEC host is not covered by
+    that policy" -- and that pinned behaviour is what broke the long-history fixture
+    recording. FRED does not publish the requirement, it just drops requests whose
+    User-Agent names nobody: `QuantRisk/0.1 (research)` produced no response at all until
+    the read timed out, while the same token with a contact answered in 0.7 s. Two paired
+    trials, order-swapped, identical outcome. A host that fails by silence has to be
+    refused locally instead, which is what this guard now does.
+    """
     monkeypatch.delenv(http.USER_AGENT_ENVIRONMENT_VARIABLE, raising=False)
-    with pytest.raises(http.RequestPolicyError, match="User-Agent"):
-        http.user_agent_for("https://data.sec.gov/api/xbrl/companyfacts/CIK1.json")
-    # A non-SEC host is not covered by that policy and gets a plain default.
-    assert http.user_agent_for("https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF")
+    for url in (
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK1.json",
+        "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF",
+        "https://api.stlouisfed.org/fred/series/observations?series_id=DFF",
+    ):
+        with pytest.raises(http.RequestPolicyError, match="User-Agent"):
+            http.user_agent_for(url)
+    # A host with no such requirement still gets a plain, version-true default.
+    assert http.user_agent_for("https://www.cftc.gov/file.zip") == (
+        f"QuantRisk/{quantrisk.version()} (research)"
+    )
+
+
+def test_the_refusal_shows_a_well_formed_example(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The suggested fix must itself be valid, or the guard teaches the wrong repair.
+
+    The first version of this message appended the contact to an already-closed
+    parenthesis and produced `QuantRisk/1.0.0 (research); contact: you@example.com)`.
+    """
+    monkeypatch.delenv(http.USER_AGENT_ENVIRONMENT_VARIABLE, raising=False)
+    with pytest.raises(http.RequestPolicyError) as caught:
+        http.user_agent_for("https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF")
+    example = http.example_user_agent()
+    assert example in str(caught.value)
+    assert example.count("(") == example.count(")")
+    monkeypatch.setenv(http.USER_AGENT_ENVIRONMENT_VARIABLE, example)
+    assert http.user_agent_for("https://data.sec.gov/x") == example
 
 
 def test_a_configured_agent_is_used_verbatim(monkeypatch: pytest.MonkeyPatch) -> None:

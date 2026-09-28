@@ -50,6 +50,22 @@ FRED_SERIES = [
     ("BAMLH0A0HYM2", "2024-01-01", "2024-03-31"),
 ]
 
+# The real-data risk study needs a decade of daily observations, and it needs them
+# committed: the experiment must run offline, so "fetch it live" is not reproducibility,
+# it is a dependency on a third party's uptime and revision history.
+#
+# Only market-observation series are used, and that filter is the whole point. `UNRATE`
+# is in FRED_SERIES above because the parser needs a monthly series to test against, but
+# it is excluded here deliberately: macro aggregates are revised, sometimes heavily, so a
+# current-revision backtest on them would silently trade on information nobody had. A
+# Treasury par yield, a CBOE index and an ICE bond index are prints, not estimates, and
+# are revised only to correct an error.
+FRED_HISTORY = [
+    ("DGS10", "2014-01-01", "2026-09-26", "Treasury par yield, market-observed"),
+    ("VIXCLS", "2014-01-01", "2026-09-26", "CBOE index, market-observed"),
+    ("BAMLH0A0HYM2", "2014-01-01", "2026-09-26", "ICE BofA HY OAS, index-observed"),
+]
+
 
 def record(name: str, data: bytes, provenance: Provenance) -> Path:
     if len(data) > MAX_COMMITTED_BYTES:
@@ -109,6 +125,37 @@ def record_fred() -> None:
                 "backtest on these values can see later revisions"
             ),
             extra={"observation_start": start, "observation_end": end},
+        )
+        record(f"fred_{series_id}_{start}_{end}.csv", fetched.data, provenance)
+
+
+def record_fred_history() -> None:
+    """Long daily windows for the real-data risk study, from the key-free CSV endpoint."""
+    print("FRED long daily history (public CSV, no key)")
+    for series_id, start, end, observation_kind in FRED_HISTORY:
+        url = fred.graph_url(series_id, start, end)
+        fetched = http.fetch(url)
+        provenance = Provenance.record(
+            source="FRED fredgraph.csv (live response, current revision)",
+            url=fetched.url,
+            series_id=series_id,
+            data=fetched.data,
+            license="St. Louis Federal Reserve terms of use; attribution requested",
+            retrieved_at_utc=fetched.retrieved_at_utc,
+            note=(
+                f"{observation_kind}. Current revision, not the vintage as published at each "
+                "observation date: an ALFRED key would be needed to remove that exposure "
+                "entirely. Market observations of this kind are revised to correct data "
+                "errors rather than re-estimated, which is why these three and not a macro "
+                "aggregate."
+            ),
+            extra={
+                "observation_start": start,
+                "observation_end": end,
+                "observation_kind": observation_kind,
+                "revised_in_place": "unlikely; these are prints, not estimates",
+                "used_by": "experiments/real_data_risk_study",
+            },
         )
         record(f"fred_{series_id}_{start}_{end}.csv", fetched.data, provenance)
 
@@ -231,6 +278,7 @@ def main() -> int:
     FIXTURES.mkdir(parents=True, exist_ok=True)
     record_edgar()
     record_fred()
+    record_fred_history()
     record_fred_vintage_shape()
     record_cftc()
     print(f"fixtures under {FIXTURES.relative_to(ROOT)}")

@@ -1,0 +1,18 @@
+{
+  "source": "FRED fredgraph.csv (live response, current revision)",
+  "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=VIXCLS&cosd=2014-01-01&coed=2026-09-26",
+  "series_id": "VIXCLS",
+  "retrieved_at_utc": "2026-09-28T04:34:11+00:00",
+  "sha256": "57f92b6a43942c4d1cdeb413644bc1f154b113126a8f5d21a1cd2eb28069ad27",
+  "bytes": 55953,
+  "license": "St. Louis Federal Reserve terms of use; attribution requested",
+  "request_policy": "",
+  "note": "CBOE index, market-observed. Current revision, not the vintage as published at each observation date: an ALFRED key would be needed to remove that exposure entirely. Market observations of this kind are revised to correct data errors rather than re-estimated, which is why these three and not a macro aggregate.",
+  "extra": {
+    "observation_start": "2014-01-01",
+    "observation_end": "2026-09-26",
+    "observation_kind": "CBOE index, market-observed",
+    "revised_in_place": "unlikely; these are prints, not estimates",
+    "used_by": "experiments/real_data_risk_study"
+  }
+}
