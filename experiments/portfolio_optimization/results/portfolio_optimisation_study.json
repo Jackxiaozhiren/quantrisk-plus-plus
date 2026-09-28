@@ -1,6 +1,6 @@
 {
   "phase": "6 - Portfolio optimisation",
-  "generated_utc": "2026-09-28T10:46:56+00:00",
+  "generated_utc": "2026-09-28T11:35:52+00:00",
   "command": "uv run python experiments/portfolio_optimization/run.py",
   "question": "Every covariance matrix the optimisers consume is an estimate. How much forward variance does each estimator cost a long-only minimum-variance portfolio, and does the documented handling of ill-conditioned inputs actually protect the result?",
   "data": {
@@ -500,20 +500,22 @@
     "every number describes synthetic returns from a process chosen by the author; no claim is made about realised markets"
   ],
   "environment": {
-    "generated_at_utc": "2026-09-28T10:46:56+00:00",
+    "generated_at_utc": "2026-09-28T11:35:52+00:00",
     "quantrisk_version": "1.3.0",
-    "git_commit": "45b550974fa3",
+    "git_commit": "eb26c81f8d62",
     "binary_git_commit": "45b550974fa3",
     "working_tree_dirty": true,
     "uncommitted_paths": [
-      "CITATION.cff",
-      "CMakeLists.txt",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
       "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
       "benchmarks/quantlib/results/pricing_vs_quantlib.json",
-      "evidence/manifest.json",
+      "docs/analysis/two_factor_error_bound.md",
+      "docs/integrity_audit.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-13-two-factor-bound.md",
+      "docs/release_notes_v1.3.0.md",
       "experiments/monte_carlo_convergence/results/convergence.csv",
       "experiments/monte_carlo_convergence/results/summary.json",
       "experiments/pricing_validation/results/summary.json",
@@ -523,11 +525,9 @@
       "experiments/variance_reduction/results/summary.json",
       "experiments/variance_reduction/results/variance_by_method.csv",
       "paper/technical_report.pdf",
-      "paper/technical_report.tex",
-      "pyproject.toml",
-      "uv.lock"
+      "paper/technical_report.tex"
     ],
-    "provenance": "ran from 45b550974fa3 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
+    "provenance": "ran from eb26c81f8d62 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",

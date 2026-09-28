@@ -1379,7 +1379,12 @@ kinds of claim. \emph{The order} is asymptotic and holds: over four successively
 windows the log-log slope of $\lvert R\rvert$ against shock size converges on two along every joint
 ray ($1.9098 \to 1.9975$ on the crash ray), while a pure-spot ray on the same book holds at
 $3.0009$ --- which is \S\ref{sec:bound}'s answer, reconciled rather than displaced, and the ratio of
-$R$ to the closed-form order-2 term reaches $0.9937$ at the smallest scale. \emph{The inequality}
+$R$ to the closed-form order-2 term reaches $0.9937$ at the smallest scale. Convergence is asserted
+as an \emph{ordering} of windows for the four joint rays only, and not for the pure-spot ray: its
+tightest error sample is $1281\times$ the double spacing of the $1.09\cdot10^5$ book value it is
+subtracted from, where the joint rays reach $1.3\cdot10^6$ to $1.9\cdot10^6$, so ordering those
+windows would compare cancellation noise --- a distinction the Linux runner forced, two guards deep,
+recorded in \src{docs/limitations.md} item 72. \emph{The inequality}
 holds unconditionally and is what survives at useful sizes: $132/132$ swept joint shocks, out to a
 $30\%$ move with $+20$ volatility points, show no violation, and on \code{risk\_off} the interval
 excludes zero, so the \emph{sign} of the published error is proved rather than estimated. \emph{The

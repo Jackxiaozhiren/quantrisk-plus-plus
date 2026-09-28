@@ -1,6 +1,6 @@
 {
   "schema": "quantrisk.two_factor_error_bound.v1",
-  "generated_at_utc": "2026-09-28T11:18:46+00:00",
+  "generated_at_utc": "2026-09-28T11:36:03+00:00",
   "command": "uv run python experiments/two_factor_error_bound/run.py",
   "claim": "the delta-gamma-vega stress map loses a quadratic term under a joint spot and volatility shock, that term is closed-form, and the residual left by subtracting it is trapped by the third directional derivative along the shock ray",
   "book": {
@@ -521,6 +521,29 @@
       "scale 0.1": null
     },
     "grid_points": 39
+  },
+  "fit_conditioning": {
+    "absolute_cancellation_floor": 2.4183128171855083e-11,
+    "crash (equity down, vol up)": {
+      "error_at_tightest_sample": 3.147911652234825e-05,
+      "samples_above_the_floor": 1301697.4602559654
+    },
+    "melt-up (equity up, vol down)": {
+      "error_at_tightest_sample": 3.155774427909819e-05,
+      "samples_above_the_floor": 1304948.8078976425
+    },
+    "aligned (equity up, vol up)": {
+      "error_at_tightest_sample": 4.5267205564414326e-05,
+      "samples_above_the_floor": 1871850.7069361443
+    },
+    "pure volatility": {
+      "error_at_tightest_sample": 3.8440332033928826e-05,
+      "samples_above_the_floor": 1589551.6808560204
+    },
+    "pure spot (k=0)": {
+      "error_at_tightest_sample": 3.0978455356489576e-08,
+      "samples_above_the_floor": 1280.9945486102604
+    }
   },
   "refusals": [
     {
@@ -4644,26 +4667,36 @@
     }
   ],
   "environment": {
-    "generated_at_utc": "2026-09-28T11:18:46+00:00",
+    "generated_at_utc": "2026-09-28T11:36:03+00:00",
     "quantrisk_version": "1.3.0",
-    "git_commit": "37fb2f635494",
+    "git_commit": "eb26c81f8d62",
     "binary_git_commit": "45b550974fa3",
     "working_tree_dirty": true,
     "uncommitted_paths": [
-      "README.md",
+      "benchmarks/performance/results/monte_carlo_speed.json",
+      "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
+      "benchmarks/quantlib/results/monte_carlo_validation.json",
+      "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
+      "benchmarks/quantlib/results/pricing_vs_quantlib.json",
       "docs/analysis/two_factor_error_bound.md",
       "docs/integrity_audit.md",
-      "docs/interview_defense.md",
       "docs/limitations.md",
       "docs/phase_reports/phase-13-two-factor-bound.md",
       "docs/release_notes_v1.3.0.md",
-      "docs/validation_matrix.md",
+      "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
+      "experiments/monte_carlo_convergence/results/convergence.csv",
+      "experiments/monte_carlo_convergence/results/summary.json",
+      "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
+      "experiments/pricing_validation/results/summary.json",
       "experiments/two_factor_error_bound/results/two_factor_bound.json",
       "experiments/two_factor_error_bound/run.py",
-      "paper/technical_report.tex",
-      "tests/python/test_two_factor_bound.py"
+      "experiments/var_backtesting/results/var_backtesting_validation.json",
+      "experiments/variance_reduction/results/summary.json",
+      "experiments/variance_reduction/results/variance_by_method.csv",
+      "paper/technical_report.pdf",
+      "paper/technical_report.tex"
     ],
-    "provenance": "ran from 37fb2f635494 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
+    "provenance": "ran from eb26c81f8d62 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",

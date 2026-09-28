@@ -260,15 +260,18 @@ sensitivities arrived as a separate struct and function rather than as fields on
 the only kind of change available here, which is worth knowing before someone tries to extend the
 Greeks struct and finds the bindings, the shims, the stubs and three documents in the way.
 
-**28. The runner caught a claim that was only true on one libm.** The convergence guard that was
-supposed to prove the error is quadratic asserted, in addition, that each narrower fit window beats
-the one before it. It passed on this laptop and failed on `benchmark-suite` with
-`3.000121 -> 2.996952` on the pure-spot ray — every value within 0.003 of the theory number 3, so
-the estimate was fine and only the ordering broke. The ordering compared ~1e-4 gaps against fits
-built from price differences that differ across libm by ~1e-14, amplified by a log-log regression
-into the 1e-3 range. Nothing was weakened about the numerical bands; the assertion was the wrong
-kind of strict, and this repository's own rule that local green proves nothing about the runner is
-what surfaced it (limitation #72).
+**28. The runner caught two guards that were only true on one libm.** The convergence guard meant to
+prove the error is quadratic asserted, on top of the numerical band, that each narrower fit window
+beats the one before it. It passed here and failed on `benchmark-suite` at
+`3.000121 -> 2.996952` on the pure-spot ray. The fix I first wrote — compare only the endpoints —
+also passed here and also failed there, at `3.004587 -> 2.991277`. Every value in both series is
+within 0.009 of the theory number 3, so no band was ever at issue; what was at issue is that the
+pure-spot ray's tightest sample is 1281x the double spacing of the 1.09e5 book value it is
+subtracted from, against 1.3e6-1.9e6 for the joint rays, which makes an ordering across its windows
+a comparison of noise. The guard now asserts convergence only where conditioning makes it
+meaningful, publishes every window, and leaves every numerical band exactly where it was — which
+matters, because "relax until green" and "stop asserting what the data cannot support" look identical
+from here and are not the same thing (limitation #72).
 
 **Verified at this addendum, by execution.** 366 pytest with the `oracles` extra (297 collected
 without it), 194 CTest (547,331 assertions in 193 Catch2 cases), 13/13 suite members with
@@ -324,5 +327,5 @@ without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite memb
 `--require-all`, `verify_evidence_manifest.py` at 76 artifacts with 0 CHANGED / 0 VOLATILE / 0
 MISSING / 0 unlisted, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the 41-page report
 rebuilt and text-verified. Nine deliberate formula mutations were compiled and all nine were caught.
-The first CI run on this revision was red in two places, and both are recorded rather than
-re-run away: PyPI returned 503 mid-install on one lane, and the guard above failed on the other.
+The first two CI runs on this revision were both red, and both are recorded rather than re-run
+away: PyPI answered 503 mid-install on one lane, and the guard above failed on the other, twice.

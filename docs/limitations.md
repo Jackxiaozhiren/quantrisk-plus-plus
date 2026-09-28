@@ -419,17 +419,19 @@ never removed just because a later phase shipped.
     windows that carry the order claim, and `tests/python/test_two_factor_bound.py` says so beside
     the constant.
 
-72. **A guard written this phase asserted a strict ordering between successive fit windows, and
-    that is not a property of the model.** The claim it meant to make — narrowing the window brings
-    the log-log slope closer to the theory value — is sound and is still asserted, but between
-    October's version and this one each step inward also had to beat the step before it. The
-    distances being ordered differ by ~1e-4 while the price differences beneath them differ across
-    libm by ~1e-14, and a log-log regression over residuals that small amplifies the difference to
-    ~1e-3 in the slope. On the Linux runner the pure-spot series stepped 3.000121 -> 2.996952 and
-    the guard failed; on macOS it stepped 3.0010 -> 3.0009 and passed. Every value on both platforms
-    sits within 0.003 of the theory value of 3, so the estimate never was in doubt — the ordering
-    was the thing that broke, and it broke because it was comparing noise. Fixed by asserting the
-    endpoints and publishing the whole series in `slopes` and `asymptotics` rather than summarising
-    it into a boolean. Recorded because the failure mode is attractive: a stricter assertion feels
-    more rigorous, and here it was simply the wrong kind of strict — red on a machine that is not
-    wrong. Related: #59, #64.
+72. **Two convergence guards written this phase asserted an ordering that the numbers do not
+    support, and the runner — not the laptop — showed it.** The first required each narrower fit
+    window to beat the one before it; the second, after the first failed on Linux, required only
+    that the narrowest beat the widest. Both passed here. Both failed on the runner, on the
+    pure-spot ray, whose slope series was `3.004587 -> 2.991277` there against `3.006067 ->
+    3.000915` here — every value within 0.009 of the theory number 3 on both platforms. The
+    measurement that settles it is in the artifact's `fit_conditioning`: the error is the residue
+    of subtracting book values near 1.09e5, whose double spacing is 2.418e-11, and at the tightest
+    fit sample the pure-spot error is 3.098e-08, only **1281×** that floor, while the four joint
+    rays' are 1.3e6–1.9e6 times it. So an ordering across the pure-spot windows compares noise,
+    and no band was ever in question — the bands stayed at 2 % on the ratio and 0.15 on the
+    narrowest slope, untouched. What changed is that an ordering is now asserted only for the rays
+    whose conditioning makes it meaningful, and every window is published rather than summarised
+    into a boolean. The lesson is not "CI is flaky": a stricter-looking assertion felt more
+    rigorous and was in fact testing the platform, and two rounds of weakening it locally would
+    have hidden that. Related: #59, #64, #71.

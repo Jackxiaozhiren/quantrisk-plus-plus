@@ -25,7 +25,7 @@
       "version": "1.3.0"
     }
   },
-  "generated_at_utc": "2026-09-28T10:46:27+00:00",
+  "generated_at_utc": "2026-09-28T11:35:20+00:00",
   "host_environment": {
     "binary_git_commit": "45b550974fa3",
     "cpp_arch": "arm64",
@@ -34,8 +34,8 @@
     "cpp_flags": "(none)",
     "cpp_os": "Darwin 27.0.0",
     "cpp_standard": "C++20",
-    "generated_at_utc": "2026-09-28T10:46:27+00:00",
-    "git_commit": "45b550974fa3",
+    "generated_at_utc": "2026-09-28T11:35:20+00:00",
+    "git_commit": "eb26c81f8d62",
     "packages": {
       "PyPortfolioOpt": "1.6.0",
       "QuantLib": "1.43",
@@ -50,24 +50,24 @@
       "scipy": "1.18.1",
       "statsmodels": "0.15.0"
     },
-    "provenance": "ran from 45b550974fa3 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
+    "provenance": "ran from eb26c81f8d62 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
     "python_machine": "arm64",
     "python_platform": "macOS-27.0-arm64-arm-64bit",
     "quantrisk_version": "1.3.0",
     "uncommitted_paths": [
-      "CITATION.cff",
-      "CMakeLists.txt",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
       "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
       "benchmarks/quantlib/results/pricing_vs_quantlib.json",
-      "evidence/manifest.json",
+      "docs/analysis/two_factor_error_bound.md",
+      "docs/integrity_audit.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-13-two-factor-bound.md",
+      "docs/release_notes_v1.3.0.md",
       "experiments/two_factor_error_bound/results/two_factor_bound.json",
       "experiments/two_factor_error_bound/run.py",
       "paper/technical_report.pdf",
-      "paper/technical_report.tex",
-      "pyproject.toml",
-      "uv.lock"
+      "paper/technical_report.tex"
     ],
     "working_tree_dirty": true
   },
@@ -93,33 +93,33 @@
   },
   "results_seconds": {
     "cpp": {
-      "max_seconds": 0.004496334004215896,
-      "mean_seconds": 0.004311940572474019,
-      "min_seconds": 0.004238624998833984,
-      "paths_per_second_mean": 46382828.48254748,
+      "max_seconds": 0.004510084007051773,
+      "mean_seconds": 0.004371428714616091,
+      "min_seconds": 0.004253292005159892,
+      "paths_per_second_mean": 45751632.48831897,
       "repetitions": 7,
-      "std_seconds": 8.444675119621446e-05
+      "std_seconds": 0.00010159516770787883
     },
     "numpy": {
-      "max_seconds": 0.001967792006325908,
-      "mean_seconds": 0.0018187797146051057,
-      "min_seconds": 0.0017849580035544932,
-      "paths_per_second_mean": 109963839.15763217,
+      "max_seconds": 0.0021972499962430447,
+      "mean_seconds": 0.0019268869987822004,
+      "min_seconds": 0.0018604579963721335,
+      "paths_per_second_mean": 103794358.53083275,
       "repetitions": 7,
-      "std_seconds": 6.708527888492088e-05
+      "std_seconds": 0.00012081935434559635
     },
     "python": {
-      "max_seconds": 0.03433875000337139,
-      "mean_seconds": 0.034208874858450145,
-      "min_seconds": 0.03412850000313483,
-      "paths_per_second_mean": 5846436.073316126,
+      "max_seconds": 0.03984987500007264,
+      "mean_seconds": 0.037523303426236713,
+      "min_seconds": 0.03665937499317806,
+      "paths_per_second_mean": 5330021.126555658,
       "repetitions": 7,
-      "std_seconds": 8.625949775451067e-05
+      "std_seconds": 0.0010579409583536823
     }
   },
-  "speedup_vs_numpy": 0.42180073775032634,
-  "speedup_vs_pure_python": 7.933521875702119,
-  "speedup_vs_pure_python_using_min": 8.051785664578334,
+  "speedup_vs_numpy": 0.4407911290740158,
+  "speedup_vs_pure_python": 8.583761940524312,
+  "speedup_vs_pure_python_using_min": 8.619059060300739,
   "z_score_vs_analytic": {
     "cpp": 0.5370189339461992,
     "numpy": -0.24212669161997663,

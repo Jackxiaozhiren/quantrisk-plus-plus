@@ -150,16 +150,25 @@ Every joint ray converges to 2 and the pure-spot ray holds at 3, which is where 
 ratio of error to the closed-form quadratic at the smallest scale reaches 0.9937, 1.0062, 0.9891 and
 0.9997 respectively, held to 2% on all four.
 
-What is asserted is that the **narrowest** window lands inside the band and closer than the widest
-was — not that every step inward beats the last. That weaker statement is the correct one, and the
-runner is what taught it: these fits differ from one another by ~1e-4 while the price differences
-underneath them differ across libm by ~1e-14, which a log-log regression over tiny residuals
-amplifies to ~1e-3 in the slope. On Linux the pure-spot series stepped `3.000121 -> 2.996952` and a
-stepwise guard failed there; on macOS the same series stepped `3.0010 -> 3.0009` and passed. Every
-value on both platforms is within 0.003 of the theory number 3, so the estimate was never in doubt —
-only the ordering was, and an ordering that a different libm can violate is not a property of the
-model. All four windows are published in `slopes` and `asymptotics` so the trend is visible rather
-than summarised into a boolean.
+Two different assertions are made about these two groups, and the difference is a measured
+conditioning gap rather than a preference. For the **four joint rays** the guard requires both that
+the narrowest window sit inside the band and that it be closer to the theory value than the widest
+was — a real convergence claim, since the crash ray's distance falls 0.0902 → 0.0025, a 36×
+improvement. For the **pure-spot ray** no ordering of any kind is asserted; only that every one of
+its four windows lands within 0.05 of 3, and the worst observed anywhere is 0.0087.
+
+The reason is in the artifact under `fit_conditioning`. The error is the residue of subtracting book
+values near 1.09e5, whose double spacing is 2.418e-11. At the tightest fit sample the pure-spot ray's
+error is 3.098e-08 — **1281×** that floor — while the four joint rays' are 1.3e6 to 1.9e6 times it,
+about a thousand-fold better conditioned. A slope fitted across four decades of samples whose last
+ones are a few thousand ulps of a cancellation is loose at the 1e-2 level, which is larger than the
+6e-3-to-9e-4 "improvement" the macOS series shows. So it is not that the pure-spot estimate is bad —
+it is 3.00 to within 0.009 everywhere — but that *ordering* its windows compares two numbers whose
+difference is noise. The runner made this unavoidable rather than arguable: a stepwise guard passed
+here and raised on Linux (`3.000121 → 2.996952`), then the endpoint version of the same idea failed
+there too (`3.004587 → 2.991277`), and both platforms were inside every band the whole time. Every
+window is published in `slopes` and `asymptotics`, so the trend is visible instead of summarised
+into a boolean.
 
 **P2.** Across the swept grid of 12 equity shocks by 11 volatility shocks — 132 joint shocks, the
 largest being a 30% equity move with a 20-point vol rise — the inclusion holds on **132/132**. It

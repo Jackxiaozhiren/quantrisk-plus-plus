@@ -79,9 +79,10 @@ uv run --frozen mypy python/quantrisk
 Plus two things that are not in the command list because they are one-off, and without which the
 section below would be assertions rather than measurements:
 
-- **A cross-platform over-specification, caught by CI rather than by me.** The first version of the
-  convergence guard passed locally and failed on the runner. §8 records what changed and why the weaker
-  assertion is the correct one.
+- **Two convergence guards that the laptop agreed to and the runner refused.** The first asserted a
+  stepwise ordering, the second an endpoint improvement; both passed here and both failed on Linux on
+  a series every value of which is within 0.009 of theory. §8 records the resolution — the ordering is
+  now asserted only for the rays whose measured conditioning makes it meaningful.
 - **Nine deliberate transcription slips** into the six derivative formulas, each rebuilt and run
   against the Catch2 net (§6).
 - **A falsification run of the new pytest net** under two of those slips, and a byte-level
@@ -116,10 +117,11 @@ limitation #63.
 | pure volatility (0, +0.06) | 1.9944 | → | **1.9998** | 2 |
 | pure spot (−0.15, 0) | 3.0061 | → | **3.0009** | 3 |
 
-The guard asserts that the narrowest window is inside the band and closer than the widest, not that
-each step beats the last — the stepwise version passed here and failed on the Linux runner
-(`3.000121 -> 2.996952` on the pure-spot ray, every value within 0.003 of theory), because a
-1e-4-level ordering of a fit is not a property of the model. See §8. The ratio of error to closed-form quadratic at the smallest scale reaches 0.9937,
+The joint rays are held to endpoint convergence (crash: 0.0902 → 0.0025 from widest to narrowest).
+The pure-spot ray is held to no ordering at all — only that all four windows sit within 0.05 of 3,
+worst observed 0.0087 — because its tightest sample is 1281× the double spacing of the book value it
+is subtracted from, against 1.3e6–1.9e6 for the joint rays. Two successive versions of a convergence
+guard passed here and failed on the runner before that was admitted; see §8. The ratio of error to closed-form quadratic at the smallest scale reaches 0.9937,
 1.0062, 0.9891 and 0.9997.
 
 **Inclusion, at size.** 132 joint shocks (12 equity × 11 volatility, out to −30 % with +20 vol
@@ -161,8 +163,9 @@ where the quadratic vanishes is predicted and deliberately not verified; no orac
 dependency set publishes a vanna, volga or mixed third partial, so the new closed forms rest on
 finite differences, exact identities and parity rather than an L2 comparison; and the price-only
 route to `g‴` has a floor and cannot resolve a small ray; and one of this phase's own guards
-asserted a strict ordering between successive fits, which is noise rather than model — #72 records
-the Linux failure that proved it.
+asserted a strict ordering between successive fits, and its replacement asserted a weaker ordering
+  that was also unsupportable for one ray. #72 records both Linux failures and the conditioning
+  measurement that settled it.
 
 ## 8. Technical debt
 

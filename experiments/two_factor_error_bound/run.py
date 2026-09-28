@@ -477,6 +477,38 @@ def ridge_probe() -> dict[str, Any]:
     }
 
 
+def fit_conditioning() -> dict[str, Any]:
+    """How close each ray's tightest fit sample sits to the cancellation floor.
+
+    The map's error is a difference of book values near 1.09e5, so the smallest absolute change
+    that any double can represent in it is roughly `1.09e5 * 2**-52` ~ 2.4e-11 -- and at the tight
+    window the error itself is far below the *value* being subtracted, so the error is the residue
+    of a cancellation. A log-log slope fitted over samples whose last decades are that residue is
+    only as stable as that residue is large, which is why one ray's convergence ordering is
+    measurable and another's is not. Published so the asymmetry in the guards is arithmetic.
+    """
+    floor = book_value(SPOT, VOLATILITY) * 2.0**-52
+    rays = {
+        "crash (equity down, vol up)": (-0.15, 0.06),
+        "melt-up (equity up, vol down)": (0.15, -0.06),
+        "aligned (equity up, vol up)": (0.15, 0.06),
+        "pure volatility": (0.0, 0.06),
+        "pure spot (k=0)": (0.15, 0.0),
+    }
+    out: dict[str, Any] = {"absolute_cancellation_floor": floor}
+    for label, (unit_delta, unit_vol) in rays.items():
+        # The tightest sample of the narrowest fit window, `SLOPE_WINDOWS`'s last ceiling scaled
+        # by the ray's own direction.
+        ceiling = SLOPE_WINDOWS[-1][1]
+        row = bound(unit_delta * ceiling, unit_vol * ceiling, with_interval=False)
+        magnitude = abs(row["error"])
+        out[label] = {
+            "error_at_tightest_sample": magnitude,
+            "samples_above_the_floor": magnitude / floor if floor else None,
+        }
+    return out
+
+
 def main() -> int:
     RESULTS.mkdir(parents=True, exist_ok=True)
     ridge = ridge_probe()
@@ -560,9 +592,22 @@ def main() -> int:
                 f"{label}: the fitted log-log slope is {narrowest['slope']:.5f}, not {expected}, "
                 f"over a window ending at {narrowest['window_ceiling']}"
             )
-        # Endpoint improvement, not stepwise ordering. See the note above the ratio loop: a
-        # per-step comparison of these fits compares libm noise, and on the Linux runner it fails
-        # on a series whose every value sits within 0.003 of the theory number.
+        for values in slopes[label]:
+            # 0.5, not 0.15: the widest window genuinely carries the higher-order bias -- the
+            # aligned ray reads 1.7979 there, 0.202 from the theory value -- and demanding the
+            # narrowest window's band of every one of them would be demanding something the
+            # asymptotics forbid. 0.5 still separates order 2 from order 1 or order 3.
+            if abs(values["slope"] - expected) > 0.5:
+                raise RuntimeError(
+                    f"{label}: the window ending at {values['window_ceiling']} reads "
+                    f"{values['slope']:.5f}, outside 0.5 of {expected}"
+                )
+        # The joint rays must also *improve* from the widest window to the narrowest. That is a
+        # claim about a dominating term, and it is safe here for a measured reason: at the tightest
+        # window these rays sit ~1e3 times further above the cancellation floor of a 1.09e5 book
+        # than the pure-spot ray does (see `fit_conditioning`), so their 36x-to-47x improvement is
+        # orders above the noise in the estimate. The pure-spot ray is not held to any ordering,
+        # and the two guards below explain why that asymmetry is arithmetic rather than preference.
         widest_window, narrowest_window = slopes[label][0], slopes[label][-1]
         if abs(narrowest_window["slope"] - expected) >= abs(widest_window["slope"] - expected):
             raise RuntimeError(
@@ -571,16 +616,24 @@ def main() -> int:
                 f"{narrowest_window['slope']:.6f}), so the reading is not the second-order term "
                 "dominating"
             )
-    if abs(pure_spot[-1]["slope"] - 3.0) > 0.15:
-        raise RuntimeError(
-            f"the pure-spot ray's slope is {pure_spot[-1]['slope']:.5f}, not 3: Phase 12's cubic "
-            "result and this one disagree, so one of them is wrong"
-        )
-    if abs(pure_spot[-1]["slope"] - 3.0) >= abs(pure_spot[0]["slope"] - 3.0):
-        raise RuntimeError(
-            "the pure-spot ray's slope did not converge toward 3 as the window narrowed "
-            f"({pure_spot[0]['slope']:.6f} -> {pure_spot[-1]['slope']:.6f})"
-        )
+    for values in pure_spot:
+        if abs(values["slope"] - 3.0) > 0.05:  # worst observed 8.7e-3, on either libm
+            raise RuntimeError(
+                f"the pure-spot ray's slope is {values['slope']:.5f} over a window ending at "
+                f"{values['window_ceiling']}: Phase 12's cubic result and this one disagree, so "
+                "one of them is wrong"
+            )
+    # No ordering is asserted across the pure-spot windows, and the reason is measured rather
+    # than asserted away. Its tightest sample has |R| = 3.098e-08, which is 1281x the double
+    # spacing of a 1.09e5 book value (2.418e-11), while the four joint rays' tightest samples are
+    # 1.3e6 to 1.9e6 times that floor -- about a thousand times better conditioned. A slope fitted
+    # over the pure-spot ray's decades is therefore loose by ~1e-2, which exceeds the 6e-3-to-9e-4
+    # improvement the macOS series happens to show: on one libm it appeared to converge and on
+    # another it did not, and neither reading was about the model. What is claimed instead is the
+    # stable one -- every pure-spot window lands within 0.0087 of 3, at both places it was
+    # measured -- and the ordering is reserved for the rays whose conditioning makes it
+    # measurable. `fit_conditioning` publishes both floors so this asymmetry can be checked
+    # rather than trusted.
 
     # C. what actually dominates at published sizes. The quadratic is the *leading* term in the
     # limit and a minority term at the sizes a stress report contains, and both halves of that
@@ -720,6 +773,7 @@ def main() -> int:
         "dominance_counts": dominance,
         "published_scenario_bound": published,
         "ridge_probe": ridge,
+        "fit_conditioning": fit_conditioning(),
         "refusals": scope,
         "provenance": {
             "no_oracle_called": True,

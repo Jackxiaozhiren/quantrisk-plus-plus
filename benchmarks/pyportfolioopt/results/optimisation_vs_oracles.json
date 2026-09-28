@@ -1,6 +1,6 @@
 {
   "phase": "6 - Portfolio optimisation",
-  "generated_utc": "2026-09-28T10:46:27+00:00",
+  "generated_utc": "2026-09-28T11:35:20+00:00",
   "command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
   "purpose": "Level 2 validation of the covariance estimators' consumers: do the mean-variance, max-Sharpe, frontier, risk-parity and CVaR solvers in the C++ core agree with PyPortfolioOpt (SciPy SLSQP) and cvxpy (OSQP/SCS) on identical inputs, and are their constraints actually satisfied?",
   "oracles": {
@@ -133,26 +133,26 @@
     "problems_solved": 75
   },
   "environment": {
-    "generated_at_utc": "2026-09-28T10:46:27+00:00",
+    "generated_at_utc": "2026-09-28T11:35:20+00:00",
     "quantrisk_version": "1.3.0",
-    "git_commit": "45b550974fa3",
+    "git_commit": "eb26c81f8d62",
     "binary_git_commit": "45b550974fa3",
     "working_tree_dirty": true,
     "uncommitted_paths": [
-      "CITATION.cff",
-      "CMakeLists.txt",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
       "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
       "benchmarks/quantlib/results/pricing_vs_quantlib.json",
-      "evidence/manifest.json",
+      "docs/analysis/two_factor_error_bound.md",
+      "docs/integrity_audit.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-13-two-factor-bound.md",
+      "docs/release_notes_v1.3.0.md",
       "experiments/two_factor_error_bound/results/two_factor_bound.json",
       "experiments/two_factor_error_bound/run.py",
       "paper/technical_report.pdf",
-      "paper/technical_report.tex",
-      "pyproject.toml",
-      "uv.lock"
+      "paper/technical_report.tex"
     ],
-    "provenance": "ran from 45b550974fa3 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
+    "provenance": "ran from eb26c81f8d62 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",

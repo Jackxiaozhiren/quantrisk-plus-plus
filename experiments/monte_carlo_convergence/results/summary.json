@@ -11,7 +11,7 @@
       "experiments/monte_carlo_convergence/results/se_versus_error.png"
     ],
     "sha256": {
-      "experiments/monte_carlo_convergence/results/convergence.csv": "8f219839ed6216243eb33b1e561b56b5853a6628f555179b171d970debe1e0df",
+      "experiments/monte_carlo_convergence/results/convergence.csv": "a6be3d6a9b15fee655e0fc46b25fcf286319b3f2bbb1614093e108f2f770227e",
       "experiments/monte_carlo_convergence/results/convergence_slope.png": "cdbe4a20bfc3f96cbe535856bc5976b8e386d2ae02930b0363872a5f67837fa9",
       "experiments/monte_carlo_convergence/results/coverage.csv": "3a16407caf5427827f0354b62b7c3598a3085cca5d2a1b541db0ee58c1dd1502",
       "experiments/monte_carlo_convergence/results/se_versus_error.png": "64154a4b4409cbe20f7d326b9c3af0af27a6afb6b2855b438e43e9d59a05116d",
@@ -185,8 +185,8 @@
     "cpp_flags": "(none)",
     "cpp_os": "Darwin 27.0.0",
     "cpp_standard": "C++20",
-    "generated_at_utc": "2026-09-28T10:46:30+00:00",
-    "git_commit": "45b550974fa3",
+    "generated_at_utc": "2026-09-28T11:35:24+00:00",
+    "git_commit": "eb26c81f8d62",
     "packages": {
       "PyPortfolioOpt": "1.6.0",
       "QuantLib": "1.43",
@@ -201,31 +201,31 @@
       "scipy": "1.18.1",
       "statsmodels": "0.15.0"
     },
-    "provenance": "ran from 45b550974fa3 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
+    "provenance": "ran from eb26c81f8d62 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
     "python_machine": "arm64",
     "python_platform": "macOS-27.0-arm64-arm-64bit",
     "quantrisk_version": "1.3.0",
     "uncommitted_paths": [
-      "CITATION.cff",
-      "CMakeLists.txt",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
       "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
       "benchmarks/quantlib/results/pricing_vs_quantlib.json",
-      "evidence/manifest.json",
+      "docs/analysis/two_factor_error_bound.md",
+      "docs/integrity_audit.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-13-two-factor-bound.md",
+      "docs/release_notes_v1.3.0.md",
       "experiments/monte_carlo_convergence/results/convergence.csv",
       "experiments/pricing_validation/results/summary.json",
       "experiments/two_factor_error_bound/results/two_factor_bound.json",
       "experiments/two_factor_error_bound/run.py",
       "paper/technical_report.pdf",
-      "paper/technical_report.tex",
-      "pyproject.toml",
-      "uv.lock"
+      "paper/technical_report.tex"
     ],
     "working_tree_dirty": true
   },
-  "generated_at_utc": "2026-09-28T10:46:30+00:00",
+  "generated_at_utc": "2026-09-28T11:35:24+00:00",
   "path_counts": [
     1000,
     3000,

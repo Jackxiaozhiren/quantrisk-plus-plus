@@ -39,8 +39,8 @@ of the obvious one: the cheap improvement to this map is **re-striking gamma at 
 volatility**, not adding vanna and volga.
 
 **Measured.** The error's log-log slope against shock size converges on 2.0 along every joint ray
-(1.9098 → 1.9975 on the crash ray over four narrowing windows) while a pure-spot ray on the same book
-holds at **3.0009** — `v1.2.0`'s answer, reconciled rather than displaced. The Lagrange inclusion
+(1.9098 → 1.9975 on the crash ray from widest to narrowest window) while a pure-spot ray on the same
+book holds at **3.0009** — `v1.2.0`'s answer, reconciled rather than displaced. The Lagrange inclusion
 holds on **132/132** joint shocks, out to a 30 % equity move with +20 volatility points. On
 `risk_off` the interval for the error is **[−6063.95, −4135.87]**, which excludes zero: the *sign* of
 the published error is proved, not estimated, and the interval's width is 36 % of the quantity it
@@ -67,6 +67,18 @@ bounds.
   beside the constant — at the σ=0.10/T=0.10 rung the sixth derivative of the price binds at any
   round-off-safe step. Worst observed residual is 1.6e-2 of its own band, so every route sits at
   least 60× inside it.
+
+## Two convergence guards the laptop agreed to and the runner refused
+
+The guards above also asserted, first stepwise and then at the endpoints, that narrowing the fit
+window brings the slope closer to theory. Both passed locally; both failed on Linux, on the
+pure-spot ray, whose series there read `3.004587 -> 2.991277` against `3.006067 -> 3.000915` here —
+every value within 0.009 of 3 on both platforms. The artifact now publishes `fit_conditioning`, which
+is what decides it: the pure-spot ray's tightest error sample is 1281× the double spacing of the
+1.09e5 book value it is subtracted from, while the four joint rays are 1.3e6–1.9e6×, so ordering the
+pure-spot windows compares noise. Convergence is now claimed only where the conditioning makes it
+meaningful, every window is published rather than reduced to a boolean, and **no numerical band was
+moved** — 2 % on the ratio and 0.15 on the narrowest slope are the values the first commit carried.
 
 ## Two documentation defects this release found in itself
 
