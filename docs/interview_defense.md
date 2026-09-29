@@ -41,7 +41,7 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 198 C++ tests under CTest (547,845 assertions in 197 Catch2
-cases), 397 pytest tests with the `oracles` extra and the same tree collects 328 tests without
+cases), 400 pytest tests with the `oracles` extra and the same tree collects 331 tests without
 it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
 revision's figure on the runner rather than trusting arithmetic here. 14/14 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they

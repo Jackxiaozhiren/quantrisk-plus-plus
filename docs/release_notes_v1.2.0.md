@@ -70,7 +70,7 @@ being subtracted and has to be measured per book.
 | Evidence manifest | **72 artifacts, 6,488,904 bytes, 0 CHANGED / 0 VOLATILE / 0 MISSING / 0 unlisted / 0 warnings** |
 | `quantrisk validate` | 7/7 |
 | mypy / ruff / ruff format / clang-format | clean |
-| Technical report | 13 chapters, **40 pages**, new §8.3 carries the proposition, the proof and the table |
+| Technical report | 12 chapters, **40 pages**, new §8.3 carries the proposition, the proof and the table |
 | Cost | **$0** |
 
 ## What is still not here

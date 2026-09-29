@@ -282,6 +282,27 @@ without it), 194 CTest (547,331 assertions in 193 Catch2 cases), 13/13 suite mem
 MISSING / 0 unlisted / 0 warnings, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the
 40-page report rebuilt and text-verified.
 
+## Addendum — Phase 14, the checks the debt list said to write (2026-09-29)
+
+**33. The architecture document described a package that has never existed, and nothing read it.**
+`docs/architecture.md` listed `python/quantrisk/analytics/` twice — in the table of layers, as
+something the Python tier "owns", and in the layout block — and no such package was ever created: the
+facades are one module per domain, because `quantrisk.pricing` had to stay the same path in Python and
+in the C++ namespace. The file also stated the technical report had thirteen chapters in two release
+notes, where `technical_report.tex` has twelve numbered `\section` commands and one unnumbered artifact
+index. Neither claim is about a number an experiment produced, so no artifact-vs-prose guard covered
+them, and the phase's own answer was to admit it rather than to fix the two sentences and move on:
+`test_every_path_the_architecture_document_declares_exists` parses the layout block, expands and
+rejoins brace groups, and fails on any declared path absent from the tree;
+`test_documents_that_count_the_paper_chapters_agree_with_the_source` counts `\section` in the source and
+checks five documents that restate it. Both were falsified — injecting the phantom path into the block
+is caught by the parser probe, and the layout guard fails on a synthetic missing path. The general form
+is the same as #76 and #77 one level up: a prose file that describes the repository is making claims,
+and a claim nothing reads is a claim that quietly stops being true. The §6 departures that were
+*deliberate* (`data/fixtures/` rather than `data/sample/`, flat facade modules rather than
+`analytics/`, and the runtime-only `data/cache/`) are now written down beside the block that shows them
+instead of living in whoever notices the difference first.
+
 ## Addendum — Phase 13, the refusal converted into a result (2026-09-28)
 
 The paragraph above records Phase 12's state and is left as written: it was true of that revision,

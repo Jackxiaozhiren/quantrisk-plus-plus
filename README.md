@@ -292,4 +292,5 @@ on a GitHub-hosted runner; see `docs/reproducibility.md`.
 
 <sub>Technical report: [`paper/technical_report.pdf`](paper/technical_report.pdf) — *Design
 and Validation of a Reproducible C++/Python Stochastic Risk Engine*, twelve chapters.
-Cite with `CITATION.cff`. Phase-by-phase reasoning in [`docs/phase_reports/`](docs/phase_reports/).</sub>
+Cite with `CITATION.cff`. Phase-by-phase reasoning in [`docs/phase_reports/`](docs/phase_reports/).
+Contributing, and the rules a change has to satisfy: [`CONTRIBUTING.md`](CONTRIBUTING.md).</sub>

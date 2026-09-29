@@ -18,7 +18,19 @@ still names `f4c1e9ef9e23`, and nothing here is claimed to be in that release.
    a regression's standard error as a bound on accuracy.
 3. **A coverage ratchet** — every file in `docs/analysis/` must be named by a test that reads it, so a
    third worked analysis cannot be born unowned the way the first two were.
-4. **A rounding inconsistency across seven documents** — the predicted remainder zero printed as
+4. **The architecture document described a package that never existed.** `docs/architecture.md` named
+   `python/quantrisk/analytics/` in its layer table and in its layout block; the facades are one module
+   per domain (`pricing.py`, `risk.py`, `portfolio.py`, `stress.py`, …), and no `analytics/` package was
+   ever created. The layout is now written as what is there, the three departures from the
+   `PROJECT_SPEC.md` §6 target are stated with their reasons, and
+   `test_every_path_the_architecture_document_declares_exists` parses the block (expanding brace groups,
+   rejoining wrapped ones) and fails on any path missing from the tree.
+   `test_documents_that_count_the_paper_chapters_agree_with_the_source` did the same for the chapter
+   count, which two release notes gave as thirteen against twelve numbered `\section` commands.
+5. **`CONTRIBUTING.md`**, which the §6 target structure listed and this repository never wrote: the
+   environment traps, the gate order, the regeneration discipline and the rules that are enforced by
+   tests rather than requested in prose.
+6. **A rounding inconsistency across seven documents** — the predicted remainder zero printed as
    `21.1446` (truncated) in five and `21.1447` (rounded) in two. All seven now print the rounded value,
    which is what the artifact's `0.21144665599988494` yields at four decimals.
 
@@ -37,7 +49,9 @@ experiment actually publishes (`slope_converges_to_theory_as_the_window_shrinks`
 | --- | --- |
 | `tests/python/test_extension_surface_parity.py` | new — bindings-vs-binary parity, six tests |
 | `tests/python/test_linearisation_bound.py` | new figure-owner test and its non-vacuity probe |
-| `tests/python/test_artifact_metadata.py` | new analysis-note coverage guard; the limitation-count guard already covers the fifth counting document |
+| `tests/python/test_artifact_metadata.py` | new analysis-note coverage guard, new architecture-path guard, new chapter-count guard; the limitation-count guard already covers the fifth counting document |
+| `docs/architecture.md` | §5 rewritten to the actual tree with the three §6 departures named; the phantom `analytics/` removed from the layer table |
+| `CONTRIBUTING.md` | new — environment, gate order, regeneration discipline, enforced rules |
 | `docs/analysis/delta_gamma_error_bound.md` | P1 rewritten onto published windows; crossing figures corrected |
 | `docs/limitations.md` | item 77 |
 | `docs/integrity_audit.md` | finding 32 |
@@ -45,7 +59,7 @@ experiment actually publishes (`slope_converges_to_theory_as_the_window_shrinks`
 
 ## 4. Tests executed
 
-397 pytest with the `oracles` extra (328 collected without it, the same four oracle-gated modules
+400 pytest with the `oracles` extra (331 collected without it, the same four oracle-gated modules
 dropping out at import); 198 CTest, 547,845 assertions in 197 Catch2 cases — unchanged, because no C++
 source moved. The benchmark suite is unchanged at 14/14 and no experiment output changed, so
 `evidence/manifest.json` needed a re-freeze only for the rebuilt `technical_report.pdf`.
@@ -71,7 +85,7 @@ ruff format --check .                 120 files already formatted
 mypy python/quantrisk                 Success: no issues found in 23 source files
 mypy <the three test files touched>   Success: no issues found in 3 source files
 clang-format (bindings/cpp/tests)     clean
-pytest -q                             397 passed in 22.01s
+pytest -q                             400 passed
 ctest --preset dev                    100% tests passed out of 198
 verify_evidence_manifest.py           76 OK, 0 CHANGED / 0 VOLATILE / 0 MISSING
 ```
@@ -120,6 +134,6 @@ prose this phase guarded. It stays on the list with that reason attached.
 | Tolerances not lowered (§4) | no tolerance in the tree was touched by this phase |
 | Every README number traceable (§4) | improved: `docs/analysis/` is now covered by owner tests and a ratchet |
 | Cost $0 (§3) | no dependency, no service |
-| Tests pass locally | 397 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
+| Tests pass locally | 400 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
 | Tests pass on the runner | `36536998342` on `10dd8f3` — `completed / success`, all three jobs, the offline lane reading `328 passed, 4 skipped` and confirming the derived collection figure quoted above; `100% tests passed out of 198`; `suite: 14/14 executed and passed` |
 | Version and release | `1.3.0` unchanged, `v1.3.0` still at `f4c1e9ef9e23`; a release bump would invalidate every committed artifact's recorded version, so it waits until the next real feature |

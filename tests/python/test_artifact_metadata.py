@@ -285,6 +285,100 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
         )
 
 
+def _declared_layout(text: str) -> list[str]:
+    """The paths named in `docs/architecture.md` §5's fenced block, brace groups expanded."""
+    block = re.search(r"## 5\..*?```text\n(.*?)```", text, flags=re.S)
+    assert block, "architecture.md no longer carries the §5 layout block in the expected form"
+    paths: list[str] = []
+    # Newlines separate items in the block; the middot separates the items written on one line. A
+    # brace group may itself be wrapped across lines, so those continuations are rejoined first.
+    lines: list[str] = []
+    for raw in block.group(1).splitlines():
+        if lines and lines[-1].count("{") > lines[-1].count("}"):
+            lines[-1] = f"{lines[-1]} {raw.strip()}"
+        else:
+            lines.append(raw.strip())
+    for line in lines:
+        for token in line.split("\u00b7"):
+            token = token.split("(")[0].strip()  # prose aside, not a path
+            if not token:
+                continue
+            brace = re.match(r"^(.*)\{([^}]*)\}(.*)$", token)
+            if brace:
+                head, choices, tail = brace.groups()
+                # A wrapped brace list gains a space at the join, so each member is trimmed.
+                paths += [f"{head}{choice.strip()}{tail}" for choice in choices.split(",")]
+            else:
+                paths.append(token)
+    return [path.strip().rstrip("/") for path in paths if path.strip()]
+
+
+def test_documents_that_count_the_paper_chapters_agree_with_the_source() -> None:
+    r"""The technical report's chapter count is restated in five documents, and two had it wrong.
+
+    `paper/technical_report.tex` has twelve numbered `\section` commands plus an unnumbered
+    artifact index, and the index is the kind of thing a person counts as a chapter: two release
+    notes claimed thirteen. A count of a document's own structure is the same class of claim as a
+    count of the limitations register, so it is derived rather than typed.
+    """
+    source = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
+    total = len(re.findall(r"^\\section\{", source, flags=re.M))
+    claims = {
+        "README.md": r"(\d+|\w+)\s+chapters",
+        "docs/release_notes_v1.0.0.md": r"(\d+|\w+) chapters",
+        "docs/release_notes_v1.1.0.md": r"(\d+|\w+) chapters",
+        "docs/release_notes_v1.2.0.md": r"(\d+|\w+) chapters",
+        "docs/release_notes_v1.3.0.md": r"(\d+|\w+) chapters",
+    }
+    for name, pattern in claims.items():
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        found = re.findall(pattern, text)
+        assert found, f"{name} no longer states a chapter count"
+        values = [int(word) if word.isdigit() else SPELLED_NUMBERS[word.lower()] for word in found]
+        assert all(value == total for value in values), (
+            f"{name} says {values}; technical_report.tex has {total} numbered sections"
+        )
+
+
+def test_every_path_the_architecture_document_declares_exists() -> None:
+    """`docs/architecture.md` describes the tree, so every path it prints has to be in it.
+
+    The document claimed a `python/quantrisk/analytics/` package for several phases. Nothing like
+    that ever existed: the facades are one module per domain, and the layer table named the same
+    phantom directory. A prose file that lists paths makes claims of the kind an artifact does,
+    and this is the check that was missing when the layout drifted from the target.
+    """
+    text = (REPO_ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
+    declared = _declared_layout(text)
+    assert len(declared) >= 25, (
+        f"the parser found only {len(declared)} paths; the block changed shape"
+    )
+    missing = [path for path in declared if not (REPO_ROOT / path).exists()]
+    assert not missing, f"architecture.md §5 declares paths that are not in the tree: {missing}"
+    assert "python/quantrisk/analytics" not in " ".join(declared), (
+        "the phantom package is back in the layout the document presents as fact"
+    )
+
+
+def test_the_layout_parser_does_not_pass_on_nothing() -> None:
+    """Negative control: a bogus path inside the block has to be reported, not skipped.
+
+    Without this the guard could go quiet on a parsing change -- which is how a stale path
+    survived in the document in the first place.
+    """
+    text = (REPO_ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
+    needle = "pyproject.toml \u00b7 README.md"
+    assert text.count(needle) == 1, (
+        "the \u00a75 block changed shape and this probe needs a new anchor"
+    )
+    tampered = text.replace(
+        needle, "pyproject.toml \u00b7 python/quantrisk/analytics/ \u00b7 README.md", 1
+    )
+    declared = _declared_layout(tampered)
+    assert "python/quantrisk/analytics" in declared, "the parser did not expand the injected path"
+    assert not (REPO_ROOT / "python/quantrisk/analytics").exists()
+
+
 def test_every_analysis_note_is_guarded_against_the_numbers_it_quotes() -> None:
     """`docs/analysis/` is where this repository states results, so it needs an owner per figure.
 
