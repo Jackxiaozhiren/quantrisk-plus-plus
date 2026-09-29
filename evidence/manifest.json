@@ -1,20 +1,20 @@
 {
   "schema": "quantrisk-evidence-manifest/1",
-  "generated_utc": "2026-09-28T11:46:22+00:00",
+  "generated_utc": "2026-09-29T03:42:47+00:00",
   "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
   "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with scripts/verify_evidence_manifest.py.",
   "repository": {
-    "git_commit": "1105eff97e52a7cef753999158ac003ed7fb05cf",
-    "git_describe": "v1.2.0-11-g1105eff",
+    "git_commit": "204512790c4dbc44cbc7c6e7d7a8c199f243751b",
+    "git_describe": "v1.2.0-13-g2045127",
     "working_tree_dirty": false,
     "uncommitted_paths": []
   },
   "environment": {
     "quantrisk_version": "1.3.0",
-    "git_commit_at_run": "1105eff97e52",
+    "git_commit_at_run": "204512790c4d",
     "binary_git_commit": "45b550974fa3",
-    "provenance": "the working tree is clean at 1105eff97e52 but the extension binary was configured at 45b550974fa3; rebuild (uv pip install -e .) before trusting numbers that depend on C++ sources",
-    "python_platform": "macOS-27.0-arm64-arm-64bit",
+    "provenance": "the working tree is clean at 204512790c4d but the extension binary was configured at 45b550974fa3; rebuild (uv pip install -e .) before trusting numbers that depend on C++ sources",
+    "python_platform": "macOS-27.0.1-arm64-arm-64bit",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "packages": {
