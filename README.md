@@ -214,7 +214,7 @@ writes its own JSON, CSV and figures, and each reports its own caveats in the ar
 | `stress_testing` | Optimiser rankings do not invert under stress — but only because the books started 20.8% apart and the stress spread is 16.8%. The *stress-sensitivity* ranking inverts completely: the minimum-variance book is the most stress-sensitive (6.11× against 5.23× for equal weight). |
 | `linearisation_error_bound` | The delta-gamma stress map has a cubic Taylor remainder with a closed-form coefficient: the Lagrange coefficient 6R/h³ stays inside the shocked path's range of V‴ at all 618 shocks tested, the fitted log-log slope converges to 3 (2.9710 → 2.9988 down, 3.0253 → 3.0012 up as the fit window shrinks), and — the part that is a prediction rather than a description — the book's V‴ changes sign along a down path at a 5.45 % move, which puts the remainder's own zero at 21.14 %, inside the 20–30 % bracket where the published curve already changes sign. |
 | `real_data_risk_study` | On 586 out-of-sample days of three real FRED factor series, the synthetic prediction survives — Gaussian 99% VaR over-rejects at 2.048%, exact interval [1.062%, 3.550%] excluding the 1% nominal — while the covariance ranking does not: shrinkage, best on generated data by mean variance ratio (1.169 against sample's 1.183 and EWMA's 1.241), ranks *worst* here (ewma < sample < shrinkage on realised variance over 582 rolling windows). Three coverage tests fail to reject anything (Kupiec 0.160, independence 0.287, conditional 0.211), and the three questions the data cannot answer are recorded as refusals inside the artifact. |
-| `two_factor_error_bound` | The stress map is second order in the equity factor and *linear* in volatility, so a joint shock makes its error quadratic instead of cubic — and at published sizes the leading quadratic is not the largest term: on the repo's own `risk_off` scenario the closed-form quadratic is +787.96 while the error is −5320.79, because ½·V_{SSσ}·h²·k (gamma applied at a volatility the move already changed) is 7.4× bigger. The Lagrange inclusion holds on 132/132 joint shocks and its interval [−6063.95, −4135.87] excludes zero, so the sign of the published error is proved, not estimated. |
+| `two_factor_error_bound` | The stress map is second order in the equity factor and *linear* in volatility, so a joint shock makes its error quadratic instead of cubic — and at published sizes the leading quadratic is not the largest term: on the repo's own `risk_off` scenario the closed-form quadratic is +787.96 while the error is −5320.79, because ½·V_{SSσ}·h²·k (gamma applied at a volatility the move already changed) is 10.7× the net quadratic (and 7.4× measured against the quadratic's two contributions in absolute value) The Lagrange inclusion holds on 132/132 joint shocks and its interval [−6063.95, −4135.87] excludes zero, so the sign of the published error is proved, not estimated. |
 
 ## Reproducibility
 
@@ -246,7 +246,7 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 75 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 76 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
 - **The risk layer's instrumented validation is synthetic; only one arm is real.** Six of the

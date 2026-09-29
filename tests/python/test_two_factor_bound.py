@@ -441,13 +441,38 @@ def test_the_dominant_omitted_piece_on_risk_off_is_gamma_at_the_wrong_volatility
     published = _payload()["published_scenario_bound"]
     for name, value in published["omitted_terms_at_base"].items():
         assert terms[name] == pytest.approx(value, rel=0.0, abs=1.0e-9), name
+    # Two denominators, both asserted, because the claim's meaning depends on which one is meant:
+    # the signed net (what a correction would subtract) and the sum of magnitudes (the larger, and
+    # the one the first draft of this prose quoted while printing the other -- finding 30).
     quadratic = abs(terms["quadratic_vanna"]) + abs(terms["quadratic_volga"])
+    quadratic_net = abs(terms["quadratic_vanna"] + terms["quadratic_volga"])
+    assert quadratic_net < quadratic, (
+        "the two quadratic contributions no longer cancel, so the net-vs-magnitudes distinction "
+        "this experiment publishes has gone away and the prose needs re-reading"
+    )
     assert abs(terms["cubic_gamma_sigma"]) > quadratic, (
         "the ranking the analysis note publishes has reversed"
     )
     assert max(terms, key=lambda name: abs(terms[name])) == "cubic_gamma_sigma"
-    ratio = abs(terms["cubic_gamma_sigma"]) / quadratic
-    assert ratio == pytest.approx(_payload()["headline"]["largest_cubic_over_quadratic"], rel=1e-9)
+    headline = _payload()["headline"]
+    # The denominators and the dominant term are published as fields so prose can cite them, which
+    # makes them claims of their own: a tampered denominator has to fail, not merely a tampered ratio.
+    for key, value in (
+        ("quadratic_net_term", terms["quadratic_vanna"] + terms["quadratic_volga"]),
+        ("quadratic_magnitudes_term", quadratic),
+        ("largest_cubic_term", abs(terms["cubic_gamma_sigma"])),
+    ):
+        assert headline[key] == pytest.approx(value, rel=0.0, abs=1e-9), key
+    for key, denominator in (
+        ("largest_cubic_over_quadratic_magnitudes", quadratic),
+        ("largest_cubic_over_net_quadratic", quadratic_net),
+    ):
+        ratio = abs(terms["cubic_gamma_sigma"]) / denominator
+        assert ratio == pytest.approx(headline[key], rel=1e-9), key
+    assert (
+        headline["largest_cubic_over_net_quadratic"]
+        > headline["largest_cubic_over_quadratic_magnitudes"]
+    ), "the net denominator is not the smaller one, so the two ratios have swapped meaning"
 
 
 def test_the_published_scenario_bounds_the_error_with_a_sign_that_is_proved() -> None:
@@ -696,7 +721,10 @@ def test_every_figure_the_finding_and_the_note_quote_is_in_the_artifact() -> Non
         "interval_high": f"{published['error_interval_high']:.2f}",
         "quadratic_sum": f"{quadratic:.2f}",
         "mixed_cubic": f"{mixed_cubic:.2f}",
-        "ratio_of_cubic_to_quadratic": f"{headline['largest_cubic_over_quadratic']:.1f}",
+        # Both ratios, because a sentence that prints one denominator while quoting the other is the
+        # defect this map shipped with, and checking a single figure cannot see it.
+        "ratio_over_magnitudes": f"{headline['largest_cubic_over_quadratic_magnitudes']:.1f}",
+        "ratio_over_net": f"{headline['largest_cubic_over_net_quadratic']:.1f}",
         "crash_slope_narrowest": f"{crash:.4f}",
         "pure_spot_slope": f"{pure_spot:.4f}",
         "joint_shocks": str(headline["joint_shocks_swept"]),
@@ -708,6 +736,34 @@ def test_every_figure_the_finding_and_the_note_quote_is_in_the_artifact() -> Non
         text = raw.replace("\u2212", "-")
         for label, value in expected.items():
             assert value in text, f"{name} does not print {label} as {value!r}"
+        # The two ratios differ because the quadratic's contributions cancel, so quoting one while
+        # meaning the other is the defect this closes. Every occurrence has to carry its own
+        # denominator: a document-wide word check is not enough, because "network" contains "net".
+        flat = re.sub(r"\s+", " ", text)
+        for value, cue in (
+            (expected["ratio_over_net"], r"\bnet\b"),
+            (expected["ratio_over_magnitudes"], r"\b(absolute|magnitudes)\b"),
+        ):
+            hits = list(re.finditer(rf"(?<![\d.]){re.escape(value)}(?![\d])", flat))
+            assert hits, f"{name} never prints the ratio {value}"
+            for hit in hits:
+                # A short window on the reading side: the cue has to qualify *this* figure, not sit
+                # somewhere in a sentence that happens to mention both denominators.
+                window = flat[max(0, hit.start() - 25) : hit.end() + 75]
+                assert re.search(cue, window), (
+                    f"{name} prints {value} here without naming its denominator: "
+                    f"...{window.strip()[:150]}..."
+                )
+        conflation = re.search(
+            rf"(?<![\d.]){re.escape(expected['ratio_over_magnitudes'])}(?![\d])"
+            r"[^.;]{0,60}?\b(entire|whole)\s+(order-2|second-order|)quadratic",
+            flat,
+            flags=re.I,
+        )
+        assert conflation is None, (
+            f"{name} quotes the magnitude-sum ratio against the net quadratic again: "
+            f"{conflation.group(0)!r}"
+        )
         for term, count in sorted(payload["dominance_counts"].items()):
             assert str(count) in text, f"{name} omits the {term} dominance count {count}"
 

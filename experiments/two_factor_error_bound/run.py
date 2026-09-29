@@ -34,8 +34,11 @@ failed and all of which are checked against `stress.run_scenario` rather than a 
      nowhere near 1: the inclusion holds where the asymptotics stop helping.
   C. At published sizes the largest single omitted piece is neither quadratic term. For the
      repo's own named `risk_off` scenario it is `1/2 V_SSsigma h**2 k` - gamma evaluated at the
-     base volatility and then applied across a move that changed the volatility - and it exceeds
-     the whole quadratic by 7.4x. That ranks
+     base volatility and then applied across a move that changed the volatility. It exceeds the
+     net quadratic -- what a correction would subtract -- by 10.7x, and by 7.4x if the quadratic's
+     two contributions are added in absolute value instead; the two differ because the vanna
+     piece cancels most of the volga piece here, and prose that quotes one ratio against the other
+     denominator is wrong by a third (docs/integrity_audit.md finding 30). That ranks
      what a future map improvement is worth, from closed forms and without re-pricing.
   D. Because the trapped interval excludes zero at that scenario, the *sign* of the map's error
      on the published scenario set is proved rather than estimated: the map is reported too
@@ -640,16 +643,23 @@ def main() -> int:
     # sentence are load-bearing, so each is a guard rather than a comment.
     published = risk_off_row()
     terms = published["omitted_terms_at_base"]
-    quadratic_total = abs(terms["quadratic_vanna"]) + abs(terms["quadratic_volga"])
+    # Two denominators, because the quadratic is two terms of opposite sign and the reader has to be
+    # told which one the claim is against. `quadratic_term` is their signed sum -- what a correction
+    # would actually subtract -- and here the vanna piece cancels most of the volga piece, so the
+    # net is smaller than the magnitudes and the dominance is *stronger* against it. Prose that
+    # quotes one of these ratios while printing the other denominator is the defect this split
+    # exists to prevent (docs/integrity_audit.md finding 30).
+    quadratic_net = abs(published["quadratic_term"])
+    quadratic_magnitudes = abs(terms["quadratic_vanna"]) + abs(terms["quadratic_volga"])
     dominant = published["dominant_omitted_term"]
-    if quadratic_total == 0.0:
+    if quadratic_net == 0.0 or quadratic_magnitudes == 0.0:
         raise RuntimeError("the quadratic term is zero for the published scenario")
     largest_cubic = max(abs(value) for name, value in terms.items() if name.startswith("cubic_"))
-    if largest_cubic <= quadratic_total:
+    if largest_cubic <= quadratic_magnitudes:
         raise RuntimeError(
             "the prose claims a cubic term dominates the quadratic at the published risk_off "
             f"scenario, and it does not: largest cubic {largest_cubic:.6e} vs quadratic "
-            f"{quadratic_total:.6e}"
+            f"{quadratic_magnitudes:.6e}"
         )
     if dominant != "cubic_gamma_sigma":
         raise RuntimeError(
@@ -765,7 +775,11 @@ def main() -> int:
             "published_interval_excludes_zero": published["interval_excludes_zero"],
             "published_interval_width_over_error": published["interval_width_over_error"],
             "dominant_omitted_term": dominant,
-            "largest_cubic_over_quadratic": largest_cubic / quadratic_total,
+            "largest_cubic_term": largest_cubic,
+            "quadratic_net_term": published["quadratic_term"],
+            "quadratic_magnitudes_term": quadratic_magnitudes,
+            "largest_cubic_over_net_quadratic": largest_cubic / quadratic_net,
+            "largest_cubic_over_quadratic_magnitudes": largest_cubic / quadratic_magnitudes,
             "quadratic_prediction_ratio_at_published_size": published["error_over_quadratic"],
         },
         "asymptotics": asymptotics,

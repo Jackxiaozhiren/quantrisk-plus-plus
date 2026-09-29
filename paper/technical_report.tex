@@ -150,7 +150,7 @@ command gives two numbers); fourteen benchmark-suite members execute under
 unlisted (\src{evidence/manifest.json}). The \emph{end-of-Phase-9} baseline, for contrast, was 190
 CTest entries and 310 pytest tests with no release tag and no suite at all
 (\src{docs/phase_reports/phase-09-research-api.md}). The limitations
-register contains 75 numbered entries (\src{docs/limitations.md}).
+register contains 76 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -1389,7 +1389,9 @@ holds unconditionally and is what survives at useful sizes: $132/132$ swept join
 $30\%$ move with $+20$ volatility points, show no violation, and on \code{risk\_off} the interval
 excludes zero, so the \emph{sign} of the published error is proved rather than estimated. \emph{The
 leading term} is the one that disappoints: at the size the scenario actually uses, the order-2 term
-is $+787.96$ against an error of $-5320.79$. A cubic term dominates it by $7.4\times$, and it is the
+is $+787.96$ against an error of $-5320.79$. A cubic term dominates it by $10.7\times$ --- or
+$7.4\times$ measured against the quadratic's two contributions summed in absolute value, which is
+the reading \src{experiments/two_factor_error_bound/run.py} publishes beside it --- and it is the
 $\tfrac12 V_{SS\sigma}h^2k$ piece --- base gamma applied across a move that has already changed the
 volatility on which gamma depends. Counted over the whole grid the largest omitted piece is that
 mixed cubic in 64 cells, the pure spot cubic in 36 and volga in 32, while $vanna \cdot hk$, the term
@@ -1723,7 +1725,7 @@ stress artifacts are byte-identical between executions
 \label{sec:limitations}
 % ===========================================================================
 
-\src{docs/limitations.md} holds 75 numbered entries, grouped by the phase that introduced them,
+\src{docs/limitations.md} holds 76 numbered entries, grouped by the phase that introduced them,
 with the rule that entries are never removed because a later phase shipped. This section
 summarises them faithfully; the file remains the authority.
 

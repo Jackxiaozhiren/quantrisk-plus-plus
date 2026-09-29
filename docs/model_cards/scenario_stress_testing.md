@@ -93,8 +93,8 @@ as a risk measure.
   scenario that moves equity and volatility together has a **quadratic** error rather than the
   cubic one a single-factor move has. `experiments/two_factor_error_bound/` bounds it and finds
   that at published sizes the largest omitted piece is `½·V_{SSσ}·h²·k` — gamma applied at a
-  volatility the move has already changed — which on `risk_off` is 7.4× the whole second-order
-  term and points the other way. Quoting the quadratic correction as "the multi-factor error"
+  volatility the move has already changed — which on `risk_off` is 10.7× the net second-order
+  term, and 7.4× its two contributions summed in absolute value and points the other way. Quoting the quadratic correction as "the multi-factor error"
   would therefore be wrong in sign, not just in size.
 - **Not linear-in-risk beyond the Gaussian case.** Stressed VaR and ES are the Phase 5
   Gaussian closed forms applied to a shocked beta; the CVaR and historical estimators from

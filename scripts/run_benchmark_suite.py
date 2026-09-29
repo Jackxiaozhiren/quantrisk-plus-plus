@@ -378,8 +378,12 @@ MEMBERS: tuple[Member, ...] = (
             ("published risk_off error", ("headline", "published_error")),
             ("risk_off interval excludes zero", ("headline", "published_interval_excludes_zero")),
             (
-                "largest cubic over quadratic at risk_off",
-                ("headline", "largest_cubic_over_quadratic"),
+                "largest cubic over the NET quadratic at risk_off",
+                ("headline", "largest_cubic_over_net_quadratic"),
+            ),
+            (
+                "largest cubic over the quadratic MAGNITUDES at risk_off",
+                ("headline", "largest_cubic_over_quadratic_magnitudes"),
             ),
             ("dominant omitted term", ("headline", "dominant_omitted_term")),
             (

@@ -105,7 +105,7 @@ is limitation #70 rather than a footnote here.
 map's joint-shock error is quadratic, and the fitted slope confirms it (2.0 on four rays, 3.0 on a
 pure-spot ray). At the size the published `risk_off` scenario uses, the quadratic is `+788` and the
 error is `−5321`: the leading term of the limit points the wrong way, because a cubic term
-`0.5 V_SSsigma h^2 k` — gamma applied at a volatility the move has already changed — is 7.4× larger.
+`0.5 V_SSsigma h^2 k` — gamma applied at a volatility the move has already changed — is 10.7× the net quadratic — or 7.4× against its two contributions summed in absolute value
 What survives at every size is the *inequality*, which holds on 132/132 swept shocks. Quoting the
 order without the size would read as "expect ~800 of error" where the defensible statement is
 "between 4136 and 6064, and the sign is negative".
@@ -123,7 +123,7 @@ order without the size would read as "expect ~800 of error" where the defensible
   workload — that is, slower than a vectorised NumPy path at 200k paths. The speedup moves
   by several percent between runs, so no single figure from that file should be quoted as
   if it were a constant.
-- **The 75 numbered limitations in `docs/limitations.md` are the complete list of what is
+- **The 76 numbered limitations in `docs/limitations.md` are the complete list of what is
   not claimed.** Where a row above says "weaker" or "partially", it points into that file.
 
 ## Regenerating

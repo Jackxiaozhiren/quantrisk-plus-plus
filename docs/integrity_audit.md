@@ -319,7 +319,7 @@ interpreter, and raising the library version invalidates committed artifacts bec
 headline of this phase was going to be "the map's joint-shock error is quadratic, and here is the
 correction". It is quadratic -- the fitted slope converges to 2.0 on four rays while a pure-spot ray
 holds at 3.0. And at the published `risk_off` the closed-form quadratic is +787.96 against an actual
-error of −5320.79, because a cubic term `½V_{SSσ}h²k` is 7.4× larger. Had I published the order claim
+error of −5320.79, because a cubic term `½V_{SSσ}h²k` is 10.7× the net quadratic. Had I published the order claim
 without the size decomposition, the repository would have shipped a correction with the wrong sign,
 in a document whose entire purpose is saying how large the error is. The order statement survives only
 bundled with the sentence that names its limits, and the practical recommendation moved from adding
@@ -353,6 +353,29 @@ the wrong shape. Limitation #73 is written in the past tense on purpose, and #75
 The lesson is not that cross-platform floats need slack, which the repository already said in #64,
 #71 and #72, but that a new file does not inherit the old file's understanding; the check that catches
 it is a green run on the machine that is not this one, which `36521846544` finally supplied.
+
+**30. A figure guard proved the digits were transcribed and was blind to the sentence reading them
+wrongly.** The headline of this phase was that the mixed cubic term `½V_{SSσ}h²k` dominates the
+quadratic "by 7.4×". The artifact's `headline.largest_cubic_over_quadratic` did say 7.408, the note
+did print 7.4, and the guard that ties prose to the artifact was green throughout. Both numbers are
+correct and the prose was not: 7.408 is the ratio against the quadratic's two contributions **summed
+in absolute value** (|-173.10| + |961.06| = 1134.15), while every sentence quoting it printed the
+**net** quadratic, +787.96 -- the quantity a correction would actually subtract -- and called it "the
+entire quadratic". Against that net the dominance is **10.66×**, so the sentence understated this
+phase's own central engineering claim by a third. It reached eleven surfaces: the README,
+`docs/findings.md`, the analysis note, the validation matrix, a model card, the interview notes, this
+phase's report and gate, the release notes, the two findings above, the technical report, and the body
+of the `v1.3.0` release published before the discrepancy was noticed.
+
+Fixed by taking the ambiguity out of the data rather than out of the prose: the key is gone, and the
+artifact now publishes `largest_cubic_over_net_quadratic` (10.663),
+`largest_cubic_over_quadratic_magnitudes` (7.408) and both denominators as their own fields, so a
+ratio's meaning travels with its name. The test recomputes both from the core, asserts that the net
+really is the smaller denominator here -- it is, because the two quadratic contributions cancel -- and
+requires every document that carries a figure to name the denominator beside it. Written as a
+limitation (#76) because the failure mode is general: a provenance check on digits certifies
+transcription, never interpretation, and a ratio field whose name does not state its denominator is a
+sentence waiting to be misread by the next author, who will be me.
 
 **Verified at this addendum, by execution.** 388 pytest with the `oracles` extra and 319 collected
 without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite members under

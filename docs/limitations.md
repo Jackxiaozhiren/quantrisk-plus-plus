@@ -383,7 +383,7 @@ never removed just because a later phase shipped.
     is not the largest term.** The quadratic `vanna*h*k + 0.5*volga*k^2` is what survives division
     by `t^2` as the joint shock shrinks, and the fitted slope confirms it (1.9975 on the narrowest
     crash window). At the size the published scenario actually uses it is a minority: the mixed
-    cubic `0.5*V_SSsigma*h^2*k` is 7.4× the entire quadratic and the quadratic alone predicts the
+    cubic `0.5*V_SSsigma*h^2*k` is 10.7× the net quadratic and 7.4× its absolute contributions and the quadratic alone predicts the
     error with the wrong sign. Worse, the ranking is book-specific for a reason that has nothing to
     do with the algebra: on the 90/100/110 book the K=90 and K=110 legs contribute −5089.09 and
     +5628.57 of vanna and nearly cancel, leaving an aggregate of 192.33, so the quadratic is small
@@ -466,7 +466,6 @@ never removed just because a later phase shipped.
     about which ones are (#75). The general form, since it bit three times: when a cross-platform
     difference appears, ask what the quantity's own noise floor is before choosing a tolerance,
     because a slack picked to make one observed gap pass is a guess about the next.
-
 75. **The comparator exempted numbers by name, and names cannot be exhaustive: three further red
     CI runs ended in a check that compares shape, not value.** After #74's derived slack the
     reproduction went red on run `36518357703` at
@@ -495,3 +494,21 @@ never removed just because a later phase shipped.
     rejected, and off-family floats rejected at 1e-3 while tolerated at 1e-9. Recorded because the
     durable rule is about *who owns* a reproducibility exemption: a test that decides field by
     field which outputs are comparable is re-guessing the numerics it is supposed to be checking.
+
+76. **A guard that checks a figure appears in the artifact cannot see that the prose paired it with
+    the wrong denominator, and this repository shipped that in eleven documents and a published
+    release.** The artifact's `headline.largest_cubic_over_quadratic` was 7.408, computed against the
+    quadratic's two contributions **summed in absolute value** (`|−173.10| + |961.06| = 1134.15`),
+    while every sentence quoting it printed the **net** quadratic `+787.96` — what a correction would
+    actually subtract — and said "7.4× the entire quadratic". Against that net the ratio is **10.66**.
+    The digits were never wrong and the figure guard was never red: it asserted `"7.4" in artifact and
+    "7.4" in prose`, which is true of a sentence whose noun phrase names a different number. The claim
+    reached `README.md`, `docs/findings.md`, the analysis note, the validation matrix, a model card, the
+    interview notes, the phase report, the release notes, two audit findings, the paper and the body of
+    the published `v1.3.0` release. Fixed by removing the ambiguous name: the artifact now publishes
+    `largest_cubic_over_net_quadratic` (10.66), `largest_cubic_over_quadratic_magnitudes` (7.41), and
+    both denominators as their own fields, and the test recomputes both ratios from the core and
+    requires each document to name the denominator beside each figure. The general form: a
+    provenance check on *digits* certifies the transcription, not the *reading* — so when a quantity
+    is a ratio, the denominator belongs in the field name, not in a sentence someone wrote beside it.
+    Related: #58, #66, #75.

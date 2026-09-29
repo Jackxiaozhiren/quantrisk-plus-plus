@@ -217,7 +217,8 @@ Then the result that changes a decision. At the published `risk_off` sizes the c
 is **+787.96** and the error is **−5320.79**: the leading term of the limit is not merely
 under-sized, it points the opposite way. The largest omitted piece is `½·V_{SSσ}·h²·k` =
 **−8402.16**, which is gamma evaluated at the base volatility and applied across a move that has
-already changed it — 7.4× the entire quadratic. So the cheap improvement to this map is not vanna
+already changed it — **10.7×** the net quadratic, **7.4×** the quadratic's two contributions summed
+in absolute value. So the cheap improvement to this map is not vanna
 and volga; it is re-striking gamma at the shocked volatility. Counted across the whole grid the
 ranking splits three ways — mixed-cubic 64 cells, spot-cubic 36, volga 32, and the mixed `vanna·h·k`
 term that the order argument singles out is the largest **nowhere**.

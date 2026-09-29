@@ -28,7 +28,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 75
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 76
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -816,7 +816,7 @@ inclusion holds on 132 of 132 joint shocks, out to −30 % equity with +20 volat
 describes the limit. At the size the repo's own `risk_off` scenario uses, the quadratic term is
 +787.96 while the error is −5320.79 — the leading term has the *opposite sign*. What dominates is
 `½·V_{SSσ}·h²·k`: gamma evaluated at the base volatility and applied across a move that has already
-changed the volatility gamma depends on. It is 7.4× the whole quadratic. Across the grid the largest
+changed the volatility gamma depends on. It is 10.7× the net quadratic, and 7.4× the quadratic's two contributions summed in absolute value. Across the grid the largest
 omitted piece is that term in 64 cells, the pure-spot cubic in 36 and volga in 32, while the mixed
 `vanna·h·k` the order argument singles out is largest *nowhere*. So the cheap fix to this map is
 re-striking gamma, not adding vanna and volga — a prioritisation you only get by deriving the terms.

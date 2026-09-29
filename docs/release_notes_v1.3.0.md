@@ -32,7 +32,8 @@ frozen, already-released surface.
 correction. Measured, that is wrong in sign, not merely in size: on the repository's own `risk_off`
 scenario the closed-form quadratic is **+787.96** while the error is **−5320.79**, because the cubic
 `½·V_SSσ·h²k` — gamma evaluated at the base volatility and applied across a move that has already
-changed it — is **7.4×** the whole quadratic. Across the 132-cell joint grid the largest omitted
+changed it — is **10.7×** the net quadratic, or **7.4×** if its two contributions are summed in
+absolute value instead of netted. Across the 132-cell joint grid the largest omitted
 piece is that term in 64 cells, the pure-spot cubic in 36 and volga in 32, while `vanna·h·k`, the
 term the order argument singles out, is largest **nowhere**. The actionable conclusion is the opposite
 of the obvious one: the cheap improvement to this map is **re-striking gamma at the shocked
@@ -137,6 +138,27 @@ file repeated it, and then repeated the fix three times, which is the actual fin
 | Technical report | 13 chapters, **42 pages**, new §8.4 carries the proposition, the proof and the table |
 | Cost | **$0** |
 
+## Erratum: the dominance ratio was quoted against the wrong denominator
+
+The sentence this release was published with — "the cubic `½·V_SSσ·h²k` is **7.4×** the whole
+quadratic", next to a printed quadratic of `+787.96` — is wrong, and was wrong in eleven surfaces
+including the attached `technical_report.pdf` and the release body. `7.408` is that ratio against the
+quadratic's two contributions **summed in absolute value** (`|−173.10| + |961.06| = 1134.15`); against
+the **net** quadratic `+787.96`, which is the quantity the prose printed and the quantity a correction
+would subtract, the dominance is **10.66×**. The claim was therefore understated by a third, in the
+direction that made this phase's engineering recommendation look weaker than the evidence for it is.
+
+The artifact's ambiguous key is gone rather than caveated: `headline` now publishes
+`largest_cubic_over_net_quadratic` = 10.663, `largest_cubic_over_quadratic_magnitudes` = 7.408, and
+both denominators as fields of their own, so a ratio's meaning travels in its name. The test net
+recomputes both from the core, asserts the net really is the smaller denominator on this book, and
+requires any document carrying the figure to name the denominator beside it — which is the guard that
+was missing, since the previous one only checked that "7.4" appeared in both places and could not see
+that the two places meant different things. Limitation #76 and audit finding 30 record it. The tagged
+commit `f4c1e9e` and its attached assets keep the superseded wording, because rewriting a published
+tag would destroy the record of what was actually released; `main` carries the corrected text, and the
+release body carries a dated note pointing here.
+
 ## What is still not here
 
 The bound covers the equity × volatility pair on a Black–Scholes European book. The rate and credit
@@ -151,5 +173,5 @@ No oracle in this dependency set publishes a vanna, a volga or a mixed third par
 Python surface stops at vega — so the new closed forms rest on differences, exact identities and
 parity rather than an external comparison. A bound still says nothing about whether a scenario is
 plausible. And the wider gaps survive unchanged: no expected-return model, no term structure, no
-live feed, no re-pricing inside the stress layer, no PyPI package, no DOI — all **74 entries** in
+live feed, no re-pricing inside the stress layer, no PyPI package, no DOI — all **76 entries** in
 `docs/limitations.md`.

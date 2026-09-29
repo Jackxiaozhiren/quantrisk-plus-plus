@@ -134,7 +134,7 @@ points) and **zero** violations of `6·(error − quadratic) ∈ [min g‴, max 
 | re-priced P&L / map P&L | −71 559.18 / −66 238.39 |
 | error | **−5 320.79** |
 | whole order-2 term | +787.96 — the wrong sign at this size |
-| `½ V_{SSσ} h² k` | **−8 402.16** — 7.4× the order-2 term |
+| `½ V_{SSσ} h² k` | **−8 402.16** — 10.7× the net order-2 term, 7.4× its absolute contributions |
 | Lagrange interval | [−6 063.95, −4 135.87], excludes zero |
 | interval width / error | 0.362 |
 
@@ -155,7 +155,7 @@ path with the C++ cases.
 
 ## 7. Remaining limitations
 
-Items 67–75 of `docs/limitations.md`, in brief: the bound covers the equity × volatility pair on a
+Items 67–76 of `docs/limitations.md`, in brief: the bound covers the equity × volatility pair on a
 Black–Scholes European book and not the rate/credit legs, and does not travel to Heston; "quadratic"
 is a limit statement whose leading term is a minority term at published sizes, and the small
 aggregate vanna here is a strike-placement coincidence rather than a property of the map; the ridge
@@ -165,7 +165,7 @@ finite differences, exact identities and parity rather than an L2 comparison; an
 route to `g‴` has a floor and cannot resolve a small ray. Two of this phase's own guards asserted a
 strict ordering between successive fits, and their replacement asserted a weaker ordering that was
 also unsupportable for one ray; #72 records both runner failures and the conditioning measurement
-that settled it. #73–#75 record the reproduction test's four failures and the way they were finally
+that settled it. #73–#76 record the reproduction test's four failures and the way they were finally
 closed: three tolerance sizes were tried, each tuned to the gap the runner had just reported, and the
 fourth red run showed that the fields needing exemption cannot be enumerated by name — so the
 experiment now declares the families itself and the check compares shape rather than value inside
@@ -182,6 +182,14 @@ Two documentation defects surfaced, both of the class this project keeps finding
   contiguity and that every in-file "row N" citation resolves.
 - **A section heading said "Four rows" over three paragraphs.** Now derived:
   `test_the_validation_matrix_heading_counts_its_own_caveat_paragraphs`.
+- **The phase's headline ratio was quoted against a denominator its own prose did not print.** The
+  artifact's `largest_cubic_over_quadratic` = 7.408 divides by the quadratic contributions summed in
+  absolute value (1134.15); eleven surfaces, the paper and the published release body included, paired
+  that figure with the *net* quadratic +787.96 and called it "the entire quadratic". Against the net it
+  is **10.66×**. The digits passed the prose-to-artifact guard the whole time, because that guard
+  compares strings, not meanings. The ambiguous key is deleted: the artifact now publishes both ratios
+  and both denominators as named fields, the test recomputes each from the core and requires the
+  denominator to be named beside the figure, and limitation #76 carries the general rule.
 - **Four documents cited the paper's bound subsections as §6.3 and §6.4; the PDF numbers them 8.3 and
   8.4.** Both are in the stress-testing chapter, and the pointer was typed from the source file's
   position rather than from the built document. Nothing checks a prose reference into the PDF, so these
@@ -244,7 +252,7 @@ ridge: I expected to *verify* the closed-form prediction of a low-error directio
 locates it at 0.87× the prediction at one scale, 1.81× at another, and not at all at a third —
 because the useful bracket width shrinks with the shock. That became a refusal instead of a finding.
 Second, and more consequentially, I expected the quadratic term to be the practical correction; at
-`risk_off` it carries the opposite sign while `½V_{SSσ}h²k` is 7.4× larger, which moved the
+`risk_off` it carries the opposite sign while `½V_{SSσ}h²k` is 10.7× the net quadratic, which moved the
 engineering recommendation from "add vanna and volga" to "re-strike gamma". Two tooling slips of
 mine are also on the record rather than smoothed: a `uv pip install -e .` served from cache that made
 the new bindings look unregistered, and a root-level copy of the experiment in `tmp_path` whose

@@ -286,9 +286,9 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
 
 
 def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
-    """`docs/limitations.md` is cited by count in four other documents.
+    """`docs/limitations.md` is cited by count in five other documents.
 
-    A count repeated by hand in four places is a fact with four chances to go stale, and it
+    A count repeated by hand in five places is a fact with five chances to go stale, and it
     does: adding Phase 10's entries left every one of them reading "55". This test makes the
     file the single source, so the next entry added without updating the prose fails here
     rather than shipping a wrong number in the README.
@@ -304,6 +304,9 @@ def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
         "docs/validation_matrix.md": r"The (\d+) numbered limitations",
         "docs/interview_defense.md": r"has all (\d+)\s*\n?numbered entries",
         "paper/technical_report.tex": r"(?:contains|holds) (\d+) numbered entries",
+        # A release note is a living document about the current file, not a record of a past
+        # revision: it quoted the count while the count moved. #76 was found by exactly that lag.
+        "docs/release_notes_v1.3.0.md": r"all \*\*(\d+) entries\*\*",
     }
     for name, pattern in claims.items():
         text = (REPO_ROOT / name).read_text(encoding="utf-8")

@@ -9,7 +9,8 @@ the result against the published book and the published scenario.
 The short version is that the map's error is **quadratic** in a joint shock where it was cubic in
 a single-factor one, that the leading term is available in closed form, and that none of that
 makes the leading term the one that matters at the sizes a stress report contains — at
-`risk_off` the closed-form quadratic is smaller than the largest omitted cubic term by 7.4× and
+`risk_off` the closed-form quadratic is smaller than the largest omitted cubic term — by **10.7×**
+against the net quadratic, **7.4×** against its two contributions summed in absolute value — and
 carries the opposite sign.
 
 ## 1. The map, stated exactly
@@ -194,7 +195,8 @@ work that the asymptotics cannot.
 | `1/2 V_Sssigma*h*k^2` | −175.07 |
 | `1/6 V_Sssss*k^3` | −240.46 |
 
-P3 is confirmed and then some: the mixed cubic is 7.4× the entire quadratic, and the quadratic
+P3 is confirmed and then some: the mixed cubic is 10.7× the net quadratic (7.4× the absolute
+contributions), and the quadratic
 alone predicts the error to be **+788** when it is **−5321** — the leading term in the limit points
 the wrong way at the size the scenario actually uses.
 
