@@ -205,7 +205,7 @@ currently written down.
   types; the RNG is instance-owned `std::mt19937_64` with our own Marsaglia polar normals.
 
 **The counter-evidence a reviewer should be given before they find it:** the C++ engine is
-*slower* than vectorised NumPy (0.42×–0.48×) on the benchmarked terminal-only workload, and
+*slower* than vectorised NumPy (0.42×–0.51×) on the benchmarked terminal-only workload, and
 the project says so in the README, the release notes and the report. Handled well, this reads
 as calibration; hidden, it would have read as either naivety or dishonesty.
 

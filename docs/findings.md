@@ -253,7 +253,7 @@ Stated because overclaiming is the failure mode this project exists to avoid:
   no number there describes a position anyone held, and a single 12.7-year sample of three factor
   series does not license a statement about markets in general.
 - No performance improvement is claimed over any library. The measured result is that the C++
-  core is roughly 8× an interpreted loop and **slower** than vectorised NumPy (0.42×–0.48×)
+  core is roughly 8× an interpreted loop and **slower** than vectorised NumPy (0.42×–0.51×)
   on the benchmarked workload.
 - No Sharpe ratio, return forecast or trading recommendation appears in this repository.
 - Two components are `partially validated` in the matrix, and the bootstrap interval's

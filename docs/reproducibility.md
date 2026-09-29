@@ -69,7 +69,7 @@ that strips too eagerly would pass the re-run test and silently rubber-stamp a c
 git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
 uv sync --extra oracles          # interpreter 3.12, deps, and the validation oracles
 uv pip install -e .              # builds the C++ core and the pybind11 module
-uv run pytest -q                 # 400 tests here; see the note below — the count is not one number
+uv run pytest -q                 # 404 tests here; see the note below — the count is not one number
 uv run cmake --preset dev && uv run cmake --build --preset dev
 uv run ctest --preset dev        # 198 C++ tests, 547,845 assertions
 uv run python scripts/run_benchmark_suite.py --require-all   # all 14 members
@@ -107,9 +107,9 @@ in that state would be claiming a measurement it did not make. The flag turns th
 a failure.
 
 **The pytest count depends on which extras you installed, and a document that prints one number
-without saying which is wrong.** The sequence above yields **400 pytest tests with the `oracles`
+without saying which is wrong.** The sequence above yields **404 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — no `oracles` extra — and the same
-tree collects 331 tests without it, the four oracle-gated modules dropping out at import. At the
+tree collects 335 tests without it, the four oracle-gated modules dropping out at import. At the
 previous revision that lane reported `319 passed, 4 skipped`: 323 outcomes from 319 collected
 items, because the four skips are module-level records reported *in addition to* the items that
 ran.
@@ -142,13 +142,29 @@ truth, and every figure inside it is a reference to an artifact path, not a rety
 every run: `benchmarks/performance/results/monte_carlo_speed.json` entirely, and the
 `mean_runtime_seconds` / `seconds_per_path` columns of
 `experiments/variance_reduction/results/variance_by_method.csv` and
-`experiments/monte_carlo_convergence/results/convergence.csv`. Four dated runs of the speed
-benchmark returned 7.99×, 8.07×, 8.20× and 8.37× against a pure Python loop (5% spread) and
-0.42, 0.42, 0.43 and 0.48 against vectorised NumPy (14% spread, because the NumPy baseline
-itself moved from 110M to 95M paths/s). Documents quote those as ranges for that reason. On
-different hardware expect different numbers; the *ordering* — C++ beats an interpreted loop by
+`experiments/monte_carlo_convergence/results/convergence.csv`. The speed benchmark has been
+re-frozen thirteen times, and the ratios of those thirteen committed files are the honest measure of
+how much these digits mean: `7.77×`–`8.70×` against a pure Python loop (11.9% spread) and
+`0.42×`–`0.51×` against vectorised NumPy (20.8% spread), because the NumPy baseline itself ranged
+from 110M to 70M paths/s. Any document quoting a single one of those ratios is quoting one dated
+run, which is why the claims are written as ranges and why the point figures in `README.md` and
+`docs/interview_defense.md` are checked against the artifact on disk. Recompute the range with:
+
+```bash
+git log --format=%H -- benchmarks/performance/results/monte_carlo_speed.json |
+  while read -r sha; do
+    git show "$sha:benchmarks/performance/results/monte_carlo_speed.json" |
+      python3 -c 'import json,sys; p=json.load(sys.stdin); print("%.3f %.3f" % (p["speedup_vs_pure_python"], p["speedup_vs_numpy"]))'
+  done
+```
+
+On different hardware expect different numbers; the *ordering* — C++ beats an interpreted loop by
 roughly an order of magnitude, and loses to vectorised NumPy for terminal-only payoffs — is the
-reproducible part, and it held on every run.
+reproducible part, and it held on every run. One further observation, recorded here rather than in
+a README because no artifact keeps it: a suite re-run taken on this machine while another process
+held a core read 12% below the C++/Python ratio of the quiet re-run that follows it, and
+`var_backtesting` took 103 s instead of 25 s in the same window. Load moves the timings, and the
+ratios with them.
 
 **Metadata.** Every artifact records its own `generated_at_utc` and the running `git_commit`, so
 a re-run always rewrites them. The manifest carries a content hash alongside the byte hash

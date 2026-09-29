@@ -59,7 +59,7 @@ instrumentation is the hard part.
 ```python
 import quantrisk
 
-quantrisk.version()  # '1.2.0'
+quantrisk.version()  # '1.4.0'
 quantrisk.normal_cdf(0.0)  # 0.5
 
 rng = quantrisk.Rng(seed=42)
@@ -169,18 +169,22 @@ the plot and the table cannot disagree.
 The performance result is deliberately unflattering. On 200,000 terminal-only paths, one
 normal per path:
 
-- **≈8× a pure Python loop** — four dated runs gave 7.99×, 8.07×, 8.20× and 8.37×
-  (45.5M vs 5.5M paths/s in the current artifact), and
-- **0.42×–0.48× vectorised NumPy** — that is, the C++ core is *slower* than a NumPy
-  `standard_normal` draw for this workload, on every run.
+- **≈8× a pure Python loop** — `8.39×` in the artifact now in the tree (38.6M vs 4.6M paths/s),
+  and `7.77×`–`8.70×` across the performance artifacts this repository has committed, and
+- **`0.445×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
+  so the C++ core is *slower* than a NumPy `standard_normal` draw for this workload, on every
+  one of those runs.
 
 Both are in the artifact, and the second is the honest one: this benchmark exercises exactly
 the case a vectorised generator is built for. The core's advantage is per-path state (running
 maxima and averages for barrier and Asian payoffs) and `O(paths)` memory instead of
-`O(paths × steps)`, neither of which the benchmark measures. The C++-to-Python ratio moves about 5%
-between runs and the NumPy ratio about 14%, because the NumPy baseline itself ranged from
-110M to 95M paths/s — so the ordering is the reproducible finding and the digits are not.
-No single speedup figure here should be read as a constant.
+`O(paths × steps)`, neither of which the benchmark measures. The spread is wide because these are
+measurements of a machine, not of the model: the NumPy baseline itself ranged from 110M to 70M
+paths/s, so any ratio against it inherits that movement rather than measuring the core.
+`docs/reproducibility.md` gives the command that recomputes the range from the committed history,
+and the first figure above is checked against the artifact by `tests/python/test_artifact_metadata.py`
+— re-run the benchmark and that paragraph goes red until it agrees. The ordering is the reproducible
+finding and the digits are not. No single speedup figure here should be read as a constant.
 
 ## Architecture
 

@@ -274,3 +274,30 @@ def test_cli_rejects_an_unparseable_argument() -> None:
     with pytest.raises(SystemExit) as exit_info:
         cli.main(["benchmark", "--iterations", "not-a-number"])
     assert exit_info.value.code == 2
+
+
+def test_the_readme_quickstart_transcript_is_what_the_build_prints() -> None:
+    """Every `#` value in the README's 30-second example is a claim about the imported library.
+
+    The version line was the one that decayed: it read `'1.2.0'` through two releases, because
+    nothing executed it. The seeded calls below are our own generator rather than libm, so they
+    are compared exactly — no ULP allowance is needed, and asking for one would hide a real change.
+    """
+    readme = (Path(__file__).resolve().parents[2] / "README.md").read_text(encoding="utf-8")
+
+    def documented(pattern: str, label: str) -> str:
+        found = re.search(pattern, readme)
+        assert found, f"README.md no longer prints a {label} value"
+        return found.group(1)
+
+    assert documented(r"quantrisk\.version\(\)\s*#\s*'([^']+)'", "version") == quantrisk.version()
+    assert documented(r"quantrisk\.normal_cdf\(0\.0\)\s*#\s*([0-9.]+)", "normal_cdf") == repr(
+        quantrisk.normal_cdf(0.0)
+    )
+    rng = quantrisk.Rng(seed=42)
+    assert documented(r"rng\.uniform01\(\)\s*#\s*([0-9.]+)", "uniform01") == repr(
+        rng.uniform01()
+    ), "the seeded uniform in the README is not what seed 42 gives"
+    assert documented(r"rng\.standard_normal\(\)\s*#\s*([0-9.]+)", "standard_normal") == repr(
+        rng.standard_normal()
+    ), "the seeded normal in the README is not what seed 42 gives"

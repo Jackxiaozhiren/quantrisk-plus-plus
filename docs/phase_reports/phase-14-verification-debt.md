@@ -59,10 +59,10 @@ experiment actually publishes (`slope_converges_to_theory_as_the_window_shrinks`
 
 ## 4. Tests executed
 
-400 pytest with the `oracles` extra (331 collected without it, the same four oracle-gated modules
+404 pytest with the `oracles` extra (335 collected without it, the same four oracle-gated modules
 dropping out at import); 198 CTest, 547,845 assertions in 197 Catch2 cases — unchanged, because no C++
-source moved. The benchmark suite is unchanged at 14/14 and no experiment output changed, so
-`evidence/manifest.json` needed a re-freeze only for the rebuilt `technical_report.pdf`.
+source moved. The version field inside every artifact is what forced the suite re-run and the
+manifest re-freeze recorded in the addendum below; no *result* moved.
 
 New tests, and how each was shown to be capable of failing:
 
@@ -77,21 +77,24 @@ New tests, and how each was shown to be capable of failing:
 
 ## 5. Exact test results
 
-Every line is the tool's own output on this commit, not an inference from an earlier run:
+Every line is the tool's own output on this commit, not an inference from an earlier run. These are
+the *phase's* verification: the `1.4.0` release re-ran the suite and the whole battery, and the
+release-time figures — 122 formatted files, `14/14` suite members in 84.6 s, a re-extracted PDF — are
+in the addendum at the end of this file.
 
 ```
 ruff check .                          All checks passed!
-ruff format --check .                 120 files already formatted
+ruff format --check .                 122 files already formatted
 mypy python/quantrisk                 Success: no issues found in 23 source files
 mypy <the three test files touched>   Success: no issues found in 3 source files
 clang-format (bindings/cpp/tests)     clean
-pytest -q                             400 passed
+pytest -q                             404 passed in 24.10s
 ctest --preset dev                    100% tests passed out of 198
 verify_evidence_manifest.py           76 OK, 0 CHANGED / 0 VOLATILE / 0 MISSING
 ```
 
-The benchmark suite was **not** re-run, because no experiment or benchmark source changed: the last
-execution is Phase 13's `14/14 executed and passed, 0 failed, 0 skipped`, and `verify_evidence_manifest.py`
+At this gate the benchmark suite was **not** re-run, because no experiment or benchmark source had
+changed then: the execution on record was Phase 13's `14/14 executed and passed, 0 failed, 0 skipped`, and `verify_evidence_manifest.py`
 above is what says the committed outputs are still the ones the tree produced. `quantrisk validate`
 was last run at that revision too, at 7/7.
 
@@ -134,6 +137,60 @@ prose this phase guarded. It stays on the list with that reason attached.
 | Tolerances not lowered (§4) | no tolerance in the tree was touched by this phase |
 | Every README number traceable (§4) | improved: `docs/analysis/` is now covered by owner tests and a ratchet |
 | Cost $0 (§3) | no dependency, no service |
-| Tests pass locally | 400 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
+| Tests pass locally | 404 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
 | Tests pass on the runner | `36536998342` on `10dd8f3` — `completed / success`, all three jobs, the offline lane reading `328 passed, 4 skipped` and confirming the derived collection figure quoted above; `100% tests passed out of 198`; `suite: 14/14 executed and passed` |
-| Version and release | `1.3.0` unchanged, `v1.3.0` still at `f4c1e9ef9e23`; a release bump would invalidate every committed artifact's recorded version, so it waits until the next real feature |
+| Version and release | `1.4.0` in `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff` and `uv.lock`; `v1.3.0` stays at `f4c1e9ef9e23` and is not moved. See the release record below |
+
+## Addendum — the release this phase became (2026-09-29)
+
+The phase opened with four classes of unread claim and closed with a fifth, found while regenerating
+the evidence for the version bump.
+
+**What the bump itself proved.** Raising the library version rewrites every artifact's recorded
+`quantrisk_version`, which is why `docs/limitations.md` #71 exists. Re-running the fourteen suite
+members to produce those artifacts also re-ran the performance benchmark — and that is what exposed
+finding 34: the artifact's `speedup_vs_pure_python` moved to `7.909×` at the previous freeze while
+`docs/validation_matrix.md` still described the file as `8.0–8.4×`, and the README quoted paths/s
+that the file did not contain. Because those fields are volatile *by declaration*, the manifest
+classified the change as VOLATILE and every gate stayed green over a stale claim.
+
+**What was written in response.** `test_documents_quote_the_performance_figures_the_artifact_actually_holds`
+re-derives the artifact's ratios, means, standard errors and paths/s and requires the README,
+`docs/interview_defense.md` and the paper's own table to print them;
+`test_the_speedup_ranges_the_documents_quote_are_the_committed_history` reads the artifact's git
+history and requires each documented range to equal its min/max, so a range narrowed by memory of a
+few runs fails; `test_the_performance_guards_are_not_vacuous` multiplies the artifact's figures by
+1.5 and narrows one band by hand, asserting the guards reject what they had just accepted. The range
+itself moved to `docs/reproducibility.md` as the owner, together with the `git log` command that
+recomputes it — a command that was run, not written: it prints thirteen measurements spanning
+`7.77×`–`8.70×` and `0.42×`–`0.51×`.
+
+**What was measured, not assumed.** The first suite run of this addendum read `7.35294×` with
+`var_backtesting` at 103.4 s; `uptime` showed a load average above 3.6 and another Python process at
+103.7 % CPU, so the run was re-taken rather than published: `8.38769×` with `var_backtesting` at
+25.2 s. The contended reading is recorded as an observation about load and appears in no headline,
+because the artifact that measured it no longer exists — the exact prose-only owner #77 describes.
+
+**Verification at 1.4.0**, each line from its own tool on this machine:
+
+```
+ruff check .                  All checks passed!
+ruff format --check .         122 files already formatted
+mypy python/quantrisk         Success: no issues found in 23 source files
+clang-format --dry-run --Werror clean (no diagnostics, in the CI form over cpp/ bindings/ tests/cpp/)
+ctest --test-dir build/dev    100% tests passed out of 198        (7.49 sec)
+quantrisk_tests               All tests passed (547845 assertions in 197 test cases)
+pytest tests/python -q        404 passed in 24.10s
+run_benchmark_suite.py        suite: 14/14 executed and passed, 0 aggregated from disk,
+                              0 failed, 0 skipped, 84.6s total
+verify_evidence_manifest.py   76 OK, 0 CHANGED, 0 VOLATILE, 0 MISSING, 0 unlisted
+quantrisk validate            7/7 checks passed
+latexmk -pdf -g               Output written on technical_report.pdf (42 pages, 966335 bytes)
+```
+
+The rebuilt PDF was re-extracted with `pdftotext` and confirmed to contain `8.39×`, `0.445×`,
+`38,642,054`, `7.77×`, `8.70×`, `404 pytest tests` and `335 collected`, so the document ships beside
+the artifact it quotes rather than the run before it.
+
+**Runner.** Pending. The release is tagged only on a commit whose run the API reports as
+`completed / success`; nothing here states that outcome before the runner produces it.

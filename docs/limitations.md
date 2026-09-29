@@ -304,8 +304,8 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 400 pytest tests with
-    the `oracles` extra installed, and the same tree collects 331 tests without it — the CI lane
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 404 pytest tests with
+    the `oracles` extra installed, and the same tree collects 335 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -535,4 +535,22 @@ never removed just because a later phase shipped.
     rounded value. Closing the class: `test_every_figure_the_note_quotes_is_owned_by_the_artifact`
     re-formats each figure from the artifact and requires it in the note, and
     `test_every_analysis_note_is_guarded_against_the_numbers_it_quotes` fails if any file in
-    `docs/analysis/` has no test that reads it. Related: #63, #76, #71.
+    `docs/analysis/` has no test that reads it. The same blind spot turned out to exist in the
+    present tense for the performance artifact, which is worse: `speedup_vs_pure_python`,
+    `speedup_vs_numpy` and `results_seconds` are volatile *by declaration*
+    (`quantrisk/experiments/evidence.VOLATILE_KEYS`), so the manifest reads any re-run of that file
+    as VOLATILE and certifies nothing about its ratios — while `README.md`,
+    `docs/validation_matrix.md`, `docs/interview_defense.md` and the paper all quote those ratios as
+    the artifact's own. The freeze behind v1.3.0 measured `7.909×`; the matrix described the same
+    file as `8.0–8.4×`, and the README quoted "45.5M vs 5.5M paths/s in the current artifact" for a
+    file reading 45.6M and 5.8M. Ranges written from a handful of runs were also too narrow: the
+    thirteen committed measurements of that file span `7.77×`–`8.70×` and `0.42×`–`0.51×`, not the
+    `5%` and `14%` spreads previously documented, and one re-run taken while another process held a
+    core read `7.35×` — outside every range the documents had ever printed. `docs/reproducibility.md`
+    now owns the range and prints the command that recomputes it from `git log`; the point figures
+    are checked against the artifact by
+    `test_documents_quote_the_performance_figures_the_artifact_actually_holds`, the ranges by
+    `test_the_speedup_ranges_the_documents_quote_are_the_committed_history`, and both are shown able
+    to fail by `test_the_performance_guards_are_not_vacuous`. So a re-run of the speed benchmark now
+    obliges a documentation edit, which is the point: the alternative was a green gate over a stale
+    claim. Related: #63, #76, #71.

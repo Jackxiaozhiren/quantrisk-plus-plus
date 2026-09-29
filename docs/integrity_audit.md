@@ -36,7 +36,7 @@ Revision audited: `v1.0.0` → `9aef2d2`. Date: 2026-09-27.
 |---|---|---|
 | Uncertainty reported | Convergence slopes carry standard errors (−0.99405 ± 0.00313; −0.614 ± 0.089); coverage and reject rates carry exact binomial intervals; Monte Carlo agreement is judged at 4× the combined standard error rather than against a tuned epsilon | Clean in the matrix and artifacts. **One gap found and fixed:** `docs/findings.md` quoted ratios with no uncertainty marker; it now states which numbers are deterministic functions of a seeded DGP and which are sampled, and why the ranges quoted are the substantive spread rather than noise. |
 | No unjustified causal claims | Read every `findings` block in the six experiment artifacts | Clean. The only causal-shaped claim available (estimation cost) is on a DGP whose truth is analytic, and the caveats say the design is what licenses it. |
-| No cherry-picking | Compare each headline against the artifact's own worst case, not its mean; check that failed arms are published | Clean and, in two cases, deliberately unflattering: bootstrap coverage 0.693 against 0.900 nominal is published as the finding, and the C++ engine's 0.42×–0.48× loss to NumPy is in the README. |
+| No cherry-picking | Compare each headline against the artifact's own worst case, not its mean; check that failed arms are published | Clean and, in two cases, deliberately unflattering: bootstrap coverage 0.693 against 0.900 nominal is published as the finding, and the C++ engine's 0.42×–0.51× loss to NumPy is in the README. |
 | Multiple comparisons | Look for a correction across the many nominal levels and arms | **Not present, and defensible** — these are confirmatory checks of pre-specified properties, not a search for significance. Recorded here because a Statistics committee will ask, and the answer was not written down anywhere before this document. |
 | Determinism | Diff every numeric leaf of a full suite re-run against the committed artifacts | Zero result differences; 12 artifacts VOLATILE (timestamp, commit, environment, wall-clock columns), 46 OK |
 
@@ -282,27 +282,6 @@ without it), 194 CTest (547,331 assertions in 193 Catch2 cases), 13/13 suite mem
 MISSING / 0 unlisted / 0 warnings, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the
 40-page report rebuilt and text-verified.
 
-## Addendum — Phase 14, the checks the debt list said to write (2026-09-29)
-
-**33. The architecture document described a package that has never existed, and nothing read it.**
-`docs/architecture.md` listed `python/quantrisk/analytics/` twice — in the table of layers, as
-something the Python tier "owns", and in the layout block — and no such package was ever created: the
-facades are one module per domain, because `quantrisk.pricing` had to stay the same path in Python and
-in the C++ namespace. The file also stated the technical report had thirteen chapters in two release
-notes, where `technical_report.tex` has twelve numbered `\section` commands and one unnumbered artifact
-index. Neither claim is about a number an experiment produced, so no artifact-vs-prose guard covered
-them, and the phase's own answer was to admit it rather than to fix the two sentences and move on:
-`test_every_path_the_architecture_document_declares_exists` parses the layout block, expands and
-rejoins brace groups, and fails on any declared path absent from the tree;
-`test_documents_that_count_the_paper_chapters_agree_with_the_source` counts `\section` in the source and
-checks five documents that restate it. Both were falsified — injecting the phantom path into the block
-is caught by the parser probe, and the layout guard fails on a synthetic missing path. The general form
-is the same as #76 and #77 one level up: a prose file that describes the repository is making claims,
-and a claim nothing reads is a claim that quietly stops being true. The §6 departures that were
-*deliberate* (`data/fixtures/` rather than `data/sample/`, flat facade modules rather than
-`analytics/`, and the runtime-only `data/cache/`) are now written down beside the block that shows them
-instead of living in whoever notices the difference first.
-
 ## Addendum — Phase 13, the refusal converted into a result (2026-09-28)
 
 The paragraph above records Phase 12's state and is left as written: it was true of that revision,
@@ -458,3 +437,55 @@ PyPI 503 on one lane, the convergence guard twice, the reproduction test four ti
 `36521846544` (`f4c1e9ef9e23`, the tagged commit), `36523154776` (`270eb23`), `36525353886`
 (`3938b83`) and `36526049661` (`b9aaa3a`, the head of `main`) are green on all three jobs, the runner's own lines being
 `100% tests passed out of 198`, `319 passed, 4 skipped`, `suite: 14/14 executed and passed`.
+
+## Addendum — Phase 14, the checks the debt list said to write (2026-09-29)
+
+**33. The architecture document described a package that has never existed, and nothing read it.**
+`docs/architecture.md` listed `python/quantrisk/analytics/` twice — in the table of layers, as
+something the Python tier "owns", and in the layout block — and no such package was ever created: the
+facades are one module per domain, because `quantrisk.pricing` had to stay the same path in Python and
+in the C++ namespace. The file also stated the technical report had thirteen chapters in two release
+notes, where `technical_report.tex` has twelve numbered `\section` commands and one unnumbered artifact
+index. Neither claim is about a number an experiment produced, so no artifact-vs-prose guard covered
+them, and the phase's own answer was to admit it rather than to fix the two sentences and move on:
+`test_every_path_the_architecture_document_declares_exists` parses the layout block, expands and
+rejoins brace groups, and fails on any declared path absent from the tree;
+`test_documents_that_count_the_paper_chapters_agree_with_the_source` counts `\section` in the source and
+checks five documents that restate it. Both were falsified — injecting the phantom path into the block
+is caught by the parser probe, and the layout guard fails on a synthetic missing path. The general form
+is the same as #76 and #77 one level up: a prose file that describes the repository is making claims,
+and a claim nothing reads is a claim that quietly stops being true. The §6 departures that were
+*deliberate* (`data/fixtures/` rather than `data/sample/`, flat facade modules rather than
+`analytics/`, and the runtime-only `data/cache/`) are now written down beside the block that shows them
+instead of living in whoever notices the difference first.
+
+**34. The speed artifact regenerates, and four documents quote it in the present tense.**
+`benchmarks/performance/results/monte_carlo_speed.json` is re-frozen by every suite run, and its
+headline fields — `speedup_vs_pure_python`, `speedup_vs_numpy`, `results_seconds` — are volatile *by
+declaration*, listed in `quantrisk/experiments/evidence.VOLATILE_KEYS` because they measure the
+machine rather than the model. The consequence was not thought through: the manifest therefore
+certifies *nothing* about those ratios, while `README.md`, `docs/validation_matrix.md`,
+`docs/interview_defense.md` and §9 of the paper all quote them as the artifact's own current values.
+The first re-run of this release caught the drift. The committed artifact behind v1.3.0 measured
+`7.909×`, and `docs/validation_matrix.md` described that same file as `8.0–8.4×` — the file it
+described was already outside the range printed about it. `README.md` carried "45.5M vs 5.5M paths/s
+in the current artifact" for a file reading 45.6M and 5.8M, and `docs/interview_defense.md` quoted
+means from a run two freezes gone. Second, the ranges themselves were too narrow because they had
+been written from a handful of runs rather than from the artifact's history: the thirteen committed
+measurements span `7.77×`–`8.70×` for C++/Python and `0.42×`–`0.51×` for C++/NumPy, against the `5%`
+and `14%` spreads the documents claimed — and one re-run taken while another process held a core read
+`7.35×`, outside every range this repository has ever printed. That run is deliberately *not* quoted
+as a headline anywhere: its artifact was overwritten by the quiet re-run that follows it, and a number
+whose artifact no longer exists is exactly the prose-only owner #77 describes. `var_backtesting` took
+103.4 s in the same window against 25.2 s in the quiet one, which is how the contention was
+identified rather than assumed. Third, `make check`-style gates were green throughout, because no test
+read that artifact at all. Closing it: `docs/reproducibility.md` now owns the range and prints the
+`git log` command that recomputes it, the other documents point at it or restate it under
+`test_the_speedup_ranges_the_documents_quote_are_the_committed_history`, and the point figures in the
+README, the interview document and the paper's own table are checked against the file by
+`test_documents_quote_the_performance_figures_the_artifact_actually_holds`.
+`test_the_performance_guards_are_not_vacuous` shifts the artifact by 1.5× and narrows one band by
+hand, and requires both guards to reject the documents they had just accepted. The ordering claim
+survives all thirteen measurements — C++ beats an interpreted loop by roughly an order of magnitude
+and loses to vectorised NumPy for terminal-only payoffs — so no conclusion moved; what moved was the
+honesty of the numbers attached to it.

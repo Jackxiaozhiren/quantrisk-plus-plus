@@ -272,12 +272,28 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
     # apart in the first place.
     with_oracles = r"(\d+)\s+pytest\s+tests\s+with\s+the\s+`oracles`\s+extra"
     without_oracles = r"collects\s+(\d+)\s+tests\s+without\s+it"
+    # Two further forms restate the same pair -- a then/now table row and a comment on the offline
+    # reproduction command -- and neither used to be checked, which is how `388` and `319` survived
+    # in `docs/interview_defense.md` after the headline above them had moved. They are checked
+    # against the document's own two figures rather than against this run's total: each belongs to
+    # one environment, so comparing either to `total` would go red on the CI lane for the right
+    # reason.
+    table_pair = r"198\s*/\s*(\d+)\s+now"
+    command_count = r"python -m pytest -q\s+#\s+(\d+)\s+Python tests"
     documents = ("docs/interview_defense.md", "docs/limitations.md", "docs/reproducibility.md")
     for name in documents:
         text = (REPO_ROOT / name).read_text(encoding="utf-8")
         high = re.search(with_oracles, text)
         low = re.search(without_oracles, text)
         assert high and low, f"{name} does not state both Python test counts"
+        for pattern, expected, label in (
+            (table_pair, high.group(1), "the with-oracles table row"),
+            (command_count, low.group(1), "the offline command comment"),
+        ):
+            for value in re.findall(pattern, text):
+                assert value == expected, (
+                    f"{name} states {label} as {value} while its headline says {expected}"
+                )
         documented = int(high.group(1)) if _oracles_present() else int(low.group(1))
         assert documented == total, (
             f"{name} says {documented} for this environment; pytest collects {total}. "
@@ -314,7 +330,7 @@ def _declared_layout(text: str) -> list[str]:
 
 
 def test_documents_that_count_the_paper_chapters_agree_with_the_source() -> None:
-    r"""The technical report's chapter count is restated in five documents, and two had it wrong.
+    r"""The technical report's chapter count is restated in six documents, and two had it wrong.
 
     `paper/technical_report.tex` has twelve numbered `\section` commands plus an unnumbered
     artifact index, and the index is the kind of thing a person counts as a chapter: two release
@@ -329,6 +345,7 @@ def test_documents_that_count_the_paper_chapters_agree_with_the_source() -> None
         "docs/release_notes_v1.1.0.md": r"(\d+|\w+) chapters",
         "docs/release_notes_v1.2.0.md": r"(\d+|\w+) chapters",
         "docs/release_notes_v1.3.0.md": r"(\d+|\w+) chapters",
+        "docs/release_notes_v1.4.0.md": r"(\d+|\w+) chapters",
     }
     for name, pattern in claims.items():
         text = (REPO_ROOT / name).read_text(encoding="utf-8")
@@ -400,7 +417,7 @@ def test_every_analysis_note_is_guarded_against_the_numbers_it_quotes() -> None:
 
 
 def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
-    """`docs/limitations.md` is cited by count in five other documents.
+    """`docs/limitations.md` is cited by count in six other documents.
 
     A count repeated by hand in five places is a fact with five chances to go stale, and it
     does: adding Phase 10's entries left every one of them reading "55". This test makes the
@@ -421,6 +438,8 @@ def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
         # A release note is a living document about the current file, not a record of a past
         # revision: it quoted the count while the count moved. #76 was found by exactly that lag.
         "docs/release_notes_v1.3.0.md": r"all \*\*(\d+) entries\*\*",
+        # ... and the same holds for the note that records #77's third case.
+        "docs/release_notes_v1.4.0.md": r"carries (\d+) numbered entries",
     }
     for name, pattern in claims.items():
         text = (REPO_ROOT / name).read_text(encoding="utf-8")
@@ -818,3 +837,171 @@ def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
         assert all(int(value) == total for value in found), (
             f"{name} says {found}, CTest lists {total}"
         )
+
+
+SPEED_ARTIFACT = REPO_ROOT / "benchmarks/performance/results/monte_carlo_speed.json"
+
+
+# The speed artifact's headline fields are volatile *by declaration* — `speedup_vs_pure_python`,
+# `speedup_vs_numpy` and `results_seconds` sit in `VOLATILE_KEYS` — so the manifest reads any re-run
+# of it as VOLATILE and certifies nothing about its ratios. Four documents nevertheless quote those
+# ratios in the present tense, and that combination is where the digits went stale: the freeze
+# behind v1.3.0 measured 7.909× while docs/validation_matrix.md described the same file as
+# `8.0–8.4×`, and
+# README.md quoted "45.5M vs 5.5M paths/s in the current artifact". A figure with no checker is a
+# figure nobody reads, so the prose is required to carry what the artifact says.
+def _speed_figures(payload: dict[str, Any]) -> dict[str, str]:
+    """The artifact's own timing fields, formatted the way each document quotes them."""
+    timing = payload["results_seconds"]
+
+    def scientific(value: float) -> str:
+        mantissa, exponent = format(value, ".2e").split("e")
+        return f"{mantissa}e{int(exponent)}"
+
+    figures = {
+        "python_ratio": f"{payload['speedup_vs_pure_python']:.2f}",
+        "numpy_ratio": f"{payload['speedup_vs_numpy']:.3f}",
+    }
+    for side in ("cpp", "python", "numpy"):
+        row = timing[side]
+        figures[f"mean_{side}"] = f"{row['mean_seconds']:.6f}"
+        figures[f"std_{side}"] = scientific(row["std_seconds"])
+        figures[f"std6_{side}"] = f"{row['std_seconds']:.6f}"
+        figures[f"pps_{side}"] = format(round(row["paths_per_second_mean"]), ",")
+        figures[f"tex_pps_{side}"] = format(round(row["paths_per_second_mean"]), ",").replace(
+            ",", "{,}"
+        )
+        figures[f"mega_{side}"] = f"{row['paths_per_second_mean'] / 1e6:.1f}"
+    return figures
+
+
+PROSE_FIGURES = {
+    "README.md": (
+        "{python_ratio}×",
+        "{numpy_ratio}×",
+        "{mega_cpp}M vs {mega_python}M paths/s",
+    ),
+    "docs/interview_defense.md": (
+        "{pps_cpp} paths/s",
+        "{pps_python} paths/s",
+        "{pps_numpy} paths/s",
+        "{python_ratio}×",
+        "{numpy_ratio}×",
+        "{mean_cpp} s",
+        "{mean_python} s",
+        "{mean_numpy} s",
+        "{std_cpp}",
+        "{std_python}",
+        "{std_numpy}",
+    ),
+    "paper/technical_report.tex": (
+        "${python_ratio}\\times$",
+        "${numpy_ratio}\\times$",
+        "{mean_cpp} & {std6_cpp} & {tex_pps_cpp}",
+        "{mean_python} & {std6_python} & {tex_pps_python}",
+        "{mean_numpy} & {std6_numpy} & {tex_pps_numpy}",
+    ),
+}
+
+RANGE_DOCUMENTS = ("README.md", "docs/validation_matrix.md", "docs/interview_defense.md")
+
+
+def _committed_speed_ratios() -> list[tuple[float, float]]:
+    """The ratio of every version of the artifact in this repository's history."""
+    relative = str(SPEED_ARTIFACT.relative_to(REPO_ROOT))
+    history = subprocess.run(
+        ["git", "log", "--format=%H", "--", relative],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if history.returncode != 0:
+        raise RuntimeError(f"`git log` could not read {relative}: {history.stderr[:200]}")
+    revisions = []
+    for sha in history.stdout.split():
+        shown = subprocess.run(
+            ["git", "show", f"{sha}:{relative}"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if shown.returncode != 0:
+            continue
+        payload = json.loads(shown.stdout)
+        revisions.append((payload["speedup_vs_pure_python"], payload["speedup_vs_numpy"]))
+    return revisions
+
+
+def _documented_ranges(text: str) -> set[tuple[float, float]]:
+    """Every `low–high` decimal pair the document states, whatever it is a range of."""
+    return {
+        (float(low), float(high))
+        for low, high in re.findall(r"(\d+\.\d+)[^\d\n]{1,4}(\d+\.\d+)", text)
+    }
+
+
+def test_documents_quote_the_performance_figures_the_artifact_actually_holds() -> None:
+    """A ratio that regenerates on every run still has to match the file it claims to quote."""
+    figures = _speed_figures(json.loads(SPEED_ARTIFACT.read_text(encoding="utf-8")))
+    for name, claims in PROSE_FIGURES.items():
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        for claim in claims:
+            expected = claim.format(**figures)
+            assert expected in text, (
+                f"{name} does not carry {expected!r}, which is what "
+                f"{SPEED_ARTIFACT.relative_to(REPO_ROOT)} measures"
+            )
+
+
+def test_the_speedup_ranges_the_documents_quote_are_the_committed_history() -> None:
+    """The ranges are claims about a sample, and the sample is the git history of the artifact."""
+    revisions = _committed_speed_ratios()
+    if not revisions:
+        pytest.skip("this clone holds no history for the artifact, so no range can be derived")
+    current = json.loads(SPEED_ARTIFACT.read_text(encoding="utf-8"))
+    sample = [
+        (python_ratio, numpy_ratio)
+        for python_ratio, numpy_ratio in [
+            *revisions,
+            (current["speedup_vs_pure_python"], current["speedup_vs_numpy"]),
+        ]
+    ]
+    python, numpy = [pair[0] for pair in sample], [pair[1] for pair in sample]
+    expected = {
+        (round(min(python), 2), round(max(python), 2)),
+        (round(min(numpy), 2), round(max(numpy), 2)),
+    }
+    for name in RANGE_DOCUMENTS:
+        documented = _documented_ranges((REPO_ROOT / name).read_text(encoding="utf-8"))
+        for low, high in expected:
+            assert (low, high) in documented, (
+                f"{name} states no `{low:.2f}–{high:.2f}` range, the spread of the "
+                f"{len(sample)} measurements this repository has"
+            )
+
+
+def test_the_performance_guards_are_not_vacuous() -> None:
+    """Each guard has to be able to fail, and say so: positive control first, then the shift."""
+    payload = json.loads(SPEED_ARTIFACT.read_text(encoding="utf-8"))
+    figures = _speed_figures(payload)
+    payload["speedup_vs_pure_python"] *= 1.5
+    payload["results_seconds"]["cpp"]["mean_seconds"] *= 1.5
+    shifted = _speed_figures(payload)
+    assert shifted["python_ratio"] != figures["python_ratio"]
+
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    assert f"{figures['python_ratio']}×" in readme
+    assert f"{shifted['python_ratio']}×" not in readme
+
+    tex = (REPO_ROOT / "paper/technical_report.tex").read_text(encoding="utf-8")
+    cell = f"{figures['mean_cpp']} & {figures['std6_cpp']} & {figures['tex_pps_cpp']}"
+    assert cell in tex
+    assert cell.replace(figures["mean_cpp"], shifted["mean_cpp"]) not in tex
+
+    matrix = (REPO_ROOT / "docs/validation_matrix.md").read_text(encoding="utf-8")
+    assert (7.77, 8.7) in _documented_ranges(matrix)
+    narrowed = matrix.replace("7.77", "8.00").replace("8.70", "8.40")
+    assert narrowed != matrix, "the substitution did not land, so it proved nothing"
+    assert (7.77, 8.7) not in _documented_ranges(narrowed)

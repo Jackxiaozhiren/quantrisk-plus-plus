@@ -1,42 +1,64 @@
 {
   "schema": "quantrisk-evidence-manifest/1",
-  "generated_utc": "2026-09-29T07:24:40+00:00",
+  "generated_utc": "2026-09-29T09:26:17+00:00",
   "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
   "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with scripts/verify_evidence_manifest.py.",
   "repository": {
-    "git_commit": "8f665582ac7ed6115a9e9b9f3da1d756b13e6b2a",
-    "git_describe": "v1.3.0-7-g8f66558",
+    "git_commit": "f526171eac4c98ed1c9145d4a48a559b050a5d8a",
+    "git_describe": "v1.3.0-10-gf526171",
     "working_tree_dirty": true,
     "uncommitted_paths": [
-      "EADME.md",
-      "docs/analysis/delta_gamma_error_bound.md",
+      "CMakeLists.txt",
+      "ITATION.cff",
+      "README.md",
+      "benchmarks/performance/results/monte_carlo_speed.json",
+      "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
+      "benchmarks/quantlib/results/monte_carlo_validation.json",
+      "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
+      "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "benchmarks/suite/results/suite_headline.csv",
+      "benchmarks/suite/results/suite_run.json",
+      "benchmarks/suite/results/suite_summary.md",
       "docs/findings.md",
       "docs/integrity_audit.md",
       "docs/interview_defense.md",
       "docs/limitations.md",
       "docs/phase_reports/phase-14-verification-debt.md",
-      "docs/project_scope.md",
-      "docs/release_notes_v1.3.0.md",
+      "docs/portfolio_audit.md",
+      "docs/release_notes_v1.4.0.md",
       "docs/reproducibility.md",
       "docs/validation_matrix.md",
+      "evidence/manifest.json",
+      "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
+      "experiments/monte_carlo_convergence/results/convergence.csv",
+      "experiments/monte_carlo_convergence/results/summary.json",
+      "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
+      "experiments/pricing_validation/results/summary.json",
+      "experiments/real_data_risk_study/results/real_data_risk_study.json",
+      "experiments/stress_testing/results/stress_testing_study.json",
+      "experiments/two_factor_error_bound/results/two_factor_bound.json",
+      "experiments/var_backtesting/results/var_backtesting_validation.json",
+      "experiments/variance_reduction/results/summary.json",
+      "experiments/variance_reduction/results/variance_by_method.csv",
       "paper/technical_report.pdf",
       "paper/technical_report.tex",
+      "pyproject.toml",
       "tests/python/test_artifact_metadata.py",
-      "tests/python/test_extension_surface_parity.py",
-      "tests/python/test_linearisation_bound.py"
+      "tests/python/test_research_api.py",
+      "uv.lock"
     ]
   },
   "environment": {
-    "quantrisk_version": "1.3.0",
-    "git_commit_at_run": "8f665582ac7e",
-    "binary_git_commit": "45b550974fa3",
-    "provenance": "ran from 8f665582ac7e plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
+    "quantrisk_version": "1.4.0",
+    "git_commit_at_run": "f526171eac4c",
+    "binary_git_commit": "f526171eac4c",
+    "provenance": "ran from f526171eac4c plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at f526171eac4c",
     "python_platform": "macOS-27.0.1-arm64-arm-64bit",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "packages": {
       "python": "3.12.14",
-      "quantrisk": "1.3.0",
+      "quantrisk": "1.4.0",
       "numpy": "2.5.3",
       "scipy": "1.18.1",
       "pandas": "3.0.6",
@@ -64,17 +86,17 @@
       "content_sha256": "47a37014def6c00212187b8738abbeb744d1269d1ddfa2913324ae9dd9005653",
       "bytes": 68261,
       "generated_by_command": "uv run python monte_carlo_validation.py --paths 200000",
-      "generated_utc": "2026-09-29T04:57:35+00:00",
+      "generated_utc": "2026-09-29T08:58:03+00:00",
       "command_recorded_in": "benchmarks/quantlib/results/monte_carlo_validation.json"
     },
     {
       "path": "benchmarks/quantlib/results/monte_carlo_validation.json",
       "category": "correctness_benchmark",
-      "sha256": "cca0642a9f97f282ac4b3c03e9aa4da2789913d9cf3224c3ff1cecdd6708b360",
+      "sha256": "cefbddc2ada8127a3cc2d403ae3ecfa0bef3420e2cfc6c93bbb10b3eb5afd892",
       "content_sha256": "f0e9189fcd587cd836cf3d7ec178d4ca1817000187913c228b9d71abbabbed93",
-      "bytes": 3447,
+      "bytes": 4271,
       "generated_by_command": "uv run python monte_carlo_validation.py --paths 200000",
-      "generated_utc": "2026-09-29T04:57:35+00:00",
+      "generated_utc": "2026-09-29T08:58:03+00:00",
       "command_recorded_in": "benchmarks/quantlib/results/monte_carlo_validation.json"
     },
     {
@@ -84,17 +106,17 @@
       "content_sha256": "f20375d9dd56b7d515203336064c4359b5279d642dac24f388449f4f69cd8eca",
       "bytes": 6478,
       "generated_by_command": "uv run python monte_carlo_validation.py --paths 200000",
-      "generated_utc": "2026-09-29T04:57:35+00:00",
+      "generated_utc": "2026-09-29T08:58:03+00:00",
       "command_recorded_in": "benchmarks/quantlib/results/monte_carlo_validation.json"
     },
     {
       "path": "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
       "category": "correctness_benchmark",
-      "sha256": "5b348130b3cc8357eb49e7e874fccdacf7bd77797d994b3883bb1d57ac7f4327",
+      "sha256": "1212cf1ab5c8c85556774eddf018f68aae8cf2f3b5ff95380f9813438ab74a97",
       "content_sha256": "d5f69b053621b0597c2ccb1d37e1100921fbd24abce7c5cd0fffbd23ae653c5f",
-      "bytes": 3191,
+      "bytes": 3950,
       "generated_by_command": "uv run python path_dependent_validation.py",
-      "generated_utc": "2026-09-29T04:57:55+00:00",
+      "generated_utc": "2026-09-29T08:58:26+00:00",
       "command_recorded_in": "benchmarks/quantlib/results/path_dependent_vs_quantlib.json"
     },
     {
@@ -104,17 +126,17 @@
       "content_sha256": "433a428d1f23132648dfd8292813535c8df0cdff0925ae325e7d4872210e49d5",
       "bytes": 3891484,
       "generated_by_command": "uv run python monte_carlo_validation.py --paths 200000",
-      "generated_utc": "2026-09-29T04:57:35+00:00",
+      "generated_utc": "2026-09-29T08:58:03+00:00",
       "command_recorded_in": "benchmarks/quantlib/results/monte_carlo_validation.json"
     },
     {
       "path": "benchmarks/quantlib/results/pricing_vs_quantlib.json",
       "category": "correctness_benchmark",
-      "sha256": "f751c01c9e0bc5fe977989ab3a4e1ab1627b60b7c4a97f9e56e1c6db21910714",
+      "sha256": "d8ca36b14f20941248abc9089ae64c54d991379d26b1c9f9bb65ae967bb6a89a",
       "content_sha256": "a33fe16fad45a74f464bf3a42401bc535e343d6eb9d9af37d9607d55ba394394",
-      "bytes": 4090,
+      "bytes": 4976,
       "generated_by_command": "benchmarks/quantlib/pricing_validation.py",
-      "generated_utc": "2026-09-29T04:57:33+00:00",
+      "generated_utc": "2026-09-29T08:58:01+00:00",
       "command_recorded_in": "benchmarks/quantlib/results/pricing_vs_quantlib.json"
     },
     {
@@ -124,27 +146,27 @@
       "content_sha256": "89aea79afe255f07dd3be3fafc089cbda71008172f1666a58a11189dd0bf3938",
       "bytes": 79615,
       "generated_by_command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
-      "generated_utc": "2026-09-29T04:57:59+00:00",
+      "generated_utc": "2026-09-29T08:58:31+00:00",
       "command_recorded_in": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json"
     },
     {
       "path": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "category": "correctness_benchmark",
-      "sha256": "cca9503d1845ccb7d0acc81120872407583c7c965533556fa1eb115025dc573b",
-      "content_sha256": "45f303d1a4bc91a74ce0ca4ad6a1fb33f7c1bb3c3da8a59d102a4cefcf535d41",
-      "bytes": 7517,
+      "sha256": "27732b6c70912c99a7d3e185a96afd5d7392b8c28575ab0bc8547403ccb3897c",
+      "content_sha256": "4c9151ee1947e93e09341b8c841dc157340fa91353bc5b50f4456fac4f1a3d40",
+      "bytes": 8207,
       "generated_by_command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
-      "generated_utc": "2026-09-29T04:57:59+00:00",
+      "generated_utc": "2026-09-29T08:58:31+00:00",
       "command_recorded_in": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json"
     },
     {
       "path": "benchmarks/performance/results/monte_carlo_speed.json",
       "category": "performance_benchmark",
-      "sha256": "ad5a790952d3f20691743c21519728a704b789bcf82bbe9f20e41e9a8f471690",
+      "sha256": "919ba64c660371d0e974e7d3bb9c425e99f498d1da6379b5ad4a97373132523e",
       "content_sha256": "7fff2c881a93e90578a1e85a52dcc9aedd41d7a864a7ec445b6c9bc097b5292a",
-      "bytes": 5134,
+      "bytes": 5742,
       "generated_by_command": "uv run python performance monte_carlo_speed.py",
-      "generated_utc": "2026-09-29T04:57:59+00:00",
+      "generated_utc": "2026-09-29T08:58:31+00:00",
       "command_recorded_in": "benchmarks/performance/results/monte_carlo_speed.json"
     },
     {
@@ -154,7 +176,7 @@
       "content_sha256": "61403cf1b6b206f330cc2b214727d2845b576bfa5992cfd64f9daf94e2ca8404",
       "bytes": 3742,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
@@ -164,7 +186,7 @@
       "content_sha256": null,
       "bytes": 31357,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
@@ -174,7 +196,7 @@
       "content_sha256": "5a3ec2ad06f29d23758deec9830e5c45ec5e31b735d4d0246ba582178c53c399",
       "bytes": 4450,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
@@ -184,7 +206,7 @@
       "content_sha256": null,
       "bytes": 77385,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
@@ -194,7 +216,7 @@
       "content_sha256": null,
       "bytes": 33205,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
@@ -204,7 +226,7 @@
       "content_sha256": null,
       "bytes": 39412,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
@@ -214,7 +236,7 @@
       "content_sha256": null,
       "bytes": 36799,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
@@ -224,7 +246,7 @@
       "content_sha256": null,
       "bytes": 42708,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
@@ -234,27 +256,27 @@
       "content_sha256": "58f5026861303f0716264aa207a2a5dab6b845c378eb32509c06b56e1b4b3305",
       "bytes": 10734,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
       "path": "experiments/pricing_validation/results/summary.json",
       "category": "statistical_experiment",
-      "sha256": "e348a3f7b71d7a53b313e6412fd3709f76f601e7e99b417e8399eccabd7d56c1",
+      "sha256": "3917c769d4dbfbcd0b3c0897b4e5323e8bf42095c7d8845e21d5a07c66dff8bd",
       "content_sha256": "356d6b5e694a32271fa12ae95b5fe111d0e73e4e94d2a5cdd894bb7795b430d5",
-      "bytes": 5965,
+      "bytes": 6520,
       "generated_by_command": "uv run python pricing_validation run.py",
-      "generated_utc": "2026-09-29T04:58:00+00:00",
+      "generated_utc": "2026-09-29T08:58:32+00:00",
       "command_recorded_in": "experiments/pricing_validation/results/summary.json"
     },
     {
       "path": "experiments/monte_carlo_convergence/results/convergence.csv",
       "category": "statistical_experiment",
-      "sha256": "900bcdb8b0012c2acf28fd3f6026b7112d322baa03cf6a52b830d35719a2a94c",
+      "sha256": "9103e30ae59fef19d2b5413e4c38cb67d3c4fcc4e5eb7eeacb5337617ff20a3c",
       "content_sha256": "99111edfeea8d37a67ea107eac70486db62c6576e9a41cdcd43239c4d17eb3d8",
-      "bytes": 4521,
+      "bytes": 4523,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:03+00:00",
+      "generated_utc": "2026-09-29T08:58:35+00:00",
       "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
     },
     {
@@ -264,7 +286,7 @@
       "content_sha256": null,
       "bytes": 66850,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:03+00:00",
+      "generated_utc": "2026-09-29T08:58:35+00:00",
       "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
     },
     {
@@ -274,7 +296,7 @@
       "content_sha256": "4ac6926cd69957ffc502715c69b0d30664be109ea041d9938fc51dbf83df77bf",
       "bytes": 702,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:03+00:00",
+      "generated_utc": "2026-09-29T08:58:35+00:00",
       "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
     },
     {
@@ -284,17 +306,17 @@
       "content_sha256": null,
       "bytes": 41391,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:03+00:00",
+      "generated_utc": "2026-09-29T08:58:35+00:00",
       "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
     },
     {
       "path": "experiments/monte_carlo_convergence/results/summary.json",
       "category": "statistical_experiment",
-      "sha256": "20993f8fcbb06d8649804a97209d5b84e204d44a5ac99b5200e95d7563ac7899",
+      "sha256": "07fb645e67b9094999c34e74be1a7c03d9266025bb9a8f022670cf01f807f91e",
       "content_sha256": "b5d1ba931c895927a79b9e822ffa083bd68e1be98eb60cbe2830ae9e396ab925",
-      "bytes": 9293,
+      "bytes": 9718,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:03+00:00",
+      "generated_utc": "2026-09-29T08:58:35+00:00",
       "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
     },
     {
@@ -304,7 +326,7 @@
       "content_sha256": "1013ee8dd4cc2f9c053816ac56689856498a24c7ea74cd9c37504f86c0b9b1fa",
       "bytes": 486,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:03+00:00",
+      "generated_utc": "2026-09-29T08:58:35+00:00",
       "command_recorded_in": "experiments/monte_carlo_convergence/results/summary.json"
     },
     {
@@ -314,7 +336,7 @@
       "content_sha256": "98c6119d85cbd4e2c343e7f311147a5b07970af056922513c994bdb51432df3d",
       "bytes": 2849,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:04+00:00",
+      "generated_utc": "2026-09-29T08:58:37+00:00",
       "command_recorded_in": "experiments/variance_reduction/results/summary.json"
     },
     {
@@ -324,27 +346,27 @@
       "content_sha256": null,
       "bytes": 47936,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:04+00:00",
+      "generated_utc": "2026-09-29T08:58:37+00:00",
       "command_recorded_in": "experiments/variance_reduction/results/summary.json"
     },
     {
       "path": "experiments/variance_reduction/results/summary.json",
       "category": "statistical_experiment",
-      "sha256": "b2fa6c170ca53efd4964a2af8a7a1f55615c6739c4ec33fb5d2fdac954f653c7",
+      "sha256": "0243fb64bba86629f5264e7a5264af81d6e0ee24a6e5216a5896f0b81292bd01",
       "content_sha256": "e2b0132ab5f6bcebed6847532257d4c536b9d094b834ef1c94a8db58a2bbda16",
-      "bytes": 5570,
+      "bytes": 5858,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:04+00:00",
+      "generated_utc": "2026-09-29T08:58:37+00:00",
       "command_recorded_in": "experiments/variance_reduction/results/summary.json"
     },
     {
       "path": "experiments/variance_reduction/results/variance_by_method.csv",
       "category": "statistical_experiment",
-      "sha256": "d880d8bcca70cd0f7df1e31b1ff16e0d8e673a7e43231c60608e74749ad43753",
+      "sha256": "f7b84420259989988bc1060b5559eafb0fc46865e0724fe52af55a65f0aa2d7b",
       "content_sha256": "ade16162f90a29ea703426ea86b080f48a241fd94fda3dc3a8a62b4d9db1806c",
       "bytes": 3711,
       "generated_by_command": "uv run python run.py",
-      "generated_utc": "2026-09-29T04:58:04+00:00",
+      "generated_utc": "2026-09-29T08:58:37+00:00",
       "command_recorded_in": "experiments/variance_reduction/results/summary.json"
     },
     {
@@ -354,7 +376,7 @@
       "content_sha256": "4df47956795aed806c14d66032887c77de521f35083884f20cdef3e0ece943e7",
       "bytes": 781,
       "generated_by_command": "uv run python experiments/var_backtesting/run.py",
-      "generated_utc": "2026-09-29T04:58:27+00:00",
+      "generated_utc": "2026-09-29T08:59:02+00:00",
       "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
     },
     {
@@ -364,7 +386,7 @@
       "content_sha256": "c11bbb7c934d200b76fb7723c47261cc0c604dfd67eed43688016247ff9424e7",
       "bytes": 3041,
       "generated_by_command": "uv run python experiments/var_backtesting/run.py",
-      "generated_utc": "2026-09-29T04:58:27+00:00",
+      "generated_utc": "2026-09-29T08:59:02+00:00",
       "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
     },
     {
@@ -374,7 +396,7 @@
       "content_sha256": "ef0e1f6be3f4fb89b6d6f966342b3940f4e7e6440de0705019cdf3514563a676",
       "bytes": 11530,
       "generated_by_command": "uv run python experiments/var_backtesting/run.py",
-      "generated_utc": "2026-09-29T04:58:27+00:00",
+      "generated_utc": "2026-09-29T08:59:02+00:00",
       "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
     },
     {
@@ -384,7 +406,7 @@
       "content_sha256": null,
       "bytes": 42874,
       "generated_by_command": "uv run python experiments/var_backtesting/run.py",
-      "generated_utc": "2026-09-29T04:58:27+00:00",
+      "generated_utc": "2026-09-29T08:59:02+00:00",
       "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
     },
     {
@@ -394,17 +416,17 @@
       "content_sha256": null,
       "bytes": 50304,
       "generated_by_command": "uv run python experiments/var_backtesting/run.py",
-      "generated_utc": "2026-09-29T04:58:27+00:00",
+      "generated_utc": "2026-09-29T08:59:02+00:00",
       "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
     },
     {
       "path": "experiments/var_backtesting/results/var_backtesting_validation.json",
       "category": "statistical_experiment",
-      "sha256": "dce09774469fa55498ae54d340d8316c3e7950327c6691e5b31d725dd5e3b255",
-      "content_sha256": "de2684e28292949e21c350babf7dc3e639dc7085a12ceb788039d5eb9c510e7f",
-      "bytes": 7942,
+      "sha256": "dcab40fcb9b12e7ced81a23365f3c056aa2a82b666474ee9befb958ccdb072cb",
+      "content_sha256": "f67a59b7a1fe87e13899b0d5eb243b42cd58b725ee7cbffafee95c455574cdaa",
+      "bytes": 8169,
       "generated_by_command": "uv run python experiments/var_backtesting/run.py",
-      "generated_utc": "2026-09-29T04:58:27+00:00",
+      "generated_utc": "2026-09-29T08:59:02+00:00",
       "command_recorded_in": "experiments/var_backtesting/results/var_backtesting_validation.json"
     },
     {
@@ -414,7 +436,7 @@
       "content_sha256": null,
       "bytes": 64942,
       "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
-      "generated_utc": "2026-09-29T04:58:29+00:00",
+      "generated_utc": "2026-09-29T08:59:05+00:00",
       "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
     },
     {
@@ -424,7 +446,7 @@
       "content_sha256": "fcf0ab1e6aa5cf6ca6aa9425236d1288bae1eae7dd2b2dd5df4bf4381eca194a",
       "bytes": 404029,
       "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
-      "generated_utc": "2026-09-29T04:58:29+00:00",
+      "generated_utc": "2026-09-29T08:59:05+00:00",
       "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
     },
     {
@@ -434,17 +456,17 @@
       "content_sha256": "6c245a0892588bf3f6bcf85e3b7c071aad3adb1bc682a12bbf0dc104928e1dd1",
       "bytes": 40865,
       "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
-      "generated_utc": "2026-09-29T04:58:29+00:00",
+      "generated_utc": "2026-09-29T08:59:05+00:00",
       "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
     },
     {
       "path": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
       "category": "statistical_experiment",
-      "sha256": "fdcae84a029080ae7925cfd0a57be049c2f1a41c934651536e4f18de5f037f7a",
+      "sha256": "f73134e15a11a21f0c49dab53790e2e349a2ac03a3b45ec7889034ea0f41dc21",
       "content_sha256": "3768b7cde83c8bab1009f4fade632a5d51ae5e0c954dcbffd8c56e005737c4b1",
-      "bytes": 28628,
+      "bytes": 28778,
       "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
-      "generated_utc": "2026-09-29T04:58:29+00:00",
+      "generated_utc": "2026-09-29T08:59:05+00:00",
       "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
     },
     {
@@ -454,7 +476,7 @@
       "content_sha256": "c8562d27a87951e0c35872039e12d3d1b4ef9d8cd3db888ce61d5164e0a9c7ac",
       "bytes": 5887,
       "generated_by_command": "uv run python experiments/portfolio_optimization/run.py",
-      "generated_utc": "2026-09-29T04:58:29+00:00",
+      "generated_utc": "2026-09-29T08:59:05+00:00",
       "command_recorded_in": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json"
     },
     {
@@ -464,7 +486,7 @@
       "content_sha256": "90fee00f83e273739d6ca47e9b478ebc46efc2c13c6d5b39a4ebebb77cf91b41",
       "bytes": 1210,
       "generated_by_command": "uv run python experiments/stress_testing/run.py",
-      "generated_utc": "2026-09-29T04:58:44+00:00",
+      "generated_utc": "2026-09-29T08:59:22+00:00",
       "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
     },
     {
@@ -474,7 +496,7 @@
       "content_sha256": null,
       "bytes": 43839,
       "generated_by_command": "uv run python experiments/stress_testing/run.py",
-      "generated_utc": "2026-09-29T04:58:44+00:00",
+      "generated_utc": "2026-09-29T08:59:22+00:00",
       "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
     },
     {
@@ -484,17 +506,17 @@
       "content_sha256": "d3f6a41fa3e1ee13bd35f726fe1a20c2b7fd0d440f538159aa23cf5295f72f01",
       "bytes": 7772,
       "generated_by_command": "uv run python experiments/stress_testing/run.py",
-      "generated_utc": "2026-09-29T04:58:44+00:00",
+      "generated_utc": "2026-09-29T08:59:22+00:00",
       "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
     },
     {
       "path": "experiments/stress_testing/results/stress_testing_study.json",
       "category": "statistical_experiment",
-      "sha256": "149e3ca123cf2ffba0f530a80e1444b191490e23a8ffd41340e383dcbf023c44",
+      "sha256": "947d0363dc422c213e55e0b1fa381877afeb235a5b21fc694e0d033d1a5d0195",
       "content_sha256": "1348184c99dd5893251ed7028b8c40595108395137e12e87b822e3f214aac653",
-      "bytes": 11239,
+      "bytes": 11217,
       "generated_by_command": "uv run python experiments/stress_testing/run.py",
-      "generated_utc": "2026-09-29T04:58:44+00:00",
+      "generated_utc": "2026-09-29T08:59:22+00:00",
       "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
     },
     {
@@ -504,7 +526,7 @@
       "content_sha256": "ca5f7a668d77bb97e65f015d2efee4e86bc6892bbf0bb49a5d84669f68708d6e",
       "bytes": 2693,
       "generated_by_command": "uv run python experiments/stress_testing/run.py",
-      "generated_utc": "2026-09-29T04:58:44+00:00",
+      "generated_utc": "2026-09-29T08:59:22+00:00",
       "command_recorded_in": "experiments/stress_testing/results/stress_testing_study.json"
     },
     {
@@ -514,17 +536,17 @@
       "content_sha256": "f47b89e21a167405bea33d76ab4df4d3ebe89afe8868f1a69a4c29abd29cf870",
       "bytes": 79811,
       "generated_by_command": "uv run python experiments/real_data_risk_study/run.py",
-      "generated_utc": "2026-09-29T04:58:45+00:00",
+      "generated_utc": "2026-09-29T08:59:24+00:00",
       "command_recorded_in": "experiments/real_data_risk_study/results/real_data_risk_study.json"
     },
     {
       "path": "experiments/real_data_risk_study/results/real_data_risk_study.json",
       "category": "statistical_experiment",
-      "sha256": "ac099733f815d37e9d3562670d93689f3194265b80357e0bd80c892657ce4d1c",
-      "content_sha256": "a7dc9fcb0e5da36196fee768cd372e619e8cde1650d6aef904919fae5def4cfd",
-      "bytes": 25682,
+      "sha256": "b72c7229aec28211fdd3ddea59a5fca9aceb86f04702d2b40949c2dbd496bdbb",
+      "content_sha256": "9bdc1462f421fca4788f917d104ee50d0f43141784baeda8fd1e12bb12a579f7",
+      "bytes": 25590,
       "generated_by_command": "uv run python experiments/real_data_risk_study/run.py",
-      "generated_utc": "2026-09-29T04:58:45+00:00",
+      "generated_utc": "2026-09-29T08:59:24+00:00",
       "command_recorded_in": "experiments/real_data_risk_study/results/real_data_risk_study.json"
     },
     {
@@ -534,7 +556,7 @@
       "content_sha256": null,
       "bytes": 74454,
       "generated_by_command": "uv run python experiments/real_data_risk_study/run.py",
-      "generated_utc": "2026-09-29T04:58:45+00:00",
+      "generated_utc": "2026-09-29T08:59:24+00:00",
       "command_recorded_in": "experiments/real_data_risk_study/results/real_data_risk_study.json"
     },
     {
@@ -544,7 +566,7 @@
       "content_sha256": "228a42e4680a281e5b6f7f544f4c8647bb8561f40621eb254edc64878d8c7c59",
       "bytes": 255605,
       "generated_by_command": "uv run python experiments/real_data_risk_study/run.py",
-      "generated_utc": "2026-09-29T04:58:45+00:00",
+      "generated_utc": "2026-09-29T08:59:24+00:00",
       "command_recorded_in": "experiments/real_data_risk_study/results/real_data_risk_study.json"
     },
     {
@@ -554,7 +576,7 @@
       "content_sha256": "16eadfe0f414f7a4731c7d4487a33d114d548a5176640b0fecbfe2be24f532df",
       "bytes": 5863,
       "generated_by_command": "uv run python experiments/linearisation_error_bound/run.py",
-      "generated_utc": "2026-09-29T04:58:34+00:00",
+      "generated_utc": "2026-09-29T08:59:10+00:00",
       "command_recorded_in": "experiments/linearisation_error_bound/results/linearisation_error_bound.json"
     },
     {
@@ -564,17 +586,17 @@
       "content_sha256": null,
       "bytes": 224162,
       "generated_by_command": "uv run python experiments/linearisation_error_bound/run.py",
-      "generated_utc": "2026-09-29T04:58:34+00:00",
+      "generated_utc": "2026-09-29T08:59:10+00:00",
       "command_recorded_in": "experiments/linearisation_error_bound/results/linearisation_error_bound.json"
     },
     {
       "path": "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
       "category": "statistical_experiment",
-      "sha256": "d4e8afefb4a0c58ec39c182129267edf1a84b7ef85ed6052e811b449008f35b1",
-      "content_sha256": "4b7dd9e36512ed88f94f9cde2bf4d696c67b85cea04e0e3fe82392259136bcdc",
-      "bytes": 28189,
+      "sha256": "3adde0e749b2485b96da48c8f071d4acf956bdce69f6392e8e09f90daa7e17b1",
+      "content_sha256": "4cb62030992c9940fac42a4b0940a9d2ced2c4d072599f8f3a27401592b3d2ff",
+      "bytes": 28253,
       "generated_by_command": "uv run python experiments/linearisation_error_bound/run.py",
-      "generated_utc": "2026-09-29T04:58:34+00:00",
+      "generated_utc": "2026-09-29T08:59:10+00:00",
       "command_recorded_in": "experiments/linearisation_error_bound/results/linearisation_error_bound.json"
     },
     {
@@ -584,7 +606,7 @@
       "content_sha256": "9522536ec7c0e271df3fcbadc21ac30aa4a18dc2c0d56785572adc7dcfdfb2f0",
       "bytes": 554,
       "generated_by_command": "uv run python experiments/two_factor_error_bound/run.py",
-      "generated_utc": "2026-09-29T04:58:40+00:00",
+      "generated_utc": "2026-09-29T08:59:18+00:00",
       "command_recorded_in": "experiments/two_factor_error_bound/results/two_factor_bound.json"
     },
     {
@@ -594,17 +616,17 @@
       "content_sha256": "880906a8416ec22c00b6e63d2743816c33fe96d020493b3ee444a01ec9a18876",
       "bytes": 57268,
       "generated_by_command": "uv run python experiments/two_factor_error_bound/run.py",
-      "generated_utc": "2026-09-29T04:58:40+00:00",
+      "generated_utc": "2026-09-29T08:59:18+00:00",
       "command_recorded_in": "experiments/two_factor_error_bound/results/two_factor_bound.json"
     },
     {
       "path": "experiments/two_factor_error_bound/results/two_factor_bound.json",
       "category": "statistical_experiment",
-      "sha256": "3448caa7ae5cb5dd9e2a36b17db4a7f47dc6c0f82fbd70c2ac6f48406d47fec7",
-      "content_sha256": "734e838207ecb6f880a6d1fb1e7a4b4ca64eb0e780bff80aaea439169e6dbc45",
-      "bytes": 191109,
+      "sha256": "c1950918938d178ee9cae3cf08c1ee1efc82f14bd14b88d04749503859f2e6dd",
+      "content_sha256": "91af6c3a0285c77b9486b5140e678f0d511b33357c306eaf54bcc3b9d6e0fa1c",
+      "bytes": 191087,
       "generated_by_command": "uv run python experiments/two_factor_error_bound/run.py",
-      "generated_utc": "2026-09-29T04:58:40+00:00",
+      "generated_utc": "2026-09-29T08:59:18+00:00",
       "command_recorded_in": "experiments/two_factor_error_bound/results/two_factor_bound.json"
     },
     {
@@ -614,37 +636,37 @@
       "content_sha256": null,
       "bytes": 145572,
       "generated_by_command": "uv run python experiments/two_factor_error_bound/run.py",
-      "generated_utc": "2026-09-29T04:58:40+00:00",
+      "generated_utc": "2026-09-29T08:59:18+00:00",
       "command_recorded_in": "experiments/two_factor_error_bound/results/two_factor_bound.json"
     },
     {
       "path": "benchmarks/suite/results/suite_headline.csv",
       "category": "suite_aggregate",
-      "sha256": "6f219e4f16a3c6ebcb593fae91da1c07c0cd5e02aac36de410a3e1983602cf72",
-      "content_sha256": "6b2900e5026330a66e9f72321a8a572f6e5273c53e81ed4c74af34bde9b5d3a5",
-      "bytes": 26202,
+      "sha256": "f400d9cc647582832a57bd9bbb6ab14d243ae835e48ed2c6dfce36dc07e5ea2c",
+      "content_sha256": "777a3bef524f970159595ec2facdc2311ba7fa95e92f7de77a1853b0d9d78054",
+      "bytes": 26200,
       "generated_by_command": "uv run python scripts/run_benchmark_suite.py --require-all",
-      "generated_utc": "2026-09-29T04:58:46+00:00",
+      "generated_utc": "2026-09-29T08:59:25+00:00",
       "command_recorded_in": "benchmarks/suite/results/suite_run.json"
     },
     {
       "path": "benchmarks/suite/results/suite_run.json",
       "category": "suite_aggregate",
-      "sha256": "f44b5dbe40073f90d3e8c284ab7b42d0453ef451a96c586dc363f010ea9ee4b2",
-      "content_sha256": "e35a1c2eb87544b1e1058476fbda4b3d680a7cb4634c74289e8490f207954276",
-      "bytes": 39931,
+      "sha256": "45e1b4b3298171c166eabe6b35668294aadcce9ac001ba7aa55a584c841d2b73",
+      "content_sha256": "456abcb8f4ddbdcb638808a346341d359c185ffbf82a595c7ee93b1deec0ca30",
+      "bytes": 39762,
       "generated_by_command": "uv run python scripts/run_benchmark_suite.py --require-all",
-      "generated_utc": "2026-09-29T04:58:46+00:00",
+      "generated_utc": "2026-09-29T08:59:25+00:00",
       "command_recorded_in": "benchmarks/suite/results/suite_run.json"
     },
     {
       "path": "benchmarks/suite/results/suite_summary.md",
       "category": "suite_aggregate",
-      "sha256": "5b038ab596d53e05f70c5993e9b92b9c7c85670e684f4159a1ad65261b0aff30",
+      "sha256": "69cd615d489a610f995f34cf38e281f1d76ac3ed73b3127d769f86e053d4ef75",
       "content_sha256": null,
       "bytes": 7321,
       "generated_by_command": "uv run python scripts/run_benchmark_suite.py --require-all",
-      "generated_utc": "2026-09-29T04:58:46+00:00",
+      "generated_utc": "2026-09-29T08:59:25+00:00",
       "command_recorded_in": "benchmarks/suite/results/suite_run.json"
     },
     {
@@ -654,7 +676,7 @@
       "content_sha256": null,
       "bytes": 140370,
       "generated_by_command": "uv run python scripts/run_benchmark_suite.py --require-all",
-      "generated_utc": "2026-09-29T04:58:46+00:00",
+      "generated_utc": "2026-09-29T08:59:25+00:00",
       "command_recorded_in": "benchmarks/suite/results/suite_run.json"
     },
     {
@@ -820,7 +842,7 @@
   ],
   "totals": {
     "artifacts": 76,
-    "bytes": 6877631,
+    "bytes": 6882802,
     "by_category": {
       "correctness_benchmark": 8,
       "performance_benchmark": 1,

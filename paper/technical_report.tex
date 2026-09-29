@@ -135,16 +135,19 @@ set (\src{README.md}; \src{docs/architecture.md}). The functional coverage is
       (\src{docs/phase_reports/phase-09-research-api.md}).
 \end{itemize}
 
-This report describes the repository at \textbf{v1.3.0}. Phases 1 to 10 are recorded complete
-with their phase gates passed, and three later phases carry no PROJECT\_SPEC number because they
-answer \src{docs/portfolio_audit.md} rather than the specification: Phase 11 is the real-data study
+This report describes the repository at \textbf{v1.4.0}. Phases 1 to 10 are recorded complete
+with their phase gates passed, and four later phases carry no PROJECT\_SPEC number because they
+answer \src{docs/portfolio_audit.md} or this repository's own debt list rather than the
+specification: Phase 11 is the real-data study
 of Section \ref{sec:realdata}, Phase 12 the single-factor remainder bound of Section
-\ref{sec:bound}, and Phase 13 the two-factor bound of Section \ref{sec:twofactor}, which converts
-the refusal Phase 12 recorded into a measured result. Four release tags exist, \code{v1.0.0},
-\code{v1.1.0}, \code{v1.2.0} and \code{v1.3.0}, each with the report, the evidence manifest and
-the suite results attached. The suite is 198 CTest entries and
-547{,}845 assertions in 197 Catch2 cases on the C++ side, and 388 pytest tests with the validation
-oracles installed, 319 collected without them (\src{docs/limitations.md}, item 63, explains why one
+\ref{sec:bound}, Phase 13 the two-factor bound of Section \ref{sec:twofactor}, which converts
+the refusal Phase 12 recorded into a measured result, and Phase 14 the verification guards of Section
+\ref{sec:reproducibility}, which make a figure, a compiled name or a declared path in the prose impossible
+to state without an owner. Five release tags exist, \code{v1.0.0},
+\code{v1.1.0}, \code{v1.2.0}, \code{v1.3.0} and \code{v1.4.0}, each with the report, the evidence
+manifest and the suite results attached. The suite is 198 CTest entries and
+547{,}845 assertions in 197 Catch2 cases on the C++ side, and 404 pytest tests with the validation
+oracles installed, 335 collected without them (\src{docs/limitations.md}, item 63, explains why one
 command gives two numbers); fourteen benchmark-suite members execute under
 \code{--require-all}, and the frozen manifest hashes 76 artifacts with nothing changed, missing or
 unlisted (\src{evidence/manifest.json}). The \emph{end-of-Phase-9} baseline, for contrast, was 190
@@ -1646,7 +1649,7 @@ thread, on the recorded arm64 platform. The price column is the estimate each im
 returned, so the timing comparison cannot be made by implementations that price something else.
 Source: the run in
 \src{benchmarks/performance/results/monte_carlo_speed.json} dated
-2026-09-27T07:05:42+00:00; the manifest binds that file to the revision and toolchain it was
+2026-09-29T08:58:31+00:00; the manifest binds that file to the revision and toolchain it was
 produced with. Earlier dated runs of the same script are in
 \src{docs/phase_reports/phase-03-monte-carlo.md} and
 \src{benchmarks/suite/results/suite_headline.csv}.}
@@ -1656,15 +1659,15 @@ produced with. Earlier dated runs of the same script are in
 \toprule
 Implementation & mean s.\ & std.\ s. & paths/s & estimate & $z$ vs analytic \\
 \midrule
-C++ core & 0.004400 & 0.000106 & 45{,}459{,}587 & 11.14596 & $+0.537$ \\
-pure Python loop & 0.036081 & 0.001356 & 5{,}543{,}089 & 11.11229 & $-0.292$ \\
-vectorised NumPy & 0.002111 & 0.000662 & 94{,}751{,}972 & 11.11430 & $-0.242$ \\
+C++ core & 0.005176 & 0.000479 & 38{,}642{,}054 & 11.14596 & $+0.537$ \\
+pure Python loop & 0.043412 & 0.001703 & 4{,}606{,}998 & 11.11229 & $-0.292$ \\
+vectorised NumPy & 0.002305 & 0.000482 & 86{,}756{,}701 & 11.11430 & $-0.242$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The measured ratio of C++ to a pure Python loop is $8.20\times$ in the run tabulated here; against
-vectorised NumPy it is $0.48\times$, that is, NumPy is faster in this regime, and the artifact says
+The measured ratio of C++ to a pure Python loop is $8.39\times$ in the run tabulated here; against
+vectorised NumPy it is $0.445\times$, that is, NumPy is faster in this regime, and the artifact says
 so (\src{benchmarks/performance/results/monte_carlo_speed.json};
 \src{docs/phase_reports/phase-03-monte-carlo.md}). The claim is scoped by four recorded caveats in
 the same artifact. The work measured is a terminal-only draw, one normal per path, which is exactly
@@ -1679,11 +1682,11 @@ cost per path and not equality of estimates (\src{docs/limitations.md}, item 21)
 wall-clock from \code{perf\_counter}, one process at a time.
 
 The ratio is less stable than its digits suggest, and the project's own freeze runs show why
-that matters. Four dated runs of this identical script on this machine returned $7.99\times$,
-$8.07\times$, $8.20\times$ and $8.37\times$ against the pure-Python loop --- a $5\%$ spread ---
-and $0.42$, $0.42$, $0.43$ and $0.48$ against NumPy, a $14\%$ spread on a quantity whose sign is
-the only point of reporting it. The NumPy variance is the more instructive number: the baseline
-itself moved from $110$M to $95$M paths per second between runs, so any ratio against it
+that matters. Thirteen committed re-freezings of this identical script on this machine give a
+C++/pure-Python ratio between $7.77\times$ and $8.70\times$ --- an $11.9\%$ spread --- and a C++/NumPy
+ratio between $0.42$ and $0.51$, a $20.8\%$ spread on a quantity whose sign is the only point of
+reporting it. The NumPy variance is the more instructive number: the baseline itself ranged from
+$110$M to $70$M paths per second between runs, so any ratio against it
 inherits that movement rather than measuring the core. Nothing qualitative turns on which figure
 is quoted, and that is the only sense in which the conclusion is robust: the C++ engine beats an
 interpreted loop by roughly an order of magnitude and loses to a vectorised NumPy draw for

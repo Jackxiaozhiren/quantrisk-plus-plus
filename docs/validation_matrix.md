@@ -119,10 +119,10 @@ order without the size would read as "expect ~800 of error" where the defensible
 - **Single-precision is never claimed.** Everything above is `double`, and the tolerances
   are float64 tolerances.
 - **Performance is not correctness.** `benchmarks/performance/results/monte_carlo_speed.json`
-  measures one machine: the C++ engine is `8.0–8.4×` pure Python and `0.42×` NumPy for this
-  workload — that is, slower than a vectorised NumPy path at 200k paths. The speedup moves
-  by several percent between runs, so no single figure from that file should be quoted as
-  if it were a constant.
+  measures one machine: the C++ engine is `7.77×`–`8.70×` pure Python and `0.42×`–`0.51×` NumPy
+  over the runs this repository has committed — that is, slower than a vectorised NumPy path at
+  200k paths on every one of them. The ratios move by more than 10% between runs, so no single
+  figure from that file should be quoted as if it were a constant.
 - **The 77 numbered limitations in `docs/limitations.md` are the complete list of what is
   not claimed.** Where a row above says "weaker" or "partially", it points into that file.
 
