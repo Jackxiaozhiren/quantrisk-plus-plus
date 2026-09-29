@@ -24,7 +24,7 @@ plausible-looking analysis results turned out to be wrong before any of them was
   the third derivative along the segment; per-direction slope convergence over five shrinking fit
   windows; the quartic's fingerprint on the departure from cubic behaviour; three recorded refusals.
 - **Finding 5** in `docs/findings.md`, **rows 13 and 14** of `docs/validation_matrix.md`, a
-  **§6.3 subsection with the proposition, its proof and a results table** in the technical report,
+  **§8.3 subsection with the proposition, its proof and a results table** in the technical report,
   and the counts those moved across README, `docs/interview_defense.md`,
   `docs/reproducibility.md`, `docs/limitations.md`, `docs/portfolio_audit.md`,
   `docs/integrity_audit.md` and `paper/technical_report.tex`.

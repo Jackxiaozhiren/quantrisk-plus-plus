@@ -150,7 +150,7 @@ command gives two numbers); fourteen benchmark-suite members execute under
 unlisted (\src{evidence/manifest.json}). The \emph{end-of-Phase-9} baseline, for contrast, was 190
 CTest entries and 310 pytest tests with no release tag and no suite at all
 (\src{docs/phase_reports/phase-09-research-api.md}). The limitations
-register contains 74 numbered entries (\src{docs/limitations.md}).
+register contains 75 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -1723,7 +1723,7 @@ stress artifacts are byte-identical between executions
 \label{sec:limitations}
 % ===========================================================================
 
-\src{docs/limitations.md} holds 74 numbered entries, grouped by the phase that introduced them,
+\src{docs/limitations.md} holds 75 numbered entries, grouped by the phase that introduced them,
 with the rule that entries are never removed because a later phase shipped. This section
 summarises them faithfully; the file remains the authority.
 
@@ -1847,6 +1847,22 @@ $10^{-14}$ relative, for example 0.0006136533643794436 against the committed
 matched exactly. Byte equality of a result field across libms was never a claim, and CI
 therefore verifies \emph{execution} on Linux rather than byte equality there
 (\src{docs/limitations.md}, item 64).
+
+The two-factor study of \S\ref{sec:twofactor} pushed the same point one level deeper, because its
+published numbers are not results with small noise but \emph{statistics fitted to} cancellation
+residues: the error at the tightest fit sample of the pure-spot ray is $1281\times$ the double spacing
+of the book value it is subtracted from, against $1.3\text{e}6$--$1.9\text{e}6$ for the joint rays.
+Four successive reproduction failures measured that --- $8\text{e-}7$ in a fitted slope under plain
+equality, $3.2\text{e-}3$ under $10^{-5}$ relative slack, $6.6\text{e-}3$ under slack derived from the
+artifact's own conditioning, and $39\%$ in a regression's standard error, which is a diagnostic
+\emph{of} the looseness and so could never appear on a list of exempted field names. What ships instead
+is a declaration rather than a tolerance: the experiment writes
+\code{reproduction\_policy.conditioning\_limited} into its own artifact, and the reproduction check
+compares \emph{shape} --- key sets, list lengths, types, with integers and verdicts still exact ---
+inside those families, and value everywhere else. The claims those families carry are proved by
+re-derivation in the test's own environment and by the experiment refusing to publish a number outside
+its band, not by agreement with the laptop that produced the committed bytes
+(\src{docs/limitations.md}, items 73--75).
 
 Identical $(\text{seed}, N, \text{parameters}, \text{code version})$ produces bit-identical
 output \emph{on the same platform family}; it does not across libms, because \code{log},

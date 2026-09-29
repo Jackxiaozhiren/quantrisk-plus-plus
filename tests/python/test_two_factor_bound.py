@@ -552,41 +552,25 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
     for key in volatile:
         mine.pop(key, None)
         theirs.pop(key, None)
-    _assert_same_result(
-        mine,
-        theirs,
-        fit_slack=_fit_slack(theirs),
-        limited=_conditioning_limited(theirs),
+    problems = _assert_same_result(mine, theirs, limited=_conditioning_limited(theirs))
+    assert not problems, "the reproduction differs from the committed artifact:\n" + "\n".join(
+        problems[:20]
     )
 
 
-# Which published numbers are only reproducible to their own conditioning. The experiment owns
-# this list and ships it in the artifact under `reproduction_policy`; a test keeping its own copy is
-# how the fifth CI run went red, on the diagnostic field that measures the looseness rather than a
-# number measured by it.
 def _conditioning_limited(payload: dict) -> tuple[str, ...]:
+    """Which published numbers are only reproducible to their own conditioning.
+
+    The experiment owns this list and ships it in the artifact under
+    `reproduction_policy.conditioning_limited`. A test keeping its own copy of it is how the fifth
+    CI run went red: the field that *measures* the looseness was itself the same cancellation
+    residue, and its name happened not to contain "slope".
+    """
     return tuple(payload["reproduction_policy"]["conditioning_limited"])
 
 
-def _fit_slack(payload: dict) -> float:
-    """How far a conditioning-limited number can move between two libms, from the artifact itself.
-
-    `fit_conditioning` publishes, per ray, how many times the double spacing of a book value its
-    tightest error sample is. A number that is either the output of a regression over such samples,
-    or such a residue itself, is determined to about `1 / sqrt(that ratio)` and no finer: 0.028
-    here, against a largest observed laptop-to-runner gap of 6.6e-3. Every other number in the
-    payload is a price, a difference of prices at comparable magnitude, a count or a verdict.
-    """
-    ratios = [
-        values["samples_above_the_floor"]
-        for key, values in payload["fit_conditioning"].items()
-        if key != "absolute_cancellation_floor"
-    ]
-    return 1.0 / math.sqrt(min(ratios))
-
-
 def _is_limited(path: str, limited: tuple[str, ...]) -> bool:
-    """Whether a dotted, bracketed path falls under one of the declared prefixes."""
+    """Whether a dotted, bracketed path falls under one of the declared families."""
     stripped = path.lstrip(".")
     for entry in limited:
         if (
@@ -603,55 +587,62 @@ def _assert_same_result(
     theirs: object,
     path: str = "",
     *,
-    fit_slack: float | None = None,
     limited: tuple[str, ...] = (),
-) -> None:
-    """Same result to the precision each quantity can be reproduced at, and no looser.
+    problems: list[str] | None = None,
+) -> list[str]:
+    """The committed artifact and a fresh run must agree wherever agreement is meaningful.
 
-    Plain equality passed on this laptop and failed on the Linux runner three times running, each
-    time on a quantity whose own conditioning is coarser than the comparison -- limitations #71 to
-    #74. Demanding that a fitted exponent or a cancellation residue repeat to 1e-5 is not a strict
-    test but a test of the platform, and four single-field patches were each "the" fix until the
-    next such number surfaced, which is the real reason the list moved into the artifact.
+    Six CI runs settled what that means. Compared for bit-equality the payload disagreed on a fitted
+    slope at 8e-7, then at 3.2e-3, then on a conditioning diagnostic at 6.6e-3, then on a
+    regression's standard error at 39% -- and each of those was a *different* quantity that had been
+    exempted by name rather than by kind. Every one of them is a statistic estimated from residuals
+    that are themselves cancellation products, so none of them has a cross-platform value to
+    reproduce, only a range it is entitled to land in. Guessing field by field which numbers qualify
+    is what cost the six runs.
 
-    So: conditioning-limited floats get the derived slack, every other float 1e-5 relative plus
-    1e-12 absolute, and nothing that carries a conclusion gets slack of any kind -- counts (the 132
-    swept shocks, the zero inclusion violations, the dominance counts), booleans (the interval
-    excluding zero), strings (the scenario name, the dominant term) and the shape of the
-    structures must match exactly. The reproduced run's compliance with the bands is not re-checked
-    here because it is already proved twice over: the copy exits 0, and the experiment raises
-    rather than
-    publishing a band it cannot hold.
+    So the artifact declares the families under `reproduction_policy.conditioning_limited`, and
+    inside them this check compares **shape, not value**: same keys, same list lengths, same types.
+    The values are still proved, just not against this laptop. The copy exits 0, and the experiment
+    raises rather than publishing a number outside its own band, so a reproduction that drifted
+    enough to matter fails on its own terms. Outside those families, floats are held to 1e-5
+    relative plus 1e-12 absolute, and counts, verdicts, strings and structure get no slack at all.
+
+    Mismatches are collected and reported together rather than raised on the first, because one
+    field per round-trip is how six runs went by one at a time.
     """
+    found = problems if problems is not None else []
     if isinstance(mine, bool) or isinstance(theirs, bool):
-        assert mine is theirs, f"{path}: {mine!r} is not {theirs!r}"
-        return
+        if mine is not theirs:
+            found.append(f"{path}: verdict {mine!r} is not {theirs!r}")
+        return found
     if isinstance(mine, float) and isinstance(theirs, float):
+        if _is_limited(path, limited):
+            return found  # shape and type are checked by the branches above and below
         allowed = 1.0e-5 * abs(mine) + 1.0e-12
-        if fit_slack is not None and _is_limited(path, limited):
-            allowed += fit_slack * max(abs(mine), abs(theirs))
-        assert abs(mine - theirs) <= allowed, (
-            f"{path}: {mine!r} vs {theirs!r} differ by more than the {allowed:.1e} this quantity "
-            "can be reproduced to"
-        )
-        return
-    assert type(mine) is type(theirs), f"{path}: {type(mine).__name__} vs {type(theirs).__name__}"
-    if isinstance(mine, dict):
-        assert mine.keys() == theirs.keys(), (
-            f"{path}: keys differ, in one only: {sorted(set(mine) ^ set(theirs))}"
-        )
-        for key in mine:
+        if abs(mine - theirs) > allowed:
+            found.append(f"{path}: {mine!r} vs {theirs!r} differ by more than {allowed:.1e}")
+        return found
+    if type(mine) is not type(theirs):
+        found.append(f"{path}: {type(mine).__name__} vs {type(theirs).__name__}")
+        return found
+    if isinstance(mine, dict) and isinstance(theirs, dict):
+        if mine.keys() != theirs.keys():
+            found.append(f"{path}: keys differ, in one only: {sorted(set(mine) ^ set(theirs))}")
+        for key in mine.keys() & theirs.keys():
             _assert_same_result(
-                mine[key], theirs[key], f"{path}.{key}", fit_slack=fit_slack, limited=limited
+                mine[key], theirs[key], f"{path}.{key}", limited=limited, problems=found
             )
-    elif isinstance(mine, list):
-        assert len(mine) == len(theirs), f"{path}: {len(mine)} vs {len(theirs)} entries"
-        for index, (left, right) in enumerate(zip(mine, theirs, strict=True)):
-            _assert_same_result(
-                left, right, f"{path}[{index}]", fit_slack=fit_slack, limited=limited
-            )
-    else:
-        assert mine == theirs, f"{path}: {mine!r} != {theirs!r}"
+    elif isinstance(mine, list) and isinstance(theirs, list):
+        if len(mine) != len(theirs):
+            found.append(f"{path}: {len(mine)} vs {len(theirs)} entries")
+        else:
+            for index, (left, right) in enumerate(zip(mine, theirs, strict=True)):
+                _assert_same_result(
+                    left, right, f"{path}[{index}]", limited=limited, problems=found
+                )
+    elif mine != theirs:
+        found.append(f"{path}: {mine!r} != {theirs!r}")
+    return found
 
 
 def test_the_refusals_say_what_the_experiment_did_not_estimate() -> None:

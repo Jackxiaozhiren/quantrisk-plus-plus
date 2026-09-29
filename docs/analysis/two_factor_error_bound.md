@@ -166,7 +166,10 @@ ones are a few thousand ulps of a cancellation is loose at the 1e-2 level, which
 it is 3.00 to within 0.009 everywhere — but that *ordering* its windows compares two numbers whose
 difference is noise. The runner made this unavoidable rather than arguable: a stepwise guard passed
 here and raised on Linux (`3.000121 → 2.996952`), then the endpoint version of the same idea failed
-there too (`3.004587 → 2.991277`), and both platforms were inside every band the whole time. Every
+there too (`3.004587 → 2.991277`), and both platforms were inside every band the whole time. The
+second of those is quotable from run `36415073007`; the first is recorded from run `36413144612`,
+whose retained job log ends at `running two_factor_error_bound ...` without the message, so that pair
+is the session's record rather than a retrievable artifact. Every
 window is published in `slopes` and `asymptotics`, so the trend is visible instead of summarised
 into a boolean.
 

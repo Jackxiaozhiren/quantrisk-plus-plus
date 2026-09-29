@@ -439,27 +439,59 @@ never removed just because a later phase shipped.
 73. **The reproduction test for this experiment was itself the third instance of the cross-platform
     float mistake, and the runner caught it.** It re-ran the experiment in a temporary tree and
     compared the result against the committed artifact with plain equality — which passed here and
-    failed on Linux at `1.9998100833` against `1.9998084571`, 8e-7 relative in a *fitted slope*.
+    failed on Linux (run `36416691279`) at `1.9998100833` against `1.9998084571`, 8e-7 relative in a
+    *fitted slope*.
     The slack that works for the inputs to a regression does not work for its output: the tightest
     sample whose residual is 1281x the double spacing of the values subtracted to produce it
     (#71, #72) drags the fitted exponent around at the 1e-6 level. Fixed by a comparator that gives
     floats `1e-5` relative plus `1e-12` absolute and nothing else any slack at all — counts,
     booleans, strings and structure must match exactly — and calibrated by feeding it both a
-    difference below the slack (tolerated) and eight kinds of real change (each rejected). Recorded
+    difference below the slack (tolerated) and eight kinds of real change (each rejected). That
+    comparator did not hold either, and neither did its replacement; see #74 and #75. Recorded
     because the project already had limitations #64 and #71 saying this, and a freshly written test
     repeated the error anyway: a lesson filed is not a lesson applied to the next file.
 
 74. **A fitted quantity is only reproducible to its own conditioning, and this repository learned
-    that in two steps rather than one.** The first fix for the cross-platform failure in #73 gave
+    that in three steps rather than one.** The first fix for the cross-platform failure in #73 gave
     floats `1e-5` relative slack — right for the crash ray's 8e-7 gap, wrong for the pure-spot
-    ray's 3.2e-3 one, so the test went red a second time on the same machine. The two gaps are not
-    two magnitudes of one effect. The reproduction slack is now derived from the artifact's
-    published `fit_conditioning` as `1 / sqrt(r)` on the ray whose tightest error sample sits `r`
-    times above the double spacing of a book value, which gives 0.028 for the pure-spot ray at
-    `r = 1281` and nothing for any value that a regression did not produce; everything else keeps
-    `1e-5`. It is calibrated in both directions and not merely asserted: the three measured
-    Linux-to-macOS gaps are tolerated while eight kinds of real change — a moved price-level error,
-    a flipped verdict, a renamed dominant term, a changed count, a shortened list, a removed key —
-    are rejected. The general form, since it bit twice: when a cross-platform difference appears,
-    ask what the quantity's own noise floor is before choosing a tolerance, because a slack picked
-    to make one observed gap pass is a guess about the next.
+    ray's 3.2e-3 one, so the test went red a second time, on the runner again
+    (`36417662618`: `.headline.slope_for_a_pure_spot_shock`, 3.000915 against 2.991277). The two
+    gaps are not two magnitudes of one effect. The slack was then derived from the artifact's published
+    `fit_conditioning` as `1 / sqrt(r)` on the ray whose tightest error sample sits `r` times above
+    the double spacing of a book value, which gives 0.028 for the pure-spot ray at `r = 1281`, and
+    nothing for any value that a regression did not produce; everything else kept `1e-5`. That too
+    was calibrated in both directions — three measured Linux-to-macOS gaps tolerated, eight kinds of
+    real change rejected — and the runner still went red twice more on it, because every one of
+    those calibrations was a guess about which *fields* are ill-conditioned rather than a statement
+    about which ones are (#75). The general form, since it bit three times: when a cross-platform
+    difference appears, ask what the quantity's own noise floor is before choosing a tolerance,
+    because a slack picked to make one observed gap pass is a guess about the next.
+
+75. **The comparator exempted numbers by name, and names cannot be exhaustive: three further red
+    CI runs ended in a check that compares shape, not value.** After #74's derived slack the
+    reproduction went red on run `36518357703` at
+    `.fit_conditioning.pure spot (k=0).error_at_tightest_sample`, `3.0978e-08` against `3.1182e-08` —
+    a 6.6e-3 relative gap on a quantity the `1/sqrt(r)` rule did not cover at all, because it is not
+    an output of a regression — and once more on run `36519230799` at
+    `.slopes.pure spot (k=0)[0].standard_error`, where the committed `0.000605699476645428` and the
+    Linux `0.0008428490503982969` differ by 39% of the committed value. Neither was a mis-tuned
+    tolerance. A regression's standard error is the residual scatter of an already ill-conditioned
+    fit, so it is a diagnostic *of* the looseness, and no name-based list of "fields whose
+    conditioning limits them" can be complete: the one field that measures the looseness was itself
+    the same cancellation residue, and `standard_error` does not contain the word `slope`.
+
+    The fix is categorical. The experiment now ships `reproduction_policy.conditioning_limited`
+    in the artifact and the test reads it from there, so the declaration lives with the code that
+    knows which numbers it fitted; inside those families the reproduction comparison checks
+    **shape** — key sets, list lengths, types — and keeps integers, booleans, strings and verdicts
+    exact even there. The values are still proved, just not against one laptop: the copy exits 0
+    only if every published slope sits in the experiment's own band, because it raises rather than
+    writing an artifact, and `test_the_joint_error_is_quadratic_where_the_single_factor_error_is_cubic`
+    re-derives the order-2-versus-order-3 claim in the *test's* environment over scale ranges the
+    experiment never uses. What is deliberately given up: a slope that is in-band on Linux and
+    in-band here need not agree, and this test will not say so. The comparator was falsified in
+    both directions again — eleven mutations, and each demanded outcome was the one obtained: two
+    family values tolerated, a family key, list length, type and an in-family integer count each
+    rejected, and off-family floats rejected at 1e-3 while tolerated at 1e-9. Recorded because the
+    durable rule is about *who owns* a reproducibility exemption: a test that decides field by
+    field which outputs are comparable is re-guessing the numerics it is supposed to be checking.

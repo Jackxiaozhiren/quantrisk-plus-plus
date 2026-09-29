@@ -169,6 +169,22 @@ value, why `test_the_readme_black_scholes_example_runs_as_written` compares in u
 last place, and why bit-exact equality is claimed only between two views of the *same* binary —
 the Python-to-C++ consistency checks — and never between compilers. See limitation #59.
 
+**Fitted statistics, one level worse.** A number that is *estimated from* floating-point results can
+be less reproducible than any of its inputs. The two-factor study fits log-log slopes to errors that
+are themselves cancellation residues, and across libms those fits moved by 8e-7, 3.2e-3 and 6.6e-3
+relative, and by 39% in one regression's standard error — the last figure not a tolerance set wrong but
+a statistic with no cross-platform value to reproduce. The mechanism is the same 1.7 ULP above,
+amplified: a fit distributes the difference across every one of its samples, and a standard error
+measures how much scatter it saw. Such a quantity is reproducible only as a *member of a band*, and the
+band is the experiment's own: `experiments/two_factor_error_bound/run.py` raises rather than writing an
+artifact whose slope leaves its declared range, and it publishes
+`reproduction_policy.conditioning_limited` naming the families this applies to. The reproduction test
+reads that list from the artifact and, inside those families, compares key sets, list lengths and types
+rather than values — integers, booleans, strings and verdicts stay exact even there, and everything
+outside the families keeps 1e-5 relative. The declaration belongs to the experiment, not the test: a
+test that decides field by field which outputs are comparable is re-guessing the numerics it is
+supposed to be checking. See limitations #73–#75.
+
 **Network data.** `data/fixtures/` holds real, committed SEC EDGAR, FRED and CFTC responses,
 so the offline path is deterministic. Anything fetched live is not: EDGAR and FRED revise
 their series, and ALFRED vintages exist precisely because the revision is the interesting

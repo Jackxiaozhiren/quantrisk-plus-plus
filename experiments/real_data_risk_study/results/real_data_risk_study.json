@@ -1,6 +1,6 @@
 {
   "phase": "11 - real-data risk study",
-  "generated_utc": "2026-09-29T03:54:34+00:00",
+  "generated_utc": "2026-09-29T04:10:24+00:00",
   "command": "uv run python experiments/real_data_risk_study/run.py",
   "question": "The Phase 5 and Phase 6 conclusions were measured on synthetic data whose truth is known. Which of them survive on real daily market observations?",
   "headline": {
@@ -587,9 +587,9 @@
     }
   ],
   "environment": {
-    "generated_at_utc": "2026-09-29T03:54:34+00:00",
+    "generated_at_utc": "2026-09-29T04:10:24+00:00",
     "quantrisk_version": "1.3.0",
-    "git_commit": "437bcdec779e",
+    "git_commit": "a461bb8295fe",
     "binary_git_commit": "45b550974fa3",
     "working_tree_dirty": true,
     "uncommitted_paths": [
@@ -605,14 +605,12 @@
       "experiments/pricing_validation/results/summary.json",
       "experiments/stress_testing/results/stress_testing_study.json",
       "experiments/two_factor_error_bound/results/two_factor_bound.json",
-      "experiments/two_factor_error_bound/run.py",
       "experiments/var_backtesting/results/var_backtesting_validation.json",
       "experiments/variance_reduction/results/summary.json",
       "experiments/variance_reduction/results/variance_by_method.csv",
-      "paper/technical_report.pdf",
       "tests/python/test_two_factor_bound.py"
     ],
-    "provenance": "ran from 437bcdec779e plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
+    "provenance": "ran from a461bb8295fe plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 45b550974fa3",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",

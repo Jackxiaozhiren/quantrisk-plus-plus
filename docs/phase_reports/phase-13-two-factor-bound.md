@@ -60,7 +60,7 @@ otherwise would launder a consistency check into an external comparison.
 | `docs/validation_matrix.md` | rows 16 and 17 added; the duplicated row number repaired; twenty rows |
 | `docs/limitations.md` | items 67–71; item 63's counts re-measured |
 | `docs/findings.md`, `README.md`, `docs/model_cards/scenario_stress_testing.md`, `docs/project_scope.md`, `docs/interview_defense.md`, `docs/reproducibility.md` | the result, the counts it moves, and three environment traps |
-| `paper/technical_report.tex`/`.pdf`, `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff`, `uv.lock` | §6.4, 41 pages, version 1.3.0 |
+| `paper/technical_report.tex`/`.pdf`, `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff`, `uv.lock` | §8.4, 42 pages, version 1.3.0 |
 
 ## 4. Tests executed
 
@@ -155,17 +155,21 @@ path with the C++ cases.
 
 ## 7. Remaining limitations
 
-Items 67–74 of `docs/limitations.md`, in brief: the bound covers the equity × volatility pair on a
+Items 67–75 of `docs/limitations.md`, in brief: the bound covers the equity × volatility pair on a
 Black–Scholes European book and not the rate/credit legs, and does not travel to Heston; "quadratic"
 is a limit statement whose leading term is a minority term at published sizes, and the small
 aggregate vanna here is a strike-placement coincidence rather than a property of the map; the ridge
 where the quadratic vanishes is predicted and deliberately not verified; no oracle in this
 dependency set publishes a vanna, volga or mixed third partial, so the new closed forms rest on
 finite differences, exact identities and parity rather than an L2 comparison; and the price-only
-route to `g‴` has a floor and cannot resolve a small ray; and one of this phase's own guards
-asserted a strict ordering between successive fits, and its replacement asserted a weaker ordering
-  that was also unsupportable for one ray. #72 records both Linux failures and the conditioning
-  measurement that settled it.
+route to `g‴` has a floor and cannot resolve a small ray. Two of this phase's own guards asserted a
+strict ordering between successive fits, and their replacement asserted a weaker ordering that was
+also unsupportable for one ray; #72 records both runner failures and the conditioning measurement
+that settled it. #73–#75 record the reproduction test's four failures and the way they were finally
+closed: three tolerance sizes were tried, each tuned to the gap the runner had just reported, and the
+fourth red run showed that the fields needing exemption cannot be enumerated by name — so the
+experiment now declares the families itself and the check compares shape rather than value inside
+them.
 
 ## 8. Technical debt
 
@@ -178,6 +182,11 @@ Two documentation defects surfaced, both of the class this project keeps finding
   contiguity and that every in-file "row N" citation resolves.
 - **A section heading said "Four rows" over three paragraphs.** Now derived:
   `test_the_validation_matrix_heading_counts_its_own_caveat_paragraphs`.
+- **Four documents cited the paper's bound subsections as §6.3 and §6.4; the PDF numbers them 8.3 and
+  8.4.** Both are in the stress-testing chapter, and the pointer was typed from the source file's
+  position rather than from the built document. Nothing checks a prose reference into the PDF, so these
+  were corrected by hand — `docs/release_notes_v1.2.0.md` and `phase-12-remainder-bound.md` included,
+  since a broken pointer is not a fact that was ever true of a revision.
 
 Carried forward, deliberately not paid down here:
 
@@ -207,7 +216,22 @@ Carried forward, deliberately not paid down here:
 | Every README number traceable (§4) | yes, and now machine-checked for the finding and the note |
 | Cost $0 (§3) | no new dependency, no service, no paid solver |
 | Tests pass locally | 198 CTest, 388 pytest, 14/14 suite, 76 artifacts intact, ruff and mypy clean |
-| Verified by execution, not by reading | nine mutations caught; a temporary-tree reproduction byte-compared against the committed artifact |
+| Verified by execution, not by reading | nine mutations caught; a temporary-tree reproduction compared against the committed artifact for shape inside the families the artifact declares, and for value everywhere else |
+
+**The runner, six times red, and what each run changed.** Phase 13 has not yet produced a green run
+on `main`; six are recorded rather than re-run away, and each one moved the design rather than the
+threshold. `36413144612` failed twice over — PyPI answered 503 mid-install on the build lane, and the
+suite lane failed inside `two_factor_error_bound` on a stepwise ordering the pure-spot ray does not
+obey. `36415073007` failed on the endpoint version of that same ordering (`3.004587 → 2.991277`), at
+which point the guard stopped asserting an ordering for the ray whose conditioning cannot support one,
+with every numerical band left where it was. The remaining four were the reproduction test: plain
+equality (`36416691279`, 8e-7 in a fitted slope), then 1e-5 slack (`36417662618`, 3.2e-3 in the
+pure-spot slope), then slack derived from the artifact's own conditioning (`36518357703`, 6.6e-3 on a
+field no regression produced), then the same rule at `36519230799`, 39% apart on a regression's
+standard error. Four successive per-field patches is the finding: the exemptions were being guessed by
+name, and the field that *measures* the looseness was never on the list. The fifth fix changes the kind
+of comparison rather than the size of a tolerance, and this phase's release waits on the run that
+tests it.
 
 **Where the plan changed under evidence.** Two of the three things I set out to claim were wrong
 when measured, and both changes are in the published result rather than in a private note. First, the

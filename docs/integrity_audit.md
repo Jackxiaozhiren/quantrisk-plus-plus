@@ -263,8 +263,11 @@ Greeks struct and finds the bindings, the shims, the stubs and three documents i
 **28. The runner caught two guards that were only true on one libm.** The convergence guard meant to
 prove the error is quadratic asserted, on top of the numerical band, that each narrower fit window
 beats the one before it. It passed here and failed on `benchmark-suite` at
-`3.000121 -> 2.996952` on the pure-spot ray. The fix I first wrote — compare only the endpoints —
-also passed here and also failed there, at `3.004587 -> 2.991277`. Every value in both series is
+`3.000121 -> 2.996952` on the pure-spot ray (run `36413144612`; that job's retained log ends at
+`running two_factor_error_bound ...`, so the pair is the session's record rather than a retrievable
+artifact). The fix I first wrote — compare only the endpoints —
+also passed here and also failed there, at `3.004587 -> 2.991277` (run `36415073007`). Every value in
+both series is
 within 0.009 of the theory number 3, so no band was ever at issue; what was at issue is that the
 pure-spot ray's tightest sample is 1281x the double spacing of the 1.09e5 book value it is
 subtracted from, against 1.3e6-1.9e6 for the joint rays, which makes an ordering across its windows
@@ -322,28 +325,43 @@ in a document whose entire purpose is saying how large the error is. The order s
 bundled with the sentence that names its limits, and the practical recommendation moved from adding
 vanna and volga to re-striking gamma.
 
-**29. My own reproduction test repeated the mistake the phase had just documented twice.** By the
-time the third CI run went red the pattern was unmistakable: the experiment's guards, then their
-replacement, then a test whose whole job was checking reproducibility, each in turn asserted
-something that only holds on the libm that produced the committed bytes. The third failure was an
-8e-7 relative difference in a *fitted slope* compared for bit-equality. The first fix gave floats
-1e-5 of slack and went red again on the very next run, on a 3.2e-3 gap in the pure-spot slope — which
-is not the same problem one size bigger but a different one: that quantity cannot be reproduced to
-better than its conditioning on any platform. The comparator now derives its slack for fitted numbers
-from the artifact's own published `fit_conditioning` (`1/sqrt(r)`, 0.028 for the pure-spot ray) and
-gives every other float 1e-5 and every count, verdict, string and structural key none — proven on
-both sides, with the three measured cross-platform gaps tolerated and eight kinds of real change
-rejected. Limitation #73 is written in the past tense on
-purpose. The lesson is not that cross-platform floats need slack, which the repository already said
-in #64, #71 and #72, but that a new file does not inherit the old file's understanding; the check
-that catches it is a green run on the machine that is not this one.
+**29. My own reproduction test repeated the mistake the phase had just documented twice, and then
+repeated the fix's mistake three more times.** By the time the third CI run went red the pattern was
+unmistakable: the experiment's guards, then their replacement, then a test whose whole job was
+checking reproducibility, each in turn asserted something that only holds on the libm that produced
+the committed bytes. The first of the four was an 8e-7 relative difference in a *fitted slope*
+compared for bit-equality (run `36416691279`, `1.9998100833` against `1.9998084571`). The first fix
+gave floats 1e-5 of slack and went red again on the very next run (`36417662618`), on a 3.2e-3 gap in
+the pure-spot slope — which is not the same problem one size bigger but a different one: that quantity
+cannot be reproduced to better than its conditioning on any platform. The slack then derived from the
+artifact's own `fit_conditioning` (`1/sqrt(r)`, 0.028 for the pure-spot ray) was calibrated in both
+directions and still went red twice more: on run `36518357703` at
+`.fit_conditioning.pure spot (k=0).error_at_tightest_sample`, 6.6e-3 relative on a field the rule does
+not cover because no regression produced it, and on run `36519230799` at
+`.slopes.pure spot (k=0)[0].standard_error`, where the committed `0.000605699` and the Linux
+`0.000842849` differ by 39% of the committed value. That last one is what proved the class: a standard
+error is the residual scatter of an ill-conditioned fit, so it *measures* the looseness instead of
+being exempt from it, and its name contains nothing resembling "slope" — no list of field names can be
+closed. The comparator now asks
+the artifact which families are conditioning-limited (`reproduction_policy.conditioning_limited`,
+owned by the experiment) and, inside them, compares **shape rather than value**: key sets, list
+lengths, types, with integers, booleans, strings and verdicts still exact even there. Value equality
+survives at 1e-5 relative everywhere else. What the numbers say, in order: 8e-7, 3.2e-3, 6.6e-3, 39%.
+What changes is not the tolerance but which question is being asked, and the honest version of this
+finding is that four successive per-field patches were needed to see that a field-by-field patch was
+the wrong shape. Limitation #73 is written in the past tense on purpose, and #75 carries the detail.
+The lesson is not that cross-platform floats need slack, which the repository already said in #64,
+#71 and #72, but that a new file does not inherit the old file's understanding; the check that catches
+it is a green run on the machine that is not this one.
 
 **Verified at this addendum, by execution.** 388 pytest with the `oracles` extra and 319 collected
 without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite members under
 `--require-all`, `verify_evidence_manifest.py` at 76 artifacts with 0 CHANGED / 0 VOLATILE / 0
-MISSING / 0 unlisted, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the 41-page report
-rebuilt and text-verified. Nine deliberate formula mutations were compiled and all nine were caught.
-The first four CI runs on this revision were red, and each is recorded rather than re-run away: PyPI
-answered 503 mid-install on one lane, the convergence guard failed on the other twice over, and then
-the reproduction test failed in the same way. The fifth run is the first that was green on both
-platforms.
+MISSING / 0 unlisted, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the 42-page report
+rebuilt and text-verified. Nine deliberate formula mutations were compiled and all nine were caught,
+and the reproduction comparator was falsified in both directions by eleven mutations that each gave
+the demanded outcome. Six CI runs on this phase have been red on `main` and every one is recorded
+rather than re-run away: PyPI answered 503 mid-install on one lane, the convergence guard failed on
+the other twice over, and the reproduction test then failed four times in the same way (#29). The
+next run tests the categorical fix; no green run on the runner has been recorded for Phase 13 at the
+time of writing, and `docs/release_notes_v1.3.0.md` says where the outcome will go when there is one.
