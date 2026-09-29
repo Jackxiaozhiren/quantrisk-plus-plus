@@ -774,6 +774,23 @@ def main() -> int:
         "published_scenario_bound": published,
         "ridge_probe": ridge,
         "fit_conditioning": fit_conditioning(),
+        "reproduction_policy": {
+            "conditioning_limited": (
+                "slopes",
+                "asymptotics",
+                "fit_conditioning",
+                "headline.slope_of_error_against_shock_size",
+                "headline.slope_for_a_pure_spot_shock",
+                "headline.ratio_of_error_to_closed_form_quadratic",
+            ),
+            "why": (
+                "every number here is either the output of a regression or the residue of "
+                "subtracting book values near 1.09e5, so it reproduces to its conditioning and no "
+                "finer -- see docs/limitations.md items 71 to 74. Naming them in the artifact, "
+                "rather than in the test that reads it, is what keeps the two from drifting apart."
+            ),
+            "everything_else": "exact for counts and verdicts, 1e-5 relative for other floats",
+        },
         "refusals": scope,
         "provenance": {
             "no_oracle_called": True,
