@@ -28,7 +28,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 76
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 77
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -41,8 +41,9 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 198 C++ tests under CTest (547,845 assertions in 197 Catch2
-cases), 388 pytest tests with the `oracles` extra and the same tree collects 319 tests without it
-— the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this one's figure on the runner rather than trusting arithmetic here). 14/14 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
+cases), 397 pytest tests with the `oracles` extra and the same tree collects 328 tests without
+it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
+revision's figure on the runner rather than trusting arithmetic here. 14/14 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
 hold (limitation #63). At the `v1.0.0` tag the same commands gave 330 and 261-passed-4-skipped, and
 the suite was 11/11. A guard asserts both figures and asks which environment it is running in

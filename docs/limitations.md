@@ -304,14 +304,14 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 388 pytest tests with
-    the `oracles` extra installed, and the same tree collects 319 tests without it — the CI lane
-    runs a plain `uv sync`, and that lane's own full run at this commit reports `319 passed, 4
-    skipped` where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 397 pytest tests with
+    the `oracles` extra installed, and the same tree collects 328 tests without it — the CI lane
+    runs a plain `uv sync`, and its own collected count for this revision is what the guard below
+    compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
     `--collect-only` counted 284 test items while the run reported those 284 as passed plus
     four *additional* module-level skip records, so 288 outcomes came from 284 collected items.
-    The same shape holds here — 323 outcomes from the 319 items `--collect-only` counts — which
+    The same shape holds at the 319-item revision — 323 outcomes from those 319 items — which
     is why neither number should be derived by arithmetic on the other. The gap is unchanged at
     69 cases inside four modules that gate on a module-level `pytest.importorskip` (for
     `sklearn`, `QuantLib` twice and `pypfopt`), and a module
@@ -512,3 +512,27 @@ never removed just because a later phase shipped.
     provenance check on *digits* certifies the transcription, not the *reading* — so when a quantity
     is a ratio, the denominator belongs in the field name, not in a sentence someone wrote beside it.
     Related: #58, #66, #75.
+
+77. **A figure whose owner is prose goes stale silently, and a regression's standard error is not a
+    bound on accuracy.** `docs/analysis/delta_gamma_error_bound.md` shipped with no test reading it,
+    and writing that test in Phase 14 turned up three defects in it. (a) The cubic-crossing spot was
+    quoted as `94.5456` with a `5.4544 %` down move; the artifact publishes `94.5487358657606` and
+    `0.05451264134239392`, i.e. `94.5487` / `5.4513 %` — and the note's pair was *internally*
+    consistent (`100 − 5.4544 = 94.5456`), which is exactly why a reader could not spot it. (b) The
+    headline fitted slope `2.996188` with standard error `0.044006` belonged to a pooled 6-point fit
+    that the experiment does not compute, so nothing in the tree owned the pair and no change to the
+    artifact could ever have flagged it. (c) The sentence built from it — a deviation of
+    `−0.087 standard errors` from theory 3, offered as agreement — misreads what a standard error
+    measures: the scatter of the residuals, not the accuracy of the estimate. Over a window whose
+    residuals carry the `δ⁴` mixture at one end and the cancellation noise of §6 at the other, the
+    error is systematic, and the artifact's own widest window sits **52 and 59 standard errors** from
+    3 in the down and up directions while still converging monotonically toward it. The note now
+    quotes the five published windows as a sequence, which is what the artifact actually claims
+    (`slope_converges_to_theory_as_the_window_shrinks`), and says plainly that many-standard-errors
+    from theory is a property of the `se`, not a refutation of the cubic. Found while writing the
+    guard, not before: the same sweep also caught `21.1446` — a truncation of the predicted zero —
+    printed in five documents beside `21.1447` — the rounding — in two, and all seven are now the
+    rounded value. Closing the class: `test_every_figure_the_note_quotes_is_owned_by_the_artifact`
+    re-formats each figure from the artifact and requires it in the note, and
+    `test_every_analysis_note_is_guarded_against_the_numbers_it_quotes` fails if any file in
+    `docs/analysis/` has no test that reads it. Related: #63, #76, #71.

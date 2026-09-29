@@ -15,10 +15,17 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 quantrisk = pytest.importorskip("quantrisk")
+
+if TYPE_CHECKING:
+    # mypy cannot see attributes through a name bound by `pytest.importorskip`, so the two types
+    # used in the annotations below are imported for the type checker only. Nothing changes at
+    # runtime: the annotations are strings, and the module is already required by the skip above.
+    from quantrisk.pricing import EuropeanOption, MarketParams
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RESULTS = REPO_ROOT / "experiments" / "linearisation_error_bound" / "results"
@@ -39,7 +46,7 @@ def _rows() -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
-def _market(spot: float) -> quantrisk.pricing.MarketParams:
+def _market(spot: float) -> MarketParams:
     return quantrisk.pricing.MarketParams(
         spot=spot,
         rate=RATE,
@@ -49,7 +56,7 @@ def _market(spot: float) -> quantrisk.pricing.MarketParams:
     )
 
 
-def _option(strike: float, put: bool = False) -> quantrisk.pricing.EuropeanOption:
+def _option(strike: float, put: bool = False) -> EuropeanOption:
     kind = quantrisk.pricing.OptionType.PUT if put else quantrisk.pricing.OptionType.CALL
     return quantrisk.pricing.EuropeanOption(kind, strike)
 
@@ -389,3 +396,102 @@ def test_a_recomputed_remainder_matches_the_frozen_curve() -> None:
             # whole relationship between the two artifacts, and getting it wrong here would compare
             # the paper against twice the error.
             assert here == pytest.approx(exact - mapped, rel=0.0, abs=1e-9)
+
+
+NOTE_PATH = REPO_ROOT / "docs" / "analysis" / "delta_gamma_error_bound.md"
+STRESS_CSV = REPO_ROOT / "experiments" / "stress_testing" / "results" / "linearisation_error.csv"
+
+
+def _note_text() -> str:
+    """The note, with the two typographic substitutions that are not numbers.
+
+    Prose sets a minus as `U+2212` and an arrow as `U+2192`; the artifact prints ASCII. Normalising
+    both keeps this a check on digits, which are the part that can go stale, rather than on type.
+    """
+    return NOTE_PATH.read_text(encoding="utf-8").replace("\u2212", "-").replace("\u2192", "->")
+
+
+def test_every_figure_the_note_quotes_is_owned_by_the_artifact() -> None:
+    """`docs/analysis/delta_gamma_error_bound.md` states results, so each one needs an owner.
+
+    Until this test existed the note was the only place several of these figures appeared, and that
+    is how two defects survived in it: the cubic-crossing spot was quoted as `94.5456` with a
+    `5.4544 %` move against the artifact's `94.5487` / `5.4513 %`, and the headline fitted slope was
+    quoted as `2.996188` with standard error `0.044006` -- a pooled 6-point fit that the experiment
+    does not compute, so nothing in the tree owned it and nothing could notice it going stale. Both
+    are recorded in `docs/integrity_audit.md` finding 32 and `docs/limitations.md` #77.
+
+    The assertion is deliberately not "the digit string appears somewhere": each expected value is
+    formatted the way the note formats it, so a re-run that moves a figure fails here instead of
+    leaving the prose behind.
+    """
+    payload = _payload()
+    headline = payload["headline"]
+    windows = payload["asymptotics"]["slope_windows"]
+    text = _note_text()
+
+    def fmt(value: float, places: int) -> str:
+        return f"{value:.{places}f}"
+
+    expected = {
+        "widest down slope": fmt(windows["down"][0]["slope"], 6),
+        "widest down standard error": fmt(windows["down"][0]["standard_error"], 6),
+        "widest up slope": fmt(windows["up"][0]["slope"], 6),
+        "down convergence sequence": " ".join(
+            "-> " + fmt(point["slope"], 6) for point in windows["down"][1:]
+        ),
+        "up convergence sequence": " ".join(
+            "-> " + fmt(point["slope"], 6) for point in windows["up"][1:]
+        ),
+        "crossing spot": fmt(headline["aggregate_speed_crosses_zero_at_spot"], 4),
+        "crossing move percent": fmt(100 * headline["aggregate_speed_crosses_zero_at_move"], 4),
+        "predicted remainder zero percent": fmt(
+            100 * headline["predicted_remainder_zero_at_move"], 4
+        ),
+        "leading term error percent": fmt(
+            100 * headline["leading_term_relative_error_at_smallest_move"], 2
+        ),
+        "base book speed": fmt(headline["book_speed_at_base_spot"], 4),
+        "bound loosest ratio": fmt(headline["bound_loosest_ratio"], 4),
+        "bound tightest ratio": fmt(
+            headline["bound_tightest_ratio_away_from_the_remainder_zero"], 4
+        ),
+        "bound collapse ratio": fmt(headline["bound_ratio_collapses_near_the_remainder_zero"], 4),
+    }
+    for label, value in expected.items():
+        assert value in text, f"the note does not print {label} as {value!r}"
+
+    down_sequence = " -> ".join(fmt(point["slope"], 6) for point in windows["down"])
+    assert down_sequence in text, (
+        f"the note does not print the down window sequence {down_sequence}"
+    )
+
+    # The two `abs_error` figures the note quotes come from a different artifact, written a phase
+    # earlier by different code, and quoting them is the whole point of the prediction check.
+    with STRESS_CSV.open(encoding="utf-8") as handle:
+        rows = {float(row["move"]): float(row["abs_error"]) for row in csv.DictReader(handle)}
+    assert fmt(-rows[0.2], 4) in text, f"the note does not print the 20 % abs_error {rows[0.2]!r}"
+    assert f"{rows[0.3]:,.4f}" in text, f"the note does not print the 30 % abs_error {rows[0.3]!r}"
+    assert fmt(abs(rows[0.1]), 1) in text, (
+        f"the note does not print the 10 % abs_error {rows[0.1]!r}"
+    )
+
+
+def test_the_note_guard_is_not_vacuous() -> None:
+    """The owner check has to fail when a figure moves, or it is decoration.
+
+    Probing the reader rather than the document keeps this honest: the formatted value the note
+    prints is found, and the same value one digit apart is not. Finding the perturbed string would
+    mean the check is matching a prefix rather than a figure.
+    """
+    text = _note_text()
+    headline = _payload()["headline"]
+    spot = headline["aggregate_speed_crosses_zero_at_spot"]
+    live = f"{spot:.4f}"
+    assert live in text
+    assert f"{spot + 1e-4:.4f}" not in text, (
+        "the reader matched a value the artifact does not publish"
+    )
+    sloped = f"{headline['bound_loosest_ratio']:.4f}"
+    assert sloped in text
+    assert f"{headline['bound_loosest_ratio'] + 1e-4:.4f}" not in text

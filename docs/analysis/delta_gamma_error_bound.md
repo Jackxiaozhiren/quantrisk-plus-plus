@@ -127,10 +127,20 @@ derivation existed.
 
 All numbers from `experiments/linearisation_error_bound/results/linearisation_error_bound.json`.
 
-**P1 holds.** Over the decade `2·10⁻³ … 2·10⁻²` — chosen to sit above the arithmetic floor of §6 and
-below where `δ⁴` matters — the fitted slope of `log|R|` on `log δ`, pooled over up and down moves
-(6 points), is **2.996188** with standard error **0.044006**: a deviation of **−0.087 standard
-errors** from theory 3. At the smallest swept shock, 0.1 %, the remainder equals `V'''(S)h³/6` to
+**P1 holds, and the manner in which it holds is the part worth reading.** Over the decade
+`2·10⁻³ … 2·10⁻²` — chosen to sit above the arithmetic floor of §6 and below where `δ⁴` matters —
+the fitted slope of `log|R|` on `log δ` is **2.971017** for down moves with standard error
+**0.000554** over 265 points, and **3.025281** for up moves. Each of those sits more than fifty
+standard errors from the theory value 3, and that is a fact about the standard error rather than
+about the cubic: a regression's `se` measures the scatter of its residuals, while the residuals over
+this decade carry the `δ⁴` mixture at the top of the window and §6's cancellation noise at the
+bottom, both systematic. What the artifact therefore claims is the *sequence*, and the sequence is
+monotone — down moves fit to `2.971017 → 2.990908 → 2.996030 → 2.998211 → 2.998785` across the five
+windows, up moves to `3.025281 → 3.008734 → 3.003902 → 3.001776 → 3.001209` — recorded as
+`slope_converges_to_theory_as_the_window_shrinks`. Quoting one window's slope with its `se` and
+calling the agreement with 3 "within a standard error" would have been exactly the error this note
+had when an earlier draft of this paragraph did it, and the figure it then quoted no longer exists
+in the artifact at all. At the smallest swept shock, 0.1 %, the remainder equals `V'''(S)h³/6` to
 within **0.38 %**. The base value everything turns on is `V'''(S) = −6.9224` for this ladder.
 
 **P2 holds everywhere it was tested.** A dense sweep of 300 shock sizes in each direction over
@@ -145,10 +155,10 @@ at 21.14 %). That collapse is what a supremum of `|V'''|` over a segment whose s
 cancel must do; it is reported rather than smoothed.
 
 **P3 holds, and this is the prediction.** The aggregate `V'''` of the ladder crosses zero at spot
-**94.5456**, a **5.4544 %** down move, so beyond that shock the segment carries both signs and their
+**94.5487**, a **5.4513 %** down move, so beyond that shock the segment carries both signs and their
 cubic contributions cancel. Carrying it through: `c(δ)` walks from `−6.8964` at a 0.1 % move to
 `−0.3964` at 20 % and then to `+4.9855` at 40 %, and solving `R(δ) = 0` puts the remainder's own zero
-at a **21.1446 %** down move. The committed CSV — frozen, hashed, and written by different code a
+at a **21.1447 %** down move. The committed CSV — frozen, hashed, and written by different code a
 phase earlier — brackets that and only that: its `abs_error` is **−528.5351 at 20 %** and
 **+12,526.8943 at 30 %**, the single sign change among its nine rows. At a 21 % move the remainder is
 `|R| = 13.3`, against 649.5 at 10 % and 12,527 at 30 %. The map is *almost exactly right* at a 21 %

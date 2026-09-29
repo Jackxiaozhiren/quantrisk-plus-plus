@@ -171,7 +171,7 @@ holds at all 618 shocks tested in both directions, and the envelope is tight —
 
 The closed form is `V‴ = −(Γ/S)(1 + d₁/(σ√T))`, and for this three-strike ladder it **crosses zero
 at spot 94.55**, a 5.45 % down move. Once the segment straddles that point the cubic contributions
-cancel, `c(δ)` falls through zero, and so does `R` — at a **21.1446 %** down move. The published
+cancel, `c(δ)` falls through zero, and so does `R` — at a **21.1447 %** down move. The published
 curve, frozen in the evidence manifest a phase before this derivation existed, brackets that with
 its single sign change between 20 % and 30 %. Two artifacts produced by different code agreeing on a
 location is the check; one agreeing with itself is not.

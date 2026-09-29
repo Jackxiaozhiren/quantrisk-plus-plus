@@ -285,6 +285,26 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
         )
 
 
+def test_every_analysis_note_is_guarded_against_the_numbers_it_quotes() -> None:
+    """`docs/analysis/` is where this repository states results, so it needs an owner per figure.
+
+    Phase 12 shipped its note without one and Phase 13 shipped its note *with* one; the difference
+    showed. When the guard for the second note was written, the first note's crossing figures turned
+    out to be stale by four decimals, and a headline fitted slope in the same paragraph was not
+    computed by anything in the tree at all (audit finding 32, limitation #77). A new note therefore
+    has to appear in the source of a test that reads it, which is what this ratchet enforces: the
+    named file is the contract, and adding prose without a reader fails here rather than in review.
+    """
+    notes = sorted(path.name for path in (REPO_ROOT / "docs" / "analysis").glob("*.md"))
+    assert len(notes) >= 2, f"expected the two worked analyses, found {notes}"
+    sources = {
+        path.name: path.read_text(encoding="utf-8")
+        for path in (REPO_ROOT / "tests" / "python").glob("test_*.py")
+    }
+    unguarded = [name for name in notes if not any(name in source for source in sources.values())]
+    assert not unguarded, f"analysis notes with no test that reads them: {unguarded}"
+
+
 def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
     """`docs/limitations.md` is cited by count in five other documents.
 
@@ -636,7 +656,7 @@ def test_the_validation_matrix_numbers_its_rows_once_and_in_order() -> None:
     assert labels, "no rows found; the table's shape changed"
     duplicates = sorted({label for label in labels if labels.count(label) > 1})
     assert not duplicates, f"validation_matrix.md numbers more than one row {duplicates}"
-    bases = sorted({int(re.match(r"\d+", label).group(0)) for label in labels})
+    bases = sorted({int(label.rstrip("abcdefghijklmnopqrstuvwxyz")) for label in labels})
     assert bases == list(range(1, len(bases) + 1)), f"row numbers skip: {bases}"
     for reference in re.finditer(r"row (\d+)\b", table):
         target = reference.group(1)

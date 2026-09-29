@@ -231,7 +231,7 @@ were found by trying, all recorded here rather than quietly corrected.
 noticed.** The stress layer's prose said the linearisation error "grows with the shock size" while
 its own committed CSV shows 649.5 at a 10 % down move, 528.5 at 20 %, and 12,527 at 30 %. The
 Taylor remainder explains the shape -- the book's third spot derivative crosses zero at spot 94.55,
-so segments past that cancel internally, and the remainder itself has a zero at a 21.1446 % move,
+so segments past that cancel internally, and the remainder itself has a zero at a 21.1447 % move,
 inside the single sign change the older artifact already contains. That prediction was computed
 before the bracket was checked, and the check is in
 `tests/python/test_linearisation_bound.py`. An audit that only asks "is the code right" misses this
@@ -396,6 +396,31 @@ by going back to the primary output instead of trusting my summary of it. Every 
 addendum is now quoted from `gh run view --json conclusion,jobs` or from the runner's own log lines.
 An unqualified "clean" across four tools is the shape that invites the original error too: the gate rows
 in the phase report and the release notes now name the tool that produced each verdict.
+
+**32. The Phase 12 analysis note had no test reading it, and writing one found three defects in it.**
+The guard for the Phase 13 note was built in-phase; the Phase 12 note, a whole phase older and the
+project's first worked analysis, was never given the same treatment. Given one now, it failed on
+contact. The cubic-crossing spot was quoted as `94.5456` with a `5.4544 %` move where the artifact
+publishes `94.5487` and `5.4513 %` -- and the note's own arithmetic (`100 - 5.4544`) was internally
+consistent, which is why no reader caught it. The paragraph's headline fitted slope, `2.996188` with
+standard error `0.044006`, belonged to a pooled six-point fit **that the experiment does not compute**
+and that no longer exists anywhere in the tree: a figure with no owner cannot go stale in a test, only
+in prose. Third, and the most interesting, the sentence drawn from it -- a deviation of `-0.087
+standard errors` from theory 3, offered as evidence of agreement -- misread the statistic. A
+regression's standard error measures the scatter of its residuals, not the accuracy of its estimate;
+over a window whose residuals carry the fourth-order mixture at one end and §6's cancellation noise at
+the other, the error is systematic, and the artifact's own widest window sits 52 and 59 standard
+errors from 3 down and up while converging toward it monotonically. The note now quotes the five
+published windows as the sequence the artifact actually claims, and says so out loud. The same sweep
+also turned up `21.1446` (a truncation of the predicted zero) in five documents beside `21.1447` (the
+rounding) in two; all seven print the rounded value now.
+
+Closed by rule, not by repair: `test_every_figure_the_note_quotes_is_owned_by_the_artifact` re-formats
+every figure from the artifact and demands it in the prose -- four perturbations, including re-inserting
+the historic `94.5456`, are each caught -- and `test_every_analysis_note_is_guarded_against_the_numbers_it_quotes`
+fails the suite if any file in `docs/analysis/` has no test that reads it, so a third note cannot be
+born unowned the way the first two were. Limitation #77 carries the general form: a number stated in
+prose and absent from any artifact is a number that cannot be checked, only re-read.
 
 **Verified at this addendum, by execution.** 388 pytest with the `oracles` extra and 319 collected
 without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite members under
