@@ -121,5 +121,5 @@ prose this phase guarded. It stays on the list with that reason attached.
 | Every README number traceable (§4) | improved: `docs/analysis/` is now covered by owner tests and a ratchet |
 | Cost $0 (§3) | no dependency, no service |
 | Tests pass locally | 397 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
-| Tests pass on the runner | not claimed here; the run that tests this commit reports its own result |
+| Tests pass on the runner | `36536998342` on `10dd8f3` — `completed / success`, all three jobs, the offline lane reading `328 passed, 4 skipped` and confirming the derived collection figure quoted above; `100% tests passed out of 198`; `suite: 14/14 executed and passed` |
 | Version and release | `1.3.0` unchanged, `v1.3.0` still at `f4c1e9ef9e23`; a release bump would invalidate every committed artifact's recorded version, so it waits until the next real feature |

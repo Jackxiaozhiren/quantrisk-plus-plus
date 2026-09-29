@@ -143,7 +143,7 @@ file repeated it, and then repeated the fix three times, which is the actual fin
 | pytest, `oracles` extra installed | **388 passed**, 0 failed, 0 skipped; 319 collected without it |
 | Benchmark suite, `--require-all` | **14/14 executed, 0 failed, 0 skipped** |
 | Evidence manifest | **76 artifacts**, 0 CHANGED / 0 VOLATILE / 0 MISSING / 0 unlisted |
-| CI on `ubuntu-latest` (three jobs) | **green on the tagged commit at run `36521846544`**, and green again on `main` through runs `36525353886` and `36526049661` after the erratum; twelve runs, seven of them red |
+| CI on `ubuntu-latest` (three jobs) | **green on the tagged commit at run `36521846544`**, and green again on `main` through runs `36525353886` and `36526049661` after the erratum; fourteen runs to date, seven of them red |
 | `quantrisk validate` | 7/7 |
 | mypy / ruff / ruff format / clang-format | clean |
 | Technical report | 13 chapters, **42 pages**, new §8.4 carries the proposition, the proof and the table |

@@ -227,7 +227,7 @@ Carried forward, deliberately not paid down here:
 | Tests pass on the runner (§7 step E: "不要宣布成功直到真实通过") | yes — `36521846544` on `f4c1e9ef9e23` (the tagged commit) and `36526049661` on `b9aaa3a` (the head of `main`), each all three jobs green, and in each case only after `gh run view --json conclusion` said `completed success` |
 | Verified by execution, not by reading | nine mutations caught; a temporary-tree reproduction compared against the committed artifact for shape inside the families the artifact declares, and for value everywhere else |
 
-**The runner, twelve times: seven red, four green, one cancelled.** Each red moved the design rather
+**The runner, fourteen times so far: seven red, six green, one cancelled.** Each red moved the design rather
 than the threshold, and the seventh red moved my own discipline instead of the code. `36413144612` failed twice over — PyPI answered 503 mid-install on the build lane, and the
 suite lane failed inside `two_factor_error_bound` on a stepwise ordering the pure-spot ray does not
 obey. `36415073007` failed on the endpoint version of that same ordering (`3.004587 → 2.991277`), at
@@ -245,7 +245,17 @@ and `suite: 14/14 executed and passed, 0 aggregated from disk, 0 failed, 0 skipp
 `388` quoted elsewhere in this report is the local count with the `oracles` extra installed, which CI
 does not install; `docs/reproducibility.md` explains why the two numbers are both right.
 
-After the green came four more: `36522762811` (`37ee4aa`) cancelled by the next push, `36523154776` (`270eb23`) green, `36524443614` (`fc98ae3`) **red on `Format and static checks`** — the denominator erratum's commit had claimed four tools clean in its message while ruff held an `E501` at `test_two_factor_bound.py:459` that I had introduced after the last sweep — `36525353886` (`3938b83`) green, and `36526049661` (`b9aaa3a`, the head of `main`) green — each with the runner's own line reading `100% tests passed out of 198`, `319 passed, 4 skipped`, `suite: 14/14 executed and passed`. The run testing the commit that records this is not claimed here.
+Seven runs followed that green, and each is named with the commit it tested: `36522762811`
+(`37ee4aa`) cancelled by the next push, `36523154776` (`270eb23`) green, `36524443614` (`fc98ae3`)
+**red on `Format and static checks`** — the denominator erratum's commit had claimed four tools clean
+in its message while ruff held an `E501` at `test_two_factor_bound.py:459` that I had introduced after
+the last sweep — then `36525353886` (`3938b83`), `36526049661` (`b9aaa3a`), `36526836740` (`8f66558`)
+and `36536998342` (`10dd8f3`, Phase 14's guards) green. The runner's own lines on those four read
+`100% tests passed out of 198` and `suite: 14/14 executed and passed`, with the offline lane's own
+pytest summary `319 passed, 4 skipped` before Phase 14 added its nine tests and `328 passed, 4
+skipped` after — which is the derived figure in `docs/reproducibility.md` confirmed by the machine that
+produces it. Running total for the phase: fourteen runs, seven red, six green, one cancelled. The run
+testing the commit that records this is not claimed here.
 
 **Where the plan changed under evidence.** Two of the three things I set out to claim were wrong
 when measured, and both changes are in the published result rather than in a private note. First, the
