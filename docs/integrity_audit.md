@@ -352,7 +352,7 @@ finding is that four successive per-field patches were needed to see that a fiel
 the wrong shape. Limitation #73 is written in the past tense on purpose, and #75 carries the detail.
 The lesson is not that cross-platform floats need slack, which the repository already said in #64,
 #71 and #72, but that a new file does not inherit the old file's understanding; the check that catches
-it is a green run on the machine that is not this one.
+it is a green run on the machine that is not this one, which `36521846544` finally supplied.
 
 **Verified at this addendum, by execution.** 388 pytest with the `oracles` extra and 319 collected
 without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite members under
@@ -360,8 +360,9 @@ without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite memb
 MISSING / 0 unlisted, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the 42-page report
 rebuilt and text-verified. Nine deliberate formula mutations were compiled and all nine were caught,
 and the reproduction comparator was falsified in both directions by eleven mutations that each gave
-the demanded outcome. Six CI runs on this phase have been red on `main` and every one is recorded
-rather than re-run away: PyPI answered 503 mid-install on one lane, the convergence guard failed on
-the other twice over, and the reproduction test then failed four times in the same way (#29). The
-next run tests the categorical fix; no green run on the runner has been recorded for Phase 13 at the
-time of writing, and `docs/release_notes_v1.3.0.md` says where the outcome will go when there is one.
+the demanded outcome. Six CI runs on this phase were red on `main` and every one is recorded rather
+than re-run away: PyPI answered 503 mid-install on one lane, the convergence guard failed on the other
+twice over, and the reproduction test then failed four times in the same way (#29). Run
+`36521846544`, on commit `f4c1e9ef9e23`, is green on all three jobs -- `100% tests passed out of 198`,
+`319 passed, 4 skipped`, `suite: 14/14 executed and passed, 0 failed, 0 skipped` -- which is the
+runner's own line for the categorical fix rather than this laptop's opinion of it.

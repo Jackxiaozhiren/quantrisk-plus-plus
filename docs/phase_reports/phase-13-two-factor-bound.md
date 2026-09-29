@@ -216,10 +216,11 @@ Carried forward, deliberately not paid down here:
 | Every README number traceable (§4) | yes, and now machine-checked for the finding and the note |
 | Cost $0 (§3) | no new dependency, no service, no paid solver |
 | Tests pass locally | 198 CTest, 388 pytest, 14/14 suite, 76 artifacts intact, ruff and mypy clean |
+| Tests pass on the runner (§7 step E: "不要宣布成功直到真实通过") | yes — `36521846544` on `f4c1e9ef9e23`, all three jobs green, after six red runs; not declared until the API reported `completed / success` |
 | Verified by execution, not by reading | nine mutations caught; a temporary-tree reproduction compared against the committed artifact for shape inside the families the artifact declares, and for value everywhere else |
 
-**The runner, six times red, and what each run changed.** Phase 13 has not yet produced a green run
-on `main`; six are recorded rather than re-run away, and each one moved the design rather than the
+**The runner, six times red and then green, and what each run changed.** Phase 13's first seven runs
+on `main` were six reds followed by one green, and each red moved the design rather than the
 threshold. `36413144612` failed twice over — PyPI answered 503 mid-install on the build lane, and the
 suite lane failed inside `two_factor_error_bound` on a stepwise ordering the pure-spot ray does not
 obey. `36415073007` failed on the endpoint version of that same ordering (`3.004587 → 2.991277`), at
@@ -229,9 +230,13 @@ equality (`36416691279`, 8e-7 in a fitted slope), then 1e-5 slack (`36417662618`
 pure-spot slope), then slack derived from the artifact's own conditioning (`36518357703`, 6.6e-3 on a
 field no regression produced), then the same rule at `36519230799`, 39% apart on a regression's
 standard error. Four successive per-field patches is the finding: the exemptions were being guessed by
-name, and the field that *measures* the looseness was never on the list. The fifth fix changes the kind
-of comparison rather than the size of a tolerance, and this phase's release waits on the run that
-tests it.
+name, and the field that *measures* the looseness was never on the list. The fifth fix changed the kind
+of comparison rather than the size of a tolerance, and `36521846544` — run seven, on commit
+`f4c1e9ef9e23` — is the run that tested it: **completed / success on all three jobs**, in the runner's
+own words `100% tests passed out of 198`, `319 passed, 4 skipped in 49.93s` on the fully offline lane,
+and `suite: 14/14 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 195.1s total`. The
+`388` quoted elsewhere in this report is the local count with the `oracles` extra installed, which CI
+does not install; `docs/reproducibility.md` explains why the two numbers are both right.
 
 **Where the plan changed under evidence.** Two of the three things I set out to claim were wrong
 when measured, and both changes are in the published result rather than in a private note. First, the
