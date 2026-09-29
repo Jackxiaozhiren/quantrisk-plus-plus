@@ -456,7 +456,8 @@ def test_the_dominant_omitted_piece_on_risk_off_is_gamma_at_the_wrong_volatility
     assert max(terms, key=lambda name: abs(terms[name])) == "cubic_gamma_sigma"
     headline = _payload()["headline"]
     # The denominators and the dominant term are published as fields so prose can cite them, which
-    # makes them claims of their own: a tampered denominator has to fail, not merely a tampered ratio.
+    # makes them claims of their own: a tampered denominator has to fail too, not only a tampered
+    # ratio.
     for key, value in (
         ("quadratic_net_term", terms["quadratic_vanna"] + terms["quadratic_volga"]),
         ("quadratic_magnitudes_term", quadratic),

@@ -157,7 +157,11 @@ was missing, since the previous one only checked that "7.4" appeared in both pla
 that the two places meant different things. Limitation #76 and audit finding 30 record it. The tagged
 commit `f4c1e9e` and its attached assets keep the superseded wording, because rewriting a published
 tag would destroy the record of what was actually released; `main` carries the corrected text, and the
-release body carries a dated note pointing here.
+release body carries a dated note pointing here. The amendment was made in place on 2026-09-29: section 2
+of the body now marks that sentence superseded where it stands, and an Erratum section at the foot
+carries the corrected figures. `publishedAt` is unchanged at `2026-09-29T04:44:27Z` and the four assets
+are the same files with the same SHA-256 digests, read back from the API after the edit — an erratum is a
+note added to the record, not a replacement of it.
 
 ## What is still not here
 

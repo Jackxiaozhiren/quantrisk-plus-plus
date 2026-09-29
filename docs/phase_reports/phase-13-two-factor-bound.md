@@ -272,3 +272,12 @@ The gate is a PASS with the runner's six red runs inside it rather than beside i
 durable output is the record that a reproducibility check can be wrong about *what it is comparing*, and
 that the correction was categorical (compare shape where no value is cross-platform, and let the
 producer declare which numbers those are) rather than a tolerance three orders larger.
+
+It is also a PASS with an erratum inside it. After the release, the phase's headline ratio turned out to
+have been quoted against a denominator no sentence named — 7.41 measured against the quadratic's
+contributions in absolute value, printed beside the net quadratic +787.96, where it is 10.66 (§8). The tag
+`f4c1e9e` and its four assets were left exactly as published, and the release body was amended in place:
+an inline "this sentence is superseded" marker in section 2 and a dated Erratum section, with
+`publishedAt` and every asset digest verified unchanged afterwards. Rewriting a tag or swapping a
+released artifact would have removed the evidence that the wrong sentence was ever shipped, which is the
+one thing an audit trail cannot be asked to do.
