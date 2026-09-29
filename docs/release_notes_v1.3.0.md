@@ -81,7 +81,7 @@ pure-spot windows compares noise. Convergence is now claimed only where the cond
 meaningful, every window is published rather than reduced to a boolean, and **no numerical band was
 moved** — 2 % on the ratio and 0.15 on the narrowest slope are the values the first commit carried.
 
-## Seven CI runs: six red, then green, and each red was real
+## Eleven CI runs: seven red, three green, one cancelled, and each red was mine or the platform's
 
 This release reached the runner six times red before it passed; §9 of
 `docs/phase_reports/phase-13-two-factor-bound.md` carries each run's id and its own message. Run
@@ -94,6 +94,15 @@ relative difference in a fitted slope, compared for bit-equality. Runs `36417662
 in the field that *measures* the looseness, and 39% in a regression's standard error. Run
 `36521846544`, on the commit this release tags, is green on all three jobs: `100% tests passed out of
 198`, `319 passed, 4 skipped`, `suite: 14/14 executed and passed`.
+
+Three runs came after that, and they are recorded because the fourth of them is an erratum rather
+than a coincidence: `36522762811` (`37ee4aa`) was cancelled by the next push, `36523154776` (`270eb23`)
+was green, and `36524443614` (`fc98ae3`) went red on the denominator erratum below — not on its
+arithmetic but on my own gate claim: its commit message said "ruff/format/mypy/clang-format clean"
+and ruff found `E501 Line too long (102 > 100)` at `test_two_factor_bound.py:459`, in a comment I had
+added after the last lint sweep. `36525353886` (`3938b83`) is green on all three jobs and is the latest
+state of `main`. Full tally: 7 failures, 3 successes, 1 cancelled.
+
 
 Nothing was relaxed to get here, and the distinction matters, so it is stated concretely: every
 numerical band in this release carries the values from the first commit — 2 % on the
@@ -109,8 +118,8 @@ types — while counts, booleans, strings and verdicts stay exact even there and
 relative. The values in those families are still proved, just not against one laptop: the experiment
 raises rather than publishing a slope outside its band, and
 `test_the_joint_error_is_quadratic_where_the_single_factor_error_is_cubic` re-derives the order claim in
-the test's own environment over scales the experiment never uses. Limitations #71–75 and audit findings
-28–29 record all six red runs; the repository had already written this lesson down twice before a new
+the test's own environment over scales the experiment never uses. Limitations #71–76 and audit findings
+28–31 record all eleven runs, seven of them red; the repository had already written this lesson down twice before a new
 file repeated it, and then repeated the fix three times, which is the actual finding.
 
 ## Two documentation defects this release found in itself
@@ -132,7 +141,7 @@ file repeated it, and then repeated the fix three times, which is the actual fin
 | pytest, `oracles` extra installed | **388 passed**, 0 failed, 0 skipped; 319 collected without it |
 | Benchmark suite, `--require-all` | **14/14 executed, 0 failed, 0 skipped** |
 | Evidence manifest | **76 artifacts**, 0 CHANGED / 0 VOLATILE / 0 MISSING / 0 unlisted |
-| CI on `ubuntu-latest` (three jobs) | **green on run `36521846544`, the commit this release tags**, after six red runs recorded above |
+| CI on `ubuntu-latest` (three jobs) | **green on the tagged commit at run `36521846544`**, and green again on `main` at run `36525353886` after the erratum; eleven runs, seven of them red |
 | `quantrisk validate` | 7/7 |
 | mypy / ruff / ruff format / clang-format | clean |
 | Technical report | 13 chapters, **42 pages**, new §8.4 carries the proposition, the proof and the table |

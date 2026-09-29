@@ -377,15 +377,38 @@ limitation (#76) because the failure mode is general: a provenance check on digi
 transcription, never interpretation, and a ratio field whose name does not state its denominator is a
 sentence waiting to be misread by the next author, who will be me.
 
+**31. I published a gate claim I had not re-run, and then mis-described the instrument that caught
+it.** Commit `897a127` ends "ruff/format/mypy/clang-format clean". Ruff was not clean at that tree:
+`E501 Line too long (102 > 100)` at `tests/python/test_two_factor_bound.py:459`, in a comment added
+*after* the last lint sweep. The final pass covered pytest, CTest, validate, mypy and clang-format and
+simply did not include ruff, so the sentence described the tree as it had been twenty minutes earlier
+rather than as it was. Run `36524443614` reported `Format and static checks: failure` with the other two
+jobs green -- this phase's seventh red, and the second one caused by a claim rather than a computation.
+
+The correction to the correction is the part worth keeping. That commit's own message asserted that
+"`gh run watch --exit-status` exited 0 on that failed run". It did not: the watcher returned **1**, and
+the zero belonged to my background-task *wrapper*, whose status comes from the last command in a chain I
+had written as `watch; echo exit=$?; gh run view`. Reading the watcher's captured output showed both
+facts -- `exit=1` for the failed run, and why an earlier watch had ended while its run was still
+`in_progress`: `failed to get run: ... EOF`, the poller losing the API on a run that went on to pass. So
+the instrument was unreliable in the *opposite* direction from the one I reported, and I found that only
+by going back to the primary output instead of trusting my summary of it. Every CI statement in this
+addendum is now quoted from `gh run view --json conclusion,jobs` or from the runner's own log lines.
+An unqualified "clean" across four tools is the shape that invites the original error too: the gate rows
+in the phase report and the release notes now name the tool that produced each verdict.
+
 **Verified at this addendum, by execution.** 388 pytest with the `oracles` extra and 319 collected
 without it, 198 CTest (547,845 assertions in 197 Catch2 cases), 14/14 suite members under
 `--require-all`, `verify_evidence_manifest.py` at 76 artifacts with 0 CHANGED / 0 VOLATILE / 0
 MISSING / 0 unlisted, `quantrisk validate` 7/7, mypy/ruff/clang-format clean, and the 42-page report
 rebuilt and text-verified. Nine deliberate formula mutations were compiled and all nine were caught,
 and the reproduction comparator was falsified in both directions by eleven mutations that each gave
-the demanded outcome. Six CI runs on this phase were red on `main` and every one is recorded rather
-than re-run away: PyPI answered 503 mid-install on one lane, the convergence guard failed on the other
-twice over, and the reproduction test then failed four times in the same way (#29). Run
-`36521846544`, on commit `f4c1e9ef9e23`, is green on all three jobs -- `100% tests passed out of 198`,
-`319 passed, 4 skipped`, `suite: 14/14 executed and passed, 0 failed, 0 skipped` -- which is the
-runner's own line for the categorical fix rather than this laptop's opinion of it.
+the demanded outcome, and both were re-checked against tampered inputs: five mutations of the published
+ratios and denominators, five caught; four conflations of the two quadratic denominators in prose, four
+caught, one positive control passing, and the document restored byte-for-byte. Eleven CI runs landed on
+`main` for this phase -- seven red, three green, one cancelled -- and each red is named by run id above:
+PyPI 503 on one lane, the convergence guard twice, the reproduction test four times in the same way
+(#29), and a fifth guard failure of mine caused by a lint claim I had not re-run (#31). Runs
+`36521846544` (`f4c1e9ef9e23`, the tagged commit), `36523154776` (`270eb23`) and `36525353886`
+(`3938b83`, the latest `main`) are green on all three jobs, the runner's own lines being
+`100% tests passed out of 198`, `319 passed, 4 skipped`, `suite: 14/14 executed and passed`.

@@ -227,9 +227,8 @@ Carried forward, deliberately not paid down here:
 | Tests pass on the runner (§7 step E: "不要宣布成功直到真实通过") | yes — `36521846544` on `f4c1e9ef9e23`, all three jobs green, after six red runs; not declared until the API reported `completed / success` |
 | Verified by execution, not by reading | nine mutations caught; a temporary-tree reproduction compared against the committed artifact for shape inside the families the artifact declares, and for value everywhere else |
 
-**The runner, six times red and then green, and what each run changed.** Phase 13's first seven runs
-on `main` were six reds followed by one green, and each red moved the design rather than the
-threshold. `36413144612` failed twice over — PyPI answered 503 mid-install on the build lane, and the
+**The runner, eleven times: seven red, three green, one cancelled.** Each red moved the design rather
+than the threshold, and the seventh red moved my own discipline instead of the code. `36413144612` failed twice over — PyPI answered 503 mid-install on the build lane, and the
 suite lane failed inside `two_factor_error_bound` on a stepwise ordering the pure-spot ray does not
 obey. `36415073007` failed on the endpoint version of that same ordering (`3.004587 → 2.991277`), at
 which point the guard stopped asserting an ordering for the ray whose conditioning cannot support one,
@@ -245,6 +244,8 @@ own words `100% tests passed out of 198`, `319 passed, 4 skipped in 49.93s` on t
 and `suite: 14/14 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 195.1s total`. The
 `388` quoted elsewhere in this report is the local count with the `oracles` extra installed, which CI
 does not install; `docs/reproducibility.md` explains why the two numbers are both right.
+
+After the green came three more: `36522762811` (`37ee4aa`) cancelled by the next push, `36523154776` (`270eb23`) green, `36524443614` (`fc98ae3`) **red on `Format and static checks`** — the denominator erratum's commit had claimed four tools clean in its message while ruff held an `E501` at `test_two_factor_bound.py:459` that I had introduced after the last sweep — and `36525353886` (`3938b83`) green, its own line reading `100% tests passed out of 198`, `319 passed, 4 skipped`, `suite: 14/14 executed and passed`.
 
 **Where the plan changed under evidence.** Two of the three things I set out to claim were wrong
 when measured, and both changes are in the published result rather than in a private note. First, the
