@@ -123,7 +123,7 @@ order without the size would read as "expect ~800 of error" where the defensible
   workload — that is, slower than a vectorised NumPy path at 200k paths. The speedup moves
   by several percent between runs, so no single figure from that file should be quoted as
   if it were a constant.
-- **The 73 numbered limitations in `docs/limitations.md` are the complete list of what is
+- **The 74 numbered limitations in `docs/limitations.md` are the complete list of what is
   not claimed.** Where a row above says "weaker" or "partially", it points into that file.
 
 ## Regenerating

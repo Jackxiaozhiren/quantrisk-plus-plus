@@ -326,9 +326,14 @@ vanna and volga to re-striking gamma.
 time the third CI run went red the pattern was unmistakable: the experiment's guards, then their
 replacement, then a test whose whole job was checking reproducibility, each in turn asserted
 something that only holds on the libm that produced the committed bytes. The third failure was an
-8e-7 relative difference in a *fitted slope* compared for bit-equality, and the fix is a comparator
-that gives floats documented slack and everything else none — proven on both sides, eight kinds of
-real change rejected for one tolerated float drift. Limitation #73 is written in the past tense on
+8e-7 relative difference in a *fitted slope* compared for bit-equality. The first fix gave floats
+1e-5 of slack and went red again on the very next run, on a 3.2e-3 gap in the pure-spot slope — which
+is not the same problem one size bigger but a different one: that quantity cannot be reproduced to
+better than its conditioning on any platform. The comparator now derives its slack for fitted numbers
+from the artifact's own published `fit_conditioning` (`1/sqrt(r)`, 0.028 for the pure-spot ray) and
+gives every other float 1e-5 and every count, verdict, string and structural key none — proven on
+both sides, with the three measured cross-platform gaps tolerated and eight kinds of real change
+rejected. Limitation #73 is written in the past tense on
 purpose. The lesson is not that cross-platform floats need slack, which the repository already said
 in #64, #71 and #72, but that a new file does not inherit the old file's understanding; the check
 that catches it is a green run on the machine that is not this one.

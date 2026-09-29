@@ -155,7 +155,7 @@ path with the C++ cases.
 
 ## 7. Remaining limitations
 
-Items 67–73 of `docs/limitations.md`, in brief: the bound covers the equity × volatility pair on a
+Items 67–74 of `docs/limitations.md`, in brief: the bound covers the equity × volatility pair on a
 Black–Scholes European book and not the rate/credit legs, and does not travel to Heston; "quadratic"
 is a limit statement whose leading term is a minority term at published sizes, and the small
 aggregate vanna here is a strike-placement coincidence rather than a property of the map; the ridge

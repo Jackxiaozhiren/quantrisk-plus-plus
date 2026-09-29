@@ -448,3 +448,18 @@ never removed just because a later phase shipped.
     difference below the slack (tolerated) and eight kinds of real change (each rejected). Recorded
     because the project already had limitations #64 and #71 saying this, and a freshly written test
     repeated the error anyway: a lesson filed is not a lesson applied to the next file.
+
+74. **A fitted quantity is only reproducible to its own conditioning, and this repository learned
+    that in two steps rather than one.** The first fix for the cross-platform failure in #73 gave
+    floats `1e-5` relative slack — right for the crash ray's 8e-7 gap, wrong for the pure-spot
+    ray's 3.2e-3 one, so the test went red a second time on the same machine. The two gaps are not
+    two magnitudes of one effect. The reproduction slack is now derived from the artifact's
+    published `fit_conditioning` as `1 / sqrt(r)` on the ray whose tightest error sample sits `r`
+    times above the double spacing of a book value, which gives 0.028 for the pure-spot ray at
+    `r = 1281` and nothing for any value that a regression did not produce; everything else keeps
+    `1e-5`. It is calibrated in both directions and not merely asserted: the three measured
+    Linux-to-macOS gaps are tolerated while eight kinds of real change — a moved price-level error,
+    a flipped verdict, a renamed dominant term, a changed count, a shortened list, a removed key —
+    are rejected. The general form, since it bit twice: when a cross-platform difference appears,
+    ask what the quantity's own noise floor is before choosing a tolerance, because a slack picked
+    to make one observed gap pass is a guess about the next.
