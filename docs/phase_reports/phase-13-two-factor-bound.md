@@ -250,5 +250,17 @@ mine are also on the record rather than smoothed: a `uv pip install -e .` served
 the new bindings look unregistered, and a root-level copy of the experiment in `tmp_path` whose
 repo-root resolution broke a test I had not thought to run from a different depth.
 
-**Release.** `v1.3.0`, tagged on the commit whose evidence manifest hashes these artifacts, with
-`technical_report.pdf`, `manifest.json` and the suite results attached.
+**Phase 13: PASS.** Released as `v1.3.0` on 2026-09-29 at commit `f4c1e9e` — the commit whose
+`36521846544` is green on all three lanes on `ubuntu-latest`: lint, then build + `100% tests passed out
+of 198` + the offline pytest lane (`319 passed, 4 skipped`), then the 14-member suite under
+`--require-all` in 195.1 s. Four assets are attached and the release is marked latest, with `v1.2.0`
+untouched: `technical_report.pdf` (966,104 B), `manifest.json` (44,397 B, 76 artifacts), `CITATION.cff`
+(2,493 B) and `quantrisk-suite-results.zip` (140,078 B holding the four suite artifacts). Each was
+downloaded back from the release and compared by SHA-256 against the committed file it claims to be,
+**including all four files inside the zip**, and every digest matched — because a release asset that
+silently differs from the tree it names would undermine the one thing this project sells.
+
+The gate is a PASS with the runner's six red runs inside it rather than beside it: the phase's most
+durable output is the record that a reproducibility check can be wrong about *what it is comparing*, and
+that the correction was categorical (compare shape where no value is cross-platform, and let the
+producer declare which numbers those are) rather than a tolerance three orders larger.
