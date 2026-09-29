@@ -81,7 +81,7 @@ pure-spot windows compares noise. Convergence is now claimed only where the cond
 meaningful, every window is published rather than reduced to a boolean, and **no numerical band was
 moved** — 2 % on the ratio and 0.15 on the narrowest slope are the values the first commit carried.
 
-## Eleven CI runs: seven red, three green, one cancelled, and each red was mine or the platform's
+## Twelve CI runs: seven red, four green, one cancelled, and each red was mine or the platform's
 
 This release reached the runner six times red before it passed; §9 of
 `docs/phase_reports/phase-13-two-factor-bound.md` carries each run's id and its own message. Run
@@ -100,8 +100,10 @@ than a coincidence: `36522762811` (`37ee4aa`) was cancelled by the next push, `3
 was green, and `36524443614` (`fc98ae3`) went red on the denominator erratum below — not on its
 arithmetic but on my own gate claim: its commit message said "ruff/format/mypy/clang-format clean"
 and ruff found `E501 Line too long (102 > 100)` at `test_two_factor_bound.py:459`, in a comment I had
-added after the last lint sweep. `36525353886` (`3938b83`) is green on all three jobs and is the latest
-state of `main`. Full tally: 7 failures, 3 successes, 1 cancelled.
+added after the last lint sweep. `36525353886` (`3938b83`) and `36526049661` (`b9aaa3a`) are both green on
+all three jobs, and `b9aaa3a` is the head of `main`. Full tally: 7 failures, 4 successes, 1 cancelled. The
+run testing *this* commit is deliberately not claimed here -- that is the rule in `docs/reproducibility.md`
+and the reason these notes name run ids instead of asserting outcomes.
 
 
 Nothing was relaxed to get here, and the distinction matters, so it is stated concretely: every
@@ -119,7 +121,7 @@ relative. The values in those families are still proved, just not against one la
 raises rather than publishing a slope outside its band, and
 `test_the_joint_error_is_quadratic_where_the_single_factor_error_is_cubic` re-derives the order claim in
 the test's own environment over scales the experiment never uses. Limitations #71–76 and audit findings
-28–31 record all eleven runs, seven of them red; the repository had already written this lesson down twice before a new
+28–31 record all twelve runs, seven of them red; the repository had already written this lesson down twice before a new
 file repeated it, and then repeated the fix three times, which is the actual finding.
 
 ## Two documentation defects this release found in itself
@@ -141,7 +143,7 @@ file repeated it, and then repeated the fix three times, which is the actual fin
 | pytest, `oracles` extra installed | **388 passed**, 0 failed, 0 skipped; 319 collected without it |
 | Benchmark suite, `--require-all` | **14/14 executed, 0 failed, 0 skipped** |
 | Evidence manifest | **76 artifacts**, 0 CHANGED / 0 VOLATILE / 0 MISSING / 0 unlisted |
-| CI on `ubuntu-latest` (three jobs) | **green on the tagged commit at run `36521846544`**, and green again on `main` at run `36525353886` after the erratum; eleven runs, seven of them red |
+| CI on `ubuntu-latest` (three jobs) | **green on the tagged commit at run `36521846544`**, and green again on `main` through runs `36525353886` and `36526049661` after the erratum; twelve runs, seven of them red |
 | `quantrisk validate` | 7/7 |
 | mypy / ruff / ruff format / clang-format | clean |
 | Technical report | 13 chapters, **42 pages**, new §8.4 carries the proposition, the proof and the table |

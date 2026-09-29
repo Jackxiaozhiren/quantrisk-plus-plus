@@ -405,10 +405,10 @@ rebuilt and text-verified. Nine deliberate formula mutations were compiled and a
 and the reproduction comparator was falsified in both directions by eleven mutations that each gave
 the demanded outcome, and both were re-checked against tampered inputs: five mutations of the published
 ratios and denominators, five caught; four conflations of the two quadratic denominators in prose, four
-caught, one positive control passing, and the document restored byte-for-byte. Eleven CI runs landed on
-`main` for this phase -- seven red, three green, one cancelled -- and each red is named by run id above:
+caught, one positive control passing, and the document restored byte-for-byte. Twelve CI runs landed on
+`main` for this phase -- seven red, four green, one cancelled -- and each red is named by run id above:
 PyPI 503 on one lane, the convergence guard twice, the reproduction test four times in the same way
 (#29), and a fifth guard failure of mine caused by a lint claim I had not re-run (#31). Runs
-`36521846544` (`f4c1e9ef9e23`, the tagged commit), `36523154776` (`270eb23`) and `36525353886`
-(`3938b83`, the latest `main`) are green on all three jobs, the runner's own lines being
+`36521846544` (`f4c1e9ef9e23`, the tagged commit), `36523154776` (`270eb23`), `36525353886`
+(`3938b83`) and `36526049661` (`b9aaa3a`, the head of `main`) are green on all three jobs, the runner's own lines being
 `100% tests passed out of 198`, `319 passed, 4 skipped`, `suite: 14/14 executed and passed`.
