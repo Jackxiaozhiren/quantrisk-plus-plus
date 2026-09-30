@@ -246,8 +246,9 @@ manifest names the tag.
 than smuggled into a tag that the runner already verified.
 
 **What was built.** `scripts/run_mutation_suite.py` plants a declared defect, requires the one guard
-that should reject it to go red, restores the file from the snapshot taken before its own edit, and
-requires the same guard to go green again. The statuses are `caught`, `anchor-not-unique`,
+that should reject it to go red, puts the tree back exactly as it found it — from the snapshot taken
+before an edit, or by deletion for a probe it created — and requires the same guard to go green again.
+The statuses are `caught`, `anchor-not-unique`, `probe-file-already-in-the-tree`,
 `mutation-was-a-no-op`, `mutation-did-not-compile`, `guard-could-not-be-run`, `guard-stayed-green`,
 `restore-mismatch`, `tree-did-not-recover`, `target-already-modified` — only the first counts, and
 `ctest -R` matching nothing is specifically *not* allowed to look like a catch, because a non-zero exit
