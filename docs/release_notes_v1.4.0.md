@@ -144,7 +144,12 @@ its own precondition, which is the point: a check that needs history declares it
 inventing a band from one measurement. The pinned band is still compared against the history min/max
 in every clone that carries one, so the provenance did not disappear — it acquired a precondition.
 
-## The mutation harness is a repo tool
+## After this tag — the mutation harness became a repo tool
+
+This section postdates `v1.4.0`. The harness landed on `main` at `ee9db87`, after the tag was cut on
+`f4e8afc13bd7`, so it is **not** in the released tree and the GitHub release says as much; it is written
+here because these notes are the living account of the release, and leaving the debt bullet in place
+would describe `main` falsely.
 
 Phase 13 §8, Phase 14 §8 and these notes' own debt list all said the same thing: the sweep that proves
 a guard can fail was hand-rolled in `/tmp`, three phases running. It is now
