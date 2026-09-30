@@ -141,6 +141,114 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="the layout block describes the tree, as finding 33 required",
     ),
     Mutation(
+        identifier="readme-undercounts-the-limitation-register",
+        kind="prose",
+        path="README.md",
+        anchor="carries 77 numbered entries",
+        replacement="carries 76 numbered entries",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_limitations_agree_with_the_file"
+        ),
+        claim="the limitation count in prose is the register's, not a remembered number",
+    ),
+    Mutation(
+        identifier="readme-overcounts-the-cpp-suite",
+        kind="prose",
+        path="README.md",
+        anchor="# 198 C++ tests",
+        replacement="# 199 C++ tests",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_cpp_tests_agree_with_the_build"
+        ),
+        claim="the C++ count in prose is what CTest actually lists",
+    ),
+    Mutation(
+        identifier="reproducibility-overcounts-the-suite",
+        kind="prose",
+        path="docs/reproducibility.md",
+        anchor="all 14 members",
+        replacement="all 15 members",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_suite_members_agree_with_the_registry"
+        ),
+        claim="the suite's member count is owned by its registry",
+    ),
+    Mutation(
+        identifier="interview-doc-overcounts-the-offline-lane",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="# 342 Python tests",
+        replacement="# 343 Python tests",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
+        ),
+        claim="every spelling of the test count agrees with the same document's headline",
+    ),
+    Mutation(
+        identifier="readme-inflates-the-report-by-a-chapter",
+        kind="prose",
+        path="README.md",
+        anchor="twelve chapters",
+        replacement="thirteen chapters",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_paper_chapters_agree_with_the_source"
+        ),
+        claim="the report's chapter count is counted from the LaTeX, not from memory",
+    ),
+    Mutation(
+        identifier="matrix-heading-overcounts-its-own-paragraphs",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="## Five rows that need the prose to be honest",
+        replacement="## Six rows that need the prose to be honest",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_validation_matrix_heading_counts_its_own_caveat_paragraphs"
+        ),
+        claim="a section heading counts the paragraphs under it, as finding from Phase 13's audit",
+    ),
+    Mutation(
+        identifier="readme-miscounts-the-findings",
+        kind="prose",
+        path="README.md",
+        anchor="The six results worth reading are in",
+        replacement="The seven results worth reading are in",
+        guard=(
+            "tests/python/test_two_factor_bound.py::"
+            "test_the_findings_are_counted_wherever_they_are_counted"
+        ),
+        claim="the findings register is counted where it is counted, in both documents",
+    ),
+    Mutation(
+        identifier="readme-miscounts-the-matrix-rows",
+        kind="prose",
+        path="README.md",
+        anchor="is the full table — twenty rows over",
+        replacement="is the full table — twenty-one rows over",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_validation_matrix_rows_agree_with_the_table"
+        ),
+        claim="the matrix's row count belongs to the table, not to the sentence quoting it",
+    ),
+    Mutation(
+        identifier="matrix-numbers-two-rows-fourteen",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="| 15 |",
+        replacement="| 14 |",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_validation_matrix_numbers_its_rows_once_and_in_order"
+        ),
+        claim="row numbers stay unique and contiguous, the defect Phase 13's two 13s shipped",
+    ),
+    Mutation(
         identifier="experiment-added-without-a-registry-entry",
         kind="tree",
         path="experiments/_mutation_probe/run.py",

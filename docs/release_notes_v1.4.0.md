@@ -86,7 +86,7 @@ find cpp bindings tests/cpp ... | xargs uv run clang-format --dry-run --Werror
                                clean (no diagnostics)
 uv run ctest --test-dir build/dev   100% tests passed out of 198   (Total Test time = 7.54 sec)
 quantrisk_tests                All tests passed (547845 assertions in 197 test cases)
-uv run pytest tests/python -q  410 passed in 21.55s
+uv run pytest tests/python -q  411 passed
 uv run python scripts/run_benchmark_suite.py --require-all
                                suite: 14/14 executed and passed, 0 aggregated from disk,
                                0 failed, 0 skipped, 84.6s total
@@ -100,7 +100,7 @@ latexmk -pdf -g technical_report.tex
 ```
 
 The PDF was re-extracted, not assumed: `pdftotext` on the rebuilt file returns `8.39×`, `0.445×`,
-`38,642,054`, `7.77×`, `8.70×`, `410 pytest tests` and `341 collected`, i.e. the document carries the
+`38,642,054`, `7.77×`, `8.70×`, `411 pytest tests` and `342 collected`, i.e. the document carries the
 artifact it ships beside rather than the run before it.
 
 The runner's own lines on the tagged head, `f4e8afc13bd7`, run `36663508268`:
@@ -112,7 +112,7 @@ offline skip is this release's history guard printing its precondition —
 can be derived; see the command in docs/reproducibility.md` — which is finding 35 resolved in the
 environment that found it, rather than in the one that wrote it.
 
-The suite count moved `388 → 410` with the `oracles` extra and `319 → 341` without it — twenty-two
+The suite count moved `388 → 411` with the `oracles` extra and `319 → 342` without it — twenty-three
 cases on each side, none of them oracle-gated, which is why the two numbers move together.
 `docs/limitations.md` carries 77 numbered entries.
 
@@ -159,14 +159,18 @@ read and the patch, and the sweep still printed "nine mutations caught".
 
 Each case proves four things in order, and a failure at any step gets its own status rather than being
 tallied as a catch: the anchor occurred exactly once; the file bytes actually changed; the named guard
-went red; the bytes restored to the recorded SHA-256 and the same guard went green again. Nine defects
-are declared in three kinds — five `prose` edits in documents or bindings (`1.9975` → `1.9976` in the
-analysis note, a narrowed README band, a stale README ratio, a pybind registration the installed binary
-cannot serve, a phantom path in the architecture block), one `tree` case that *creates* an unregistered
+went red; the bytes restored to the recorded SHA-256 and the same guard went green again. Eighteen
+defects are declared in three kinds — fourteen `prose` edits in documents or bindings (a shifted analysis-note
+slope, a narrowed README band, a stale README ratio, a pybind registration the installed binary cannot
+serve, a phantom path in the architecture block, and one off-by-one in each documented figure: the
+limitation register, the C++ count, the suite's member count, the offline test count in a second spelling,
+the report's chapter count, the matrix's row count, the caveat heading and the findings count, plus a
+duplicated matrix row number), one `tree` case that *creates* an unregistered
 `experiments/_mutation_probe/run.py` for the registry-completeness guard and then deletes it, and three
 `core` edits in the C++ closed forms (volga using its own square, vanna losing its sign, `V_SSsigma`
-dropping a term), each rebuilt into the Catch2 target and rejected by its CTest case. On this tree the
-run printed `9/9 planted defects were rejected by their guard.`
+dropping a term), each rebuilt into the Catch2 target and rejected by its CTest case. The sweep runs on a
+clean tree — it refuses to start if any target differs from `HEAD` — and its own line is quoted in
+`docs/phase_reports/phase-14-verification-debt.md`.
 
 The harness is also shown able to say *no*. A probe mutation in text no guard reads, aimed at a guard
 that cannot see it, was reported as `guard-stayed-green` rather than counted — finding 25's failure mode
@@ -182,13 +186,17 @@ which enumerates every `experiments/*/run.py` and `benchmarks/*/*.py` and compar
 registry in both directions. That guard is what the probe plants: an experiment that runs but is not a
 member.
 
-Its gate is `tests/python/test_mutation_suite.py` (four cases), which is what keeps the tool from
+Its gate is `tests/python/test_mutation_suite.py` (five cases), which is what keeps the tool from
 rotting the way the prose did: on every ordinary test run it re-checks that each anchor still occurs
 exactly once in the file it names, that each prose guard still defines the named test, that each C++
-guard still exists as a `TEST_CASE`, that the identifiers are unique, and that the status function
-names each way a cycle can lie instead of calling it `caught`. Running the harness itself remains an
-operator action — it edits tracked files and recompiles — so it is not a CI step; what CI checks is the
-list.
+guard still exists as a `TEST_CASE`, that the identifiers are unique, that the status function names
+each way a cycle can lie instead of calling it `caught`, and — the ratchet that makes the list itself
+checked — that *every* documented-figure guard in `tests/python/test_artifact_metadata.py` is named by
+some mutation, so a twelfth count guard cannot arrive with no defect planted for it. That ratchet has
+already earned its keep: mid-cascade an edit moved a guard's anchor from `# 341 Python tests` to 342 and
+the self-test failed on the now-stale anchor, which is the finding-25 failure mode caught before it could
+report a clean sweep. Running the harness itself remains an operator action — it edits tracked files and
+recompiles — so it is not a CI step; what CI checks is the list.
 
 One scope limit stated rather than implied: a `core` case rebuilds only `quantrisk_tests`, not the
 Python extension, so it proves the C++ gate rejects the wrong formula. The Python-visible consequences

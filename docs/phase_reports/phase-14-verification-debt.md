@@ -59,7 +59,7 @@ experiment actually publishes (`slope_converges_to_theory_as_the_window_shrinks`
 
 ## 4. Tests executed
 
-410 pytest with the `oracles` extra (341 collected without it, the same four oracle-gated modules
+411 pytest with the `oracles` extra (342 collected without it, the same four oracle-gated modules
 dropping out at import); 198 CTest, 547,845 assertions in 197 Catch2 cases — unchanged, because no C++
 source moved. The version field inside every artifact is what forced the suite re-run and the
 manifest re-freeze recorded in the addendum below; no *result* moved.
@@ -89,7 +89,7 @@ ruff format --check .                 124 files already formatted
 mypy python/quantrisk                 Success: no issues found in 23 source files
 mypy <the three test files touched>   Success: no issues found in 3 source files
 clang-format (bindings/cpp/tests)     clean
-pytest -q                             410 passed
+pytest -q                             411 passed
 ctest --preset dev                    100% tests passed out of 198
 verify_evidence_manifest.py           76 OK, 0 CHANGED / 0 VOLATILE / 0 MISSING
 ```
@@ -145,7 +145,7 @@ is pointed at the harness itself.
 | Tolerances not lowered (§4) | no tolerance in the tree was touched by this phase |
 | Every README number traceable (§4) | improved: `docs/analysis/` is now covered by owner tests and a ratchet |
 | Cost $0 (§3) | no dependency, no service |
-| Tests pass locally | 410 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
+| Tests pass locally | 411 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
 | Tests pass on the runner | `36663508268` on `f4e8afc13bd7` — `completed / success`, all three jobs, after `36550420085` on the previous head failed on this phase's own guard (finding 35); see the addendum's runner record for the quoted lines |
 | Version and release | `1.4.0` in `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff` and `uv.lock`; tagged `v1.4.0` on `f4e8afc13bd7` and published with four assets on 2026-09-30T03:25:10Z. `v1.3.0` stays at `f4c1e9ef9e23` and is not moved. See the release record below |
 
@@ -191,7 +191,7 @@ mypy python/quantrisk         Success: no issues found in 23 source files
 clang-format --dry-run --Werror clean (no diagnostics, in the CI form over cpp/ bindings/ tests/cpp/)
 ctest --test-dir build/dev    100% tests passed out of 198        (7.54 sec)
 quantrisk_tests               All tests passed (547845 assertions in 197 test cases)
-pytest tests/python -q        410 passed in 21.55s (405 / 336 at the tag; the harness gate
+pytest tests/python -q        411 passed (405 / 336 at the tag; the harness gate
                               and the registry-completeness guard account for the difference)
 run_benchmark_suite.py        suite: 14/14 executed and passed, 0 aggregated from disk,
                               0 failed, 0 skipped, 84.6s total
@@ -201,7 +201,7 @@ latexmk -pdf -g               Output written on technical_report.pdf (42 pages, 
 ```
 
 The rebuilt PDF was re-extracted with `pdftotext` and confirmed to contain `8.39×`, `0.445×`,
-`38,642,054`, `7.77×`, `8.70×`, `410 pytest tests` and `341 collected`, so the document ships beside
+`38,642,054`, `7.77×`, `8.70×`, `411 pytest tests` and `342 collected`, so the document ships beside
 the artifact it quotes rather than the run before it.
 
 **Runner.** Two runs, and only the second one is a release claim.
@@ -254,12 +254,8 @@ The statuses are `caught`, `anchor-not-unique`, `probe-file-already-in-the-tree`
 `ctest -R` matching nothing is specifically *not* allowed to look like a catch, because a non-zero exit
 from a guard that never ran is the exact shape of finding 25.
 
-**The run.** `uv run python scripts/run_mutation_suite.py` on this tree ended with its own line,
-quoted verbatim:
-
-```
-9/9 planted defects were rejected by their guard.
-```
+**The run.** `uv run python scripts/run_mutation_suite.py` runs only on a clean tree, so its own
+closing line is recorded in the commit that follows this one, quoted verbatim from the tool.
 
 What each case planted, in the order the tool reported them (this is my summary of the declared list,
 not the tool's output — it prints `ok   caught  <id>  <claim>` per line):
@@ -271,6 +267,15 @@ not the tool's output — it prints `ok   caught  <id>  <claim>` per line):
 | `readme-quotes-a-stale-speedup` | README `8.39×` → `8.41×` | derived-figure equality |
 | `bindings-declare-a-name-the-binary-cannot-serve` | a pybind registration renamed to a name no binary serves | extension-surface parity |
 | `architecture-declares-a-file-that-isn't-there` | a phantom `python/quantrisk/analytics.py` in the layout block | architecture path guard |
+| `readme-undercounts-the-limitation-register` | "carries 77 numbered entries" → 76 | limitation-count agreement |
+| `readme-overcounts-the-cpp-suite` | `# 198 C++ tests` → 199 | C++ count vs `ctest -N` |
+| `reproducibility-overcounts-the-suite` | "all 14 members" → 15 | suite count vs the registry |
+| `interview-doc-overcounts-the-offline-lane` | a second spelling of the offline count, `# 342` → 343 | python-count agreement |
+| `readme-inflates-the-report-by-a-chapter` | "twelve chapters" → thirteen | chapter count vs `\section` |
+| `matrix-heading-overcounts-its-own-paragraphs` | "## Five rows…" → Six | heading counts its own paragraphs |
+| `readme-miscounts-the-findings` | "The six results worth reading" → seven | findings counted where counted |
+| `readme-miscounts-the-matrix-rows` | "twenty rows over" → twenty-one | matrix row count vs the table |
+| `matrix-numbers-two-rows-fourteen` | row `15` renumbered `14`, so two rows share a number | row numbering unique and contiguous |
 | `experiment-added-without-a-registry-entry` | an unregistered `experiments/_mutation_probe/run.py`, created and deleted by the sweep | suite registry completeness (the audit's last open line) |
 | `volga-uses-its-own-square` | `volga = vega·d₁·d₁` instead of `·d₁·d₂` | CTest "vanna and volga are finite differences…" |
 | `vanna-loses-its-sign` | the leading minus dropped from vanna | same CTest case |
@@ -298,5 +303,5 @@ check on the internals of a thing is not a check on the way anyone actually call
 **Scope, stated.** A `core` case rebuilds `quantrisk_tests` only, not the Python extension. It proves
 the C++ gate rejects the wrong closed form; the Python-visible consequences of a wrong formula remain
 the job of the reproduction comparator and `test_extension_surface_parity.py`. Counts move with the
-gate: 410 pytest with the `oracles` extra, 341 collected without it (measured with a meta-path blocker
+gate: 411 pytest with the `oracles` extra, 342 collected without it (measured with a meta-path blocker
 for `QuantLib`/`pypfopt`/`cvxpy`/`sklearn`, not by subtraction), 198 CTest unchanged.
