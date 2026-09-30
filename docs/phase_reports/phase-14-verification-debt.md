@@ -220,6 +220,13 @@ than assumed.
 GitHub release is `publishedAt 2026-09-30T03:25:10Z`, `isDraft: false`. Four assets were uploaded
 from a `git archive v1.4.0` export and downloaded back, and every digest matched:
 `e86af9d7…` `technical_report.pdf`, `4a29b1af…` `manifest.json`, `85113b4f…` `CITATION.cff`,
+The two record commits after the tag: `24524ba8423a`'s run `36664649873` was **cancelled** — the
+erratum push superseded it, which is what GitHub does to an in-progress run on the same branch — and
+`ba3cb377202d`'s run `36664952912` is `completed / success` on all three jobs
+(`Format and static checks`, `Configure, build, C++ tests, Python tests`,
+`Benchmark suite against live oracles`), with SonarCloud `neutral` as on every prior head. Neither
+affects the release: the tagged tree is `f4e8afc13bd7`, the commit `36663508268` verified.
+
 `c24bcf07…` `quantrisk-suite-results.zip`. `manifest.json` records `git_commit: 0b1d1f63482a` with a
 dirty tree, because the freeze was taken before the guard-fix commit; it verifies `76 OK, 0 CHANGED,
 0 VOLATILE, 0 MISSING` against the tagged tree, and the release notes say so rather than implying the
