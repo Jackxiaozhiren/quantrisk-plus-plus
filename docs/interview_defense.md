@@ -842,9 +842,10 @@ Sources: `docs/analysis/two_factor_error_bound.md`, `docs/limitations.md` #67–
 
 **30 s.** Coverage percentages measure execution, not detection, so I do not quote them. The claim
 is tested directly: `scripts/run_mutation_suite.py` plants a declared defect and requires the one
-guard that should reject it to go red. Nine are declared — five in documents and bindings, one that
-*creates* an unregistered experiment, three in the C++ closed forms — and on this tree the sweep
-printed `9/9 planted defects were rejected by their guard.`
+guard that should reject it to go red. Eighteen are declared — fourteen in documents and bindings
+(counted figures, a phantom path, a renamed pybind registration, a shifted analysis-note slope), one
+that *creates* an unregistered experiment, three in the C++ closed forms — and on `adbc096` the sweep
+printed `18/18 planted defects were rejected by their guard.`, with `git status` empty afterwards.
 
 **2 min.** The tool exists because my own sweep lied twice, and `docs/integrity_audit.md` finding 25
 records it: two of nine mutations never applied — clang-format had reflowed the expression between
@@ -870,6 +871,13 @@ because the phase that built it was wrong about its own tooling twice — findin
 a guard derived a value range from `git log` and CI's depth-1 checkout had no history to read, one
 where I published a sentence about a watcher's exit code that this same audit had already refuted.
 
+And the sweep is not allowed to quietly fall behind the guards it covers:
+`test_every_documented_figure_guard_in_that_file_has_a_declared_defect` enumerates the
+count-and-agreement guards in `tests/python/test_artifact_metadata.py` and requires each to be named
+by a mutation. It fired within minutes of being written — a document sync moved one mutation's anchor
+from `# 341 Python tests` to 342, and the self-test failed on the now-stale anchor instead of letting a
+sweep report a clean verdict while planting nothing.
+
 Sources: `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`,
 `docs/integrity_audit.md` findings 25, 35, 36, `docs/phase_reports/phase-14-verification-debt.md`
 (second addendum).
@@ -884,7 +892,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 198 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
   .venv/bin/python -m pytest -q                                          # 342 Python tests
-uv run python scripts/run_mutation_suite.py                             # 9/9 planted defects rejected
+uv run python scripts/run_mutation_suite.py                            # 18/18 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
 uv run python experiments/variance_reduction/run.py
@@ -926,7 +934,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | ERC condition `wᵢ(Σw)ᵢ = (wᵀΣw)/n` and "validated against independent implementation" | `docs/mathematical_specification.md` §9 |
 | Heston dynamics, Feller condition, full-truncation Euler bias, "validation weaker than Black-Scholes section" | `docs/mathematical_specification.md` §10; `docs/project_scope.md` §4 |
 | Eigen arrives in Phase 6, not before; single-thread and no-QMC limits; path-matrix memory bound | `docs/limitations.md` #8, #16, #18; `docs/model_cards/monte_carlo_gbm.md` |
-| "the tests would catch a wrong formula": nine planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
+| "the tests would catch a wrong formula": eighteen planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
 
 Anything in this file that is not in that table is an opinion about a method, not a result of
 this repository — answer it as an opinion.
