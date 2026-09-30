@@ -74,7 +74,11 @@ Raising the library version invalidates every committed artifact, because each o
   in the field name — see limitation #76 for why a correct digit in a wrong sentence is still wrong.
 - **Every test must be shown capable of failing.** New assertions get a negative control: a mutation
   that must be caught and a benign change that must not be. A green test nobody has falsified is
-  decoration (finding 25).
+  decoration (finding 25). The controls are declared in `scripts/run_mutation_suite.py`; adding a
+  guard means adding a mutation to its list, and `tests/python/test_mutation_suite.py` fails if an
+  anchor stops resolving, so the sweep cannot rot into a script that reports success while planting
+  nothing. Run it before pushing a change to a guard: `uv run python scripts/run_mutation_suite.py`
+  (it edits tracked files and rebuilds `quantrisk_tests`, which is why it is not a CI step).
 - **Never go green by weakening a check.** No lowering a tolerance, no deleting a failing test, no
   `# noqa`, no adding an exclude to a linter — including in scratch tooling. Fix the thing or record
   the failure; failed experiments are published, not dropped.

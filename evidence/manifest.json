@@ -1,29 +1,31 @@
 {
   "schema": "quantrisk-evidence-manifest/1",
-  "generated_utc": "2026-09-30T03:09:48+00:00",
+  "generated_utc": "2026-09-30T04:15:15+00:00",
   "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
   "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with scripts/verify_evidence_manifest.py.",
   "repository": {
-    "git_commit": "0b1d1f63482ae515db3c78926523111c44b3d6e5",
-    "git_describe": "v1.3.0-11-g0b1d1f6",
+    "git_commit": "a51e0b583cfb09f1ff2d9a8efa5ee796a9024f6a",
+    "git_describe": "v1.4.0-3-ga51e0b5",
     "working_tree_dirty": true,
     "uncommitted_paths": [
+      "ONTRIBUTING.md",
       "docs/interview_defense.md",
       "docs/limitations.md",
       "docs/phase_reports/phase-14-verification-debt.md",
+      "docs/project_scope.md",
       "docs/release_notes_v1.4.0.md",
       "docs/reproducibility.md",
-      "ocs/integrity_audit.md",
       "paper/technical_report.pdf",
       "paper/technical_report.tex",
-      "tests/python/test_artifact_metadata.py"
+      "scripts/run_mutation_suite.py",
+      "tests/python/test_mutation_suite.py"
     ]
   },
   "environment": {
     "quantrisk_version": "1.4.0",
-    "git_commit_at_run": "0b1d1f63482a",
+    "git_commit_at_run": "a51e0b583cfb",
     "binary_git_commit": "f526171eac4c",
-    "provenance": "ran from 0b1d1f63482a plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at f526171eac4c",
+    "provenance": "ran from a51e0b583cfb plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at f526171eac4c",
     "python_platform": "macOS-27.0.1-arm64-arm-64bit",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",

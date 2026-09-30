@@ -59,7 +59,7 @@ experiment actually publishes (`slope_converges_to_theory_as_the_window_shrinks`
 
 ## 4. Tests executed
 
-405 pytest with the `oracles` extra (336 collected without it, the same four oracle-gated modules
+409 pytest with the `oracles` extra (340 collected without it, the same four oracle-gated modules
 dropping out at import); 198 CTest, 547,845 assertions in 197 Catch2 cases — unchanged, because no C++
 source moved. The version field inside every artifact is what forced the suite re-run and the
 manifest re-freeze recorded in the addendum below; no *result* moved.
@@ -80,16 +80,16 @@ New tests, and how each was shown to be capable of failing:
 
 Every line is the tool's own output on this commit, not an inference from an earlier run. These are
 the *phase's* verification: the `1.4.0` release re-ran the suite and the whole battery, and the
-release-time figures — 122 formatted files, `14/14` suite members in 84.6 s, a re-extracted PDF — are
+release-time figures — 124 formatted files, `14/14` suite members in 84.6 s, a re-extracted PDF — are
 in the addendum at the end of this file.
 
 ```
 ruff check .                          All checks passed!
-ruff format --check .                 122 files already formatted
+ruff format --check .                 124 files already formatted
 mypy python/quantrisk                 Success: no issues found in 23 source files
 mypy <the three test files touched>   Success: no issues found in 3 source files
 clang-format (bindings/cpp/tests)     clean
-pytest -q                             405 passed
+pytest -q                             409 passed
 ctest --preset dev                    100% tests passed out of 198
 verify_evidence_manifest.py           76 OK, 0 CHANGED / 0 VOLATILE / 0 MISSING
 ```
@@ -112,7 +112,8 @@ deviations from theory are 52.3 and 59.0 standard errors in the widest windows �
 
 Nothing new is claimed and nothing existing is weakened. The limitation register grows by one entry
 (#77) recording the class rather than the incident. Phase 13's items 67–76 still describe the bound's
-scope, and its §8 list is now down to two unpaid lines.
+scope. Its §8 list had two unpaid lines at that point; the mutation harness was promoted after the
+release, and the sentence above records why that was a design question rather than a chore.
 
 ## 8. Technical debt
 
@@ -120,11 +121,17 @@ Paid here: the CI-mechanical extension-surface check (Phase 13 §8 item 3) and t
 artifact-vs-prose guard for `docs/analysis/` (item 1, now covered for both notes by a ratchet rather
 than by good intentions).
 
-Still unpaid, deliberately: **promoting the mutation harness into `scripts/`**. It has been hand-rolled
-three phases running, and a repo tool version would need its own gate — it compiles deliberately wrong
-C++, so it must be excluded from the ordinary build and re-checked each time the core changes, which is
-a design problem rather than a chore. Doing it halfway would produce a script that rots exactly like the
-prose this phase guarded. It stays on the list with that reason attached.
+Paid after the release, in `scripts/run_mutation_suite.py` and `tests/python/test_mutation_suite.py`:
+**promoting the mutation harness into `scripts/`**. The hesitation recorded above was about a real design
+problem — the tool recompiles deliberately wrong C++, so it cannot be a step in the ordinary gate — and
+it was solved by splitting what the gate can hold from what it cannot. The gate holds the *list*: every
+ordinary test run re-checks that each mutation's anchor still occurs exactly once in the file it names,
+that each prose guard still defines its named test, that each C++ guard still exists as a `TEST_CASE`,
+that identifiers are unique, and that the status function names each way a cycle can lie rather than
+calling it `caught`. The operator runs the *sweep*, which edits tracked files and rebuilds
+`quantrisk_tests`. That split is what makes the earlier warning true rather than a reason to postpone:
+the script cannot rot the way the prose did, because the same phase-14 logic — a claim needs a reader —
+is pointed at the harness itself.
 
 ## 9. Gate
 
@@ -138,7 +145,7 @@ prose this phase guarded. It stays on the list with that reason attached.
 | Tolerances not lowered (§4) | no tolerance in the tree was touched by this phase |
 | Every README number traceable (§4) | improved: `docs/analysis/` is now covered by owner tests and a ratchet |
 | Cost $0 (§3) | no dependency, no service |
-| Tests pass locally | 405 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
+| Tests pass locally | 409 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
 | Tests pass on the runner | `36663508268` on `f4e8afc13bd7` — `completed / success`, all three jobs, after `36550420085` on the previous head failed on this phase's own guard (finding 35); see the addendum's runner record for the quoted lines |
 | Version and release | `1.4.0` in `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff` and `uv.lock`; tagged `v1.4.0` on `f4e8afc13bd7` and published with four assets on 2026-09-30T03:25:10Z. `v1.3.0` stays at `f4c1e9ef9e23` and is not moved. See the release record below |
 
@@ -179,12 +186,12 @@ because the artifact that measured it no longer exists — the exact prose-only 
 
 ```
 ruff check .                  All checks passed!
-ruff format --check .         122 files already formatted
+ruff format --check .         124 files already formatted
 mypy python/quantrisk         Success: no issues found in 23 source files
 clang-format --dry-run --Werror clean (no diagnostics, in the CI form over cpp/ bindings/ tests/cpp/)
 ctest --test-dir build/dev    100% tests passed out of 198        (7.54 sec)
 quantrisk_tests               All tests passed (547845 assertions in 197 test cases)
-pytest tests/python -q        405 passed in 24.06s
+pytest tests/python -q        409 passed in 42.70s (405 / 336 at the tag, 409 / 340 here)
 run_benchmark_suite.py        suite: 14/14 executed and passed, 0 aggregated from disk,
                               0 failed, 0 skipped, 84.6s total
 verify_evidence_manifest.py   76 OK, 0 CHANGED, 0 VOLATILE, 0 MISSING, 0 unlisted
@@ -193,7 +200,7 @@ latexmk -pdf -g               Output written on technical_report.pdf (42 pages, 
 ```
 
 The rebuilt PDF was re-extracted with `pdftotext` and confirmed to contain `8.39×`, `0.445×`,
-`38,642,054`, `7.77×`, `8.70×`, `405 pytest tests` and `336 collected`, so the document ships beside
+`38,642,054`, `7.77×`, `8.70×`, `409 pytest tests` and `340 collected`, so the document ships beside
 the artifact it quotes rather than the run before it.
 
 **Runner.** Two runs, and only the second one is a release claim.
@@ -231,3 +238,48 @@ affects the release: the tagged tree is `f4e8afc13bd7`, the commit `36663508268`
 dirty tree, because the freeze was taken before the guard-fix commit; it verifies `76 OK, 0 CHANGED,
 0 VOLATILE, 0 MISSING` against the tagged tree, and the release notes say so rather than implying the
 manifest names the tag.
+
+## Second addendum — the harness, paid after the tag (2026-09-30)
+
+`v1.4.0` was tagged before this existed, so it is not in the released tree; it is recorded here rather
+than smuggled into a tag that the runner already verified.
+
+**What was built.** `scripts/run_mutation_suite.py` plants a declared defect, requires the one guard
+that should reject it to go red, restores the file from the snapshot taken before its own edit, and
+requires the same guard to go green again. The statuses are `caught`, `anchor-not-unique`,
+`mutation-was-a-no-op`, `mutation-did-not-compile`, `guard-could-not-be-run`, `guard-stayed-green`,
+`restore-mismatch`, `tree-did-not-recover`, `target-already-modified` — only the first counts, and
+`ctest -R` matching nothing is specifically *not* allowed to look like a catch, because a non-zero exit
+from a guard that never ran is the exact shape of finding 25.
+
+**The run.** `uv run python scripts/run_mutation_suite.py` on this tree:
+
+```
+ok   caught   note-prints-a-slope-the-artifact-doesnt          (1.9975 → 1.9976 in the analysis note)
+ok   caught   readme-claims-a-narrower-speedup-band            (README `7.77×` → `8.00×`)
+ok   caught   readme-quotes-a-stale-speedup                    (README `8.39×` → `8.41×`)
+ok   caught   bindings-declare-a-name-the-binary-cannot-serve  (a pybind registration with no target)
+ok   caught   architecture-declares-a-file-that-isn't-there    (a phantom path in the layout block)
+ok   caught   volga-uses-its-own-square                        (rebuilt; CTest rejected it)
+ok   caught   vanna-loses-its-sign                             (rebuilt; CTest rejected it)
+ok   caught   mixed-partial-drops-a-term                       (rebuilt; CTest rejected it)
+
+8/8 planted defects were rejected by their guard.
+```
+
+**The harness's own negative control.** A probe mutation in prose that no guard reads — appending a
+clause to a README sentence and pointing it at a test that cannot see that file — was reported as
+`guard-stayed-green`, not counted, and `git status --porcelain -- README.md` came back empty afterwards.
+A tool that can only say "caught" is not evidence; this one was shown saying the other thing.
+
+**Gate.** `tests/python/test_mutation_suite.py` (4 cases) runs every ordinary test pass: it re-asserts
+anchor uniqueness per mutation, that prose guards define the named test and C++ guards exist as
+`TEST_CASE`s, that identifiers are unique and paths repo-relative, and it drives `decide()` through
+each failure mode. The sweep itself stays an operator action — it edits tracked files and recompiles —
+so CI checks the list, not the mutations.
+
+**Scope, stated.** A `core` case rebuilds `quantrisk_tests` only, not the Python extension. It proves
+the C++ gate rejects the wrong closed form; the Python-visible consequences of a wrong formula remain
+the job of the reproduction comparator and `test_extension_surface_parity.py`. Counts move with the
+gate: 409 pytest with the `oracles` extra, 340 collected without it (measured with a meta-path blocker
+for `QuantLib`/`pypfopt`/`cvxpy`/`sklearn`, not by subtraction), 198 CTest unchanged.

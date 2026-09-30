@@ -80,13 +80,13 @@ from `f526171eac4c` and reinstalled with `--no-cache`:
 
 ```
 uv run ruff check .            All checks passed!
-uv run ruff format --check .   122 files already formatted
+uv run ruff format --check .   124 files already formatted
 uv run mypy python/quantrisk   Success: no issues found in 23 source files
 find cpp bindings tests/cpp ... | xargs uv run clang-format --dry-run --Werror
                                clean (no diagnostics)
 uv run ctest --test-dir build/dev   100% tests passed out of 198   (Total Test time = 7.54 sec)
 quantrisk_tests                All tests passed (547845 assertions in 197 test cases)
-uv run pytest tests/python -q  405 passed in 24.06s
+uv run pytest tests/python -q  409 passed in 42.70s
 uv run python scripts/run_benchmark_suite.py --require-all
                                suite: 14/14 executed and passed, 0 aggregated from disk,
                                0 failed, 0 skipped, 84.6s total
@@ -100,7 +100,7 @@ latexmk -pdf -g technical_report.tex
 ```
 
 The PDF was re-extracted, not assumed: `pdftotext` on the rebuilt file returns `8.39×`, `0.445×`,
-`38,642,054`, `7.77×`, `8.70×`, `405 pytest tests` and `336 collected`, i.e. the document carries the
+`38,642,054`, `7.77×`, `8.70×`, `409 pytest tests` and `340 collected`, i.e. the document carries the
 artifact it ships beside rather than the run before it.
 
 The runner's own lines on the tagged head, `f4e8afc13bd7`, run `36663508268`:
@@ -112,7 +112,7 @@ offline skip is this release's history guard printing its precondition —
 can be derived; see the command in docs/reproducibility.md` — which is finding 35 resolved in the
 environment that found it, rather than in the one that wrote it.
 
-The suite count moved `388 → 405` with the `oracles` extra and `319 → 336` without it — seventeen
+The suite count moved `388 → 409` with the `oracles` extra and `319 → 340` without it — twenty-one
 cases on each side, none of them oracle-gated, which is why the two numbers move together.
 `docs/limitations.md` carries 77 numbered entries.
 
@@ -144,6 +144,43 @@ its own precondition, which is the point: a check that needs history declares it
 inventing a band from one measurement. The pinned band is still compared against the history min/max
 in every clone that carries one, so the provenance did not disappear — it acquired a precondition.
 
+## The mutation harness is a repo tool
+
+Phase 13 §8, Phase 14 §8 and these notes' own debt list all said the same thing: the sweep that proves
+a guard can fail was hand-rolled in `/tmp`, three phases running. It is now
+`scripts/run_mutation_suite.py`, and it exists because finding 25 recorded what the hand-rolled version
+did — two of nine mutations never applied, because clang-format had reflowed the expression between the
+read and the patch, and the sweep still printed "nine mutations caught".
+
+Each case proves four things in order, and a failure at any step gets its own status rather than being
+tallied as a catch: the anchor occurred exactly once; the file bytes actually changed; the named guard
+went red; the bytes restored to the recorded SHA-256 and the same guard went green again. Eight defects
+are declared — five in prose or bindings (`1.9975` → `1.9976` in the analysis note, a narrowed README
+band, a stale README ratio, a pybind registration the installed binary cannot serve, a phantom path in
+the architecture block) and three in the C++ closed forms (volga using its own square, vanna losing its
+sign, `V_SSsigma` dropping a term), each rebuilt into the Catch2 target and rejected by its CTest case.
+On this tree the run printed `8/8 planted defects were rejected by their guard.`
+
+The harness is also shown able to say *no*. A probe mutation in text no guard reads, aimed at a guard
+that cannot see it, was reported as `guard-stayed-green` rather than counted — finding 25's failure mode
+made visible instead of silent. Two safety properties are enforced rather than trusted: it refuses to
+start if any target file differs from `HEAD`, so it cannot overwrite work in progress, and it restores
+each file from the snapshot taken before its own edit, hashes the restore, and finishes with a sweep
+that prints `restore-mismatch` and exits non-zero if anything is left modified.
+
+Its gate is `tests/python/test_mutation_suite.py` (four cases), which is what keeps the tool from
+rotting the way the prose did: on every ordinary test run it re-checks that each anchor still occurs
+exactly once in the file it names, that each prose guard still defines the named test, that each C++
+guard still exists as a `TEST_CASE`, that the identifiers are unique, and that the status function
+names each way a cycle can lie instead of calling it `caught`. Running the harness itself remains an
+operator action — it edits tracked files and recompiles — so it is not a CI step; what CI checks is the
+list.
+
+One scope limit stated rather than implied: a `core` case rebuilds only `quantrisk_tests`, not the
+Python extension, so it proves the C++ gate rejects the wrong formula. The Python-visible consequences
+of a wrong formula are carried by the reproduction comparator and the extension-surface parity guard,
+not by the harness.
+
 ## What is still not here
 
 - **No new validated component.** The matrix gained no row; what gained coverage was documentation
@@ -154,7 +191,5 @@ in every clone that carries one, so the provenance did not disappear — it acqu
 - **Volatile fields still have no cross-platform meaning.** `docs/reproducibility.md` now states the
   history band and the command that recomputes it; it does not make a laptop's ratio meaningful on
   Linux, and no gate pretends otherwise.
-- **The mutation harness is still not in `scripts/`** — the debt item that would prove these guards
-  kill a planted defect rather than a deleted one.
 - Nothing here is a trading recommendation, an expected return, or a statement about realised
   markets. `docs/limitations.md` is the complete list of what is not claimed.

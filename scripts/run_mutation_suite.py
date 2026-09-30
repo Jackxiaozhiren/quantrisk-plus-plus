@@ -1,0 +1,409 @@
+r"""Plant a known defect, and require a guard to reject it.
+
+Every test that checks prose against an artifact can go green for two different reasons: the
+claim is right, or the check never looked at anything. Finding 25 in `docs/integrity_audit.md`
+records the second case happening twice — a mutation sweep that printed `NEEDLE NOT FOUND` for
+two of nine cases and still reported "nine mutations caught", and a sweep that died part-way and
+left a mutated source file in the tree. This file is the answer: the falsification is a repo tool,
+its list of mutations is policed by the ordinary test suite
+(`tests/python/test_mutation_suite.py`), and each case proves four things in order —
+
+1. the anchor occurred exactly once, so the edit landed on the text it names;
+2. the file bytes actually changed, so the control was not a no-op;
+3. the named guard went **red** on the mutated tree, so it can detect this defect;
+4. the bytes restored to the recorded SHA-256, and the same guard went **green** again.
+
+Failing any step yields that step's status, never ``caught``.
+
+Two kinds of mutation. ``prose`` edits a file a documented claim lives in and runs one pytest node;
+nothing is rebuilt. That includes `bindings/python_bindings.cpp`, whose parity guard compares the
+*source* against the already installed extension, so a declaration the binary cannot serve is caught
+without a compile. ``core`` edits a closed form in the C++ library, rebuilds only the Catch2/CTest
+target, and requires the named CTest case to fail. It deliberately does not rebuild the Python
+extension, so a ``core`` case proves the C++ gate rejects the wrong formula; the Python-visible
+consequences of a wrong formula are the province of the reproduction guards and the parity check.
+
+Refuses to start if any file it would edit is not clean at `HEAD`: the harness must never overwrite
+work in progress, and finding 25's second half is what happens when two writers share one tree.
+
+Usage::
+
+    uv run python scripts/run_mutation_suite.py --list
+    uv run python scripts/run_mutation_suite.py --kind prose --verbose
+    uv run python scripts/run_mutation_suite.py --only volga-uses-its-own-square
+
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import re
+import signal
+import subprocess
+import sys
+from collections.abc import Sequence
+from dataclasses import dataclass
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_BUILD_DIR = "build/dev"
+TEST_BINARY_TARGET = "quantrisk_tests"
+
+CAUGHT = "caught"
+ANCHOR_NOT_UNIQUE = "anchor-not-unique"
+NO_OP = "mutation-was-a-no-op"
+BUILD_FAILED = "mutation-did-not-compile"
+GUARD_NOT_RUN = "guard-could-not-be-run"
+ESCAPED = "guard-stayed-green"
+NOT_RESTORED = "restore-mismatch"
+NOT_GREEN_AGAIN = "tree-did-not-recover"
+DIRTY_TARGET = "target-already-modified"
+
+
+@dataclass(frozen=True)
+class Mutation:
+    """One planted defect and the single guard that must reject it."""
+
+    identifier: str
+    kind: str
+    path: str
+    anchor: str
+    replacement: str
+    guard: str
+    claim: str
+
+
+MUTATIONS: tuple[Mutation, ...] = (
+    Mutation(
+        identifier="note-prints-a-slope-the-artifact-doesnt",
+        kind="prose",
+        path="docs/analysis/two_factor_error_bound.md",
+        anchor="1.9975",
+        replacement="1.9976",
+        guard=(
+            "tests/python/test_two_factor_bound.py::"
+            "test_every_figure_the_finding_and_the_note_quote_is_in_the_artifact"
+        ),
+        claim="the crash-ray slope in the analysis note is owned by the artifact, not typed",
+    ),
+    Mutation(
+        identifier="readme-claims-a-narrower-speedup-band",
+        kind="prose",
+        path="README.md",
+        anchor="`7.77×`",
+        replacement="`8.00×`",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_documented_speedup_ranges_contain_the_current_measurement"
+        ),
+        claim="the documented ratio range is the real spread, not a remembered one",
+    ),
+    Mutation(
+        identifier="readme-quotes-a-stale-speedup",
+        kind="prose",
+        path="README.md",
+        anchor="`8.39×`",
+        replacement="`8.41×`",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_quote_the_performance_figures_the_artifact_actually_holds"
+        ),
+        claim="the README's present-tense figure is the artifact's current measurement",
+    ),
+    Mutation(
+        identifier="bindings-declare-a-name-the-binary-cannot-serve",
+        kind="prose",
+        path="bindings/python_bindings.cpp",
+        anchor='pricing.def("black_scholes_vol_cross_derivatives"',
+        replacement='pricing.def("black_scholes_vol_cross_derivatives_plus"',
+        guard=(
+            "tests/python/test_extension_surface_parity.py::"
+            "test_every_name_the_bindings_declare_is_exposed_by_the_binary"
+        ),
+        claim="every pybind registration in the source resolves in the imported extension",
+    ),
+    Mutation(
+        identifier="architecture-declares-a-file-that-isn't-there",
+        kind="prose",
+        path="docs/architecture.md",
+        anchor="stress,special}.py",
+        replacement="stress,special}.py · python/quantrisk/analytics.py",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_path_the_architecture_document_declares_exists"
+        ),
+        claim="the layout block describes the tree, as finding 33 required",
+    ),
+    Mutation(
+        identifier="volga-uses-its-own-square",
+        kind="core",
+        path="cpp/src/pricing/black_scholes.cpp",
+        anchor="cross.volga = vega * first * second / market.volatility;",
+        replacement="cross.volga = vega * first * first / market.volatility;",
+        guard="vanna and volga are finite differences of the published Greeks and of the price",
+        claim="volga is the sigma-derivative of the published vega",
+    ),
+    Mutation(
+        identifier="vanna-loses-its-sign",
+        kind="core",
+        path="cpp/src/pricing/black_scholes.cpp",
+        anchor="cross.vanna = -terms.growth_discount",
+        replacement="cross.vanna = terms.growth_discount",
+        guard="vanna and volga are finite differences of the published Greeks and of the price",
+        claim="vanna carries the sign the closed form derives",
+    ),
+    Mutation(
+        identifier="mixed-partial-drops-a-term",
+        kind="core",
+        path="cpp/src/pricing/black_scholes.cpp",
+        anchor="mixed.spot_spot_sigma = gamma * (first * second - 1.0) / sigma;",
+        replacement="mixed.spot_spot_sigma = gamma * first * second / sigma;",
+        guard="the three mixed third partials are finite differences taken at least two ways",
+        claim="V_SSsigma is the sigma-derivative of gamma, every term included",
+    ),
+)
+
+
+def apply_mutation(text: str, anchor: str, replacement: str) -> tuple[str, str | None]:
+    """The mutated text and, when it cannot be produced safely, why not. Pure, so it is testable.
+
+    A missing or repeated anchor is refused rather than guessed at: the failure finding 25 recorded
+    was an edit that silently applied to nothing and was then counted as a caught defect.
+    """
+    occurrences = text.count(anchor)
+    if occurrences != 1:
+        return text, f"anchor occurs {occurrences} times, expected exactly once"
+    mutated = text.replace(anchor, replacement)
+    if mutated == text:
+        return text, "replacement is identical to the anchor"
+    return mutated, None
+
+
+def decide(
+    *,
+    anchor_ok: bool,
+    changed: bool,
+    build_ok: bool,
+    guard_ran: bool,
+    guard_returncode: int,
+    restored: bool,
+    green_again: bool,
+) -> str:
+    """Which step of the proof failed, if any. A catch requires all of them to hold, in order."""
+    if not anchor_ok:
+        return ANCHOR_NOT_UNIQUE
+    if not changed:
+        return NO_OP
+    if not build_ok:
+        return BUILD_FAILED
+    if not guard_ran:
+        return GUARD_NOT_RUN
+    if guard_returncode == 0:
+        return ESCAPED
+    if not restored:
+        return NOT_RESTORED
+    if not green_again:
+        return NOT_GREEN_AGAIN
+    return CAUGHT
+
+
+def _run(command: Sequence[str], verbose: bool) -> subprocess.CompletedProcess[str]:
+    completed = subprocess.run(
+        list(command), cwd=REPO_ROOT, capture_output=True, text=True, check=False
+    )
+    if verbose:
+        tail = (completed.stdout + completed.stderr).strip().splitlines()[-2:]
+        print("      " + " / ".join(tail), flush=True)
+    return completed
+
+
+class Harness:
+    """Subprocess plumbing for one environment: the uv runner, the cmake build, the guards."""
+
+    def __init__(self, build_dir: str, verbose: bool = False) -> None:
+        self.build_dir = build_dir
+        self.verbose = verbose
+
+    def uv(self, *arguments: str) -> subprocess.CompletedProcess[str]:
+        return _run(("uv", "run", "--frozen", *arguments), self.verbose)
+
+    def build(self) -> bool:
+        built = self.uv("cmake", "--build", self.build_dir, "--target", TEST_BINARY_TARGET)
+        return built.returncode == 0
+
+    def ctest(self, name: str) -> int:
+        """The CTest return code for one case, or -1 when the name is not exactly one test.
+
+        `-R` matching nothing exits non-zero, which would read as a caught defect; the `-N`
+        listing is what distinguishes "the guard rejected the mutation" from "the guard never
+        ran".
+        """
+        listed = self.uv("ctest", "--test-dir", self.build_dir, "-N", "-R", name)
+        if len(re.findall(r"^\s*Test +#(\d+)", listed.stdout, flags=re.M)) != 1:
+            return -1
+        return self.uv("ctest", "--test-dir", self.build_dir, "-R", name).returncode
+
+    def pytest(self, node: str) -> int:
+        return self.uv("pytest", node, "-q", "-p", "no:cacheprovider").returncode
+
+    def guard(self, mutation: Mutation) -> tuple[bool, int]:
+        """``(ran, returncode)`` for the guard alone; the build is the caller's to time."""
+        if mutation.kind == "core":
+            code = self.ctest(mutation.guard)
+            return code != -1, code
+        return True, self.pytest(mutation.guard)
+
+    def check_exists(self, mutation: Mutation) -> str | None:
+        """Why this mutation's guard could not be invoked at all, or None if it can."""
+        if mutation.kind != "core":
+            file_, _, name = mutation.guard.partition("::")
+            source = REPO_ROOT / file_
+            if not source.is_file():
+                return f"{file_} is not in the tree"
+            if f"def {name}" not in source.read_text(encoding="utf-8"):
+                return f"{file_} does not define {name!r}"
+            return None
+        listed = self.uv("ctest", "--test-dir", self.build_dir, "-N", "-R", mutation.guard)
+        found = re.findall(r"^\s*Test +#(\d+)", listed.stdout, flags=re.M)
+        if len(found) != 1:
+            return f"{mutation.guard!r} resolves to {len(found)} CTest cases, expected 1"
+        return None
+
+
+def git_status(path: str) -> str:
+    return _run(("git", "status", "--porcelain", "--", path), False).stdout.strip()
+
+
+def run_one(mutation: Mutation, harness: Harness) -> dict[str, str]:
+    """One full falsification cycle for a single mutation, reported as a record."""
+    path = REPO_ROOT / mutation.path
+    before = path.read_bytes()
+    digest = hashlib.sha256(before).hexdigest()
+    mutated, reason = apply_mutation(before.decode("utf-8"), mutation.anchor, mutation.replacement)
+    anchor_ok = reason is None
+    changed = False
+    build_ok = True
+    guard_ran = False
+    guard_returncode = 0
+    restored = False
+    green_again = False
+    if anchor_ok:
+        try:
+            path.write_text(mutated, encoding="utf-8")
+            changed = path.read_bytes() != before
+            if changed:
+                if mutation.kind == "core":
+                    build_ok = harness.build()
+                guard_ran, guard_returncode = harness.guard(mutation)
+        finally:
+            path.write_bytes(before)
+            restored = hashlib.sha256(path.read_bytes()).hexdigest() == digest
+        if restored and guard_returncode != 0:
+            if mutation.kind == "core":
+                green_again = harness.build() and harness.ctest(mutation.guard) == 0
+            else:
+                green_again = harness.pytest(mutation.guard) == 0
+    return {
+        "id": mutation.identifier,
+        "kind": mutation.kind,
+        "status": decide(
+            anchor_ok=anchor_ok,
+            changed=changed,
+            build_ok=build_ok,
+            guard_ran=guard_ran,
+            guard_returncode=guard_returncode,
+            restored=restored,
+            green_again=green_again,
+        ),
+        "reason": reason or "",
+        "guard": mutation.guard,
+        "claim": mutation.claim,
+    }
+
+
+def select(kind: str | None, only: Sequence[str]) -> list[Mutation]:
+    chosen = [mutation for mutation in MUTATIONS if kind is None or mutation.kind == kind]
+    if not only:
+        return chosen
+    wanted = set(only)
+    return [mutation for mutation in chosen if mutation.identifier in wanted]
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Require every guard to reject a planted defect.")
+    parser.add_argument("--list", action="store_true", help="print the mutations and exit")
+    parser.add_argument("--only", action="append", default=[], help="run just these mutation ids")
+    parser.add_argument("--kind", choices=("prose", "core"), help="run just one kind")
+    parser.add_argument("--build-dir", default=DEFAULT_BUILD_DIR, help="cmake build directory")
+    parser.add_argument("--verbose", action="store_true", help="echo each guard's own tail")
+    arguments = parser.parse_args(argv)
+
+    selected = select(arguments.kind, arguments.only)
+    unknown = set(arguments.only).difference(mutation.identifier for mutation in MUTATIONS)
+    if unknown:
+        print(f"unknown mutation ids: {', '.join(sorted(unknown))}", file=sys.stderr)
+        return 2
+    if arguments.list:
+        for mutation in selected:
+            print(f"{mutation.identifier}\t{mutation.kind}\t{mutation.guard}")
+        return 0
+
+    dirty = [mutation.path for mutation in selected if git_status(mutation.path)]
+    if dirty:
+        print(
+            f"{DIRTY_TARGET}: these mutation targets differ from HEAD -> "
+            + ", ".join(sorted(set(dirty))),
+            file=sys.stderr,
+        )
+        return 2
+
+    harness = Harness(arguments.build_dir, arguments.verbose)
+    unavailable = [(mutation, harness.check_exists(mutation)) for mutation in selected]
+    broken = [(mutation, reason) for mutation, reason in unavailable if reason]
+    if broken:
+        for mutation, reason in broken:
+            print(f"{GUARD_NOT_RUN:<22} {mutation.identifier}: {reason}", file=sys.stderr)
+        return 2
+
+    results: list[dict[str, str]] = []
+    snapshots = {
+        (REPO_ROOT / mutation.path).resolve(): (REPO_ROOT / mutation.path).read_bytes()
+        for mutation in selected
+    }
+
+    def on_signal(signum: int, _frame: object) -> None:
+        for path, payload in snapshots.items():
+            path.write_bytes(payload)
+        raise SystemExit(128 + signum)
+
+    for number in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(number, on_signal)
+    try:
+        for mutation in selected:
+            print(f"- {mutation.identifier} ({mutation.kind}) ...", flush=True)
+            results.append(run_one(mutation, harness))
+            print(f"    {results[-1]['status']}", flush=True)
+    finally:
+        for number in (signal.SIGINT, signal.SIGTERM):
+            signal.signal(
+                number, signal.default_int_handler if number == signal.SIGINT else signal.SIG_DFL
+            )
+
+    width = max((len(result["id"]) for result in results), default=0)
+    print()
+    for result in results:
+        marker = "ok  " if result["status"] == CAUGHT else "FAIL"
+        print(f"{marker} {result['status']:<22} {result['id']:<{width}}  {result['claim']}")
+    caught = [result for result in results if result["status"] == CAUGHT]
+    left = [path for path in snapshots if git_status(str(path.relative_to(REPO_ROOT)))]
+    print(f"\n{len(caught)}/{len(results)} planted defects were rejected by their guard.")
+    if left:
+        names = ", ".join(sorted(str(path.relative_to(REPO_ROOT)) for path in left))
+        print(f"{NOT_RESTORED}: {len(left)} target(s) still differ from HEAD: {names}")
+        return 1
+    return 0 if len(caught) == len(results) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
