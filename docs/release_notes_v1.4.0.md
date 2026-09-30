@@ -1,6 +1,6 @@
 # v1.4.0 — The release that adds readers, not results
 
-Released 2026-09-29. Predecessors: `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0`. Total monetary cost of
+Released 2026-09-30. Predecessors: `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0`. Total monetary cost of
 building and validating this release: **$0**.
 
 `v1.3.0` ended with a list of checks the project owed itself. `v1.4.0` pays that debt and adds no
@@ -44,11 +44,14 @@ suite run rewrites. `speedup_vs_pure_python`, `speedup_vs_numpy` and `results_se
 by declaration, so the manifest certifies nothing about them — while the README, the validation
 matrix, the interview document and §9 of the paper all quote them as the artifact's own. Now
 `test_documents_quote_the_performance_figures_the_artifact_actually_holds` re-derives those figures
-from the file and demands them of the prose, and
-`test_the_speedup_ranges_the_documents_quote_are_the_committed_history` requires each documented
-range to equal the min/max over the artifact's own git history, with
-`test_the_performance_guards_are_not_vacuous` shifting the artifact by 1.5× to prove both guards
-can fail. See the section below, because this one corrected the release's own documentation.
+from the file and demands them of the prose. The ranges are checked twice over:
+`test_the_documented_speedup_ranges_contain_the_current_measurement` pins the band, requires the
+current measurement to sit inside it and the documents to state it;
+`test_the_documented_speedup_ranges_match_the_committed_history` requires the pinned band to equal
+the min/max read out of the artifact's git history, and declares a skip where the clone has no
+history to read. `test_the_performance_guards_are_not_vacuous` shifts the artifact by 1.5× and
+narrows a band by hand to prove the guards can fail. See the two sections below: this one corrected
+the release's own documentation, and the runner then corrected the correction.
 
 ## What this release corrected in itself
 
@@ -81,9 +84,9 @@ uv run ruff format --check .   122 files already formatted
 uv run mypy python/quantrisk   Success: no issues found in 23 source files
 find cpp bindings tests/cpp ... | xargs uv run clang-format --dry-run --Werror
                                clean (no diagnostics)
-uv run ctest --test-dir build/dev   100% tests passed out of 198   (Total Test time = 7.49 sec)
+uv run ctest --test-dir build/dev   100% tests passed out of 198   (Total Test time = 7.54 sec)
 quantrisk_tests                All tests passed (547845 assertions in 197 test cases)
-uv run pytest tests/python -q  404 passed in 24.10s
+uv run pytest tests/python -q  405 passed in 24.06s
 uv run python scripts/run_benchmark_suite.py --require-all
                                suite: 14/14 executed and passed, 0 aggregated from disk,
                                0 failed, 0 skipped, 84.6s total
@@ -97,12 +100,30 @@ latexmk -pdf -g technical_report.tex
 ```
 
 The PDF was re-extracted, not assumed: `pdftotext` on the rebuilt file returns `8.39×`, `0.445×`,
-`38,642,054`, `7.77×`, `8.70×`, `404 pytest tests` and `335 collected`, i.e. the document carries the
+`38,642,054`, `7.77×`, `8.70×`, `405 pytest tests` and `336 collected`, i.e. the document carries the
 artifact it ships beside rather than the run before it.
 
-The suite count moved `388 → 404` with the `oracles` extra and `319 → 335` without it — sixteen
+The suite count moved `388 → 405` with the `oracles` extra and `319 → 336` without it — seventeen
 cases on each side, none of them oracle-gated, which is why the two numbers move together.
 `docs/limitations.md` carries 77 numbered entries.
+
+## The runner corrected the correction
+
+`36550420085` is `failure`, and the failure was in the new guard rather than in the mathematics. The
+range check derived its band from `git log -- benchmarks/performance/results/monte_carlo_speed.json`,
+which locally reads thirteen measurements; `.github/workflows/ci.yml` uses `actions/checkout` at its
+default depth of 1, so the runner saw one revision and demanded that `README.md` quote a `0.45–0.45`
+spread. The job printed `1 failed, 334 passed, 4 skipped`. A check that reads history is a claim about
+the *clone*, and I had asserted the two were the same thing.
+
+The invariant was split accordingly. What is checked in every clone: the current artifact lies inside
+the pinned band, and every document states that band. What is checked where history exists: the pinned
+band equals the min/max over the artifact's committed revisions — and when it cannot be derived, the
+test says so in its own skip reason instead of passing quietly. The vacuity test now carries the case
+that would have caught this before the runner did: a band derived from one measurement is zero-width,
+and the pinned band must never be one. `gh run watch --exit-status` returned 0 for the failed run, so
+the tag was created only after `commits/<sha>/check-runs` reported success (see
+`docs/integrity_audit.md` finding 35).
 
 ## What is still not here
 

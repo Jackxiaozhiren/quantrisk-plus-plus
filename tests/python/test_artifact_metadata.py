@@ -903,7 +903,16 @@ PROSE_FIGURES = {
     ),
 }
 
-RANGE_DOCUMENTS = ("README.md", "docs/validation_matrix.md", "docs/interview_defense.md")
+RANGE_DOCUMENTS = (
+    "README.md",
+    "docs/validation_matrix.md",
+    "docs/interview_defense.md",
+    "docs/reproducibility.md",
+)
+
+# The spread of the speed benchmark's two ratios over every committed measurement of the artifact —
+# thirteen at the 1.4.0 freeze, recomputable with the command printed in docs/reproducibility.md.
+SPEEDUP_BANDS = {"python": (7.77, 8.7), "numpy": (0.42, 0.51)}
 
 
 def _committed_speed_ratios() -> list[tuple[float, float]]:
@@ -955,31 +964,51 @@ def test_documents_quote_the_performance_figures_the_artifact_actually_holds() -
             )
 
 
-def test_the_speedup_ranges_the_documents_quote_are_the_committed_history() -> None:
-    """The ranges are claims about a sample, and the sample is the git history of the artifact."""
-    revisions = _committed_speed_ratios()
-    if not revisions:
-        pytest.skip("this clone holds no history for the artifact, so no range can be derived")
-    current = json.loads(SPEED_ARTIFACT.read_text(encoding="utf-8"))
-    sample = [
-        (python_ratio, numpy_ratio)
-        for python_ratio, numpy_ratio in [
-            *revisions,
-            (current["speedup_vs_pure_python"], current["speedup_vs_numpy"]),
-        ]
-    ]
-    python, numpy = [pair[0] for pair in sample], [pair[1] for pair in sample]
-    expected = {
-        (round(min(python), 2), round(max(python), 2)),
-        (round(min(numpy), 2), round(max(numpy), 2)),
+def test_the_documented_speedup_ranges_contain_the_current_measurement() -> None:
+    """The ranges are claims about a sample, and the current artifact has to be inside them.
+
+    `SPEEDUP_BANDS` is written down rather than derived because CI checks the repository out at
+    depth 1: a guard that recomputes the band from history sees one measurement there and demands
+    that the documents quote `0.45-0.45`, which is how this release's first runner attempt went
+    red. The history is still checked, in the test below, wherever a clone carries it.
+    """
+    payload = json.loads(SPEED_ARTIFACT.read_text(encoding="utf-8"))
+    current = {
+        "python": payload["speedup_vs_pure_python"],
+        "numpy": payload["speedup_vs_numpy"],
     }
+    for kind, (low, high) in SPEEDUP_BANDS.items():
+        assert low <= current[kind] <= high, (
+            f"the artifact measures {current[kind]:.3f} for the {kind} ratio, outside the "
+            f"documented {low}-{high}; widen the band where the range is owned"
+        )
     for name in RANGE_DOCUMENTS:
         documented = _documented_ranges((REPO_ROOT / name).read_text(encoding="utf-8"))
-        for low, high in expected:
+        for low, high in SPEEDUP_BANDS.values():
             assert (low, high) in documented, (
-                f"{name} states no `{low:.2f}–{high:.2f}` range, the spread of the "
-                f"{len(sample)} measurements this repository has"
+                f"{name} states no `{low}-{high}` range for a speedup ratio"
             )
+
+
+def test_the_documented_speedup_ranges_match_the_committed_history() -> None:
+    """Where the clone carries history, the band above must equal its actual min and max."""
+    revisions = _committed_speed_ratios()
+    if len(revisions) < 2:
+        pytest.skip(
+            "this clone carries "
+            f"{len(revisions)} revision of the artifact (CI uses actions/checkout at depth 1), "
+            "so no spread can be derived; see the command in docs/reproducibility.md"
+        )
+    python = [pair[0] for pair in revisions]
+    numpy = [pair[1] for pair in revisions]
+    derived = {
+        "python": (round(min(python), 2), round(max(python), 2)),
+        "numpy": (round(min(numpy), 2), round(max(numpy), 2)),
+    }
+    assert derived == SPEEDUP_BANDS, (
+        f"the {len(revisions)} committed measurements span {derived}, but the documents and "
+        "the guard claim SPEEDUP_BANDS"
+    )
 
 
 def test_the_performance_guards_are_not_vacuous() -> None:
@@ -1002,6 +1031,13 @@ def test_the_performance_guards_are_not_vacuous() -> None:
 
     matrix = (REPO_ROOT / "docs/validation_matrix.md").read_text(encoding="utf-8")
     assert (7.77, 8.7) in _documented_ranges(matrix)
+
+    # A depth-1 clone sees one measurement, so it can only derive a zero-width band. That is what
+    # made this release's first runner attempt red; the pinned band must never be one.
+    one = float(figures["python_ratio"])
+    assert (one, one) not in SPEEDUP_BANDS.values(), (
+        "a single measurement cannot support the documented spread"
+    )
     narrowed = matrix.replace("7.77", "8.00").replace("8.70", "8.40")
     assert narrowed != matrix, "the substitution did not land, so it proved nothing"
     assert (7.77, 8.7) not in _documented_ranges(narrowed)

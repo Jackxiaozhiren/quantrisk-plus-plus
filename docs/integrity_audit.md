@@ -489,3 +489,25 @@ hand, and requires both guards to reject the documents they had just accepted. T
 survives all thirteen measurements — C++ beats an interpreted loop by roughly an order of magnitude
 and loses to vectorised NumPy for terminal-only payoffs — so no conclusion moved; what moved was the
 honesty of the numbers attached to it.
+
+**35. The guard written to close #34 was verified only in the environment it was written in.**
+Its range check derived the documented band from `git log -- benchmarks/performance/results/monte_carlo_speed.json`
+and required the documents to state exactly that min/max. Locally that reads thirteen measurements and
+passes. The runner does not have thirteen: `.github/workflows/ci.yml` uses `actions/checkout` at its
+default depth of 1, so the derivation saw the single revision at the tag and demanded that `README.md`
+quote a `0.45–0.45` spread — run `36550420085`, `Configure, build, C++ tests, Python tests` →
+`failure`, `1 failed, 334 passed, 4 skipped`. The failure was real and it was mine: a check that reads
+history is a check about the *clone*, not about the repository, and I had asserted it was the same
+thing. Note also that `gh run watch --exit-status` returned exit code 0 for that run; the API's
+`commits/<sha>/check-runs` is what reported the failure, which is why the tag was not created.
+
+Two changes make the guard honest about which half is live where.
+`test_the_documented_speedup_ranges_contain_the_current_measurement` pins the band and checks two
+things that hold in any clone: the current artifact lies inside it, and each document states it.
+`test_the_documented_speedup_ranges_match_the_committed_history` keeps the provenance check but
+declares its precondition — it skips, naming `actions/checkout` depth 1, when fewer than two revisions
+are visible, so a thin clone reports a skip rather than a wrong verdict or a silent pass.
+`test_the_performance_guards_are_not_vacuous` gained the case that would have caught this before the
+runner did: a band derived from one measurement is zero-width, and the pinned band must never be one.
+The rule this leaves behind: any guard that shells out to git has to be run against a depth-1 clone
+before it is claimed green, because the clone CI builds is not the clone the guard was written in.

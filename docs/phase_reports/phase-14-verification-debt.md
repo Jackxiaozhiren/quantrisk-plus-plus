@@ -59,7 +59,7 @@ experiment actually publishes (`slope_converges_to_theory_as_the_window_shrinks`
 
 ## 4. Tests executed
 
-404 pytest with the `oracles` extra (335 collected without it, the same four oracle-gated modules
+405 pytest with the `oracles` extra (336 collected without it, the same four oracle-gated modules
 dropping out at import); 198 CTest, 547,845 assertions in 197 Catch2 cases — unchanged, because no C++
 source moved. The version field inside every artifact is what forced the suite re-run and the
 manifest re-freeze recorded in the addendum below; no *result* moved.
@@ -74,6 +74,7 @@ New tests, and how each was shown to be capable of failing:
 | parser non-vacuity | counts floored (statements, functions, classes, members) and the newest Phase 13 types required by name, so a silent parser cannot pass |
 | note figure owner | four perturbations of the note — re-inserting the historic `94.5456`, re-truncating `21.1447`, moving a bound ratio, dropping a sequence item — each caught |
 | note coverage ratchet | an unguarded `docs/analysis/_unguarded_probe.md` made the guard fail; removing it restored green |
+| README quickstart transcript | `quantrisk.version()  # '1.2.0'` had decayed through two releases; the seed-42 values were shifted by one digit and the guard rejected both |
 
 ## 5. Exact test results
 
@@ -88,7 +89,7 @@ ruff format --check .                 122 files already formatted
 mypy python/quantrisk                 Success: no issues found in 23 source files
 mypy <the three test files touched>   Success: no issues found in 3 source files
 clang-format (bindings/cpp/tests)     clean
-pytest -q                             404 passed in 24.10s
+pytest -q                             405 passed
 ctest --preset dev                    100% tests passed out of 198
 verify_evidence_manifest.py           76 OK, 0 CHANGED / 0 VOLATILE / 0 MISSING
 ```
@@ -137,11 +138,11 @@ prose this phase guarded. It stays on the list with that reason attached.
 | Tolerances not lowered (§4) | no tolerance in the tree was touched by this phase |
 | Every README number traceable (§4) | improved: `docs/analysis/` is now covered by owner tests and a ratchet |
 | Cost $0 (§3) | no dependency, no service |
-| Tests pass locally | 404 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
+| Tests pass locally | 405 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
 | Tests pass on the runner | `36536998342` on `10dd8f3` — `completed / success`, all three jobs, the offline lane reading `328 passed, 4 skipped` and confirming the derived collection figure quoted above; `100% tests passed out of 198`; `suite: 14/14 executed and passed` |
 | Version and release | `1.4.0` in `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff` and `uv.lock`; `v1.3.0` stays at `f4c1e9ef9e23` and is not moved. See the release record below |
 
-## Addendum — the release this phase became (2026-09-29)
+## Addendum — the release this phase became (2026-09-30)
 
 The phase opened with four classes of unread claim and closed with a fifth, found while regenerating
 the evidence for the version bump.
@@ -157,13 +158,16 @@ classified the change as VOLATILE and every gate stayed green over a stale claim
 **What was written in response.** `test_documents_quote_the_performance_figures_the_artifact_actually_holds`
 re-derives the artifact's ratios, means, standard errors and paths/s and requires the README,
 `docs/interview_defense.md` and the paper's own table to print them;
-`test_the_speedup_ranges_the_documents_quote_are_the_committed_history` reads the artifact's git
-history and requires each documented range to equal its min/max, so a range narrowed by memory of a
-few runs fails; `test_the_performance_guards_are_not_vacuous` multiplies the artifact's figures by
-1.5 and narrows one band by hand, asserting the guards reject what they had just accepted. The range
-itself moved to `docs/reproducibility.md` as the owner, together with the `git log` command that
-recomputes it — a command that was run, not written: it prints thirteen measurements spanning
-`7.77×`–`8.70×` and `0.42×`–`0.51×`.
+a range narrowed by memory of a few runs fails
+(`test_the_documented_speedup_ranges_contain_the_current_measurement`, plus
+`test_the_documented_speedup_ranges_match_the_committed_history` for the history itself); and
+`test_the_performance_guards_are_not_vacuous` multiplies the artifact's figures by 1.5 and narrows
+one band by hand, asserting the guards reject what they had just accepted. The range itself moved to
+`docs/reproducibility.md` as the owner, together with the `git log` command that recomputes it — a
+command that was run, not written: it prints thirteen measurements spanning `7.77×`–`8.70×` and
+`0.42×`–`0.51×`. Those thirteen are also pinned in the guard, because the first version derived the
+band from history alone and `actions/checkout` at depth 1 shows CI one measurement: run
+`36550420085` went red demanding that README quote `0.45–0.45`, which is finding 35.
 
 **What was measured, not assumed.** The first suite run of this addendum read `7.35294×` with
 `var_backtesting` at 103.4 s; `uptime` showed a load average above 3.6 and another Python process at
@@ -178,9 +182,9 @@ ruff check .                  All checks passed!
 ruff format --check .         122 files already formatted
 mypy python/quantrisk         Success: no issues found in 23 source files
 clang-format --dry-run --Werror clean (no diagnostics, in the CI form over cpp/ bindings/ tests/cpp/)
-ctest --test-dir build/dev    100% tests passed out of 198        (7.49 sec)
+ctest --test-dir build/dev    100% tests passed out of 198        (7.54 sec)
 quantrisk_tests               All tests passed (547845 assertions in 197 test cases)
-pytest tests/python -q        404 passed in 24.10s
+pytest tests/python -q        405 passed in 24.06s
 run_benchmark_suite.py        suite: 14/14 executed and passed, 0 aggregated from disk,
                               0 failed, 0 skipped, 84.6s total
 verify_evidence_manifest.py   76 OK, 0 CHANGED, 0 VOLATILE, 0 MISSING, 0 unlisted
@@ -189,8 +193,12 @@ latexmk -pdf -g               Output written on technical_report.pdf (42 pages, 
 ```
 
 The rebuilt PDF was re-extracted with `pdftotext` and confirmed to contain `8.39×`, `0.445×`,
-`38,642,054`, `7.77×`, `8.70×`, `404 pytest tests` and `335 collected`, so the document ships beside
+`38,642,054`, `7.77×`, `8.70×`, `405 pytest tests` and `336 collected`, so the document ships beside
 the artifact it quotes rather than the run before it.
 
-**Runner.** Pending. The release is tagged only on a commit whose run the API reports as
-`completed / success`; nothing here states that outcome before the runner produces it.
+**Runner.** `36550420085` on `0b1d1f6` is `failure`: `Format and static checks` and `Benchmark suite
+against live oracles` passed, while `Configure, build, C++ tests, Python tests` printed
+`1 failed, 334 passed, 4 skipped` — the new range guard deriving a `0.45–0.45` band from the single
+revision a depth-1 checkout can see. Recorded as finding 35; the tag was not created, and
+`gh run watch --exit-status` returned 0 for that run, so the API's `commits/<sha>/check-runs` is what
+reported it. **No release claim is made until a run on the head reports `completed / success`.**

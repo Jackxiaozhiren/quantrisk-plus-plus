@@ -304,8 +304,8 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 404 pytest tests with
-    the `oracles` extra installed, and the same tree collects 335 tests without it — the CI lane
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 405 pytest tests with
+    the `oracles` extra installed, and the same tree collects 336 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -549,8 +549,15 @@ never removed just because a later phase shipped.
     core read `7.35×` — outside every range the documents had ever printed. `docs/reproducibility.md`
     now owns the range and prints the command that recomputes it from `git log`; the point figures
     are checked against the artifact by
-    `test_documents_quote_the_performance_figures_the_artifact_actually_holds`, the ranges by
-    `test_the_speedup_ranges_the_documents_quote_are_the_committed_history`, and both are shown able
-    to fail by `test_the_performance_guards_are_not_vacuous`. So a re-run of the speed benchmark now
-    obliges a documentation edit, which is the point: the alternative was a green gate over a stale
-    claim. Related: #63, #76, #71.
+    `test_documents_quote_the_performance_figures_the_artifact_actually_holds`. The ranges are
+    checked two ways, because the first version of that check was itself wrong:
+    `test_the_documented_speedup_ranges_contain_the_current_measurement` pins the band and requires
+    the current artifact to sit inside it and the documents to state it, while
+    `test_the_documented_speedup_ranges_match_the_committed_history` requires the pinned band to
+    equal the min/max over the artifact's git history and *declares a skip* when the clone does not
+    carry that history — which is the CI case, `actions/checkout` at depth 1, where the first
+    version derived a `0.45–0.45` spread from the single visible revision and went red for a reason
+    that had nothing to do with the documents. `test_the_performance_guards_are_not_vacuous`
+    multiplies the artifact by 1.5, narrows one band by hand, and asserts a one-measurement band can
+    never equal the pinned one. So a re-run of the speed benchmark now obliges a documentation edit,
+    which is the point: the alternative was a green gate over a stale claim. Related: #63, #76, #71.
