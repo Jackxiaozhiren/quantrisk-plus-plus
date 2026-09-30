@@ -307,6 +307,18 @@ declared list, and the self-test now runs `main(["--list", "--kind", k])` for ea
 surface that had been missed. The lesson is the same one as findings 34 and 36, applied to a tool: a
 check on the internals of a thing is not a check on the way anyone actually calls it.
 
+**Runner, on the heads after the tag.** Every conclusion below is the API's
+`commits/<sha>/check-runs`, not a watcher's exit code. `9017126` — the CLI-kind fix — is
+`completed / success` on all three jobs. `74359f9`, which brings the interview document to eighteen
+cases, is likewise `completed / success` on all three (`Format and static checks`,
+`Configure, build, C++ tests, Python tests`, `Benchmark suite against live oracles`), SonarCloud
+`neutral` as on every prior head. Two heads in between, `adbc096` and `a83d301`, are recorded as
+`cancelled` on the two long jobs: pushing the next commit superseded their in-flight runs, which is
+what GitHub does on the same branch, and their `Format and static checks` had already finished
+`success`. Nothing released depends on any of them — `v1.4.0` is `f4e8afc13bd7` — and the sweep line
+quoted above was produced on `adbc096` locally, which is a statement about my machine, not about a
+run.
+
 **Scope, stated.** A `core` case rebuilds `quantrisk_tests` only, not the Python extension. It proves
 the C++ gate rejects the wrong closed form; the Python-visible consequences of a wrong formula remain
 the job of the reproduction comparator and `test_extension_surface_parity.py`. Counts move with the
