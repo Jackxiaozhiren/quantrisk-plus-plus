@@ -252,20 +252,26 @@ requires the same guard to go green again. The statuses are `caught`, `anchor-no
 `ctest -R` matching nothing is specifically *not* allowed to look like a catch, because a non-zero exit
 from a guard that never ran is the exact shape of finding 25.
 
-**The run.** `uv run python scripts/run_mutation_suite.py` on this tree:
+**The run.** `uv run python scripts/run_mutation_suite.py` on this tree ended with its own line,
+quoted verbatim:
 
 ```
-ok   caught   note-prints-a-slope-the-artifact-doesnt          (1.9975 → 1.9976 in the analysis note)
-ok   caught   readme-claims-a-narrower-speedup-band            (README `7.77×` → `8.00×`)
-ok   caught   readme-quotes-a-stale-speedup                    (README `8.39×` → `8.41×`)
-ok   caught   bindings-declare-a-name-the-binary-cannot-serve  (a pybind registration with no target)
-ok   caught   architecture-declares-a-file-that-isn't-there    (a phantom path in the layout block)
-ok   caught   volga-uses-its-own-square                        (rebuilt; CTest rejected it)
-ok   caught   vanna-loses-its-sign                             (rebuilt; CTest rejected it)
-ok   caught   mixed-partial-drops-a-term                       (rebuilt; CTest rejected it)
-
 8/8 planted defects were rejected by their guard.
 ```
+
+What each case planted, in the order the tool reported them (this is my summary of the declared list,
+not the tool's output — it prints `ok   caught  <id>  <claim>` per line):
+
+| Mutation | Defect planted | Guard that had to reject it |
+| --- | --- | --- |
+| `note-prints-a-slope-the-artifact-doesnt` | `1.9975` → `1.9976` in the two-factor note | note-figure owner, `test_two_factor_bound.py` |
+| `readme-claims-a-narrower-speedup-band` | README `7.77×` → `8.00×` | documented-range containment |
+| `readme-quotes-a-stale-speedup` | README `8.39×` → `8.41×` | derived-figure equality |
+| `bindings-declare-a-name-the-binary-cannot-serve` | a pybind registration renamed to a name no binary serves | extension-surface parity |
+| `architecture-declares-a-file-that-isn't-there` | a phantom `python/quantrisk/analytics.py` in the layout block | architecture path guard |
+| `volga-uses-its-own-square` | `volga = vega·d₁·d₁` instead of `·d₁·d₂` | CTest "vanna and volga are finite differences…" |
+| `vanna-loses-its-sign` | the leading minus dropped from vanna | same CTest case |
+| `mixed-partial-drops-a-term` | `V_SSσ = γ·(d₁d₂)` without the `− 1` | CTest "the three mixed third partials…" |
 
 **The harness's own negative control.** A probe mutation in prose that no guard reads — appending a
 clause to a README sentence and pointing it at a test that cannot see that file — was reported as
