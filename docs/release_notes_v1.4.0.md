@@ -169,8 +169,8 @@ duplicated matrix row number), one `tree` case that *creates* an unregistered
 `experiments/_mutation_probe/run.py` for the registry-completeness guard and then deletes it, and three
 `core` edits in the C++ closed forms (volga using its own square, vanna losing its sign, `V_SSsigma`
 dropping a term), each rebuilt into the Catch2 target and rejected by its CTest case. The sweep runs on a
-clean tree — it refuses to start if any target differs from `HEAD` — and its own line is quoted in
-`docs/phase_reports/phase-14-verification-debt.md`.
+clean tree — it refuses to start if any target differs from `HEAD` — and on `adbc096` it printed
+`18/18 planted defects were rejected by their guard.`, with `git status` empty afterwards.
 
 The harness is also shown able to say *no*. A probe mutation in text no guard reads, aimed at a guard
 that cannot see it, was reported as `guard-stayed-green` rather than counted — finding 25's failure mode

@@ -254,8 +254,15 @@ The statuses are `caught`, `anchor-not-unique`, `probe-file-already-in-the-tree`
 `ctest -R` matching nothing is specifically *not* allowed to look like a catch, because a non-zero exit
 from a guard that never ran is the exact shape of finding 25.
 
-**The run.** `uv run python scripts/run_mutation_suite.py` runs only on a clean tree, so its own
-closing line is recorded in the commit that follows this one, quoted verbatim from the tool.
+**The run.** On `adbc096`, with the tree clean, `uv run python scripts/run_mutation_suite.py` ended:
+
+```
+18/18 planted defects were rejected by their guard.
+```
+
+and `git status --porcelain` was empty afterwards, which is the other half of what the sweep promises:
+every case restored its target byte-for-byte and the probe file, its parent directory and all were
+removed.
 
 What each case planted, in the order the tool reported them (this is my summary of the declared list,
 not the tool's output — it prints `ok   caught  <id>  <claim>` per line):
