@@ -133,8 +133,12 @@ features" was reported on the strength of a query that could only ever answer ha
   a deliberate boundary rather than an omission.
 - Test counts and the limitations count are quoted in dated documents; the living documents no
   longer quote a mutable count, and the limitations figure is now guarded by a test.
-- The suite's member registry is hand-maintained: a new benchmark that is never registered is
-  simply absent, and absence produces no output to check.
+- ~~The suite's member registry is hand-maintained: a new benchmark that is never registered is
+  simply absent, and absence produces no output to check.~~ Closed by
+  `test_every_experiment_and_benchmark_script_on_disk_is_a_suite_member`, which compares the set of
+  `experiments/*/run.py` and `benchmarks/*/*.py` files against the registry in both directions, and by
+  `experiment-added-without-a-registry-entry` in `scripts/run_mutation_suite.py`, which creates an
+  unregistered probe experiment and requires that guard to reject it.
 
 ---
 

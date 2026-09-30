@@ -59,7 +59,7 @@ experiment actually publishes (`slope_converges_to_theory_as_the_window_shrinks`
 
 ## 4. Tests executed
 
-409 pytest with the `oracles` extra (340 collected without it, the same four oracle-gated modules
+410 pytest with the `oracles` extra (341 collected without it, the same four oracle-gated modules
 dropping out at import); 198 CTest, 547,845 assertions in 197 Catch2 cases — unchanged, because no C++
 source moved. The version field inside every artifact is what forced the suite re-run and the
 manifest re-freeze recorded in the addendum below; no *result* moved.
@@ -89,7 +89,7 @@ ruff format --check .                 124 files already formatted
 mypy python/quantrisk                 Success: no issues found in 23 source files
 mypy <the three test files touched>   Success: no issues found in 3 source files
 clang-format (bindings/cpp/tests)     clean
-pytest -q                             409 passed
+pytest -q                             410 passed
 ctest --preset dev                    100% tests passed out of 198
 verify_evidence_manifest.py           76 OK, 0 CHANGED / 0 VOLATILE / 0 MISSING
 ```
@@ -145,7 +145,7 @@ is pointed at the harness itself.
 | Tolerances not lowered (§4) | no tolerance in the tree was touched by this phase |
 | Every README number traceable (§4) | improved: `docs/analysis/` is now covered by owner tests and a ratchet |
 | Cost $0 (§3) | no dependency, no service |
-| Tests pass locally | 409 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
+| Tests pass locally | 410 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
 | Tests pass on the runner | `36663508268` on `f4e8afc13bd7` — `completed / success`, all three jobs, after `36550420085` on the previous head failed on this phase's own guard (finding 35); see the addendum's runner record for the quoted lines |
 | Version and release | `1.4.0` in `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff` and `uv.lock`; tagged `v1.4.0` on `f4e8afc13bd7` and published with four assets on 2026-09-30T03:25:10Z. `v1.3.0` stays at `f4c1e9ef9e23` and is not moved. See the release record below |
 
@@ -191,16 +191,17 @@ mypy python/quantrisk         Success: no issues found in 23 source files
 clang-format --dry-run --Werror clean (no diagnostics, in the CI form over cpp/ bindings/ tests/cpp/)
 ctest --test-dir build/dev    100% tests passed out of 198        (7.54 sec)
 quantrisk_tests               All tests passed (547845 assertions in 197 test cases)
-pytest tests/python -q        409 passed in 42.70s (405 / 336 at the tag, 409 / 340 here)
+pytest tests/python -q        410 passed in 21.55s (405 / 336 at the tag; the harness gate
+                              and the registry-completeness guard account for the difference)
 run_benchmark_suite.py        suite: 14/14 executed and passed, 0 aggregated from disk,
                               0 failed, 0 skipped, 84.6s total
 verify_evidence_manifest.py   76 OK, 0 CHANGED, 0 VOLATILE, 0 MISSING, 0 unlisted
 quantrisk validate            7/7 checks passed
-latexmk -pdf -g               Output written on technical_report.pdf (42 pages, 966335 bytes)
+latexmk -pdf -g               Output written on technical_report.pdf (42 pages, 966341 bytes)
 ```
 
 The rebuilt PDF was re-extracted with `pdftotext` and confirmed to contain `8.39×`, `0.445×`,
-`38,642,054`, `7.77×`, `8.70×`, `409 pytest tests` and `340 collected`, so the document ships beside
+`38,642,054`, `7.77×`, `8.70×`, `410 pytest tests` and `341 collected`, so the document ships beside
 the artifact it quotes rather than the run before it.
 
 **Runner.** Two runs, and only the second one is a release claim.
@@ -256,7 +257,7 @@ from a guard that never ran is the exact shape of finding 25.
 quoted verbatim:
 
 ```
-8/8 planted defects were rejected by their guard.
+9/9 planted defects were rejected by their guard.
 ```
 
 What each case planted, in the order the tool reported them (this is my summary of the declared list,
@@ -269,6 +270,7 @@ not the tool's output — it prints `ok   caught  <id>  <claim>` per line):
 | `readme-quotes-a-stale-speedup` | README `8.39×` → `8.41×` | derived-figure equality |
 | `bindings-declare-a-name-the-binary-cannot-serve` | a pybind registration renamed to a name no binary serves | extension-surface parity |
 | `architecture-declares-a-file-that-isn't-there` | a phantom `python/quantrisk/analytics.py` in the layout block | architecture path guard |
+| `experiment-added-without-a-registry-entry` | an unregistered `experiments/_mutation_probe/run.py`, created and deleted by the sweep | suite registry completeness (the audit's last open line) |
 | `volga-uses-its-own-square` | `volga = vega·d₁·d₁` instead of `·d₁·d₂` | CTest "vanna and volga are finite differences…" |
 | `vanna-loses-its-sign` | the leading minus dropped from vanna | same CTest case |
 | `mixed-partial-drops-a-term` | `V_SSσ = γ·(d₁d₂)` without the `− 1` | CTest "the three mixed third partials…" |
@@ -287,5 +289,5 @@ so CI checks the list, not the mutations.
 **Scope, stated.** A `core` case rebuilds `quantrisk_tests` only, not the Python extension. It proves
 the C++ gate rejects the wrong closed form; the Python-visible consequences of a wrong formula remain
 the job of the reproduction comparator and `test_extension_surface_parity.py`. Counts move with the
-gate: 409 pytest with the `oracles` extra, 340 collected without it (measured with a meta-path blocker
+gate: 410 pytest with the `oracles` extra, 341 collected without it (measured with a meta-path blocker
 for `QuantLib`/`pypfopt`/`cvxpy`/`sklearn`, not by subtraction), 198 CTest unchanged.

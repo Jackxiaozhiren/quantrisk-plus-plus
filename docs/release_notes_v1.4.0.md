@@ -86,7 +86,7 @@ find cpp bindings tests/cpp ... | xargs uv run clang-format --dry-run --Werror
                                clean (no diagnostics)
 uv run ctest --test-dir build/dev   100% tests passed out of 198   (Total Test time = 7.54 sec)
 quantrisk_tests                All tests passed (547845 assertions in 197 test cases)
-uv run pytest tests/python -q  409 passed in 42.70s
+uv run pytest tests/python -q  410 passed in 21.55s
 uv run python scripts/run_benchmark_suite.py --require-all
                                suite: 14/14 executed and passed, 0 aggregated from disk,
                                0 failed, 0 skipped, 84.6s total
@@ -96,11 +96,11 @@ uv run python scripts/verify_evidence_manifest.py
 uv run quantrisk validate      7/7 checks passed   (parity, O(h^2) delta, 1/sqrt(N), seeded MC,
                                ES >= VaR, optimiser constraints + certificate, attribution)
 latexmk -pdf -g technical_report.tex
-                               Output written on technical_report.pdf (42 pages, 966335 bytes)
+                               Output written on technical_report.pdf (42 pages, 966341 bytes)
 ```
 
 The PDF was re-extracted, not assumed: `pdftotext` on the rebuilt file returns `8.39×`, `0.445×`,
-`38,642,054`, `7.77×`, `8.70×`, `409 pytest tests` and `340 collected`, i.e. the document carries the
+`38,642,054`, `7.77×`, `8.70×`, `410 pytest tests` and `341 collected`, i.e. the document carries the
 artifact it ships beside rather than the run before it.
 
 The runner's own lines on the tagged head, `f4e8afc13bd7`, run `36663508268`:
@@ -112,7 +112,7 @@ offline skip is this release's history guard printing its precondition —
 can be derived; see the command in docs/reproducibility.md` — which is finding 35 resolved in the
 environment that found it, rather than in the one that wrote it.
 
-The suite count moved `388 → 409` with the `oracles` extra and `319 → 340` without it — twenty-one
+The suite count moved `388 → 410` with the `oracles` extra and `319 → 341` without it — twenty-two
 cases on each side, none of them oracle-gated, which is why the two numbers move together.
 `docs/limitations.md` carries 77 numbered entries.
 
@@ -159,12 +159,14 @@ read and the patch, and the sweep still printed "nine mutations caught".
 
 Each case proves four things in order, and a failure at any step gets its own status rather than being
 tallied as a catch: the anchor occurred exactly once; the file bytes actually changed; the named guard
-went red; the bytes restored to the recorded SHA-256 and the same guard went green again. Eight defects
-are declared — five in prose or bindings (`1.9975` → `1.9976` in the analysis note, a narrowed README
-band, a stale README ratio, a pybind registration the installed binary cannot serve, a phantom path in
-the architecture block) and three in the C++ closed forms (volga using its own square, vanna losing its
-sign, `V_SSsigma` dropping a term), each rebuilt into the Catch2 target and rejected by its CTest case.
-On this tree the run printed `8/8 planted defects were rejected by their guard.`
+went red; the bytes restored to the recorded SHA-256 and the same guard went green again. Nine defects
+are declared in three kinds — five `prose` edits in documents or bindings (`1.9975` → `1.9976` in the
+analysis note, a narrowed README band, a stale README ratio, a pybind registration the installed binary
+cannot serve, a phantom path in the architecture block), one `tree` case that *creates* an unregistered
+`experiments/_mutation_probe/run.py` for the registry-completeness guard and then deletes it, and three
+`core` edits in the C++ closed forms (volga using its own square, vanna losing its sign, `V_SSsigma`
+dropping a term), each rebuilt into the Catch2 target and rejected by its CTest case. On this tree the
+run printed `9/9 planted defects were rejected by their guard.`
 
 The harness is also shown able to say *no*. A probe mutation in text no guard reads, aimed at a guard
 that cannot see it, was reported as `guard-stayed-green` rather than counted — finding 25's failure mode
@@ -172,6 +174,13 @@ made visible instead of silent. Two safety properties are enforced rather than t
 start if any target file differs from `HEAD`, so it cannot overwrite work in progress, and it restores
 each file from the snapshot taken before its own edit, hashes the restore, and finishes with a sweep
 that prints `restore-mismatch` and exits non-zero if anything is left modified.
+
+The tree case exists because of the audit's last open line — "the suite's member registry is
+hand-maintained: a new benchmark that is never registered is simply absent, and absence produces no
+output to check" — and it is closed by `test_every_experiment_and_benchmark_script_on_disk_is_a_suite_member`,
+which enumerates every `experiments/*/run.py` and `benchmarks/*/*.py` and compares the set against the
+registry in both directions. That guard is what the probe plants: an experiment that runs but is not a
+member.
 
 Its gate is `tests/python/test_mutation_suite.py` (four cases), which is what keeps the tool from
 rotting the way the prose did: on every ordinary test run it re-checks that each anchor still occurs

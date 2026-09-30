@@ -43,13 +43,22 @@ def test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists
     """
     identifiers = [mutation.identifier for mutation in harness.MUTATIONS]
     assert len(set(identifiers)) == len(identifiers), f"duplicate mutation ids: {identifiers}"
-    assert len([m for m in harness.MUTATIONS if m.kind == "core"]) >= 3, identifiers
-    assert len([m for m in harness.MUTATIONS if m.kind == "prose"]) >= 5, identifiers
+    kinds = [mutation.kind for mutation in harness.MUTATIONS]
+    assert set(kinds) == {"prose", "core", "tree"}, set(kinds)
+    assert kinds.count("core") >= 3 and kinds.count("prose") >= 5 and kinds.count("tree") >= 1
 
     for mutation in harness.MUTATIONS:
         assert not Path(mutation.path).is_absolute(), mutation.identifier
         assert ".." not in Path(mutation.path).parts, mutation.identifier
         target = REPO_ROOT / mutation.path
+        if mutation.kind == "tree":
+            # A probe already in the tree would be overwritten by the sweep, and a probe left behind
+            # by an interrupted run is the same fault in the other direction: this assertion is what
+            # notices either, because no other test reads that path.
+            assert not target.exists(), (
+                f"{mutation.identifier}: {mutation.path} exists, so the sweep would overwrite it"
+            )
+            continue
         assert target.is_file(), f"{mutation.identifier}: {mutation.path} is not in the tree"
         text = target.read_text(encoding="utf-8")
         assert text.count(mutation.anchor) == 1, (
@@ -118,6 +127,7 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired() -> No
         "green_again": True,
     }
     assert harness.decide(**cycle) == harness.CAUGHT
+    assert harness.decide(**{**cycle, "probe_free": False}) == harness.PROBE_EXISTS
     assert harness.decide(**{**cycle, "changed": False}) == harness.NO_OP
     assert harness.decide(**{**cycle, "build_ok": False}) == harness.BUILD_FAILED
     assert harness.decide(**{**cycle, "guard_ran": False}) == harness.GUARD_NOT_RUN
@@ -140,7 +150,9 @@ def test_the_selected_mutations_resolve_by_kind_and_identifier() -> None:
         assert [item.identifier for item in chosen] == [mutation.identifier]
     prose = harness.select("prose", [])
     core = harness.select("core", [])
-    assert len(prose) + len(core) == len(harness.MUTATIONS)
+    tree = harness.select("tree", [])
+    assert len(prose) + len(core) + len(tree) == len(harness.MUTATIONS)
     assert all(item.kind == "prose" for item in prose)
     assert all(item.kind == "core" for item in core)
+    assert all(item.kind == "tree" for item in tree)
     assert harness.select("core", [prose[0].identifier]) == []

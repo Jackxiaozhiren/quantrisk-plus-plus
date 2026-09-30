@@ -520,6 +520,34 @@ def _load_suite_members() -> list[Any]:
     return list(module.MEMBERS)
 
 
+def test_every_experiment_and_benchmark_script_on_disk_is_a_suite_member() -> None:
+    """A script nobody registers is invisible, so absence itself has to be an assertion.
+
+    `docs/integrity_audit.md` keeps this on its open list for one reason: the registry in
+    `scripts/run_benchmark_suite.py` is hand-maintained, so an `experiments/*/run.py` that arrives
+    without a member entry produces no output anywhere. Nothing disagrees with anything: the
+    fourteen published numbers stay as true as they were before the fifteenth experiment existed.
+    The other direction is already policed, by
+    `test_suite_run_json_records_a_member_for_each_registered_script`, which fails on a member whose
+    file is gone; the unprovable half was this one, disk to registry.
+
+    The floor is part of the check, not decoration. Discovery is by the layout the repository
+    actually uses, and a glob that silently narrowed would compare two shortlists and pass.
+    """
+    on_disk = {
+        str(path.relative_to(REPO_ROOT))
+        for pattern in ("experiments/*/run.py", "benchmarks/*/*.py")
+        for path in REPO_ROOT.glob(pattern)
+        if path.is_file()
+    }
+    registered = {member.script for member in _load_suite_members()}
+    assert len(on_disk) >= 14, f"discovery found only {len(on_disk)}: {sorted(on_disk)}"
+    assert on_disk == registered, (
+        f"on disk but not registered: {sorted(on_disk - registered)}; "
+        f"registered but not on disk: {sorted(registered - on_disk)}"
+    )
+
+
 def test_the_suite_records_a_pasteable_command_with_no_machine_path(tmp_path: Path) -> None:
     """The roll-up is evidence now, so it names its own invocation like the others do.
 

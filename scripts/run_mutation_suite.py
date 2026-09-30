@@ -15,13 +15,17 @@ its list of mutations is policed by the ordinary test suite
 
 Failing any step yields that step's status, never ``caught``.
 
-Two kinds of mutation. ``prose`` edits a file a documented claim lives in and runs one pytest node;
+Three kinds of mutation. ``prose`` edits a file a documented claim lives in and runs one pytest
+node;
 nothing is rebuilt. That includes `bindings/python_bindings.cpp`, whose parity guard compares the
 *source* against the already installed extension, so a declaration the binary cannot serve is caught
 without a compile. ``core`` edits a closed form in the C++ library, rebuilds only the Catch2/CTest
 target, and requires the named CTest case to fail. It deliberately does not rebuild the Python
 extension, so a ``core`` case proves the C++ gate rejects the wrong formula; the Python-visible
 consequences of a wrong formula are the province of the reproduction guards and the parity check.
+``tree`` exists for the guards whose defect is *absence*: it creates one probe file at a path
+preflighted to be free, requires the guard to reject its existence, and removes it again. That kind
+never overwrites anything, and refuses the case outright if the path is already occupied.
 
 Refuses to start if any file it would edit is not clean at `HEAD`: the harness must never overwrite
 work in progress, and finding 25's second half is what happens when two writers share one tree.
@@ -59,6 +63,7 @@ ESCAPED = "guard-stayed-green"
 NOT_RESTORED = "restore-mismatch"
 NOT_GREEN_AGAIN = "tree-did-not-recover"
 DIRTY_TARGET = "target-already-modified"
+PROBE_EXISTS = "probe-file-already-in-the-tree"
 
 
 @dataclass(frozen=True)
@@ -136,6 +141,18 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="the layout block describes the tree, as finding 33 required",
     ),
     Mutation(
+        identifier="experiment-added-without-a-registry-entry",
+        kind="tree",
+        path="experiments/_mutation_probe/run.py",
+        anchor="",
+        replacement='"""Probe written by the mutation sweep; never committed."""\n',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_experiment_and_benchmark_script_on_disk_is_a_suite_member"
+        ),
+        claim="a runnable experiment nobody registers fails the registry's own completeness check",
+    ),
+    Mutation(
         identifier="volga-uses-its-own-square",
         kind="core",
         path="cpp/src/pricing/black_scholes.cpp",
@@ -183,6 +200,7 @@ def apply_mutation(text: str, anchor: str, replacement: str) -> tuple[str, str |
 def decide(
     *,
     anchor_ok: bool,
+    probe_free: bool = True,
     changed: bool,
     build_ok: bool,
     guard_ran: bool,
@@ -193,6 +211,8 @@ def decide(
     """Which step of the proof failed, if any. A catch requires all of them to hold, in order."""
     if not anchor_ok:
         return ANCHOR_NOT_UNIQUE
+    if not probe_free:
+        return PROBE_EXISTS
     if not changed:
         return NO_OP
     if not build_ok:
@@ -275,8 +295,60 @@ def git_status(path: str) -> str:
     return _run(("git", "status", "--porcelain", "--", path), False).stdout.strip()
 
 
+def run_one_probe(mutation: Mutation, harness: Harness) -> dict[str, str]:
+    """Plant *absence* rather than a wrong value: create one probe file, then take it away.
+
+    The four steps are the same ones the other kinds run, re-expressed for a guard that fires on
+    a file nobody registered: the path must be free before the case (nothing is overwritten), the
+    probe must really exist before the guard runs, the guard must reject its existence, and the
+    case is only complete when the probe is gone and the same guard passes again.
+    """
+    path = REPO_ROOT / mutation.path
+    probe_free = not path.exists()
+    changed = False
+    guard_ran = False
+    guard_returncode = 0
+    restored = False
+    green_again = False
+    reason = None if probe_free else f"{mutation.path} already exists, so the probe would overwrite"
+    if probe_free:
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(mutation.replacement, encoding="utf-8")
+            changed = path.is_file()
+            guard_ran, guard_returncode = harness.guard(mutation)
+        finally:
+            path.unlink(missing_ok=True)
+            parent = path.parent
+            if parent.is_dir() and not any(parent.iterdir()):
+                parent.rmdir()
+            restored = not path.exists()
+        if restored and guard_returncode != 0:
+            _, code = harness.guard(mutation)
+            green_again = code == 0
+    return {
+        "id": mutation.identifier,
+        "kind": mutation.kind,
+        "status": decide(
+            anchor_ok=True,
+            probe_free=probe_free,
+            changed=changed,
+            build_ok=True,
+            guard_ran=guard_ran,
+            guard_returncode=guard_returncode,
+            restored=restored,
+            green_again=green_again,
+        ),
+        "reason": reason or "",
+        "guard": mutation.guard,
+        "claim": mutation.claim,
+    }
+
+
 def run_one(mutation: Mutation, harness: Harness) -> dict[str, str]:
     """One full falsification cycle for a single mutation, reported as a record."""
+    if mutation.kind == "tree":
+        return run_one_probe(mutation, harness)
     path = REPO_ROOT / mutation.path
     before = path.read_bytes()
     digest = hashlib.sha256(before).hexdigest()
@@ -370,11 +442,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     snapshots = {
         (REPO_ROOT / mutation.path).resolve(): (REPO_ROOT / mutation.path).read_bytes()
         for mutation in selected
+        if mutation.kind != "tree"
     }
+    probes = [REPO_ROOT / mutation.path for mutation in selected if mutation.kind == "tree"]
 
     def on_signal(signum: int, _frame: object) -> None:
         for path, payload in snapshots.items():
             path.write_bytes(payload)
+        for probe in probes:
+            probe.unlink(missing_ok=True)
+            parent = probe.parent
+            if parent.is_dir() and not any(parent.iterdir()):
+                parent.rmdir()
         raise SystemExit(128 + signum)
 
     for number in (signal.SIGINT, signal.SIGTERM):
