@@ -139,8 +139,8 @@ prose this phase guarded. It stays on the list with that reason attached.
 | Every README number traceable (§4) | improved: `docs/analysis/` is now covered by owner tests and a ratchet |
 | Cost $0 (§3) | no dependency, no service |
 | Tests pass locally | 405 pytest, 198 CTest, 76 artifacts OK, ruff/format/mypy (both the CI scope and the three files this phase touched) and clang-format clean, each quoted from its own run above |
-| Tests pass on the runner | `36536998342` on `10dd8f3` — `completed / success`, all three jobs, the offline lane reading `328 passed, 4 skipped` and confirming the derived collection figure quoted above; `100% tests passed out of 198`; `suite: 14/14 executed and passed` |
-| Version and release | `1.4.0` in `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff` and `uv.lock`; `v1.3.0` stays at `f4c1e9ef9e23` and is not moved. See the release record below |
+| Tests pass on the runner | `36663508268` on `f4e8afc13bd7` — `completed / success`, all three jobs, after `36550420085` on the previous head failed on this phase's own guard (finding 35); see the addendum's runner record for the quoted lines |
+| Version and release | `1.4.0` in `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff` and `uv.lock`; tagged `v1.4.0` on `f4e8afc13bd7` and published with four assets on 2026-09-30T03:25:10Z. `v1.3.0` stays at `f4c1e9ef9e23` and is not moved. See the release record below |
 
 ## Addendum — the release this phase became (2026-09-30)
 
@@ -196,9 +196,30 @@ The rebuilt PDF was re-extracted with `pdftotext` and confirmed to contain `8.39
 `38,642,054`, `7.77×`, `8.70×`, `405 pytest tests` and `336 collected`, so the document ships beside
 the artifact it quotes rather than the run before it.
 
-**Runner.** `36550420085` on `0b1d1f6` is `failure`: `Format and static checks` and `Benchmark suite
-against live oracles` passed, while `Configure, build, C++ tests, Python tests` printed
-`1 failed, 334 passed, 4 skipped` — the new range guard deriving a `0.45–0.45` band from the single
-revision a depth-1 checkout can see. Recorded as finding 35; the tag was not created, and
-`gh run watch --exit-status` returned 0 for that run, so the API's `commits/<sha>/check-runs` is what
-reported it. **No release claim is made until a run on the head reports `completed / success`.**
+**Runner.** Two runs, and only the second one is a release claim.
+
+`36550420085` on `0b1d1f6` is `failure`: `Format and static checks` and `Benchmark suite against live
+oracles` passed, while `Configure, build, C++ tests, Python tests` printed `1 failed, 334 passed,
+4 skipped` — the range guard deriving a `0.45–0.45` band from the single revision a depth-1 checkout
+can see (finding 35). `gh run watch --exit-status` returned 0 for that run; the API's
+`commits/<sha>/check-runs` reported the failure, which is why no tag was created from the watcher's
+word.
+
+`36663508268` on `f4e8afc13bd7` is `completed / success` on all three jobs. The same API reads
+`Configure, build, C++ tests, Python tests` → `success`, `Benchmark suite against live oracles` →
+`success`, `Format and static checks` → `success`, with SonarCloud `neutral` as it has been on every
+prior head. The runner's own lines: `100% tests passed out of 198`, `335 passed, 5 skipped in
+50.26s`, `suite: 14/14 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 194.4s
+total`, `Success: no issues found in 23 source files`. The added skip is this phase's history guard
+printing `this clone carries 1 revision of the artifact (CI uses actions/checkout at depth 1), so no
+spread can be derived; see the command in docs/reproducibility.md` — the precondition declared rather
+than assumed.
+
+**Release.** `v1.4.0` is an annotated tag object on `f4e8afc13bd7` (tag `0ca51f4d51f1`), and the
+GitHub release is `publishedAt 2026-09-30T03:25:10Z`, `isDraft: false`. Four assets were uploaded
+from a `git archive v1.4.0` export and downloaded back, and every digest matched:
+`e86af9d7…` `technical_report.pdf`, `4a29b1af…` `manifest.json`, `85113b4f…` `CITATION.cff`,
+`c24bcf07…` `quantrisk-suite-results.zip`. `manifest.json` records `git_commit: 0b1d1f63482a` with a
+dirty tree, because the freeze was taken before the guard-fix commit; it verifies `76 OK, 0 CHANGED,
+0 VOLATILE, 0 MISSING` against the tagged tree, and the release notes say so rather than implying the
+manifest names the tag.

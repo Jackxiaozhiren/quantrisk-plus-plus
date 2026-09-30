@@ -103,6 +103,15 @@ The PDF was re-extracted, not assumed: `pdftotext` on the rebuilt file returns `
 `38,642,054`, `7.77×`, `8.70×`, `405 pytest tests` and `336 collected`, i.e. the document carries the
 artifact it ships beside rather than the run before it.
 
+The runner's own lines on the tagged head, `f4e8afc13bd7`, run `36663508268`:
+`100% tests passed out of 198`; `335 passed, 5 skipped in 50.26s` offline;
+`suite: 14/14 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 194.4s total` on the
+oracle lane; `Success: no issues found in 23 source files` and a silent clang-format step. The fifth
+offline skip is this release's history guard printing its precondition —
+`this clone carries 1 revision of the artifact (CI uses actions/checkout at depth 1), so no spread
+can be derived; see the command in docs/reproducibility.md` — which is finding 35 resolved in the
+environment that found it, rather than in the one that wrote it.
+
 The suite count moved `388 → 405` with the `oracles` extra and `319 → 336` without it — seventeen
 cases on each side, none of them oracle-gated, which is why the two numbers move together.
 `docs/limitations.md` carries 77 numbered entries.
@@ -124,6 +133,15 @@ that would have caught this before the runner did: a band derived from one measu
 and the pinned band must never be one. `gh run watch --exit-status` returned 0 for the failed run, so
 the tag was created only after `commits/<sha>/check-runs` reported success (see
 `docs/integrity_audit.md` finding 35).
+
+The fix was verified where the defect appeared. `36663508268` on `f4e8afc13bd7` — the revision the
+tag names — is `completed / success` on all three jobs, and the API's `commits/<sha>/check-runs` is
+what said so: `100% tests passed out of 198`, `335 passed, 5 skipped in 50.26s`,
+`suite: 14/14 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 194.4s total`,
+`Success: no issues found in 23 source files`. The fifth offline skip is the history guard printing
+its own precondition, which is the point: a check that needs history declares it rather than
+inventing a band from one measurement. The pinned band is still compared against the history min/max
+in every clone that carries one, so the provenance did not disappear — it acquired a precondition.
 
 ## What is still not here
 

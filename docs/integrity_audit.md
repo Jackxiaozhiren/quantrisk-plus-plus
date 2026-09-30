@@ -510,4 +510,10 @@ are visible, so a thin clone reports a skip rather than a wrong verdict or a sil
 `test_the_performance_guards_are_not_vacuous` gained the case that would have caught this before the
 runner did: a band derived from one measurement is zero-width, and the pinned band must never be one.
 The rule this leaves behind: any guard that shells out to git has to be run against a depth-1 clone
-before it is claimed green, because the clone CI builds is not the clone the guard was written in.
+before it is claimed green, because the clone CI builds is not the clone the guard was written in. The fix was proven where the defect
+lived: `36663508268` on `f4e8afc13bd7` is `completed / success` on all three jobs, the offline lane
+printing `335 passed, 5 skipped in 50.26s`, and the fifth skip is that guard saying so in its own
+words — `this clone carries 1 revision of the artifact (CI uses actions/checkout at depth 1), so no
+spread can be derived; see the command in docs/reproducibility.md`. The pinned band is still checked
+against the history min/max wherever a clone carries one, so the provenance did not disappear, it
+acquired a precondition.
