@@ -403,8 +403,8 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 198 C++ tests (547,845 assertions in 197 cases) and 386
-Python tests with the validation oracles installed — 295 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
+variance reduction. Today that is 198 C++ tests (547,845 assertions in 197 cases) and 410
+Python tests with the validation oracles installed — 341 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -838,6 +838,42 @@ a fact about the scan. The probe is in the artifact so the refusal can be checke
 Sources: `docs/analysis/two_factor_error_bound.md`, `docs/limitations.md` #67–71,
 `experiments/two_factor_error_bound/results/two_factor_bound.json`.
 
+### Q24. How do you know your tests would catch a wrong formula?
+
+**30 s.** Coverage percentages measure execution, not detection, so I do not quote them. The claim
+is tested directly: `scripts/run_mutation_suite.py` plants a declared defect and requires the one
+guard that should reject it to go red. Nine are declared — five in documents and bindings, one that
+*creates* an unregistered experiment, three in the C++ closed forms — and on this tree the sweep
+printed `9/9 planted defects were rejected by their guard.`
+
+**2 min.** The tool exists because my own sweep lied twice, and `docs/integrity_audit.md` finding 25
+records it: two of nine mutations never applied — clang-format had reflowed the expression between
+the moment I read the needle and the moment I patched it — and the sweep still reported "nine
+mutations caught". So a case has to prove four ordered things, and failing any one yields that
+step's status rather than a count: the anchor occurred exactly once, so the edit landed on the text
+it names; the bytes actually changed, so the control was not a no-op; the named guard went red; the
+bytes restored to the recorded SHA-256 and the same guard went green again. The subtlest case is
+`ctest -R` matching nothing, which exits non-zero and would be tallied as a rejection — a guard that
+never ran is scored as `guard-could-not-be-run`, and a `-N` listing before the run proves the name
+resolves to exactly one test.
+
+**Deeper.** The tool is shown capable of saying *no*: a probe defect written into prose no guard
+reads, aimed at a guard that cannot see that file, comes back `guard-stayed-green` instead of being
+counted. Its inputs are policed by the ordinary test suite — `tests/python/test_mutation_suite.py`
+re-asserts on every run that each mutation's anchor still occurs exactly once, that each named guard
+still exists as a `def` or a `TEST_CASE`, and that the status function names each way a cycle can
+lie — because the sweep itself cannot be a CI step: it edits tracked files and recompiles
+`quantrisk_tests`. Two limits I would state before anyone asks. A `core` case proves the C++ gate
+rejects the wrong formula; it does not rebuild the extension, so Python-visible consequences belong
+to the reproduction comparator and the surface-parity check. And this whole class of evidence exists
+because the phase that built it was wrong about its own tooling twice — findings 35 and 36, one where
+a guard derived a value range from `git log` and CI's depth-1 checkout had no history to read, one
+where I published a sentence about a watcher's exit code that this same audit had already refuted.
+
+Sources: `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`,
+`docs/integrity_audit.md` findings 25, 35, 36, `docs/phase_reports/phase-14-verification-debt.md`
+(second addendum).
+
 ---
 
 ## How to verify each claim in this file
@@ -848,6 +884,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 198 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
   .venv/bin/python -m pytest -q                                          # 341 Python tests
+uv run python scripts/run_mutation_suite.py                             # 9/9 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
 uv run python experiments/variance_reduction/run.py
@@ -889,6 +926,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | ERC condition `wᵢ(Σw)ᵢ = (wᵀΣw)/n` and "validated against independent implementation" | `docs/mathematical_specification.md` §9 |
 | Heston dynamics, Feller condition, full-truncation Euler bias, "validation weaker than Black-Scholes section" | `docs/mathematical_specification.md` §10; `docs/project_scope.md` §4 |
 | Eigen arrives in Phase 6, not before; single-thread and no-QMC limits; path-matrix memory bound | `docs/limitations.md` #8, #16, #18; `docs/model_cards/monte_carlo_gbm.md` |
+| "the tests would catch a wrong formula": nine planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
 
 Anything in this file that is not in that table is an opinion about a method, not a result of
 this repository — answer it as an opinion.

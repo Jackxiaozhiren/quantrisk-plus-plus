@@ -278,8 +278,16 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
     # against the document's own two figures rather than against this run's total: each belongs to
     # one environment, so comparing either to `total` would go red on the CI lane for the right
     # reason.
+    #
+    # A third round of the same lesson: Q11 restates the pair as "386 Python tests with the
+    # validation oracles installed — 295 without them", which no pattern above matched, so the
+    # sentence kept a count two releases behind while its own document's headline was current. A
+    # restatement guards only in the wording it recognises, so these two phrasings are now policed
+    # too rather than left to whichever reader notices the disagreement between two sentences.
     table_pair = r"198\s*/\s*(\d+)\s+now"
     command_count = r"python -m pytest -q\s+#\s+(\d+)\s+Python tests"
+    oracle_prose = r"(\d+)\s+Python tests with the validation oracles installed"
+    offline_prose = r"[—-]\s*(\d+)\s+without them"
     documents = ("docs/interview_defense.md", "docs/limitations.md", "docs/reproducibility.md")
     for name in documents:
         text = (REPO_ROOT / name).read_text(encoding="utf-8")
@@ -289,6 +297,8 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
         for pattern, expected, label in (
             (table_pair, high.group(1), "the with-oracles table row"),
             (command_count, low.group(1), "the offline command comment"),
+            (oracle_prose, high.group(1), "the with-oracles prose figure"),
+            (offline_prose, low.group(1), "the without-oracles prose figure"),
         ):
             for value in re.findall(pattern, text):
                 assert value == expected, (

@@ -560,4 +560,10 @@ never removed just because a later phase shipped.
     that had nothing to do with the documents. `test_the_performance_guards_are_not_vacuous`
     multiplies the artifact by 1.5, narrows one band by hand, and asserts a one-measurement band can
     never equal the pinned one. So a re-run of the speed benchmark now obliges a documentation edit,
-    which is the point: the alternative was a green gate over a stale claim. Related: #63, #76, #71.
+    which is the point: the alternative was a green gate over a stale claim. The class then
+    reappeared one level up: `docs/interview_defense.md` Q11 restated the Python test counts as
+    "386 … and 295 without them" while its own headline two lines above said 410 and 341, because
+    the count guard matches the wordings it knows — a restatement phrased a fourth way is a figure
+    with no owner inside a sentence that looks checked. Both spellings are policed by that guard now,
+    which is the rule restated: policing a number means policing every spelling of it.
+    Related: #63, #76, #71.
