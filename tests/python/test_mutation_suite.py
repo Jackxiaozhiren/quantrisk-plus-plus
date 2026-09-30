@@ -143,8 +143,14 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired() -> No
     )
 
 
-def test_the_selected_mutations_resolve_by_kind_and_identifier() -> None:
-    """`--only` and `--kind` are how an operator runs one case, so they must resolve exactly."""
+def test_the_selected_mutations_resolve_by_kind_and_identifier(capsys) -> None:
+    """`--only` and `--kind` are how an operator runs one case, so they must resolve exactly.
+
+    The CLI is asserted rather than assumed because it drifted once for real: adding the `tree`
+    kind left argparse's `choices` listing only the two older kinds, so the new mutation was
+    unreachable by name while every function around it handled it correctly. Deriving the choices
+    from the declared list fixed it, and this is the check that keeps it fixed.
+    """
     for mutation in harness.MUTATIONS:
         chosen = harness.select(None, [mutation.identifier])
         assert [item.identifier for item in chosen] == [mutation.identifier]
@@ -156,3 +162,8 @@ def test_the_selected_mutations_resolve_by_kind_and_identifier() -> None:
     assert all(item.kind == "core" for item in core)
     assert all(item.kind == "tree" for item in tree)
     assert harness.select("core", [prose[0].identifier]) == []
+    assert harness.kinds_of(harness.MUTATIONS) == {"prose", "core", "tree"}
+    for kind in ("prose", "core", "tree"):
+        assert harness.main(["--list", "--kind", kind]) == 0
+        listed = capsys.readouterr().out.strip().splitlines()
+        assert len(listed) == len(harness.select(kind, [])), (kind, listed)

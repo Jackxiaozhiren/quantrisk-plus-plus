@@ -394,6 +394,11 @@ def run_one(mutation: Mutation, harness: Harness) -> dict[str, str]:
     }
 
 
+def kinds_of(mutations: Sequence[Mutation]) -> set[str]:
+    """Every kind the list declares, so `--kind` cannot drift behind the mutations."""
+    return {mutation.kind for mutation in mutations}
+
+
 def select(kind: str | None, only: Sequence[str]) -> list[Mutation]:
     chosen = [mutation for mutation in MUTATIONS if kind is None or mutation.kind == kind]
     if not only:
@@ -406,7 +411,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Require every guard to reject a planted defect.")
     parser.add_argument("--list", action="store_true", help="print the mutations and exit")
     parser.add_argument("--only", action="append", default=[], help="run just these mutation ids")
-    parser.add_argument("--kind", choices=("prose", "core"), help="run just one kind")
+    parser.add_argument(
+        "--kind", choices=tuple(sorted(kinds_of(MUTATIONS))), help="run just one kind"
+    )
     parser.add_argument("--build-dir", default=DEFAULT_BUILD_DIR, help="cmake build directory")
     parser.add_argument("--verbose", action="store_true", help="echo each guard's own tail")
     arguments = parser.parse_args(argv)

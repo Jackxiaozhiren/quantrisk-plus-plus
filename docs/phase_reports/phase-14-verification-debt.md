@@ -287,6 +287,14 @@ anchor uniqueness per mutation, that prose guards define the named test and C++ 
 each failure mode. The sweep itself stays an operator action — it edits tracked files and recompiles —
 so CI checks the list, not the mutations.
 
+**A defect the sweep's own tests did not cover.** Adding the `tree` kind left argparse's
+`--kind choices` listing only `prose` and `core`, so the new mutation was unreachable by name while
+every function around it — `select`, `run_one`, `decide`, the self-test's set comparison — handled it
+correctly. A spot-check of `--kind tree` is what surfaced it; the fix derives the choices from the
+declared list, and the self-test now runs `main(["--list", "--kind", k])` for each kind, which is the
+surface that had been missed. The lesson is the same one as findings 34 and 36, applied to a tool: a
+check on the internals of a thing is not a check on the way anyone actually calls it.
+
 **Scope, stated.** A `core` case rebuilds `quantrisk_tests` only, not the Python extension. It proves
 the C++ gate rejects the wrong closed form; the Python-visible consequences of a wrong formula remain
 the job of the reproduction comparator and `test_extension_surface_parity.py`. Counts move with the
