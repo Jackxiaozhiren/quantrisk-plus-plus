@@ -498,8 +498,11 @@ default depth of 1, so the derivation saw the single revision at the tag and dem
 quote a `0.45–0.45` spread — run `36550420085`, `Configure, build, C++ tests, Python tests` →
 `failure`, `1 failed, 334 passed, 4 skipped`. The failure was real and it was mine: a check that reads
 history is a check about the *clone*, not about the repository, and I had asserted it was the same
-thing. Note also that `gh run watch --exit-status` returned exit code 0 for that run; the API's
-`commits/<sha>/check-runs` is what reported the failure, which is why the tag was not created.
+thing. Note also that this file first asserted `gh run watch --exit-status` returned exit code 0 for that
+run, and that assertion was **wrong in its own right**: the watcher exits **1** on that run, measured
+directly on the completed `36550420085`, and the 0 belonged to the background wrapper whose last command
+was an `echo`. The API's `commits/<sha>/check-runs` is what reported the failure, which is why the tag
+was not created. See finding 36 for the correction of that sentence.
 
 Two changes make the guard honest about which half is live where.
 `test_the_documented_speedup_ranges_contain_the_current_measurement` pins the band and checks two
@@ -517,3 +520,17 @@ words — `this clone carries 1 revision of the artifact (CI uses actions/checko
 spread can be derived; see the command in docs/reproducibility.md`. The pinned band is still checked
 against the history min/max wherever a clone carries one, so the provenance did not disappear, it
 acquired a precondition.
+
+**36. The release notes repeated a claim this same file had already corrected.** Finding 35's first
+draft said `gh run watch --exit-status` returned exit code 0 for the failed run. One hundred and
+twelve lines earlier in the same document (`docs/integrity_audit.md:389`), the Phase 13 addendum
+records that exactly this sentence was already tested and refuted: the watcher returned **1**, and the zero belonged to a background wrapper whose
+last command was an `echo`. I wrote the disproved claim again because I reasoned about the tool from
+the notification I had seen ("completed (exit code 0)") instead of reading the instrument again — and
+nothing in the gate set can catch a sentence about a tool's behavior, since no test executes `gh`.
+
+Measured now, on the completed failed run `36550420085`: `gh run watch … --exit-status` exits **1**.
+The finding-35 text is corrected in place, and this entry exists so the correction is attributable
+rather than silent. The rule it leaves is narrower than "verify before asserting": when a document in
+this repository has already recorded that one of my own claims was wrong, that document is the first
+place to read before making a claim of the same kind again.

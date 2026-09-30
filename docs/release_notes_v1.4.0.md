@@ -130,8 +130,9 @@ the pinned band, and every document states that band. What is checked where hist
 band equals the min/max over the artifact's committed revisions — and when it cannot be derived, the
 test says so in its own skip reason instead of passing quietly. The vacuity test now carries the case
 that would have caught this before the runner did: a band derived from one measurement is zero-width,
-and the pinned band must never be one. `gh run watch --exit-status` returned 0 for the failed run, so
-the tag was created only after `commits/<sha>/check-runs` reported success (see
+and the pinned band must never be one. the background wrapper around `gh run watch --exit-status` reported 0 for the failed run while
+the watcher itself exits 1 — measured directly on `36550420085` after the fact — so the tag was created
+only after `commits/<sha>/check-runs` reported success (see
 `docs/integrity_audit.md` finding 35).
 
 The fix was verified where the defect appeared. `36663508268` on `f4e8afc13bd7` — the revision the

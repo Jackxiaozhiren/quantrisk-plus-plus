@@ -201,7 +201,8 @@ the artifact it quotes rather than the run before it.
 `36550420085` on `0b1d1f6` is `failure`: `Format and static checks` and `Benchmark suite against live
 oracles` passed, while `Configure, build, C++ tests, Python tests` printed `1 failed, 334 passed,
 4 skipped` — the range guard deriving a `0.45–0.45` band from the single revision a depth-1 checkout
-can see (finding 35). `gh run watch --exit-status` returned 0 for that run; the API's
+can see (finding 35). the watcher's exit code never reached me (the background wrapper's `echo` was the last command, and
+it reported 0 for a run the watcher exits 1 on — measured later on the same completed run), so the API's
 `commits/<sha>/check-runs` reported the failure, which is why no tag was created from the watcher's
 word.
 
