@@ -187,27 +187,52 @@ a snapshot with a query beside it rather than a list that goes stale the moment 
 
 Item 2 of §5 says extending the crossing radius needs fourth-order terms. That derivation was done
 here so it is not lost between sessions. With `v = sigma sqrt(T)`, `P = e^{-qT} phi(d1)` and
-`d2 = d1 - v`, the five partials of total order four are
+`d2 = d1 - v`, every partial of total order four has the same shape,
 
-    V_SSSS     = P (d1^2 + 3 d1 v + 2 v^2 - 1) / (S^3 v^3)
-    V_SSSsigma = P d1 (v^2 + 3 - d1^2) / (S^2 v^2 sigma T)
-    V_SSsigmasigma
-               = P (d1^2 d2^2 - 5 d1^2 + 5 d1 v - v^2 + 2) / (S T v^3)
-    V_Ssigmasigmasigma
-               = P (-d1^5 + 3 d1^4 v - 3 d1^3 v^2 + 7 d1^3 + d1^2 v^3 - 12 d1^2 v
-                    + 6 d1 v^2 - 6 d1 - v^3 + 3 v) / (sigma^3 T^3)
-    V_sigmasigmasigmasigma
-               = P S (-d1^6 + 3 d1^5 v - 3 d1^4 v^2 + 9 d1^4 + d1^3 v^3 - 18 d1^3 v
-                      + 12 d1^2 v^2 - 12 d1^2 - 3 d1 v^3 + 12 d1 v - 3 v^2) / (sigma^4 T^2 v^3)
+    V_[S x n_S][sigma x n_sigma] = P * S^(1 - n_S) * T^(n_sigma / 2) * R(d1, v) / v^3
 
-They were produced by applying the two chart operators
-`d/dS|sigma = (1/(S v)) d/dd1` and `d/dsigma|S = ((1 - d1/v) d/dd1 + d/dv)/sqrt(T)` to the price, in
-the `(d1, v)` coordinate where `S = K exp(d1 v - v^2 / 2)` and every logarithm disappears. The
-derivation is checked rather than trusted: the first line, obtained by the same operators, is
-symbolically identical to the closed form `tests/cpp/test_black_scholes.cpp` already verifies for
-`SpotDerivatives::fourth`, so the chart and the operator conventions are the core's, not a parallel
-invention. Homogeneity is consistent throughout: a partial with `n` spot derivatives carries
-`S^{1-n}`, which is why the third line has `1/S`, the fourth none, and the fifth `S`.
+for a numerator polynomial `R`: the spot order sets the power of `S`, the volatility order sets the
+power of `sqrt(T)`, and the denominator is `v^3` in all five. The five polynomials are
+
+    R(4,0) = d1^2 + 3 d1 v + 2 v^2 - 1
+    R(3,1) = d1 (v^2 + 3 - d1^2)
+    R(2,2) = d1^4 - 2 d1^3 v + d1^2 (v^2 - 5) + 5 d1 v - v^2 + 2
+             = d1^2 d2^2 - 5 d1^2 + 5 d1 v - v^2 + 2
+    R(1,3) = -d1^5 + 3 d1^4 v - 3 d1^3 v^2 + 7 d1^3 + d1^2 v^3 - 12 d1^2 v
+             + 6 d1 v^2 - 6 d1 - v^3 + 3 v
+    R(0,4) = d1^6 - 3 d1^5 v + 3 d1^4 v^2 - 9 d1^4 - d1^3 v^3 + 18 d1^3 v
+             + 12 d1^2 - 12 d1^2 v^2 + 3 d1 v^3 - 12 d1 v + 3 v^2
+
+Neither `r` nor `K` survives anywhere but inside `d1`, and `q` only in the `e^{-qT}` of `P`: in the
+`(d1, v)` coordinate the price is `S e^{-qT} [N(d1) - exp(v^2/2 - d1 v) N(d2)]`, which carries no
+rate at all. That is what makes the five forms usable in the core, whose model is BSM with a
+continuous dividend yield rather than the chart's zero-rate case.
+
+The derivation is checked rather than trusted, twice over and independently. Structurally, the
+operators that produce it are the core's own: `d/dS|sigma = (1/(S v)) d/dd1` and `d/dsigma|S =
+sqrt(T) [(1 - d1/v) d/dd1 + d/dv]`, applied in the coordinate where `S = K exp(d1 v - v^2/2 -
+(r - q) T)` so every logarithm disappears; the first line is symbolically identical to the closed
+form `tests/cpp/test_black_scholes.cpp` already verifies for `SpotDerivatives::fourth`, so the chart
+and the operator conventions are the core's, not a parallel invention. Numerically, each `R` was
+recovered by solving a 28-coefficient linear system against the exact symbolic fourth derivative of
+the price at 80 decimal digits, and then re-tested on 200 fresh random points spanning `S` 40-160,
+`sigma` 0.08-0.60, `T` 0.08-3.0 and non-zero `r` and `q`; the worst relative error over those 1000
+checks was 4.5e-77, which is the arithmetic precision, not a tolerance.
+
+**This block replaced an earlier version of itself.** As first committed, it differed from the
+verified forms in two ways. Its volatility-order factors were wrong by a factor `T^(n_sigma)`: the
+same five numerators sat over denominators such as `sigma^3 T^3` instead of the `T^(3/2) / v^3`
+above, because the `d/dsigma` operator had been written dividing by `sqrt(T)` where the chain rule
+multiplies by it (`dv/dsigma = sqrt(T)`). The probe that should have caught it ran at the single
+tenor the re-struck-gamma experiment uses, `T = 1`, where the missing factor is exactly 1, so its
+residuals vanished and the error looked like a pass; re-run across tenors, the residuals were
+proportional to `(T - 1)` and `(T^2 + 1)`. The finite-difference form of that probe was itself then
+discarded: at fourth order the `1/h^4` amplification of rounding noise swamped the signal (worst
+relative residual 255), so the check moved to exact differentiation. Separately, the `R(0,4)`
+numerator was committed with the opposite sign, which no factor-of-one argument can excuse; it fell
+out of the 80-digit reconstruction, whose coefficients are solved rather than transcribed. Two
+lessons, kept because they generalise: a factor that happens to be 1 at the tenor you test is not a
+factor you have verified, and a hand-collected polynomial is not a checked one.
 
 **Not shipped.** No core file, binding, test or artifact was touched by this section: the four new
 mixed partials need `MixedFourthDerivatives` in `cpp/include/quantrisk/pricing/black_scholes.hpp`,
