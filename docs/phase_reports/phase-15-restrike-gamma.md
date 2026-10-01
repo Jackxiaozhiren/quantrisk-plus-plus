@@ -123,25 +123,16 @@ numbers, which is now part of the release checklist below.
 
 ## 5. What the next release cycle owes this one
 
-1. The falsification sweep has to be re-run on a clean tree after committing, because the harness
-   refuses to start on a dirty target — the 19 declared defects are then proved against the revision
-   the tag will name, not against a work in progress.
-2. The falsification sweep ran on the committed tree afterwards, twice — once on `dcc9eaa` and once on
-   `e5daedc`, the head whose provenance defect the reproduction test had caught on the runner. Both
-   printed `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards. Its
-   own list is what those sentences claim. Six of its anchors had to be refreshed during the phase
-   because the prose they key on moved under them — the suite count, the offline test count twice, the
-   limitation register, the findings count, the matrix row count and the README's live speedup ratio —
-   and each time the self-test failed on the stale anchor instead of letting a clean verdict stand for
-   a defect nobody planted.
-
-3. `docs/limitations.md` #78 says `stress.run_scenario` is unchanged. If a future phase does ship a
-   re-struck variant, #78, matrix row 12 and row 18, `docs/findings.md` §7 and this report all have to
-   move together, and the refusal in the artifact (`order_not_changed`) has to be re-derived rather
-   than edited.
-4. The crossing prediction is gated only inside `|delta| <= 0.05`. Extending that radius needs the
-   fourth-order terms, not a wider tolerance; if someone widens the tolerance instead, the gate stops
-   meaning what it says.
+1. `docs/limitations.md` #78 says `stress.run_scenario` is unchanged. If a future phase does ship a
+   re-struck variant, #78, matrix rows 12 and 18, `docs/findings.md` §7, the analysis note and this
+   report all have to move together, and the refusal the artifact carries (`order_not_changed`,
+   `improvement_is_not_uniform`) has to be re-derived from a new run rather than edited in place.
+2. The crossing prediction is gated only inside `|delta| <= 0.05`. Extending that radius needs the
+   fourth-order terms of the expansion, not a wider tolerance; if someone widens the tolerance
+   instead, the gate stops meaning what it says and the number in the docs becomes decorative.
+3. Six of the falsification harness's anchors moved during this phase because the prose they key on
+   moved with it. Any future re-freeze of the performance artifact re-opens the same set, so the
+   anchor refresh belongs in the release checklist beside the prose sync, not after a red self-test.
 
 ## 6. Release
 
@@ -150,5 +141,8 @@ numbers, which is now part of the release checklist below.
 assets were exported from the tag itself with `git archive` and re-hashed after download;
 `docs/release_notes_v1.5.0.md` carries the digests and the two provenance facts that go with them — this
 note is a post-tag commit, and `evidence/manifest.json` names the revision it was generated from. The
-falsification sweep ran twice on the committed tree, on `dcc9eaa` and again on `e5daedc`, printing
-`19/19 planted defects were rejected by their guard.` with `git status` empty afterwards both times.
+falsification sweep ran twice on committed trees during the phase, on `dcc9eaa` and on `e5daedc`,
+printing `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards
+both times. Neither printed the tagged commit's own sha: every head since `e5daedc` changes prose
+about the sweep and the release only, and no result file, so a re-run there would re-plant the same
+19 defects against the same 19 guards.
