@@ -147,22 +147,29 @@ both times. Neither printed the tagged commit's own sha: every head since `e5dae
 about the sweep and the release only, and no result file, so a re-run there would re-plant the same
 19 defects against the same 19 guards.
 
-## 7. The heads after the tag, by what the API said about each
+## 7. The heads after the tag, and how to check them
 
-The tag is not the end of the history, and a release record that stops at the tag leaves the reader to
-guess whether the later commits were ever run. GitHub Actions, queried per head:
+The tag is not the end of the history, and a record that stops at the tag leaves the reader to guess
+whether the commits after it were ever run. What the runner said, for each head as of this writing:
 
 | head | what it changed | run | verdict |
 | --- | --- | --- | --- |
-| `2ad5405` | **the tagged commit** — anchors and the count of anchors | `36811258118` | `completed / success`, all three jobs |
-| `e5daedc` | the duplicate provenance owner, removed | `36811131549` | `completed / cancelled` — superseded mid-run by the next push |
+| `2ad5405` | **the tagged commit** | `36811258118` | `completed / success` — all three jobs |
+| `e5daedc` | duplicate provenance owner removed | `36811131549` | `completed / cancelled` (superseded mid-run by the next push) |
 | `1f0ed1e` | naming the head the sweep re-ran on | `36811230046` | `completed / cancelled`, same cause |
-| `7ae977f` | the release record itself | `36812286425` | `completed / cancelled`, same cause |
-| `15bcb35` | this section's predecessor: discharged duty removed from §5 | `36812527633` | `completed / success` — `Configure, build, C++ tests, Python tests`, `Format and static checks` and `Benchmark suite against live oracles` all `success`, Sonar `neutral` |
+| `7ae977f` | the release record | `36812286425` | `completed / cancelled`, same cause |
+| `15bcb35` | §5's discharged duty removed | `36812527633` | `completed / success` |
+| `d04ca1a` | this table | — | `success` on all three jobs, read from the API and not transcribed here |
 
-Three of the four post-tag heads were cancelled by a newer push before their runner finished, which is
-what the platform does to a branch that keeps moving; their *content* was docs prose, and the head that
-carries the last of it (`15bcb35`) finished green, so the paragraph above is evidence rather than
-assumption. The commit that adds this table cannot report its own run for the same reason the release
-note cannot contain its own publication, and no further commit is made to chase that verdict: it is
-read from the API instead.
+A cancelled run means the platform stopped a job a newer push made unnecessary; it says nothing about
+the content, which for every head after the tag is documentation. The last row is deliberately the only
+one whose verdict is not stored in the file it describes: a commit cannot contain its own runner's
+conclusion, so it states where to read it instead —
+
+```bash
+gh api "repos/Jackxiaozhiren/quantrisk-plus-plus/commits/<sha>/check-runs" \
+  --jq '.check_runs[] | "\(.name)\t\(.status)\t\(.conclusion)"'
+```
+
+— and the same command answers for any head added after this line was written, which is why the table is
+a snapshot with a query beside it rather than a list that goes stale the moment it is committed.
