@@ -129,8 +129,11 @@ numbers, which is now part of the release checklist below.
 2. The falsification sweep ran on the committed tree afterwards, twice — once on `dcc9eaa` and once on
    `e5daedc`, the head whose provenance defect the reproduction test had caught on the runner. Both
    printed `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards. Its
-   own list is what those sentences claim, and four of its anchors had to be refreshed during the phase
-   because the prose they key on moved under them.
+   own list is what those sentences claim. Six of its anchors had to be refreshed during the phase
+   because the prose they key on moved under them — the suite count, the offline test count twice, the
+   limitation register, the findings count, the matrix row count and the README's live speedup ratio —
+   and each time the self-test failed on the stale anchor instead of letting a clean verdict stand for
+   a defect nobody planted.
 
 3. `docs/limitations.md` #78 says `stress.run_scenario` is unchanged. If a future phase does ship a
    re-struck variant, #78, matrix row 12 and row 18, `docs/findings.md` §7 and this report all have to
