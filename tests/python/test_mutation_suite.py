@@ -85,20 +85,20 @@ def test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists
 def test_every_documented_figure_guard_in_that_file_has_a_declared_defect() -> None:
     """The sweep must cover the guards, not merely the defects I happened to think of.
 
-    `tests/python/test_artifact_metadata.py` is the file whose entire purpose is comparing a prose
-    figure against its owner, so every count- or agreement-shaped guard in it is required to appear
-    as some mutation's guard. Without this, adding a twelfth documented-number guard would leave the
-    sweep silently at eleven -- the same "absence produces no output" failure the registry guard
-    exists to catch, one level up.
+    `tests/python/test_artifact_metadata.py` and the Phase 15 producer-docstring guard are the files
+    whose entire purpose is comparing a prose figure against its owner, so every count- or
+    agreement-shaped guard in them has to appear as some mutation's guard. Without this, adding a
+    documented-number guard would leave the sweep silently one short -- the same "absence produces
+    no output" failure the registry guard exists to catch, one level up.
     """
-    source = (REPO_ROOT / "tests" / "python" / "test_artifact_metadata.py").read_text(
-        encoding="utf-8"
-    )
-    doc_guards = {
-        f"tests/python/test_artifact_metadata.py::{name}"
-        for name in re.findall(r"^def (test_\w*(?:count|agree)\w*)", source, flags=re.M)
-    }
-    assert len(doc_guards) >= 7, sorted(doc_guards)
+    doc_guards = set()
+    for file_ in ("test_artifact_metadata.py", "test_restrike_gamma_map.py"):
+        source = (REPO_ROOT / "tests" / "python" / file_).read_text(encoding="utf-8")
+        doc_guards |= {
+            f"tests/python/{file_}::{name}"
+            for name in re.findall(r"^def (test_\w*(?:count|agree)\w*)", source, flags=re.M)
+        }
+    assert len(doc_guards) >= 8, sorted(doc_guards)
     named = {mutation.guard for mutation in harness.MUTATIONS}
     uncovered = sorted(doc_guards - named)
     assert not uncovered, f"documented-figure guards with no declared defect: {uncovered}"

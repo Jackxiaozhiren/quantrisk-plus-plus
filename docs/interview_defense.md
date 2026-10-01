@@ -28,7 +28,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 77
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 78
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -41,9 +41,9 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 198 C++ tests under CTest (547,845 assertions in 197 Catch2
-cases), 411 pytest tests with the `oracles` extra and the same tree collects 342 tests without
+cases), 422 pytest tests with the `oracles` extra and the same tree collects 353 tests without
 it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
-revision's figure on the runner rather than trusting arithmetic here. 14/14 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
+revision's figure on the runner rather than trusting arithmetic here. 15/15 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
 hold (limitation #63). At the `v1.0.0` tag the same commands gave 330 and 261-passed-4-skipped, and
 the suite was 11/11. A guard asserts both figures and asks which environment it is running in
@@ -403,8 +403,8 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 198 C++ tests (547,845 assertions in 197 cases) and 411
-Python tests with the validation oracles installed — 342 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
+variance reduction. Today that is 198 C++ tests (547,845 assertions in 197 cases) and 422
+Python tests with the validation oracles installed — 353 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -437,9 +437,9 @@ in `/tmp` with the commit and the full command list recorded.
 ### Q12. Why use C++ instead of pure Python?
 
 **30 s.** For the hot loops and the memory layout, with a measured number rather than a belief:
-38,642,054 paths/s in the C++ core versus 4,606,998 paths/s in an equivalent pure-Python loop —
-8.39× on this machine. The same measurement gives vectorised NumPy 86,756,701 paths/s, i.e.
-C++ is 0.445× of NumPy for one-normal-per-path work, so the honest claim is narrower than "C++ is
+45,146,242 paths/s in the C++ core versus 5,649,456 paths/s in an equivalent pure-Python loop —
+7.99× on this machine. The same measurement gives vectorised NumPy 101,115,587 paths/s, i.e.
+C++ is 0.446× of NumPy for one-normal-per-path work, so the honest claim is narrower than "C++ is
 faster than Python".
 
 **2 min.** Three reasons the boundary is where it is. (1) The regime where C++ genuinely wins is
@@ -458,9 +458,9 @@ binding plus tests in both suites.
 `benchmarks/performance/results/monte_carlo_speed.json`: terminal-only European call
 (`S = K = 100`, `r = 5 %`, `q = 2 %`, `σ = 25 %`, `T = 1`), 200,000 paths per run, 7
 repetitions, single-threaded, `CMAKE_BUILD_TYPE=Release`, AppleClang 21.0.0.21000334, arm64.
-Means: C++ 0.005176 s (std 4.79e-4), pure Python 0.043412 s (std 1.70e-3), NumPy 0.002305 s
-(std 4.82e-4); speedups 8.39× versus pure Python, 0.445× versus NumPy. Those are the digits in the
-frozen artifact, and they are not constants: across the thirteen re-freezings in this repository's
+Means: C++ 0.004430 s (std 8.15e-5), pure Python 0.035402 s (std 1.14e-4), NumPy 0.001978 s
+(std 2.95e-4); speedups 7.99× versus pure Python, 0.446× versus NumPy. Those are the digits in the
+frozen artifact, and they are not constants: across the fifteen re-freezings in this repository's
 history the C++/Python ratio spans 7.77×–8.70× and the NumPy ratio 0.42×–0.51×, so the answer above
 quotes a run and the claim is the ordering. Three caveats shipped in
 the same artifact: the pure-Python baseline uses `random.Random(seed).gauss`, so its stream
@@ -782,7 +782,7 @@ allocates `paths × (steps + 1)` doubles. And buy accuracy before cores: control
 1.93×–40.47× and antithetic 1.12×–2.77× realised-MSE improvement at equal path budget.
 
 **2 min.** Terminal-only European work is embarrassingly parallel and memory-light; at the
-measured 38,642,054 paths/s single-threaded, 20,000,000 terminal paths is 0.52 s of the same loop
+measured 45,146,242 paths/s single-threaded, 20,000,000 terminal paths is 0.44 s of the same loop
 (arithmetic on the measured rate, which I would re-measure rather than claim). Path-dependent
 work is the memory-bound case — the model card bounds path counts at about 1e6 × 250 on a laptop,
 so a per-worker buffer plus a running payoff is the first real change, and it is already listed
@@ -842,10 +842,11 @@ Sources: `docs/analysis/two_factor_error_bound.md`, `docs/limitations.md` #67–
 
 **30 s.** Coverage percentages measure execution, not detection, so I do not quote them. The claim
 is tested directly: `scripts/run_mutation_suite.py` plants a declared defect and requires the one
-guard that should reject it to go red. Eighteen are declared — fourteen in documents and bindings
-(counted figures, a phantom path, a renamed pybind registration, a shifted analysis-note slope), one
-that *creates* an unregistered experiment, three in the C++ closed forms — and on `adbc096` the sweep
-printed `18/18 planted defects were rejected by their guard.`, with `git status` empty afterwards.
+guard that should reject it to go red. Nineteen are declared — fourteen in documents and bindings
+(counted figures, a phantom path, a renamed pybind registration, a shifted analysis-note slope), one in
+an experiment's own docstring, one that *creates* an unregistered experiment, three in the C++ closed
+forms — and the sweep is re-run on every one of them before a release; its own summary line, with
+`git status` empty afterwards, is the record.
 
 **2 min.** The tool exists because my own sweep lied twice, and `docs/integrity_audit.md` finding 25
 records it: two of nine mutations never applied — clang-format had reflowed the expression between
@@ -882,6 +883,39 @@ Sources: `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`,
 `docs/integrity_audit.md` findings 25, 35, 36, `docs/phase_reports/phase-14-verification-debt.md`
 (second addendum).
 
+
+### Q25. Did the fix your own analysis recommended actually help?
+
+**30 s.** Partly, and the part where it does not is the finding. `v1.3.0` finished the two-factor
+error analysis with a priority — re-strike gamma at the shocked volatility rather than add vanna and
+volga — and never measured it. Phase 15 built four maps, priced all four through `run_scenario`
+against a revaluation of the same book, and got three answers. On the published `risk_off` the
+recommendation works: the error falls from -5,320.79 to +1,937.72, a factor of 0.364, removing
+7,258.51 of the 8,402.16 term the derivation named — 86.4 % of it, the shortfall being a finite
+difference across six volatility points rather than a local derivative. On the grid it is not uniform:
+45 of 120 cells are no better and 20 are at least twice as wrong, worst factor 142. And re-pricing
+*every* sensitivity at the shocked market — the naive reading — is worse than the gamma-only variant on
+116 of 120 and worse than the shipped map by a factor of 11 on `risk_off`.
+
+**Deeper.** The 20 cells that get worse are not noise; they are where the shipped map's error was
+smaller than the term the recipe removes. Along a `delta` column the error contains a
+volatility-independent piece `1/6 V_SSS h^3` and pieces proportional to `k`, and where they cancel the
+map is exact by arithmetic, not by merit — deleting one of the cancelling terms spends the
+cancellation. So the experiment states that as a prediction with a validity radius rather than a story
+told afterwards: the zeros of the third-order truncation, assembled from core closed forms with nothing
+fitted to the measured errors, are compared against the zeros of the priced error using one shared
+bracket-and-bisect routine. Within `|delta| <= 0.05` the nearest pair agrees to 0.0002-0.0024 in vol
+move against a gated tolerance of 0.005; beyond it the prediction drifts to 0.093 at `|delta| = 0.30`,
+and at `delta = +0.30` the truncation predicts a zero the map does not have. The gate covers only the
+regime where a third-order truncation is a fair argument, which is where the published scenarios live,
+and the drift outside it is published rather than hidden. The order never changes — 1.98-2.01 between
+the two narrowest scales for all four maps — because re-striking deletes a cubic and leaves the
+quadratic terms where they were.
+
+Sources: `experiments/restrike_gamma_map/run.py`,
+`experiments/restrike_gamma_map/results/restrike_gamma_map.json` (`headline`, `asymptotics`,
+`mechanism`, `cancellation`, `refusals`), `docs/analysis/restrike_gamma_map.md`, `docs/findings.md` §7,
+`docs/limitations.md` #78, and row 18 of `docs/validation_matrix.md`.
 ---
 
 ## How to verify each claim in this file
@@ -891,7 +925,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 ```bash
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 198 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 342 Python tests
+  .venv/bin/python -m pytest -q                                          # 353 Python tests
 uv run python scripts/run_mutation_suite.py                            # 18/18 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
@@ -904,7 +938,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | Claim in this file | Source to check |
 |---|---|
 | What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (66 entries) |
-| 190 C++ / 330 Python tests at `v1.0.0`, 198 / 411 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
+| 190 C++ / 330 Python tests at `v1.0.0`, 198 / 422 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
 | BS worst abs 1.49e-13 / rel 3.46e-11; Greeks abs 7.97e-15 … 5.12e-13; rel rho 1.07e-07; 18,816 rows; floors 1e-4 / 1e-6; oracle config (AnalyticEuropeanEngine, Actual365Fixed, day → `days/365`) | `benchmarks/quantlib/results/pricing_vs_quantlib.json` |
 | Put-call parity worst residual 7.99e-15; worst analytic-vs-FD delta 1.17e-4 | `experiments/pricing_validation/results/summary.json` (`worst_*` keys) |
 | CRR slopes −0.99405 / −1.00544 / −0.99244 / −0.999674 with SEs; relative errors at N = 3200 | `experiments/pricing_validation/results/summary.json` (`crr_convergence_slope`, `final_lattice_relative_error`) |
@@ -914,7 +948,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | Coverage 12/12 inside the exact `Binomial(200, level)` band; example cell 191/200 in [181, 197] | `experiments/monte_carlo_convergence/results/summary.json` (`coverage`, `coverage_intervals_inside_binomial_band`); band construction `run.py:184-188` |
 | Pooled z-scores vs QuantLib analytic (492 rows, 4 scenarios × 3 methods × 40 seeds, 200,000 paths): means −0.0228 / +0.0503 / +0.0310, stds 1.0139 / 0.9232 / 0.9304, 96.25 %–98.75 % inside ±2; `quantlib_mc_engine_used: false` | `benchmarks/quantlib/results/monte_carlo_validation.json` |
 | Out-of-sample MSE reductions: antithetic 1.1155×–2.7741×, control variate 1.9313×–40.468×; 40 seeds; in-sample-`beta` caveat | `experiments/variance_reduction/results/summary.json` (+ `realised_error.csv`); `docs/limitations.md` #19 |
-| Speed: C++ 0.005176 s / 38,642,054 paths/s, pure Python 0.043412 s / 4,606,998, NumPy 0.002305 s / 86,756,701; 8.39× and 0.445×, with the 7.77×–8.70× / 0.42×–0.51× history range; 7 repetitions; three estimates and z-scores; caveats list | `benchmarks/performance/results/monte_carlo_speed.json` |
+| Speed: C++ 0.004430 s / 45,146,242 paths/s, pure Python 0.035402 s / 5,649,456, NumPy 0.001978 s / 101,115,587; 7.99× and 0.446×, with the 7.77×–8.70× / 0.42×–0.51× history range; 7 repetitions; three estimates and z-scores; caveats list | `benchmarks/performance/results/monte_carlo_speed.json` |
 | Antithetic `iid_units = paths / 2`; odd path count throws; pair product identity to 1e-12; drift not negated | `cpp/src/monte_carlo/engine.cpp:87-97,142-154`; `cpp/src/stochastic/gbm.cpp:74-88,104-109`; `tests/cpp/test_monte_carlo.cpp:96-110`; `tests/cpp/test_gbm.cpp:128-167` |
 | Control-variate exactness identity (price to 1e-12, SE < 1e-12, `beta ≈ 1`) and constant-payoff discount factor to 1e-15 | `tests/cpp/test_monte_carlo.cpp:142-168`; `cpp/src/monte_carlo/engine.cpp:57-85` |
 | Physical measure is a separate code path, and `mu = r` reproduces the risk-neutral stream bit-for-bit | `cpp/src/stochastic/gbm.cpp:113-127`; `tests/cpp/test_gbm.cpp:170-186`; convention in `docs/project_scope.md` §10 |

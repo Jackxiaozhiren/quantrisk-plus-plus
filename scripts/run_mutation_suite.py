@@ -108,8 +108,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
-        anchor="`8.39×`",
-        replacement="`8.41×`",
+        anchor="`7.99×`",
+        replacement="`8.01×`",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_quote_the_performance_figures_the_artifact_actually_holds"
@@ -144,7 +144,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 77 numbered entries",
+        anchor="carries 78 numbered entries",
         replacement="carries 76 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -168,8 +168,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-overcounts-the-suite",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="all 14 members",
-        replacement="all 15 members",
+        anchor="all 15 members",
+        replacement="all 16 members",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_suite_members_agree_with_the_registry"
@@ -180,8 +180,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 342 Python tests",
-        replacement="# 343 Python tests",
+        anchor="# 353 Python tests",
+        replacement="# 344 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
@@ -216,8 +216,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-miscounts-the-findings",
         kind="prose",
         path="README.md",
-        anchor="The six results worth reading are in",
-        replacement="The seven results worth reading are in",
+        anchor="The seven results worth reading are in",
+        replacement="The eight results worth reading are in",
         guard=(
             "tests/python/test_two_factor_bound.py::"
             "test_the_findings_are_counted_wherever_they_are_counted"
@@ -228,8 +228,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-miscounts-the-matrix-rows",
         kind="prose",
         path="README.md",
-        anchor="is the full table — twenty rows over",
-        replacement="is the full table — twenty-one rows over",
+        anchor="is the full table — twenty-one rows over",
+        replacement="is the full table — twenty-two rows over",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_validation_matrix_rows_agree_with_the_table"
@@ -247,6 +247,18 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_validation_matrix_numbers_its_rows_once_and_in_order"
         ),
         claim="row numbers stay unique and contiguous, the defect Phase 13's two 13s shipped",
+    ),
+    Mutation(
+        identifier="producer-docstring-quotes-a-stale-restdike-share",
+        kind="prose",
+        path="experiments/restrike_gamma_map/run.py",
+        anchor="86 % of the local",
+        replacement="92 % of the local",
+        guard=(
+            "tests/python/test_restrike_gamma_map.py::"
+            "test_the_docstring_figures_and_counts_are_the_ones_the_artifact_holds"
+        ),
+        claim="the figures in an experiment's own docstring are re-derived from its artifact",
     ),
     Mutation(
         identifier="experiment-added-without-a-registry-entry",

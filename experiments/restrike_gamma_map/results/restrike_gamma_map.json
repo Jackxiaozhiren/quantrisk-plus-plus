@@ -1,0 +1,1441 @@
+{
+  "schema": "quantrisk.restrike_gamma_map.v1",
+  "generated_at_utc": "2026-10-01T02:59:40+00:00",
+  "command": "uv run python experiments/restrike_gamma_map/run.py",
+  "claim": "re-striking gamma at the shocked volatility does remove the term v1.3.0 named as dominant -- 86% of it at published size, taking the risk_off error to 0.364x -- but it worsens 45 of the 120 cells swept, and the cells it worsens are exactly those where the shipped map was accurate because two third-order terms cancelled",
+  "book": {
+    "spot": 100.0,
+    "rate": 0.03,
+    "dividend_yield": 0.0,
+    "volatility": 0.2,
+    "maturity": 0.5,
+    "strikes": [
+      90.0,
+      100.0,
+      110.0
+    ],
+    "quantity": 5000.0,
+    "base_value": 108911.1270234195,
+    "source": "experiments/stress_testing/run.py:run_linearisation"
+  },
+  "maps": {
+    "base": {
+      "expression": "delta and gamma and vega all at the base market (what ships)",
+      "produced_by": "quantrisk.stress.run_scenario"
+    },
+    "gamma_restrike": {
+      "expression": "gamma at (S, sigma + k); delta and vega at base",
+      "produced_by": "quantrisk.stress.run_scenario"
+    },
+    "gamma_restrike_at_move": {
+      "expression": "gamma at (S + h, sigma + k); delta and vega at base",
+      "produced_by": "quantrisk.stress.run_scenario"
+    },
+    "all_restrike": {
+      "expression": "every exposure at (S + h, sigma + k)",
+      "produced_by": "quantrisk.stress.run_scenario"
+    }
+  },
+  "headline": {
+    "joint_shocks_swept": 132,
+    "cells_with_a_volatility_move": 120,
+    "cells_where_restrike_reduces_abs_error": 75,
+    "cells_where_restrike_does_not": 45,
+    "share_improved": 0.625,
+    "median_error_factor_after_over_before": 0.6924941092044448,
+    "worst_error_factor_after_over_before": 141.97742681157987,
+    "best_error_factor_after_over_before": 0.007482450312661869,
+    "value_weighted_error_before": 1360273.488300556,
+    "value_weighted_error_after": 856404.410498828,
+    "value_weighted_reduction": 0.37041748011367315,
+    "published_scenario": "risk_off",
+    "published_error_base": -5320.792367571179,
+    "published_error_gamma_restrike": 1937.722509756888,
+    "published_error_all_restrike": -60275.63763486447,
+    "published_restrike_factor": 0.36417931313516266,
+    "published_removed_term": -7258.514877328067,
+    "published_local_cubic_gamma_sigma": -8402.162800790202,
+    "published_fraction_of_local_term_removed": 0.8638864836855366,
+    "cells_where_restrike_at_least_doubles_error": 20,
+    "of_those_the_base_error_was_smaller_than_the_removed_term": 20,
+    "mechanism_probes": 7,
+    "mechanism_inclusions_violated": 0,
+    "mechanism_worst_map_difference_relative_error": 3.727196639267602e-15,
+    "zero_vol_control_max_gap": 0.0,
+    "slope_of_error_against_shock_size": {
+      "crash (equity down, vol up)": {
+        "base": 2.154130569002688,
+        "gamma_restrike": 2.134408515813067,
+        "gamma_restrike_at_move": 2.344139454810408,
+        "all_restrike": 1.9448427639820702
+      },
+      "melt-up (equity up, vol down)": {
+        "base": 2.190137118010051,
+        "gamma_restrike": 2.159220907913764,
+        "gamma_restrike_at_move": 2.273629086711781,
+        "all_restrike": 2.005423696836701
+      },
+      "aligned (equity up, vol up)": {
+        "base": 2.1821474291694307,
+        "gamma_restrike": 1.9234137395930486,
+        "gamma_restrike_at_move": 2.085342124696,
+        "all_restrike": 1.9668818767907494
+      }
+    },
+    "slope_standard_errors": {
+      "crash (equity down, vol up)": {
+        "base": 0.14427196927650326,
+        "gamma_restrike": 0.024178888537752716,
+        "gamma_restrike_at_move": 0.09337917235223676,
+        "all_restrike": 0.022469447854770862
+      },
+      "melt-up (equity up, vol down)": {
+        "base": 0.034648406340921416,
+        "gamma_restrike": 0.14593255653957765,
+        "gamma_restrike_at_move": 0.16043087460884536,
+        "all_restrike": 0.0036790567629489098
+      },
+      "aligned (equity up, vol up)": {
+        "base": 0.23485768006909025,
+        "gamma_restrike": 0.17639619822694597,
+        "gamma_restrike_at_move": 0.08063817383534343,
+        "all_restrike": 0.012836253264975936
+      }
+    },
+    "slope_narrow_end_standard_errors": {
+      "crash (equity down, vol up)": {
+        "base": 0.019060869801814095,
+        "gamma_restrike": 0.009884600275353964,
+        "gamma_restrike_at_move": 0.012787778412918983,
+        "all_restrike": 0.0008135271513527502
+      },
+      "melt-up (equity up, vol down)": {
+        "base": 0.013785033817741987,
+        "gamma_restrike": 0.013153032269156293,
+        "gamma_restrike_at_move": 0.01159258091055198,
+        "all_restrike": 0.0007548659295307438
+      },
+      "aligned (equity up, vol up)": {
+        "base": 0.037138030408232006,
+        "gamma_restrike": 0.009845949010215746,
+        "gamma_restrike_at_move": 0.008990007021469012,
+        "all_restrike": 0.0005541316068033273
+      }
+    },
+    "slope_of_error_narrow_end": {
+      "crash (equity down, vol up)": {
+        "base": 1.942415767697231,
+        "gamma_restrike": 2.033248297834063,
+        "gamma_restrike_at_move": 2.0405735047450198,
+        "all_restrike": 1.997425439045293
+      },
+      "melt-up (equity up, vol down)": {
+        "base": 2.0466111782630443,
+        "gamma_restrike": 1.9599444308511516,
+        "gamma_restrike_at_move": 1.9619114399930764,
+        "all_restrike": 2.0024521001501947
+      },
+      "aligned (equity up, vol up)": {
+        "base": 1.8918572891526815,
+        "gamma_restrike": 1.9694558455241356,
+        "gamma_restrike_at_move": 1.9703849878159216,
+        "all_restrike": 1.9982495599001515
+      }
+    },
+    "local_slope_narrowest_pair": {
+      "crash (equity down, vol up)": {
+        "base": 1.9884607804155083,
+        "gamma_restrike": 2.0079366968152033,
+        "gamma_restrike_at_move": 2.0088211296067553,
+        "all_restrike": 1.9994417586354531
+      },
+      "melt-up (equity up, vol down)": {
+        "base": 2.0112169683779033,
+        "gamma_restrike": 1.9918619482787936,
+        "gamma_restrike_at_move": 1.9912513640997116,
+        "all_restrike": 2.0005545762542094
+      },
+      "aligned (equity up, vol up)": {
+        "base": 1.9797158725215835,
+        "gamma_restrike": 1.9935932424336322,
+        "gamma_restrike_at_move": 1.9931631479387921,
+        "all_restrike": 1.999621650004227
+      }
+    },
+    "local_slope_narrowest_pair_span": [
+      1.9797158725215835,
+      2.0112169683779033
+    ],
+    "narrow_end_window_slope_span": [
+      1.8918572891526815,
+      2.0466111782630443
+    ],
+    "whole_ray_slope_span": [
+      1.9234137395930486,
+      2.344139454810408
+    ],
+    "cells_ranked_against_the_base_map": 120,
+    "columns_within_the_small_move_limit": 4,
+    "predicted_zeros_total": 14,
+    "measured_zeros_total": 13,
+    "predicted_zeros_without_a_measured_one": 10,
+    "measured_zeros_without_a_predicted_one": 9,
+    "nearest_zero_distance_max": 0.09341752441547391,
+    "nearest_zero_distance_median": 0.01607311885255295,
+    "nearest_zero_distance_max_beyond_the_limit": 0.09341752441547391,
+    "root_finder_largest_residual_at_a_measured_zero": 1.3096723705530167e-10,
+    "restrike_error_at_a_measured_zero_largest": 22869.30950039804,
+    "all_restrike_worse_than_gamma_only": 116
+  },
+  "asymptotics": {
+    "crash (equity down, vol up)": [
+      {
+        "map": "base",
+        "slope": 2.154130569002688,
+        "standard_error": 0.14427196927650326,
+        "observations": 7,
+        "slope_narrow_end": 1.942415767697231,
+        "slope_narrow_end_standard_error": 0.019060869801814095,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 1.9884607804155083,
+        "quadratic_coefficient_at_narrowest": 34801.03528289418,
+        "error_at_narrowest_shock": 0.0007830358222378209,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0007830358222378209,
+            "error_gamma_restrike": 0.000791436816911073,
+            "error_gamma_restrike_at_move": 0.0007917776769374996,
+            "error_all_restrike": 0.09993868902355985
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.006958546489670425,
+            "error_gamma_restrike": 0.0071853102592172036,
+            "error_gamma_restrike_at_move": 0.007195392863991401,
+            "error_all_restrike": 0.8988967470025386
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.07385197197800153,
+            "error_gamma_restrike": 0.08224244911275491,
+            "error_gamma_restrike_at_move": 0.0827294265409364,
+            "error_all_restrike": 9.966168200340235
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.5745874575964081,
+            "error_gamma_restrike": 0.800498568059993,
+            "error_gamma_restrike_at_move": 0.8223024330113731,
+            "error_all_restrike": 89.13106850126178
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 2.76056408869772,
+            "error_gamma_restrike": 11.045522945401899,
+            "error_gamma_restrike_at_move": 12.929474483418744,
+            "error_all_restrike": 967.2130006617335
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 76.3329936432201,
+            "error_gamma_restrike": 141.0137948203992,
+            "error_gamma_restrike_at_move": 264.07284741532203,
+            "error_all_restrike": 8036.374572249781
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 5320.792367571179,
+            "error_gamma_restrike": 1937.722509756888,
+            "error_gamma_restrike_at_move": 11485.085079768702,
+            "error_all_restrike": 60275.63763486447
+          }
+        ]
+      },
+      {
+        "map": "gamma_restrike",
+        "slope": 2.134408515813067,
+        "standard_error": 0.024178888537752716,
+        "observations": 7,
+        "slope_narrow_end": 2.033248297834063,
+        "slope_narrow_end_standard_error": 0.009884600275353964,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 2.0079366968152033,
+        "quadratic_coefficient_at_narrowest": 35174.40684998254,
+        "error_at_narrowest_shock": 0.000791436816911073,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0007830358222378209,
+            "error_gamma_restrike": 0.000791436816911073,
+            "error_gamma_restrike_at_move": 0.0007917776769374996,
+            "error_all_restrike": 0.09993868902355985
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.006958546489670425,
+            "error_gamma_restrike": 0.0071853102592172036,
+            "error_gamma_restrike_at_move": 0.007195392863991401,
+            "error_all_restrike": 0.8988967470025386
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.07385197197800153,
+            "error_gamma_restrike": 0.08224244911275491,
+            "error_gamma_restrike_at_move": 0.0827294265409364,
+            "error_all_restrike": 9.966168200340235
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.5745874575964081,
+            "error_gamma_restrike": 0.800498568059993,
+            "error_gamma_restrike_at_move": 0.8223024330113731,
+            "error_all_restrike": 89.13106850126178
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 2.76056408869772,
+            "error_gamma_restrike": 11.045522945401899,
+            "error_gamma_restrike_at_move": 12.929474483418744,
+            "error_all_restrike": 967.2130006617335
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 76.3329936432201,
+            "error_gamma_restrike": 141.0137948203992,
+            "error_gamma_restrike_at_move": 264.07284741532203,
+            "error_all_restrike": 8036.374572249781
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 5320.792367571179,
+            "error_gamma_restrike": 1937.722509756888,
+            "error_gamma_restrike_at_move": 11485.085079768702,
+            "error_all_restrike": 60275.63763486447
+          }
+        ]
+      },
+      {
+        "map": "gamma_restrike_at_move",
+        "slope": 2.344139454810408,
+        "standard_error": 0.09337917235223676,
+        "observations": 7,
+        "slope_narrow_end": 2.0405735047450198,
+        "slope_narrow_end_standard_error": 0.012787778412918983,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 2.0088211296067553,
+        "quadratic_coefficient_at_narrowest": 35189.55594210491,
+        "error_at_narrowest_shock": 0.0007917776769374996,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0007830358222378209,
+            "error_gamma_restrike": 0.000791436816911073,
+            "error_gamma_restrike_at_move": 0.0007917776769374996,
+            "error_all_restrike": 0.09993868902355985
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.006958546489670425,
+            "error_gamma_restrike": 0.0071853102592172036,
+            "error_gamma_restrike_at_move": 0.007195392863991401,
+            "error_all_restrike": 0.8988967470025386
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.07385197197800153,
+            "error_gamma_restrike": 0.08224244911275491,
+            "error_gamma_restrike_at_move": 0.0827294265409364,
+            "error_all_restrike": 9.966168200340235
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.5745874575964081,
+            "error_gamma_restrike": 0.800498568059993,
+            "error_gamma_restrike_at_move": 0.8223024330113731,
+            "error_all_restrike": 89.13106850126178
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 2.76056408869772,
+            "error_gamma_restrike": 11.045522945401899,
+            "error_gamma_restrike_at_move": 12.929474483418744,
+            "error_all_restrike": 967.2130006617335
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 76.3329936432201,
+            "error_gamma_restrike": 141.0137948203992,
+            "error_gamma_restrike_at_move": 264.07284741532203,
+            "error_all_restrike": 8036.374572249781
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 5320.792367571179,
+            "error_gamma_restrike": 1937.722509756888,
+            "error_gamma_restrike_at_move": 11485.085079768702,
+            "error_all_restrike": 60275.63763486447
+          }
+        ]
+      },
+      {
+        "map": "all_restrike",
+        "slope": 1.9448427639820702,
+        "standard_error": 0.022469447854770862,
+        "observations": 7,
+        "slope_narrow_end": 1.997425439045293,
+        "slope_narrow_end_standard_error": 0.0008135271513527502,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 1.9994417586354531,
+        "quadratic_coefficient_at_narrowest": 4441648.445783083,
+        "error_at_narrowest_shock": 0.09993868902355985,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0007830358222378209,
+            "error_gamma_restrike": 0.000791436816911073,
+            "error_gamma_restrike_at_move": 0.0007917776769374996,
+            "error_all_restrike": 0.09993868902355985
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.006958546489670425,
+            "error_gamma_restrike": 0.0071853102592172036,
+            "error_gamma_restrike_at_move": 0.007195392863991401,
+            "error_all_restrike": 0.8988967470025386
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.07385197197800153,
+            "error_gamma_restrike": 0.08224244911275491,
+            "error_gamma_restrike_at_move": 0.0827294265409364,
+            "error_all_restrike": 9.966168200340235
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.5745874575964081,
+            "error_gamma_restrike": 0.800498568059993,
+            "error_gamma_restrike_at_move": 0.8223024330113731,
+            "error_all_restrike": 89.13106850126178
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 2.76056408869772,
+            "error_gamma_restrike": 11.045522945401899,
+            "error_gamma_restrike_at_move": 12.929474483418744,
+            "error_all_restrike": 967.2130006617335
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 76.3329936432201,
+            "error_gamma_restrike": 141.0137948203992,
+            "error_gamma_restrike_at_move": 264.07284741532203,
+            "error_all_restrike": 8036.374572249781
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 5320.792367571179,
+            "error_gamma_restrike": 1937.722509756888,
+            "error_gamma_restrike_at_move": 11485.085079768702,
+            "error_all_restrike": 60275.63763486447
+          }
+        ]
+      }
+    ],
+    "melt-up (equity up, vol down)": [
+      {
+        "map": "base",
+        "slope": 2.190137118010051,
+        "standard_error": 0.034648406340921416,
+        "observations": 7,
+        "slope_narrow_end": 2.0466111782630443,
+        "slope_narrow_end_standard_error": 0.013785033817741987,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 2.0112169683779033,
+        "quadratic_coefficient_at_narrowest": 35238.704161625705,
+        "error_at_narrowest_shock": 0.0007928835295700765,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0007928835295700765,
+            "error_gamma_restrike": 0.000784480198745996,
+            "error_gamma_restrike_at_move": 0.0007841719650940604,
+            "error_all_restrike": 0.09999979802636005
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.007224432869350039,
+            "error_gamma_restrike": 0.006997479872211443,
+            "error_gamma_restrike_at_move": 0.006990040001994657,
+            "error_all_restrike": 0.9005466860637625
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.08369944297282927,
+            "error_gamma_restrike": 0.07528560461673806,
+            "error_gamma_restrike_at_move": 0.07512488819224927,
+            "error_all_restrike": 10.02727481280408
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.8404284670382367,
+            "error_gamma_restrike": 0.6126252451836081,
+            "error_gamma_restrike_at_move": 0.6172467291598878,
+            "error_all_restrike": 90.7804147633401
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 12.589401333458227,
+            "error_gamma_restrike": 4.071055957887438,
+            "error_gamma_restrike_at_move": 5.446976512979745,
+            "error_all_restrike": 1028.0760792919027
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 185.02574378927966,
+            "error_gamma_restrike": 51.07571958153858,
+            "error_gamma_restrike_at_move": 88.12641335924127,
+            "error_all_restrike": 9627.445844670656
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 2847.2565637971275,
+            "error_gamma_restrike": 6487.037541885569,
+            "error_gamma_restrike_at_move": 13939.67315936659,
+            "error_all_restrike": 100588.73592709855
+          }
+        ]
+      },
+      {
+        "map": "gamma_restrike",
+        "slope": 2.159220907913764,
+        "standard_error": 0.14593255653957765,
+        "observations": 7,
+        "slope_narrow_end": 1.9599444308511516,
+        "slope_narrow_end_standard_error": 0.013153032269156293,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 1.9918619482787936,
+        "quadratic_coefficient_at_narrowest": 34865.22876727288,
+        "error_at_narrowest_shock": 0.000784480198745996,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0007928835295700765,
+            "error_gamma_restrike": 0.000784480198745996,
+            "error_gamma_restrike_at_move": 0.0007841719650940604,
+            "error_all_restrike": 0.09999979802636005
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.007224432869350039,
+            "error_gamma_restrike": 0.006997479872211443,
+            "error_gamma_restrike_at_move": 0.006990040001994657,
+            "error_all_restrike": 0.9005466860637625
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.08369944297282927,
+            "error_gamma_restrike": 0.07528560461673806,
+            "error_gamma_restrike_at_move": 0.07512488819224927,
+            "error_all_restrike": 10.02727481280408
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.8404284670382367,
+            "error_gamma_restrike": 0.6126252451836081,
+            "error_gamma_restrike_at_move": 0.6172467291598878,
+            "error_all_restrike": 90.7804147633401
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 12.589401333458227,
+            "error_gamma_restrike": 4.071055957887438,
+            "error_gamma_restrike_at_move": 5.446976512979745,
+            "error_all_restrike": 1028.0760792919027
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 185.02574378927966,
+            "error_gamma_restrike": 51.07571958153858,
+            "error_gamma_restrike_at_move": 88.12641335924127,
+            "error_all_restrike": 9627.445844670656
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 2847.2565637971275,
+            "error_gamma_restrike": 6487.037541885569,
+            "error_gamma_restrike_at_move": 13939.67315936659,
+            "error_all_restrike": 100588.73592709855
+          }
+        ]
+      },
+      {
+        "map": "gamma_restrike_at_move",
+        "slope": 2.273629086711781,
+        "standard_error": 0.16043087460884536,
+        "observations": 7,
+        "slope_narrow_end": 1.9619114399930764,
+        "slope_narrow_end_standard_error": 0.01159258091055198,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 1.9912513640997116,
+        "quadratic_coefficient_at_narrowest": 34851.52971303839,
+        "error_at_narrowest_shock": 0.0007841719650940604,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0007928835295700765,
+            "error_gamma_restrike": 0.000784480198745996,
+            "error_gamma_restrike_at_move": 0.0007841719650940604,
+            "error_all_restrike": 0.09999979802636005
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.007224432869350039,
+            "error_gamma_restrike": 0.006997479872211443,
+            "error_gamma_restrike_at_move": 0.006990040001994657,
+            "error_all_restrike": 0.9005466860637625
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.08369944297282927,
+            "error_gamma_restrike": 0.07528560461673806,
+            "error_gamma_restrike_at_move": 0.07512488819224927,
+            "error_all_restrike": 10.02727481280408
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.8404284670382367,
+            "error_gamma_restrike": 0.6126252451836081,
+            "error_gamma_restrike_at_move": 0.6172467291598878,
+            "error_all_restrike": 90.7804147633401
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 12.589401333458227,
+            "error_gamma_restrike": 4.071055957887438,
+            "error_gamma_restrike_at_move": 5.446976512979745,
+            "error_all_restrike": 1028.0760792919027
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 185.02574378927966,
+            "error_gamma_restrike": 51.07571958153858,
+            "error_gamma_restrike_at_move": 88.12641335924127,
+            "error_all_restrike": 9627.445844670656
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 2847.2565637971275,
+            "error_gamma_restrike": 6487.037541885569,
+            "error_gamma_restrike_at_move": 13939.67315936659,
+            "error_all_restrike": 100588.73592709855
+          }
+        ]
+      },
+      {
+        "map": "all_restrike",
+        "slope": 2.005423696836701,
+        "standard_error": 0.0036790567629489098,
+        "observations": 7,
+        "slope_narrow_end": 2.0024521001501947,
+        "slope_narrow_end_standard_error": 0.0007548659295307438,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 2.0005545762542094,
+        "quadratic_coefficient_at_narrowest": 4444364.358008496,
+        "error_at_narrowest_shock": 0.09999979802636005,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0007928835295700765,
+            "error_gamma_restrike": 0.000784480198745996,
+            "error_gamma_restrike_at_move": 0.0007841719650940604,
+            "error_all_restrike": 0.09999979802636005
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.007224432869350039,
+            "error_gamma_restrike": 0.006997479872211443,
+            "error_gamma_restrike_at_move": 0.006990040001994657,
+            "error_all_restrike": 0.9005466860637625
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.08369944297282927,
+            "error_gamma_restrike": 0.07528560461673806,
+            "error_gamma_restrike_at_move": 0.07512488819224927,
+            "error_all_restrike": 10.02727481280408
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.8404284670382367,
+            "error_gamma_restrike": 0.6126252451836081,
+            "error_gamma_restrike_at_move": 0.6172467291598878,
+            "error_all_restrike": 90.7804147633401
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 12.589401333458227,
+            "error_gamma_restrike": 4.071055957887438,
+            "error_gamma_restrike_at_move": 5.446976512979745,
+            "error_all_restrike": 1028.0760792919027
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 185.02574378927966,
+            "error_gamma_restrike": 51.07571958153858,
+            "error_gamma_restrike_at_move": 88.12641335924127,
+            "error_all_restrike": 9627.445844670656
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 2847.2565637971275,
+            "error_gamma_restrike": 6487.037541885569,
+            "error_gamma_restrike_at_move": 13939.67315936659,
+            "error_all_restrike": 100588.73592709855
+          }
+        ]
+      }
+    ],
+    "aligned (equity up, vol up)": [
+      {
+        "map": "base",
+        "slope": 2.1821474291694307,
+        "standard_error": 0.23485768006909025,
+        "observations": 7,
+        "slope_narrow_end": 1.8918572891526815,
+        "slope_narrow_end_standard_error": 0.037138030408232006,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 1.9797158725215835,
+        "quadratic_coefficient_at_narrowest": 49856.59220912656,
+        "error_at_narrowest_shock": 0.0011217912730785429,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0011217912730785429,
+            "error_gamma_restrike": 0.001130192267766006,
+            "error_gamma_restrike_at_move": 0.0011298828976293862,
+            "error_all_restrike": 0.10029466855107216
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.009873623851774482,
+            "error_gamma_restrike": 0.01010038762132126,
+            "error_gamma_restrike_at_move": 0.010092852747504821,
+            "error_all_restrike": 0.9022768986293386
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.10105509633240217,
+            "error_gamma_restrike": 0.10944557346715555,
+            "error_gamma_restrike_at_move": 0.10927185555738106,
+            "error_all_restrike": 10.010599429650483
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.6871113423949282,
+            "error_gamma_restrike": 0.9130224528589679,
+            "error_gamma_restrike_at_move": 0.9162974402743203,
+            "error_all_restrike": 89.70906468715566
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 0.9908745381726476,
+            "error_gamma_restrike": 7.294084318531532,
+            "error_gamma_restrike_at_move": 8.378937504745409,
+            "error_all_restrike": 980.770165657048
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 226.77048606391327,
+            "error_gamma_restrike": 9.423697600293963,
+            "error_gamma_restrike_at_move": 79.14474871967832,
+            "error_all_restrike": 8363.224857258821
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 9953.87948822626,
+            "error_gamma_restrike": 2695.364610898192,
+            "error_gamma_restrike_at_move": 3601.334949477052,
+            "error_all_restrike": 74515.54055242971
+          }
+        ]
+      },
+      {
+        "map": "gamma_restrike",
+        "slope": 1.9234137395930486,
+        "standard_error": 0.17639619822694597,
+        "observations": 7,
+        "slope_narrow_end": 1.9694558455241356,
+        "slope_narrow_end_standard_error": 0.009845949010215746,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 1.9935932424336322,
+        "quadratic_coefficient_at_narrowest": 50229.9637768465,
+        "error_at_narrowest_shock": 0.001130192267766006,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0011217912730785429,
+            "error_gamma_restrike": 0.001130192267766006,
+            "error_gamma_restrike_at_move": 0.0011298828976293862,
+            "error_all_restrike": 0.10029466855107216
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.009873623851774482,
+            "error_gamma_restrike": 0.01010038762132126,
+            "error_gamma_restrike_at_move": 0.010092852747504821,
+            "error_all_restrike": 0.9022768986293386
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.10105509633240217,
+            "error_gamma_restrike": 0.10944557346715555,
+            "error_gamma_restrike_at_move": 0.10927185555738106,
+            "error_all_restrike": 10.010599429650483
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.6871113423949282,
+            "error_gamma_restrike": 0.9130224528589679,
+            "error_gamma_restrike_at_move": 0.9162974402743203,
+            "error_all_restrike": 89.70906468715566
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 0.9908745381726476,
+            "error_gamma_restrike": 7.294084318531532,
+            "error_gamma_restrike_at_move": 8.378937504745409,
+            "error_all_restrike": 980.770165657048
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 226.77048606391327,
+            "error_gamma_restrike": 9.423697600293963,
+            "error_gamma_restrike_at_move": 79.14474871967832,
+            "error_all_restrike": 8363.224857258821
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 9953.87948822626,
+            "error_gamma_restrike": 2695.364610898192,
+            "error_gamma_restrike_at_move": 3601.334949477052,
+            "error_all_restrike": 74515.54055242971
+          }
+        ]
+      },
+      {
+        "map": "gamma_restrike_at_move",
+        "slope": 2.085342124696,
+        "standard_error": 0.08063817383534343,
+        "observations": 7,
+        "slope_narrow_end": 1.9703849878159216,
+        "slope_narrow_end_standard_error": 0.008990007021469012,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 1.9931631479387921,
+        "quadratic_coefficient_at_narrowest": 50216.21421298976,
+        "error_at_narrowest_shock": 0.0011298828976293862,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0011217912730785429,
+            "error_gamma_restrike": 0.001130192267766006,
+            "error_gamma_restrike_at_move": 0.0011298828976293862,
+            "error_all_restrike": 0.10029466855107216
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.009873623851774482,
+            "error_gamma_restrike": 0.01010038762132126,
+            "error_gamma_restrike_at_move": 0.010092852747504821,
+            "error_all_restrike": 0.9022768986293386
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.10105509633240217,
+            "error_gamma_restrike": 0.10944557346715555,
+            "error_gamma_restrike_at_move": 0.10927185555738106,
+            "error_all_restrike": 10.010599429650483
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.6871113423949282,
+            "error_gamma_restrike": 0.9130224528589679,
+            "error_gamma_restrike_at_move": 0.9162974402743203,
+            "error_all_restrike": 89.70906468715566
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 0.9908745381726476,
+            "error_gamma_restrike": 7.294084318531532,
+            "error_gamma_restrike_at_move": 8.378937504745409,
+            "error_all_restrike": 980.770165657048
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 226.77048606391327,
+            "error_gamma_restrike": 9.423697600293963,
+            "error_gamma_restrike_at_move": 79.14474871967832,
+            "error_all_restrike": 8363.224857258821
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 9953.87948822626,
+            "error_gamma_restrike": 2695.364610898192,
+            "error_gamma_restrike_at_move": 3601.334949477052,
+            "error_all_restrike": 74515.54055242971
+          }
+        ]
+      },
+      {
+        "map": "all_restrike",
+        "slope": 1.9668818767907494,
+        "standard_error": 0.012836253264975936,
+        "observations": 7,
+        "slope_narrow_end": 1.9982495599001515,
+        "slope_narrow_end_standard_error": 0.0005541316068033273,
+        "narrow_end_observations": 4,
+        "local_slope_narrowest_pair": 1.999621650004227,
+        "quadratic_coefficient_at_narrowest": 4457469.5049800165,
+        "error_at_narrowest_shock": 0.10029466855107216,
+        "sweep": [
+          {
+            "size": 0.00015000119999520004,
+            "error_base": 0.0011217912730785429,
+            "error_gamma_restrike": 0.001130192267766006,
+            "error_gamma_restrike_at_move": 0.0011298828976293862,
+            "error_all_restrike": 0.10029466855107216
+          },
+          {
+            "size": 0.00045000359998560014,
+            "error_base": 0.009873623851774482,
+            "error_gamma_restrike": 0.01010038762132126,
+            "error_gamma_restrike_at_move": 0.010092852747504821,
+            "error_all_restrike": 0.9022768986293386
+          },
+          {
+            "size": 0.0015000119999520004,
+            "error_base": 0.10105509633240217,
+            "error_gamma_restrike": 0.10944557346715555,
+            "error_gamma_restrike_at_move": 0.10927185555738106,
+            "error_all_restrike": 10.010599429650483
+          },
+          {
+            "size": 0.004500035999856001,
+            "error_base": 0.6871113423949282,
+            "error_gamma_restrike": 0.9130224528589679,
+            "error_gamma_restrike_at_move": 0.9162974402743203,
+            "error_all_restrike": 89.70906468715566
+          },
+          {
+            "size": 0.015000119999520004,
+            "error_base": 0.9908745381726476,
+            "error_gamma_restrike": 7.294084318531532,
+            "error_gamma_restrike_at_move": 8.378937504745409,
+            "error_all_restrike": 980.770165657048
+          },
+          {
+            "size": 0.04500035999856001,
+            "error_base": 226.77048606391327,
+            "error_gamma_restrike": 9.423697600293963,
+            "error_gamma_restrike_at_move": 79.14474871967832,
+            "error_all_restrike": 8363.224857258821
+          },
+          {
+            "size": 0.15000119999520004,
+            "error_base": 9953.87948822626,
+            "error_gamma_restrike": 2695.364610898192,
+            "error_gamma_restrike_at_move": 3601.334949477052,
+            "error_all_restrike": 74515.54055242971
+          }
+        ]
+      }
+    ]
+  },
+  "mechanism": [
+    {
+      "delta": 0.05,
+      "vol_move": -0.06,
+      "gamma_exposure_difference": 414857.5158081197,
+      "divided_difference": -6914291.930135328,
+      "segment_min_gamma_rate": -7268355.866638761,
+      "segment_max_gamma_rate": -6223824.296881631,
+      "inside_segment_range": true,
+      "map_difference_observed": 1037.143789520298,
+      "map_difference_predicted": 1037.1437895202994,
+      "map_difference_relative_error": 1.3153837167461444e-15
+    },
+    {
+      "delta": 0.05,
+      "vol_move": 0.06,
+      "gamma_exposure_difference": -322600.6612145812,
+      "divided_difference": -5376677.686909688,
+      "segment_min_gamma_rate": -6223824.296881631,
+      "segment_max_gamma_rate": -4582059.52577513,
+      "inside_segment_range": true,
+      "map_difference_observed": -806.5016530364519,
+      "map_difference_predicted": -806.5016530364531,
+      "map_difference_relative_error": 1.5505922526376426e-15
+    },
+    {
+      "delta": 0.05,
+      "vol_move": 0.1,
+      "gamma_exposure_difference": -488031.5098972856,
+      "divided_difference": -4880315.098972856,
+      "segment_min_gamma_rate": -6223824.296881631,
+      "segment_max_gamma_rate": -3724276.0404294,
+      "inside_segment_range": true,
+      "map_difference_observed": -1220.0787747432187,
+      "map_difference_predicted": -1220.0787747432141,
+      "map_difference_relative_error": 3.727196639267602e-15
+    },
+    {
+      "delta": 0.15,
+      "vol_move": -0.06,
+      "gamma_exposure_difference": 414857.5158081197,
+      "divided_difference": -6914291.930135328,
+      "segment_min_gamma_rate": -7268355.866638761,
+      "segment_max_gamma_rate": -6223824.296881631,
+      "inside_segment_range": true,
+      "map_difference_observed": 9334.294105682697,
+      "map_difference_predicted": 9334.294105682691,
+      "map_difference_relative_error": 5.846149852205088e-16
+    },
+    {
+      "delta": 0.15,
+      "vol_move": 0.06,
+      "gamma_exposure_difference": -322600.6612145812,
+      "divided_difference": -5376677.686909688,
+      "segment_min_gamma_rate": -6223824.296881631,
+      "segment_max_gamma_rate": -4582059.52577513,
+      "inside_segment_range": true,
+      "map_difference_observed": -7258.514877328067,
+      "map_difference_predicted": -7258.514877328077,
+      "map_difference_relative_error": 1.3783042245667936e-15
+    },
+    {
+      "delta": 0.15,
+      "vol_move": 0.1,
+      "gamma_exposure_difference": -488031.5098972856,
+      "divided_difference": -4880315.098972856,
+      "segment_min_gamma_rate": -6223824.296881631,
+      "segment_max_gamma_rate": -3724276.0404294,
+      "inside_segment_range": true,
+      "map_difference_observed": -10980.70897268891,
+      "map_difference_predicted": -10980.708972688926,
+      "map_difference_relative_error": 1.490878655707041e-15
+    },
+    {
+      "delta": -0.15,
+      "vol_move": 0.06,
+      "gamma_exposure_difference": -322600.6612145812,
+      "divided_difference": -5376677.686909688,
+      "segment_min_gamma_rate": -6223824.296881631,
+      "segment_max_gamma_rate": -4582059.52577513,
+      "inside_segment_range": true,
+      "map_difference_observed": -7258.514877328067,
+      "map_difference_predicted": -7258.514877328077,
+      "map_difference_relative_error": 1.3783042245667936e-15
+    }
+  ],
+  "cancellation": [
+    {
+      "delta": -0.3,
+      "predicted_zeros": [
+        0.055634639467804003
+      ],
+      "measured_zeros": [
+        -0.0377828849476699
+      ],
+      "predicted_zero_count": 1,
+      "measured_zero_count": 1,
+      "nearest_predicted_zero": 0.055634639467804003,
+      "nearest_measured_zero": -0.0377828849476699,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.09341752441547391,
+      "nearest_zero_signed_bias": -0.09341752441547391,
+      "base_abs_error_at_nearest_measured_zero": 1.0186340659856796e-10,
+      "restrike_abs_error_at_nearest_measured_zero": 22869.30950039804,
+      "all_restrike_abs_error_at_nearest_measured_zero": 113630.13730082923,
+      "column_median_abs_error_base": 21863.30259600455,
+      "predicted_zeros_without_a_measured_one": 1,
+      "measured_zeros_without_a_predicted_one": 1
+    },
+    {
+      "delta": -0.2,
+      "predicted_zeros": [
+        0.037398612285930166
+      ],
+      "measured_zeros": [
+        0.0025398758494485614
+      ],
+      "predicted_zero_count": 1,
+      "measured_zero_count": 1,
+      "nearest_predicted_zero": 0.037398612285930166,
+      "nearest_measured_zero": 0.0025398758494485614,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.0348587364364816,
+      "nearest_zero_signed_bias": -0.0348587364364816,
+      "base_abs_error_at_nearest_measured_zero": 1.4551915228366852e-11,
+      "restrike_abs_error_at_nearest_measured_zero": 628.5823754755402,
+      "all_restrike_abs_error_at_nearest_measured_zero": 98834.43842487822,
+      "column_median_abs_error_base": 14943.718073825483,
+      "predicted_zeros_without_a_measured_one": 1,
+      "measured_zeros_without_a_predicted_one": 1
+    },
+    {
+      "delta": -0.15,
+      "predicted_zeros": [
+        0.02829115538415658
+      ],
+      "measured_zeros": [
+        0.009418147086780787
+      ],
+      "predicted_zero_count": 1,
+      "measured_zero_count": 1,
+      "nearest_predicted_zero": 0.02829115538415658,
+      "nearest_measured_zero": 0.009418147086780787,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.018873008297375794,
+      "nearest_zero_signed_bias": -0.018873008297375794,
+      "base_abs_error_at_nearest_measured_zero": 4.3655745685100555e-11,
+      "restrike_abs_error_at_nearest_measured_zero": 1289.9684754605842,
+      "all_restrike_abs_error_at_nearest_measured_zero": 69544.35678510141,
+      "column_median_abs_error_base": 8363.70276725461,
+      "predicted_zeros_without_a_measured_one": 1,
+      "measured_zeros_without_a_predicted_one": 1
+    },
+    {
+      "delta": -0.1,
+      "predicted_zeros": [
+        0.01920737866626107
+      ],
+      "measured_zeros": [
+        0.01077826532773714
+      ],
+      "predicted_zero_count": 1,
+      "measured_zero_count": 1,
+      "nearest_predicted_zero": 0.01920737866626107,
+      "nearest_measured_zero": 0.01077826532773714,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.008429113338523931,
+      "nearest_zero_signed_bias": -0.008429113338523931,
+      "base_abs_error_at_nearest_measured_zero": 4.3655745685100555e-11,
+      "restrike_abs_error_at_nearest_measured_zero": 653.9860453690053,
+      "all_restrike_abs_error_at_nearest_measured_zero": 36416.8844760301,
+      "column_median_abs_error_base": 2990.4617484581613,
+      "predicted_zeros_without_a_measured_one": 1,
+      "measured_zeros_without_a_predicted_one": 1
+    },
+    {
+      "delta": -0.05,
+      "predicted_zeros": [
+        0.01025172812323957
+      ],
+      "measured_zeros": [
+        0.00781906344910761,
+        0.06768111585119109
+      ],
+      "predicted_zero_count": 1,
+      "measured_zero_count": 2,
+      "nearest_predicted_zero": 0.01025172812323957,
+      "nearest_measured_zero": 0.00781906344910761,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.0024326646741319596,
+      "nearest_zero_signed_bias": -0.0024326646741319596,
+      "base_abs_error_at_nearest_measured_zero": 1.3096723705530167e-10,
+      "restrike_abs_error_at_nearest_measured_zero": 119.44808670566272,
+      "all_restrike_abs_error_at_nearest_measured_zero": 10215.490246125784,
+      "column_median_abs_error_base": 912.2371334822819,
+      "predicted_zeros_without_a_measured_one": 0,
+      "measured_zeros_without_a_predicted_one": 1
+    },
+    {
+      "delta": -0.02,
+      "predicted_zeros": [],
+      "measured_zeros": [],
+      "predicted_zero_count": 0,
+      "measured_zero_count": 0,
+      "nearest_predicted_zero": null,
+      "nearest_measured_zero": null,
+      "nearest_zeros_both_absent": true,
+      "nearest_zero_distance": null,
+      "nearest_zero_signed_bias": null,
+      "base_abs_error_at_nearest_measured_zero": null,
+      "restrike_abs_error_at_nearest_measured_zero": null,
+      "all_restrike_abs_error_at_nearest_measured_zero": null,
+      "column_median_abs_error_base": 1457.7421999869475,
+      "predicted_zeros_without_a_measured_one": 0,
+      "measured_zeros_without_a_predicted_one": 0
+    },
+    {
+      "delta": 0.02,
+      "predicted_zeros": [
+        -0.003111423171175343,
+        0.011218755349956689
+      ],
+      "measured_zeros": [
+        -0.003307272077945643,
+        0.011037080499659976
+      ],
+      "predicted_zero_count": 2,
+      "measured_zero_count": 2,
+      "nearest_predicted_zero": -0.003111423171175343,
+      "nearest_measured_zero": -0.003307272077945643,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.0001958489067703001,
+      "nearest_zero_signed_bias": -0.0001958489067703001,
+      "base_abs_error_at_nearest_measured_zero": 2.1827872842550278e-11,
+      "restrike_abs_error_at_nearest_measured_zero": 8.296475963419653,
+      "all_restrike_abs_error_at_nearest_measured_zero": 1792.916869827739,
+      "column_median_abs_error_base": 1405.6865909300395,
+      "predicted_zeros_without_a_measured_one": 0,
+      "measured_zeros_without_a_predicted_one": 0
+    },
+    {
+      "delta": 0.05,
+      "predicted_zeros": [
+        -0.008448664948868475,
+        0.08742452588853301,
+        0.17539185248178119
+      ],
+      "measured_zeros": [
+        -0.009945280184604464,
+        0.06270788853822035
+      ],
+      "predicted_zero_count": 3,
+      "measured_zero_count": 2,
+      "nearest_predicted_zero": -0.008448664948868475,
+      "nearest_measured_zero": -0.009945280184604464,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.0014966152357359895,
+      "nearest_zero_signed_bias": -0.0014966152357359895,
+      "base_abs_error_at_nearest_measured_zero": 1.4551915228366852e-11,
+      "restrike_abs_error_at_nearest_measured_zero": 158.2741203331243,
+      "all_restrike_abs_error_at_nearest_measured_zero": 11370.76439618435,
+      "column_median_abs_error_base": 816.0120001594332,
+      "predicted_zeros_without_a_measured_one": 2,
+      "measured_zeros_without_a_predicted_one": 1
+    },
+    {
+      "delta": 0.1,
+      "predicted_zeros": [
+        -0.017507970700929416
+      ],
+      "measured_zeros": [
+        -0.024166345140307945
+      ],
+      "predicted_zero_count": 1,
+      "measured_zero_count": 1,
+      "nearest_predicted_zero": -0.017507970700929416,
+      "nearest_measured_zero": -0.024166345140307945,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.006658374439378528,
+      "nearest_zero_signed_bias": -0.006658374439378528,
+      "base_abs_error_at_nearest_measured_zero": 5.820766091346741e-11,
+      "restrike_abs_error_at_nearest_measured_zero": 1585.2113217928854,
+      "all_restrike_abs_error_at_nearest_measured_zero": 45057.058802371685,
+      "column_median_abs_error_base": 2697.873403479505,
+      "predicted_zeros_without_a_measured_one": 1,
+      "measured_zeros_without_a_predicted_one": 1
+    },
+    {
+      "delta": 0.15,
+      "predicted_zeros": [
+        -0.026608872353796206
+      ],
+      "measured_zeros": [
+        -0.042681991206349155
+      ],
+      "predicted_zero_count": 1,
+      "measured_zero_count": 1,
+      "nearest_predicted_zero": -0.026608872353796206,
+      "nearest_measured_zero": -0.042681991206349155,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.01607311885255295,
+      "nearest_zero_signed_bias": -0.01607311885255295,
+      "base_abs_error_at_nearest_measured_zero": 5.820766091346741e-11,
+      "restrike_abs_error_at_nearest_measured_zero": 6508.854471234605,
+      "all_restrike_abs_error_at_nearest_measured_zero": 95587.21832444097,
+      "column_median_abs_error_base": 9953.87948822626,
+      "predicted_zeros_without_a_measured_one": 1,
+      "measured_zeros_without_a_predicted_one": 1
+    },
+    {
+      "delta": 0.2,
+      "predicted_zeros": [
+        -0.035722190789782296
+      ],
+      "measured_zeros": [
+        -0.06659599538811553
+      ],
+      "predicted_zero_count": 1,
+      "measured_zero_count": 1,
+      "nearest_predicted_zero": -0.035722190789782296,
+      "nearest_measured_zero": -0.06659599538811553,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": 0.030873804598333235,
+      "nearest_zero_signed_bias": -0.030873804598333235,
+      "base_abs_error_at_nearest_measured_zero": 8.731149137020111e-11,
+      "restrike_abs_error_at_nearest_measured_zero": 18486.278804540547,
+      "all_restrike_abs_error_at_nearest_measured_zero": 149934.08019487938,
+      "column_median_abs_error_base": 17765.294217380142,
+      "predicted_zeros_without_a_measured_one": 1,
+      "measured_zeros_without_a_predicted_one": 1
+    },
+    {
+      "delta": 0.3,
+      "predicted_zeros": [
+        -0.053962364132414106
+      ],
+      "measured_zeros": [],
+      "predicted_zero_count": 1,
+      "measured_zero_count": 0,
+      "nearest_predicted_zero": -0.053962364132414106,
+      "nearest_measured_zero": null,
+      "nearest_zeros_both_absent": false,
+      "nearest_zero_distance": null,
+      "nearest_zero_signed_bias": null,
+      "base_abs_error_at_nearest_measured_zero": null,
+      "restrike_abs_error_at_nearest_measured_zero": null,
+      "all_restrike_abs_error_at_nearest_measured_zero": null,
+      "column_median_abs_error_base": 54251.161353659816,
+      "predicted_zeros_without_a_measured_one": 1,
+      "measured_zeros_without_a_predicted_one": 0
+    }
+  ],
+  "refusals": {
+    "improvement_is_not_uniform": "45 of the 120 cells swept are no better under the re-strike, and 20 of those are at least twice as wrong, worst factor 142; the CSV names every one",
+    "cancellation_is_not_accuracy": "the cells the re-strike damages are the cells whose shipped-map error was already smaller than the term being removed: the map was not accurate there, two third-order pieces were opposing, and the re-strike spends the cancellation",
+    "order_not_changed": "the local slope of |error| against shock size between the two narrowest scales is 1.98-2.01 for all four maps: re-striking removes a cubic, not the quadratic vanna and volga pieces it was competing with. Window regressions spread further (1.89-2.05 narrow, 1.92-2.34 over the whole ray) and are published so the reader sees the wobble instead of the tightest number",
+    "truncation_is_valid_only_near_the_base": "the third-order zeros sit 0.0002-0.0024 in vol move from the priced zeros within |delta| <= 0.05, and drift to 0.093 by |delta| = 0.30 -- where the truncation predicts a zero the priced error never has. Nothing beyond the small-move limit is claimed, and the drift is reported rather than gated",
+    "book_specific_ranking": "the shares and factors above are one three-strike ladder at one maturity; they rank the four maps for this grid and say nothing about a book with different convexity or a scenario that moves vol more than spot",
+    "counts_are_not_money": "share_improved counts cells; value_weighted_reduction weights each cell by the same error it is made of, and the two can disagree"
+  },
+  "reproduction_policy": {
+    "conditioning_limited": [
+      "asymptotics",
+      "cancellation",
+      "headline.slope_of_error_against_shock_size",
+      "headline.slope_of_error_narrow_end",
+      "headline.slope_standard_errors",
+      "headline.slope_narrow_end_standard_errors",
+      "headline.local_slope_narrowest_pair",
+      "headline.nearest_zero_distance",
+      "headline.root_finder_largest_residual_at_a_measured_zero",
+      "headline.restrike_error_at_a_measured_zero"
+    ],
+    "why": "slopes are regressions and the zero locations are roots of a residue that subtracts book values near 1.09e5, so each reproduces to its conditioning and no finer; counts, verdicts and the priced PnL differences are exact arithmetic on the shipped engine",
+    "everything_else": "exact for counts and verdicts, 1e-5 relative for other floats"
+  },
+  "environment": {
+    "generated_at_utc": "2026-10-01T02:59:41+00:00",
+    "quantrisk_version": "1.5.0",
+    "git_commit": "cf053f1f42fd",
+    "binary_git_commit": "cf053f1f42fd",
+    "working_tree_dirty": true,
+    "uncommitted_paths": [
+      ".github/workflows/ci.yml",
+      "CITATION.cff",
+      "CMakeLists.txt",
+      "README.md",
+      "benchmarks/performance/results/monte_carlo_speed.json",
+      "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
+      "benchmarks/quantlib/results/monte_carlo_validation.json",
+      "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
+      "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "benchmarks/suite/results/suite_headline.csv",
+      "benchmarks/suite/results/suite_run.json",
+      "benchmarks/suite/results/suite_summary.md",
+      "docs/analysis/restrike_gamma_map.md",
+      "docs/findings.md",
+      "docs/integrity_audit.md",
+      "docs/interview_defense.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-15-restrike-gamma.md",
+      "docs/release_notes_v1.3.0.md",
+      "docs/release_notes_v1.4.0.md",
+      "docs/release_notes_v1.5.0.md",
+      "docs/reproducibility.md",
+      "docs/validation_matrix.md",
+      "evidence/manifest.json",
+      "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
+      "experiments/monte_carlo_convergence/results/convergence.csv",
+      "experiments/monte_carlo_convergence/results/summary.json",
+      "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
+      "experiments/pricing_validation/results/summary.json",
+      "experiments/real_data_risk_study/results/real_data_risk_study.json",
+      "experiments/restrike_gamma_map/",
+      "experiments/stress_testing/results/stress_testing_study.json",
+      "experiments/two_factor_error_bound/results/two_factor_bound.json",
+      "experiments/two_factor_error_bound/run.py",
+      "experiments/var_backtesting/results/var_backtesting_validation.json",
+      "experiments/variance_reduction/results/summary.json",
+      "experiments/variance_reduction/results/variance_by_method.csv",
+      "paper/technical_report.pdf",
+      "paper/technical_report.tex",
+      "pyproject.toml",
+      "scripts/build_evidence_manifest.py",
+      "scripts/run_benchmark_suite.py",
+      "scripts/run_mutation_suite.py",
+      "tests/python/test_artifact_metadata.py",
+      "tests/python/test_mutation_suite.py",
+      "tests/python/test_restrike_gamma_map.py",
+      "uv.lock"
+    ],
+    "provenance": "ran from cf053f1f42fd plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at cf053f1f42fd",
+    "cpp_compiler": "AppleClang 21.0.0.21000334",
+    "cpp_arch": "arm64",
+    "cpp_os": "Darwin 27.0.0",
+    "cpp_build_type": "Release",
+    "cpp_standard": "C++20",
+    "cpp_flags": "(none)",
+    "python_platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python_machine": "arm64",
+    "packages": {
+      "python": "3.12.14",
+      "quantrisk": "1.5.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pandas": "3.0.6",
+      "matplotlib": "3.11.2",
+      "QuantLib": "1.43",
+      "PyPortfolioOpt": "1.6.0",
+      "cvxpy": "1.9.3",
+      "osqp": "1.1.3",
+      "scikit-learn": "1.9.1",
+      "statsmodels": "0.15.0"
+    }
+  },
+  "package_versions": {
+    "python": "3.12.14",
+    "quantrisk": "1.5.0",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "pandas": "3.0.6",
+    "matplotlib": "3.11.2",
+    "QuantLib": "1.43",
+    "PyPortfolioOpt": "1.6.0",
+    "cvxpy": "1.9.3",
+    "osqp": "1.1.3",
+    "scikit-learn": "1.9.1",
+    "statsmodels": "0.15.0"
+  },
+  "artifacts": [
+    {
+      "path": "experiments/restrike_gamma_map/results/restrike_gamma_map.csv",
+      "sha256": "ce5b1e753354d49b046f9c9e191d9dda94724889bf18712ff73326c2b6561f00",
+      "bytes": "39993"
+    },
+    {
+      "path": "experiments/restrike_gamma_map/results/published_scenario_maps.csv",
+      "sha256": "0b7921bb075d464fa596ba7c3fba516c5a067c67dddc1d3717f1943abf3b7140",
+      "bytes": "505"
+    },
+    {
+      "path": "experiments/restrike_gamma_map/results/cancellation_columns.csv",
+      "sha256": "82ccd22863b62f182428c87513cf1b9423ee897acf5ce95ab862c24a1ad59037",
+      "bytes": "2947"
+    }
+  ],
+  "csv_rows": 132
+}

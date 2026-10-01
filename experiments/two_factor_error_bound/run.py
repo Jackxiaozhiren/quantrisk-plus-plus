@@ -138,13 +138,15 @@ def totals(spot: float, sigma: float) -> dict[str, float]:
 
     Each entry is in the units the stress layer quotes exposures in: per unit *relative* move for
     `delta` and per unit *absolute* move for `vega`, so the map and the expansion consume the same
-    numbers.
+    numbers. The three exposure entries scale on the `spot` argument, not on the base spot: only
+    `BASE` is read as an exposure today, and a caller that asked for the exposures at a moved market
+    would have been handed the base ones wearing the moved book's name.
     """
     m = market(spot, sigma)
     out: dict[str, float] = {}
     readings = {
-        "delta": lambda o: quantrisk.pricing.black_scholes_greeks(o, m).delta * SPOT,
-        "gamma": lambda o: 0.5 * quantrisk.pricing.black_scholes_greeks(o, m).gamma * SPOT * SPOT,
+        "delta": lambda o: quantrisk.pricing.black_scholes_greeks(o, m).delta * spot,
+        "gamma": lambda o: 0.5 * quantrisk.pricing.black_scholes_greeks(o, m).gamma * spot * spot,
         "vega": lambda o: quantrisk.pricing.black_scholes_greeks(o, m).vega,
         "speed": lambda o: quantrisk.pricing.black_scholes_spot_derivatives(o, m).third,
         "vanna": lambda o: quantrisk.pricing.black_scholes_vol_cross_derivatives(o, m).vanna,

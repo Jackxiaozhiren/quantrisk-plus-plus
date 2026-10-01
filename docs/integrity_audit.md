@@ -538,3 +538,43 @@ The finding-35 text is corrected in place, and this entry exists so the correcti
 rather than silent. The rule it leaves is narrower than "verify before asserting": when a document in
 this repository has already recorded that one of my own claims was wrong, that document is the first
 place to read before making a claim of the same kind again.
+
+## Addendum — Phase 15, the recommendation measured and the guards that argued about it (2026-09-30)
+
+**37. A band guard could reject the measurement it was derived from.** `SPEEDUP_BANDS` is pinned in
+`tests/python/test_artifact_metadata.py` because CI checks the repository out at depth 1 and a band
+recomputed there comes from one revision (finding 35). Its companion guard required the *raw* current
+ratio to lie inside the pinned band, while the history guard derives the band from the **rounded** min
+and max of the committed ratios. The two conventions met the first time a re-frozen run landed at
+`speedup_vs_numpy = 0.5104`: the documents' own upper edge, `0.51`, is what that value rounds to, and
+the guard reported a measurement outside the band it was built from. Nothing about the artifact was
+wrong; the guard pair disagreed about what a band edge *is*. Fixed by testing containment on the same
+rounding the history guard uses, with the reasoning in the test rather than in a comment above it, and
+`test_the_performance_guards_are_not_vacuous` still shifts the artifact by 1.5× to prove the band bites.
+The general form: two guards that meet at a boundary have to agree about the units of that boundary, not
+merely about its value.
+
+**38. A shipped producer's helper ignored its own argument, and nothing could see it.**
+`experiments/two_factor_error_bound/run.py:totals(spot, sigma)` scaled its `delta`, `gamma` and `vega`
+entries by the module-level `SPOT` instead of the `spot` parameter. It never fired: only `BASE` is read
+as an exposure, and the one call site that passes a moved market (`third_directional`) consumes only
+the raw-partial entries, which have no spot factor. It was found by accident — the Phase 15 experiment
+began as a copy of that helper and had the identical defect, and the first run of the new variant table
+produced a gamma re-strike priced at the wrong spot. Both are fixed now, and Phase 13's experiment was
+re-run to prove the published numbers are untouched: every field of `two_factor_bound.json` is
+byte-identical except `generated_at_utc` and the dirty-tree list its own provenance records, and
+`two_factor_bound.csv` is unchanged. A helper whose parameters are decoration is a trap for the next
+caller, and the only real defence is that the next caller notices — which here was a copy.
+
+**39. The recommendation this phase existed to test turned out to be half right, and the half that is
+wrong is the interesting part.** `v1.3.0` closed with "re-strike gamma, do not add vanna and volga".
+Measured on the published `risk_off`, it holds: the error falls to a factor of 0.364. Measured over the
+120 swept cells with a volatility move, 45 are no better and 20 at least twice as wrong. The temptation
+was to publish the scenario result and file the rest as noise; instead the worsening is characterised
+arithmetically — every doubled cell is one whose shipped-map error was smaller than the term the recipe
+removes — and then *predicted*: the zeros of a third-order truncation assembled from core closed forms
+agree with the zeros of the priced error to 0.0002-0.0024 within `|delta| <= 0.05`, and drift to 0.093
+outside it, with one column where the truncation predicts a zero the map does not have. That is a result
+about the reach of the analysis rather than about the map, and it is published as such:
+`docs/findings.md` §7 leads with the 45 cells, `docs/limitations.md` #78 keeps the scope, and
+`stress.run_scenario` ships unchanged.

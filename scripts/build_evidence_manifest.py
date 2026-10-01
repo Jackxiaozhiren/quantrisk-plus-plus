@@ -65,6 +65,7 @@ SOURCES: list[tuple[str, str, tuple[str, ...]]] = [
             "experiments/real_data_risk_study/results",
             "experiments/linearisation_error_bound/results",
             "experiments/two_factor_error_bound/results",
+            "experiments/restrike_gamma_map/results",
         ),
     ),
     (

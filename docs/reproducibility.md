@@ -69,10 +69,10 @@ that strips too eagerly would pass the re-run test and silently rubber-stamp a c
 git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
 uv sync --extra oracles          # interpreter 3.12, deps, and the validation oracles
 uv pip install -e .              # builds the C++ core and the pybind11 module
-uv run pytest -q                 # 411 tests here; see the note below — the count is not one number
+uv run pytest -q                 # 422 tests here; see the note below — the count is not one number
 uv run cmake --preset dev && uv run cmake --build --preset dev
 uv run ctest --preset dev        # 198 C++ tests, 547,845 assertions
-uv run python scripts/run_benchmark_suite.py --require-all   # all 14 members
+uv run python scripts/run_benchmark_suite.py --require-all   # all 15 members
 uv run quantrisk validate        # 7 identity checks against the build you just made
 ```
 
@@ -101,15 +101,15 @@ suite with `--require-all`, then re-freeze `evidence/manifest.json` — in that 
 manifest records the commit and the artifacts record the version.
 
 `--require-all` on the suite is what stops the run meaning anything. Without the `oracles`
-extra installed, six of the fourteen members report `skipped` and the suite still exits 0,
+extra installed, six of the fifteen members report `skipped` and the suite still exits 0,
 because skipping is the honest status for a missing dependency. A CI job that reported green
 in that state would be claiming a measurement it did not make. The flag turns that state into
 a failure.
 
 **The pytest count depends on which extras you installed, and a document that prints one number
-without saying which is wrong.** The sequence above yields **411 pytest tests with the `oracles`
+without saying which is wrong.** The sequence above yields **422 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — no `oracles` extra — and the same
-tree collects 342 tests without it, the four oracle-gated modules dropping out at import. At the
+tree collects 353 tests without it, the four oracle-gated modules dropping out at import. At the
 previous revision that lane reported `319 passed, 4 skipped`: 323 outcomes from 319 collected
 items, because the four skips are module-level records reported *in addition to* the items that
 ran.
@@ -143,9 +143,9 @@ every run: `benchmarks/performance/results/monte_carlo_speed.json` entirely, and
 `mean_runtime_seconds` / `seconds_per_path` columns of
 `experiments/variance_reduction/results/variance_by_method.csv` and
 `experiments/monte_carlo_convergence/results/convergence.csv`. The speed benchmark has been
-re-frozen thirteen times, and the ratios of those thirteen committed files are the honest measure of
+re-frozen fifteen times, and the ratios of those fifteen committed files are the honest measure of
 how much these digits mean: `7.77×`–`8.70×` against a pure Python loop (11.9% spread) and
-`0.42×`–`0.51×` against vectorised NumPy (20.8% spread), because the NumPy baseline itself ranged
+`0.42×`–`0.51×` against vectorised NumPy (21.7% spread), because the NumPy baseline itself ranged
 from 110M to 70M paths/s. Any document quoting a single one of those ratios is quoting one dated
 run, which is why the claims are written as ranges and why the point figures in `README.md` and
 `docs/interview_defense.md` are checked against the artifact on disk. Recompute the range with:

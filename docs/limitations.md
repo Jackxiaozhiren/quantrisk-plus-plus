@@ -246,7 +246,7 @@ never removed just because a later phase shipped.
 
 56. **Resolved on first contact: the CI lane is proven on a runner, and the runner disagreed
     with the laptop.** `benchmark-suite` passes on `ubuntu-latest` in ~5m46s with
-    `--require-all`, so all fourteen members execute against live oracles and none can be skipped
+    `--require-all`, so all fifteen members execute against live oracles and none can be skipped
     silently. What the same runner caught was not in the new lane at all: the pre-existing
     `build-and-test` lane failed on a README assertion that demanded bit-exact agreement with a
     transcribed price, and glibc's libm is 1.7 ULP from Apple's. Local green said nothing about
@@ -304,8 +304,8 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 411 pytest tests with
-    the `oracles` extra installed, and the same tree collects 342 tests without it — the CI lane
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 422 pytest tests with
+    the `oracles` extra installed, and the same tree collects 353 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -337,7 +337,7 @@ never removed just because a later phase shipped.
     no conclusion moved. The consequence is stated rather than smoothed: `verify_evidence_manifest.py`
     is a same-platform tamper check, and running it on a different libm would report CHANGED on
     result fields that are in fact the same result. CI therefore verifies *execution* on Linux (the
-    `benchmark-suite` lane runs all fourteen members with `--require-all`) and *byte equality* only on
+    `benchmark-suite` lane runs all fifteen members with `--require-all`) and *byte equality* only on
     the platform that produced the artifacts. `test_a_fresh_run_reproduces_the_committed_artifact_exactly`
     encodes the split: relative slack of 1e-12 on floats, exact equality on everything else. Making
     the chain platform-independent would require storing results at a stated precision rather than at
@@ -567,3 +567,21 @@ never removed just because a later phase shipped.
     with no owner inside a sentence that looks checked. Both spellings are policed by that guard now,
     which is the rule restated: policing a number means policing every spelling of it.
     Related: #63, #76, #71.
+
+78. **The re-struck-gamma recommendation is now measured, and its scope is the grid, not the map.**
+    `v1.3.0` closed finding 6 with a priority — re-strike gamma at the shocked volatility rather than
+    add vanna and volga — and `experiments/restrike_gamma_map/` measures it against revaluation.
+    Three limits travel with the measurement. (a) It is not uniformly safer: 45 of the 120 swept cells
+    with a volatility move are no better, and 20 are at least twice as wrong (worst factor 142),
+    because those cells' shipped-map error was *smaller than the term the recipe removes* — two
+    third-order pieces cancelling, and the correction spending the cancellation. (b) The prediction
+    that explains them, the zeros of the third-order truncation of the base map's error, is gated only
+    within `|delta| <= 0.05`, where it locates the priced zeros to 0.0002-0.0024 in vol move; past
+    that the drift grows to 0.093 at `|delta| = 0.30` and the truncation predicts zeros the map does
+    not have. A third-order truncation is an argument near the base market, which is where the
+    published scenarios live. (c) Nothing here changes `stress.run_scenario`: it ships a two-factor
+    delta-gamma-vega map, row 12 of `docs/validation_matrix.md` says so, and a user who needs the
+    joint residual controlled has to re-value the book rather than re-strike exposures at the call
+    site. One three-strike ladder, one maturity, one base volatility, and no estimate of how the
+    ranking of the four maps changes for a book whose gamma moves the other way in volatility — the
+    artifact's `refusals` block is that list, and `docs/analysis/restrike_gamma_map.md` §7 argues it.

@@ -1,10 +1,10 @@
 # Findings
 
-Six results worth ninety seconds. Each is a number, the confound that makes it mean
+Seven results worth ninety seconds. Each is a number, the confound that makes it mean
 something, and the artifact that regenerates it. Everything here is measured; nothing is
 asserted from a model's reputation.
 
-**On uncertainty, because the first three numbers are deterministic, the fourth is an interval, and the fifth and sixth are exact analysis against floating-point data.**
+**On uncertainty, because the first three numbers are deterministic, the fourth is an interval, and the fifth, sixth and seventh are exact analysis against floating-point data.**
 Findings 1 and 2 are functions of a fully specified, seeded data-generating process: given the
 same build, every figure reproduces to the last digit, and the ranges quoted
 (1.13×–1.26×, 1.57×–1.60×) are the spread *across window lengths and estimators*, which is the
@@ -241,6 +241,54 @@ probe ships in the artifact precisely so that this refusal is checkable rather t
   `slopes`, `dominance_counts`, `published_scenario_bound`, `ridge_probe`), `two_factor_bound.csv`,
   `published_scenario_bound.csv`, `two_factor_bound.png`; derivation in
   `docs/analysis/two_factor_error_bound.md`.
+
+
+## 7. Re-striking gamma does fix the published scenario, and it makes 45 of 120 cells worse
+
+Finding 6 ended in a recommendation: the cheap correction to the stress map is to read gamma at the
+shocked volatility rather than to add vanna and volga. `experiments/restrike_gamma_map/` builds that
+map, runs it through `quantrisk.stress.run_scenario`, and measures it. On `risk_off` the recommendation
+holds: the error falls from **-5,320.79** to **+1,937.72**, a factor of **0.364**, and what it removed is
+**7,258.51** of the **8,402.16** term the derivation named — **86.4 %** of it, the shortfall being the
+difference between a finite difference of gamma across a six-point move and the local derivative the
+closed form quotes. The sign flips with the magnitude, so the map goes from reporting the loss too high
+to reporting it too low.
+
+The rest is the finding. Across the 120 swept cells with a volatility move the re-strike improves
+75 of them (62.5 % by count, and **0.3704** weighted by the errors themselves), but on **45** cells it
+does not, and on **20** of those it at least **doubles** the error — worst factor **142**, at
+`delta = +0.05` with a −0.01 vol move, where the shipped map's error is 1.11 and the re-struck map's is
+158.05. Every one of those 20 is a cell whose shipped-map error was *smaller than the term being
+removed*, and there is a mechanism for that rather than a list: along a `delta` column the shipped map's
+error contains a `k`-independent spot cubic `1/6 V_SSS h^3` and terms proportional to `k`, and where
+they cancel the map is exact by arithmetic, not by merit. Deleting one of the cancelling pieces spends
+the cancellation.
+
+So the experiment predicts the location of those cells rather than describing them after the fact. The
+zeros of the third-order truncation — assembled from core closed forms, nothing fitted to the measured
+errors — are compared with the zeros of the priced error, both found by one bracket-and-bisect routine.
+Within `|delta| <= 0.05` the nearest pair agrees to **0.0002-0.0024** in vol move against a tolerance of
+**0.005**, and the run refuses to publish if that gate breaks. Past the limit the prediction drifts with
+the move size, worst **0.093** at `delta = -0.30`, and at `delta = +0.30` the truncation predicts a zero
+the priced map does not have; over the twelve columns the truncation finds **14** zeros and the priced
+error **13**. That is the honest shape of a third-order argument: good near the base market, which is
+where the published scenarios live, and not an argument out at a 30 % move.
+
+Two further measurements, because the naive version of the fix is the one a reader reaches for. Pricing
+*every* sensitivity at the shocked market is worse than the gamma-only variant on **116 of the 120**
+cells, and on `risk_off` its error is **60,275.64** against the shipped **5,320.79** — a factor of
+**11**. And the order of the map is untouched: between the two narrowest scales of each of three rays
+the error of all four maps falls with a local slope of **1.98-2.01**, because re-striking removes a
+cubic and leaves the quadratic vanna and volga terms exactly where they were. The recommendation was
+right about which term dominates and right that the cheap fix is gamma; it was silent about the cells
+where the shipped map's accuracy was already a coincidence.
+
+- **Confound identified:** a small residual is not the same as an accurate model, and a correction
+  that removes one error term makes every cell where that term was *cancelling* another one worse.
+- **Artifact:** `experiments/restrike_gamma_map/results/restrike_gamma_map.json` (`headline`,
+  `asymptotics`, `mechanism`, `cancellation`, `refusals`), `restrike_gamma_map.csv`,
+  `published_scenario_maps.csv`, `cancellation_columns.csv`; derivation in
+  `docs/analysis/restrike_gamma_map.md`.
 
 ---
 

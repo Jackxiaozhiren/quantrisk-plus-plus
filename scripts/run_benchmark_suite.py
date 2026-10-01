@@ -457,6 +457,50 @@ MEMBERS: tuple[Member, ...] = (
             ),
         ),
     ),
+    Member(
+        key="restrike_gamma_map",
+        title="What re-striking gamma at the shocked volatility actually buys the stress map",
+        kind=EXPERIMENT,
+        script="experiments/restrike_gamma_map/run.py",
+        artifact="experiments/restrike_gamma_map/results/restrike_gamma_map.json",
+        # No `plot`, for the reason the two members above give: this compares approximations against
+        # a revaluation rather than against an oracle, and panel A of the envelope figure is
+        # labelled |our value - oracle| / |oracle|.
+        headline=(
+            ("grid cells with a volatility move", ("headline", "cells_with_a_volatility_move")),
+            (
+                "cells the re-strike improves",
+                ("headline", "cells_where_restrike_reduces_abs_error"),
+            ),
+            ("share of cells improved", ("headline", "share_improved")),
+            ("value-weighted error reduction", ("headline", "value_weighted_reduction")),
+            (
+                "worst error factor after over before",
+                ("headline", "worst_error_factor_after_over_before"),
+            ),
+            ("published risk_off error, shipped map", ("headline", "published_error_base")),
+            (
+                "published risk_off error, re-struck gamma",
+                ("headline", "published_error_gamma_restrike"),
+            ),
+            (
+                "fraction of the named cubic removed",
+                ("headline", "published_fraction_of_local_term_removed"),
+            ),
+            (
+                "doubled-error cells explained by cancellation",
+                ("headline", "of_those_the_base_error_was_smaller_than_the_removed_term"),
+            ),
+            (
+                "nearest-zero prediction error, worst column",
+                ("headline", "nearest_zero_distance_max"),
+            ),
+            (
+                "cells where the naive full re-strike is worse",
+                ("headline", "all_restrike_worse_than_gamma_only"),
+            ),
+        ),
+    ),
 )
 
 

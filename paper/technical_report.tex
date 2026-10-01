@@ -153,7 +153,7 @@ command gives two numbers); fourteen benchmark-suite members execute under
 unlisted (\src{evidence/manifest.json}). The \emph{end-of-Phase-9} baseline, for contrast, was 190
 CTest entries and 310 pytest tests with no release tag and no suite at all
 (\src{docs/phase_reports/phase-09-research-api.md}). The limitations
-register contains 77 numbered entries (\src{docs/limitations.md}).
+register contains 78 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -1414,6 +1414,52 @@ neither agreement nor disagreement is claimed, and the scan is published so that
 checked (\src{docs/analysis/two_factor_error_bound.md}; \src{docs/limitations.md}, items
 67--71).
 
+\subsection{Re-striking gamma: the recommendation, measured}
+\label{sec:restrike}
+The paragraph above ends in a priority rather than a result, and a priority is the kind of claim a
+later revision quietly gets wrong. \src{experiments/restrike_gamma_map/run.py} rebuilds the map four
+ways --- every exposure at the base market (what ships), gamma alone at $(S, \sigma{+}k)$, gamma at
+$(S{+}h, \sigma{+}k)$, and all three at the shocked market --- and prices each through the shipped
+\code{run\_scenario} against a revaluation of the same book, so the comparison is between four maps and
+not between a map and a re-typed formula.
+
+The mechanism survives contact. The difference between the re-struck and the shipped map is exactly
+$(\gamma(\sigma{+}k) - \gamma(\sigma))\,\delta^2$ --- the \emph{relative} move squared, because the
+exposure already carries $S^2$ --- and the divided difference across $k$ lies inside the segment's own
+range of $\mathrm{d}\gamma/\mathrm{d}\sigma$ built from \code{black\_scholes\_mixed\_third\_derivatives},
+on $7$ probes with a worst relative mismatch of 3.7e-15. What the recipe removes at
+\code{risk\_off} is 7258.51 of the 8402.16 named above: \textbf{86.4\,\%} of it, the shortfall being a
+finite difference across six volatility points rather than the local derivative. The error there moves
+from $-5320.79$ to $+1937.72$, a factor of $0.364$, with the sign flipping alongside it.
+
+The order does not change: between the two narrowest scales of each of three rays the error of all four
+maps falls with a local slope of 1.98-2.01, because re-striking deletes a cubic and leaves the
+quadratic $vanna \cdot hk + \tfrac12 volga \cdot k^2$ terms where they were. Window regressions over
+four points give 1.89-2.05 and over the whole ray 1.92-2.34; both are published in the artifact, and
+the pairwise number is the one quoted because it needs no window.
+
+The limit is the finding. On 45 of 120 cells with a volatility move the re-strike does not reduce the
+absolute error, and on 20 of those it at least doubles it, worst factor 142. Every one of those 20 is a
+cell whose shipped-map error was \emph{smaller than the term being removed}: along a $\delta$ column the
+error contains a $k$-independent piece $\tfrac16 V_{SSS}h^3$ and pieces proportional to $k$, and where
+they cancel the map is exact by arithmetic rather than by merit. Deleting one of the cancelling terms
+spends the cancellation. Read as a prediction rather than an excuse, the zeros of the third-order
+truncation --- assembled from closed forms, nothing fitted to the measured errors --- agree with the
+zeros of the priced error to 0.0002-0.0024 in vol move within $|\delta| \le 0.05$, against a gated
+tolerance of 0.005, and drift to 0.093 by $|\delta| = 0.30$; at $\delta = +0.30$ the truncation
+predicts a zero the priced map does not have, and across the twelve columns it finds 14 against the
+priced error's 13. A third-order truncation is an argument near the base market, which is where the
+published scenarios live, and stops being one out at a 30\,\% move.
+
+Re-pricing \emph{every} sensitivity at the shocked market --- the fix a reader reaches for first --- is
+worse than the gamma-only variant on 116 of the 120 cells, and on \code{risk\_off} its error is 60275.64
+against the shipped map's 5320.79, a factor of 11: moving delta and vega replaces a linear leg with a
+tangent at the wrong point of the move. What survives is the specific half of the earlier
+recommendation, with its scope stated: re-striking gamma helps on the published scenario and on
+62.5\,\% of the grid, reduces the value-weighted error by 0.3704, and is not a uniformly safer map.
+Nothing here changes \code{run\_scenario}; \src{docs/limitations.md}, item 78 records what a user who
+needs the residual controlled at joint published sizes must do instead.
+
 % ===========================================================================
 \section{Numerical Validation}
 \label{sec:validation}
@@ -1659,15 +1705,15 @@ produced with. Earlier dated runs of the same script are in
 \toprule
 Implementation & mean s.\ & std.\ s. & paths/s & estimate & $z$ vs analytic \\
 \midrule
-C++ core & 0.005176 & 0.000479 & 38{,}642{,}054 & 11.14596 & $+0.537$ \\
-pure Python loop & 0.043412 & 0.001703 & 4{,}606{,}998 & 11.11229 & $-0.292$ \\
-vectorised NumPy & 0.002305 & 0.000482 & 86{,}756{,}701 & 11.11430 & $-0.242$ \\
+C++ core & 0.004430 & 0.000082 & 45{,}146{,}242 & 11.14596 & $+0.537$ \\
+pure Python loop & 0.035402 & 0.000114 & 5{,}649{,}456 & 11.11229 & $-0.292$ \\
+vectorised NumPy & 0.001978 & 0.000295 & 101{,}115{,}587 & 11.11430 & $-0.242$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The measured ratio of C++ to a pure Python loop is $8.39\times$ in the run tabulated here; against
-vectorised NumPy it is $0.445\times$, that is, NumPy is faster in this regime, and the artifact says
+The measured ratio of C++ to a pure Python loop is $7.99\times$ in the run tabulated here; against
+vectorised NumPy it is $0.446\times$, that is, NumPy is faster in this regime, and the artifact says
 so (\src{benchmarks/performance/results/monte_carlo_speed.json};
 \src{docs/phase_reports/phase-03-monte-carlo.md}). The claim is scoped by four recorded caveats in
 the same artifact. The work measured is a terminal-only draw, one normal per path, which is exactly
@@ -1728,7 +1774,7 @@ stress artifacts are byte-identical between executions
 \label{sec:limitations}
 % ===========================================================================
 
-\src{docs/limitations.md} holds 77 numbered entries, grouped by the phase that introduced them,
+\src{docs/limitations.md} holds 78 numbered entries, grouped by the phase that introduced them,
 with the rule that entries are never removed because a later phase shipped. This section
 summarises them faithfully; the file remains the authority.
 
