@@ -61,7 +61,39 @@ lies about its own provenance is visible. `verify_evidence_manifest.py` distingu
 Raising the library version invalidates every committed artifact, because each one records
 `environment.quantrisk_version`. Bump it deliberately, in one commit, and re-freeze after.
 
-## 4. Rules this repository enforces, not suggests
+## 4. Releasing a version
+
+A release is a sequence with a fixed order, because each step invalidates the one before it. The
+ordering below is the one `v1.4.0` and `v1.5.0` learned the expensive way: three of its steps were
+performed out of order in Phase 15, and every one of those produced a red gate rather a review comment.
+
+1. Land the change, then run the gates: `ctest`, the suite with `--require-all`, `quantrisk validate`,
+   `pytest`, `ruff`, `mypy`, `clang-format` on any touched C++, `latexmk`, then
+   `build_evidence_manifest.py` and `verify_evidence_manifest.py`.
+2. **Sync the prose last among the regenerations.** Re-running the suite rewrites
+   `benchmarks/performance/results/monte_carlo_speed.json`, whose ratios, means, standard deviations
+   and paths/s are quoted in `README.md`, `docs/interview_defense.md`, `docs/validation_matrix.md`,
+   `docs/reproducibility.md` and the report — and the guards re-derive all of them from the artifact.
+   Snapshot the spellings the documents currently carry before re-running anything: once a session has
+   re-run twice, `git show HEAD:<artifact>` is no longer what the prose says, and replacing from it
+   silently no-ops.
+3. Refresh the falsification harness's anchors, in the same commit as step 2. Several defects in
+   `scripts/run_mutation_suite.py` key on exactly the figures step 2 moves, and
+   `tests/python/test_mutation_suite.py` fails on an anchor that no longer occurs — that failure is
+   the mechanism working, not a nuisance to route around.
+4. Commit, then re-run the sweep **on the committed tree**, because it refuses a dirty target and its
+   verdict is a claim about the revision it ran on.
+5. Tag the commit the runner verified, never a later one. `commits/<sha>/check-runs` is the ground
+   truth; `gh run watch` can report completion while the run is still `in_progress`, and its
+   `--exit-status` is not the verdict (`docs/integrity_audit.md` finding 36).
+6. Build the assets from `git archive <tag>`, not from a working tree, and hash each one on the way up
+   and again after downloading it back.
+7. State what the record cannot contain. A release note cannot describe its own publication, a manifest
+   cannot carry its own hash, and a table of post-tag runs cannot hold the verdict of the commit that
+   adds the table. Those are read from the API; `docs/phase_reports/phase-15-restrike-gamma.md` §7 is
+   the worked example.
+
+## 5. Rules this repository enforces, not suggests
 
 - **Own implementation.** Black–Scholes, the lattice, Monte Carlo, the Greeks, variance reduction,
   VaR/ES, the backtests, covariance estimation and the optimizers are implemented here.
@@ -94,7 +126,7 @@ Raising the library version invalidates every committed artifact, because each o
 - **Look-ahead bias is a defect, not a simplification.** Any series used to make a claim must have been
   knowable at the decision time it is applied to.
 
-## 5. Committing
+## 6. Committing
 
 Conventional Commits, subject line in the imperative, and the body states **why** — what was wrong,
 what was measured, and what the evidence says. A commit that records a mistake is worth more than one
@@ -104,7 +136,7 @@ something its tree did not do, and the runner proved it (findings 28–32).
 Write the docs in English so the repository reads as one artifact; keep the code comments in English
 for the same reason.
 
-## 6. Where the boundaries are
+## 7. Where the boundaries are
 
 `docs/limitations.md` is the complete list of what is *not* claimed — read it before adding a feature,
 because several entries exist precisely to stop a future contributor from "finishing" something that was

@@ -130,9 +130,18 @@ numbers, which is now part of the release checklist below.
 2. The crossing prediction is gated only inside `|delta| <= 0.05`. Extending that radius needs the
    fourth-order terms of the expansion, not a wider tolerance; if someone widens the tolerance
    instead, the gate stops meaning what it says and the number in the docs becomes decorative.
-3. Six of the falsification harness's anchors moved during this phase because the prose they key on
-   moved with it. Any future re-freeze of the performance artifact re-opens the same set, so the
-   anchor refresh belongs in the release checklist beside the prose sync, not after a red self-test.
+
+A third item this list carried was discharged the same day, before either of the above is picked up.
+Six of the falsification harness's anchors moved during the phase because the prose they key on moved
+with them, which is the mechanism working — but each refresh should not need a red self-test to be
+noticed. `CONTRIBUTING.md` §4 now fixes the order: sync the regenerated figures, refresh the anchors
+in the same commit, re-run the sweep on the committed tree, tag the head the runner verified, and
+export the assets from the tag. It also records the trap that cost the most time here: a session that
+re-runs the performance benchmark twice can no longer take its "before" values from
+`git show HEAD:<artifact>`, because the documents already moved past those.
+
+That checklist is the one durable change made after the tag. Sections 6 and 7 are bookkeeping about
+this release.
 
 ## 6. Release
 
