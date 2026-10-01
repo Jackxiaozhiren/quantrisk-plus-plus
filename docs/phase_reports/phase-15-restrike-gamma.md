@@ -38,7 +38,7 @@ never measured. Repository version becomes `1.5.0`; nothing here is claimed to b
    `1/2 V_SSsigma h^2 k` equals Phase 13's published `term_cubic_gamma_sigma` to the last digit. Two
    independent producers, one book, one map — now asserted by
    `test_the_shipped_map_error_is_the_number_the_phase_13_artifact_published`.
-6. **Tests that do not reuse the producer.** `tests/python/test_restrike_gamma_map.py`, eleven tests:
+6. **Tests that do not reuse the producer.** `tests/python/test_restrike_gamma_map.py`, twelve tests:
    the four variants' exposures rebuilt per-exposure from the pricer and pushed through the engine; the
    committed CSV re-evaluated against that rebuild; the `k = 0` control recounted; the artifact's zeros
    re-found by bisecting the engine; the cancellation cells recounted from the table; the refusals' key

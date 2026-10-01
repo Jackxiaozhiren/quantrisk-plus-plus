@@ -44,11 +44,12 @@ been the load-bearing part.
 volatility points rather than the local derivative — and the order of the map is untouched: between the
 two narrowest scales of three rays the error of all four maps falls with a local slope of `1.98-2.01`.
 
-**Eleven tests that refuse to reuse the producer.** `tests/python/test_restrike_gamma_map.py` rebuilds
+**Twelve tests that refuse to reuse the producer.** `tests/python/test_restrike_gamma_map.py` rebuilds
 the four variants' exposures one leg at a time from the pricer, re-evaluates the committed CSV against
 the shipped engine, re-finds the artifact's zeros by bisecting the engine, recounts the cancellation
-cells from the table, and re-derives every figure the experiment's own docstring, the analysis note,
-finding 7 and the technical report print. It also asserts, against Phase 13's artifact, that the base
+cells from the table, re-derives every figure the experiment's own docstring, the analysis note, finding
+7 and the technical report print, and asserts that the interpreter and the optional extras have exactly
+one home in the artifact. It also asserts, against Phase 13's artifact, that the base
 map's `risk_off` error is the same number both producers compute — it is, to the last digit.
 
 **A note, a matrix row, and a limitation.** `docs/analysis/restrike_gamma_map.md` owns the derivation;
