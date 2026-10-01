@@ -142,3 +142,13 @@ numbers, which is now part of the release checklist below.
 4. The crossing prediction is gated only inside `|delta| <= 0.05`. Extending that radius needs the
    fourth-order terms, not a wider tolerance; if someone widens the tolerance instead, the gate stops
    meaning what it says.
+
+## 6. Release
+
+`v1.5.0` tags `2ad54059ae288d5cc14dcba954f014fefeb29160`, the commit run `36811258118` verified
+(`success` on all three jobs; the offline lane `353 passed, 5 skipped in 47.82s`). The release's four
+assets were exported from the tag itself with `git archive` and re-hashed after download;
+`docs/release_notes_v1.5.0.md` carries the digests and the two provenance facts that go with them — this
+note is a post-tag commit, and `evidence/manifest.json` names the revision it was generated from. The
+falsification sweep ran twice on the committed tree, on `dcc9eaa` and again on `e5daedc`, printing
+`19/19 planted defects were rejected by their guard.` with `git status` empty afterwards both times.

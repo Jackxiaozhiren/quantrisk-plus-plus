@@ -101,6 +101,41 @@ the C++ gate re-verifies the same 198 tests it did at `v1.4.0`. The manifest's o
 the revision it was generated *from*, which is necessarily the commit before this file's, and the
 working tree it saw was the one being committed — `evidence/manifest.json` cannot contain its own hash.
 
+## Release record
+
+The tag `v1.5.0` points at `2ad54059ae288d5cc14dcba954f014fefeb29160` — the commit the runner had
+just verified, not a later documentation head. GitHub Actions reports it directly:
+
+```text
+run 36811258118   status=completed  conclusion=success
+  Format and static checks                    success
+  Configure, build, C++ tests, Python tests    success   353 passed, 5 skipped in 47.82s
+  Benchmark suite against live oracles         success
+```
+
+The five skips are the four oracle-gated modules, which drop out at import on a lane without the
+`oracles` extra, plus this release's own history guard saying so in its words (audit finding 35). The
+`353 passed` is the CI collection the documents quote as "354 collected without it": the four module
+skips are reported by the run and never collected, which is why the two numbers differ by five and not
+by four.
+
+The release is `publishedAt 2026-10-01T03:46:09Z` at
+`https://github.com/Jackxiaozhiren/quantrisk-plus-plus/releases/tag/v1.5.0`. Its four assets were
+built from `git archive v1.5.0` — not from a working tree — and each was downloaded back and hashed:
+
+| asset | sha256, computed on the export and again on the download | size |
+| --- | --- | --- |
+| `technical_report.pdf` | `706d4075b58aa9bb29807977c9812f90e3dc1c11a8e2340fa4018525cca69e8d` | 970,663 |
+| `manifest.json` | `81f42f1c4bef74389dcdcfef14ce81bc07e161d786b3425bc684cfd93deb2988` | 48,434 |
+| `CITATION.cff` | `4f6665120196280aaa7f5f73ca7cbfff43b389a980b9501db00f3f859f6ce54a` | 2,493 |
+| `quantrisk-suite-results.zip` | `601be2e6d0d922dae896cc8e29cd772406761044e04183ae49542aea58404b45` | 141,702 |
+
+Two provenance facts are stated rather than smoothed. This file is a **post-tag** commit: the copy of
+`docs/release_notes_v1.5.0.md` inside the tag ends before this section, because a release note cannot
+record its own publication. And `evidence/manifest.json` names `cf053f1f42fd` with
+`working_tree_dirty: true` in its own `repository` block — the manifest records the revision it was
+generated *from*, which is necessarily the commit before the one that contains it.
+
 ## What is still not here
 
 - `stress.run_scenario` still maps volatility to first order. This release measures a *hypothetical*
