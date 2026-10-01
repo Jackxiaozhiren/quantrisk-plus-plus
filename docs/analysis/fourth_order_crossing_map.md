@@ -45,6 +45,13 @@ residual-ratio back upward at that scale. The gated window is therefore `1e-3 <=
 the through-the-floor fit sits next to it in the artifact so the choice is auditable rather than
 asserted.
 
+The bands around those slopes are sized from two platforms rather than one. The CI runner measured
+`5.223` on the crash ray from the same committed artifact where this machine measured `5.014`; a band
+tight enough to call `5.014` the ceiling rejects a machine that is not wrong, so the quartic band runs
+`4.6-5.6` and the cubic band `3.6-4.4`, clear of each other. What the bands still exclude is the
+*order*: a residual that fell with the third order reads 3.0, and the cubic's own 4.0 sits outside
+the quartic band.
+
 The ratio of the two residuals falls against `log scale` with slope **0.62-1.04** — the 1.0 one extra
 order implies — and is down to **0.0013-0.048** by `scale = 3e-3`.
 

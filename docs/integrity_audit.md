@@ -634,3 +634,17 @@ Verification for the phase, in the tools' own words: `100% tests passed out of 2
 re-derived against the shipped price function's exact derivatives before any C++ existed, so §8 of the
 Phase 15 report, the core implementation and the three C++ test cases are three independent renderings of
 the same five polynomials.
+
+**44. A band sized from one machine rejected a machine that was not wrong.** Phase 16 gates the
+fourth-order residual's fall on a log-log slope band of 4.6-5.2, derived from four rays measured here
+(4.73-5.01). The CI runner, executing the identical committed artifact, measured 5.223 on the crash ray
+and the experiment raised. Nothing had drifted in the mathematics: the quantity being fitted is the
+*fifth*-order remainder, which is small relative to the noise of subtracting book values near 1.09e5,
+so its fitted slope carries platform-dependent slack of a few hundredths. A band whose ceiling is one
+observation plus a rounding margin is not a band around the integer, it is a copy of a laptop. The bands
+are now 3.6-4.4 and 4.6-5.6 — clear of each other, and still excluding the orders they are not claiming:
+a residual that fell with the third order reads 3.0, and the cubic's own 4.0 is not in the quartic band.
+The general form, which this file has now recorded three times in three shapes (#37, #44, and the
+`Assert in the measuring environment` rule): a tolerance derived from one measuring environment is a
+claim about that environment, and the gate that encodes it has to be sized from every environment the
+claim is going to be tested in.
