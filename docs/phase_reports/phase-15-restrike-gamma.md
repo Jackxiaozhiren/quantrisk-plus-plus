@@ -126,10 +126,14 @@ numbers, which is now part of the release checklist below.
 1. The falsification sweep has to be re-run on a clean tree after committing, because the harness
    refuses to start on a dirty target — the 19 declared defects are then proved against the revision
    the tag will name, not against a work in progress.
-2. `docs/limitations.md` #78 says `stress.run_scenario` is unchanged. If a future phase does ship a
+2. The falsification sweep ran on the committed tree afterwards: `19/19 planted defects were rejected
+   by their guard.`, with `git status` empty afterwards. Its own list is what that sentence claims, and
+   three of its anchors had to be refreshed during the phase because the prose they key on moved.
+
+3. `docs/limitations.md` #78 says `stress.run_scenario` is unchanged. If a future phase does ship a
    re-struck variant, #78, matrix row 12 and row 18, `docs/findings.md` §7 and this report all have to
    move together, and the refusal in the artifact (`order_not_changed`) has to be re-derived rather
    than edited.
-3. The crossing prediction is gated only inside `|delta| <= 0.05`. Extending that radius needs the
+4. The crossing prediction is gated only inside `|delta| <= 0.05`. Extending that radius needs the
    fourth-order terms, not a wider tolerance; if someone widens the tolerance instead, the gate stops
    meaning what it says.
