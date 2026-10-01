@@ -1,21 +1,19 @@
 {
   "schema": "quantrisk-evidence-manifest/1",
-  "generated_utc": "2026-10-01T06:14:46+00:00",
+  "generated_utc": "2026-10-01T06:30:41+00:00",
   "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
   "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with scripts/verify_evidence_manifest.py.",
   "repository": {
-    "git_commit": "7c8a3c3f54523d1289b84919885f30e8df64a7d7",
-    "git_describe": "v1.5.0-10-g7c8a3c3",
-    "working_tree_dirty": true,
-    "uncommitted_paths": [
-      "vidence/manifest.json"
-    ]
+    "git_commit": "2f9320d957e06e2aeffa50a2fd97c7825a1719f7",
+    "git_describe": "v1.5.0-14-g2f9320d",
+    "working_tree_dirty": false,
+    "uncommitted_paths": []
   },
   "environment": {
     "quantrisk_version": "1.6.0",
-    "git_commit_at_run": "7c8a3c3f5452",
+    "git_commit_at_run": "2f9320d957e0",
     "binary_git_commit": "2e79e866d7da",
-    "provenance": "ran from 7c8a3c3f5452 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 2e79e866d7da",
+    "provenance": "the working tree is clean at 2f9320d957e0 but the extension binary was configured at 2e79e866d7da; rebuild (uv pip install -e .) before trusting numbers that depend on C++ sources",
     "python_platform": "macOS-27.0.1-arm64-arm-64bit",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
@@ -649,17 +647,17 @@
       "content_sha256": "0c6bb20dd705b66b5b2a75634b88addab9426710ce749eccd65107f5938d15b3",
       "bytes": 2067,
       "generated_by_command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_utc": "2026-10-01T06:09:17.874371+00:00",
+      "generated_utc": "2026-10-01T06:29:13.594060+00:00",
       "command_recorded_in": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
     },
     {
       "path": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
       "category": "statistical_experiment",
-      "sha256": "8508436ed547b899b032c5ee7c9a3529c569b32ddd77b9e10cc2f1e2b25e106c",
+      "sha256": "9ab43497582e4d4dc7eef859dfd6f9ab45d23882fa14c78ae244304b23f499f4",
       "content_sha256": "e3b035044c0a3a1d85d1e0887da2deaa9c0e20523ba0a2fe238a57bd6c62492f",
       "bytes": 38138,
       "generated_by_command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_utc": "2026-10-01T06:09:17.874371+00:00",
+      "generated_utc": "2026-10-01T06:29:13.594060+00:00",
       "command_recorded_in": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
     },
     {
@@ -669,7 +667,7 @@
       "content_sha256": "e838970d75b36b7c65df29432eca730bde7672dea3f0feda1f6551ffc0941fe6",
       "bytes": 3495,
       "generated_by_command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_utc": "2026-10-01T06:09:17.874371+00:00",
+      "generated_utc": "2026-10-01T06:29:13.594060+00:00",
       "command_recorded_in": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
     },
     {
