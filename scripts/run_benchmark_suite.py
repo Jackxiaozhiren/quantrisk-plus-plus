@@ -501,6 +501,47 @@ MEMBERS: tuple[Member, ...] = (
             ),
         ),
     ),
+    Member(
+        key="fourth_order_crossing_map",
+        title="How far a fourth-order truncation predicts the stress map's crossing",
+        kind=EXPERIMENT,
+        script="experiments/fourth_order_crossing_map/run.py",
+        artifact="experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
+        # No `plot`, for the reason the members above give: it compares a truncation against a
+        # revaluation rather than against an oracle.
+        headline=(
+            ("delta columns swept", ("headline", "columns_swept")),
+            ("priced zeros across the columns", ("headline", "measured_zeros_total")),
+            ("cubic truncation zeros", ("headline", "cubic_zeros_total")),
+            ("quartic truncation zeros", ("headline", "quartic_zeros_total")),
+            (
+                "columns where the cubic mis-counts the crossings",
+                ("headline", "columns_where_the_cubic_zero_count_disagrees"),
+            ),
+            (
+                "columns where the quartic mis-counts the crossings",
+                ("headline", "columns_where_the_quartic_zero_count_disagrees"),
+            ),
+            (
+                "worst crossing distance, cubic, |delta| <= 0.15",
+                ("headline", "cubic_distance_max_within_the_widened_limit"),
+            ),
+            (
+                "worst crossing distance, quartic, |delta| <= 0.15",
+                ("headline", "quartic_distance_max_within_the_widened_limit"),
+            ),
+            (
+                "radius improvement factor at the widened limit",
+                ("headline", "improvement_factor_at_the_widened_limit"),
+            ),
+            ("residual slope after the cubic", ("headline", "residual_slope_cubic_span")),
+            ("residual slope after the quartic", ("headline", "residual_slope_quartic_span")),
+            (
+                "risk_off error, quartic truncation relative",
+                ("headline", "published_base_quartic_relative_error"),
+            ),
+        ),
+    ),
 )
 
 

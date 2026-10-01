@@ -246,7 +246,7 @@ never removed just because a later phase shipped.
 
 56. **Resolved on first contact: the CI lane is proven on a runner, and the runner disagreed
     with the laptop.** `benchmark-suite` passes on `ubuntu-latest` in ~5m46s with
-    `--require-all`, so all fifteen members execute against live oracles and none can be skipped
+    `--require-all`, so all sixteen members execute against live oracles and none can be skipped
     silently. What the same runner caught was not in the new lane at all: the pre-existing
     `build-and-test` lane failed on a README assertion that demanded bit-exact agreement with a
     transcribed price, and glibc's libm is 1.7 ULP from Apple's. Local green said nothing about
@@ -304,8 +304,8 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 423 pytest tests with
-    the `oracles` extra installed, and the same tree collects 354 tests without it — the CI lane
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 437 pytest tests with
+    the `oracles` extra installed, and the same tree collects 368 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -337,7 +337,7 @@ never removed just because a later phase shipped.
     no conclusion moved. The consequence is stated rather than smoothed: `verify_evidence_manifest.py`
     is a same-platform tamper check, and running it on a different libm would report CHANGED on
     result fields that are in fact the same result. CI therefore verifies *execution* on Linux (the
-    `benchmark-suite` lane runs all fifteen members with `--require-all`) and *byte equality* only on
+    `benchmark-suite` lane runs all sixteen members with `--require-all`) and *byte equality* only on
     the platform that produced the artifacts. `test_a_fresh_run_reproduces_the_committed_artifact_exactly`
     encodes the split: relative slack of 1e-12 on floats, exact equality on everything else. Making
     the chain platform-independent would require storing results at a stated precision rather than at
@@ -585,3 +585,19 @@ never removed just because a later phase shipped.
     site. One three-strike ladder, one maturity, one base volatility, and no estimate of how the
     ranking of the four maps changes for a book whose gamma moves the other way in volatility — the
     artifact's `refusals` block is that list, and `docs/analysis/restrike_gamma_map.md` §7 argues it.
+
+79. **The fourth-order crossing radius is a statement about place, not amount, and about this book.**
+    `experiments/fourth_order_crossing_map/` extends v1.5.0's column truncation to order four with the
+    mixed fourth partials this release ships, and the result has three edges. (a) What widens is the
+    *location* of the crossings: worst nearest-zero distance 0.00162 inside `|delta| <= 0.15` against
+    the cubic's 0.01887. What does not widen is the accuracy of the *amount* — on `risk_off` the
+    quartic estimate is still 16.2 % off, now from the other side, and on the shallow ray at full
+    shock size its residual is 1.38x the cubic's. Any reader who wants a predicted P&L still has to
+    re-value the book. (b) The ordering law is gated over `1e-3 <= scale <= 3e-1` because below
+    `1e-3` the residuals are differences of book values near 1.09e5 at the arithmetic floor, and a fit
+    that reaches down there returns 2.46-4.30 instead of 4.73-5.01; both fits are in the artifact so
+    the window can be audited. (c) Fourteen zeros are found by both truncations against the priced
+    error's thirteen, but the quartic's false crossing is a different one (`k = 0.164` on the
+    `delta = +0.10` column), so neither truncation is a root counter. One three-strike ladder, one
+    maturity, one base volatility, and no estimate for a book whose fourth-order terms do not share
+    these signs.

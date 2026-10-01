@@ -1,6 +1,6 @@
 # Findings
 
-Seven results worth ninety seconds. Each is a number, the confound that makes it mean
+Eight results worth ninety seconds. Each is a number, the confound that makes it mean
 something, and the artifact that regenerates it. Everything here is measured; nothing is
 asserted from a model's reputation.
 
@@ -289,6 +289,39 @@ where the shipped map's accuracy was already a coincidence.
   `asymptotics`, `mechanism`, `cancellation`, `refusals`), `restrike_gamma_map.csv`,
   `published_scenario_maps.csv`, `cancellation_columns.csv`; derivation in
   `docs/analysis/restrike_gamma_map.md`.
+
+## 8. A fourth-order truncation triples the radius, and still cannot price the amount
+
+Finding 7 explained the cells the re-strike damages: two third-order pieces of the base map's error
+cancel there, so the map looks accurate by arithmetic and the correction spends that cancellation.
+The explanation is a prediction — the zeros of the truncation, computed from closed forms alone —
+and it held only within `|delta| <= 0.05`. `experiments/fourth_order_crossing_map/` carries the same
+truncation to order four, using the mixed fourth partials this release ships, and measures two
+different things about the extra order.
+
+The **place** improves a lot. Within `|delta| <= 0.15` the nearest predicted crossing now sits inside
+the published 0.005 tolerance on every column that has one, worst **0.00162**, where the cubic's worst
+over the same columns is **0.01887** — a factor of **11.6**, and a factor of **211.6** inside the
+limit v1.5.0 already gated. The residual the cubic leaves behind falls with log-log slope
+**3.96-4.37**; the one the quartic leaves falls with **4.73-5.01**. Fourth order against fifth, which
+is the whole claim, and the ratio of the two falls with slope **0.62-1.04** against `log scale`.
+
+The **amount** does not. On `risk_off` the quartic moves the shipped map's error estimate from 22.3 %
+short to 16.2 % over — closer, but on the other side, and the order-four piece it adds (-2,046.40) is
+larger than the 1,184.92 correction the price needed. At full shock size on a shallow ray the quartic
+residual is **1.38x** the cubic's with the opposite sign. The ordering law is therefore gated to a
+third of the published shock, and the artifact publishes the through-the-floor fit next to the gated
+one so the window reads as a measurement choice rather than a favour.
+
+And the **count** barely moves: the priced error has 13 zeros across the twelve columns, the cubic
+finds 14, and so does the quartic. It repairs the cubic's three column-level mistakes — a crossing
+missed at `delta = -0.05`, one invented at `+0.05`, one invented at `+0.30` — and invents a different
+one, at `k = 0.164` on `delta = +0.10`. Two truncations with the same total and different places is
+the honest shape of the result, which is why the counts are reported rather than gated: a tolerance
+on distance alone would have hidden a false zero completely.
+
+Evidence: `experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json`,
+`docs/analysis/fourth_order_crossing_map.md`, validation matrix row 19, limitation #79.
 
 ---
 

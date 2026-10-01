@@ -153,7 +153,7 @@ command gives two numbers); fourteen benchmark-suite members execute under
 unlisted (\src{evidence/manifest.json}). The \emph{end-of-Phase-9} baseline, for contrast, was 190
 CTest entries and 310 pytest tests with no release tag and no suite at all
 (\src{docs/phase_reports/phase-09-research-api.md}). The limitations
-register contains 78 numbered entries (\src{docs/limitations.md}).
+register contains 79 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -469,7 +469,7 @@ rather than special-cased away: $T = 0$ collapses to intrinsic, $\sigma = 0$ to 
 intrinsic of the forward, and the ATM-forward call equals the ATM-forward put.
 
 Level-1 identities hold to floating-point noise. Worst put--call parity residual over the
-experiment grid is $8.12 \times 10^{-15}$ on notionals $\le 200$
+experiment grid is $8.00 \times 10^{-15}$ on notionals $\le 200$
 (\src{experiments/pricing_validation/results/summary.json}, key
 \code{worst_put_call_parity_residual}; \src{README.md}). Level-2 agreement against
 QuantLib's analytic European engine, over 2{,}464 price comparisons within an 18{,}816-row
@@ -1460,6 +1460,46 @@ recommendation, with its scope stated: re-striking gamma helps on the published 
 Nothing here changes \code{run\_scenario}; \src{docs/limitations.md}, item 78 records what a user who
 needs the residual controlled at joint published sizes must do instead.
 
+\subsection{The fourth order: a wider crossing radius, and no cheaper amount}
+\label{sec:fourth-order}
+
+The prediction above is gated only inside $|\delta| \le 0.05$, which is an argument about the region a
+third-order truncation owns rather than about the mechanism. \src{cpp/include/quantrisk/pricing/black\_scholes.hpp}
+now carries the four mixed fourth partials, each in the shape
+$V = P \cdot S^{1-n_{\text{spot}}} \cdot T^{n_{\sigma}/2} \cdot R(d_1, v) / v^3$, and
+\src{experiments/fourth\_order\_crossing\_map/run.py} adds them to the same column truncation, on the
+same book, with the cubic imported from the phase-15 experiment rather than re-typed.
+
+Two checks say the added piece is what it claims. Along four joint-shock rays scaled from published
+size to a thousandth of it, the residual the cubic leaves falls with log-log slope 3.96--4.37 and the
+residual the quartic leaves with 4.73--5.01 --- a fourth-order remainder against a fifth-order one ---
+and the ratio of the two falls with slope 0.62--1.04 against \code{log scale}, the 1.0 an extra order
+implies, and is down to 0.0013--0.048 by \code{scale} $= 3 \times 10^{-3}$. The window is part of the
+result, not a convenience: the residuals are differences of book values near $1.09 \times 10^5$, so
+below \code{scale} $= 10^{-3}$ the subtraction is at the arithmetic floor and a fit that reaches down
+there returns 2.46--4.30 instead. Both fits are in the artifact.
+
+What the extra order buys is place rather than amount. Within $|\delta| \le 0.15$ the nearest zero of
+the quartic truncation lies inside the published tolerance of 0.005 on every column that has a priced
+zero, worst distance 0.00162, where the cubic's worst over the same columns is 0.01887: a factor of
+11.6, and a factor of 211.6 inside the 0.05 limit v1.5.0 already gated (1.15e-5 against 0.00243). The
+gate is two-sided --- the quartic must pass where the cubic fails --- so the widening cannot be an
+artifact of a wider test. Beyond 0.15 both fail and the quartic fails less: 0.0323 against 0.0934 at
+$\delta = -0.30$. On the amount, the same extra order moves the \code{risk\_off} estimate of
+the shipped map's error from $-4135.87$ against a priced $-5320.79$ (22.3\,\% short) to $-6182.27$
+(16.2\,\% over): closer, on the other side, and the order-four piece it adds, $-2046.40$, is larger
+than the 1184.92 the price needed. For the re-struck map of v1.5.0 the pair reads 61.2\,\% against
+44.5\,\%. At full shock size on a shallow ray the quartic residual is 1.38x
+the cubic's with the opposite sign.
+
+The crossing \emph{count} barely moves: 13 zeros in the priced error, 14 found by the cubic and 14 by
+the quartic. The quartic repairs the cubic's three column-level mistakes --- a crossing missed at
+$\delta = -0.05$, one invented at $\delta = +0.05$, one invented at $\delta = +0.30$ --- and invents a
+different one, at $k = 0.164$ on the $\delta = +0.10$ column. The counts are reported rather than
+gated, because a tolerance on distance alone would have hidden a false zero completely. Scope: one
+three-strike ladder, one maturity, one base volatility; \src{docs/limitations.md}, item 79 and
+\src{docs/analysis/fourth\_order\_crossing\_map.md} §5 carry the rest.
+
 % ===========================================================================
 \section{Numerical Validation}
 \label{sec:validation}
@@ -1534,7 +1574,7 @@ artifact.}
 Component & Level and method & Oracle & Measured result \\
 \midrule
 Normal distribution, inverse, statistics & L1 identities; L2 dense grid & SciPy \citep{scipy2020} & max abs.\ err $< 10^{-12}$; L3 KS on 50{,}000 normals, $\chi^2$ on 80{,}000 uniforms \\
-BS price \& Greeks & L1 parity and limits; L2 live repricing & QuantLib analytic & Tables \ref{tab:bs-agreement}; parity $8.12\times10^{-15}$ \\
+BS price \& Greeks & L1 parity and limits; L2 live repricing & QuantLib analytic & Tables \ref{tab:bs-agreement}; parity $8.00\times10^{-15}$ \\
 CRR lattice & L1 $ud=1$, no-early-exercise; L2 lattice engine; L3 slope fit & QuantLib lattice engine & Table \ref{tab:crr-slopes}; corner gap read as normalised property \\
 MC European & L1 exactness identities; L2 analytic limit; L3 slope \& coverage & QuantLib analytic + NumPy/PCG64 & Tables \ref{tab:zscores}; slopes $-0.61$ to $-0.51$; 12/12 coverage \\
 Variance reduction & L3 out-of-sample MSE over seed ensembles & --- (own estimator) & $1.12$--$2.77\times$ antithetic, $1.93$--$40.47\times$ control variate \\
@@ -1705,15 +1745,15 @@ produced with. Earlier dated runs of the same script are in
 \toprule
 Implementation & mean s.\ & std.\ s. & paths/s & estimate & $z$ vs analytic \\
 \midrule
-C++ core & 0.004550 & 0.000121 & 43{,}960{,}245 & 11.14596 & $+0.537$ \\
-pure Python loop & 0.036953 & 0.000827 & 5{,}412{,}320 & 11.11229 & $-0.292$ \\
-vectorised NumPy & 0.001920 & 0.000084 & 104{,}169{,}899 & 11.11430 & $-0.242$ \\
+C++ core & 0.004349 & 0.000126 & 45{,}982{,}736 & 11.14596 & $+0.537$ \\
+pure Python loop & 0.035922 & 0.001314 & 5{,}567{,}590 & 11.11229 & $-0.292$ \\
+vectorised NumPy & 0.002085 & 0.000365 & 95{,}935{,}040 & 11.11430 & $-0.242$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The measured ratio of C++ to a pure Python loop is $8.12\times$ in the run tabulated here; against
-vectorised NumPy it is $0.422\times$, that is, NumPy is faster in this regime, and the artifact says
+The measured ratio of C++ to a pure Python loop is $8.26\times$ in the run tabulated here; against
+vectorised NumPy it is $0.479\times$, that is, NumPy is faster in this regime, and the artifact says
 so (\src{benchmarks/performance/results/monte_carlo_speed.json};
 \src{docs/phase_reports/phase-03-monte-carlo.md}). The claim is scoped by four recorded caveats in
 the same artifact. The work measured is a terminal-only draw, one normal per path, which is exactly
@@ -1774,7 +1814,7 @@ stress artifacts are byte-identical between executions
 \label{sec:limitations}
 % ===========================================================================
 
-\src{docs/limitations.md} holds 78 numbered entries, grouped by the phase that introduced them,
+\src{docs/limitations.md} holds 79 numbered entries, grouped by the phase that introduced them,
 with the rule that entries are never removed because a later phase shipped. This section
 summarises them faithfully; the file remains the authority.
 

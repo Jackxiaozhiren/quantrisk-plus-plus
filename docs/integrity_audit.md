@@ -578,3 +578,59 @@ outside it, with one column where the truncation predicts a zero the map does no
 about the reach of the analysis rather than about the map, and it is published as such:
 `docs/findings.md` §7 leads with the 45 cells, `docs/limitations.md` #78 keeps the scope, and
 `stress.run_scenario` ships unchanged.
+
+## Addendum — Phase 16, a closed form that was wrong at the tenor it was tested (2026-10-01)
+
+**40. A published derivation was wrong by a factor that equals one at the point it was checked.**
+`docs/phase_reports/phase-15-restrike-gamma.md` §8 recorded the four mixed fourth partials as groundwork
+for Phase 16, and three of the five forms carried the wrong power of `T`: `V_SSSsigma` over `S^2 v^2
+sigma T` instead of times `sqrt(T) / v^3`, and the same class of error on the two higher ones. The cause
+was one operator: `d/dsigma|S` was written dividing by `sqrt(T)` where the chain rule multiplies by it,
+because `dv/dsigma = sqrt(T)` with `v = sigma sqrt(T)`. What hid it was the verification, not the
+algebra. The probe that should have caught it ran at `T = 1`, the single maturity the re-struck-gamma
+experiment uses, and at `T = 1` the missing factor is exactly `1` — the residuals vanished and the check
+read as a pass. Re-run across tenors, the residuals were proportional to `(T - 1)` and `(T^2 + 1)`. The
+finite-difference form of the probe was then discarded for a second reason: at fourth order the `1/h^4`
+amplification of double rounding swamps the signal, worst relative residual 255. What replaced both was
+a coefficient *reconstruction*: the exact symbolic fourth derivative of the price, sampled at 80 decimal
+digits, solved as a 28-coefficient linear system and re-tested on 200 fresh points per order spanning
+`S` 40-160, `sigma` 0.08-0.60, `T` 0.08-3.0 with non-zero `r` and `q`; worst relative error 4.5e-77. Two
+rules come out of it. A factor that happens to be 1 at the tenor you test is not a factor you have
+verified. And an equality checked at one point is a transcription test, not a reading test.
+
+**41. The same reconstruction found a second, unrelated error in the same block.** `R(0,4)` had been
+committed with the opposite sign — no factor-of-one story explains that one, it was simply transcribed
+wrong. Because the new method solves for the coefficients rather than copying them from a derivation, the
+sign fell out of the linear system with the rest. Both are corrected in §8 of that report, which now
+states the uniform shape `V = P S^(1-n_spot) T^(n_sigma/2) R(d1, v) / v^3` — the shared `v^3` denominator
+and the fact that neither `r` nor `K` survives outside `d1` are what make the five forms usable in a core
+whose model is BSM with a dividend yield rather than the chart's zero-rate case.
+
+**42. A verification test asserted an identity about the wrong order, and only failed because the
+arithmetic disagreed.** The core's `MixedFourthDerivatives` is checked, in part, by differentiating the
+published homogeneity relations `vanna = V_SSS S^2 sigma T + 2 S sigma T gamma` and
+`volga = V_SSsigma S^2 sigma T + gamma S^2 T`. A third relation was written for `V_Ssigmasigmasigma` as
+"d(volga)/dS". It is not fourth order: `volga` is `d2V/dsigma2`, so one spot derivative lands on
+`V_Ssigmasigma`, the third-order partial the core already publishes. The test failed by a factor of -14
+against the number it claimed to check — which is the shape of the mistake rather than a tolerance
+problem, and is worth recording because the same slip, had the two orders coincidentally agreed at one
+point, would have produced a green test that proved nothing. Two of the four partials have an exact
+published partner; the other two have no order-four partner to differentiate into and are held by finite
+differences alone (three independent routes for each, worst residual-to-band 1.1e-2).
+
+**43. A struct was bound to Python without its function, and the parity guard could not see it.**
+`bindings/python_bindings.cpp` registers a class and a function as two separate statements. Only the
+class was added, and `test_extension_surface_parity.py` — which compares the compiled module against
+what the bindings file *declares*, in both directions — passed, because the declaration it was missing was
+also missing from the source. The detector was not a guard but the new experiment calling the function and
+raising `AttributeError`. That is the correct place for it in this case (the API is used by a producer that
+would otherwise silently publish a truncation built on nothing), but the gap is real: nothing derives
+"every public core entry point is reachable from Python". Recorded here as open rather than fixed, because
+the list of what should be reachable is a claim the repository has not made anywhere.
+
+Verification for the phase, in the tools' own words: `100% tests passed out of 201` (548,217 assertions in
+200 Catch2 cases), `437 passed` under pytest, `suite: 16/16 executed and passed`, `7/7 checks passed`,
+`ruff`/`mypy`/`clang-format` clean, `latexmk` output 42 pages. The fourth-order closed forms were also
+re-derived against the shipped price function's exact derivatives before any C++ existed, so §8 of the
+Phase 15 report, the core implementation and the three C++ test cases are three independent renderings of
+the same five polynomials.

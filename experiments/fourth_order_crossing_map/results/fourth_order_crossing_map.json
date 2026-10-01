@@ -1,0 +1,1066 @@
+{
+  "generated_at_utc": "2026-10-01T06:09:17.874371+00:00",
+  "command": "uv run python experiments/fourth_order_crossing_map/run.py",
+  "claim": "adding the four mixed fourth partials to the column truncation triples the radius overwhich it predicts the shipped map's crossing -- |delta| <= 0.15 against the cubic's 0.05, worst distance 0.00162 against 0.01887 -- and the residual it leaves falls with a fifth-order slope of 4.73-5.01 against the cubic's 3.96-4.37, but it does not make the map's error cheaper to predict at the size the documents quote: on risk_off the quartic truncation is still 16.2 % wrong, on the other side, and on one ray at full shock size its residual is 1.38x the cubic's",
+  "book": {
+    "spot": 100.0,
+    "rate": 0.03,
+    "dividend_yield": 0.0,
+    "volatility": 0.2,
+    "maturity": 0.5,
+    "strikes": [
+      90.0,
+      100.0,
+      110.0
+    ],
+    "quantity": 5000.0,
+    "base_value": 108911.1270234195,
+    "source": "imported from experiments/restrike_gamma_map/run.py"
+  },
+  "coefficients": {
+    "cubic": {
+      "speed": -6.92241371328431,
+      "vanna": 192.3282415201532,
+      "volga": 533920.629324789,
+      "gamma_sigma": -1244.7648593763263,
+      "vanna_sigma": 6483.9446779139535,
+      "volga_sigma": -6679389.594260638
+    },
+    "fourth_order": {
+      "spot_x4": -1.039015730392998,
+      "spot_spot_spot_sigma": 30.417600657839703,
+      "spot_spot_sigma_sigma": 5768.258999502625,
+      "spot_sigma_sigma_sigma": 91980.16994049917,
+      "sigma_sigma_sigma_sigma": 99004964.61571181
+    },
+    "note": "book sums of raw partials at the base market, each multiplied by the position quantity; the cubic set is v1.5.0's and is read from that module, not recomputed"
+  },
+  "truncation": {
+    "cubic": "v1.5.0's third-order column truncation, called through that experiment",
+    "quartic": "the same plus (1/24) times the fourth directional derivative along (h, k)",
+    "produced_by": "quantrisk.stress.run_scenario for the priced side; closed forms for both truncations"
+  },
+  "headline": {
+    "columns_swept": 12,
+    "joint_shocks_per_column": 11,
+    "measured_zeros_total": 13,
+    "cubic_zeros_total": 14,
+    "quartic_zeros_total": 14,
+    "columns_where_the_cubic_zero_count_disagrees": 3,
+    "columns_where_the_quartic_zero_count_disagrees": 1,
+    "cubic_count_disagreements": [
+      -0.05,
+      0.05,
+      0.3
+    ],
+    "quartic_count_disagreements": [
+      0.1
+    ],
+    "widened_limit": 0.15,
+    "tolerance": 0.005,
+    "cubic_distance_max_within_the_published_limit": 0.0024326646741319596,
+    "quartic_distance_max_within_the_published_limit": 1.1496688844848946e-05,
+    "quartic_distance_max_within_the_widened_limit": 0.0016208684077405958,
+    "cubic_distance_max_within_the_widened_limit": 0.018873008297375794,
+    "columns_the_cubic_misses_between_the_two_limits": [
+      -0.15,
+      -0.1,
+      0.1,
+      0.15
+    ],
+    "quartic_distance_max_beyond_the_widened_limit": 0.03227468405949802,
+    "cubic_distance_max_beyond_the_widened_limit": 0.09341752441547391,
+    "improvement_factor_at_the_widened_limit": 11.643763434000027,
+    "residual_slope_after_cubic": {
+      "crash (equity down, vol up)": 3.971088667733477,
+      "melt-up (equity up, vol down)": 4.025357147512217,
+      "aligned (equity up, vol up)": 4.366457010912464,
+      "shallow (equity down, vol up, a third of the size)": 3.9571222893251297
+    },
+    "residual_slope_after_quartic": {
+      "crash (equity down, vol up)": 5.014405385241662,
+      "melt-up (equity up, vol down)": 5.01222037476922,
+      "aligned (equity up, vol up)": 4.98662598381839,
+      "shallow (equity down, vol up, a third of the size)": 4.72943587528355
+    },
+    "residual_slope_cubic_span": [
+      3.9571222893251297,
+      4.366457010912464
+    ],
+    "residual_slope_quartic_span": [
+      4.72943587528355,
+      5.014405385241662
+    ],
+    "residual_slope_cubic_through_floor_span": [
+      3.536784333958202,
+      4.060485036049567
+    ],
+    "residual_slope_quartic_through_floor_span": [
+      2.458401089500844,
+      4.297403593558871
+    ],
+    "ratio_slope_span": [
+      0.6201689729059251,
+      1.043316717508185
+    ],
+    "residual_ratio_at_grid_size_span": [
+      0.2856075572434189,
+      1.3814632026872808
+    ],
+    "residual_ratio_at_the_fit_floor_span": [
+      0.0012636114761115183,
+      0.047556433795905614
+    ],
+    "rays_with_a_floor_turnaround": 4,
+    "ordering_window": [
+      0.003,
+      0.3
+    ],
+    "residual_ratio_at_grid_size": {
+      "crash (equity down, vol up)": 0.7270315988607204,
+      "melt-up (equity up, vol down)": 0.2856075572434189,
+      "aligned (equity up, vol up)": 0.9166590991203815,
+      "shallow (equity down, vol up, a third of the size)": 1.3814632026872808
+    },
+    "rays_where_the_quartic_is_worse_at_grid_size": [
+      "shallow (equity down, vol up, a third of the size)"
+    ],
+    "rays_number_of": 4,
+    "k_zero_order_four_relative_mismatch": 5.252055431897572e-16,
+    "root_finder_largest_residual_at_a_measured_zero": 1.0186340659856796e-10,
+    "published_scenario": "risk_off",
+    "published_base_priced_error": -5320.792367571179,
+    "published_base_cubic_relative_error": 0.2226969936742174,
+    "published_base_quartic_relative_error": -0.16190775137244204,
+    "published_restrike_cubic_relative_error": 0.6115036896441365,
+    "published_restrike_quartic_relative_error": -0.44458250519119735,
+    "published_order_four_piece": -2046.4019919759248,
+    "nearest_zero_distance_quartic_all": [
+      0.03227468405949802,
+      0.005479350133031397,
+      0.0016208684077405958,
+      0.0002783754541479614,
+      3.9026723058430135e-07,
+      4.079183925937563e-07,
+      1.1496688844848946e-05,
+      0.0002859752397795928,
+      0.0015956971226373864,
+      0.005419577614849749
+    ],
+    "nearest_zero_distance_cubic_all": [
+      0.09341752441547391,
+      0.0348587364364816,
+      0.018873008297375794,
+      0.008429113338523931,
+      0.0024326646741319596,
+      0.00018167485029671297,
+      0.0014966152357359895,
+      0.006658374439378528,
+      0.01607311885255295,
+      0.030873804598333235
+    ]
+  },
+  "columns": [
+    {
+      "delta": -0.3,
+      "measured_zeros": [
+        -0.0377828849476699
+      ],
+      "cubic_zeros": [
+        0.055634639467804003
+      ],
+      "quartic_zeros": [
+        -0.005508200888171873
+      ],
+      "measured_zero_count": 1,
+      "cubic_zero_count": 1,
+      "quartic_zero_count": 1,
+      "cubic_nearest_zero_distance": 0.09341752441547391,
+      "quartic_nearest_zero_distance": 0.03227468405949802,
+      "cubic_nearest_predicted_zero": [
+        0.055634639467804003,
+        -0.0377828849476699
+      ],
+      "quartic_nearest_predicted_zero": [
+        -0.005508200888171873,
+        -0.0377828849476699
+      ],
+      "priced_error_at_nearest_measured_zero": 1.0186340659856796e-10
+    },
+    {
+      "delta": -0.2,
+      "measured_zeros": [
+        0.0025398758494485614
+      ],
+      "cubic_zeros": [
+        0.037398612285930166
+      ],
+      "quartic_zeros": [
+        0.008019225982479958
+      ],
+      "measured_zero_count": 1,
+      "cubic_zero_count": 1,
+      "quartic_zero_count": 1,
+      "cubic_nearest_zero_distance": 0.0348587364364816,
+      "quartic_nearest_zero_distance": 0.005479350133031397,
+      "cubic_nearest_predicted_zero": [
+        0.037398612285930166,
+        0.0025398758494485614
+      ],
+      "quartic_nearest_predicted_zero": [
+        0.008019225982479958,
+        0.0025398758494485614
+      ],
+      "priced_error_at_nearest_measured_zero": 1.4551915228366852e-11
+    },
+    {
+      "delta": -0.15,
+      "measured_zeros": [
+        0.009418147086780787
+      ],
+      "cubic_zeros": [
+        0.02829115538415658
+      ],
+      "quartic_zeros": [
+        0.011039015494521383
+      ],
+      "measured_zero_count": 1,
+      "cubic_zero_count": 1,
+      "quartic_zero_count": 1,
+      "cubic_nearest_zero_distance": 0.018873008297375794,
+      "quartic_nearest_zero_distance": 0.0016208684077405958,
+      "cubic_nearest_predicted_zero": [
+        0.02829115538415658,
+        0.009418147086780787
+      ],
+      "quartic_nearest_predicted_zero": [
+        0.011039015494521383,
+        0.009418147086780787
+      ],
+      "priced_error_at_nearest_measured_zero": 4.3655745685100555e-11
+    },
+    {
+      "delta": -0.1,
+      "measured_zeros": [
+        0.01077826532773714
+      ],
+      "cubic_zeros": [
+        0.01920737866626107
+      ],
+      "quartic_zeros": [
+        0.011056640781885101
+      ],
+      "measured_zero_count": 1,
+      "cubic_zero_count": 1,
+      "quartic_zero_count": 1,
+      "cubic_nearest_zero_distance": 0.008429113338523931,
+      "quartic_nearest_zero_distance": 0.0002783754541479614,
+      "cubic_nearest_predicted_zero": [
+        0.01920737866626107,
+        0.01077826532773714
+      ],
+      "quartic_nearest_predicted_zero": [
+        0.011056640781885101,
+        0.01077826532773714
+      ],
+      "priced_error_at_nearest_measured_zero": 4.3655745685100555e-11
+    },
+    {
+      "delta": -0.05,
+      "measured_zeros": [
+        0.00781906344910761,
+        0.06768111585119109
+      ],
+      "cubic_zeros": [
+        0.01025172812323957
+      ],
+      "quartic_zeros": [
+        0.007819453716338194,
+        0.06885633738510659
+      ],
+      "measured_zero_count": 2,
+      "cubic_zero_count": 1,
+      "quartic_zero_count": 2,
+      "cubic_nearest_zero_distance": 0.0024326646741319596,
+      "quartic_nearest_zero_distance": 3.9026723058430135e-07,
+      "cubic_nearest_predicted_zero": [
+        0.01025172812323957,
+        0.00781906344910761
+      ],
+      "quartic_nearest_predicted_zero": [
+        0.007819453716338194,
+        0.00781906344910761
+      ],
+      "priced_error_at_nearest_measured_zero": 8.36735125631094e-11
+    },
+    {
+      "delta": -0.02,
+      "measured_zeros": [],
+      "cubic_zeros": [],
+      "quartic_zeros": [],
+      "measured_zero_count": 0,
+      "cubic_zero_count": 0,
+      "quartic_zero_count": 0,
+      "cubic_nearest_zero_distance": null,
+      "quartic_nearest_zero_distance": null,
+      "cubic_nearest_predicted_zero": null,
+      "quartic_nearest_predicted_zero": null,
+      "priced_error_at_nearest_measured_zero": null
+    },
+    {
+      "delta": 0.02,
+      "measured_zeros": [
+        -0.003307272077945643,
+        0.011037080499659976
+      ],
+      "cubic_zeros": [
+        -0.003111423171175343,
+        0.011218755349956689
+      ],
+      "quartic_zeros": [
+        -0.0033076799963382367,
+        0.011060670499004653
+      ],
+      "measured_zero_count": 2,
+      "cubic_zero_count": 2,
+      "quartic_zero_count": 2,
+      "cubic_nearest_zero_distance": 0.00018167485029671297,
+      "quartic_nearest_zero_distance": 4.079183925937563e-07,
+      "cubic_nearest_predicted_zero": [
+        0.011218755349956689,
+        0.011037080499659976
+      ],
+      "quartic_nearest_predicted_zero": [
+        -0.0033076799963382367,
+        -0.003307272077945643
+      ],
+      "priced_error_at_nearest_measured_zero": 1.0913936421275139e-11
+    },
+    {
+      "delta": 0.05,
+      "measured_zeros": [
+        -0.009945280184604464,
+        0.06270788853822035
+      ],
+      "cubic_zeros": [
+        -0.008448664948868475,
+        0.08742452588853301,
+        0.17539185248178119
+      ],
+      "quartic_zeros": [
+        -0.009933783495759616,
+        0.06177539819017373
+      ],
+      "measured_zero_count": 2,
+      "cubic_zero_count": 3,
+      "quartic_zero_count": 2,
+      "cubic_nearest_zero_distance": 0.0014966152357359895,
+      "quartic_nearest_zero_distance": 1.1496688844848946e-05,
+      "cubic_nearest_predicted_zero": [
+        -0.008448664948868475,
+        -0.009945280184604464
+      ],
+      "quartic_nearest_predicted_zero": [
+        -0.009933783495759616,
+        -0.009945280184604464
+      ],
+      "priced_error_at_nearest_measured_zero": 1.4551915228366852e-11
+    },
+    {
+      "delta": 0.1,
+      "measured_zeros": [
+        -0.024166345140307945
+      ],
+      "cubic_zeros": [
+        -0.017507970700929416
+      ],
+      "quartic_zeros": [
+        -0.023880369900528352,
+        0.16360441297226197
+      ],
+      "measured_zero_count": 1,
+      "cubic_zero_count": 1,
+      "quartic_zero_count": 2,
+      "cubic_nearest_zero_distance": 0.006658374439378528,
+      "quartic_nearest_zero_distance": 0.0002859752397795928,
+      "cubic_nearest_predicted_zero": [
+        -0.017507970700929416,
+        -0.024166345140307945
+      ],
+      "quartic_nearest_predicted_zero": [
+        -0.023880369900528352,
+        -0.024166345140307945
+      ],
+      "priced_error_at_nearest_measured_zero": 5.820766091346741e-11
+    },
+    {
+      "delta": 0.15,
+      "measured_zeros": [
+        -0.042681991206349155
+      ],
+      "cubic_zeros": [
+        -0.026608872353796206
+      ],
+      "quartic_zeros": [
+        -0.04108629408371177
+      ],
+      "measured_zero_count": 1,
+      "cubic_zero_count": 1,
+      "quartic_zero_count": 1,
+      "cubic_nearest_zero_distance": 0.01607311885255295,
+      "quartic_nearest_zero_distance": 0.0015956971226373864,
+      "cubic_nearest_predicted_zero": [
+        -0.026608872353796206,
+        -0.042681991206349155
+      ],
+      "quartic_nearest_predicted_zero": [
+        -0.04108629408371177,
+        -0.042681991206349155
+      ],
+      "priced_error_at_nearest_measured_zero": 5.820766091346741e-11
+    },
+    {
+      "delta": 0.2,
+      "measured_zeros": [
+        -0.06659599538811553
+      ],
+      "cubic_zeros": [
+        -0.035722190789782296
+      ],
+      "quartic_zeros": [
+        -0.06117641777326578
+      ],
+      "measured_zero_count": 1,
+      "cubic_zero_count": 1,
+      "quartic_zero_count": 1,
+      "cubic_nearest_zero_distance": 0.030873804598333235,
+      "quartic_nearest_zero_distance": 0.005419577614849749,
+      "cubic_nearest_predicted_zero": [
+        -0.035722190789782296,
+        -0.06659599538811553
+      ],
+      "quartic_nearest_predicted_zero": [
+        -0.06117641777326578,
+        -0.06659599538811553
+      ],
+      "priced_error_at_nearest_measured_zero": 8.731149137020111e-11
+    },
+    {
+      "delta": 0.3,
+      "measured_zeros": [],
+      "cubic_zeros": [
+        -0.053962364132414106
+      ],
+      "quartic_zeros": [],
+      "measured_zero_count": 0,
+      "cubic_zero_count": 1,
+      "quartic_zero_count": 0,
+      "cubic_nearest_zero_distance": null,
+      "quartic_nearest_zero_distance": null,
+      "cubic_nearest_predicted_zero": null,
+      "quartic_nearest_predicted_zero": null,
+      "priced_error_at_nearest_measured_zero": null
+    }
+  ],
+  "rays": {
+    "crash (equity down, vol up)": {
+      "rows": [
+        {
+          "scale": 1.0,
+          "delta": -0.15,
+          "vol_move": 0.06,
+          "priced_error": -5320.792367571179,
+          "cubic_truncation": -4135.867903348356,
+          "quartic_truncation": -6182.269895324281,
+          "order_four_piece": -2046.4019919759248,
+          "residual_after_cubic": -1184.9244642228232,
+          "residual_after_quartic": 861.4775277531016,
+          "residual_ratio_quartic_over_cubic": -0.7270315988607204
+        },
+        {
+          "scale": 0.3,
+          "delta": -0.045,
+          "vol_move": 0.018,
+          "priced_error": -76.3329936432201,
+          "cubic_truncation": -62.02684531916714,
+          "quartic_truncation": -78.60270145417213,
+          "order_four_piece": -16.575856135004997,
+          "residual_after_cubic": -14.30614832405297,
+          "residual_after_quartic": 2.2697078109520277,
+          "residual_ratio_quartic_over_cubic": -0.15865261281654414
+        },
+        {
+          "scale": 0.1,
+          "delta": -0.015,
+          "vol_move": 0.006,
+          "priced_error": 2.76056408869772,
+          "cubic_truncation": 2.955787535399984,
+          "quartic_truncation": 2.7511473362023913,
+          "order_four_piece": -0.20464019919759258,
+          "residual_after_cubic": -0.195223446702264,
+          "residual_after_quartic": 0.009416752495328584,
+          "residual_ratio_quartic_over_cubic": -0.0482357660127275
+        },
+        {
+          "scale": 0.03,
+          "delta": -0.0045,
+          "vol_move": 0.0018,
+          "priced_error": 0.5745874575964081,
+          "cubic_truncation": 0.5762221441681836,
+          "quartic_truncation": 0.5745645585546831,
+          "order_four_piece": -0.0016575856135004896,
+          "residual_after_cubic": -0.0016346865717755676,
+          "residual_after_quartic": 2.2899041724921965e-05,
+          "residual_ratio_quartic_over_cubic": -0.014008215470962994
+        },
+        {
+          "scale": 0.01,
+          "delta": -0.0015,
+          "vol_move": 0.0006,
+          "priced_error": 0.07385197197800153,
+          "cubic_truncation": 0.07387234192288339,
+          "quartic_truncation": 0.07385187790296363,
+          "order_four_piece": -2.0464019919758103e-05,
+          "residual_after_cubic": -2.0369944881859503e-05,
+          "residual_after_quartic": 9.407503789859994e-08,
+          "residual_ratio_quartic_over_cubic": -0.004618325599024014
+        },
+        {
+          "scale": 0.003,
+          "delta": -0.00045,
+          "vol_move": 0.00017999999999999998,
+          "priced_error": 0.006958546489670425,
+          "cubic_truncation": 0.00695871203904169,
+          "quartic_truncation": 0.00695854628048034,
+          "order_four_piece": -1.6575856134990602e-07,
+          "residual_after_cubic": -1.6554937126451313e-07,
+          "residual_after_quartic": 2.091900853928852e-10,
+          "residual_ratio_quartic_over_cubic": -0.0012636114761115183
+        },
+        {
+          "scale": 0.001,
+          "delta": -0.00015,
+          "vol_move": 6e-05,
+          "priced_error": 0.0007830358222378209,
+          "cubic_truncation": 0.0007830378857977175,
+          "quartic_truncation": 0.0007830358393957255,
+          "order_four_piece": -2.046401991980841e-09,
+          "residual_after_cubic": -2.063559896635196e-09,
+          "residual_after_quartic": -1.7157904654355183e-11,
+          "residual_ratio_quartic_over_cubic": 0.008314711233888852
+        }
+      ],
+      "scales": [
+        1.0,
+        0.3,
+        0.1,
+        0.03,
+        0.01,
+        0.003,
+        0.001
+      ],
+      "residual_after_cubic": [
+        -1184.9244642228232,
+        -14.30614832405297,
+        -0.195223446702264,
+        -0.0016346865717755676,
+        -2.0369944881859503e-05,
+        -1.6554937126451313e-07,
+        -2.063559896635196e-09
+      ],
+      "residual_after_quartic": [
+        861.4775277531016,
+        2.2697078109520277,
+        0.009416752495328584,
+        2.2899041724921965e-05,
+        9.407503789859994e-08,
+        2.091900853928852e-10,
+        -1.7157904654355183e-11
+      ],
+      "residual_ratio_quartic_over_cubic": [
+        0.7270315988607204,
+        0.15865261281654414,
+        0.0482357660127275,
+        0.014008215470962994,
+        0.004618325599024014,
+        0.0012636114761115183,
+        0.008314711233888852
+      ],
+      "residual_slope_after_cubic": 3.971088667733477,
+      "residual_slope_after_cubic_standard_error": 0.009859688042299322,
+      "residual_slope_after_quartic": 5.014405385241662,
+      "residual_slope_after_quartic_standard_error": 0.009300761461547397,
+      "residual_slope_cubic_through_the_floor": 3.993874535325454,
+      "residual_slope_quartic_through_the_floor": 4.250029223958376,
+      "ratio_slope_over_the_above_floor_window": 1.043316717508185,
+      "ratio_slope_standard_error": 0.007188758310096576,
+      "ratio_at_grid_size": 0.7270315988607204,
+      "ratio_at_the_fit_floor": 0.0012636114761115183,
+      "ratio_smallest": 0.0012636114761115183,
+      "ratio_largest": 0.7270315988607204,
+      "ratio_monotone_down_to_the_floor": false,
+      "floor_turnaround": true
+    },
+    "melt-up (equity up, vol down)": {
+      "rows": [
+        {
+          "scale": 1.0,
+          "delta": 0.15,
+          "vol_move": -0.06,
+          "priced_error": 2847.2565637971275,
+          "cubic_truncation": 5711.791334181319,
+          "quartic_truncation": 3665.3893422053943,
+          "order_four_piece": -2046.4019919759248,
+          "residual_after_cubic": -2864.5347703841917,
+          "residual_after_quartic": -818.1327784082669,
+          "residual_ratio_quartic_over_cubic": 0.2856075572434189
+        },
+        {
+          "scale": 0.3,
+          "delta": 0.045,
+          "vol_move": -0.018,
+          "priced_error": 185.02574378927966,
+          "cubic_truncation": 203.85995409413403,
+          "quartic_truncation": 187.28409795912904,
+          "order_four_piece": -16.575856135004983,
+          "residual_after_cubic": -18.834210304854366,
+          "residual_after_quartic": -2.258354169849383,
+          "residual_ratio_quartic_over_cubic": 0.11990702733457906
+        },
+        {
+          "scale": 0.1,
+          "delta": 0.015,
+          "vol_move": -0.006,
+          "priced_error": 12.589401333458227,
+          "cubic_truncation": 12.803446772929663,
+          "quartic_truncation": 12.59880657373207,
+          "order_four_piece": -0.20464019919759302,
+          "residual_after_cubic": -0.21404543947143573,
+          "residual_after_quartic": -0.009405240273842708,
+          "residual_ratio_quartic_over_cubic": 0.043940390867789704
+        },
+        {
+          "scale": 0.03,
+          "delta": 0.0045,
+          "vol_move": -0.0018,
+          "priced_error": 0.8404284670382367,
+          "cubic_truncation": 0.8421089435814847,
+          "quartic_truncation": 0.8404513579679842,
+          "order_four_piece": -0.0016575856135004896,
+          "residual_after_cubic": -0.0016804765432479885,
+          "residual_after_quartic": -2.2890929747498845e-05,
+          "residual_ratio_quartic_over_cubic": 0.013621689537692537
+        },
+        {
+          "scale": 0.01,
+          "delta": 0.0015,
+          "vol_move": -0.0006,
+          "priced_error": 0.08369944297282927,
+          "cubic_truncation": 0.08372000116041306,
+          "quartic_truncation": 0.0836995371404933,
+          "order_four_piece": -2.0464019919758103e-05,
+          "residual_after_cubic": -2.0558187583785692e-05,
+          "residual_after_quartic": -9.416766402758903e-08,
+          "residual_ratio_quartic_over_cubic": 0.00458054308745871
+        },
+        {
+          "scale": 0.003,
+          "delta": 0.00045,
+          "vol_move": -0.00017999999999999998,
+          "priced_error": 0.007224432869350039,
+          "cubic_truncation": 0.007224598838454991,
+          "quartic_truncation": 0.007224433079893641,
+          "order_four_piece": -1.6575856134990602e-07,
+          "residual_after_cubic": -1.659691049515563e-07,
+          "residual_after_quartic": -2.1054360165029262e-10,
+          "residual_ratio_quartic_over_cubic": 0.0012685710494838595
+        },
+        {
+          "scale": 0.001,
+          "delta": 0.00015,
+          "vol_move": -6e-05,
+          "priced_error": 0.0007928835295700765,
+          "cubic_truncation": 0.0007928855450352472,
+          "quartic_truncation": 0.0007928834986332552,
+          "order_four_piece": -2.046401991980841e-09,
+          "residual_after_cubic": -2.015465170733706e-09,
+          "residual_after_quartic": 3.093682124713504e-11,
+          "residual_ratio_quartic_over_cubic": -0.01534971762170063
+        }
+      ],
+      "scales": [
+        1.0,
+        0.3,
+        0.1,
+        0.03,
+        0.01,
+        0.003,
+        0.001
+      ],
+      "residual_after_cubic": [
+        -2864.5347703841917,
+        -18.834210304854366,
+        -0.21404543947143573,
+        -0.0016804765432479885,
+        -2.0558187583785692e-05,
+        -1.659691049515563e-07,
+        -2.015465170733706e-09
+      ],
+      "residual_after_quartic": [
+        -818.1327784082669,
+        -2.258354169849383,
+        -0.009405240273842708,
+        -2.2890929747498845e-05,
+        -9.416766402758903e-08,
+        -2.1054360165029262e-10,
+        3.093682124713504e-11
+      ],
+      "residual_ratio_quartic_over_cubic": [
+        0.2856075572434189,
+        0.11990702733457906,
+        0.043940390867789704,
+        0.013621689537692537,
+        0.00458054308745871,
+        0.0012685710494838595,
+        0.01534971762170063
+      ],
+      "residual_slope_after_cubic": 4.025357147512217,
+      "residual_slope_after_cubic_standard_error": 0.008129231108987292,
+      "residual_slope_after_quartic": 5.01222037476922,
+      "residual_slope_after_quartic_standard_error": 0.009020070712254883,
+      "residual_slope_cubic_through_the_floor": 4.0078707110430205,
+      "residual_slope_quartic_through_the_floor": 4.095412699359087,
+      "ratio_slope_over_the_above_floor_window": 0.9868632272570032,
+      "ratio_slope_standard_error": 0.016071074869559797,
+      "ratio_at_grid_size": 0.2856075572434189,
+      "ratio_at_the_fit_floor": 0.0012685710494838595,
+      "ratio_smallest": 0.0012685710494838595,
+      "ratio_largest": 0.2856075572434189,
+      "ratio_monotone_down_to_the_floor": false,
+      "floor_turnaround": true
+    },
+    "aligned (equity up, vol up)": {
+      "rows": [
+        {
+          "scale": 1.0,
+          "delta": 0.15,
+          "vol_move": 0.06,
+          "priced_error": -9953.87948822626,
+          "cubic_truncation": -11227.259483449574,
+          "quartic_truncation": -11121.134847485579,
+          "order_four_piece": 106.12463596399539,
+          "residual_after_cubic": 1273.3799952233148,
+          "residual_after_quartic": 1167.2553592593194,
+          "residual_ratio_quartic_over_cubic": 0.9166590991203815
+        },
+        {
+          "scale": 0.3,
+          "delta": 0.045,
+          "vol_move": 0.018,
+          "priced_error": -226.77048606391327,
+          "cubic_truncation": -231.68439539351476,
+          "quartic_truncation": -230.8247858422064,
+          "order_four_piece": 0.8596095513083526,
+          "residual_after_cubic": 4.913909329601495,
+          "residual_after_quartic": 4.054299778293142,
+          "residual_ratio_quartic_over_cubic": 0.8250660535940201
+        },
+        {
+          "scale": 0.1,
+          "delta": 0.015,
+          "vol_move": 0.006,
+          "priced_error": -0.9908745381726476,
+          "cubic_truncation": -1.019886532074753,
+          "quartic_truncation": -1.0092740684783534,
+          "order_four_piece": 0.010612463596399557,
+          "residual_after_cubic": 0.029011993902105404,
+          "residual_after_quartic": 0.018399530305705847,
+          "residual_ratio_quartic_over_cubic": 0.6342042662697027
+        },
+        {
+          "scale": 0.03,
+          "delta": 0.0045,
+          "vol_move": 0.0018,
+          "priced_error": 0.6871113423949282,
+          "cubic_truncation": 0.6869791702302194,
+          "quartic_truncation": 0.6870651311853502,
+          "order_four_piece": 8.596095513080382e-05,
+          "residual_after_cubic": 0.00013217216470884363,
+          "residual_after_quartic": 4.6211209578039814e-05,
+          "residual_ratio_quartic_over_cubic": 0.34962890771923494
+        },
+        {
+          "scale": 0.01,
+          "delta": 0.0015,
+          "vol_move": 0.0006,
+          "priced_error": 0.10105509633240217,
+          "cubic_truncation": 0.10105384298167346,
+          "quartic_truncation": 0.1010549042280331,
+          "order_four_piece": 1.0612463596376687e-06,
+          "residual_after_cubic": 1.2533507287165735e-06,
+          "residual_after_quartic": 1.9210436907890482e-07,
+          "residual_ratio_quartic_over_cubic": 0.15327263524681475
+        },
+        {
+          "scale": 0.003,
+          "delta": 0.00045,
+          "vol_move": 0.00017999999999999998,
+          "priced_error": 0.009873623851774482,
+          "cubic_truncation": 0.009873614826467559,
+          "quartic_truncation": 0.009873623422563071,
+          "order_four_piece": 8.596095512486412e-09,
+          "residual_after_cubic": 9.025306923690635e-09,
+          "residual_after_quartic": 4.2921141120422224e-10,
+          "residual_ratio_quartic_over_cubic": 0.047556433795905614
+        },
+        {
+          "scale": 0.001,
+          "delta": 0.00015,
+          "vol_move": 6e-05,
+          "priced_error": 0.0011217912730785429,
+          "cubic_truncation": 0.0011217911381191557,
+          "quartic_truncation": 0.0011217912442437917,
+          "order_four_piece": 1.0612463598874688e-10,
+          "residual_after_cubic": 1.3495938719874923e-10,
+          "residual_after_quartic": 2.883475121000234e-11,
+          "residual_ratio_quartic_over_cubic": 0.21365502473376358
+        }
+      ],
+      "scales": [
+        1.0,
+        0.3,
+        0.1,
+        0.03,
+        0.01,
+        0.003,
+        0.001
+      ],
+      "residual_after_cubic": [
+        1273.3799952233148,
+        4.913909329601495,
+        0.029011993902105404,
+        0.00013217216470884363,
+        1.2533507287165735e-06,
+        9.025306923690635e-09,
+        1.3495938719874923e-10
+      ],
+      "residual_after_quartic": [
+        1167.2553592593194,
+        4.054299778293142,
+        0.018399530305705847,
+        4.6211209578039814e-05,
+        1.9210436907890482e-07,
+        4.2921141120422224e-10,
+        2.883475121000234e-11
+      ],
+      "residual_ratio_quartic_over_cubic": [
+        0.9166590991203815,
+        0.8250660535940201,
+        0.6342042662697027,
+        0.34962890771923494,
+        0.15327263524681475,
+        0.047556433795905614,
+        0.21365502473376358
+      ],
+      "residual_slope_after_cubic": 4.366457010912464,
+      "residual_slope_after_cubic_standard_error": 0.06746673979922027,
+      "residual_slope_after_quartic": 4.98662598381839,
+      "residual_slope_after_quartic_standard_error": 0.016659733009107818,
+      "residual_slope_cubic_through_the_floor": 4.060485036049567,
+      "residual_slope_quartic_through_the_floor": 4.297403593558871,
+      "ratio_slope_over_the_above_floor_window": 0.6201689729059251,
+      "ratio_slope_standard_error": 0.08384123106205672,
+      "ratio_at_grid_size": 0.9166590991203815,
+      "ratio_at_the_fit_floor": 0.047556433795905614,
+      "ratio_smallest": 0.047556433795905614,
+      "ratio_largest": 0.9166590991203815,
+      "ratio_monotone_down_to_the_floor": false,
+      "floor_turnaround": true
+    },
+    "shallow (equity down, vol up, a third of the size)": {
+      "rows": [
+        {
+          "scale": 1.0,
+          "delta": -0.05,
+          "vol_move": 0.03,
+          "priced_error": -160.98699906620823,
+          "cubic_truncation": -155.80095163737968,
+          "quartic_truncation": -168.15133275652585,
+          "order_four_piece": -12.350381119146164,
+          "residual_after_cubic": -5.1860474288285445,
+          "residual_after_quartic": 7.164333690317619,
+          "residual_ratio_quartic_over_cubic": -1.3814632026872808
+        },
+        {
+          "scale": 0.3,
+          "delta": -0.015,
+          "vol_move": 0.009,
+          "priced_error": 9.031418856542587,
+          "cubic_truncation": 9.112522264783065,
+          "quartic_truncation": 9.012484177717981,
+          "order_four_piece": -0.10003808706508366,
+          "residual_after_cubic": -0.08110340824047846,
+          "residual_after_quartic": 0.0189346788246052,
+          "residual_ratio_quartic_over_cubic": -0.23346341707936955
+        },
+        {
+          "scale": 0.1,
+          "delta": -0.005000000000000001,
+          "vol_move": 0.003,
+          "priced_error": 1.7457790668745474,
+          "cubic_truncation": 1.7469344710758086,
+          "quartic_truncation": 1.745699432963894,
+          "order_four_piece": -0.0012350381119146103,
+          "residual_after_cubic": -0.0011554042012611454,
+          "residual_after_quartic": 7.963391065346492e-05,
+          "residual_ratio_quartic_over_cubic": -0.06892298865327218
+        },
+        {
+          "scale": 0.03,
+          "delta": -0.0015,
+          "vol_move": 0.0009,
+          "priced_error": 0.1803489014102979,
+          "cubic_truncation": 0.18035871030897005,
+          "quartic_truncation": 0.18034870650026355,
+          "order_four_piece": -1.0003808706499084e-05,
+          "residual_after_cubic": -9.808898672136745e-06,
+          "residual_after_quartic": 1.949100343623389e-07,
+          "residual_ratio_quartic_over_cubic": -0.01987073583663396
+        },
+        {
+          "scale": 0.01,
+          "delta": -0.0005,
+          "vol_move": 0.0003,
+          "priced_error": 0.020774166085288925,
+          "cubic_truncation": 0.020774288698207695,
+          "quartic_truncation": 0.020774165194396503,
+          "order_four_piece": -1.235038111918607e-07,
+          "residual_after_cubic": -1.2261291876952685e-07,
+          "residual_after_quartic": 8.908924223338666e-10,
+          "residual_ratio_quartic_over_cubic": -0.0072658936046409595
+        },
+        {
+          "scale": 0.003,
+          "delta": -0.00015000000000000001,
+          "vol_move": 8.999999999999999e-05,
+          "priced_error": 0.001892819581968297,
+          "cubic_truncation": 0.0018928205907508397,
+          "quartic_truncation": 0.001892819590369969,
+          "order_four_piece": -1.00038087058954e-09,
+          "residual_after_cubic": -1.00878254274267e-09,
+          "residual_after_quartic": -8.401672153129924e-12,
+          "residual_ratio_quartic_over_cubic": 0.00832852651304564
+        },
+        {
+          "scale": 0.001,
+          "delta": -5e-05,
+          "vol_move": 3e-05,
+          "priced_error": 0.000211047901878203,
+          "cubic_truncation": 0.0002110478309695266,
+          "quartic_truncation": 0.0002110478186191455,
+          "order_four_piece": -1.2350381107346584e-11,
+          "residual_after_cubic": 7.090867639152759e-11,
+          "residual_after_quartic": 8.325905749887418e-11,
+          "residual_ratio_quartic_over_cubic": 1.1741730594314443
+        }
+      ],
+      "scales": [
+        1.0,
+        0.3,
+        0.1,
+        0.03,
+        0.01,
+        0.003,
+        0.001
+      ],
+      "residual_after_cubic": [
+        -5.1860474288285445,
+        -0.08110340824047846,
+        -0.0011554042012611454,
+        -9.808898672136745e-06,
+        -1.2261291876952685e-07,
+        -1.00878254274267e-09,
+        7.090867639152759e-11
+      ],
+      "residual_after_quartic": [
+        7.164333690317619,
+        0.0189346788246052,
+        7.963391065346492e-05,
+        1.949100343623389e-07,
+        8.908924223338666e-10,
+        -8.401672153129924e-12,
+        8.325905749887418e-11
+      ],
+      "residual_ratio_quartic_over_cubic": [
+        1.3814632026872808,
+        0.23346341707936955,
+        0.06892298865327218,
+        0.01987073583663396,
+        0.0072658936046409595,
+        0.00832852651304564,
+        1.1741730594314443
+      ],
+      "residual_slope_after_cubic": 3.9571222893251297,
+      "residual_slope_after_cubic_standard_error": 0.013450163879456599,
+      "residual_slope_after_quartic": 4.72943587528355,
+      "residual_slope_after_quartic_standard_error": 0.1334136129441811,
+      "residual_slope_cubic_through_the_floor": 3.536784333958202,
+      "residual_slope_quartic_through_the_floor": 2.458401089500844,
+      "ratio_slope_over_the_above_floor_window": 0.7723135859584205,
+      "ratio_slope_standard_error": 0.14236944071561816,
+      "ratio_at_grid_size": 1.3814632026872808,
+      "ratio_at_the_fit_floor": 0.00832852651304564,
+      "ratio_smallest": 0.0072658936046409595,
+      "ratio_largest": 1.3814632026872808,
+      "ratio_monotone_down_to_the_floor": false,
+      "floor_turnaround": true
+    }
+  },
+  "published_scenario": {
+    "scenario": "risk_off",
+    "delta": -0.15,
+    "vol_move": 0.06,
+    "order_four_piece": -2046.4019919759248,
+    "base_map": {
+      "priced_error": -5320.792367571179,
+      "cubic_truncation": -4135.867903348356,
+      "quartic_truncation": -6182.269895324281,
+      "cubic_relative_error": 0.2226969936742174,
+      "quartic_relative_error": -0.16190775137244204
+    },
+    "gamma_restrike_map": {
+      "priced_error": 1937.722509756888,
+      "cubic_truncation": 3122.646973979721,
+      "quartic_truncation": 1076.2449820037964,
+      "cubic_relative_error": 0.6115036896441365,
+      "quartic_relative_error": -0.44458250519119735
+    }
+  },
+  "refusals": {
+    "radius_is_not_accuracy": "claim 2 is about where the error crosses zero; claim 4 says the amount at published size is still 16.2 % off, so neither number may be quoted as the other",
+    "one_book": "every coefficient is a sum over this three-strike ladder at one maturity and one base vol; the radius is a property of that book's fourth-order terms",
+    "zeros_are_sign_changes": "a zero is a sign change located by bracketing on a scanned interval, not a proof that the priced error has a root there; the residual at each measured zero is published so the reader can see how sharp each one is",
+    "floor_is_not_a_term": "the residual ratio stops falling at scale 1e-3 because the subtraction reaches double precision on a book near 1.09e5, not because the fifth-order term vanished",
+    "ordering_is_not_a_grid_size_claim": "the ordering law is gated over scales from 3e-3 to 3e-1 of the published shock; at full size one ray's residual grows, so nothing here says the fourth order improves the estimate of an amount at the sizes the scenarios use",
+    "counts_are_not_money": "zero counts are per column and say nothing about how large the P&L is where they sit; the distance fields are in volatility points, not currency"
+  },
+  "reproduction_policy": {
+    "conditioning_limited": [
+      "residual_after_cubic",
+      "residual_after_quartic",
+      "residual_ratio_quartic_over_cubic",
+      "measured_zeros",
+      "quartic_nearest_zero_distance",
+      "cubic_nearest_zero_distance"
+    ],
+    "why": "each is a difference of book values near 1.09e5, or a root of such a difference, so it reproduces to the conditioning of that subtraction rather than to its last digit",
+    "everything_else": "the two truncations and the order-four piece are closed forms; the priced error and the engine P&L are exact arithmetic on the shipped engine"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "platform": "darwin",
+    "packages": {
+      "quantrisk": "1.6.0"
+    }
+  }
+}

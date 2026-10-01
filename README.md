@@ -16,7 +16,7 @@ estimators with bootstrap intervals, Kupiec and Christoffersen coverage tests, t
 covariance estimators, six portfolio solvers, a scenario and stress layer with attribution,
 and an optional public-data layer that never touches the core.
 
-The seven results worth reading are in [`docs/findings.md`](docs/findings.md).
+The eight results worth reading are in [`docs/findings.md`](docs/findings.md).
 
 It is not a trading system, not a market-data product, and not a forecast. It ships no
 expected-return model, makes no recommendation, and has never been run against live prices —
@@ -59,7 +59,7 @@ instrumentation is the hard part.
 ```python
 import quantrisk
 
-quantrisk.version()  # '1.5.0'
+quantrisk.version()  # '1.6.0'
 quantrisk.normal_cdf(0.0)  # 0.5
 
 rng = quantrisk.Rng(seed=42)
@@ -128,7 +128,7 @@ Three levels, defined in [`docs/validation_protocol.md`](docs/validation_protoco
   coverage against exact binomial bands; backtest size and power over thousands of
   replications on synthetic data whose truth is known.
 
-[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full table — twenty-one rows over
+[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full table — twenty-two rows over
 those twelve components: method, oracle, the bound the test asserts, the error actually measured,
 and the artifact.
 The four that carry a first reading:
@@ -156,8 +156,8 @@ difference of the order below.
 
 ## Benchmark
 
-`uv run python scripts/run_benchmark_suite.py` runs all fifteen members — four correctness
-benchmarks, ten statistical experiments, one performance benchmark, and writes JSON, CSV, Markdown and a figure under
+`uv run python scripts/run_benchmark_suite.py` runs all sixteen members — four correctness
+benchmarks, eleven statistical experiments, one performance benchmark, and writes JSON, CSV, Markdown and a figure under
 `benchmarks/suite/results/`. No wall-clock is quoted here on purpose: `wall_seconds` is in
 the artifact, from the run that produced it.
 
@@ -169,9 +169,9 @@ the plot and the table cannot disagree.
 The performance result is deliberately unflattering. On 200,000 terminal-only paths, one
 normal per path:
 
-- **≈8× a pure Python loop** — `8.12×` in the artifact now in the tree (44.0M vs 5.4M paths/s),
+- **≈8× a pure Python loop** — `8.26×` in the artifact now in the tree (46.0M vs 5.6M paths/s),
   and `7.77×`–`8.70×` across the performance artifacts this repository has committed, and
-- **`0.422×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
+- **`0.479×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
   so the C++ core is *slower* than a NumPy `standard_normal` draw for this workload, on every
   one of those runs.
 
@@ -250,7 +250,7 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 78 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 79 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
 - **The risk layer's instrumented validation is synthetic; only one arm is real.** Six of the
