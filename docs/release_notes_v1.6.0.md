@@ -93,6 +93,7 @@ uv run python scripts/run_benchmark_suite.py --require-all   16/16 executed and 
 uv run quantrisk validate                               7/7 checks passed
 uv run --frozen clang-format --dry-run -Werror          exit 0
 uv run latexmk -pdf                                     42 pages, 998,781 bytes
+uv run python scripts/run_mutation_suite.py             20/20 planted defects rejected
 ```
 
 The suite grew from fifteen members to sixteen; the C++ suite from 198 tests to 201. The performance

@@ -83,7 +83,8 @@ Date: 2026-10-01 · Files: core + 1 experiment + 2 test files + 8 documents · S
 `uv run python scripts/run_benchmark_suite.py --require-all`, `uv run quantrisk validate`,
 `uv run python scripts/build_evidence_manifest.py`, `uv run python scripts/verify_evidence_manifest.py`,
 `uv run --frozen clang-format --dry-run -Werror` on the four touched C++ files, `uv run latexmk -pdf`,
-and `uv run python scripts/run_mutation_suite.py` on the committed tree.
+and `uv run python scripts/run_mutation_suite.py` twice on committed trees — 19/19 on the release
+commit, then 20/20 after this phase's producer-docstring guard was given its own planted defect.
 
 ## 5. Exact test results
 
