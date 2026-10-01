@@ -126,9 +126,11 @@ numbers, which is now part of the release checklist below.
 1. The falsification sweep has to be re-run on a clean tree after committing, because the harness
    refuses to start on a dirty target — the 19 declared defects are then proved against the revision
    the tag will name, not against a work in progress.
-2. The falsification sweep ran on the committed tree afterwards: `19/19 planted defects were rejected
-   by their guard.`, with `git status` empty afterwards. Its own list is what that sentence claims, and
-   three of its anchors had to be refreshed during the phase because the prose they key on moved.
+2. The falsification sweep ran on the committed tree afterwards, twice — once on `dcc9eaa` and once on
+   `e5daedc`, the head whose provenance defect the reproduction test had caught on the runner. Both
+   printed `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards. Its
+   own list is what those sentences claim, and four of its anchors had to be refreshed during the phase
+   because the prose they key on moved under them.
 
 3. `docs/limitations.md` #78 says `stress.run_scenario` is unchanged. If a future phase does ship a
    re-struck variant, #78, matrix row 12 and row 18, `docs/findings.md` §7 and this report all have to

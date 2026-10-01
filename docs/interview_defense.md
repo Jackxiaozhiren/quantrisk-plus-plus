@@ -845,9 +845,9 @@ is tested directly: `scripts/run_mutation_suite.py` plants a declared defect and
 guard that should reject it to go red. Nineteen are declared — fourteen in documents and bindings
 (counted figures, a phantom path, a renamed pybind registration, a shifted analysis-note slope), one in
 an experiment's own docstring, one that *creates* an unregistered experiment, three in the C++ closed
-forms — and every one of them is re-planted before a release. On `dcc9eaa`, the commit this phase
-shipped, the sweep printed `19/19 planted defects were rejected by their guard.` and left
-`git status` empty afterwards.
+forms — and every one of them is re-planted before a release. On `e5daedc`, the tree the tag names,
+the sweep printed `19/19 planted defects were rejected by their guard.` and left `git status` empty
+afterwards.
 
 **2 min.** The tool exists because my own sweep lied twice, and `docs/integrity_audit.md` finding 25
 records it: two of nine mutations never applied — clang-format had reflowed the expression between
@@ -969,7 +969,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | ERC condition `wᵢ(Σw)ᵢ = (wᵀΣw)/n` and "validated against independent implementation" | `docs/mathematical_specification.md` §9 |
 | Heston dynamics, Feller condition, full-truncation Euler bias, "validation weaker than Black-Scholes section" | `docs/mathematical_specification.md` §10; `docs/project_scope.md` §4 |
 | Eigen arrives in Phase 6, not before; single-thread and no-QMC limits; path-matrix memory bound | `docs/limitations.md` #8, #16, #18; `docs/model_cards/monte_carlo_gbm.md` |
-| "the tests would catch a wrong formula": nineteen planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green; the sweep's own line on `dcc9eaa` is `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
+| "the tests would catch a wrong formula": nineteen planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green; the sweep's own line on `e5daedc` is `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
 
 Anything in this file that is not in that table is an opinion about a method, not a result of
 this repository — answer it as an opinion.
