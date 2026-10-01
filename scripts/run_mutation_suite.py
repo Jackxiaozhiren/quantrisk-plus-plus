@@ -105,6 +105,18 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="the documented ratio range is the real spread, not a remembered one",
     ),
     Mutation(
+        identifier="fourth-order-docstring-quotes-a-stale-crossing-radius",
+        kind="prose",
+        path="experiments/fourth_order_crossing_map/run.py",
+        anchor="worst 0.00162",
+        replacement="worst 0.00152",
+        guard=(
+            "tests/python/test_fourth_order_crossing_map.py::"
+            "test_the_module_docstring_figures_are_the_ones_the_artifact_holds"
+        ),
+        claim="the producer's own docstring quotes the radius the artifact measured",
+    ),
+    Mutation(
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
