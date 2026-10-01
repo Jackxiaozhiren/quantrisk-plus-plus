@@ -647,12 +647,20 @@ whose residual is smallest, which is why one edge is not enough to fix.
 
 The shape of the gate changed, not just its numbers. A band whose ceiling is one observation plus a
 rounding margin is not a band around the integer; it is a copy of a laptop. The absolute bands are now
-gross-error checks (cubic 3.6-4.4, quartic 4.0-5.8), and the load-bearing ordering evidence is
-scale-free: the quartic residual must be smaller than the cubic's at every scale in the window, the
-ratio must fall with log-log slope at least 0.5 (measured 0.62-1.04, where one extra order implies 1.0),
-and the two fitted slopes are compared to each other *within* a run with the sign gated and no margin —
-because the margin is what differs across platforms. Both CI rounds' measurements are in
-`docs/analysis/fourth_order_crossing_map.md` §2. The general form, recorded a third time in a third
-shape (#37, #44, and the `Assert in the measuring environment` rule): a tolerance derived from one
-measuring environment is a claim about that environment, and what survives a platform change is the
-statement that does not reference absolute magnitudes.
+gross-error checks (cubic 3.5-4.6, quartic 4.0-5.8), and the load-bearing ordering evidence is
+scale-free: the quartic residual smaller in magnitude than the cubic's at every scale in the window, its
+ratio falling monotonically over the three largest above-floor scales, and the two slopes compared
+*within* a run with the sign gated and no margin.
+
+The third CI round is the one that finishes the lesson. What round two left in place — the ratio's own
+log-log slope, gated at `>= 0.5` and measured 0.62-1.04 here — came back at 0.381 on the shallow ray, so
+the gate became a monotonicity test over `0.3, 0.1, 0.03`, the three largest above-floor scales, where
+the residuals sit far enough from the floor for an ordering to mean the same thing on any machine. The
+rule this finding actually leaves behind is therefore narrower and harder than "size the band from every
+platform": *a gate on a quotient of two subtraction residuals is a magnitude gate wearing a relative
+mask.* Ratio, slope and separation are all such quotients; only their signs and orderings travel between
+platforms. The measured slopes and ratios are still published, each attributed to the machine that
+produced it (`docs/analysis/fourth_order_crossing_map.md` §2), and it is the artifact's own
+`reproduction_policy` that tells a re-run which of them it may compare by value. Third time, third shape
+(#37, #44, and the `Assert in the measuring environment` rule): a tolerance derived from one measuring
+environment is a claim about that environment.

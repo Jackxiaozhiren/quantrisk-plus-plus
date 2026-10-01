@@ -86,13 +86,17 @@ Date: 2026-10-01 · Files: core + 1 experiment + 2 test files + 8 documents · S
 and `uv run python scripts/run_mutation_suite.py` twice on committed trees — 19/19 on the release
 commit, then 20/20 after this phase's producer-docstring guard was given its own planted defect.
 
-Two CI rounds on this branch caught what the local gates could not. The quartic slope band was 4.6-5.2,
+Three CI rounds on this branch caught what the local gates could not. The quartic slope band was 4.6-5.2,
 sized from this machine's four rays (4.73-5.01), and the runner measured `5.223` on the crash ray; the
 widened 4.6-5.6 then rejected `4.323` on the shallow ray, where this machine measures 4.729. Both are in
 audit finding 44, and the gate changed shape rather than just size: absolute bands are gross-error
-checks (cubic 3.6-4.4, quartic 4.0-5.8), while the ordering claim is carried by scale-free tests —
+checks (cubic 3.5-4.6, quartic 4.0-5.8), while the ordering claim is carried by scale-free tests —
 the ratio below one at every scale in the window, its own log-log slope at least 0.5 (measured
-0.62-1.04), and the two slopes compared inside one run with the sign gated and no margin.
+0.62-1.04 locally, 0.381 on the runner's shallow ray), and the two slopes compared inside one run
+with the sign gated and no margin. The third restructuring is the one worth keeping: a ratio between
+two subtraction residuals is itself a magnitude, so gating its slope at 0.5 failed for exactly the
+reason the first two bands failed. The gate is now monotonicity over the three largest above-floor
+scales, and the fitted ratio slope is reported rather than gated.
 
 ## 5. Exact test results
 

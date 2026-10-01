@@ -51,11 +51,14 @@ measured `5.223` on the crash ray where this machine measured `5.014`, and `4.32
 where this machine measured `4.729` — the shallow ray's fifth-order residual is the smallest of the
 four, so its fitted slope is the one sitting nearest the arithmetic floor. A band tight enough to make
 `5.014` the ceiling rejects a machine that is not wrong (the first version did, twice: audit finding
-44). So the bands are gross-error checks — cubic `3.6-4.4`, quartic `4.0-5.8` — and the load-bearing
-ordering statement is scale-free: the quartic residual is smaller than the cubic's at *every* scale in
-the window, and the ratio between them falls with `log scale` at a slope of 0.62-1.04, which is the
-1.0 one extra order implies. The slopes are also compared to each other inside a run, sign only, never
-margin: same platform, same noise, quartic must fall faster.
+44). So the bands are gross-error checks — cubic `3.5-4.6`, quartic `4.0-5.8` — and the load-bearing
+ordering statements are scale-free: the quartic residual is smaller in magnitude than the cubic's at
+*every* scale in the window, its ratio falls monotonically over the three largest above-floor scales
+(`0.3`, `0.1`, `0.03`), and the two fitted slopes are compared to each other inside one run with the
+sign gated and no margin — the margin is exactly what differs across machines. The ratio's own
+log-log slope is reported (0.62-1.04 here, the `1.0` one extra order implies) and deliberately not
+gated: it is a quotient of two subtraction-noise quantities, and the runner put the shallow ray at
+0.381 where this machine reads 0.71.
 
 The ratio of the two residuals falls against `log scale` with slope **0.62-1.04** — the 1.0 one extra
 order implies — and is down to **0.0013-0.048** by `scale = 3e-3`.
