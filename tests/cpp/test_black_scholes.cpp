@@ -881,3 +881,264 @@ TEST_CASE("the mixed partials are identical for calls and puts and zero where th
             ValidationError);
     }
 }
+
+namespace {
+
+/// The published speed (d3V/dS3) read at a perturbed (spot, volatility) pair, so a route
+/// below can differentiate it in volatility to reach V_SSSsigma without touching it.
+Real read_spot_third(const EuropeanOption &option, const MarketParams &base, const FactorPoint at) {
+    MarketParams bumped = base;
+    bumped.spot = at.spot;
+    bumped.volatility = at.volatility;
+    return quantrisk::black_scholes_spot_derivatives(option, bumped).third;
+}
+
+/// Five-point stencil for a third derivative, used only for the volatility-only fourth
+/// partial: it is the one route that reaches that number from `black_scholes_greeks`
+/// alone, without going through either of the two structs built on top of it.
+template <typename Function>
+Real central_third_difference(const Function &f, const Real x, const Real h) {
+    return (-f(x - 2.0 * h) + 2.0 * f(x - h) - 2.0 * f(x + h) + f(x + 2.0 * h)) / (2.0 * h * h * h);
+}
+
+/// The band a third-derivative route is held to: four orders looser than a slope route,
+/// deliberately. This stencil amplifies round-off by 1/(2h^3) rather than 1/(12h), and
+/// unlike the two five-point stencils above it is only O(h^2) accurate, so at the step
+/// used below (3e-3 * sigma) its truncation term is the binding error rather than
+/// round-off. Holding it to 1e-8 would be measuring the stencil, not the formula.
+///
+/// Measured worst residual-to-band ratio over the ladder: 1.1e-2, on the
+/// `S = 150, K = 100, sigma = 0.25, T = 0.50` rung, which is where the third derivative
+/// of vega is largest. It is the loosest of the ten routes in the case below and the
+/// only one that reaches `V_sigmasigmasigmasigma` without going through either struct
+/// layered on `black_scholes_greeks`.
+Real third_difference_tolerance(const Real reference) {
+    return 1.0e-2 * std::abs(reference) + 1.0e-6;
+}
+
+} // namespace
+
+TEST_CASE("the four mixed fourth partials are finite differences taken at least two ways") {
+    /// Ten routes over nine rungs: two per partial, plus a third for each of the two
+    /// volatility-heavy ones. Measured worst residual-to-band ratio per route over the
+    /// ladder, at spot step 1e-5*S, volatility step 1e-4*sigma, curvature step 1e-3*sigma
+    /// and third-difference step 3e-3*sigma: 2.6e-3 (V_Ssigmasigmasigma via d(V_Sssss)/dS),
+    /// 2.2e-5 (V_Ssigmasigmasigma via d2(vanna)/dsigma2), and 1.1e-2 for the
+    /// third-difference route on V_sigmasigmasigmasigma. Every route therefore sits at least
+    /// 90x inside its own band, and a dropped power of `T` or `S` - the failure mode this
+    /// phase actually produced, see docs/phase_reports/phase-15-restrike-gamma.md §8 - moves
+    /// a number by percent of itself, which is three or more orders above the widest band.
+    const std::vector<MixedRung> &ladder = mixed_ladder();
+
+    for (const MixedRung &rung : ladder) {
+        const EuropeanOption option{rung.type, rung.strike};
+        const auto fourth = quantrisk::black_scholes_mixed_fourth_derivatives(option, rung.market);
+        const Real hs = 1.0e-5 * rung.market.spot;
+        const Real hv = 1.0e-4 * rung.market.volatility;
+        const Real hc = 1.0e-3 * rung.market.volatility;
+        const Real ht = 3.0e-3 * rung.market.volatility;
+        const Real spot = rung.market.spot;
+        const Real vol = rung.market.volatility;
+        CAPTURE(rung.strike, spot, vol, rung.market.maturity);
+
+        /// V_SSSsigma: the slope in volatility of the published speed, and the slope in
+        /// spot of the published V_SSsigma. Schwarz's theorem, two different core calls.
+        const Real s31_from_speed = central_slope(
+            [&](const Real v) { return read_spot_third(option, rung.market, {spot, v}); }, vol, hv);
+        const Real s31_from_ss_sigma = central_slope(
+            [&](const Real s) { return read_spot_spot_sigma(option, rung.market, {s, vol}); }, spot,
+            hs);
+
+        /// V_SSsigmasigma: d(V_SSsigma)/dsigma and d(V_Ssigmasigma)/dS.
+        const Real s22_from_ss_sigma = central_slope(
+            [&](const Real v) { return read_spot_spot_sigma(option, rung.market, {spot, v}); }, vol,
+            hv);
+        const Real s22_from_s_ss = central_slope(
+            [&](const Real s) { return read_spot_sigma_sigma(option, rung.market, {s, vol}); },
+            spot, hs);
+
+        /// V_Ssigmasigmasigma: d(V_Ssigmasigma)/dsigma, d(V_Sssss)/dS, and the curvature in
+        /// volatility of the published vanna - three routes, three different structs.
+        const Real s13_from_s_ss = central_slope(
+            [&](const Real v) { return read_spot_sigma_sigma(option, rung.market, {spot, v}); },
+            vol, hv);
+        const Real s13_from_s3 = central_slope(
+            [&](const Real s) { return read_sigma_sigma_sigma(option, rung.market, {s, vol}); },
+            spot, hs);
+        const Real s13_from_vanna = central_curvature(
+            [&](const Real v) { return read_vanna(option, rung.market, {spot, v}); }, vol, hc);
+
+        /// V_sigmasigmasigmasigma: d(V_Sssss)/dsigma, the curvature of the published volga,
+        /// and the third difference of the published vega. The last of these never touches
+        /// `VolCrossDerivatives` or `MixedThirdDerivatives` at all.
+        const Real s4_from_s3 = central_slope(
+            [&](const Real v) { return read_sigma_sigma_sigma(option, rung.market, {spot, v}); },
+            vol, hv);
+        const Real s4_from_volga = central_curvature(
+            [&](const Real v) { return read_volga(option, rung.market, {spot, v}); }, vol, hc);
+        const Real s4_from_vega = central_third_difference(
+            [&](const Real v) { return read_vega(option, rung.market, {spot, v}); }, vol, ht);
+
+        INFO("V_SSSsigma " << fourth.spot_spot_spot_sigma << " vs d(V_SSS)/dsigma "
+                           << s31_from_speed << ", d(V_SSsigma)/dS " << s31_from_ss_sigma);
+        INFO("V_SSsigmasigma " << fourth.spot_spot_sigma_sigma << " vs d(V_SSsigma)/dsigma "
+                               << s22_from_ss_sigma << ", d(V_Ssigmasigma)/dS " << s22_from_s_ss);
+        INFO("V_Ssigmasigmasigma "
+             << fourth.spot_sigma_sigma_sigma << " vs d(V_Ssigmasigma)/dsigma " << s13_from_s_ss
+             << ", d(V_Sssss)/dS " << s13_from_s3 << ", d2(vanna)/dsigma2 " << s13_from_vanna);
+        INFO("V_sigmasigmasigmasigma " << fourth.sigma_sigma_sigma_sigma << " vs d(V_Sssss)/dsigma "
+                                       << s4_from_s3 << ", d2(volga)/dsigma2 " << s4_from_volga
+                                       << ", d3(vega)/dsigma3 " << s4_from_vega);
+        CHECK(std::abs(fourth.spot_spot_spot_sigma - s31_from_speed) <=
+              slope_tolerance(s31_from_speed));
+        CHECK(std::abs(fourth.spot_spot_spot_sigma - s31_from_ss_sigma) <=
+              slope_tolerance(s31_from_ss_sigma));
+        CHECK(std::abs(fourth.spot_spot_sigma_sigma - s22_from_ss_sigma) <=
+              slope_tolerance(s22_from_ss_sigma));
+        CHECK(std::abs(fourth.spot_spot_sigma_sigma - s22_from_s_ss) <=
+              slope_tolerance(s22_from_s_ss));
+        CHECK(std::abs(fourth.spot_sigma_sigma_sigma - s13_from_s_ss) <=
+              slope_tolerance(s13_from_s_ss));
+        CHECK(std::abs(fourth.spot_sigma_sigma_sigma - s13_from_s3) <=
+              slope_tolerance(s13_from_s3));
+        CHECK(std::abs(fourth.spot_sigma_sigma_sigma - s13_from_vanna) <=
+              curvature_tolerance(s13_from_vanna));
+        CHECK(std::abs(fourth.sigma_sigma_sigma_sigma - s4_from_s3) <= slope_tolerance(s4_from_s3));
+        CHECK(std::abs(fourth.sigma_sigma_sigma_sigma - s4_from_volga) <=
+              curvature_tolerance(s4_from_volga));
+        CHECK(std::abs(fourth.sigma_sigma_sigma_sigma - s4_from_vega) <=
+              third_difference_tolerance(s4_from_vega));
+    }
+}
+
+TEST_CASE("differentiating the published homogeneity relations pins two fourth partials exactly") {
+    /// `vega = gamma S^2 sigma T` is an identity of the model, and the two routes out of it
+    /// that the third-order case uses are
+    ///     vanna = V_SSS * S^2 sigma T + 2 S sigma T gamma
+    ///     volga = V_SSsigma * S^2 sigma T + gamma S^2 T
+    /// Differentiating each once in volatility gives the two relations below, in which
+    /// exactly one new fourth-order partial appears on the right:
+    ///     d(vanna)/dsigma  = V_SSSsigma  S^2 sigma T + V_SSS S^2 T + 2 S T gamma
+    ///                        + 2 S sigma T V_SSsigma
+    ///     d(volga)/dsigma  = V_SSsigmasigma S^2 sigma T + 2 S^2 T V_SSsigma
+    /// Both left-hand sides are published third partials, so each relation solves for one
+    /// new number out of quantities the core shipped before this phase - with no bump, no
+    /// step size, and no reuse of the formula under test.
+    ///
+    /// Only two of the four new numbers have such a partner, and finding that out cost a
+    /// wrong test case. The obvious third candidate was `d(volga)/dS`, which is exactly one
+    /// spot derivative of the relation that produced the second one above. It is *not*
+    /// fourth order: `volga` is `d2V/dsigma2`, so a single spot derivative of it lands on
+    /// `V_Ssigmasigma`, the third-order partial the core already publishes. Asserting the
+    /// fourth-order `V_Ssigmasigmasigma` against that right-hand side failed by a factor of
+    /// -14 on the reference rung, which is the shape of the mistake rather than a tolerance
+    /// problem. Differentiating any further in either factor introduces a fifth-order
+    /// partial, so the remaining two numbers are held by finite differences alone - three
+    /// independent routes each, in the case above.
+    ///
+    /// Measured over the 36 (market, strike) pairs below: worst absolute residual 4.2e-17
+    /// on V_SSSsigma and 3.6e-15 on V_SSsigmasigma, worst relative 5.5e-16 and 1.2e-15. The
+    /// band is 1e-9 relative plus a 1e-12 floor, so both sit at least three orders inside
+    /// it; what is left at that level is the cancellation in the brackets, not the formula.
+    const std::vector<MarketParams> markets = {
+        params(100.0, 0.03, 0.01, 0.20, 0.50), params(100.0, 0.05, 0.00, 0.20, 1.00),
+        params(150.0, 0.03, 0.02, 0.25, 0.50), params(60.0, 0.03, 0.02, 0.35, 2.00),
+        params(100.0, 0.08, 0.06, 0.10, 0.10), params(100.0, -0.01, 0.00, 0.60, 3.00),
+    };
+    const Real relative_band = 1.0e-9;
+    Real worst_v31 = 0.0, worst_v22 = 0.0;
+    for (const MarketParams &market : markets) {
+        for (const Real strike : {80.0, 90.0, 100.0, 105.0, 110.0, 130.0}) {
+            const EuropeanOption option{OptionType::Call, strike};
+            const auto greeks = quantrisk::black_scholes_greeks(option, market);
+            const auto speed = quantrisk::black_scholes_spot_derivatives(option, market).third;
+            const auto third = quantrisk::black_scholes_mixed_third_derivatives(option, market);
+            const auto fourth = quantrisk::black_scholes_mixed_fourth_derivatives(option, market);
+            const Real s = market.spot, sig = market.volatility, t = market.maturity;
+            const Real s2sigmat = s * s * sig * t;
+
+            const Real v31_identity =
+                (third.spot_sigma_sigma - speed * s * s * t - 2.0 * s * t * greeks.gamma -
+                 2.0 * s * sig * t * third.spot_spot_sigma) /
+                s2sigmat;
+            const Real v22_identity =
+                (third.sigma_sigma_sigma - 2.0 * s * s * t * third.spot_spot_sigma) / s2sigmat;
+
+            CAPTURE(s, sig, t, strike);
+            worst_v31 = std::max(worst_v31, std::abs(fourth.spot_spot_spot_sigma - v31_identity) /
+                                                std::max(1.0e-30, std::abs(v31_identity)));
+            worst_v22 = std::max(worst_v22, std::abs(fourth.spot_spot_sigma_sigma - v22_identity) /
+                                                std::max(1.0e-30, std::abs(v22_identity)));
+            CHECK(std::abs(fourth.spot_spot_spot_sigma - v31_identity) <=
+                  relative_band *
+                          std::max(std::abs(fourth.spot_spot_spot_sigma), std::abs(v31_identity)) +
+                      1.0e-12);
+            CHECK(std::abs(fourth.spot_spot_sigma_sigma - v22_identity) <=
+                  relative_band *
+                          std::max(std::abs(fourth.spot_spot_sigma_sigma), std::abs(v22_identity)) +
+                      1.0e-12);
+        }
+    }
+    INFO("worst relative residuals: V_SSSsigma " << worst_v31 << ", V_SSsigmasigma " << worst_v22);
+    CHECK(worst_v31 < relative_band);
+    CHECK(worst_v22 < relative_band);
+}
+
+TEST_CASE(
+    "the fourth-order partials are identical for calls and puts and zero where the model is") {
+    const std::vector<MarketParams> markets = {
+        params(100.0, 0.05, 0.02, 0.2, 1.0),
+        params(70.0, 0.01, 0.05, 0.4, 0.25),
+        params(130.0, 0.08, 0.0, 0.15, 3.0),
+        params(100.0, 0.03, 0.01, 0.2, 0.5),
+    };
+    for (const MarketParams &market : markets) {
+        for (const Real strike : {80.0, 99.0, 100.0, 105.0, 130.0}) {
+            const auto call = quantrisk::black_scholes_mixed_fourth_derivatives(
+                EuropeanOption{OptionType::Call, strike}, market);
+            const auto put = quantrisk::black_scholes_mixed_fourth_derivatives(
+                EuropeanOption{OptionType::Put, strike}, market);
+            CAPTURE(market.spot, market.volatility, market.maturity, strike);
+            /// Bit-exact. The call/put difference is `S e^{-qT} - K e^{-rT}`, which
+            /// depends on neither spot nor volatility, so every partial of order two or
+            /// more across the two factors - including all four of these - cancels.
+            CHECK(call.spot_spot_spot_sigma == put.spot_spot_spot_sigma);
+            CHECK(call.spot_spot_sigma_sigma == put.spot_spot_sigma_sigma);
+            CHECK(call.spot_sigma_sigma_sigma == put.spot_sigma_sigma_sigma);
+            CHECK(call.sigma_sigma_sigma_sigma == put.sigma_sigma_sigma_sigma);
+        }
+    }
+
+    SECTION("the degenerate edges return the limit rather than an overflow") {
+        for (const MarketParams &market :
+             {params(100.0, 0.05, 0.0, 0.0, 1.0), params(100.0, 0.05, 0.0, 0.0, 0.5),
+              params(100.0, 0.05, 0.0, 0.2, 0.0)}) {
+            for (const Real strike : {90.0, 100.0, 110.0}) {
+                const EuropeanOption option{OptionType::Call, strike};
+                CAPTURE(strike, market.volatility, market.maturity);
+                CHECK_NOTHROW(quantrisk::black_scholes_mixed_fourth_derivatives(option, market));
+                const auto fourth =
+                    quantrisk::black_scholes_mixed_fourth_derivatives(option, market);
+                CHECK(fourth.spot_spot_spot_sigma == 0.0);
+                CHECK(fourth.spot_spot_sigma_sigma == 0.0);
+                CHECK(fourth.spot_sigma_sigma_sigma == 0.0);
+                CHECK(fourth.sigma_sigma_sigma_sigma == 0.0);
+            }
+        }
+    }
+
+    SECTION("invalid inputs are rejected the same way the Greeks reject them") {
+        CHECK_THROWS_AS(
+            quantrisk::black_scholes_mixed_fourth_derivatives(
+                EuropeanOption{OptionType::Call, 100.0}, params(-1.0, 0.05, 0.0, 0.2, 1.0)),
+            ValidationError);
+        CHECK_THROWS_AS(
+            quantrisk::black_scholes_mixed_fourth_derivatives(EuropeanOption{OptionType::Call, 0.0},
+                                                              params(100.0, 0.05, 0.0, 0.2, 1.0)),
+            ValidationError);
+        CHECK_THROWS_AS(
+            quantrisk::black_scholes_mixed_fourth_derivatives(
+                EuropeanOption{OptionType::Call, 100.0}, params(100.0, 0.05, 0.0, -0.2, 1.0)),
+            ValidationError);
+    }
+}

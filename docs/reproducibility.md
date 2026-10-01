@@ -71,7 +71,7 @@ uv sync --extra oracles          # interpreter 3.12, deps, and the validation or
 uv pip install -e .              # builds the C++ core and the pybind11 module
 uv run pytest -q                 # 423 tests here; see the note below — the count is not one number
 uv run cmake --preset dev && uv run cmake --build --preset dev
-uv run ctest --preset dev        # 198 C++ tests, 547,845 assertions
+uv run ctest --preset dev        # 201 C++ tests, 548,217 assertions
 uv run python scripts/run_benchmark_suite.py --require-all   # all 15 members
 uv run quantrisk validate        # 7 identity checks against the build you just made
 ```
@@ -123,7 +123,7 @@ Both numbers are guarded now.
 subprocess, asks whether the optional oracle packages are importable, and checks the figure that
 belongs to *that* environment — so the runner validates its own 284 instead of being asked to agree
 with a laptop. The first version of that guard asserted only the local number and failed on CI,
-which is the same class of error as the one it was written to prevent. The C++ side has no such split: 198 tests under
+which is the same class of error as the one it was written to prevent. The C++ side has no such split: 201 tests under
 CTest either way, because the C++ suite has no optional dependencies.
 
 ## What is *not* reproducible

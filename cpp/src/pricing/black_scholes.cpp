@@ -274,8 +274,65 @@ MixedThirdDerivatives black_scholes_mixed_third_derivatives(const EuropeanOption
     return mixed;
 }
 
-Real put_call_parity_residual(const MarketParams &market, const Real strike) {
+MixedFourthDerivatives black_scholes_mixed_fourth_derivatives(const EuropeanOption &option,
+                                                              const MarketParams &market) {
+    market.validate();
+    option.validate();
 
+    MixedFourthDerivatives mixed;
+    if (is_degenerate(market)) {
+        /// The same limit again, one order further in: with no volatility the value is
+        /// piecewise linear in the forward and flat in the volatility, so there is no
+        /// fourth-order cross term to report. Every line below divides by `v^3`, which at
+        /// `sigma == 0` or `T == 0` would be an inf rather than the limit.
+        return mixed;
+    }
+
+    const Terms terms = terms_of(market, option.strike);
+    const Real first = d1(option, market);
+    const Real root_t = std::sqrt(market.maturity);
+    const Real sigma = market.volatility;
+    const Real v = sigma * root_t;
+    const Real second = first - v;
+    const Real spot = market.spot;
+
+    /// `P = e^{-qT} phi(d1)`, the prefactor the §8 shape puts in front of all five; and
+    /// `v^3`, the denominator all five share.
+    const Real prefactor = terms.growth_discount * normal_pdf(first);
+    const Real inv_v3 = 1.0 / (v * v * v);
+
+    /// Each line is the §8 shape `P S^(1 - n_spot) T^(n_vol / 2) R(d1, v) / v^3` for one
+    /// of the four mixed numerators, written as Horner in `d1` with each coefficient a
+    /// polynomial in `v`. The numerators are the ones the report records and re-derives;
+    /// they are not restated here so that a slip has exactly one place to be fixed.
+    const Real r31 = first * (v * v + 3.0 - first * first);
+    const Real r22 =
+        first * first * second * second - 5.0 * first * first + 5.0 * first * v - v * v + 2.0;
+
+    const Real v2 = v * v;
+    const Real v3 = v2 * v;
+    const Real r13 =
+        ((((-first + 3.0 * v) * first + (7.0 - 3.0 * v2)) * first + (v3 - 12.0 * v)) * first +
+         6.0 * (v2 - 1.0)) *
+            first +
+        (3.0 * v - v3);
+    const Real r04 =
+        (((((first - 3.0 * v) * first + (3.0 * v2 - 9.0)) * first + (18.0 * v - v3)) * first +
+          12.0 * (1.0 - v2)) *
+             first +
+         3.0 * v * (v2 - 4.0)) *
+            first +
+        3.0 * v2;
+
+    mixed.spot_spot_spot_sigma = prefactor * r31 * root_t / (spot * spot) * inv_v3;
+    mixed.spot_spot_sigma_sigma = prefactor * r22 * market.maturity / spot * inv_v3;
+    mixed.spot_sigma_sigma_sigma = prefactor * r13 * (market.maturity * root_t) * inv_v3;
+    mixed.sigma_sigma_sigma_sigma =
+        prefactor * spot * r04 * (market.maturity * market.maturity) * inv_v3;
+    return mixed;
+}
+
+Real put_call_parity_residual(const MarketParams &market, const Real strike) {
     const Terms terms = terms_of(market, strike);
     return black_scholes_call(market, strike) - black_scholes_put(market, strike) -
            (terms.forward_spot - terms.discounted_strike);

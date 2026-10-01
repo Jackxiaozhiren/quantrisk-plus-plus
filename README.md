@@ -284,7 +284,7 @@ uv run pytest -m oracle      # live-oracle tests only (needs `uv sync --extra or
 
 uv run cmake --preset dev           # configure C++
 uv run cmake --build --preset dev   # build core + tests
-uv run ctest --preset dev           # 198 C++ tests, 547,845 assertions
+uv run ctest --preset dev           # 201 C++ tests, 548,217 assertions
 ```
 
 Three CI jobs run on every push: lint and format, the full build with both test suites, and

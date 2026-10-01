@@ -112,6 +112,41 @@ struct MixedThirdDerivatives {
 [[nodiscard]] MixedThirdDerivatives
 black_scholes_mixed_third_derivatives(const EuropeanOption &option, const MarketParams &market);
 
+/// The four mixed partials of total order four. With `SpotDerivatives::fourth` they
+/// are the five coefficients of the fourth directional derivative
+///     d4V/du4 = V_SSSS h^4 + 4 V_SSSsigma h^3 k + 6 V_SSsigmasigma h^2 k^2
+///               + 4 V_Ssigmasigmasigma h k^3 + V_sigmasigmasigmasigma k^4
+/// along the joint shock `(h, k)`, which is the term the third-order remainder leaves
+/// behind: the crossing radius measured in `docs/analysis/two_factor_error_bound.md`
+/// is set by how far that remainder stays smaller than the terms it corrects, so
+/// widening it needs these four numbers rather than a better estimate of the cubic.
+///
+/// Every partial of total order four has the same shape in the variables `v = sigma
+/// sqrt(T)`, `P = e^{-qT} phi(d1)` and `d2 = d1 - v`:
+///     V = P * S^(1 - n_spot) * T^(n_vol / 2) * R(d1, v) / v^3
+/// for a numerator polynomial `R`, with `v^3` the denominator in all five and neither
+/// `r` nor `K` surviving anywhere but inside `d1`. The polynomials themselves, and the
+/// two independent ways they were verified, are recorded in
+/// docs/phase_reports/phase-15-restrike-gamma.md §8; each field below is the derivative
+/// of a partial this file already publishes, which is what makes the Catch2 cross-checks
+/// checks rather than restatements.
+///
+/// Same regularity as the third-order struct: `S, K, sigma, T > 0`, and the `v^3`
+/// denominator means the degenerate case returns the limit rather than an overflow.
+struct MixedFourthDerivatives {
+    /// V_SSSsigma: d(V_SSS)/dsigma, and d(V_SSsigma)/dS.
+    Real spot_spot_spot_sigma = 0.0;
+    /// V_SSsigmasigma: d(V_SSsigma)/dsigma, and d(V_Ssigmasigma)/dS.
+    Real spot_spot_sigma_sigma = 0.0;
+    /// V_Ssigmasigmasigma: d(V_Ssigmasigma)/dsigma, and d(V_Ssigmasigmasigma)/dS.
+    Real spot_sigma_sigma_sigma = 0.0;
+    /// V_sigmasigmasigmasigma: d(V_sigmasigmasigmasigma)/dsigma.
+    Real sigma_sigma_sigma_sigma = 0.0;
+};
+
+[[nodiscard]] MixedFourthDerivatives
+black_scholes_mixed_fourth_derivatives(const EuropeanOption &option, const MarketParams &market);
+
 /// Put-call parity residual `C - P - (S e^{-qT} - K e^{-rT})`, which must be
 /// zero for any correct implementation of the same model.
 [[nodiscard]] Real put_call_parity_residual(const MarketParams &market, Real strike);

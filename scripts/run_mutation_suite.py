@@ -156,8 +156,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-overcounts-the-cpp-suite",
         kind="prose",
         path="README.md",
-        anchor="# 198 C++ tests",
-        replacement="# 199 C++ tests",
+        anchor="# 201 C++ tests",
+        replacement="# 202 C++ tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_cpp_tests_agree_with_the_build"

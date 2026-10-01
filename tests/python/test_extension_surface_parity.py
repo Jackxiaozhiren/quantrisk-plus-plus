@@ -235,8 +235,16 @@ def test_the_parser_recognises_the_surface_it_claims_to_have_read() -> None:
     assert {"vanna", "volga"} <= classes["pricing"]["VolCrossDerivatives"]
     third = {"spot_spot_sigma", "spot_sigma_sigma", "sigma_sigma_sigma"}
     assert third <= classes["pricing"]["MixedThirdDerivatives"]
+    fourth = {
+        "spot_spot_spot_sigma",
+        "spot_spot_sigma_sigma",
+        "spot_sigma_sigma_sigma",
+        "sigma_sigma_sigma_sigma",
+    }
+    assert fourth <= classes["pricing"]["MixedFourthDerivatives"]
     assert "black_scholes_vol_cross_derivatives" in functions["pricing"]
     assert "black_scholes_mixed_third_derivatives" in functions["pricing"]
+    assert "black_scholes_mixed_fourth_derivatives" in functions["pricing"]
 
 
 def test_the_statement_split_follows_a_declaration_the_formatter_broke() -> None:
