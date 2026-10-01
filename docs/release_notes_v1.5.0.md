@@ -82,7 +82,7 @@ Read out of the commands, on the working tree that becomes this tag:
 
 ```text
 uv run ctest --preset dev          100% tests passed out of 198
-uv run --frozen pytest -q          422 passed in 22.74s
+uv run --frozen pytest -q          422 passed in 23.58s
 uv run python scripts/run_benchmark_suite.py --require-all
                                    suite: 15/15 executed and passed, 0 aggregated from disk,
                                    0 failed, 0 skipped, 77.0s total

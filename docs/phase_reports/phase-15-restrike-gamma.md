@@ -104,7 +104,7 @@ Every line below was read out of a command that had already returned; none was w
 | gate | command | what it printed |
 | --- | --- | --- |
 | C++ | `uv run cmake --preset dev && --build --preset dev`, `uv run ctest --preset dev` | `100% tests passed out of 198`, `Total Test time (real) = 8.32 sec` |
-| Python | `uv run --frozen pytest -q` | `422 passed in 22.74s` (411 before the phase; 353 collected without the `oracles` extra) |
+| Python | `uv run --frozen pytest -q` | `422 passed in 23.58s` (411 before the phase; 353 collected without the `oracles` extra) |
 | Suite | `uv run python scripts/run_benchmark_suite.py --require-all` | `suite: 15/15 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 77.0s total` |
 | Identities | `uv run quantrisk validate` | `7/7 checks passed` |
 | Evidence | `uv run python scripts/build_evidence_manifest.py` then `verify_evidence_manifest.py` | `80 OK`, `0 CHANGED`, `0 VOLATILE`, `0 MISSING`, `0 on disk but not in the manifest`, `Evidence is intact.` |
