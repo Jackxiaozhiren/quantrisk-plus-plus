@@ -146,3 +146,23 @@ printing `19/19 planted defects were rejected by their guard.` with `git status`
 both times. Neither printed the tagged commit's own sha: every head since `e5daedc` changes prose
 about the sweep and the release only, and no result file, so a re-run there would re-plant the same
 19 defects against the same 19 guards.
+
+## 7. The heads after the tag, by what the API said about each
+
+The tag is not the end of the history, and a release record that stops at the tag leaves the reader to
+guess whether the later commits were ever run. GitHub Actions, queried per head:
+
+| head | what it changed | run | verdict |
+| --- | --- | --- | --- |
+| `2ad5405` | **the tagged commit** — anchors and the count of anchors | `36811258118` | `completed / success`, all three jobs |
+| `e5daedc` | the duplicate provenance owner, removed | `36811131549` | `completed / cancelled` — superseded mid-run by the next push |
+| `1f0ed1e` | naming the head the sweep re-ran on | `36811230046` | `completed / cancelled`, same cause |
+| `7ae977f` | the release record itself | `36812286425` | `completed / cancelled`, same cause |
+| `15bcb35` | this section's predecessor: discharged duty removed from §5 | `36812527633` | `completed / success` — `Configure, build, C++ tests, Python tests`, `Format and static checks` and `Benchmark suite against live oracles` all `success`, Sonar `neutral` |
+
+Three of the four post-tag heads were cancelled by a newer push before their runner finished, which is
+what the platform does to a branch that keeps moving; their *content* was docs prose, and the head that
+carries the last of it (`15bcb35`) finished green, so the paragraph above is evidence rather than
+assumption. The commit that adds this table cannot report its own run for the same reason the release
+note cannot contain its own publication, and no further commit is made to chase that verdict: it is
+read from the API instead.
