@@ -182,3 +182,40 @@ gh api "repos/Jackxiaozhiren/quantrisk-plus-plus/commits/<sha>/check-runs" \
 
 — and the same command answers for any head added after this line was written, which is why the table is
 a snapshot with a query beside it rather than a list that goes stale the moment it is committed.
+
+## 8. Phase 16 groundwork: the fourth-order partials, derived and verified but not yet shipped
+
+Item 2 of §5 says extending the crossing radius needs fourth-order terms. That derivation was done
+here so it is not lost between sessions. With `v = sigma sqrt(T)`, `P = e^{-qT} phi(d1)` and
+`d2 = d1 - v`, the five partials of total order four are
+
+    V_SSSS     = P (d1^2 + 3 d1 v + 2 v^2 - 1) / (S^3 v^3)
+    V_SSSsigma = P d1 (v^2 + 3 - d1^2) / (S^2 v^2 sigma T)
+    V_SSsigmasigma
+               = P (d1^2 d2^2 - 5 d1^2 + 5 d1 v - v^2 + 2) / (S T v^3)
+    V_Ssigmasigmasigma
+               = P (-d1^5 + 3 d1^4 v - 3 d1^3 v^2 + 7 d1^3 + d1^2 v^3 - 12 d1^2 v
+                    + 6 d1 v^2 - 6 d1 - v^3 + 3 v) / (sigma^3 T^3)
+    V_sigmasigmasigmasigma
+               = P S (-d1^6 + 3 d1^5 v - 3 d1^4 v^2 + 9 d1^4 + d1^3 v^3 - 18 d1^3 v
+                      + 12 d1^2 v^2 - 12 d1^2 - 3 d1 v^3 + 12 d1 v - 3 v^2) / (sigma^4 T^2 v^3)
+
+They were produced by applying the two chart operators
+`d/dS|sigma = (1/(S v)) d/dd1` and `d/dsigma|S = ((1 - d1/v) d/dd1 + d/dv)/sqrt(T)` to the price, in
+the `(d1, v)` coordinate where `S = K exp(d1 v - v^2 / 2)` and every logarithm disappears. The
+derivation is checked rather than trusted: the first line, obtained by the same operators, is
+symbolically identical to the closed form `tests/cpp/test_black_scholes.cpp` already verifies for
+`SpotDerivatives::fourth`, so the chart and the operator conventions are the core's, not a parallel
+invention. Homogeneity is consistent throughout: a partial with `n` spot derivatives carries
+`S^{1-n}`, which is why the third line has `1/S`, the fourth none, and the fifth `S`.
+
+**Not shipped.** No core file, binding, test or artifact was touched by this section: the four new
+mixed partials need `MixedFourthDerivatives` in `cpp/include/quantrisk/pricing/black_scholes.hpp`,
+implementations, pybind registration, the `.pyi`, and the C++ checks the project requires of a closed
+form — finite differences of the price, the `d/dsigma` and `d/dS` relations back to the third-order
+quantities, and call/put equality wherever the spot order is at least two. A numerical probe in this
+session supports the effort: the residual of the third-order truncation scales at local log-log
+slopes 3.96, 3.98, 3.99 (`delta = +0.05`) and 4.08, 4.05, 4.03 (`+0.15`), i.e. it genuinely is a
+fourth-order term, while at `|delta| = 0.30` the same probe reads 5.64, 2.23, 3.53 and 4.65, 4.43,
+4.26 — the scaling is not clean that far out, which is the honest reason to expect the radius to grow
+rather than the crossing to become exact everywhere.
