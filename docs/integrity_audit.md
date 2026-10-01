@@ -635,16 +635,24 @@ re-derived against the shipped price function's exact derivatives before any C++
 Phase 15 report, the core implementation and the three C++ test cases are three independent renderings of
 the same five polynomials.
 
-**44. A band sized from one machine rejected a machine that was not wrong.** Phase 16 gates the
+**44. A band sized from one machine rejected a machine that is not wrong — twice.** Phase 16 gates the
 fourth-order residual's fall on a log-log slope band of 4.6-5.2, derived from four rays measured here
 (4.73-5.01). The CI runner, executing the identical committed artifact, measured 5.223 on the crash ray
-and the experiment raised. Nothing had drifted in the mathematics: the quantity being fitted is the
-*fifth*-order remainder, which is small relative to the noise of subtracting book values near 1.09e5,
-so its fitted slope carries platform-dependent slack of a few hundredths. A band whose ceiling is one
-observation plus a rounding margin is not a band around the integer, it is a copy of a laptop. The bands
-are now 3.6-4.4 and 4.6-5.6 — clear of each other, and still excluding the orders they are not claiming:
-a residual that fell with the third order reads 3.0, and the cubic's own 4.0 is not in the quartic band.
-The general form, which this file has now recorded three times in three shapes (#37, #44, and the
-`Assert in the measuring environment` rule): a tolerance derived from one measuring environment is a
-claim about that environment, and the gate that encodes it has to be sized from every environment the
-claim is going to be tested in.
+and the experiment raised. The band was widened to 4.6-5.6 on the theory that the ceiling was the
+problem; the next CI round failed on the *floor* instead, with 4.323 on the shallow ray where this
+machine measured 4.729. Nothing had drifted in the mathematics either time: the quantity fitted is the
+fifth-order remainder, which is small relative to the noise of subtracting book values near 1.09e5, so
+its fitted slope carries platform slack of a few tenths — and the slack is largest exactly on the ray
+whose residual is smallest, which is why one edge is not enough to fix.
+
+The shape of the gate changed, not just its numbers. A band whose ceiling is one observation plus a
+rounding margin is not a band around the integer; it is a copy of a laptop. The absolute bands are now
+gross-error checks (cubic 3.6-4.4, quartic 4.0-5.8), and the load-bearing ordering evidence is
+scale-free: the quartic residual must be smaller than the cubic's at every scale in the window, the
+ratio must fall with log-log slope at least 0.5 (measured 0.62-1.04, where one extra order implies 1.0),
+and the two fitted slopes are compared to each other *within* a run with the sign gated and no margin —
+because the margin is what differs across platforms. Both CI rounds' measurements are in
+`docs/analysis/fourth_order_crossing_map.md` §2. The general form, recorded a third time in a third
+shape (#37, #44, and the `Assert in the measuring environment` rule): a tolerance derived from one
+measuring environment is a claim about that environment, and what survives a platform change is the
+statement that does not reference absolute magnitudes.

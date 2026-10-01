@@ -151,19 +151,27 @@ FIT_FLOOR = 0.003
 # showing up as physics.
 ORDERING_CEILING = 0.3
 
-# The bands each residual's slope is required to fall in. A cubic truncation of a two-variable
-# expansion leaves a fourth-order remainder, and a quartic one leaves a fifth-order remainder; those
-# are the integers, and each band sits clear of the other so the test is "fourth against fifth"
-# rather than "both near five".
+# Two gates, because one machine does not get to fix an absolute band.
 #
-# The slack is sized from two platforms, not from one. On this machine the quartic slopes measured
-# 4.73-5.01 and the CI runner measured 5.223 on the same crash ray from the same committed artifact;
-# the fifth-order term is small next to the noise of subtracting book values near 1.09e5, so a band
-# tightened to the local span (an earlier version used 4.6-5.2) rejects a machine that is not wrong.
-# A dropped order still lands outside: the cubic's own 4.0 is not in the quartic band, and a
-# residual that fell with the third order would read 3.0.
+# The load-bearing one is `MINIMUM_SLOPE_SEPARATION`: in the same run, on the same platform, with
+# the
+# same subtraction noise, the quartic residual must fall *faster* than the cubic one. That is the
+# ordering claim: a cubic truncation leaves a fourth-order remainder, a quartic one a fifth-order
+# one,
+# expressed without referencing what either slope happens to measure.
+#
+# The absolute bands are then gross-error checks, and the quartic's is deliberately loose. Two
+# platforms, running the identical committed artifact, put its fitted slope between 4.323 (the
+# shallow
+# ray, whose fifth-order residual is the smallest, closest to the arithmetic floor) and 5.223
+# (the crash ray); this machine's four rays read 4.73-5.01. An earlier version gated 4.6-5.2 on
+# local span alone and the CI runner rejected it twice -- see docs/integrity_audit.md finding 44. A
+# dropped order is still caught: a residual that fell with the third order reads 3.0 and cannot
+# clear
+# the cubic band, and one that fell with the fourth reads 4.0 and cannot separate from it.
 CUBIC_SLOPE_BAND = (3.6, 4.4)
-QUARTIC_SLOPE_BAND = (4.6, 5.6)
+QUARTIC_SLOPE_BAND = (4.0, 5.8)
+MINIMUM_SLOPE_SEPARATION = 0.0  # the sign only: the margin is what differs by platform
 
 FOURTH_FIELDS = (
     "spot_spot_spot_sigma",
@@ -531,6 +539,14 @@ def main() -> int:
                     f"the {order} residual on {label} falls with slope {value:.3f}, outside the "
                     f"{band[0]}-{band[1]} band that makes it a {named}-order remainder"
                 )
+        quartic = stat["residual_slope_after_quartic"]
+        cubic = stat["residual_slope_after_cubic"]
+        if quartic - cubic <= MINIMUM_SLOPE_SEPARATION:
+            raise RuntimeError(
+                f"the quartic residual on {label} falls only {quartic - cubic:.3f} orders faster "
+                f"than the cubic ({quartic:.3f} against {cubic:.3f}): the added piece is not one "
+                "order higher"
+            )
     not_improved = [
         (label, row["scale"])
         for label, rows in rays.items()
@@ -662,6 +678,12 @@ def main() -> int:
             min(stat["residual_slope_quartic_through_the_floor"] for stat in ray_stats.values()),
             max(stat["residual_slope_quartic_through_the_floor"] for stat in ray_stats.values()),
         ],
+        "residual_slope_separation": {
+            label: ray_stats[label]["residual_slope_after_quartic"]
+            - ray_stats[label]["residual_slope_after_cubic"]
+            for label in rays
+        },
+        "minimum_slope_separation": MINIMUM_SLOPE_SEPARATION,
         "ratio_slope_span": [min(ratio_slopes), max(ratio_slopes)],
         "residual_ratio_at_grid_size_span": [
             min(stat["ratio_at_grid_size"] for stat in ray_stats.values()),

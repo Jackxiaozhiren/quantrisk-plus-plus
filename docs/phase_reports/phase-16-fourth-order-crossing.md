@@ -86,11 +86,13 @@ Date: 2026-10-01 · Files: core + 1 experiment + 2 test files + 8 documents · S
 and `uv run python scripts/run_mutation_suite.py` twice on committed trees — 19/19 on the release
 commit, then 20/20 after this phase's producer-docstring guard was given its own planted defect.
 
-The first CI round on this branch caught one thing the local gates could not: the quartic slope band
-was 4.6-5.2, sized from this machine's four rays (4.73-5.01), and the runner measured `5.223` on the
-crash ray from the same committed artifact, so the experiment raised. The bands are now 3.6-4.4 and
-4.6-5.6 (audit finding 44) — clear of each other, and still excluding the third order at 3.0 and the
-cubic's 4.0 from the quartic band.
+Two CI rounds on this branch caught what the local gates could not. The quartic slope band was 4.6-5.2,
+sized from this machine's four rays (4.73-5.01), and the runner measured `5.223` on the crash ray; the
+widened 4.6-5.6 then rejected `4.323` on the shallow ray, where this machine measures 4.729. Both are in
+audit finding 44, and the gate changed shape rather than just size: absolute bands are gross-error
+checks (cubic 3.6-4.4, quartic 4.0-5.8), while the ordering claim is carried by scale-free tests —
+the ratio below one at every scale in the window, its own log-log slope at least 0.5 (measured
+0.62-1.04), and the two slopes compared inside one run with the sign gated and no margin.
 
 ## 5. Exact test results
 

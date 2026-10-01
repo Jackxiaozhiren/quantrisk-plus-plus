@@ -45,12 +45,17 @@ residual-ratio back upward at that scale. The gated window is therefore `1e-3 <=
 the through-the-floor fit sits next to it in the artifact so the choice is auditable rather than
 asserted.
 
-The bands around those slopes are sized from two platforms rather than one. The CI runner measured
-`5.223` on the crash ray from the same committed artifact where this machine measured `5.014`; a band
-tight enough to call `5.014` the ceiling rejects a machine that is not wrong, so the quartic band runs
-`4.6-5.6` and the cubic band `3.6-4.4`, clear of each other. What the bands still exclude is the
-*order*: a residual that fell with the third order reads 3.0, and the cubic's own 4.0 sits outside
-the quartic band.
+The bands around those slopes are sized from two platforms rather than one, because the slopes are the
+least reproducible numbers in this artifact. The CI runner, on the identical committed artifact,
+measured `5.223` on the crash ray where this machine measured `5.014`, and `4.323` on the shallow ray
+where this machine measured `4.729` — the shallow ray's fifth-order residual is the smallest of the
+four, so its fitted slope is the one sitting nearest the arithmetic floor. A band tight enough to make
+`5.014` the ceiling rejects a machine that is not wrong (the first version did, twice: audit finding
+44). So the bands are gross-error checks — cubic `3.6-4.4`, quartic `4.0-5.8` — and the load-bearing
+ordering statement is scale-free: the quartic residual is smaller than the cubic's at *every* scale in
+the window, and the ratio between them falls with `log scale` at a slope of 0.62-1.04, which is the
+1.0 one extra order implies. The slopes are also compared to each other inside a run, sign only, never
+margin: same platform, same noise, quartic must fall faster.
 
 The ratio of the two residuals falls against `log scale` with slope **0.62-1.04** — the 1.0 one extra
 order implies — and is down to **0.0013-0.048** by `scale = 3e-3`.
