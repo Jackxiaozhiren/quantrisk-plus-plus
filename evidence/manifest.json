@@ -1,19 +1,19 @@
 {
   "schema": "quantrisk-evidence-manifest/1",
-  "generated_utc": "2026-10-01T06:30:41+00:00",
+  "generated_utc": "2026-10-01T06:43:45+00:00",
   "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
   "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with scripts/verify_evidence_manifest.py.",
   "repository": {
-    "git_commit": "2f9320d957e06e2aeffa50a2fd97c7825a1719f7",
-    "git_describe": "v1.5.0-14-g2f9320d",
+    "git_commit": "a9b0d23b1f067aa7420bd9157337b302dd7d1cbb",
+    "git_describe": "v1.5.0-16-ga9b0d23",
     "working_tree_dirty": false,
     "uncommitted_paths": []
   },
   "environment": {
     "quantrisk_version": "1.6.0",
-    "git_commit_at_run": "2f9320d957e0",
+    "git_commit_at_run": "a9b0d23b1f06",
     "binary_git_commit": "2e79e866d7da",
-    "provenance": "the working tree is clean at 2f9320d957e0 but the extension binary was configured at 2e79e866d7da; rebuild (uv pip install -e .) before trusting numbers that depend on C++ sources",
+    "provenance": "the working tree is clean at a9b0d23b1f06 but the extension binary was configured at 2e79e866d7da; rebuild (uv pip install -e .) before trusting numbers that depend on C++ sources",
     "python_platform": "macOS-27.0.1-arm64-arm-64bit",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
@@ -647,17 +647,17 @@
       "content_sha256": "0c6bb20dd705b66b5b2a75634b88addab9426710ce749eccd65107f5938d15b3",
       "bytes": 2067,
       "generated_by_command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_utc": "2026-10-01T06:29:13.594060+00:00",
+      "generated_utc": "2026-10-01T06:42:53.335251+00:00",
       "command_recorded_in": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
     },
     {
       "path": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
       "category": "statistical_experiment",
-      "sha256": "9ab43497582e4d4dc7eef859dfd6f9ab45d23882fa14c78ae244304b23f499f4",
-      "content_sha256": "e3b035044c0a3a1d85d1e0887da2deaa9c0e20523ba0a2fe238a57bd6c62492f",
-      "bytes": 38138,
+      "sha256": "ee0efd6a20d7a1afa3f7d6d7b94dde1fe018672e32e014db5382b85f76f5a7bf",
+      "content_sha256": "f95fc216c515797296338bffcec01e3be2db5e919bebd00080dcd2416ecbf091",
+      "bytes": 38468,
       "generated_by_command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_utc": "2026-10-01T06:29:13.594060+00:00",
+      "generated_utc": "2026-10-01T06:42:53.335251+00:00",
       "command_recorded_in": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
     },
     {
@@ -667,7 +667,7 @@
       "content_sha256": "e838970d75b36b7c65df29432eca730bde7672dea3f0feda1f6551ffc0941fe6",
       "bytes": 3495,
       "generated_by_command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_utc": "2026-10-01T06:29:13.594060+00:00",
+      "generated_utc": "2026-10-01T06:42:53.335251+00:00",
       "command_recorded_in": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
     },
     {
@@ -873,7 +873,7 @@
   ],
   "totals": {
     "artifacts": 83,
-    "bytes": 7054703,
+    "bytes": 7055033,
     "by_category": {
       "correctness_benchmark": 8,
       "performance_benchmark": 1,
