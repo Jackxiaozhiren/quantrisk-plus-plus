@@ -108,7 +108,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
-        anchor="`7.99×`",
+        anchor="`8.12×`",
         replacement="`8.01×`",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -180,7 +180,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 353 Python tests",
+        anchor="# 354 Python tests",
         replacement="# 344 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"

@@ -528,3 +528,20 @@ def test_every_figure_the_note_and_the_finding_quote_is_in_the_artifact() -> Non
         )
         for label, value in claims.items():
             assert value in text, f"{name} does not print {label} as {value!r}"
+
+
+def test_the_provenance_is_recorded_once() -> None:
+    """The interpreter and the optional extras belong to `environment`, and nowhere else.
+
+    The first version of this artifact also carried a top-level `package_versions`. Nothing
+    disagreed with it locally, but the offline CI lane installs none of the oracle extras and runs
+    a different patch release of Python, so the reproduction test compared a copy that had been
+    popped on one side and not the other, and went red on `.package_versions.python:
+    '3.12.14' != '3.12.3'`. A second owner of a provenance block is not merely untidy: its value
+    depends on which machine read it, so the single owner is asserted rather than trusted.
+    """
+    payload = _payload()
+    assert "package_versions" not in payload
+    packages = payload["environment"]["packages"]
+    assert packages["python"]
+    assert packages["quantrisk"] == quantrisk.version()

@@ -25,7 +25,7 @@
       "version": "1.5.0"
     }
   },
-  "generated_at_utc": "2026-10-01T02:58:51+00:00",
+  "generated_at_utc": "2026-10-01T03:28:37+00:00",
   "host_environment": {
     "binary_git_commit": "cf053f1f42fd",
     "cpp_arch": "arm64",
@@ -34,8 +34,8 @@
     "cpp_flags": "(none)",
     "cpp_os": "Darwin 27.0.0",
     "cpp_standard": "C++20",
-    "generated_at_utc": "2026-10-01T02:58:51+00:00",
-    "git_commit": "cf053f1f42fd",
+    "generated_at_utc": "2026-10-01T03:28:37+00:00",
+    "git_commit": "cbd4e5e72431",
     "packages": {
       "PyPortfolioOpt": "1.6.0",
       "QuantLib": "1.43",
@@ -50,15 +50,11 @@
       "scipy": "1.18.1",
       "statsmodels": "0.15.0"
     },
-    "provenance": "ran from cf053f1f42fd plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at cf053f1f42fd",
+    "provenance": "ran from cbd4e5e72431 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at cf053f1f42fd",
     "python_machine": "arm64",
     "python_platform": "macOS-27.0.1-arm64-arm-64bit",
     "quantrisk_version": "1.5.0",
     "uncommitted_paths": [
-      ".github/workflows/ci.yml",
-      "CITATION.cff",
-      "CMakeLists.txt",
-      "README.md",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
@@ -67,41 +63,24 @@
       "benchmarks/suite/results/suite_headline.csv",
       "benchmarks/suite/results/suite_run.json",
       "benchmarks/suite/results/suite_summary.md",
-      "docs/analysis/restrike_gamma_map.md",
-      "docs/findings.md",
-      "docs/integrity_audit.md",
       "docs/interview_defense.md",
       "docs/limitations.md",
-      "docs/phase_reports/phase-15-restrike-gamma.md",
-      "docs/release_notes_v1.3.0.md",
-      "docs/release_notes_v1.4.0.md",
-      "docs/release_notes_v1.5.0.md",
       "docs/reproducibility.md",
-      "docs/validation_matrix.md",
-      "evidence/manifest.json",
       "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
       "experiments/monte_carlo_convergence/results/convergence.csv",
       "experiments/monte_carlo_convergence/results/summary.json",
       "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
       "experiments/pricing_validation/results/summary.json",
       "experiments/real_data_risk_study/results/real_data_risk_study.json",
-      "experiments/restrike_gamma_map/",
+      "experiments/restrike_gamma_map/results/restrike_gamma_map.json",
+      "experiments/restrike_gamma_map/run.py",
       "experiments/stress_testing/results/stress_testing_study.json",
       "experiments/two_factor_error_bound/results/two_factor_bound.json",
-      "experiments/two_factor_error_bound/run.py",
       "experiments/var_backtesting/results/var_backtesting_validation.json",
       "experiments/variance_reduction/results/summary.json",
       "experiments/variance_reduction/results/variance_by_method.csv",
-      "paper/technical_report.pdf",
-      "paper/technical_report.tex",
-      "pyproject.toml",
-      "scripts/build_evidence_manifest.py",
-      "scripts/run_benchmark_suite.py",
       "scripts/run_mutation_suite.py",
-      "tests/python/test_artifact_metadata.py",
-      "tests/python/test_mutation_suite.py",
-      "tests/python/test_restrike_gamma_map.py",
-      "uv.lock"
+      "tests/python/test_restrike_gamma_map.py"
     ],
     "working_tree_dirty": true
   },
@@ -127,33 +106,33 @@
   },
   "results_seconds": {
     "cpp": {
-      "max_seconds": 0.004612334000057672,
-      "mean_seconds": 0.004430047571434313,
-      "min_seconds": 0.004386041999964618,
-      "paths_per_second_mean": 45146242.06061204,
+      "max_seconds": 0.004793832999894221,
+      "mean_seconds": 0.004549565142951906,
+      "min_seconds": 0.0044281250002313755,
+      "paths_per_second_mean": 43960245.3675899,
       "repetitions": 7,
-      "std_seconds": 8.15046925657513e-05
+      "std_seconds": 0.00012055876912690002
     },
     "numpy": {
-      "max_seconds": 0.002644957999905273,
-      "mean_seconds": 0.0019779344285422796,
-      "min_seconds": 0.0018445829999791385,
-      "paths_per_second_mean": 101115586.6008148,
+      "max_seconds": 0.0020982500000172877,
+      "mean_seconds": 0.0019199404286415042,
+      "min_seconds": 0.0018607090000841708,
+      "paths_per_second_mean": 104169898.71999016,
       "repetitions": 7,
-      "std_seconds": 0.00029457888791592187
+      "std_seconds": 8.380815010643715e-05
     },
     "python": {
-      "max_seconds": 0.03558512500001143,
-      "mean_seconds": 0.035401636857143,
-      "min_seconds": 0.03525995799998327,
-      "paths_per_second_mean": 5649456.289466624,
+      "max_seconds": 0.038548667000213754,
+      "mean_seconds": 0.036952732142838486,
+      "min_seconds": 0.035829124999963824,
+      "paths_per_second_mean": 5412319.696062322,
       "repetitions": 7,
-      "std_seconds": 0.00011388584176727711
+      "std_seconds": 0.0008273265634886854
     }
   },
-  "speedup_vs_numpy": 0.44648153245494043,
-  "speedup_vs_pure_python": 7.9912543344723135,
-  "speedup_vs_pure_python_using_min": 8.039129128327478,
+  "speedup_vs_numpy": 0.4220052616711813,
+  "speedup_vs_pure_python": 8.12225586001003,
+  "speedup_vs_pure_python_using_min": 8.091263231749714,
   "z_score_vs_analytic": {
     "cpp": 0.5370189339461992,
     "numpy": -0.24212669161997663,

@@ -85,7 +85,6 @@ from quantrisk import stress as STRESS
 from quantrisk.experiments.metadata import (
     artifact_manifest,
     environment,
-    package_versions,
     repo_relative,
     utc_timestamp,
 )
@@ -936,7 +935,6 @@ def main() -> int:
             "everything_else": "exact for counts and verdicts, 1e-5 relative for other floats",
         },
         "environment": environment(),
-        "package_versions": package_versions(),
         "artifacts": artifact_manifest([grid_csv, published_csv, cancellation_csv]),
         "csv_rows": len(rows),
     }

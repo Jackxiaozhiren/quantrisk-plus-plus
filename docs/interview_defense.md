@@ -41,7 +41,7 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 198 C++ tests under CTest (547,845 assertions in 197 Catch2
-cases), 422 pytest tests with the `oracles` extra and the same tree collects 353 tests without
+cases), 423 pytest tests with the `oracles` extra and the same tree collects 354 tests without
 it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
 revision's figure on the runner rather than trusting arithmetic here. 15/15 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
@@ -403,8 +403,8 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 198 C++ tests (547,845 assertions in 197 cases) and 422
-Python tests with the validation oracles installed — 353 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
+variance reduction. Today that is 198 C++ tests (547,845 assertions in 197 cases) and 423
+Python tests with the validation oracles installed — 354 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -437,9 +437,9 @@ in `/tmp` with the commit and the full command list recorded.
 ### Q12. Why use C++ instead of pure Python?
 
 **30 s.** For the hot loops and the memory layout, with a measured number rather than a belief:
-45,146,242 paths/s in the C++ core versus 5,649,456 paths/s in an equivalent pure-Python loop —
-7.99× on this machine. The same measurement gives vectorised NumPy 101,115,587 paths/s, i.e.
-C++ is 0.446× of NumPy for one-normal-per-path work, so the honest claim is narrower than "C++ is
+43,960,245 paths/s in the C++ core versus 5,412,320 paths/s in an equivalent pure-Python loop —
+8.12× on this machine. The same measurement gives vectorised NumPy 104,169,899 paths/s, i.e.
+C++ is 0.422× of NumPy for one-normal-per-path work, so the honest claim is narrower than "C++ is
 faster than Python".
 
 **2 min.** Three reasons the boundary is where it is. (1) The regime where C++ genuinely wins is
@@ -458,8 +458,8 @@ binding plus tests in both suites.
 `benchmarks/performance/results/monte_carlo_speed.json`: terminal-only European call
 (`S = K = 100`, `r = 5 %`, `q = 2 %`, `σ = 25 %`, `T = 1`), 200,000 paths per run, 7
 repetitions, single-threaded, `CMAKE_BUILD_TYPE=Release`, AppleClang 21.0.0.21000334, arm64.
-Means: C++ 0.004430 s (std 8.15e-5), pure Python 0.035402 s (std 1.14e-4), NumPy 0.001978 s
-(std 2.95e-4); speedups 7.99× versus pure Python, 0.446× versus NumPy. Those are the digits in the
+Means: C++ 0.004550 s (std 1.21e-4), pure Python 0.036953 s (std 8.27e-4), NumPy 0.001920 s
+(std 8.38e-5); speedups 8.12× versus pure Python, 0.422× versus NumPy. Those are the digits in the
 frozen artifact, and they are not constants: across the fifteen re-freezings in this repository's
 history the C++/Python ratio spans 7.77×–8.70× and the NumPy ratio 0.42×–0.51×, so the answer above
 quotes a run and the claim is the ordering. Three caveats shipped in
@@ -782,7 +782,7 @@ allocates `paths × (steps + 1)` doubles. And buy accuracy before cores: control
 1.93×–40.47× and antithetic 1.12×–2.77× realised-MSE improvement at equal path budget.
 
 **2 min.** Terminal-only European work is embarrassingly parallel and memory-light; at the
-measured 45,146,242 paths/s single-threaded, 20,000,000 terminal paths is 0.44 s of the same loop
+measured 43,960,245 paths/s single-threaded, 20,000,000 terminal paths is 0.45 s of the same loop
 (arithmetic on the measured rate, which I would re-measure rather than claim). Path-dependent
 work is the memory-bound case — the model card bounds path counts at about 1e6 × 250 on a laptop,
 so a per-worker buffer plus a running payoff is the first real change, and it is already listed
@@ -926,7 +926,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 ```bash
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 198 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 353 Python tests
+  .venv/bin/python -m pytest -q                                          # 354 Python tests
 uv run python scripts/run_mutation_suite.py                            # 18/18 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
@@ -939,9 +939,9 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | Claim in this file | Source to check |
 |---|---|
 | What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (66 entries) |
-| 190 C++ / 330 Python tests at `v1.0.0`, 198 / 422 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
+| 190 C++ / 330 Python tests at `v1.0.0`, 198 / 423 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
 | BS worst abs 1.49e-13 / rel 3.46e-11; Greeks abs 7.97e-15 … 5.12e-13; rel rho 1.07e-07; 18,816 rows; floors 1e-4 / 1e-6; oracle config (AnalyticEuropeanEngine, Actual365Fixed, day → `days/365`) | `benchmarks/quantlib/results/pricing_vs_quantlib.json` |
-| Put-call parity worst residual 7.99e-15; worst analytic-vs-FD delta 1.17e-4 | `experiments/pricing_validation/results/summary.json` (`worst_*` keys) |
+| Put-call parity worst residual 8.12e-15; worst analytic-vs-FD delta 1.17e-4 | `experiments/pricing_validation/results/summary.json` (`worst_*` keys) |
 | CRR slopes −0.99405 / −1.00544 / −0.99244 / −0.999674 with SEs; relative errors at N = 3200 | `experiments/pricing_validation/results/summary.json` (`crr_convergence_slope`, `final_lattice_relative_error`) |
 | Lattice mutual-gap property (`mutual < 0.2 * our_error`); ~1.3e-4 at N = 50; corner gaps 1.819909 / 0.456807 / 0.46 reading | `tests/python/test_pricing_vs_quantlib.py:151-191`; `docs/limitations.md` #12; `docs/model_cards/crr_binomial.md` |
 | SciPy agreement `< 1e-12` on `x ∈ [-8, 8]`, 1,601 points; KS on 50,000 normals; chi-square on 80,000 uniforms | `tests/python/test_normal_vs_scipy.py`; `docs/phase_reports/phase-01-engineering-foundation.md` §6 |
@@ -949,7 +949,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | Coverage 12/12 inside the exact `Binomial(200, level)` band; example cell 191/200 in [181, 197] | `experiments/monte_carlo_convergence/results/summary.json` (`coverage`, `coverage_intervals_inside_binomial_band`); band construction `run.py:184-188` |
 | Pooled z-scores vs QuantLib analytic (492 rows, 4 scenarios × 3 methods × 40 seeds, 200,000 paths): means −0.0228 / +0.0503 / +0.0310, stds 1.0139 / 0.9232 / 0.9304, 96.25 %–98.75 % inside ±2; `quantlib_mc_engine_used: false` | `benchmarks/quantlib/results/monte_carlo_validation.json` |
 | Out-of-sample MSE reductions: antithetic 1.1155×–2.7741×, control variate 1.9313×–40.468×; 40 seeds; in-sample-`beta` caveat | `experiments/variance_reduction/results/summary.json` (+ `realised_error.csv`); `docs/limitations.md` #19 |
-| Speed: C++ 0.004430 s / 45,146,242 paths/s, pure Python 0.035402 s / 5,649,456, NumPy 0.001978 s / 101,115,587; 7.99× and 0.446×, with the 7.77×–8.70× / 0.42×–0.51× history range; 7 repetitions; three estimates and z-scores; caveats list | `benchmarks/performance/results/monte_carlo_speed.json` |
+| Speed: C++ 0.004550 s / 43,960,245 paths/s, pure Python 0.036953 s / 5,412,320, NumPy 0.001920 s / 104,169,899; 8.12× and 0.422×, with the 7.77×–8.70× / 0.42×–0.51× history range; 7 repetitions; three estimates and z-scores; caveats list | `benchmarks/performance/results/monte_carlo_speed.json` |
 | Antithetic `iid_units = paths / 2`; odd path count throws; pair product identity to 1e-12; drift not negated | `cpp/src/monte_carlo/engine.cpp:87-97,142-154`; `cpp/src/stochastic/gbm.cpp:74-88,104-109`; `tests/cpp/test_monte_carlo.cpp:96-110`; `tests/cpp/test_gbm.cpp:128-167` |
 | Control-variate exactness identity (price to 1e-12, SE < 1e-12, `beta ≈ 1`) and constant-payoff discount factor to 1e-15 | `tests/cpp/test_monte_carlo.cpp:142-168`; `cpp/src/monte_carlo/engine.cpp:57-85` |
 | Physical measure is a separate code path, and `mu = r` reproduces the risk-neutral stream bit-for-bit | `cpp/src/stochastic/gbm.cpp:113-127`; `tests/cpp/test_gbm.cpp:170-186`; convention in `docs/project_scope.md` §10 |

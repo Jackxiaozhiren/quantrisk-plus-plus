@@ -469,7 +469,7 @@ rather than special-cased away: $T = 0$ collapses to intrinsic, $\sigma = 0$ to 
 intrinsic of the forward, and the ATM-forward call equals the ATM-forward put.
 
 Level-1 identities hold to floating-point noise. Worst put--call parity residual over the
-experiment grid is $7.99 \times 10^{-15}$ on notionals $\le 200$
+experiment grid is $8.12 \times 10^{-15}$ on notionals $\le 200$
 (\src{experiments/pricing_validation/results/summary.json}, key
 \code{worst_put_call_parity_residual}; \src{README.md}). Level-2 agreement against
 QuantLib's analytic European engine, over 2{,}464 price comparisons within an 18{,}816-row
@@ -1534,7 +1534,7 @@ artifact.}
 Component & Level and method & Oracle & Measured result \\
 \midrule
 Normal distribution, inverse, statistics & L1 identities; L2 dense grid & SciPy \citep{scipy2020} & max abs.\ err $< 10^{-12}$; L3 KS on 50{,}000 normals, $\chi^2$ on 80{,}000 uniforms \\
-BS price \& Greeks & L1 parity and limits; L2 live repricing & QuantLib analytic & Tables \ref{tab:bs-agreement}; parity $7.99\times10^{-15}$ \\
+BS price \& Greeks & L1 parity and limits; L2 live repricing & QuantLib analytic & Tables \ref{tab:bs-agreement}; parity $8.12\times10^{-15}$ \\
 CRR lattice & L1 $ud=1$, no-early-exercise; L2 lattice engine; L3 slope fit & QuantLib lattice engine & Table \ref{tab:crr-slopes}; corner gap read as normalised property \\
 MC European & L1 exactness identities; L2 analytic limit; L3 slope \& coverage & QuantLib analytic + NumPy/PCG64 & Tables \ref{tab:zscores}; slopes $-0.61$ to $-0.51$; 12/12 coverage \\
 Variance reduction & L3 out-of-sample MSE over seed ensembles & --- (own estimator) & $1.12$--$2.77\times$ antithetic, $1.93$--$40.47\times$ control variate \\
@@ -1705,15 +1705,15 @@ produced with. Earlier dated runs of the same script are in
 \toprule
 Implementation & mean s.\ & std.\ s. & paths/s & estimate & $z$ vs analytic \\
 \midrule
-C++ core & 0.004430 & 0.000082 & 45{,}146{,}242 & 11.14596 & $+0.537$ \\
-pure Python loop & 0.035402 & 0.000114 & 5{,}649{,}456 & 11.11229 & $-0.292$ \\
-vectorised NumPy & 0.001978 & 0.000295 & 101{,}115{,}587 & 11.11430 & $-0.242$ \\
+C++ core & 0.004550 & 0.000121 & 43{,}960{,}245 & 11.14596 & $+0.537$ \\
+pure Python loop & 0.036953 & 0.000827 & 5{,}412{,}320 & 11.11229 & $-0.292$ \\
+vectorised NumPy & 0.001920 & 0.000084 & 104{,}169{,}899 & 11.11430 & $-0.242$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The measured ratio of C++ to a pure Python loop is $7.99\times$ in the run tabulated here; against
-vectorised NumPy it is $0.446\times$, that is, NumPy is faster in this regime, and the artifact says
+The measured ratio of C++ to a pure Python loop is $8.12\times$ in the run tabulated here; against
+vectorised NumPy it is $0.422\times$, that is, NumPy is faster in this regime, and the artifact says
 so (\src{benchmarks/performance/results/monte_carlo_speed.json};
 \src{docs/phase_reports/phase-03-monte-carlo.md}). The claim is scoped by four recorded caveats in
 the same artifact. The work measured is a terminal-only draw, one normal per path, which is exactly

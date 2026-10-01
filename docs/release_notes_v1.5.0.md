@@ -82,17 +82,18 @@ Read out of the commands, on the working tree that becomes this tag:
 
 ```text
 uv run ctest --preset dev          100% tests passed out of 198
-uv run --frozen pytest -q          422 passed in 23.58s
+uv run --frozen pytest -q          423 passed (wall-clock quoted in the phase report,
+                                   because it is a per-run measurement, not a result)
 uv run python scripts/run_benchmark_suite.py --require-all
                                    suite: 15/15 executed and passed, 0 aggregated from disk,
-                                   0 failed, 0 skipped, 77.0s total
+                                   0 failed, 0 skipped, 77.7s total
 uv run quantrisk validate          7/7 checks passed
 uv run python scripts/verify_evidence_manifest.py
                                    80 OK, 0 CHANGED, 0 VOLATILE, 0 MISSING,
                                    0 on disk but not in the manifest -- Evidence is intact.
 uv run ruff check .                All checks passed!
 uv run mypy python/quantrisk       Success: no issues found in 23 source files
-latexmk -pdf technical_report.tex  Output written on technical_report.pdf (43 pages, 970468 bytes)
+latexmk -pdf technical_report.tex  Output written on technical_report.pdf (43 pages, 970663 bytes)
 ```
 
 `git diff --name-only HEAD -- '*.cpp' '*.hpp'` is empty: the core does not change in this release, so

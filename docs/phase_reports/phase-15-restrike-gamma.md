@@ -104,19 +104,19 @@ Every line below was read out of a command that had already returned; none was w
 | gate | command | what it printed |
 | --- | --- | --- |
 | C++ | `uv run cmake --preset dev && --build --preset dev`, `uv run ctest --preset dev` | `100% tests passed out of 198`, `Total Test time (real) = 8.32 sec` |
-| Python | `uv run --frozen pytest -q` | `422 passed in 23.58s` (411 before the phase; 353 collected without the `oracles` extra) |
-| Suite | `uv run python scripts/run_benchmark_suite.py --require-all` | `suite: 15/15 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 77.0s total` |
+| Python | `uv run --frozen pytest -q` | `423 passed in 23.48s` on the run recorded here; the count, not the seconds, is the claim (411 before the phase, and 354 collected without the `oracles` extra) |
+| Suite | `uv run python scripts/run_benchmark_suite.py --require-all` | `suite: 15/15 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 77.7s total` |
 | Identities | `uv run quantrisk validate` | `7/7 checks passed` |
 | Evidence | `uv run python scripts/build_evidence_manifest.py` then `verify_evidence_manifest.py` | `80 OK`, `0 CHANGED`, `0 VOLATILE`, `0 MISSING`, `0 on disk but not in the manifest`, `Evidence is intact.` |
 | Style/types | `ruff format --check .`, `ruff check .`, `mypy python/quantrisk` | `129 files already formatted`, `All checks passed!`, `Success: no issues found in 23 source files` |
 | C++ format | `git diff --name-only HEAD -- '*.cpp' '*.hpp'` | empty — the core is untouched this phase, so the clang-format gate has nothing new to check |
-| Report | `latexmk -pdf technical_report.tex` in `paper/` | `Output written on technical_report.pdf (43 pages, 970468 bytes)` |
+| Report | `latexmk -pdf technical_report.tex` in `paper/` | `Output written on technical_report.pdf (43 pages, 970663 bytes)` |
 
 Two things the gate set caught while the phase was still open, both recorded above in §1.7:
 the band guard that could reject the measurement it was derived from (audit finding 37), and the
 `spot`-ignoring helper that the new experiment inherited and then outgrew (finding 38). A third catch
 was quieter: refreshing the volatile speed figures for the second time moved `README.md`'s quoted ratio
-from `7.98×` to `7.99×`, and the mutation harness failed its own self-test on the stale anchor
+from `7.98×` to `8.12×`, and the mutation harness failed its own self-test on the stale anchor
 `readme-quotes-a-stale-speedup` before any human could have signed off on a sweep that would have
 planted nothing. Anchors over regenerated numbers have to be refreshed in the same commit as the
 numbers, which is now part of the release checklist below.
