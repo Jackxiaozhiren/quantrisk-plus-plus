@@ -40,7 +40,12 @@ claimed to be inside that release.
    differential is asserted in the test, not argued in prose. On disk: `scripts/run_mutation_suite.py`
    carries a 22nd plant, `core-declares-a-function-nobody-binds`, which edits a real header and must be
    rejected by this guard's node.
-6. **The documents.** Audit addendum closing finding 43 (and the two things the claim does *not* cover),
+6. **The fifth-order pre-check, converted from a note into a gate.** Phase 16 §8 asked whether the
+   residual an order-five truncation would remove is above the subtraction noise of a book near 1.09e5 or
+   is the noise itself. It is measured per ray in
+   `test_the_residual_the_quartic_leaves_is_a_measurable_fifth_order_term`, with the cubic truncation's
+   identical statistic as the foil inside the same test. §8 item 2 records the answer.
+7. **The documents.** Audit addendum closing finding 43 (and the two things the claim does *not* cover),
    limitation #80, the count of numbered limitations carried by the six live documents that quote it,
    `docs/reproducibility.md` and `docs/limitations.md` #79(d)-(e) restored to the family-declared gate
    (an earlier bulk edit had reverted them), `docs/interview_defense.md` Q27 and its citation row, this
@@ -83,9 +88,11 @@ covers the same ground by checking the committed bytes.
 ```text
 cmake --build --preset dev     52 steps after touching every header, exit 0, 0 warning lines
 ctest --preset dev             100% tests passed out of 201     Total Test time (real) = 10.54 sec
-pytest tests/python -q         446 passed in 22.30s
+pytest tests/python -q         447 passed in 30.28s
 pytest ...tension_surface_parity.py -q
                                13 passed in 0.24s
+pytest ...h_order_crossing_map.py -q
+                               17 passed in 0.52s
 ruff check .                   All checks passed!
 ruff format --check .          134 files already formatted
 mypy python/quantrisk          Success: no issues found in 23 source files
@@ -122,18 +129,26 @@ against the rebuilt extension.
 
 ## 8. Technical debt
 
-1. **Two research items remain from Phase 16 §8**, untouched by this phase: the crossing radius on a
-   second book (different convexity signs and maturities, to see whether `|delta| <= 0.15` is a property
-   of the model or of this ladder), and a fifth-order noise pre-check before anyone ships order-five
-   partials — the order-four residual at `1e-3` is already at the subtraction floor of a book near 1.09e5,
-   so the fifth order may be measuring arithmetic.
-2. **Uniform `[[nodiscard]]`** would retire the inventory test in §1 item 4. Estimated at a few dozen
-   declarations plus the call sites the compiler then warns about.
-3. **The sweep's count is prose in two places** (`docs/interview_defense.md` names nineteen planted defects
-   as a historical statement about `e5daedc`, which stays true; the current number is only in the harness's
-   own output). A guard that recomputed the count from `MUTATIONS` and refused a stale sentence would be
-   the same class of fix as this phase's limitation-count guard, at the cost of turning a historical claim
-   into a live one — which `docs/integrity_audit.md` says not to do to a record.
+1. **One research item survives from Phase 16 §8 unchanged:** the crossing radius on a second book --
+   different convexity signs, another maturity -- to test whether `|delta| <= 0.15` is a property of the
+   model or of this three-strike ladder. It is the higher-value of the two remaining directions precisely
+   because the pre-check below removed the doubt from the other one.
+2. **The fifth-order pre-check is now a test, not a note.**
+   `test_the_residual_the_quartic_leaves_is_a_measurable_fifth_order_term` answers what Phase 16 §8 left
+   open: the residual the quartic truncation leaves scales as a fifth-order term over every step whose
+   residual stays above 50 ULPs of the book (local order 4.70-5.00 here, 15 usable steps, at least three
+   per ray), and the published-size residual sits about ten orders of magnitude above the subtraction
+   floor. So order five would be measuring the expansion, not the arithmetic. Its own foil is in the same
+   test: the identical statistic on the *cubic* residual -- a fourth-order term -- falls below 4.5 on
+   every ray, so the band can fail. What the pre-check does not settle is the payoff, which needs the
+   order-five coefficients before it can be measured rather than extrapolated.
+3. **Uniform `[[nodiscard]]`** would retire the inventory test of §1 item 4 -- a few dozen declarations,
+   plus the call sites the compiler then warns about.
+4. **The sweep's count is prose in two places.** `docs/interview_defense.md` names nineteen planted
+   defects as a historical statement about `e5daedc`, which stays true; the current number lives only in
+   the harness's own output. A guard that recomputed it from `MUTATIONS` and refused a stale sentence
+   would repeat this phase's limitation-count fix, at the cost of turning a historical claim into a live
+   one -- which `docs/integrity_audit.md` says not to do to a record.
 
 ## 9. Gate
 

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import math
 import subprocess
 import sys
 from collections.abc import Callable
@@ -715,3 +716,70 @@ def test_the_exemption_does_not_reach_a_count_a_closed_form_or_a_shape_change() 
     dropped = _fresh()
     dropped["columns"][0]["measured_zeros"].pop()
     assert _compare(dropped), "a zero missing from an exempt family went unnoticed"
+
+
+def test_the_residual_the_quartic_leaves_is_a_measurable_fifth_order_term(experiment) -> None:
+    """The pre-check Phase 16 §8 asked for before anyone writes order five.
+
+    That note was a question -- is the next order's residual above the subtraction noise, or would
+    implementing six more closed forms be measuring arithmetic? -- and here it is answered by
+    measurement. Along each ray the residual the quartic truncation leaves is scaled down, and for
+    every step whose residual still sits well above one unit in the last place of a book near
+    1.09e5, the local log-log order is nearer 5 than it is to 4 or to 6. So a fifth-order piece is
+    a real term of this expansion at the sizes the documents quote, not a floor artefact.
+
+    Two things are deliberately not asserted: the size of the coefficient, and where the regime
+    ends. The coefficient drifts with which grid point anchors it, and the regime's edge is a
+    comparison between a residual and the noise floor -- both are exactly the conditioning this
+    phase learned not to gate (finding 44, limitation #79(e)). What is asserted is the shape that
+    survives any platform: a local order nearer five than either neighbour, on at least three steps
+    per ray. Measured here: 4.70 to 5.00 over 15 usable steps, so 4.5 and 5.5 are gross-error
+    bounds rather than a claim about any one machine.
+    """
+    floor = 2.220446049250313e-16 * abs(experiment.P15.BASE_VALUE)
+    scales = experiment.SCALES
+    for label, (base_delta, base_move) in experiment.RAYS.items():
+        residuals = [
+            abs(
+                experiment.priced_column_error(base_delta * scale, base_move * scale)
+                - experiment.quartic_column_error(base_delta * scale, base_move * scale)
+            )
+            for scale in scales
+        ]
+        orders = []
+        for index in range(1, len(scales)):
+            before, after = residuals[index - 1], residuals[index]
+            if after <= 50.0 * floor or before <= 0.0 or after <= 0.0:
+                continue
+            step = math.log(scales[index] / scales[index - 1])
+            orders.append((scales[index], math.log(after / before) / step))
+        assert len(orders) >= 3, (label, [f"{s}:{o:.2f}" for s, o in orders])
+        for scale, order in orders:
+            assert 4.5 < order < 5.5, (label, scale, order)
+        assert residuals[0] > 1.0e6 * floor, (
+            f"{label}: at published size the residual is {residuals[0]:.3e} against a subtraction "
+            f"floor of {floor:.3e}, so there is no fifth-order term here to measure"
+        )
+
+        # The band has to be able to fail, and the natural foil is this experiment's own other
+        # truncation: the same statistic on the residual the CUBIC leaves is a
+        # fourth-order term, and
+        # on every ray at least one usable step of it lands below 4.5 -- measured here: 3.67 on
+        # crash, 4.01 on melt-up, 4.10 on aligned, 3.99 on shallow. A band admitting those would be
+        # asserting nothing about order five.
+        cubic_orders = []
+        cubic_residuals = [
+            abs(
+                experiment.priced_column_error(base_delta * scale, base_move * scale)
+                - experiment.cubic_column_error(base_delta * scale, base_move * scale)
+            )
+            for scale in scales
+        ]
+        for index in range(1, len(scales)):
+            before, after = cubic_residuals[index - 1], cubic_residuals[index]
+            if after <= 50.0 * floor or before <= 0.0 or after <= 0.0:
+                continue
+            cubic_orders.append(
+                math.log(after / before) / math.log(scales[index] / scales[index - 1])
+            )
+        assert min(cubic_orders) < 4.5, (label, [f"{order:.2f}" for order in cubic_orders])
