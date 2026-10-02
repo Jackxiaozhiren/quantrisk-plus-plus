@@ -17,19 +17,24 @@ namespace quantrisk {
 /// True when the model collapses to a deterministic forward (`T == 0` or
 /// `sigma == 0`). Every pricer and lattice branches on this instead of clamping
 /// an epsilon into a denominator.
+// python: internal -- pricers and lattices branch on this in C++; Python gets the branch's result.
 [[nodiscard]] bool is_degenerate(const MarketParams &market);
 
 /// Lognormal d1 (NaN when `T == 0` or `sigma == 0`).
+// python: internal -- the lognormal argument, which reaches Python through the greeks built on it.
 [[nodiscard]] Real d1(const EuropeanOption &option, const MarketParams &market);
 
 /// Lognormal d2 = d1 - sigma*sqrt(T) (NaN under the same conditions).
+// python: internal -- d2 enters only through vega, vanna and volga, each of which is bound.
 [[nodiscard]] Real d2(const EuropeanOption &option, const MarketParams &market);
 
 [[nodiscard]] PricingResult black_scholes(const EuropeanOption &option, const MarketParams &market);
 
 /// Price of a call (`option.type` ignored) and of a put, for symmetry with the
 /// specification and for put-call parity tests.
+// python: via `black_scholes` -- the option carries its type, so these two exist for parity tests.
 [[nodiscard]] Real black_scholes_call(const MarketParams &market, Real strike);
+// python: via `black_scholes` -- the option carries its type, so these two exist for parity tests.
 [[nodiscard]] Real black_scholes_put(const MarketParams &market, Real strike);
 
 /// Analytic Delta, Gamma, Vega, Theta, Rho (docs/mathematical_specification.md §3).

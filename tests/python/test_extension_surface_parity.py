@@ -22,6 +22,17 @@ lines is still attributed to its object.
 Two ways the first version of this parser was wrong are kept as tests below: a section comment at
 the same indent as a declaration swallowed the registration after it, and a doc string containing
 `[0, 1)` contributed a closing parenthesis that never opened, merging one statement into the next.
+
+A third direction was added for audit finding 43, because the two above cannot see its defect. Both
+read the bindings file, so a function that was never registered is invisible: source and binary
+agree on its absence. The header is the only place that knows the function exists. So the last
+section of this file reads `cpp/include/quantrisk/**/*.hpp` and claims that every function the core
+marks `[[nodiscard]]` -- the core's own way of saying `this result is the point of calling` -- is
+either registered in the bindings or disclaimed at its declaration by a `// python:` marker. A
+disclaimer is a checkable claim, not prose: `via X` has to name something the bindings really
+declare, a marker left on a function that is in fact bound is stale, and a marker above nothing is
+orphaned. Each of those three failure modes is planted in a test, as is the shape finding 43
+describes -- a new core function that reaches neither a binding nor a marker.
 """
 
 from __future__ import annotations
@@ -318,4 +329,516 @@ def test_the_comparator_reports_a_name_missing_from_either_side() -> None:
     assert "pricing.Greeks.vanna (in the binary, not declared by the source)" in stale_binary
     assert not [problem for problem in stale_binary if "__repr__" in problem], (
         "a dunder is pybind's own, not drift"
+    )
+
+
+# --- the third direction: what the core declares has to be reachable, or say otherwise --
+
+HEADER_ROOT = REPO_ROOT / "cpp" / "include" / "quantrisk"
+MARKER_HEAD = "// python:"
+MARKER = re.compile(
+    r"^// python: (?:internal|via `?(?P<route>[A-Za-z_][\w.]*)`?) -- (?P<reason>\S.*)$"
+)
+CLASS_LIKE = re.compile(r"\b(?:class|struct|enum|union)\b")
+DECLARATION_STATEMENT = re.compile(r"\b([a-z_][a-z_0-9]*)\s*\([^()]*\)\s*(?:const\s*)?;")
+NON_DECLARATIONS = frozenset(
+    {
+        "static_assert",
+        "noexcept",
+        "return",
+        "if",
+        "for",
+        "while",
+        "switch",
+        "sizeof",
+        "and",
+        "not",
+        "or",
+    }
+)
+ATTRIBUTE = "[[nodiscard]]"
+
+
+def _masked(text: str) -> str:
+    """Comments and literals blanked to spaces, newlines and every offset preserved.
+
+    The offsets have to survive because the line number each declaration is reported at is the
+    reader's address for fixing it, and this file's own first parser learned that a bracket inside a
+    string literal ends a statement early.
+
+    One scanner rather than three regex passes, because the two hide each other. A doc comment
+    quoting `("speed")` is prose, and a pass that looks for string literals first pairs that quote
+    with the next one several lines down and erases real declarations with it; a pass that looks for
+    `//` first does the same to a literal containing `https://`. The scanner takes the decision in
+    reading order, which is the only order in which it is well defined.
+    """
+    out = list(text)
+    index = 0
+    length = len(text)
+    while index < length:
+        char = text[index]
+        if text.startswith("//", index):
+            end = text.find("\n", index)
+            end = length if end == -1 else end
+        elif text.startswith("/*", index):
+            end = text.find("*/", index + 2)
+            end = length if end == -1 else end + 2
+        elif char in ('"', "'"):
+            end = index + 1
+            while end < length:
+                if text[end] == "\\":
+                    end += 2
+                    continue
+                if text[end] == char:
+                    end += 1
+                    break
+                end += 1
+        else:
+            index += 1
+            continue
+        for position in range(index, min(end, length)):
+            if out[position] != "\n":
+                out[position] = " "
+        index = end
+    return "".join(out)
+
+
+def _marker_above(lines: list[str], attribute_index: int) -> tuple[str | None, int | None]:
+    """The `// python:` line governing a declaration, and the line it sits on.
+
+    Doc comments (`///`) are traversed, because a declaration's own documentation always stands
+    between the marker and the attribute; a blank line or a line of code ends the walk, so a marker
+    cannot drift onto an unrelated declaration below it.
+    """
+    marker: str | None = None
+    at: int | None = None
+    cursor = attribute_index - 1
+    while cursor >= 0:
+        stripped = lines[cursor].strip()
+        if not stripped.startswith("//"):
+            break
+        if stripped.startswith(MARKER_HEAD):
+            marker, at = stripped, cursor + 1
+        cursor -= 1
+    return marker, at
+
+
+def _namespace_view(text: str) -> str:
+    """Comments, literals and every brace-delimited body blanked, offsets and lines intact.
+
+    One owner for the scope question, because two scans have to answer it: the attribute scan below
+    must not read a struct's `total()` as an entry point, and the inventory of what the claim does
+    NOT cover has to count the same declarations. Both read this view rather than each keeping a
+    stack.
+    cover has to count the same declarations. Both read this view rather than each keeping a stack.
+
+    A frame is transparent only when `namespace` opened it. A type body, a function body and an
+    `if (...) {` are all opaque, which is what keeps `require_finite(value, name);` inside an inline
+    definition from being read as a declaration of `require_finite`.
+    """
+    masked = _masked(text)
+    out = list(masked)
+    stack: list[str] = []
+    pending = ""
+    index = 0
+    while index < len(masked):
+        char = masked[index]
+        if char == "{":
+            if pending:
+                stack.append(pending)
+                pending = ""
+            elif index and masked[index - 1] == ")":
+                stack.append("body")
+            else:
+                stack.append("block")
+            index += 1
+            continue
+        if char == "}":
+            if stack:
+                stack.pop()
+            index += 1
+            continue
+        if masked.startswith("namespace", index) and (
+            index == 0 or not masked[index - 1].isalnum()
+        ):
+            after = masked[index + 9 : index + 10]
+            if not after.isalnum():
+                pending = "ns"
+                for position in range(index, index + 9):
+                    out[position] = " "
+                index += 9
+                continue
+        keyword = CLASS_LIKE.match(masked, index)
+        if keyword and (index == 0 or not masked[index - 1].isalnum()):
+            pending = "type"
+            for position in range(index, keyword.end()):
+                out[position] = " "
+            index = keyword.end()
+            continue
+        if any(frame != "ns" for frame in stack) and char != "\n":
+            out[index] = " "
+        index += 1
+    return "".join(out)
+
+
+def _declarations(text: str) -> list[tuple[int, str, str | None, int | None]]:
+    """`(line, name, marker, marker line)` for namespace-scope `[[nodiscard]]` declarations.
+
+    The attribute is the anchor the core chose for itself -- `this result is the point of calling`
+    -- so the claim is keyed on intent already written in the code rather than on a list assembled
+    here. A declaration that reaches a `(` with no name, or a member function inside a type body,
+    is not found here at all, which is what `_namespace_view` is for.
+    """
+    view = _namespace_view(text)
+    lines = text.split("\n")
+    found: list[tuple[int, str, str | None, int | None]] = []
+    index = 0
+    while True:
+        index = view.find(ATTRIBUTE, index)
+        if index == -1:
+            return found
+        head = view[index + len(ATTRIBUTE) : index + len(ATTRIBUTE) + 900]
+        stop = len(head)
+        for terminator in (";", "{"):
+            at = head.find(terminator)
+            if at != -1:
+                stop = min(stop, at)
+        names = re.findall(r"\b([a-z_][a-z_0-9]*)\s*\(", head[:stop])
+        if names:
+            line = view.count("\n", 0, index) + 1
+            marker, marker_line = _marker_above(lines, line - 1)
+            found.append((line, names[-1], marker, marker_line))
+        index += len(ATTRIBUTE)
+
+
+def _unattributed_declarations(text: str) -> set[str]:
+    """Namespace-scope declarations the core did NOT mark `[[nodiscard]]`.
+
+    These are invisible to the claim, which reads the attribute, so they are inventoried instead
+    (the test that does it is what keeps the list from growing quietly). Two shapes match a
+    declaration's syntax without being one: a call qualified with `::`, and an initialiser, which is
+    how `constexpr Real kEpsilon = std::numeric_limits<Real>::epsilon();` would otherwise read as a
+    declaration of `epsilon`.
+    """
+    view = _namespace_view(text)
+    found: set[str] = set()
+    for match in DECLARATION_STATEMENT.finditer(view):
+        name = match.group(1)
+        qualified = view[max(0, match.start() - 2) : match.start()] == "::"
+        if name in NON_DECLARATIONS or qualified:
+            continue
+        start = max(view.rfind(";", 0, match.start()), view.rfind("\n", 0, match.start())) + 1
+        if "=" in view[start : match.start()]:
+            continue
+        if ATTRIBUTE in view[start : match.start()]:
+            continue
+        found.add(name)
+    return found
+
+
+def _core_surface() -> list[tuple[str, int, str, str | None, int | None]]:
+    """Every declaration the claim covers, keyed by the header it came from."""
+    rows = []
+    for header in sorted(HEADER_ROOT.rglob("*.hpp")):
+        relative = str(header.relative_to(REPO_ROOT))
+        for line, name, marker, marker_line in _declarations(header.read_text(encoding="utf-8")):
+            rows.append((relative, line, name, marker, marker_line))
+    return rows
+
+
+def _route_declared(
+    route: str, functions: dict[str, set[str]], classes: dict[str, dict[str, set[str]]]
+) -> bool:
+    """Whether the route an exemption names is really on the Python surface.
+
+    `via X` claims a function; `via Class.member` claims a field of a bound struct. Either is a
+    checkable fact, so the marker is a claim the guard can test rather than a sentence to trust.
+    """
+    if "." in route:
+        class_name, member = route.split(".", 1)
+        return any(
+            class_name in by_class and member in by_class[class_name]
+            for by_class in classes.values()
+        )
+    return route in set().union(*functions.values()) if functions else False
+
+
+def _surface_claim(
+    rows: list[tuple[str, int, str, str | None, int | None]],
+    functions: dict[str, set[str]],
+    classes: dict[str, dict[str, set[str]]],
+) -> list[str]:
+    """The three things that can go wrong between a header, a marker and a registration."""
+    registered = set().union(*functions.values()) if functions else set()
+    problems: list[str] = []
+    for path, line, name, marker, _ in rows:
+        parsed = MARKER.match(marker) if marker is not None else None
+        if marker is not None and parsed is None:
+            problems.append(
+                f"{path}:{line} {name}: a `{MARKER_HEAD}` marker in the wrong shape; it reads "
+                f"`{MARKER_HEAD} internal -- <reason>` or `{MARKER_HEAD} via <target> -- <reason>`"
+            )
+            continue
+        reachable = name in registered
+        if reachable and marker is not None:
+            problems.append(
+                f"{path}:{line} {name}: the exemption buys nothing any more, the bindings "
+                "register it; delete the marker"
+            )
+            continue
+        if reachable:
+            continue
+        if marker is None:
+            problems.append(
+                f"{path}:{line} {name}: declared `{ATTRIBUTE}` in the core and absent from the "
+                "bindings, with no `// python:` marker saying why"
+            )
+            continue
+        route = parsed.group("route") if parsed is not None else None
+        if route is not None and not _route_declared(route, functions, classes):
+            problems.append(
+                f"{path}:{line} {name}: the exemption reaches Python through `{route}`, which the "
+                "bindings do not declare"
+            )
+    return problems
+
+
+def _orphan_markers(rows: list[tuple[str, int, str, str | None, int | None]]) -> list[str]:
+    """Markers standing on disk above nothing the claim covers.
+
+    Kept apart from `_surface_claim` because that function also runs over planted one-row lists, and
+    a statement about the whole tree would then contradict every plant. Its own failure mode is the
+    third way an exemption rots: the function it disclaimed was deleted, or lost the attribute, and
+    the comment stayed to explain a gap nobody can see any more.
+    """
+    claimed = {(path, line) for path, _, _, _, line in rows if line is not None}
+    problems: list[str] = []
+    for header in sorted(HEADER_ROOT.rglob("*.hpp")):
+        relative = str(header.relative_to(REPO_ROOT))
+        for number, text in enumerate(header.read_text(encoding="utf-8").split("\n"), start=1):
+            if text.strip().startswith(MARKER_HEAD) and (relative, number) not in claimed:
+                problems.append(
+                    f"{relative}:{number}: a `// python:` marker above nothing the claim covers: "
+                    "the function it disclaimed is gone, or no longer carries the attribute"
+                )
+    return problems
+
+
+def _declared_surface() -> tuple[dict[str, set[str]], dict[str, dict[str, set[str]]]]:
+    """What `bindings/python_bindings.cpp` says the extension should expose."""
+    functions, classes, _ = _declared(_statements(BINDINGS.read_text(encoding="utf-8")))
+    return functions, classes
+
+
+def test_the_header_parser_reads_the_surface_it_claims_to_have_read() -> None:
+    """A scanner that silently matched nothing would make the guard below vacuously green.
+
+    Three shapes are pinned here because each one is a real declaration pattern in these headers:
+    the attribute on the line above a split signature, the same attribute on a struct member (which
+    must NOT count), and an `enum class` whose braces the stack has to close before the next free
+    function is read. The counts are the newest API in the tree, so the day the file shape moves
+    under this parser the test says so.
+    """
+    rows = _core_surface()
+    registered, classes = _declared_surface()
+    names = {name for _, _, name, _, _ in rows}
+    assert len(rows) >= 80, f"the scan found {len(rows)} namespace-scope declarations"
+    assert {
+        "black_scholes_mixed_fourth_derivatives",
+        "black_scholes_mixed_third_derivatives",
+    } <= names
+    assert {"run_scenario", "historical_var", "price_heston_european"} <= names
+    assert len(names & set().union(*registered.values())) >= 50, names
+
+    split = _declarations(
+        "[[nodiscard]] std::vector<std::pair<int, double>>\nconvergence_ladder(int steps);\n"
+    )
+    assert [name for _, name, _, _ in split] == ["convergence_ladder"], split
+    member = _declarations(
+        "struct Summary {\n    [[nodiscard]] double total() const { return 0.0; }\n};\n"
+    )
+    assert member == [], member
+    after_enum = _declarations(
+        "enum class Kind { Call, Put };\n[[nodiscard]] const char *to_string(const Kind kind);\n"
+    )
+    assert [name for _, name, _, _ in after_enum] == ["to_string"], after_enum
+    assert classes, (
+        "no bound class was parsed, so a `via Class.member` exemption could not be checked"
+    )
+
+
+def test_every_core_function_the_core_marks_reachable_is_bound_or_disclaimed() -> None:
+    """The claim finding 43 said the repository had never made, made.
+
+    `[[nodiscard]]` is the core's own marker for `this result is the point of calling it`, so
+    the set is intent already stated in the code rather than a list assembled here. Each member is
+    either registered in the bindings or carries a marker at its declaration -- and a marker is a
+    testable claim, not prose: `via X` has to name something the bindings really declare, an
+    exemption on a function that is in fact bound is stale, and a marker above nothing is orphaned.
+    """
+    registered, classes = _declared_surface()
+    rows = _core_surface()
+    problems = _surface_claim(rows, registered, classes) + _orphan_markers(rows)
+    assert not problems, "the core surface and the bindings do not agree:\n" + "\n".join(problems)
+    disclaimed = [row for row in rows if row[3] is not None]
+    assert len(disclaimed) >= 20, f"only {len(disclaimed)} exemptions: the markers were edited away"
+    assert len({row[2] for row in disclaimed}) >= 15, "the exemptions collapsed onto a few names"
+
+
+def test_the_functions_outside_the_claim_are_an_inventory_not_a_blind_spot() -> None:
+    """What the attribute does not mark is listed, counted, and pinned to one name.
+
+    The claim keys on `[[nodiscard]]`, so a declaration the core left unmarked and the bindings
+    never registered would be invisible to it -- which is a real shape of the same defect finding
+    43 describes, not a hypothetical one. Rather than widen the claim onto a weaker anchor, the
+    residual is inventoried: exactly one function is outside today, and the day a second appears
+    somebody decides whether it is bound, marked, or genuinely internal.
+
+    The plant below is the guard's own negative control, because a scanner that quietly found
+    nothing would make this test pass for the wrong reason. `epsilon()` is a member call in an
+    initialiser and `require_finite(value, name);` sits inside an inline body; both look like
+    declarations to a regex and neither is one.
+    and neither is one.
+    """
+    registered, _ = _declared_surface()
+    reachable = set().union(*registered.values())
+    rows = _core_surface()
+    covered = {row[2] for row in rows}
+    outside = {
+        (str(header.relative_to(REPO_ROOT)), name)
+        for header in sorted(HEADER_ROOT.rglob("*.hpp"))
+        for name in _unattributed_declarations(header.read_text(encoding="utf-8"))
+        if name not in reachable and name not in covered
+    }
+    assert outside == {("cpp/include/quantrisk/core/statistics.hpp", "quantile_linear")}, (
+        f"the residual moved: {sorted(outside)}. A function declared at namespace scope, marked "
+        "nothing and bound nothing is exactly what finding 43 was about."
+    )
+    assert len(rows) >= 80, "the attribute scan lost declarations, so this comparison means nothing"
+
+    probe = _unattributed_declarations(
+        "namespace quantrisk {\n"
+        "inline constexpr double kEpsilon = std::numeric_limits<double>::epsilon();\n"
+        'inline void check(double value) { require_finite(value, "name"); }\n'
+        "[[nodiscard]] double marked(double value);\n"
+        "double unmarked(double value);\n"
+        "}  // namespace quantrisk\n"
+    )
+    assert probe == {"unmarked"}, probe
+
+
+def test_a_marker_left_above_nothing_is_caught() -> None:
+    """The orphan branch's own negative control: drop a covered row, the marker reports itself.
+
+    Single variable, which is what makes it a control rather than a second assertion: the tree is
+    unchanged and only the list the claim is run over loses one declaration, so the marker that was
+    standing under it has nothing left to stand under.
+    """
+    rows = _core_surface()
+    marked = [row for row in rows if row[4] is not None]
+    assert marked, "no exemption marker in the tree, so the orphan branch has nothing to probe"
+    assert not _orphan_markers(rows)
+    gone = marked[0]
+    without = [row for row in rows if row is not gone]
+    problems = _orphan_markers(without)
+    assert any(problem.startswith(f"{gone[0]}:{gone[4]}") for problem in problems), (gone, problems)
+
+
+def test_a_core_function_bound_by_nobody_is_caught() -> None:
+    """The negative control, and the differential that says why this guard exists.
+
+    Finding 43's defect was a struct bound and its function never registered, which the two-way
+    parity check above cannot see: source and binary agreed, because the registration line was
+    absent from both. So the control adds a header declaration and removes nothing, and asserts
+    the old comparison stays silent while the new claim names the function.
+    """
+    registered, classes = _declared_surface()
+    baseline = _problems()
+    rows = _core_surface()
+    assert not _surface_claim(rows, registered, classes), "the tree is not green to begin with"
+
+    planted = ("cpp/include/quantrisk/pricing/black_scholes.hpp", 999, "unbound_probe", None, None)
+    problems = _surface_claim([*rows, planted], registered, classes)
+    assert any("unbound_probe" in problem for problem in problems), problems
+    assert not [problem for problem in problems if "unbound_probe" not in problem], (
+        "the plant should be the only thing this changes: " + repr(problems)
+    )
+
+    # And the pre-existing guard has nothing to say about it, which is the gap being closed.
+    assert all("unbound_probe" not in problem for problem in baseline), baseline
+
+
+def test_an_exemption_whose_route_does_not_exist_is_caught() -> None:
+    """`via X` is a fact claim, so a wrong X has to fail rather than read as a sentence."""
+    rows = [
+        (
+            "cpp/include/quantrisk/risk/measures.hpp",
+            5,
+            "quantile_standard_error",
+            "// python: via `monte_carlo_var_of_record` -- a route nobody registered.",
+            None,
+        )
+    ]
+    registered, classes = _declared_surface()
+    problems = _surface_claim(rows, registered, classes)
+    assert any("monte_carlo_var_of_record" in problem for problem in problems), problems
+
+    field = [
+        (
+            "cpp/include/quantrisk/risk/measures.hpp",
+            5,
+            "quantile_standard_error",
+            "// python: via `RiskEstimate.standard_error` -- reported as a field.",
+            None,
+        )
+    ]
+    assert not _surface_claim(field, registered, classes), (
+        "the real route must verify, not just parse"
+    )
+
+    wrong_field = [
+        (
+            "cpp/include/quantrisk/risk/measures.hpp",
+            5,
+            "quantile_standard_error",
+            "// python: via `RiskEstimate.standard_deviation` -- the wrong field.",
+            None,
+        )
+    ]
+    assert any(
+        "standard_deviation" in problem
+        for problem in _surface_claim(wrong_field, registered, classes)
+    )
+
+
+def test_an_exemption_that_the_bindings_made_obsolete_is_caught() -> None:
+    """Exemptions rot in one direction only if nothing reads them: the bound case.
+
+    The other direction is a marker left above a declaration that no longer carries the attribute.
+    Both are planted here against the real surface, so neither branch of the claim is unwatched.
+    """
+    registered, classes = _declared_surface()
+    bound = [
+        (
+            "cpp/include/quantrisk/pricing/black_scholes.hpp",
+            12,
+            "black_scholes",
+            "// python: internal -- a reason that has stopped being true.",
+            None,
+        )
+    ]
+    problems = _surface_claim(bound, registered, classes)
+    assert any("buys nothing any more" in problem for problem in problems), problems
+
+    malformed = [
+        (
+            "cpp/include/quantrisk/pricing/black_scholes.hpp",
+            12,
+            "d1",
+            "// python: internal because it is internal",
+            None,
+        )
+    ]
+    assert any(
+        "wrong shape" in problem for problem in _surface_claim(malformed, registered, classes)
     )

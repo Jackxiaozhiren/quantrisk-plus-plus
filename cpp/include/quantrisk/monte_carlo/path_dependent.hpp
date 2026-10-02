@@ -51,10 +51,12 @@ namespace path_dependent {
 
 /// Payoff of an Asian option evaluated from a simulated path (all monitoring
 /// dates are the path's interior and final levels).
+// python: via `price_asian` -- the payoff is that engine's per-path step, not a separate price.
 [[nodiscard]] Real asian_payoff_from_path(const AsianOption &option, const Real *data,
                                           std::size_t length);
 
 /// Knocked-out test plus terminal payoff of a barrier option on one path.
+// python: via `price_barrier` -- the payoff is that engine's per-path step, not a separate price.
 [[nodiscard]] Real barrier_payoff_from_path(const BarrierOption &option, const Real *data,
                                             std::size_t length, Real effective_barrier);
 

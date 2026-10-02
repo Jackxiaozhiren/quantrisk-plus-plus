@@ -22,6 +22,7 @@ enum class FactorClass {
     credit_spread, ///< shocked absolutely, in decimal spread units
 };
 
+// python: internal -- enum spelling for C++ diagnostics and messages; pybind binds FactorClass.
 [[nodiscard]] const char *to_string(FactorClass asset_class);
 
 /// A named factor at a quoted level.

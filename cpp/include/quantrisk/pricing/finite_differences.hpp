@@ -34,14 +34,19 @@ struct BumpPolicy {
 
 /// A single Greek by name, for targeted experiments ("how does the analytic
 /// value move as the bump shrinks?").
+// python: via `finite_difference_greeks` -- one Greek by name is a C++ study convenience.
 [[nodiscard]] Real finite_difference_delta(const EuropeanOption &, const MarketParams &,
                                            const BumpPolicy & = {});
+// python: via `finite_difference_greeks` -- one Greek by name is a C++ study convenience.
 [[nodiscard]] Real finite_difference_gamma(const EuropeanOption &, const MarketParams &,
                                            const BumpPolicy & = {});
+// python: via `finite_difference_greeks` -- one Greek by name is a C++ study convenience.
 [[nodiscard]] Real finite_difference_vega(const EuropeanOption &, const MarketParams &,
                                           const BumpPolicy & = {});
+// python: via `finite_difference_greeks` -- one Greek by name is a C++ study convenience.
 [[nodiscard]] Real finite_difference_theta(const EuropeanOption &, const MarketParams &,
                                            const BumpPolicy & = {});
+// python: via `finite_difference_greeks` -- one Greek by name is a C++ study convenience.
 [[nodiscard]] Real finite_difference_rho(const EuropeanOption &, const MarketParams &,
                                          const BumpPolicy & = {});
 

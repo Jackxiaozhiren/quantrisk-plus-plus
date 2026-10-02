@@ -46,6 +46,7 @@ enum class ScenarioKind {
     monte_carlo,   ///< moves drawn from a shifted distribution: model plus seed
 };
 
+// python: internal -- enum spelling for C++ diagnostics and messages; pybind binds ScenarioKind.
 [[nodiscard]] const char *to_string(ScenarioKind kind);
 
 /// One named stress: factor moves, a distribution deformation, and the assumptions

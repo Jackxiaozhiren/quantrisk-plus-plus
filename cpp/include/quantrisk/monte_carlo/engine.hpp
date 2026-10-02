@@ -18,6 +18,7 @@ using PathPayoff = std::function<Real(const Real *data, std::size_t length)>;
 
 enum class VarianceReduction { None, Antithetic, ControlVariate };
 
+// python: via `variance_reduction_name` -- the binding returns this spelling as that function.
 [[nodiscard]] const char *to_string(const VarianceReduction method);
 
 /// Everything a reader needs to judge and reproduce one Monte Carlo estimate.

@@ -701,3 +701,33 @@ verified with `cmp`. `uv run pytest tests/python/test_fourth_order_crossing_map.
 The rule: *an exemption expressed as names predicts which numbers will move; an exemption expressed as
 where a number is built states a property of it.* Four CI rounds is the price of the difference, and the
 two-directional plant is what stops a fifth.
+
+## Addendum — Phase 17, the check finding 43 said to write (2026-10-02)
+
+Finding 43 was recorded open with the reason: *"the list of what should be reachable is a claim the
+repository has not made anywhere."* Phase 17 makes the claim and enforces it.
+
+The claim is keyed on `[[nodiscard]]`, because that attribute is the core already stating `this result is
+the point of calling` — a stronger anchor than a list assembled in a test file. `tests/python/
+test_extension_surface_parity.py` now reads every header under `cpp/include/quantrisk/`, takes the
+namespace-scope declarations carrying it (85 names over 92 declarations), and requires each to be either
+registered in `bindings/python_bindings.cpp` or disclaimed at its declaration by a `// python:` marker.
+24 declarations are disclaimed, and a disclaimer is a checked fact rather than a sentence: `via X` has to
+name a function the bindings really register, `via Class.member` has to name a field of a bound struct, a
+marker sitting on a function that *is* bound is stale, and a marker left above a declaration that no
+longer exists is orphaned. All four failure modes are planted in tests, and so is finding 43's own shape —
+a new core function reaching neither a binding nor a marker — with the differential stated in the same
+test: the two-way parity comparison that shipped in Phase 14 stays silent about it, which is exactly why
+this third direction was needed.
+
+Two things this does not claim, both recorded rather than glossed. The attribute is not applied uniformly
+in the core, so a namespace-scope function *without* it is outside the claim; those are inventoried by a
+separate test and pinned to exactly one name (`stats::quantile_linear`), so the residual is a list someone
+must extend deliberately instead of a gap. And the markers' reasons are prose: the guard verifies the
+route each one names, not that the reason is still the right one. Limitation #80.
+
+Verification, in the tools' own words: `uv run pytest tests/python -q` — 446 passed; the parity file's own
+13 tests in 0.27 s; `uv run ctest --preset dev` — 100 % tests passed out of 201 after the header edits;
+`uv run --frozen clang-format --dry-run -Werror` on all 29 headers — exit 0; the falsification sweep on the
+committed tree — 22/22 planted defects rejected, the new entry
+(`core-declares-a-function-nobody-binds`) caught by the guard it names.

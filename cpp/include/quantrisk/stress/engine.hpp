@@ -90,8 +90,10 @@ struct Moves {
     std::vector<Real> absolute;
 };
 
+// python: via `run_scenario` -- resolving a scenario's moves is a step inside that call.
 [[nodiscard]] Moves resolve_moves(const FactorSet &factors, const Scenario &scenario);
 
+// python: via `run_scenario` -- a factor's attribution is accumulated and returned by that call.
 [[nodiscard]] FactorContribution contribute(const RiskFactor &factor, std::size_t at, Real relative,
                                             Real absolute, const ExposureVector &exposures);
 

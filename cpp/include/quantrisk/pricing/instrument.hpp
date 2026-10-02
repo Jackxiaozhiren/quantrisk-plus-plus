@@ -15,7 +15,9 @@ enum class OptionType { Call, Put };
 
 enum class ExerciseStyle { European, American };
 
+// python: internal -- enum spelling for C++ diagnostics and messages; pybind binds OptionType.
 [[nodiscard]] const char *to_string(const OptionType type);
+// python: internal -- enum spelling for C++ diagnostics and messages; pybind binds ExerciseStyle.
 [[nodiscard]] const char *to_string(const ExerciseStyle style);
 
 /// Market environment shared by every deterministic pricer.

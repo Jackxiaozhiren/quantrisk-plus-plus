@@ -156,8 +156,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 79 numbered entries",
-        replacement="carries 76 numbered entries",
+        anchor="carries 80 numbered entries",
+        replacement="carries 77 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_limitations_agree_with_the_file"
@@ -189,6 +189,23 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="the suite's member count is owned by its registry",
     ),
     Mutation(
+        identifier="core-declares-a-function-nobody-binds",
+        kind="prose",
+        path="cpp/include/quantrisk/pricing/black_scholes.hpp",
+        anchor="[[nodiscard]] bool is_degenerate(const MarketParams &market);",
+        replacement=(
+            "[[nodiscard]] bool is_degenerate(const MarketParams &market);\n"
+            "[[nodiscard]] bool unbound_probe(const MarketParams &market);"
+        ),
+        guard=(
+            "tests/python/test_extension_surface_parity.py::"
+            "test_every_core_function_the_core_marks_reachable_is_bound_or_disclaimed"
+        ),
+        claim=(
+            "a core function neither the bindings nor a marker accounts for is a defect, not a gap"
+        ),
+    ),
+    Mutation(
         identifier="reproduction-policy-silences-a-gated-verdict",
         kind="prose",
         path="experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
@@ -204,8 +221,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 370 Python tests",
-        replacement="# 371 Python tests",
+        anchor="# 377 Python tests",
+        replacement="# 378 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"

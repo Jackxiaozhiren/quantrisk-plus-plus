@@ -70,6 +70,7 @@ struct RiskEstimate {
 /// Standard error of a Monte Carlo quantile estimate through its density,
 /// `sqrt(alpha (1 - alpha) / n) / f(x_alpha)`, estimated by finite differences
 /// on the empirical CDF. Reported by the Monte Carlo estimators.
+// python: via `RiskEstimate.standard_error` -- the Monte Carlo estimators report it as that field.
 [[nodiscard]] Real quantile_standard_error(std::vector<Real> losses_sorted, Real confidence_level);
 /// @}
 

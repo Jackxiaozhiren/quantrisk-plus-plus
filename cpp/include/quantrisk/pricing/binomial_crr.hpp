@@ -34,9 +34,13 @@ struct BinomialResult {
                                           ExerciseStyle style, Count steps);
 
 /// Convenience wrappers matching the four instruments Phase 2 lists.
+// python: via `crr_binomial` -- the option names its style; these four are lattice-test shorthand.
 [[nodiscard]] Real crr_european_call(const MarketParams &, Real strike, Count steps);
+// python: via `crr_binomial` -- the option names its style; these four are lattice-test shorthand.
 [[nodiscard]] Real crr_european_put(const MarketParams &, Real strike, Count steps);
+// python: via `crr_binomial` -- the option names its style; these four are lattice-test shorthand.
 [[nodiscard]] Real crr_american_call(const MarketParams &, Real strike, Count steps);
+// python: via `crr_binomial` -- the option names its style; these four are lattice-test shorthand.
 [[nodiscard]] Real crr_american_put(const MarketParams &, Real strike, Count steps);
 
 /// Error of the European lattice against the Black-Scholes value for each of

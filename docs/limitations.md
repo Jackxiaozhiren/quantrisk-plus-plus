@@ -304,8 +304,8 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 439 pytest tests with
-    the `oracles` extra installed, and the same tree collects 370 tests without it — the CI lane
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 446 pytest tests with
+    the `oracles` extra installed, and the same tree collects 377 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -598,6 +598,30 @@ never removed just because a later phase shipped.
     that reaches down there returns 2.46-4.30 instead of 4.73-5.01; both fits are in the artifact so
     the window can be audited. (c) Fourteen zeros are found by both truncations against the priced
     error's thirteen, but the quartic's false crossing is a different one (`k = 0.164` on the
-    `delta = +0.10` column), so neither truncation is a root counter. One three-strike ladder, one
-    maturity, one base volatility, and no estimate for a book whose fourth-order terms do not share
-    these signs.
+    `delta = +0.10` column), so neither truncation is a root counter. (d) One *verdict* in that
+    artifact is decided by noise rather than by the model: the count of rays whose residual-ratio turns
+    back upward at the arithmetic floor compares two values that are themselves the floor, so the
+    producer declares `headline.fits` and `rays` under
+    `reproduction_policy.noise_decided_verdicts` and a fresh platform is not held to the number. The
+    committed artifact shows four of four on this machine, and what the documents may carry is the
+    floor's effect on the fit, never the count. (e) The exemption is declared as three *families*
+    (`rays`, `columns`, `headline.fits`) rather than as field names, after three CI rounds each went red
+    on a conditioning-limited field a name list had not named; inside `columns` the counts and labels
+    stay compared by value, and a guard test plants both directions — a perturbed fit that must be
+    tolerated and a perturbed zero count that must be caught — so the exemption is a checked property
+    (audit finding 45). One three-strike ladder, one maturity, one base volatility, and no estimate for
+    a book whose fourth-order terms do not share these signs.
+
+80. **The extension-surface claim is keyed on `[[nodiscard]]`, so an unmarked function is outside it.**
+    `tests/python/test_extension_surface_parity.py` closes audit finding 43 by reading
+    `cpp/include/quantrisk/**/*.hpp` and requiring every namespace-scope function the core marks
+    `[[nodiscard]]` to be registered in `bindings/python_bindings.cpp` or disclaimed at its declaration
+    by a `// python:` marker. The attribute is the strongest anchor the tree offers — it is the core's
+    own statement that a result is the point of calling — but it is not applied uniformly: the scan
+    covers 85 function names today, and the namespace-scope declarations it does *not* see are
+    inventoried by a second test, pinned to exactly one name (`stats::quantile_linear`, reachable from
+    C++ callers and deliberately not a Python entry point). A new unattributed, unbound function is
+    therefore a red test rather than a silent gap, and a `via X` disclaimer is checked against what the
+    bindings really declare instead of being read as prose. What remains outside the claim is a
+    function the core leaves without the attribute and someone still binds: nothing in the tree would
+    notice, which is why the inventory is a list rather than a count.

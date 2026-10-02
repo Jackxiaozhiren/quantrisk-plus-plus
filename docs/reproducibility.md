@@ -69,7 +69,7 @@ that strips too eagerly would pass the re-run test and silently rubber-stamp a c
 git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
 uv sync --extra oracles          # interpreter 3.12, deps, and the validation oracles
 uv pip install -e .              # builds the C++ core and the pybind11 module
-uv run pytest -q                 # 439 tests here; see the note below — the count is not one number
+uv run pytest -q                 # 446 tests here; see the note below — the count is not one number
 uv run cmake --preset dev && uv run cmake --build --preset dev
 uv run ctest --preset dev        # 201 C++ tests, 548,217 assertions
 uv run python scripts/run_benchmark_suite.py --require-all   # all 16 members
@@ -107,9 +107,9 @@ in that state would be claiming a measurement it did not make. The flag turns th
 a failure.
 
 **The pytest count depends on which extras you installed, and a document that prints one number
-without saying which is wrong.** The sequence above yields **439 pytest tests with the `oracles`
+without saying which is wrong.** The sequence above yields **446 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — no `oracles` extra — and the same
-tree collects 370 tests without it, the four oracle-gated modules dropping out at import. At the
+tree collects 377 tests without it, the four oracle-gated modules dropping out at import. At the
 previous revision that lane reported `319 passed, 4 skipped`: 323 outcomes from 319 collected
 items, because the four skips are module-level records reported *in addition to* the items that
 ran.
@@ -198,10 +198,16 @@ band is the experiment's own: `experiments/two_factor_error_bound/run.py` raises
 artifact whose slope leaves its declared range, and it publishes
 `reproduction_policy.conditioning_limited` naming the families this applies to. The reproduction test
 reads that list from the artifact and, inside those families, compares key sets, list lengths and types
-rather than values — integers, booleans, strings and verdicts stay exact even there, and everything
-outside the families keeps 1e-5 relative. The declaration belongs to the experiment, not the test: a
+rather than values — integers, booleans, strings and verdicts stay exact even there, unless the
+producer also declares the family under `reproduction_policy.noise_decided_verdicts`. That second list
+is for the rarer case where a *verdict* is decided by comparing two values that are themselves at the
+subtraction floor (`fourth_order_crossing_map`'s count of rays whose residual-ratio turns back upward
+below `scale = 1e-3` is the example, and limitation #79(d) keeps the scope); it is empty by default, so
+an experiment that does not declare it keeps every verdict gated, which is why `two_factor_bound` and
+`restrike_gamma_map` are unchanged by its existence. Everything outside the families keeps 1e-5
+relative. The declaration belongs to the experiment, not the test: a
 test that decides field by field which outputs are comparable is re-guessing the numerics it is
-supposed to be checking. See limitations #73–#75.
+supposed to be checking. See limitations #73–#75, #79(d)-(e).
 
 **Network data.** `data/fixtures/` holds real, committed SEC EDGAR, FRED and CFTC responses,
 so the offline path is deterministic. Anything fetched live is not: EDGAR and FRED revise

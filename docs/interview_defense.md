@@ -28,7 +28,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 79
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 80
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -41,7 +41,7 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 201 C++ tests under CTest (548,217 assertions in 200 Catch2
-cases), 439 pytest tests with the `oracles` extra and the same tree collects 370 tests without
+cases), 446 pytest tests with the `oracles` extra and the same tree collects 377 tests without
 it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
 revision's figure on the runner rather than trusting arithmetic here. 16/16 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
@@ -403,8 +403,8 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 201 C++ tests (548,217 assertions in 200 cases) and 439
-Python tests with the validation oracles installed — 370 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
+variance reduction. Today that is 201 C++ tests (548,217 assertions in 200 cases) and 446
+Python tests with the validation oracles installed — 377 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -951,6 +951,38 @@ Sources: `experiments/fourth_order_crossing_map/run.py`,
 (`MixedFourthDerivatives`), `tests/cpp/test_black_scholes.cpp`,
 `docs/analysis/fourth_order_crossing_map.md`, limitation #79, matrix row 19.
 
+### Q27. How do you stop an API from quietly not existing?
+
+**30 s.** By making the header a witness, not just the binary. `v1.6.0` shipped exactly this defect: the
+pybind registration for `black_scholes_mixed_fourth_derivatives` was written as two statements, the class
+was added and the function was not, and `test_extension_surface_parity.py` -- which compares the compiled
+module against what the bindings file *declares*, in both directions -- passed, because the declaration it
+was missing was missing from the source as well. Nothing in the tree knew the function existed except the
+header that declares it. What caught it was a consumer: the Phase 16 experiment called it and got
+`AttributeError`. Audit finding 43 recorded that as open, with the reason -- the repository had never
+made a claim about what should be reachable.
+
+Phase 17 makes the claim and enforces it. Every namespace-scope function the core marks `[[nodiscard]]`
+in `cpp/include/quantrisk/**/*.hpp` (92 declarations, 85 names) must either be registered in
+`bindings/python_bindings.cpp` or carry a `// python:` marker at its own declaration disclaiming it. 24
+declarations are disclaimed, and a disclaimer is a checked fact, not a sentence: `via X` has to name a
+function the bindings really register, `via Class.member` has to name a field of a bound struct, a marker
+on a function that is in fact bound is stale, and a marker above nothing is orphaned. All four are
+planted in tests.
+
+**Deeper.** Two decisions are worth defending. The anchor is the attribute rather than "every
+declaration", because `[[nodiscard]]` is the core already stating *this result is the point of calling*
+-- the claim keys on intent written in the code instead of a list assembled in a test file. The cost is
+honest and stated (limitation #80): the attribute is not applied uniformly, so a function without it is
+outside the claim, and the residual is therefore inventoried by a second test and pinned to exactly one
+name, `stats::quantile_linear`, so a second unbound-and-unmarked function is a red test rather than a
+silent gap. The other decision is that a guard nobody can make fail is not a guard: the test for the
+original defect shape asserts the differential explicitly -- add a core function with neither a binding
+nor a marker, and the Phase 14 two-way comparison stays silent while the new claim names it. Beyond the
+in-memory plants, `scripts/run_mutation_suite.py` carries a 22nd planted defect that edits the header on
+disk and expects this guard's node to reject it, so the falsifiability is re-executed by CI rather than
+asserted by me.
+
 ## How to verify each claim in this file
 
 Regenerate, then compare. Commands are the ones recorded in the phase reports.
@@ -958,7 +990,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 ```bash
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 201 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 370 Python tests
+  .venv/bin/python -m pytest -q                                          # 377 Python tests
 uv run python scripts/run_mutation_suite.py                            # 18/18 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
@@ -1001,6 +1033,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | ERC condition `wᵢ(Σw)ᵢ = (wᵀΣw)/n` and "validated against independent implementation" | `docs/mathematical_specification.md` §9 |
 | Heston dynamics, Feller condition, full-truncation Euler bias, "validation weaker than Black-Scholes section" | `docs/mathematical_specification.md` §10; `docs/project_scope.md` §4 |
 | Eigen arrives in Phase 6, not before; single-thread and no-QMC limits; path-matrix memory bound | `docs/limitations.md` #8, #16, #18; `docs/model_cards/monte_carlo_gbm.md` |
+| The extension-surface claim and how it was made falsifiable: 92 namespace-scope `[[nodiscard]]` declarations across 29 headers, 85 names, 24 disclaimed by `// python:` markers whose `via` routes the guard verifies; four planted failure modes plus the differential against the Phase 14 guard; residual inventory pinned to `stats::quantile_linear` | `tests/python/test_extension_surface_parity.py`, `scripts/run_mutation_suite.py` (`core-declares-a-function-nobody-binds`), `docs/limitations.md` #80, `docs/phase_reports/phase-17-surface-coverage.md` |
 | "the tests would catch a wrong formula": nineteen planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green; the sweep's own line on `e5daedc` is `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
 
 Anything in this file that is not in that table is an opinion about a method, not a result of

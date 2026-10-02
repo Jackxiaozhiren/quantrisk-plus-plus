@@ -125,7 +125,7 @@ order without the size would read as "expect ~800 of error" where the defensible
   over the runs this repository has committed — that is, slower than a vectorised NumPy path at
   200k paths on every one of them. The ratios move by more than 10% between runs, so no single
   figure from that file should be quoted as if it were a constant.
-- **The 79 numbered limitations in `docs/limitations.md` are the complete list of what is
+- **The 80 numbered limitations in `docs/limitations.md` are the complete list of what is
   not claimed.** Where a row above says "weaker" or "partially", it points into that file.
 
 ## Regenerating
