@@ -139,6 +139,8 @@ against the rebuilt extension.
 
 **Not a release, and that is deliberate.** Version stays `1.6.0`, tag stays `b4e4bea`; this lands as
 verification engineering after the release, like Phase 14. Every gate above ran on this tree and reported
-its own pass. The falsification sweep runs on the committed tree because it refuses a dirty target, so its
-verdict is recorded in the commit that follows this one, citing the revision it ran on; this report does
-not state a sweep result it has not yet observed.
+its own pass. The falsification sweep runs on the committed tree because it refuses a dirty target: on
+`ca6fbb8`, the commit that carries this report, `uv run python scripts/run_mutation_suite.py` printed
+`22/22 planted defects were rejected by their guard.` and left `git status` empty afterwards. That
+sentence is one commit late by construction -- the sweep cannot read a dirty tree, and the commit that
+reports a verdict is not the commit that earns it -- which is why it names the revision it ran on.
