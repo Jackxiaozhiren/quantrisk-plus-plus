@@ -169,9 +169,9 @@ the plot and the table cannot disagree.
 The performance result is deliberately unflattering. On 200,000 terminal-only paths, one
 normal per path:
 
-- **≈8× a pure Python loop** — `8.26×` in the artifact now in the tree (46.0M vs 5.6M paths/s),
+- **≈8× a pure Python loop** — `8.06×` in the artifact now in the tree (38.3M vs 4.7M paths/s),
   and `7.77×`–`8.70×` across the performance artifacts this repository has committed, and
-- **`0.479×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
+- **`0.444×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
   so the C++ core is *slower* than a NumPy `standard_normal` draw for this workload, on every
   one of those runs.
 

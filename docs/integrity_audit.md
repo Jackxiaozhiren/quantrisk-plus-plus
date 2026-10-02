@@ -664,3 +664,40 @@ produced it (`docs/analysis/fourth_order_crossing_map.md` §2), and it is the ar
 `reproduction_policy` that tells a re-run which of them it may compare by value. Third time, third shape
 (#37, #44, and the `Assert in the measuring environment` rule): a tolerance derived from one measuring
 environment is a claim about that environment.
+
+**45. A reproducibility exemption written as a list of field names is a prediction, and the runner
+proved it wrong a fourth time.** The committed `reproduction_policy.conditioning_limited` held six leaf
+names (`residual_after_cubic`, `residual_after_quartic`, `residual_ratio_quartic_over_cubic`,
+`measured_zeros` and the two nearest-zero distances). The runner re-ran the experiment in a temporary tree
+and reported twenty differing leaves, every one of them under `rays.<label>` — three fitted slopes, two
+standard errors, the ratio's own span statistics, `ratio_smallest`, `ratio_at_the_fit_floor`, and the
+per-scale residuals and ratios beneath them. The message is capped at twenty entries, so the real count is
+at least that. None of it is drift: each is a quotient of two residuals that are subtraction residue, or a
+root located in one, exactly the kind finding 37 and limitation #75 already describe. What was wrong was
+the *shape of the declaration* — a list of names can only ever be as complete as the last platform that
+went through it.
+
+Closing it by construction instead. The fitted headline numbers are now built into one nested block,
+`headline.fits`, beside the counts and published amounts that stay flat in `headline`, and the policy reads
+`["rays", "columns", "headline.fits"]`. A new fit joins the exemption by where it is computed rather than
+by someone remembering to write it down. The runner's diff also surfaced a verdict in the same case:
+`floor_turnaround` asks whether the smallest-scale ratio exceeds the next one up, and both sides of that
+comparison *are* the floor, so the answer belongs to the platform. The producer declares that in
+`reproduction_policy.noise_decided_verdicts`; the shared comparator honours the declaration only for an
+experiment that makes one, so `two_factor_bound` and `restrike_gamma_map` keep every verdict gated, and the
+local assertion in `test_fourth_order_crossing_map.py` still pins all four rays in *this* artifact rather
+than relaxing the claim.
+
+The guard test is `test_the_declared_families_cover_the_paths_the_runner_disagreed_on` and
+`test_the_exemption_does_not_reach_a_count_a_closed_form_or_a_shape_change`: seven perturbed noise leaves
+must be tolerated, and five perturbed real values plus a renamed field and a dropped zero must be caught.
+Both directions were then mutated to prove they fire. Narrowing the declared families to `["rays",
+"columns"]` turned the tolerance guard red on
+`.headline.fits.residual_slope_cubic_span[1]: 4.366457010912464 vs 4.466457010912464 differ by more than
+4.4e-05`; widening them to cover the whole payload turned the catching guard red on "a zero count inside
+`columns` was replaced and the comparison said nothing". The artifact was restored from a byte copy and
+verified with `cmp`. `uv run pytest tests/python/test_fourth_order_crossing_map.py` — 16 passed in 0.49 s.
+
+The rule: *an exemption expressed as names predicts which numbers will move; an exemption expressed as
+where a number is built states a property of it.* Four CI rounds is the price of the difference, and the
+two-directional plant is what stops a fifth.

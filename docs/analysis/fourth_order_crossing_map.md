@@ -40,10 +40,13 @@ of a two-variable expansion leaves a quartic remainder, and a quartic one leaves
 
 The window is what makes those numbers mean anything, and both fits are published. The residual is a
 difference of book values near 1.09e5, so below `scale = 1e-3` it is at the arithmetic floor; a fit
-that includes that point returns 2.46-4.30 for the quartic, and all four rays turn their
-residual-ratio back upward at that scale. The gated window is therefore `1e-3 <= scale <= 3e-1`, and
-the through-the-floor fit sits next to it in the artifact so the choice is auditable rather than
-asserted.
+that includes that point returns 2.46-4.30 for the quartic, and on this machine all four rays turn
+their residual-ratio back upward at that scale. That last count is not a finding: the comparison that
+decides it is between two values which *are* the floor's noise, so the artifact reports it as one of
+the quantities a fresh platform is entitled to print differently (see §6), and the claim the documents
+carry is the through-the-floor degradation, not the count. The gated window is therefore
+`1e-3 <= scale <= 3e-1`, and the through-the-floor fit sits next to it in the artifact so the choice
+is auditable rather than asserted.
 
 The bands around those slopes are sized from two platforms rather than one, because the slopes are the
 least reproducible numbers in this artifact. The CI runner, on the identical committed artifact,
@@ -131,8 +134,16 @@ used anyway.
   demonstrated *at* 0.15, not interpolated to it.
 - `measured_zeros` are sign changes of a function sampled at 401 points and refined by 40 bisection
   steps, not distinct analytic roots. Near a shallow crossing two of them can be one root.
-- Residuals, ratios, slopes and zero locations are conditioning-limited and the artifact declares
-  which fields that covers; the reproduction test compares them for shape rather than value.
+- Residuals, ratios, slopes and zero locations are conditioning-limited. The artifact does not name
+  them field by field — three CI rounds each went red on a field a hand-written list had missed — it
+  declares three *families* (`rays`, `columns`, `headline.fits`) under
+  `reproduction_policy.conditioning_limited`, and the reproduction test compares everything inside a
+  declared family for shape rather than value. Floats outside those families, and every count and
+  label inside `columns`, are still compared by value.
+- One *verdict* is in the same case as those floats: which rays turn their ratio back up at the floor
+  is decided by comparing two values at the floor. `reproduction_policy.noise_decided_verdicts`
+  declares the families where a verdict is advisory too, and the guard test plants it as a perturbation
+  that must be tolerated, beside the plants that must still be caught.
 - Nothing here changes what `run_scenario` ships.
 
 ## 8. Reproducing

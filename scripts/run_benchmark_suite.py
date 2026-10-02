@@ -524,18 +524,29 @@ MEMBERS: tuple[Member, ...] = (
             ),
             (
                 "worst crossing distance, cubic, |delta| <= 0.15",
-                ("headline", "cubic_distance_max_within_the_widened_limit"),
+                (
+                    "headline",
+                    "fits",
+                    "cubic_distance_max_within_the_widened_limit",
+                ),
             ),
             (
                 "worst crossing distance, quartic, |delta| <= 0.15",
-                ("headline", "quartic_distance_max_within_the_widened_limit"),
+                (
+                    "headline",
+                    "fits",
+                    "quartic_distance_max_within_the_widened_limit",
+                ),
             ),
             (
                 "radius improvement factor at the widened limit",
-                ("headline", "improvement_factor_at_the_widened_limit"),
+                ("headline", "fits", "improvement_factor_at_the_widened_limit"),
             ),
-            ("residual slope after the cubic", ("headline", "residual_slope_cubic_span")),
-            ("residual slope after the quartic", ("headline", "residual_slope_quartic_span")),
+            ("residual slope after the cubic", ("headline", "fits", "residual_slope_cubic_span")),
+            (
+                "residual slope after the quartic",
+                ("headline", "fits", "residual_slope_quartic_span"),
+            ),
             (
                 "risk_off error, quartic truncation relative",
                 ("headline", "published_base_quartic_relative_error"),

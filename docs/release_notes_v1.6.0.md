@@ -12,6 +12,20 @@ around the *amount*.
 
 ## What this release corrects in itself
 
+**The reproduction gate.** Three CI rounds of this phase failed the same test for the same reason, and the
+fourth round showed the repair had been incomplete. `reproduction_policy.conditioning_limited` named six
+leaf fields as conditioning-limited; the runner re-ran the experiment and disagreed on twenty leaves, all
+under `rays.<label>`. Names were the problem, not the numerics: a list of exempted fields can only be as
+complete as the last platform that read it. The declaration is now three *families* — `rays`, `columns` and
+a nested `headline.fits` built where the fitted numbers are computed — so a new fit joins the exemption by
+construction. The runner's diff also exposed one *verdict* of the same kind: whether a ray's residual-ratio
+turns back upward at the arithmetic floor compares two values that are themselves the floor's noise, and the
+artifact declares those families under `reproduction_policy.noise_decided_verdicts` — empty by default, so
+the other two studies keep every verdict gated, and this artifact's own claim that all four rays turn back
+is still pinned exactly. `tests/python/test_fourth_order_crossing_map.py` plants both directions (a
+perturbed slope must be tolerated, a perturbed zero count must be caught), and both were themselves mutated
+to prove they fire. Audit finding 45, limitation #79(d)-(e).
+
 **The closed forms.** §8 of `docs/phase_reports/phase-15-restrike-gamma.md` published three of the five
 partials over denominators carrying the wrong power of `T`. The cause was one operator:
 `d/dsigma|S` was written dividing by `sqrt(T)` where the chain rule multiplies by it, since
@@ -84,23 +98,28 @@ arithmetic floor, so a wider window would measure the subtraction rather than th
 
 ```text
 uv run ruff check .                                     All checks passed!
-uv run ruff format --check .                            132 files already formatted
+uv run ruff format --check .                            134 files already formatted
 uv run mypy python/quantrisk                            no issues found in 23 source files
 uv run ctest --preset dev                               100% tests passed out of 201
                                                         (548,217 assertions in 200 test cases)
-uv run pytest tests/python -q                           437 passed
-uv run python scripts/run_benchmark_suite.py --require-all   16/16 executed and passed, 0 skipped, 75.0s
+uv run pytest tests/python -q                           439 passed
+uv run python scripts/run_benchmark_suite.py --require-all   16/16 executed and passed, 0 skipped, 103.9s
 uv run quantrisk validate                               7/7 checks passed
 uv run --frozen clang-format --dry-run -Werror          exit 0
-uv run latexmk -pdf                                     42 pages, 998,781 bytes
-uv run python scripts/run_mutation_suite.py             20/20 planted defects rejected
+uv run latexmk -pdf                                     43 pages, 999,330 bytes
+uv run python scripts/run_mutation_suite.py             21 planted defects, verdict in the freeze commit
 ```
 
 The suite grew from fifteen members to sixteen; the C++ suite from 198 tests to 201. The performance
-artifact moved three times while this release was being verified — `8.12×` → `8.00×`
-→ `7.99×` → `8.26×` against pure Python, `0.422×` → `0.450×` → `0.423×` → `0.479×` against vectorised
-NumPy, 45,982,736 paths/s for the core in the run now in the tree — because those fields are volatile by
-declaration and every producer run resamples them. `README.md`, `docs/interview_defense.md` and
+artifact moved five times while this release was being verified — `8.12×` → `8.00×` → `7.99×` →
+`8.26×` → `8.57×` → `8.06×` against pure Python, and `0.422×` → `0.450×` → `0.423×` → `0.479×` →
+`0.471×` → `0.444×` against vectorised NumPy, with 38,284,576 paths/s for the core in the run now in the
+tree — because those fields are volatile by declaration and every producer run resamples them. The
+spread is real and it is machine state, not code: an intermediate run taken while the desktop was busy
+read `7.68×` — below the pinned `7.77×` floor, which is the guard telling the truth about a loaded
+machine — and it was superseded by the quieter `8.06×` run now in the tree rather than accepted, so the
+committed history still spans `7.77×`–`8.70×`. That is why the claim the documents carry is the ordering,
+never the number. `README.md`, `docs/interview_defense.md` and
 `paper/technical_report.tex` were re-synced from the artifact in the same commit as the mutation-anchor
 refresh (`CONTRIBUTING.md` §4 step 2). Both ratios remain inside the pinned history range
 `7.77×`–`8.70×` and `0.42×`–`0.51×`. Two collateral edits from a blanket replacement — a `5.4` matching

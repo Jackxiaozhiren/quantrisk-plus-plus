@@ -42,6 +42,17 @@ Date: 2026-10-01 · Files: core + 1 experiment + 2 test files + 8 documents · S
    (findings 40-43), `docs/interview_defense.md` Q26, and `paper/technical_report.tex`
    `\subsection{The fourth order...}` `\label{sec:fourth-order}`.
 
+7. **The reproduction gate, rebuilt by family.** A fourth CI round failed the temp-tree reproduction test
+   rather than a band: the committed `reproduction_policy.conditioning_limited` named six leaf fields and
+   the runner disagreed on twenty leaves, every one under `rays.<label>`. The declaration now names three
+   families — `rays`, `columns` and a nested `headline.fits` built where the fitted numbers are computed —
+   so a new fit joins the exemption by construction instead of by a list someone has to extend. The same
+   diff exposed a *verdict* decided by noise (`floor_turnaround` compares two values that are themselves at
+   the arithmetic floor); the producer declares those in
+   `reproduction_policy.noise_decided_verdicts`, the shared comparator honours the declaration only where an
+   experiment makes one, and this artifact's own four-ray claim stays pinned exactly. Two guard tests plant
+   both directions, and both plants were themselves mutated to prove they fire. Audit finding 45,
+   limitation #79(d)-(e).
 ## 2. Mathematical assumptions
 
 - Model: Black-Scholes-Merton with continuous dividend yield, `S, K, sigma, T > 0`; the stress map is
@@ -72,9 +83,10 @@ Date: 2026-10-01 · Files: core + 1 experiment + 2 test files + 8 documents · S
 | `tests/cpp/test_black_scholes.cpp` | 3 cases, 10 finite-difference routes, 2 exact identities, parity/degenerate/rejection sections, two new tolerance helpers |
 | `experiments/fourth_order_crossing_map/run.py` | new experiment (suite member 16) |
 | `experiments/fourth_order_crossing_map/results/*` | JSON + two CSVs |
-| `tests/python/test_fourth_order_crossing_map.py` | 14 tests: coefficient re-derivation, book sums, polynomial contraction, fit and distance instruments, radius re-derivation, zeros re-measured, slopes re-fitted, scenario re-priced, prose figures, refusals, provenance, temp-tree reproduction |
+| `tests/python/test_fourth_order_crossing_map.py` | 16 tests: coefficient re-derivation, book sums, polynomial contraction, fit and distance instruments, radius re-derivation, zeros re-measured, slopes re-fitted, scenario re-priced, prose figures, refusals, provenance, temp-tree reproduction, and the exemption's two-way plant |
 | `scripts/run_benchmark_suite.py`, `scripts/build_evidence_manifest.py`, `scripts/run_mutation_suite.py` | 16th member; new results directory; refreshed anchors |
 | `README.md`, `docs/findings.md`, `docs/validation_matrix.md`, `docs/limitations.md`, `docs/interview_defense.md`, `docs/reproducibility.md`, `docs/analysis/fourth_order_crossing_map.md`, `paper/technical_report.tex`, `docs/integrity_audit.md` | results, counts, and the refreshed volatile performance figures |
+| `tests/python/test_two_factor_bound.py` | shared comparator gains the `advisory` families parameter (empty unless a producer declares it) |
 
 ## 4. Tests executed
 
@@ -97,22 +109,34 @@ with the sign gated and no margin. The third restructuring is the one worth keep
 two subtraction residuals is itself a magnitude, so gating its slope at 0.5 failed for exactly the
 reason the first two bands failed. The gate is now monotonicity over the three largest above-floor
 scales, and the fitted ratio slope is reported rather than gated.
+A fourth CI round failed a different gate than the first three: not a band around a fitted slope, but
+`test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_numbers`, on twenty leaves all
+reached through `rays.<label>`. What was wrong was the *shape* of the exemption rather than its numbers —
+six field names cannot cover a family — and §1 item 7 records the rebuild. The repair was then tested
+against itself: narrowing the declared families turns the tolerance guard red on
+`.headline.fits.residual_slope_cubic_span[1]`, widening them to cover the whole payload turns the catching
+guard red on a zero count inside `columns`, and the artifact was restored from a byte copy and verified
+with `cmp`. The counts are in §5: 439 Python tests after the change, 437 before it, the difference being
+the plant pair.
+
 
 ## 5. Exact test results
 
 ```text
 ruff check .                 All checks passed!
-ruff format --check .        132 files already formatted
+ruff format --check .        134 files already formatted
 mypy python/quantrisk        Success: no issues found in 23 source files
-ctest --preset dev           100% tests passed out of 201        Total Test time (real) = 7.94 sec
+ctest --preset dev           100% tests passed out of 201        Total Test time (real) = 8.61 sec
 quantrisk_tests              All tests passed (548217 assertions in 200 test cases)
-pytest tests/python -q       437 passed in 22.04s
+pytest tests/python -q       439 passed in 21.88s
+pytest ...fourth_order_crossing_map.py
+                             16 passed in 0.49s
 run_benchmark_suite --require-all
                              suite: 16/16 executed and passed, 0 aggregated from disk, 0 failed,
-                             0 skipped, 76.4s total
+                             0 skipped, 103.9s total
 quantrisk validate           7/7 checks passed
 clang-format --dry-run       exit 0
-latexmk -pdf                 Output written on build/technical_report.pdf (42 pages, 998781 bytes)
+latexmk -pdf                 Output written on technical_report.pdf (43 pages, 999330 bytes)
 ```
 
 The fourth-order experiment's own summary line:

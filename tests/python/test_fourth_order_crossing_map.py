@@ -30,11 +30,13 @@ import importlib.util
 import json
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import pytest
 import quantrisk
-from test_two_factor_bound import _assert_same_result
+from test_two_factor_bound import _assert_same_result, _noise_decided_verdicts
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "experiments" / "fourth_order_crossing_map" / "run.py"
@@ -217,10 +219,10 @@ def test_the_widening_is_a_fact_about_both_truncations(experiment, payload) -> N
     quartic = [row["quartic_nearest_zero_distance"] for row in inside]
     cubic = [row["cubic_nearest_zero_distance"] for row in inside]
     assert max(quartic) == pytest.approx(
-        payload["headline"]["quartic_distance_max_within_the_widened_limit"]
+        payload["headline"]["fits"]["quartic_distance_max_within_the_widened_limit"]
     )
     assert max(cubic) == pytest.approx(
-        payload["headline"]["cubic_distance_max_within_the_widened_limit"]
+        payload["headline"]["fits"]["cubic_distance_max_within_the_widened_limit"]
     )
     assert max(quartic) <= tolerance
     between = {
@@ -331,6 +333,7 @@ def test_the_module_docstring_figures_are_the_ones_the_artifact_holds(payload) -
     """
     docstring = SCRIPT.read_text(encoding="utf-8").split('"""')[1]
     headline = payload["headline"]
+    fits = headline["fits"]
     published = payload["published_scenario"]
 
     def assert_figure(figure: str, value: float, decimals: int) -> None:
@@ -338,27 +341,27 @@ def test_the_module_docstring_figures_are_the_ones_the_artifact_holds(payload) -
         assert abs(value - float(figure.replace(",", ""))) <= 0.5 * 10**-decimals, (figure, value)
 
     for figure, (low, high) in {
-        "3.96-4.37": headline["residual_slope_cubic_span"],
-        "4.73-5.01": headline["residual_slope_quartic_span"],
-        "2.46-4.30": headline["residual_slope_quartic_through_floor_span"],
-        "0.0013-0.048": headline["residual_ratio_at_the_fit_floor_span"],
-        "0.62-1.04": headline["ratio_slope_span"],
+        "3.96-4.37": fits["residual_slope_cubic_span"],
+        "4.73-5.01": fits["residual_slope_quartic_span"],
+        "2.46-4.30": fits["residual_slope_quartic_through_floor_span"],
+        "0.0013-0.048": fits["residual_ratio_at_the_fit_floor_span"],
+        "0.62-1.04": fits["ratio_slope_span"],
     }.items():
         assert figure in docstring, figure
         for quoted, value in zip(figure.split("-"), (low, high), strict=True):
             decimals = len(quoted.split(".")[1])
             assert abs(value - float(quoted)) <= 0.5 * 10**-decimals, (figure, quoted, value)
 
-    assert_figure("0.00162", headline["quartic_distance_max_within_the_widened_limit"], 5)
-    assert_figure("0.01887", headline["cubic_distance_max_within_the_widened_limit"], 5)
-    assert_figure("0.0323", headline["quartic_distance_max_beyond_the_widened_limit"], 4)
-    assert_figure("0.0934", headline["cubic_distance_max_beyond_the_widened_limit"], 4)
-    assert_figure("0.00243", headline["cubic_distance_max_within_the_published_limit"], 5)
-    assert_figure("11.6", headline["improvement_factor_at_the_widened_limit"], 1)
+    assert_figure("0.00162", fits["quartic_distance_max_within_the_widened_limit"], 5)
+    assert_figure("0.01887", fits["cubic_distance_max_within_the_widened_limit"], 5)
+    assert_figure("0.0323", fits["quartic_distance_max_beyond_the_widened_limit"], 4)
+    assert_figure("0.0934", fits["cubic_distance_max_beyond_the_widened_limit"], 4)
+    assert_figure("0.00243", fits["cubic_distance_max_within_the_published_limit"], 5)
+    assert_figure("11.6", fits["improvement_factor_at_the_widened_limit"], 1)
     assert_figure(
         "211.6",
-        headline["cubic_distance_max_within_the_published_limit"]
-        / headline["quartic_distance_max_within_the_published_limit"],
+        fits["cubic_distance_max_within_the_published_limit"]
+        / fits["quartic_distance_max_within_the_published_limit"],
         1,
     )
     assert_figure("-5,320.79", published["base_map"]["priced_error"], 2)
@@ -370,7 +373,7 @@ def test_the_module_docstring_figures_are_the_ones_the_artifact_holds(payload) -
         abs(published["base_map"]["priced_error"] - published["base_map"]["cubic_truncation"]),
         2,
     )
-    assert abs(headline["quartic_distance_max_within_the_published_limit"] - 1.15e-5) <= 0.005e-5
+    assert abs(fits["quartic_distance_max_within_the_published_limit"] - 1.15e-5) <= 0.005e-5
     assert "1.15e-5" in docstring
 
     for figure, value in (
@@ -404,16 +407,17 @@ def test_every_figure_the_note_and_the_finding_quote_is_in_the_artifact(payload)
     missing reader; this is the reader.
     """
     headline = payload["headline"]
+    fits = headline["fits"]
     published = payload["published_scenario"]
     base = published["base_map"]
     struck = published["gamma_restrike_map"]
-    cubic_span = headline["residual_slope_cubic_span"]
-    quartic_span = headline["residual_slope_quartic_span"]
-    floor_span = headline["residual_slope_quartic_through_floor_span"]
-    ratio_span = headline["ratio_slope_span"]
-    floor_ratio = headline["residual_ratio_at_the_fit_floor_span"]
-    inside = headline["quartic_distance_max_within_the_published_limit"]
-    inside_cubic = headline["cubic_distance_max_within_the_published_limit"]
+    cubic_span = fits["residual_slope_cubic_span"]
+    quartic_span = fits["residual_slope_quartic_span"]
+    floor_span = fits["residual_slope_quartic_through_floor_span"]
+    ratio_span = fits["ratio_slope_span"]
+    floor_ratio = fits["residual_ratio_at_the_fit_floor_span"]
+    inside = fits["quartic_distance_max_within_the_published_limit"]
+    inside_cubic = fits["cubic_distance_max_within_the_published_limit"]
     overshoot = abs(payload["rays"][SHALLOW]["ratio_at_grid_size"])
 
     shared = {
@@ -422,14 +426,14 @@ def test_every_figure_the_note_and_the_finding_quote_is_in_the_artifact(payload)
         "floor_slope": f"{floor_span[0]:.2f}-{floor_span[1]:.2f}",
         "ratio_slope": f"{ratio_span[0]:.2f}-{ratio_span[1]:.2f}",
         "floor_ratio": f"{floor_ratio[0]:.4f}-{floor_ratio[1]:.3f}",
-        "quartic_distance": f"{headline['quartic_distance_max_within_the_widened_limit']:.5f}",
-        "cubic_distance": f"{headline['cubic_distance_max_within_the_widened_limit']:.5f}",
-        "radius_factor": f"{headline['improvement_factor_at_the_widened_limit']:.1f}",
+        "quartic_distance": f"{fits['quartic_distance_max_within_the_widened_limit']:.5f}",
+        "cubic_distance": f"{fits['cubic_distance_max_within_the_widened_limit']:.5f}",
+        "radius_factor": f"{fits['improvement_factor_at_the_widened_limit']:.1f}",
         "published_quartic": f"{inside:.2e}".replace("e-05", "e-5"),
         "published_cubic": f"{inside_cubic:.5f}",
         "published_factor": f"{inside_cubic / inside:.1f}",
-        "beyond_quartic": f"{headline['quartic_distance_max_beyond_the_widened_limit']:.4f}",
-        "beyond_cubic": f"{headline['cubic_distance_max_beyond_the_widened_limit']:.4f}",
+        "beyond_quartic": f"{fits['quartic_distance_max_beyond_the_widened_limit']:.4f}",
+        "beyond_cubic": f"{fits['cubic_distance_max_beyond_the_widened_limit']:.4f}",
         "measured_zeros": str(headline["measured_zeros_total"]),
         "cubic_zeros": str(headline["cubic_zeros_total"]),
         "quartic_zeros": str(headline["quartic_zeros_total"]),
@@ -497,11 +501,18 @@ def test_the_refusals_name_the_limits_the_run_shows(payload) -> None:
         "counts_are_not_money",
     }
     headline = payload["headline"]
+    fits = headline["fits"]
     assert headline["rays_where_the_quartic_is_worse_at_grid_size"], (
         "the ordering_is_not_a_grid_size_claim refusal describes a reversal this run must show"
     )
-    assert headline["rays_with_a_floor_turnaround"] == headline["rays_number_of"]
-    assert headline["improvement_factor_at_the_widened_limit"] > 1.0
+    # Pinned at all four, because this reads the committed artifact and that artifact does show
+    # four. Which rays turn around is not reproducible -- the comparison that decides it is
+    # between two values at the subtraction floor -- so the producer declares `headline.fits`
+    # under `noise_decided_verdicts` and a fresh run on another machine is not held to the count.
+    # A regeneration here that prints a different number is a reason to re-read the prose, not to
+    # relax this line.
+    assert fits["rays_with_a_floor_turnaround"] == headline["rays_number_of"]
+    assert fits["improvement_factor_at_the_widened_limit"] > 1.0
 
 
 def test_the_provenance_is_recorded_once(payload) -> None:
@@ -552,7 +563,155 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
         mine.pop(key, None)
         theirs.pop(key, None)
     limited = tuple(theirs["reproduction_policy"]["conditioning_limited"])
-    problems = _assert_same_result(mine, theirs, limited=limited)
+    advisory = _noise_decided_verdicts(theirs)
+    problems = _assert_same_result(mine, theirs, limited=limited, advisory=advisory)
     assert not problems, "the reproduction differs from the committed artifact:\n" + "\n".join(
         problems[:20]
     )
+
+
+def _policy() -> tuple[tuple[str, ...], tuple[str, ...]]:
+    payload = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+    return (
+        tuple(payload["reproduction_policy"]["conditioning_limited"]),
+        _noise_decided_verdicts(payload),
+    )
+
+
+def _compare(mutated: dict) -> list[str]:
+    """The committed artifact against itself with one planted defect, under the declared policy."""
+    pristine = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+    for payload in (pristine, mutated):
+        for key in ("generated_at_utc", "environment"):
+            payload.pop(key, None)
+    limited, advisory = _policy()
+    return _assert_same_result(pristine, mutated, limited=limited, advisory=advisory)
+
+
+def _fresh() -> dict:
+    return json.loads(ARTIFACT.read_text(encoding="utf-8"))
+
+
+def _twist(node: object, key: str | int, by: Callable[[Any], Any]) -> None:
+    """Replace one published number with a version of it no slack could absorb."""
+    node[key] = by(node[key])
+
+
+def test_the_declared_families_cover_the_paths_the_runner_disagreed_on() -> None:
+    """Every field the runner put a different value on sits inside a declared family.
+
+    This is the negative control for the exemption. Three CI rounds each contributed their own list
+    of disagreements -- a fitted slope, then the ratio's standard error, then the two residuals
+    measured at the arithmetic floor, then the count of rays that turn back -- and a fourth would
+    contribute another the moment a fit were published beside a gated field. So the runner's own
+    paths are planted here as perturbations far larger than any slack, and each must be tolerated by
+    the policy the artifact declares. A plant the policy *should* absorb but does not is the failure
+    exists to catch before the runner finds it.
+    """
+    crash = "crash (equity down, vol up)"
+
+    def ray(payload: dict) -> dict:
+        return payload["rays"][crash]
+
+    def fitted(payload: dict) -> dict:
+        return payload["headline"]["fits"]
+
+    tolerated: list[tuple[str, object, object, Callable[[float], float]]] = [
+        ("a fitted slope", ray, "residual_slope_after_quartic", lambda value: value * 1.05),
+        ("a fit's standard error", ray, "ratio_slope_standard_error", lambda value: value * 2.0),
+        (
+            "a residual two rows up",
+            lambda payload: ray(payload)["rows"][5],
+            "residual_after_cubic",
+            lambda value: value * 1.5,
+        ),
+        (
+            "a residual at the floor",
+            lambda payload: ray(payload)["rows"][6],
+            "residual_after_quartic",
+            lambda value: value * 1.5,
+        ),
+        (
+            "the ratio itself",
+            lambda payload: ray(payload)["residual_ratio_quartic_over_cubic"],
+            5,
+            lambda value: value * 3.0,
+        ),
+        (
+            "a located root",
+            lambda payload: payload["columns"][0]["measured_zeros"],
+            0,
+            lambda value: value + 1.0e-4,
+        ),
+        (
+            "a headline span",
+            lambda payload: fitted(payload)["residual_slope_cubic_span"],
+            1,
+            lambda value: value + 0.1,
+        ),
+    ]
+    for label, container, key, by in tolerated:
+        payload = _fresh()
+        _twist(container(payload), key, by)
+        problems = _compare(payload)
+        assert not problems, (
+            f"{label} moved inside a declared family and the gate still fired: {problems[:3]}"
+        )
+
+    # Two verdicts the policy declares noise-decided: which rays turn back, and the count of them.
+    payload = _fresh()
+    block = ray(payload)
+    block["floor_turnaround"] = not block["floor_turnaround"]
+    payload["headline"]["fits"]["rays_with_a_floor_turnaround"] += 2
+    assert not _compare(payload), "a noise-decided verdict was held to its platform"
+
+
+def test_the_exemption_does_not_reach_a_count_a_closed_form_or_a_shape_change() -> None:
+    """The other side of the gate: what the families must still catch.
+
+    Declaring a family is only defensible while the numbers inside it that are NOT noise stay gated.
+    Each plant below is a defect a different platform could plausibly produce -- a different zero
+    count, a different closed form, a renamed field, the other side of the grid-size reversal -- and
+    the comparison must name it. Without this test the exemption would be a claim, not a gate.
+    """
+    crash = "crash (equity down, vol up)"
+
+    caught: list[tuple[str, object]] = []
+
+    def bump_count(payload: dict) -> None:
+        row = payload["columns"][0]
+        row["measured_zero_count"] = row["measured_zero_count"] + 1
+
+    def break_coefficient(payload: dict) -> None:
+        payload["coefficients"]["fourth_order"]["spot_x4"] = 1.0e10
+
+    def break_truncation(payload: dict) -> None:
+        payload["published_scenario"]["base_map"]["quartic_truncation"] = -9999.0
+
+    def flip_reversal(payload: dict) -> None:
+        payload["headline"]["rays_where_the_quartic_is_worse_at_grid_size"] = [crash]
+
+    def break_a_delta(payload: dict) -> None:
+        payload["headline"]["columns_the_cubic_misses_between_the_two_limits"][0] = 0.42
+
+    for label, plant in (
+        ("a zero count inside `columns`", bump_count),
+        ("a fourth-order coefficient", break_coefficient),
+        ("the published quartic truncation", break_truncation),
+        ("the grid-size reversal verdict", flip_reversal),
+        ("a column the cubic misses", break_a_delta),
+    ):
+        payload = _fresh()
+        plant(payload)
+        problems = _compare(payload)
+        assert problems, f"{label} was replaced and the comparison said nothing"
+        caught.append((label, problems[0]))
+
+    renamed = _fresh()
+    block = renamed["rays"][crash]
+    block["ratio_at_the_fit_floor_plus_one"] = block.pop("ratio_at_the_fit_floor")
+    assert _compare(renamed), "a field renamed inside an exempt family went unnoticed"
+
+    dropped = _fresh()
+    dropped["columns"][0]["measured_zeros"].pop()
+    assert _compare(dropped), "a zero missing from an exempt family went unnoticed"

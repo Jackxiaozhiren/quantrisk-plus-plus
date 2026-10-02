@@ -1745,15 +1745,15 @@ produced with. Earlier dated runs of the same script are in
 \toprule
 Implementation & mean s.\ & std.\ s. & paths/s & estimate & $z$ vs analytic \\
 \midrule
-C++ core & 0.004349 & 0.000126 & 45{,}982{,}736 & 11.14596 & $+0.537$ \\
-pure Python loop & 0.035922 & 0.001314 & 5{,}567{,}590 & 11.11229 & $-0.292$ \\
-vectorised NumPy & 0.002085 & 0.000365 & 95{,}935{,}040 & 11.11430 & $-0.242$ \\
+C++ core & 0.005224 & 0.000210 & 38{,}284{,}576 & 11.14596 & $+0.537$ \\
+pure Python loop & 0.042105 & 0.000444 & 4{,}749{,}979 & 11.11229 & $-0.292$ \\
+vectorised NumPy & 0.002320 & 0.000609 & 86{,}224{,}157 & 11.11430 & $-0.242$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The measured ratio of C++ to a pure Python loop is $8.26\times$ in the run tabulated here; against
-vectorised NumPy it is $0.479\times$, that is, NumPy is faster in this regime, and the artifact says
+The measured ratio of C++ to a pure Python loop is $8.06\times$ in the run tabulated here; against
+vectorised NumPy it is $0.444\times$, that is, NumPy is faster in this regime, and the artifact says
 so (\src{benchmarks/performance/results/monte_carlo_speed.json};
 \src{docs/phase_reports/phase-03-monte-carlo.md}). The claim is scoped by four recorded caveats in
 the same artifact. The work measured is a terminal-only draw, one normal per path, which is exactly

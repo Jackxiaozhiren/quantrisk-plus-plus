@@ -265,7 +265,12 @@ def nearest(first: list[float], second: list[float]) -> float | None:
 
 
 def column_row(delta: float) -> dict[str, Any]:
-    """Claims 2 and 3 for one `delta` column: where each truncation puts the crossing."""
+    """Claims 2 and 3 for one `delta` column: where each truncation puts the crossing.
+
+    The counts and the positions sit in the same row because they answer the same question, but they
+    are not equally portable: the counts are verdicts and the positions are roots of a cancellation,
+    so `reproduction_policy` puts them in different classes rather than the row doing it.
+    """
     measured = zeros(P15.measured_error_on_column(delta), MEASURED_SCAN)
     cubic = zeros(lambda k: cubic_column_error(delta, k), SCAN)
     quartic = zeros(lambda k: quartic_column_error(delta, k), SCAN)
@@ -617,18 +622,13 @@ def main() -> int:
         row["delta"] for row in columns if row["quartic_zero_count"] != row["measured_zero_count"]
     ]
 
-    headline = {
-        "columns_swept": len(columns),
-        "joint_shocks_per_column": len(VOL_MOVES),
-        "measured_zeros_total": sum(row["measured_zero_count"] for row in columns),
-        "cubic_zeros_total": sum(row["cubic_zero_count"] for row in columns),
-        "quartic_zeros_total": sum(row["quartic_zero_count"] for row in columns),
-        "columns_where_the_cubic_zero_count_disagrees": len(count_disagree_cubic),
-        "columns_where_the_quartic_zero_count_disagrees": len(count_disagree_quartic),
-        "cubic_count_disagreements": count_disagree_cubic,
-        "quartic_count_disagreements": count_disagree_quartic,
-        "widened_limit": WIDENED_LIMIT,
-        "tolerance": TOLERANCE,
+    # Everything in `fits` is a statistic estimated on residuals that are themselves cancellation
+    # products, a root located in one by bisection, or a percentage of either. It is gathered under
+    # one key so the reproduction gate can exempt it *by family*: each of the three rounds that went
+    # red went red on a conditioning-limited field whose name had not been written on a list, and
+    # hand-picking names is what made that possible. A fitted number added later belongs in `fits`
+    # because that is where it is computed, not because someone remembered a list.
+    fits = {
         "cubic_distance_max_within_the_published_limit": max(
             (
                 row["cubic_nearest_zero_distance"]
@@ -662,7 +662,6 @@ def main() -> int:
             ),
             default=None,
         ),
-        "columns_the_cubic_misses_between_the_two_limits": [row["delta"] for row in cubic_outside],
         "quartic_distance_max_beyond_the_widened_limit": max(beyond_quartic, default=None),
         "cubic_distance_max_beyond_the_widened_limit": max(beyond_cubic, default=None),
         "improvement_factor_at_the_widened_limit": (
@@ -698,7 +697,6 @@ def main() -> int:
             - ray_stats[label]["residual_slope_after_cubic"]
             for label in rays
         },
-        "minimum_slope_separation": MINIMUM_SLOPE_SEPARATION,
         "ratio_slope_span": [min(ratio_slopes), max(ratio_slopes)],
         "residual_ratio_at_grid_size_span": [
             min(stat["ratio_at_grid_size"] for stat in ray_stats.values()),
@@ -708,17 +706,42 @@ def main() -> int:
             min(stat["ratio_at_the_fit_floor"] for stat in ray_stats.values()),
             max(stat["ratio_at_the_fit_floor"] for stat in ray_stats.values()),
         ],
+        # Which rays turn their ratio back up below the arithmetic floor is decided by comparing two
+        # values that *are* the floor's noise, so the count travels with the platform that
+        # measured it.
         "rays_with_a_floor_turnaround": sum(
             1 for stat in ray_stats.values() if stat["floor_turnaround"]
         ),
-        "ordering_window": [FIT_FLOOR, ORDERING_CEILING],
         "residual_ratio_at_grid_size": {
             label: ray_stats[label]["ratio_at_grid_size"] for label in rays
         },
-        "rays_where_the_quartic_is_worse_at_grid_size": sorted(overshoot),
-        "rays_number_of": len(rays),
         "k_zero_order_four_relative_mismatch": spot_quartic_gap,
         "root_finder_largest_residual_at_a_measured_zero": residual,
+        "nearest_zero_distance_quartic_all": distances_quartic,
+        "nearest_zero_distance_cubic_all": distances_cubic,
+    }
+
+    headline = {
+        "columns_swept": len(columns),
+        "joint_shocks_per_column": len(VOL_MOVES),
+        "measured_zeros_total": sum(row["measured_zero_count"] for row in columns),
+        "cubic_zeros_total": sum(row["cubic_zero_count"] for row in columns),
+        "quartic_zeros_total": sum(row["quartic_zero_count"] for row in columns),
+        "columns_where_the_cubic_zero_count_disagrees": len(count_disagree_cubic),
+        "columns_where_the_quartic_zero_count_disagrees": len(count_disagree_quartic),
+        "cubic_count_disagreements": count_disagree_cubic,
+        "quartic_count_disagreements": count_disagree_quartic,
+        "widened_limit": WIDENED_LIMIT,
+        "tolerance": TOLERANCE,
+        "columns_the_cubic_misses_between_the_two_limits": [row["delta"] for row in cubic_outside],
+        "minimum_slope_separation": MINIMUM_SLOPE_SEPARATION,
+        "ordering_window": [FIT_FLOOR, ORDERING_CEILING],
+        # The labels, not the ratios: at full shock size the worst margin against the 1.0
+        # threshold is 8 %, while the residuals it is computed from are orders of magnitude above
+        # the floor, so this classification is not a noise decision and is compared by value like
+        # a verdict should be.
+        "rays_where_the_quartic_is_worse_at_grid_size": sorted(overshoot),
+        "rays_number_of": len(rays),
         "published_scenario": "risk_off",
         "published_base_priced_error": published["base_map"]["priced_error"],
         "published_base_cubic_relative_error": published["base_map"]["cubic_relative_error"],
@@ -730,8 +753,7 @@ def main() -> int:
             "quartic_relative_error"
         ],
         "published_order_four_piece": published["order_four_piece"],
-        "nearest_zero_distance_quartic_all": distances_quartic,
-        "nearest_zero_distance_cubic_all": distances_cubic,
+        "fits": fits,
     }
 
     payload = {
@@ -806,22 +828,42 @@ def main() -> int:
             ),
         },
         "reproduction_policy": {
-            "conditioning_limited": [
-                "residual_after_cubic",
-                "residual_after_quartic",
-                "residual_ratio_quartic_over_cubic",
-                "measured_zeros",
-                "quartic_nearest_zero_distance",
-                "cubic_nearest_zero_distance",
-            ],
+            # Three families, no field names. A reproduction test can only compare a number by value
+            # if the number *has* a cross-platform value, and nothing under these keys does: each
+            # is a difference of book values near 1.09e5, a ratio of two such differences, a fit
+            # over them, or a root located in one by bisection. The three CI rounds that went red
+            # each went red on a field of exactly that kind which a hand-written list had not
+            # named -- first a fitted slope, then the ratio's own standard error, then the two
+            # residuals measured at the arithmetic floor -- so the exemption is declared where
+            # the quantities are built rather than remembered afterwards.
+            "conditioning_limited": ["rays", "columns", "headline.fits"],
+            # Inside those families a *verdict* can be noise-decided too, and the shape-only rule
+            # for floats does not reach it: `floor_turnaround` compares the two ratios that ARE
+            # the subtraction floor, so which side of the comparison it lands on is the
+            # platform's, not the model's. Counts and labels stay gated -- the zero counts that
+            # carry claim 3 and the ray labels that carry the grid-size reversal are not noise
+            # decisions and are not listed here.
+            "noise_decided_verdicts": ["rays", "headline.fits"],
             "why": (
-                "each is a difference of book values near 1.09e5, or a root of such a "
-                "difference, so it reproduces to the conditioning of that subtraction rather "
-                "than to its last digit"
+                "fits over residuals, ratios of two residuals, roots located by bisection, the "
+                "percentages derived from them, and one verdict computed by  "
+                "comparing two values at the arithmetic floor: each  "
+                "reproduces to the conditioning of a subtraction near 1.09e5, "
+                " not to its last digit. What IS still compared by value is  "
+                "every count and label in `columns`, the published amounts,  "
+                "the coefficient book sums, and this run's own gates, which  "
+                "raise rather than publish a number outside their band"
             ),
             "everything_else": (
-                "the two truncations and the order-four piece are closed forms; the priced "
-                "error and the engine P&L are exact arithmetic on the shipped engine"
+                "the two truncations and the order-four piece are closed  "
+                "forms; the priced error and the engine P&L are exact  "
+                "arithmetic on the shipped engine. Both appear outside the  "
+                "exempt families too -- in `coefficients`, and as the  "
+                "`priced_error`, `cubic_truncation`, `quartic_truncation` and "
+                " `order_four_piece` of the risk_off row under  "
+                "`published_scenario` -- so the closed forms are still  "
+                "compared by value even where the per-ray and per-column  "
+                "copies of them are not"
             ),
         },
         "environment": {
@@ -838,21 +880,21 @@ def main() -> int:
         RESULTS / "fourth_order_residual_rays.csv", [r for rows in rays.values() for r in rows]
     )
 
-    cubic_span = headline["residual_slope_cubic_span"]
-    quartic_span = headline["residual_slope_quartic_span"]
+    cubic_span = fits["residual_slope_cubic_span"]
+    quartic_span = fits["residual_slope_quartic_span"]
     print(
         f"quartic radius |delta| <= {WIDENED_LIMIT}: worst distance "
-        f"{headline['quartic_distance_max_within_the_widened_limit']:.4f} "
-        f"(cubic {headline['cubic_distance_max_within_the_widened_limit']:.4f}); "
+        f"{fits['quartic_distance_max_within_the_widened_limit']:.4f} "
+        f"(cubic {fits['cubic_distance_max_within_the_widened_limit']:.4f}); "
         f"zeros measured {headline['measured_zeros_total']}, cubic "
         f"{headline['cubic_zeros_total']}, quartic {headline['quartic_zeros_total']}; "
         f"count disagreements {len(count_disagree_cubic)} -> {len(count_disagree_quartic)}"
     )
     print(
-        f"residual ratio quartic/cubic: {headline['residual_ratio_at_grid_size_span'][0]:.3f}"
-        f"-{headline['residual_ratio_at_grid_size_span'][1]:.3f} at grid size, "
-        f"{headline['residual_ratio_at_the_fit_floor_span'][0]:.4f}"
-        f"-{headline['residual_ratio_at_the_fit_floor_span'][1]:.4f} at scale {FIT_FLOOR}; "
+        f"residual ratio quartic/cubic: {fits['residual_ratio_at_grid_size_span'][0]:.3f}"
+        f"-{fits['residual_ratio_at_grid_size_span'][1]:.3f} at grid size, "
+        f"{fits['residual_ratio_at_the_fit_floor_span'][0]:.4f}"
+        f"-{fits['residual_ratio_at_the_fit_floor_span'][1]:.4f} at scale {FIT_FLOOR}; "
         f"slopes {cubic_span[0]:.2f}-{cubic_span[1]:.2f} (cubic) against "
         f"{quartic_span[0]:.2f}-{quartic_span[1]:.2f} (quartic)"
     )

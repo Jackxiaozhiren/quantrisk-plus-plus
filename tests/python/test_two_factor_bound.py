@@ -595,6 +595,14 @@ def _conditioning_limited(payload: dict) -> tuple[str, ...]:
     return tuple(payload["reproduction_policy"]["conditioning_limited"])
 
 
+def _noise_decided_verdicts(payload: dict) -> tuple[str, ...]:
+    """The families whose *verdicts* are also advisory, declared the same way and by the producer.
+
+    Empty for an experiment that does not declare it, so the default stays "every verdict is gated".
+    """
+    return tuple(payload["reproduction_policy"].get("noise_decided_verdicts", ()))
+
+
 def _is_limited(path: str, limited: tuple[str, ...]) -> bool:
     """Whether a dotted, bracketed path falls under one of the declared families."""
     stripped = path.lstrip(".")
@@ -614,6 +622,7 @@ def _assert_same_result(
     path: str = "",
     *,
     limited: tuple[str, ...] = (),
+    advisory: tuple[str, ...] = (),
     problems: list[str] | None = None,
 ) -> list[str]:
     """The committed artifact and a fresh run must agree wherever agreement is meaningful.
@@ -631,13 +640,20 @@ def _assert_same_result(
     The values are still proved, just not against this laptop. The copy exits 0, and the experiment
     raises rather than publishing a number outside its own band, so a reproduction that drifted
     enough to matter fails on its own terms. Outside those families, floats are held to 1e-5
-    relative plus 1e-12 absolute, and counts, verdicts, strings and structure get no slack at all.
+    relative plus 1e-12 absolute, and counts, verdicts, strings and structure get no slack at all --
+    unless the producer also declares the family under
+    `reproduction_policy.noise_decided_verdicts`, which is for the rarer case where a *verdict* is
+    decided by comparing two values that are themselves at the subtraction floor. That list is empty
+    by default, so an experiment that does not declare it keeps every verdict gated; `advisory`
+    families are still compared for keys, lengths and types.
 
     Mismatches are collected and reported together rather than raised on the first, because one
     field per round-trip is how six runs went by one at a time.
     """
     found = problems if problems is not None else []
     if isinstance(mine, bool) or isinstance(theirs, bool):
+        if _is_limited(path, advisory):
+            return found
         if mine is not theirs:
             found.append(f"{path}: verdict {mine!r} is not {theirs!r}")
         return found
@@ -656,7 +672,12 @@ def _assert_same_result(
             found.append(f"{path}: keys differ, in one only: {sorted(set(mine) ^ set(theirs))}")
         for key in mine.keys() & theirs.keys():
             _assert_same_result(
-                mine[key], theirs[key], f"{path}.{key}", limited=limited, problems=found
+                mine[key],
+                theirs[key],
+                f"{path}.{key}",
+                limited=limited,
+                advisory=advisory,
+                problems=found,
             )
     elif isinstance(mine, list) and isinstance(theirs, list):
         if len(mine) != len(theirs):
@@ -664,9 +685,16 @@ def _assert_same_result(
         else:
             for index, (left, right) in enumerate(zip(mine, theirs, strict=True)):
                 _assert_same_result(
-                    left, right, f"{path}[{index}]", limited=limited, problems=found
+                    left,
+                    right,
+                    f"{path}[{index}]",
+                    limited=limited,
+                    advisory=advisory,
+                    problems=found,
                 )
     elif mine != theirs:
+        if _is_limited(path, advisory):
+            return found
         found.append(f"{path}: {mine!r} != {theirs!r}")
     return found
 

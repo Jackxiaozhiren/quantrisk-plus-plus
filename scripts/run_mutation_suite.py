@@ -120,7 +120,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
-        anchor="`8.26×`",
+        anchor="`8.06×`",
         replacement="`8.01×`",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -189,11 +189,23 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="the suite's member count is owned by its registry",
     ),
     Mutation(
+        identifier="reproduction-policy-silences-a-gated-verdict",
+        kind="prose",
+        path="experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
+        anchor='"noise_decided_verdicts": [\n      "rays",',
+        replacement='"noise_decided_verdicts": [\n      "rays",\n      "columns",',
+        guard=(
+            "tests/python/test_fourth_order_crossing_map.py::"
+            "test_the_exemption_does_not_reach_a_count_a_closed_form_or_a_shape_change"
+        ),
+        claim="the zero counts are not noise-decided, and the guard proves the exemption holds",
+    ),
+    Mutation(
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 368 Python tests",
-        replacement="# 369 Python tests",
+        anchor="# 370 Python tests",
+        replacement="# 371 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"

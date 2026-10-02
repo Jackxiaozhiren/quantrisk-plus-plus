@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-10-01T06:56:54.172540+00:00",
+  "generated_at_utc": "2026-10-02T03:28:48.565857+00:00",
   "command": "uv run python experiments/fourth_order_crossing_map/run.py",
   "claim": "adding the four mixed fourth partials to the column truncation triples the radius overwhich it predicts the shipped map's crossing -- |delta| <= 0.15 against the cubic's 0.05, worst distance 0.00162 against 0.01887 -- and the residual it leaves falls with a fifth-order slope of 4.73-5.01 against the cubic's 3.96-4.37, but it does not make the map's error cheaper to predict at the size the documents quote: on risk_off the quartic truncation is still 16.2 % wrong, on the other side, and on one ray at full shock size its residual is 1.38x the cubic's",
   "book": {
@@ -58,83 +58,21 @@
     ],
     "widened_limit": 0.15,
     "tolerance": 0.005,
-    "cubic_distance_max_within_the_published_limit": 0.0024326646741319596,
-    "quartic_distance_max_within_the_published_limit": 1.1496688844848946e-05,
-    "quartic_distance_max_within_the_widened_limit": 0.0016208684077405958,
-    "cubic_distance_max_within_the_widened_limit": 0.018873008297375794,
     "columns_the_cubic_misses_between_the_two_limits": [
       -0.15,
       -0.1,
       0.1,
       0.15
     ],
-    "quartic_distance_max_beyond_the_widened_limit": 0.03227468405949802,
-    "cubic_distance_max_beyond_the_widened_limit": 0.09341752441547391,
-    "improvement_factor_at_the_widened_limit": 11.643763434000027,
-    "residual_slope_after_cubic": {
-      "crash (equity down, vol up)": 3.971088667733477,
-      "melt-up (equity up, vol down)": 4.025357147512217,
-      "aligned (equity up, vol up)": 4.366457010912464,
-      "shallow (equity down, vol up, a third of the size)": 3.9571222893251297
-    },
-    "residual_slope_after_quartic": {
-      "crash (equity down, vol up)": 5.014405385241662,
-      "melt-up (equity up, vol down)": 5.01222037476922,
-      "aligned (equity up, vol up)": 4.98662598381839,
-      "shallow (equity down, vol up, a third of the size)": 4.72943587528355
-    },
-    "residual_slope_cubic_span": [
-      3.9571222893251297,
-      4.366457010912464
-    ],
-    "residual_slope_quartic_span": [
-      4.72943587528355,
-      5.014405385241662
-    ],
-    "residual_slope_cubic_through_floor_span": [
-      3.536784333958202,
-      4.060485036049567
-    ],
-    "residual_slope_quartic_through_floor_span": [
-      2.458401089500844,
-      4.297403593558871
-    ],
-    "residual_slope_separation": {
-      "crash (equity down, vol up)": 1.0433167175081848,
-      "melt-up (equity up, vol down)": 0.986863227257003,
-      "aligned (equity up, vol up)": 0.6201689729059261,
-      "shallow (equity down, vol up, a third of the size)": 0.7723135859584205
-    },
     "minimum_slope_separation": 0.0,
-    "ratio_slope_span": [
-      0.6201689729059251,
-      1.043316717508185
-    ],
-    "residual_ratio_at_grid_size_span": [
-      0.2856075572434189,
-      1.3814632026872808
-    ],
-    "residual_ratio_at_the_fit_floor_span": [
-      0.0012636114761115183,
-      0.047556433795905614
-    ],
-    "rays_with_a_floor_turnaround": 4,
     "ordering_window": [
       0.003,
       0.3
     ],
-    "residual_ratio_at_grid_size": {
-      "crash (equity down, vol up)": 0.7270315988607204,
-      "melt-up (equity up, vol down)": 0.2856075572434189,
-      "aligned (equity up, vol up)": 0.9166590991203815,
-      "shallow (equity down, vol up, a third of the size)": 1.3814632026872808
-    },
     "rays_where_the_quartic_is_worse_at_grid_size": [
       "shallow (equity down, vol up, a third of the size)"
     ],
     "rays_number_of": 4,
-    "k_zero_order_four_relative_mismatch": 5.252055431897572e-16,
-    "root_finder_largest_residual_at_a_measured_zero": 1.0186340659856796e-10,
     "published_scenario": "risk_off",
     "published_base_priced_error": -5320.792367571179,
     "published_base_cubic_relative_error": 0.2226969936742174,
@@ -142,30 +80,94 @@
     "published_restrike_cubic_relative_error": 0.6115036896441365,
     "published_restrike_quartic_relative_error": -0.44458250519119735,
     "published_order_four_piece": -2046.4019919759248,
-    "nearest_zero_distance_quartic_all": [
-      0.03227468405949802,
-      0.005479350133031397,
-      0.0016208684077405958,
-      0.0002783754541479614,
-      3.9026723058430135e-07,
-      4.079183925937563e-07,
-      1.1496688844848946e-05,
-      0.0002859752397795928,
-      0.0015956971226373864,
-      0.005419577614849749
-    ],
-    "nearest_zero_distance_cubic_all": [
-      0.09341752441547391,
-      0.0348587364364816,
-      0.018873008297375794,
-      0.008429113338523931,
-      0.0024326646741319596,
-      0.00018167485029671297,
-      0.0014966152357359895,
-      0.006658374439378528,
-      0.01607311885255295,
-      0.030873804598333235
-    ]
+    "fits": {
+      "cubic_distance_max_within_the_published_limit": 0.0024326646741319596,
+      "quartic_distance_max_within_the_published_limit": 1.1496688844848946e-05,
+      "quartic_distance_max_within_the_widened_limit": 0.0016208684077405958,
+      "cubic_distance_max_within_the_widened_limit": 0.018873008297375794,
+      "quartic_distance_max_beyond_the_widened_limit": 0.03227468405949802,
+      "cubic_distance_max_beyond_the_widened_limit": 0.09341752441547391,
+      "improvement_factor_at_the_widened_limit": 11.643763434000027,
+      "residual_slope_after_cubic": {
+        "crash (equity down, vol up)": 3.971088667733477,
+        "melt-up (equity up, vol down)": 4.025357147512217,
+        "aligned (equity up, vol up)": 4.366457010912464,
+        "shallow (equity down, vol up, a third of the size)": 3.9571222893251297
+      },
+      "residual_slope_after_quartic": {
+        "crash (equity down, vol up)": 5.014405385241662,
+        "melt-up (equity up, vol down)": 5.01222037476922,
+        "aligned (equity up, vol up)": 4.98662598381839,
+        "shallow (equity down, vol up, a third of the size)": 4.72943587528355
+      },
+      "residual_slope_cubic_span": [
+        3.9571222893251297,
+        4.366457010912464
+      ],
+      "residual_slope_quartic_span": [
+        4.72943587528355,
+        5.014405385241662
+      ],
+      "residual_slope_cubic_through_floor_span": [
+        3.536784333958202,
+        4.060485036049567
+      ],
+      "residual_slope_quartic_through_floor_span": [
+        2.458401089500844,
+        4.297403593558871
+      ],
+      "residual_slope_separation": {
+        "crash (equity down, vol up)": 1.0433167175081848,
+        "melt-up (equity up, vol down)": 0.986863227257003,
+        "aligned (equity up, vol up)": 0.6201689729059261,
+        "shallow (equity down, vol up, a third of the size)": 0.7723135859584205
+      },
+      "ratio_slope_span": [
+        0.6201689729059251,
+        1.043316717508185
+      ],
+      "residual_ratio_at_grid_size_span": [
+        0.2856075572434189,
+        1.3814632026872808
+      ],
+      "residual_ratio_at_the_fit_floor_span": [
+        0.0012636114761115183,
+        0.047556433795905614
+      ],
+      "rays_with_a_floor_turnaround": 4,
+      "residual_ratio_at_grid_size": {
+        "crash (equity down, vol up)": 0.7270315988607204,
+        "melt-up (equity up, vol down)": 0.2856075572434189,
+        "aligned (equity up, vol up)": 0.9166590991203815,
+        "shallow (equity down, vol up, a third of the size)": 1.3814632026872808
+      },
+      "k_zero_order_four_relative_mismatch": 5.252055431897572e-16,
+      "root_finder_largest_residual_at_a_measured_zero": 1.0186340659856796e-10,
+      "nearest_zero_distance_quartic_all": [
+        0.03227468405949802,
+        0.005479350133031397,
+        0.0016208684077405958,
+        0.0002783754541479614,
+        3.9026723058430135e-07,
+        4.079183925937563e-07,
+        1.1496688844848946e-05,
+        0.0002859752397795928,
+        0.0015956971226373864,
+        0.005419577614849749
+      ],
+      "nearest_zero_distance_cubic_all": [
+        0.09341752441547391,
+        0.0348587364364816,
+        0.018873008297375794,
+        0.008429113338523931,
+        0.0024326646741319596,
+        0.00018167485029671297,
+        0.0014966152357359895,
+        0.006658374439378528,
+        0.01607311885255295,
+        0.030873804598333235
+      ]
+    }
   },
   "columns": [
     {
@@ -1053,15 +1055,16 @@
   },
   "reproduction_policy": {
     "conditioning_limited": [
-      "residual_after_cubic",
-      "residual_after_quartic",
-      "residual_ratio_quartic_over_cubic",
-      "measured_zeros",
-      "quartic_nearest_zero_distance",
-      "cubic_nearest_zero_distance"
+      "rays",
+      "columns",
+      "headline.fits"
     ],
-    "why": "each is a difference of book values near 1.09e5, or a root of such a difference, so it reproduces to the conditioning of that subtraction rather than to its last digit",
-    "everything_else": "the two truncations and the order-four piece are closed forms; the priced error and the engine P&L are exact arithmetic on the shipped engine"
+    "noise_decided_verdicts": [
+      "rays",
+      "headline.fits"
+    ],
+    "why": "fits over residuals, ratios of two residuals, roots located by bisection, the percentages derived from them, and one verdict computed by  comparing two values at the arithmetic floor: each  reproduces to the conditioning of a subtraction near 1.09e5,  not to its last digit. What IS still compared by value is  every count and label in `columns`, the published amounts,  the coefficient book sums, and this run's own gates, which  raise rather than publish a number outside their band",
+    "everything_else": "the two truncations and the order-four piece are closed  forms; the priced error and the engine P&L are exact  arithmetic on the shipped engine. Both appear outside the  exempt families too -- in `coefficients`, and as the  `priced_error`, `cubic_truncation`, `quartic_truncation` and  `order_four_piece` of the risk_off row under  `published_scenario` -- so the closed forms are still  compared by value even where the per-ray and per-column  copies of them are not"
   },
   "environment": {
     "python": "3.12.14",

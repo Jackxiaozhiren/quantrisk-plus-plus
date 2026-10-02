@@ -25,7 +25,7 @@
       "version": "1.6.0"
     }
   },
-  "generated_at_utc": "2026-10-01T06:08:29+00:00",
+  "generated_at_utc": "2026-10-02T03:27:36+00:00",
   "host_environment": {
     "binary_git_commit": "2e79e866d7da",
     "cpp_arch": "arm64",
@@ -34,8 +34,8 @@
     "cpp_flags": "(none)",
     "cpp_os": "Darwin 27.0.0",
     "cpp_standard": "C++20",
-    "generated_at_utc": "2026-10-01T06:08:29+00:00",
-    "git_commit": "2e79e866d7da",
+    "generated_at_utc": "2026-10-02T03:27:36+00:00",
+    "git_commit": "d44683ae38df",
     "packages": {
       "PyPortfolioOpt": "1.6.0",
       "QuantLib": "1.43",
@@ -50,14 +50,11 @@
       "scipy": "1.18.1",
       "statsmodels": "0.15.0"
     },
-    "provenance": "ran from 2e79e866d7da plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 2e79e866d7da",
+    "provenance": "ran from d44683ae38df plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 2e79e866d7da",
     "python_machine": "arm64",
     "python_platform": "macOS-27.0.1-arm64-arm-64bit",
     "quantrisk_version": "1.6.0",
     "uncommitted_paths": [
-      ".github/workflows/ci.yml",
-      "CITATION.cff",
-      "CMakeLists.txt",
       "README.md",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
@@ -68,18 +65,14 @@
       "benchmarks/suite/results/suite_run.json",
       "benchmarks/suite/results/suite_summary.md",
       "docs/analysis/fourth_order_crossing_map.md",
-      "docs/findings.md",
       "docs/integrity_audit.md",
       "docs/interview_defense.md",
       "docs/limitations.md",
       "docs/phase_reports/phase-16-fourth-order-crossing.md",
-      "docs/release_notes_v1.3.0.md",
-      "docs/release_notes_v1.4.0.md",
       "docs/release_notes_v1.6.0.md",
       "docs/reproducibility.md",
-      "docs/validation_matrix.md",
-      "evidence/manifest.json",
-      "experiments/fourth_order_crossing_map/",
+      "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
+      "experiments/fourth_order_crossing_map/run.py",
       "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
       "experiments/monte_carlo_convergence/results/convergence.csv",
       "experiments/monte_carlo_convergence/results/summary.json",
@@ -93,12 +86,17 @@
       "experiments/variance_reduction/results/summary.json",
       "experiments/variance_reduction/results/variance_by_method.csv",
       "paper/technical_report.tex",
-      "pyproject.toml",
-      "scripts/build_evidence_manifest.py",
       "scripts/run_benchmark_suite.py",
       "scripts/run_mutation_suite.py",
+      "technical_report.aux",
+      "technical_report.fdb_latexmk",
+      "technical_report.fls",
+      "technical_report.log",
+      "technical_report.out",
+      "technical_report.pdf",
+      "technical_report.toc",
       "tests/python/test_fourth_order_crossing_map.py",
-      "uv.lock"
+      "tests/python/test_two_factor_bound.py"
     ],
     "working_tree_dirty": true
   },
@@ -124,33 +122,33 @@
   },
   "results_seconds": {
     "cpp": {
-      "max_seconds": 0.004627166999853216,
-      "mean_seconds": 0.004349458428415736,
-      "min_seconds": 0.004265541998393019,
-      "paths_per_second_mean": 45982736.308816455,
+      "max_seconds": 0.005628207999961887,
+      "mean_seconds": 0.005224035857086814,
+      "min_seconds": 0.005011875000036525,
+      "paths_per_second_mean": 38284576.42163469,
       "repetitions": 7,
-      "std_seconds": 0.0001261430750640615
+      "std_seconds": 0.0002096631402943455
     },
     "numpy": {
-      "max_seconds": 0.002908291999119683,
-      "mean_seconds": 0.0020847439996681976,
-      "min_seconds": 0.0019148329993186053,
-      "paths_per_second_mean": 95935040.48066884,
+      "max_seconds": 0.003697084000123141,
+      "mean_seconds": 0.0023195355713921473,
+      "min_seconds": 0.0020434160001059354,
+      "paths_per_second_mean": 86224157.31264827,
       "repetitions": 7,
-      "std_seconds": 0.00036486028394200484
+      "std_seconds": 0.0006086746324336677
     },
     "python": {
-      "max_seconds": 0.03815983399908873,
-      "mean_seconds": 0.035922184714114076,
-      "min_seconds": 0.03450883400000748,
-      "paths_per_second_mean": 5567590.100426676,
+      "max_seconds": 0.04272366700024577,
+      "mean_seconds": 0.042105446428714846,
+      "min_seconds": 0.04134570799988069,
+      "paths_per_second_mean": 4749979.324850598,
       "repetitions": 7,
-      "std_seconds": 0.0013140673917536997
+      "std_seconds": 0.00044416309780246206
     }
   },
-  "speedup_vs_numpy": 0.4793111680406503,
-  "speedup_vs_pure_python": 8.259001736728523,
-  "speedup_vs_pure_python_using_min": 8.090140482266541,
+  "speedup_vs_numpy": 0.44401218422831373,
+  "speedup_vs_pure_python": 8.059945907835894,
+  "speedup_vs_pure_python_using_min": 8.249548921227957,
   "z_score_vs_analytic": {
     "cpp": 0.5370189339461992,
     "numpy": -0.24212669161997663,
