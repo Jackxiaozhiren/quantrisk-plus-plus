@@ -107,8 +107,14 @@ uv run python scripts/run_benchmark_suite.py --require-all   16/16 executed and 
 uv run quantrisk validate                               7/7 checks passed
 uv run --frozen clang-format --dry-run -Werror          exit 0
 uv run latexmk -pdf                                     43 pages, 999,330 bytes
-uv run python scripts/run_mutation_suite.py             21 planted defects, verdict in the freeze commit
+uv run python scripts/run_mutation_suite.py             21/21 planted defects rejected
+uv run python scripts/build_evidence_manifest.py        83 artifacts frozen
+uv run python scripts/verify_evidence_manifest.py       0 missing, 0 unlisted -- Evidence is intact
 ```
+
+The sweep and the freeze above both ran on commit `e1b67a0`, the tree they describe, because the sweep
+refuses a dirty target and its verdict is a claim about a revision rather than about a session. This
+commit adds the table, so it cannot carry its own freeze; `CONTRIBUTING.md` §4 step 7.
 
 The suite grew from fifteen members to sixteen; the C++ suite from 198 tests to 201. The performance
 artifact moved five times while this release was being verified — `8.12×` → `8.00×` → `7.99×` →

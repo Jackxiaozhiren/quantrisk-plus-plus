@@ -95,8 +95,10 @@ Date: 2026-10-01 · Files: core + 1 experiment + 2 test files + 8 documents · S
 `uv run python scripts/run_benchmark_suite.py --require-all`, `uv run quantrisk validate`,
 `uv run python scripts/build_evidence_manifest.py`, `uv run python scripts/verify_evidence_manifest.py`,
 `uv run --frozen clang-format --dry-run -Werror` on the four touched C++ files, `uv run latexmk -pdf`,
-and `uv run python scripts/run_mutation_suite.py` twice on committed trees — 19/19 on the release
-commit, then 20/20 after this phase's producer-docstring guard was given its own planted defect.
+and `uv run python scripts/run_mutation_suite.py` three times on committed trees — 19/19 on the release
+commit, then 20/20 after this phase's producer-docstring guard was given its own planted defect, then
+21/21 on `e1b67a0` after the exemption's own defect was planted (widening
+`noise_decided_verdicts` to cover `columns`, which the catching guard must refuse).
 
 Three CI rounds on this branch caught what the local gates could not. The quartic slope band was 4.6-5.2,
 sized from this machine's four rays (4.73-5.01), and the runner measured `5.223` on the crash ray; the
@@ -137,6 +139,9 @@ run_benchmark_suite --require-all
 quantrisk validate           7/7 checks passed
 clang-format --dry-run       exit 0
 latexmk -pdf                 Output written on technical_report.pdf (43 pages, 999330 bytes)
+run_mutation_suite           21/21 planted defects were rejected by their guard   (on e1b67a0)
+build_evidence_manifest      83 artifacts frozen                                 (on e1b67a0)
+verify_evidence_manifest     0 missing, 0 unlisted -- Evidence is intact
 ```
 
 The fourth-order experiment's own summary line:
