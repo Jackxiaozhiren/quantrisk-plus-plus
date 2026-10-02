@@ -215,7 +215,23 @@ Carried by `docs/limitations.md` #79 and `docs/analysis/fourth_order_crossing_ma
 
 ## 9. Gate
 
-**Ready for release as `v1.6.0`.** Every gate above ran on this tree and reported its own pass; nothing is
-asserted about CI until `commits/<sha>/check-runs` says otherwise. The release order is `CONTRIBUTING.md`
-§4: commit, re-freeze the manifest on the committed tree, tag the commit the runner verified, build assets
-from `git archive <tag>`, and state in the note what the record cannot contain.
+**Released as `v1.6.0`.** Every gate above ran on this tree and reported its own pass, and the runner
+agreed: `commits/b4e4bea/check-runs` reports `Format and static checks`, `Configure, build, C++ tests,
+Python tests` and `Benchmark suite against live oracles` all `success` on run 36960884689. The annotated
+tag points at `b4e4bea05fd2fd0726b9d4f78fc52088098da4fe`, the commit the runner verified and nothing later,
+and the release at
+[`github.com/Jackxiaozhiren/quantrisk-plus-plus/releases/tag/v1.6.0`](https://github.com/Jackxiaozhiren/quantrisk-plus-plus/releases/tag/v1.6.0)
+carries four assets built from `git archive v1.6.0` rather than from a working tree:
+
+| asset | sha256 |
+|---|---|
+| `CITATION.cff` | `3247e67b0b4bd8f3ef9792143f93880e8c68cdb0054abaa6dcd9da76884f2921` |
+| `manifest.json` | `ce07fb7069a8a67166f55135d6a0cb4dfd36fec2629421779b0b1b42fecc2885` |
+| `quantrisk-suite-results.zip` | `eca3a9bae55629640d5e69c40fa90f015006db0b97aafb180673f1b2e87d9eca` |
+| `technical_report.pdf` | `56c5f86a90eaf777493d467372f4f1bdb8a2338bf647abc73325366f641ba30c` |
+
+Each digest was taken on the way up, GitHub reports the same four as the asset's own `digest`, and a fresh
+`gh release download` re-hashes to all four. The section is itself a post-tag commit, so it cannot be part
+of what the tag or the manifest describes: `evidence/manifest.json` names `b4e4bea` as its revision, and
+the release note states what the record cannot contain rather than pretending the gap closed
+(`CONTRIBUTING.md` §4 steps 5-7).
