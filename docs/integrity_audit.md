@@ -763,3 +763,19 @@ to 5 of 5 books and its magnitude to none — `0.05 -> 0.15` is one ladder's pai
 to 3.0 — and the mechanism v1.6.0's note leaned on, the order-four-to-three ratio, does not order the
 widening at all. `docs/limitations.md` #81, validation row 20, and a dated correction in
 `docs/release_notes_v1.6.0.md` carry that; `docs/analysis/second_book_crossing_map.md` §3 argues it.
+
+**47. The evidence freeze hashes the directories it names, and its verifier cannot see a directory it
+was never told about.** `scripts/build_evidence_manifest.py` walks a hand-kept list of result
+directories. Phase 18 added `experiments/second_book_crossing_map/results/` and the freeze stayed at 83
+artifacts, while `verify_evidence_manifest.py` reported `0 MISSING` and `0 on disk but not in the
+manifest` -- both correct about the list it walks, and silent about the one thing outside it. A new
+experiment's evidence is therefore invisible to the mechanism whose job is to notice that evidence
+changed, which is finding 25's "absence produces no output" one level further down the stack: the guard
+there was checking that a *check* ran, this one is that the *population* was enumerated.
+
+Closed by deriving the population from the tree:
+`tests/python/test_artifact_metadata.py::test_the_manifest_hashes_every_experiment_results_directory`
+compares the frozen manifest's entries against `experiments/*/results` on disk, and the sweep carries
+`experiment-results-the-evidence-freeze-never-saw` -- a probe directory no one declared -- so CI re-runs
+the proof that an undeclared directory is caught rather than counted as clean. The directory itself is now
+declared and the manifest re-frozen at 85 artifacts.

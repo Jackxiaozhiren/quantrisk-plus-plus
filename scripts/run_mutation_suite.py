@@ -221,8 +221,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 389 Python tests",
-        replacement="# 390 Python tests",
+        anchor="# 390 Python tests",
+        replacement="# 391 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
@@ -314,6 +314,18 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="a runnable experiment nobody registers fails the registry's own completeness check",
     ),
     Mutation(
+        identifier="experiment-results-the-evidence-freeze-never-saw",
+        kind="tree",
+        path="experiments/_mutation_probe/results/probe.json",
+        anchor="",
+        replacement='{"command": "probe written by the mutation sweep; never committed"}\n',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_manifest_hashes_every_experiment_results_directory"
+        ),
+        claim="an undeclared results directory is evidence the frozen manifest never hashed",
+    ),
+    Mutation(
         identifier="volga-uses-its-own-square",
         kind="core",
         path="cpp/src/pricing/black_scholes.cpp",
@@ -368,7 +380,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 458 pytest tests with the validation",
+        anchor="and 459 pytest tests with the validation",
         replacement="and 457 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"

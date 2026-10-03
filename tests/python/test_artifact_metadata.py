@@ -310,8 +310,8 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
             f"oracles present: {_oracles_present()}"
         )
 
-    # The report gives the same pair in LaTeX prose -- "458 pytest tests with the validation oracles
-    # installed, 389 collected without them" -- where none of the patterns above reaches it. It said
+    # The report gives the same pair in LaTeX prose -- "459 pytest tests with the validation oracles
+    # installed, 390 collected without them" -- where none of the patterns above reaches it. It said
     # 411 and 342 until this phase read it, two releases after both numbers stopped being true.
     report = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
     tex_high = re.search(
@@ -618,6 +618,27 @@ def test_the_suite_records_a_pasteable_command_with_no_machine_path(tmp_path: Pa
     # An output directory outside the repository cannot be expressed relative to it, so the
     # path stays absolute. That is not a leak: nothing under /private/var is ever committed.
     assert str(Path.home()) not in outside_command
+
+
+def test_the_manifest_hashes_every_experiment_results_directory() -> None:
+    """A new experiment escapes the evidence freeze silently, because the list is kept by hand.
+
+    `scripts/build_evidence_manifest.py` walks the directories it names, and Phase 18 added
+    `experiments/second_book_crossing_map/` without naming it there. The verifier then read back
+    `83 OK / 0 MISSING / 0 on disk but not in the manifest` -- three true statements about the list
+    it walks, and blind to the directory that is not in it. Every README, matrix and paper number
+    traces to files like these, so the tree owns the list and the frozen manifest has to cover it.
+    """
+    manifest = json.loads((REPO_ROOT / "evidence" / "manifest.json").read_text(encoding="utf-8"))
+    covered = {str(Path(entry["path"]).parent) for entry in manifest["artifacts"]}
+    on_disk = sorted(
+        path.relative_to(REPO_ROOT).as_posix()
+        for path in (REPO_ROOT / "experiments").glob("*/results")
+        if path.is_dir()
+    )
+    assert on_disk, "no experiment results directories found; the tree's shape changed"
+    missing = [directory for directory in on_disk if directory not in covered]
+    assert not missing, f"evidence/manifest.json hashes none of: {missing}"
 
 
 def test_the_frozen_suite_roll_up_records_the_command_that_made_it() -> None:

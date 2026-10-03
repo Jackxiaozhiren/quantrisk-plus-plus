@@ -33,10 +33,19 @@ release note carries a dated correction instead (§5 of this report).
    suite members while the registry had sixteen, and 411/342 pytest tests where the tree gives 447/378;
    README said "eight experiments" above a table of nine rows, with twelve scripts on disk. Two existing
    guards now read the report, and a new guard
-   (`test_the_readme_experiment_count_agrees_with_the_experiments_on_disk`) reads the tree. Three plants
-   cover them, plus one for the radius rule: **26 planted defects** in the sweep.
-8. **The README's experiment table is brought current** with the two rows Phase 15 and Phase 16 never
-   added, and the Phase 18 row.
+   (`test_the_readme_experiment_count_agrees_with_the_experiments_on_disk`) reads the tree.
+8. **A fourth ownerless list turned out to be an evidence hole** (finding 47).
+   `scripts/build_evidence_manifest.py` hashes the directories it *names*, and this phase's new
+   `experiments/second_book_crossing_map/results/` was not among them: the verifier read back
+   `83 OK / 0 MISSING / 0 on disk but not in the manifest`, three true statements about the list it walks
+   and blind to the directory that is not in it. The directory is now declared, the manifest re-frozen at
+   85 artifacts, and `test_the_manifest_hashes_every_experiment_results_directory` compares the frozen
+   manifest against the tree.
+9. **Five plants** cover items 7 and 8 and the radius rule (report member count, report test counts,
+   README experiment count, undeclared results directory, `-0.15`/`+0.15` read one at a time):
+   **27 planted defects** in the sweep.
+10. **The README's experiment table is brought current** with the two rows Phase 15 and Phase 16 never
+    added, and the Phase 18 row.
 
 ## 2. Mathematical assumptions
 
@@ -70,7 +79,9 @@ release note carries a dated correction instead (§5 of this report).
 | `tests/python/test_second_book_crossing_map.py` | new: 10 tests, including the note-figure owner and the signed-pair plant |
 | `docs/analysis/second_book_crossing_map.md` | new note, six sections |
 | `scripts/run_benchmark_suite.py` | member 17 registered with seven headline fields read by key path |
-| `scripts/run_mutation_suite.py` | four plants added (report suite count, report test counts, radius pair rule, README experiment count); four anchors refreshed to the values this phase changed |
+| `scripts/run_mutation_suite.py` | five plants added (report suite count, report test counts, radius pair rule, README experiment count, undeclared results directory); four anchors refreshed to the values this phase changed |
+| `scripts/build_evidence_manifest.py` | the new results directory declared, so its evidence is hashed rather than assumed |
+| `evidence/manifest.json` | re-frozen at 85 artifacts on the commit that carries the work |
 | `tests/python/test_artifact_metadata.py` | two existing guards extended to the report; one new guard for the README's experiment table |
 | `docs/validation_matrix.md` | row 20 added; row and member counts re-derived |
 | `docs/limitations.md` | #81 added, #79's closing clause pointed at it; count claims 80 → 81 |
@@ -145,7 +156,7 @@ The five books, one row each, from `second_book_crossing_map.json`:
 Verification for the phase, in the tools' own words:
 
 ```text
-uv run pytest tests/python -q                     458 passed in 60.80s (0:01:00)
+uv run pytest tests/python -q                     459 passed in 73.57s (0:01:13)
 uv run ctest --preset dev                         100% tests passed out of 201 (11.52 s)
 uv run ruff check .                               All checks passed!
 uv run ruff format --check .                      138 files already formatted
@@ -154,6 +165,8 @@ uv run clang-format --dry-run -Werror <29 headers> exit 0
 uv run python scripts/run_benchmark_suite.py --require-all
   suite: 17/17 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 226.4s total
 uv run latexmk -pdf (paper/)                      Output written on technical_report.pdf (44 pages, 1001529 bytes)
+uv run python scripts/build_evidence_manifest.py   wrote evidence/manifest.json: 85 artifacts
+uv run python scripts/verify_evidence_manifest.py  85 OK, 0 CHANGED, 0 MISSING, 0 unlisted
 ```
 
 The suite run is `benchmarks/suite/results/suite_run.json` at `generated_at_utc`
@@ -204,10 +217,12 @@ size on the published book (limitation #79).
 3. **Post-tag accounting.** `v1.6.0`'s assets are frozen and its note now carries a dated correction;
    the report PDF and the manifest in this tree are newer than the tag. If a `v1.7.0` is ever cut, its
    release note must state the radius per book rather than restating `0.05 -> 0.15` as the model's.
-4. **Prose counts with no owner.** Three were closed here (the report's member count, its two test
-   counts, README's experiment table). Still unowned by any guard: the `ruff format --check` file counts
-   quoted in release notes, and the "four documents and eleven guards" style self-descriptions. The rule
-   this phase keeps learning is that a count is only as alive as the file it was read from.
+4. **Prose counts and hand-kept lists with no owner.** Four were closed here (the report's member
+   count, its two test counts, README's experiment table, the manifest's directory list). Still unowned by
+   any guard: the `ruff format --check` file counts quoted in release notes, and the "four documents and
+   eleven guards" style self-descriptions. The rule this phase keeps learning is that a count is only as
+   alive as the file it was read from -- and that a verifier's silence is a statement about its own list,
+   not about the disk.
 5. **One decision field, one value field.** Finding 46's rule is not specific to radii: anywhere a
    document or artifact stores both a decision and the quantities the decision was made over, one of the
    two is redundant unless something compares them. The repository has no general instrument for finding
