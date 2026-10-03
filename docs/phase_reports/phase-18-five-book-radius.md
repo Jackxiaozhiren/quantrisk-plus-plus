@@ -238,4 +238,12 @@ the freeze" and Phase 17 §9 explain. Nothing in this file is claimed to be insi
 
 Order followed, from `CONTRIBUTING.md` §4: gates → one full `--require-all` suite run → prose sync
 (counts, figures, and the dated correction to a published claim) → falsification anchors → commit →
-sweep and manifest re-freeze on the committed tree → push → CI on the runner.
+manifest re-freeze on the committed tree → sweep → push → CI on the runner.
+
+The sweep ran on `2e8142a`, the commit whose tree it describes, after the manifest re-freeze had made
+that tree clean. Its own line: `27/27 planted defects were rejected by their guard.` Five of those are
+new with this phase -- the report's member count, the report's test counts, the README's experiment
+sentence, the undeclared results directory, and `-0.15`/`+0.15` read one at a time -- and each was seen
+through the four steps the harness requires: anchor unique, bytes changed, named guard red, bytes
+restored and the guard green again. This sentence is one commit late by construction: the sweep refuses a
+dirty target, and the commit that records a verdict is not the commit that earns it.
