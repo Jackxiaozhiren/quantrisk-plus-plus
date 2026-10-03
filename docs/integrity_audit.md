@@ -823,3 +823,11 @@ disclaimed, and no guard reaches the three things still outside it: class member
 disclaimer's reason, and functions declared only in a `.cpp`. Limitation #80 states those; the counts are
 policed by `test_the_documents_that_count_the_core_surface_count_it_correctly`, whose own plant edits one
 of them in the register.
+
+Verification, in the tools' own words: `uv run pytest tests/python -q` -- 460 passed; the parity file's
+own 14 tests; `uv run ctest --preset dev` -- 100 % tests passed out of 201 after the header edits and a
+full rebuild; `uv run ruff check .` and `uv run ruff format --check .` -- all checks passed, 139 files
+already formatted; `uv run mypy python/quantrisk` -- no issues in 23 source files; `uv run clang-format
+--dry-run -Werror` on the 29 headers -- exit 0; the falsification sweep on the committed tree
+(`5bb7e12`) -- `29/29 planted defects were rejected by their guard.` No artifact was regenerated, so the
+manifest frozen at `2e8142a` still verifies: `85 OK / 0 CHANGED / 0 MISSING / 0 unlisted`.
