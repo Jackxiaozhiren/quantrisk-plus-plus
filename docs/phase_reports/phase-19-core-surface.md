@@ -134,3 +134,10 @@ changed, so nothing is re-frozen: the manifest committed at `2e8142a` still hash
 produces, and `verify_evidence_manifest.py` reports `0 CHANGED / 0 MISSING / 0 unlisted`. The falsification
 sweep runs on a committed tree because it refuses a dirty target, so its verdict is recorded one commit
 later, naming the revision it ran on -- the ordering `CONTRIBUTING.md` §4 and Phase 17 §9 both describe.
+
+The sweep ran on `5bb7e12`, the commit that carries the headers and the re-keyed guard, with `git status`
+empty before and after it. Its own line: `29/29 planted defects were rejected by their guard.` The two
+plants this phase added both fired: `core-returns-a-value-and-says-nothing-about-it` (an attribute
+stripped from a function the bindings already register, so only the uniformity half of the claim can see
+it) and `limitations-count-a-stale-core-surface` (a declaration count edited in the register). This
+sentence is one commit later than the revision it names, which is what the ordering above requires.
