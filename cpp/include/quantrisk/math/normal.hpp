@@ -15,9 +15,9 @@ namespace quantrisk {
 ///   quantile function of the normal distribution"). It is validated against
 ///   SciPy's `norm.ppf` in tests/python rather than being trusted by citation.
 /// @{
-Real normal_pdf(Real x);
-Real normal_cdf(Real x);
-Real inverse_normal_cdf(Real probability);
+[[nodiscard]] Real normal_pdf(Real x);
+[[nodiscard]] Real normal_cdf(Real x);
+[[nodiscard]] Real inverse_normal_cdf(Real probability);
 /// @}
 
 } // namespace quantrisk

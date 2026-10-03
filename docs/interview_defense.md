@@ -41,7 +41,7 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 201 C++ tests under CTest (548,217 assertions in 200 Catch2
-cases), 459 pytest tests with the `oracles` extra and the same tree collects 390 tests without
+cases), 460 pytest tests with the `oracles` extra and the same tree collects 391 tests without
 it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
 revision's figure on the runner rather than trusting arithmetic here. 17/17 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
@@ -403,8 +403,8 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 201 C++ tests (548,217 assertions in 200 cases) and 459
-Python tests with the validation oracles installed — 390 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
+variance reduction. Today that is 201 C++ tests (548,217 assertions in 200 cases) and 460
+Python tests with the validation oracles installed — 391 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -962,13 +962,16 @@ header that declares it. What caught it was a consumer: the Phase 16 experiment 
 `AttributeError`. Audit finding 43 recorded that as open, with the reason -- the repository had never
 made a claim about what should be reachable.
 
-Phase 17 makes the claim and enforces it. Every namespace-scope function the core marks `[[nodiscard]]`
-in `cpp/include/quantrisk/**/*.hpp` (92 declarations, 85 names) must either be registered in
-`bindings/python_bindings.cpp` or carry a `// python:` marker at its own declaration disclaiming it. 24
-declarations are disclaimed, and a disclaimer is a checked fact, not a sentence: `via X` has to name a
-function the bindings really register, `via Class.member` has to name a field of a bound struct, a marker
-on a function that is in fact bound is stale, and a marker above nothing is orphaned. All four are
-planted in tests.
+Phase 17 makes the claim and enforces it; Phase 19 widened it from the attribute to the whole surface.
+Every namespace-scope function declaration in `cpp/include/quantrisk/**/*.hpp` (109 declarations, 101
+names) must be registered in `bindings/python_bindings.cpp` or carry a `// python:` marker at its own
+declaration disclaiming it, and every one of them must carry the `[[nodiscard]]` the core chose as its
+own intent marker. 25 declarations are disclaimed, and a disclaimer is a checked fact, not a sentence:
+`via X` has to name a function the bindings really register, `via Class.member` has to name a field of a
+bound struct, a marker on a function that is in fact bound is stale, and a marker above nothing is
+orphaned. Four failure modes plus the unmarked-declaration one are planted in tests, and the residual
+Phase 17 had to inventory -- seventeen functions in four headers, `stats::quantile_linear` the only one
+not bound -- is now asserted empty rather than listed.
 
 **Deeper.** Two decisions are worth defending. The anchor is the attribute rather than "every
 declaration", because `[[nodiscard]]` is the core already stating *this result is the point of calling*
@@ -1021,7 +1024,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 ```bash
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 201 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 390 Python tests
+  .venv/bin/python -m pytest -q                                          # 391 Python tests
 uv run python scripts/run_mutation_suite.py                            # 18/18 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
@@ -1064,7 +1067,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | ERC condition `wᵢ(Σw)ᵢ = (wᵀΣw)/n` and "validated against independent implementation" | `docs/mathematical_specification.md` §9 |
 | Heston dynamics, Feller condition, full-truncation Euler bias, "validation weaker than Black-Scholes section" | `docs/mathematical_specification.md` §10; `docs/project_scope.md` §4 |
 | Eigen arrives in Phase 6, not before; single-thread and no-QMC limits; path-matrix memory bound | `docs/limitations.md` #8, #16, #18; `docs/model_cards/monte_carlo_gbm.md` |
-| The extension-surface claim and how it was made falsifiable: 92 namespace-scope `[[nodiscard]]` declarations across 29 headers, 85 names, 24 disclaimed by `// python:` markers whose `via` routes the guard verifies; four planted failure modes plus the differential against the Phase 14 guard; residual inventory pinned to `stats::quantile_linear` | `tests/python/test_extension_surface_parity.py`, `scripts/run_mutation_suite.py` (`core-declares-a-function-nobody-binds`), `docs/limitations.md` #80, `docs/phase_reports/phase-17-surface-coverage.md` |
+| The extension-surface claim and how it was made falsifiable: 109 namespace-scope `[[nodiscard]]` declarations across 29 headers, 101 names, 25 disclaimed by `// python:` markers whose `via` routes the guard verifies; four planted failure modes plus the differential against the Phase 14 guard, and Phase 19 closed the residual it used to inventory | `tests/python/test_extension_surface_parity.py`, `scripts/run_mutation_suite.py` (`core-declares-a-function-nobody-binds`), `docs/limitations.md` #80, `docs/phase_reports/phase-17-surface-coverage.md` |
 | "the tests would catch a wrong formula": nineteen planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green; the sweep's own line on `e5daedc` is `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
 | A one-book claim tested on five: the order-four radius transfers in direction (5 of 5) and in no magnitude (factors 1.3 to 3.0); the equality control is bit-identity over 30 joint moves, not a band; the order-four-to-three ratio spans 254-fold and does not order the widening; two radius definitions were wrong, and the second is planted in both column orders | `experiments/second_book_crossing_map/run.py`, `tests/python/test_second_book_crossing_map.py`, `docs/analysis/second_book_crossing_map.md`, `docs/limitations.md` #81, `docs/integrity_audit.md` finding 46 |
 

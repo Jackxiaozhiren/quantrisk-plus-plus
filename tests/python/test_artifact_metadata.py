@@ -310,8 +310,8 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
             f"oracles present: {_oracles_present()}"
         )
 
-    # The report gives the same pair in LaTeX prose -- "459 pytest tests with the validation oracles
-    # installed, 390 collected without them" -- where none of the patterns above reaches it. It said
+    # The report gives the same pair in LaTeX prose -- "460 pytest tests with the validation oracles
+    # installed, 391 collected without them" -- where none of the patterns above reaches it. It said
     # 411 and 342 until this phase read it, two releases after both numbers stopped being true.
     report = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
     tex_high = re.search(

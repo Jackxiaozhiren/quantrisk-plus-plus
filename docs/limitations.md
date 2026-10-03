@@ -304,8 +304,8 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 459 pytest tests with
-    the `oracles` extra installed, and the same tree collects 390 tests without it — the CI lane
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 460 pytest tests with
+    the `oracles` extra installed, and the same tree collects 391 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -613,19 +613,23 @@ never removed just because a later phase shipped.
     measures the radius on four further books and finds the direction transfers while this ladder's
     `0.05 -> 0.15` does not, and the *amount* at published size stays this book's 16.2 %.
 
-80. **The extension-surface claim is keyed on `[[nodiscard]]`, so an unmarked function is outside it.**
-    `tests/python/test_extension_surface_parity.py` closes audit finding 43 by reading
-    `cpp/include/quantrisk/**/*.hpp` and requiring every namespace-scope function the core marks
-    `[[nodiscard]]` to be registered in `bindings/python_bindings.cpp` or disclaimed at its declaration
-    by a `// python:` marker. The attribute is the strongest anchor the tree offers — it is the core's
-    own statement that a result is the point of calling — but it is not applied uniformly: the scan
-    covers 85 function names today, and the namespace-scope declarations it does *not* see are
-    inventoried by a second test, pinned to exactly one name (`stats::quantile_linear`, reachable from
-    C++ callers and deliberately not a Python entry point). A new unattributed, unbound function is
-    therefore a red test rather than a silent gap, and a `via X` disclaimer is checked against what the
-    bindings really declare instead of being read as prose. What remains outside the claim is a
-    function the core leaves without the attribute and someone still binds: nothing in the tree would
-    notice, which is why the inventory is a list rather than a count.
+80. **The extension-surface claim covers every namespace-scope function the core declares; the reasons
+    inside it are still prose.** `tests/python/test_extension_surface_parity.py` reads
+    `cpp/include/quantrisk/**/*.hpp` and requires each namespace-scope function declaration to be
+    registered in `bindings/python_bindings.cpp` or disclaimed at its own declaration by a `// python:`
+    marker. Phase 17 keyed that claim on `[[nodiscard]]` and then inventoried what the attribute missed:
+    seventeen declarations across four headers -- the statistics primitives, the normal
+    PDF/CDF/quantile, the version pair, the three covariance estimators and `stats::quantile_linear`.
+    Phase 19 marked every one of them, because a numerical core that returns a value means it, so the
+    attribute and the population are now the same set: the surface holds 109 namespace-scope
+    declarations and 101 distinct names, and 25 of them are disclaimed rather than bound, each
+    disclaimer's `via X` route checked against what the bindings really declare and each orphan stale
+    exemption caught. Three things stay outside the claim, listed because no guard reaches them: a
+    *class member* is not a namespace-scope entry point and is not covered -- the parser blanks type
+    bodies for exactly that reason, which is also why `struct Summary::total()` cannot sneak in; the
+    reason text of a disclaimer is prose, so the guard verifies the route it names and not whether the
+    justification is still the true one; and a function declared only inside a `.cpp` is invisible to a
+    header scan, which is finding 43's blind spot one file type over rather than a closed one.
 
 81. **A crossing radius transfers in direction, not in size, and the mechanism this phase assumed
     of it is wrong.** `experiments/second_book_crossing_map/` measures v1.6.0's fourth-order radius

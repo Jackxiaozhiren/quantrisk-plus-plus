@@ -221,8 +221,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 390 Python tests",
-        replacement="# 391 Python tests",
+        anchor="# 391 Python tests",
+        replacement="# 392 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
@@ -380,7 +380,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 459 pytest tests with the validation",
+        anchor="and 460 pytest tests with the validation",
         replacement="and 457 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -399,6 +399,30 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_numbers"
         ),
         claim="-0.15 and +0.15 are one candidate, and a radius may not contain a column it failed",
+    ),
+    Mutation(
+        identifier="core-returns-a-value-and-says-nothing-about-it",
+        kind="prose",
+        path="cpp/include/quantrisk/math/normal.hpp",
+        anchor="[[nodiscard]] Real normal_cdf(Real x);",
+        replacement="Real normal_cdf(Real x);",
+        guard=(
+            "tests/python/test_extension_surface_parity.py::"
+            "test_no_namespace_scope_declaration_is_left_unmarked"
+        ),
+        claim="every namespace-scope function states that its result is the point of calling it",
+    ),
+    Mutation(
+        identifier="limitations-count-a-stale-core-surface",
+        kind="prose",
+        path="docs/limitations.md",
+        anchor="the surface holds 109 namespace-scope",
+        replacement="the surface holds 108 namespace-scope",
+        guard=(
+            "tests/python/test_extension_surface_parity.py::"
+            "test_the_documents_that_count_the_core_surface_count_it_correctly"
+        ),
+        claim="the size of the core surface belongs to the scan, not to the sentence quoting it",
     ),
 )
 

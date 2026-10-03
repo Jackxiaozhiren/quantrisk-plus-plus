@@ -787,3 +787,39 @@ python/quantrisk` -- no issues in 23 source files; `uv run clang-format --dry-ru
 headers -- exit 0; `uv run python scripts/run_benchmark_suite.py --require-all` -- `17/17 executed and
 passed, 0 skipped, 226.4s`; `uv run latexmk -pdf` -- 44 pages, 1001529 bytes; and the falsification
 sweep on the committed tree (`2e8142a`) -- `27/27 planted defects were rejected by their guard.`
+
+
+## Addendum — Phase 19, the debt item Phase 17 published about itself (2026-10-03)
+
+**48. An inventory was right for a reason that had nothing to do with the scanner that produced it.**
+Phase 17 closed finding 43 with a claim keyed on `[[nodiscard]]`, and a second test whose whole job was
+to list what that key missed. The list came out as exactly one name, `stats::quantile_linear`, and the
+test pinned it. The scanner that produced it, though, walked back from a declaration's name to the
+previous newline to find the statement's start -- and these headers wrap. `[[nodiscard]]
+MixedThirdDerivatives` and the function name on the next line are one declaration, and that walk read
+the name's line alone, concluded nothing was marked, and reported it. Calling the function directly on
+the tree returned 23 names, not one. What made the test correct was an unrelated filter: the residual
+dropped any name the attribute scan had already covered or the bindings already registered, and every
+false positive happened to satisfy one of those. So the assertion held, the prose figure was right, and
+the instrument underneath was wrong -- which is the shape of finding 25 again, one level down: a check
+whose passing does not demonstrate what it claims to demonstrate.
+
+Phase 19 removes the ambiguity rather than documenting it. A declaration's statement now begins at the
+previous `;`, `}`, `{` or blank line, so a wrapped attribute is seen by both scanners; the population of
+the claim is every namespace-scope declaration, marked or not, and the residual is asserted *empty*
+instead of inventoried. The parser's own test pins the shapes that used to fool it -- an attribute on the
+name's own line, an attribute a line above the name, a struct member (which must NOT count), and one
+genuinely unmarked declaration, the only name that may be reported.
+
+The debt item itself closed the same day. Seventeen functions in four headers carried no attribute:
+`sum_compensated`, `mean`, `sample_variance`, `sample_stddev`, `quantile`, `mean_of_largest_sorted`,
+`autocorrelation`, `standard_error_of_mean` and `quantile_linear` in `core/statistics.hpp`; `version` and
+`build_metadata`; `normal_pdf`, `normal_cdf`, `inverse_normal_cdf`; and the three covariance estimators.
+Every one returns a value that is the point of calling it, so every one is marked now, and
+`quantile_linear` -- the only one that stays unreachable from Python, because it takes data the caller
+already sorted -- carries the disclaimer at its own declaration, where the guard tests the route it names
+instead of reading the sentence. The surface is 109 namespace-scope declarations, 101 distinct names, 25
+disclaimed, and no guard reaches the three things still outside it: class members, the truth of a
+disclaimer's reason, and functions declared only in a `.cpp`. Limitation #80 states those; the counts are
+policed by `test_the_documents_that_count_the_core_surface_count_it_correctly`, whose own plant edits one
+of them in the register.

@@ -60,8 +60,8 @@ inline constexpr Real kSolveRefusalThreshold = 1.0e12;
 /// Unbiased (divisor `n - 1`) sample covariance. This is the canonical
 /// implementation; `risk::sample_covariance` is the frozen Phase 5 entry point and
 /// returns this matrix's flat values.
-CovarianceEstimate sample_covariance(std::span<const Real> returns_rows, Count assets,
-                                     Count observations);
+[[nodiscard]] CovarianceEstimate sample_covariance(std::span<const Real> returns_rows, Count assets,
+                                                   Count observations);
 
 /// RiskMetrics-style exponentially weighted covariance, **about zero**:
 /// weights proportional to `lambda^(T-1-t)` on observation `t` (newest gets 1),
@@ -69,15 +69,15 @@ CovarianceEstimate sample_covariance(std::span<const Real> returns_rows, Count a
 /// the estimator is meant for short windows and daily returns whose weighted mean
 /// is mostly sampling noise. `half_life = ln(0.5) / ln(lambda)`; `lambda = 1`
 /// degenerates to equal weights and reports an infinite half-life.
-CovarianceEstimate ewma_covariance(std::span<const Real> returns_rows, Count assets,
-                                   Count observations, Real lambda);
+[[nodiscard]] CovarianceEstimate ewma_covariance(std::span<const Real> returns_rows, Count assets,
+                                                 Count observations, Real lambda);
 
 /// Ledoit & Wolf (2004) linear shrinkage toward `mu * I`, `mu = tr(S) / p`, with the
 /// closed-form optimal intensity `delta = min(b^2, d^2) / d^2`. Follows the paper's
 /// own normalisation, which forms `S` with divisor `T` rather than `T - 1`: mixing an
 /// unbiased `S` into that derivation would change the estimator being validated.
-CovarianceEstimate shrinkage_covariance(std::span<const Real> returns_rows, Count assets,
-                                        Count observations);
+[[nodiscard]] CovarianceEstimate shrinkage_covariance(std::span<const Real> returns_rows,
+                                                      Count assets, Count observations);
 
 /// @}
 

@@ -511,37 +511,64 @@ def _declarations(text: str) -> list[tuple[int, str, str | None, int | None]]:
         index += len(ATTRIBUTE)
 
 
-def _unattributed_declarations(text: str) -> set[str]:
+def _statement_head(view: str, name_start: int) -> int:
+    """The offset a declaration's own statement begins at.
+
+    Walking back to the previous newline is not enough, because these headers wrap: the core writes
+    `[[nodiscard]] MixedThirdDerivatives` and the name on the next line, so a scan that started at
+    the name's line read that declaration as unmarked. The real boundary is the previous statement
+    (`;`, `}`, `{`) or the blank line that ends a comment block.
+    """
+    start = max(
+        view.rfind(";", 0, name_start),
+        view.rfind("}", 0, name_start),
+        view.rfind("{", 0, name_start),
+        view.rfind("\n\n", 0, name_start) + 1,
+    )
+    return start + 1 if view[start] != "\n" else start
+
+
+def _unmarked_declarations(text: str) -> list[tuple[int, str, str | None, int | None]]:
     """Namespace-scope declarations the core did NOT mark `[[nodiscard]]`.
 
-    These are invisible to the claim, which reads the attribute, so they are inventoried instead
-    (the test that does it is what keeps the list from growing quietly). Two shapes match a
-    declaration's syntax without being one: a call qualified with `::`, and an initialiser, which is
-    how `constexpr Real kEpsilon = std::numeric_limits<Real>::epsilon();` would otherwise read as a
-    declaration of `epsilon`.
+    Phase 17 inventoried these because the claim could not see them. Phase 19 marked every one of
+    them -- a value returned by a numerical core is always the point of calling it -- so the list is
+    now the uniformity check itself: it has to stay empty, and a new function written without the
+    attribute lands here rather than in a caveat. Two shapes match a declaration's syntax without
+    being one: a call qualified with `::`, and an initialiser, which is how `constexpr Real kEpsilon
+    = std::numeric_limits<Real>::epsilon();` would otherwise read as a declaration of `epsilon`.
     """
     view = _namespace_view(text)
-    found: set[str] = set()
+    lines = text.split("\n")
+    found: list[tuple[int, str, str | None, int | None]] = []
     for match in DECLARATION_STATEMENT.finditer(view):
         name = match.group(1)
         qualified = view[max(0, match.start() - 2) : match.start()] == "::"
         if name in NON_DECLARATIONS or qualified:
             continue
-        start = max(view.rfind(";", 0, match.start()), view.rfind("\n", 0, match.start())) + 1
-        if "=" in view[start : match.start()]:
+        head = _statement_head(view, match.start())
+        if "=" in view[head : match.start()] or ATTRIBUTE in view[head : match.start()]:
             continue
-        if ATTRIBUTE in view[start : match.start()]:
-            continue
-        found.add(name)
+        line = view.count("\n", 0, head) + 1
+        marker, marker_line = _marker_above(lines, line - 1)
+        found.append((line, name, marker, marker_line))
     return found
 
 
 def _core_surface() -> list[tuple[str, int, str, str | None, int | None]]:
-    """Every declaration the claim covers, keyed by the header it came from."""
+    """Every namespace-scope function declaration in the core, keyed by the header it came from.
+
+    Two scans, not one: the attribute scan reads what the core marked, and
+    `_unmarked_declarations` reads what it did not. Phase 17 keyed the claim on `[[nodiscard]]`
+    alone and inventoried the difference; Phase 19 marked the whole surface, so the population here
+    is the surface, and an unmarked declaration is caught twice -- unreachable, and unmarked.
+    """
     rows = []
     for header in sorted(HEADER_ROOT.rglob("*.hpp")):
         relative = str(header.relative_to(REPO_ROOT))
-        for line, name, marker, marker_line in _declarations(header.read_text(encoding="utf-8")):
+        text = header.read_text(encoding="utf-8")
+        scanned = sorted(list(_declarations(text)) + list(_unmarked_declarations(text)))
+        for line, name, marker, marker_line in scanned:
             rows.append((relative, line, name, marker, marker_line))
     return rows
 
@@ -590,8 +617,8 @@ def _surface_claim(
             continue
         if marker is None:
             problems.append(
-                f"{path}:{line} {name}: declared `{ATTRIBUTE}` in the core and absent from the "
-                "bindings, with no `// python:` marker saying why"
+                f"{path}:{line} {name}: declared at namespace scope in the core and absent from "
+                "the bindings, with no `// python:` marker saying why"
             )
             continue
         route = parsed.group("route") if parsed is not None else None
@@ -619,7 +646,7 @@ def _orphan_markers(rows: list[tuple[str, int, str, str | None, int | None]]) ->
             if text.strip().startswith(MARKER_HEAD) and (relative, number) not in claimed:
                 problems.append(
                     f"{relative}:{number}: a `// python:` marker above nothing the claim covers: "
-                    "the function it disclaimed is gone, or no longer carries the attribute"
+                    "the function it disclaimed is gone, or moved off the line the marker sits on"
                 )
     return problems
 
@@ -646,6 +673,11 @@ def test_the_header_parser_reads_the_surface_it_claims_to_have_read() -> None:
     assert {
         "black_scholes_mixed_fourth_derivatives",
         "black_scholes_mixed_third_derivatives",
+        # Phase 19: these were outside the attribute scan and are in the population now.
+        "normal_cdf",
+        "mean",
+        "quantile_linear",
+        "shrinkage_covariance",
     } <= names
     assert {"run_scenario", "historical_var", "price_heston_european"} <= names
     assert len(names & set().union(*registered.values())) >= 50, names
@@ -685,46 +717,95 @@ def test_every_core_function_the_core_marks_reachable_is_bound_or_disclaimed() -
     assert len({row[2] for row in disclaimed}) >= 15, "the exemptions collapsed onto a few names"
 
 
-def test_the_functions_outside_the_claim_are_an_inventory_not_a_blind_spot() -> None:
-    """What the attribute does not mark is listed, counted, and pinned to one name.
+def test_the_documents_that_count_the_core_surface_count_it_correctly() -> None:
+    """Three documents restate how big the core surface is, and the scan owns that number.
 
-    The claim keys on `[[nodiscard]]`, so a declaration the core left unmarked and the bindings
-    never registered would be invisible to it -- which is a real shape of the same defect finding
-    43 describes, not a hypothetical one. Rather than widen the claim onto a weaker anchor, the
-    residual is inventoried: exactly one function is outside today, and the day a second appears
-    somebody decides whether it is bound, marked, or genuinely internal.
-
-    The plant below is the guard's own negative control, because a scanner that quietly found
-    nothing would make this test pass for the wrong reason. `epsilon()` is a member call in an
-    initialiser and `require_finite(value, name);` sits inside an inline body; both look like
-    declarations to a regex and neither is one.
-    and neither is one.
+    Phase 17 wrote 92 declarations, 85 names and 24 exemptions into the
+    limitation register, the interview answer and its citation row. Phase 19
+    changed every one of them and no check said so: a count in prose with no
+    owner is a count that goes stale twice, the failure this repository has
+    now closed in five other files.
     """
-    registered, _ = _declared_surface()
-    reachable = set().union(*registered.values())
     rows = _core_surface()
-    covered = {row[2] for row in rows}
-    outside = {
-        (str(header.relative_to(REPO_ROOT)), name)
-        for header in sorted(HEADER_ROOT.rglob("*.hpp"))
-        for name in _unattributed_declarations(header.read_text(encoding="utf-8"))
-        if name not in reachable and name not in covered
+    totals = {
+        "declared": len(rows),
+        "names": len({row[2] for row in rows}),
+        "disclaimed": sum(1 for row in rows if row[3] is not None),
+        "headers": len(list(HEADER_ROOT.rglob("*.hpp"))),
     }
-    assert outside == {("cpp/include/quantrisk/core/statistics.hpp", "quantile_linear")}, (
-        f"the residual moved: {sorted(outside)}. A function declared at namespace scope, marked "
-        "nothing and bound nothing is exactly what finding 43 was about."
-    )
-    assert len(rows) >= 80, "the attribute scan lost declarations, so this comparison means nothing"
+    claims = {
+        "docs/limitations.md": (
+            r"the surface holds (\d+)\s+namespace-scope\s+declarations\s+and\s+(\d+)\s+distinct"
+            r"\s+names,\s+and\s+(\d+)\s+of\s+them\s+are\s+disclaimed",
+            ("declared", "names", "disclaimed"),
+        ),
+        "docs/interview_defense.md": (
+            r"\((\d+) declarations, (\d+)\s+names\)",
+            ("declared", "names"),
+        ),
+    }
+    for name, (pattern, fields) in claims.items():
+        found = re.search(pattern, (REPO_ROOT / name).read_text(encoding="utf-8"))
+        assert found, f"{name} no longer states the core-surface counts in the checked form"
+        for value, field in zip(found.groups(), fields, strict=True):
+            assert int(value) == totals[field], (
+                f"{name} says {field} is {value}; the scan reads {totals[field]}"
+            )
 
-    probe = _unattributed_declarations(
+    citation = re.search(
+        r"(\d+) namespace-scope `\[\[nodiscard\]\]` declarations across (\d+) headers, "
+        r"(\d+) names, (\d+) disclaimed",
+        (REPO_ROOT / "docs" / "interview_defense.md").read_text(encoding="utf-8"),
+    )
+    assert citation, "interview_defense.md's citation row no longer states the surface counts"
+    for value, field in zip(
+        citation.groups(), ("declared", "headers", "names", "disclaimed"), strict=True
+    ):
+        assert int(value) == totals[field], (
+            f"the citation row says {field} is {value}, not {totals[field]}"
+        )
+
+
+def test_no_namespace_scope_declaration_is_left_unmarked() -> None:
+    """Every function the core declares at namespace scope carries `[[nodiscard]]`.
+
+    Phase 17 keyed its claim on the attribute and inventoried what fell outside it: seventeen
+    declarations in four headers -- the statistics primitives, the normal PDF/CDF/quantile, the
+    version pair and the three covariance estimators -- carried nothing. Phase 19 marks them,
+    because a numerical core that returns a value means it, and re-keys the claim onto the whole
+    namespace-scope surface so a new function cannot join a residual by forgetting the attribute.
+    `quantile_linear` stays unreachable from Python -- it takes data the caller already sorted --
+    and now says so at its own declaration, where the guard tests the sentence rather than reads it.
+
+    The probe is this guard's own negative control, because a scanner that quietly found nothing
+    would make the assertion pass for the wrong reason. Five shapes are pinned: a member
+    call inside an initialiser, a call inside an inline body, an attribute on the same line as the
+    name, a declaration whose attribute sits on the line ABOVE the name -- which a scan starting at
+    the name's own line read as unmarked, and did in the version Phase 17 shipped -- and one
+    genuinely unmarked declaration, the only name that may be reported.
+    """
+    unmarked = [
+        (str(header.relative_to(REPO_ROOT)), row[1])
+        for header in sorted(HEADER_ROOT.rglob("*.hpp"))
+        for row in _unmarked_declarations(header.read_text(encoding="utf-8"))
+    ]
+    assert unmarked == [], f"declarations the core left without `{ATTRIBUTE}`: {unmarked}"
+    rows = _core_surface()
+    assert len(rows) >= 100, f"the surface scan found {len(rows)} declarations; it lost the thread"
+    assert all(row[3] is None or MARKER.match(row[3]) for row in rows if row[3] is not None), (
+        "an exemption marker in a shape the claim does not parse"
+    )
+
+    probe = _unmarked_declarations(
         "namespace quantrisk {\n"
         "inline constexpr double kEpsilon = std::numeric_limits<double>::epsilon();\n"
         'inline void check(double value) { require_finite(value, "name"); }\n'
         "[[nodiscard]] double marked(double value);\n"
+        "[[nodiscard]] long\nsplit_after_the_type(double value);\n"
         "double unmarked(double value);\n"
         "}  // namespace quantrisk\n"
     )
-    assert probe == {"unmarked"}, probe
+    assert [row[1] for row in probe] == ["unmarked"], probe
 
 
 def test_a_marker_left_above_nothing_is_caught() -> None:

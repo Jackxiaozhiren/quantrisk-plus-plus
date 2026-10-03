@@ -21,8 +21,8 @@ struct BuildMetadata {
 };
 
 /// Library version, e.g. "1.0.0".
-const std::string &version();
+[[nodiscard]] const std::string &version();
 
-BuildMetadata build_metadata();
+[[nodiscard]] BuildMetadata build_metadata();
 
 } // namespace quantrisk
