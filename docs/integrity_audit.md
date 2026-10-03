@@ -779,3 +779,11 @@ compares the frozen manifest's entries against `experiments/*/results` on disk, 
 `experiment-results-the-evidence-freeze-never-saw` -- a probe directory no one declared -- so CI re-runs
 the proof that an undeclared directory is caught rather than counted as clean. The directory itself is now
 declared and the manifest re-frozen at 85 artifacts.
+
+Verification for the phase, in the tools' own words: `uv run pytest tests/python -q` -- 459 passed;
+`uv run ctest --preset dev` -- 100 % tests passed out of 201; `uv run ruff check .` and
+`uv run ruff format --check .` -- all checks passed, 138 files already formatted; `uv run mypy
+python/quantrisk` -- no issues in 23 source files; `uv run clang-format --dry-run -Werror` on the 29
+headers -- exit 0; `uv run python scripts/run_benchmark_suite.py --require-all` -- `17/17 executed and
+passed, 0 skipped, 226.4s`; `uv run latexmk -pdf` -- 44 pages, 1001529 bytes; and the falsification
+sweep on the committed tree (`2e8142a`) -- `27/27 planted defects were rejected by their guard.`
