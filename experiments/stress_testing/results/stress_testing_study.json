@@ -1,6 +1,6 @@
 {
   "phase": "7 - Stress testing",
-  "generated_utc": "2026-10-02T03:28:35+00:00",
+  "generated_utc": "2026-10-03T04:31:06+00:00",
   "command": "uv run python experiments/stress_testing/run.py",
   "question": "A portfolio chosen to be least risky under normal dispersion is optimal for that dispersion. Does a stress change which portfolio is the risky one, and can the attribution say why?",
   "market": {
@@ -25,39 +25,6 @@
     ]
   },
   "ranking": {
-    "credit_+150bp": {
-      "books": 4,
-      "books_that_changed_absolute_rank": 0,
-      "books_that_changed_sensitivity_rank": 4,
-      "max_var_multiplier": 1.000360436228923,
-      "min_var_multiplier": 1.000184247021596,
-      "base_var_spread": 0.207671223472964,
-      "multiplier_spread": 0.00017615675097015782,
-      "most_stress_sensitive": "risk_parity",
-      "least_stress_sensitive": "min_cvar"
-    },
-    "risk_off": {
-      "books": 4,
-      "books_that_changed_absolute_rank": 0,
-      "books_that_changed_sensitivity_rank": 4,
-      "max_var_multiplier": 5.6058064260464455,
-      "min_var_multiplier": 4.933851866996343,
-      "base_var_spread": 0.207671223472964,
-      "multiplier_spread": 0.13619269024774727,
-      "most_stress_sensitive": "min_variance",
-      "least_stress_sensitive": "equal_weight"
-    },
-    "rates_-100bp": {
-      "books": 4,
-      "books_that_changed_absolute_rank": 0,
-      "books_that_changed_sensitivity_rank": 4,
-      "max_var_multiplier": 0.9975433730453853,
-      "min_var_multiplier": 0.9951941836143628,
-      "base_var_spread": 0.207671223472964,
-      "multiplier_spread": 0.0023605337226657586,
-      "most_stress_sensitive": "min_cvar",
-      "least_stress_sensitive": "risk_parity"
-    },
     "correlation_+0.2": {
       "books": 4,
       "books_that_changed_absolute_rank": 0,
@@ -80,6 +47,17 @@
       "most_stress_sensitive": "risk_parity",
       "least_stress_sensitive": "min_cvar"
     },
+    "rates_-100bp": {
+      "books": 4,
+      "books_that_changed_absolute_rank": 0,
+      "books_that_changed_sensitivity_rank": 4,
+      "max_var_multiplier": 0.9975433730453853,
+      "min_var_multiplier": 0.9951941836143628,
+      "base_var_spread": 0.207671223472964,
+      "multiplier_spread": 0.0023605337226657586,
+      "most_stress_sensitive": "min_cvar",
+      "least_stress_sensitive": "risk_parity"
+    },
     "vol_x2": {
       "books": 4,
       "books_that_changed_absolute_rank": 0,
@@ -91,6 +69,17 @@
       "most_stress_sensitive": "min_variance",
       "least_stress_sensitive": "min_variance"
     },
+    "credit_+150bp": {
+      "books": 4,
+      "books_that_changed_absolute_rank": 0,
+      "books_that_changed_sensitivity_rank": 4,
+      "max_var_multiplier": 1.000360436228923,
+      "min_var_multiplier": 1.000184247021596,
+      "base_var_spread": 0.207671223472964,
+      "multiplier_spread": 0.00017615675097015782,
+      "most_stress_sensitive": "risk_parity",
+      "least_stress_sensitive": "min_cvar"
+    },
     "equity_-20pct": {
       "books": 4,
       "books_that_changed_absolute_rank": 0,
@@ -99,6 +88,17 @@
       "min_var_multiplier": 5.233863659955977,
       "base_var_spread": 0.207671223472964,
       "multiplier_spread": 0.16799284494318978,
+      "most_stress_sensitive": "min_variance",
+      "least_stress_sensitive": "equal_weight"
+    },
+    "risk_off": {
+      "books": 4,
+      "books_that_changed_absolute_rank": 0,
+      "books_that_changed_sensitivity_rank": 4,
+      "max_var_multiplier": 5.6058064260464455,
+      "min_var_multiplier": 4.933851866996343,
+      "base_var_spread": 0.207671223472964,
+      "multiplier_spread": 0.13619269024774727,
       "most_stress_sensitive": "min_variance",
       "least_stress_sensitive": "equal_weight"
     }
@@ -213,38 +213,34 @@
     "scenarios_evaluated": 28
   },
   "environment": {
-    "generated_at_utc": "2026-10-02T03:28:35+00:00",
+    "generated_at_utc": "2026-10-03T04:31:06+00:00",
     "quantrisk_version": "1.6.0",
-    "git_commit": "d44683ae38df",
+    "git_commit": "f5cfa9ef6058",
     "binary_git_commit": "2e79e866d7da",
     "working_tree_dirty": true,
     "uncommitted_paths": [
+      ".github/workflows/ci.yml",
       "README.md",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
       "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
       "benchmarks/quantlib/results/pricing_vs_quantlib.json",
-      "benchmarks/suite/results/suite_headline.csv",
-      "benchmarks/suite/results/suite_run.json",
-      "benchmarks/suite/results/suite_summary.md",
-      "docs/analysis/fourth_order_crossing_map.md",
+      "docs/analysis/second_book_crossing_map.md",
       "docs/integrity_audit.md",
       "docs/interview_defense.md",
       "docs/limitations.md",
-      "docs/phase_reports/phase-16-fourth-order-crossing.md",
+      "docs/release_notes_v1.3.0.md",
+      "docs/release_notes_v1.4.0.md",
       "docs/release_notes_v1.6.0.md",
       "docs/reproducibility.md",
-      "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
-      "experiments/fourth_order_crossing_map/run.py",
+      "docs/validation_matrix.md",
       "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
       "experiments/monte_carlo_convergence/results/convergence.csv",
       "experiments/monte_carlo_convergence/results/summary.json",
       "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
       "experiments/pricing_validation/results/summary.json",
-      "experiments/real_data_risk_study/results/real_data_risk_study.json",
-      "experiments/restrike_gamma_map/results/restrike_gamma_map.json",
-      "experiments/stress_testing/results/stress_testing_study.json",
+      "experiments/second_book_crossing_map/",
       "experiments/two_factor_error_bound/results/two_factor_bound.json",
       "experiments/var_backtesting/results/var_backtesting_validation.json",
       "experiments/variance_reduction/results/summary.json",
@@ -252,17 +248,10 @@
       "paper/technical_report.tex",
       "scripts/run_benchmark_suite.py",
       "scripts/run_mutation_suite.py",
-      "technical_report.aux",
-      "technical_report.fdb_latexmk",
-      "technical_report.fls",
-      "technical_report.log",
-      "technical_report.out",
-      "technical_report.pdf",
-      "technical_report.toc",
-      "tests/python/test_fourth_order_crossing_map.py",
-      "tests/python/test_two_factor_bound.py"
+      "tests/python/test_artifact_metadata.py",
+      "tests/python/test_second_book_crossing_map.py"
     ],
-    "provenance": "ran from d44683ae38df plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 2e79e866d7da",
+    "provenance": "ran from f5cfa9ef6058 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 2e79e866d7da",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",

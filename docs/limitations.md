@@ -246,7 +246,7 @@ never removed just because a later phase shipped.
 
 56. **Resolved on first contact: the CI lane is proven on a runner, and the runner disagreed
     with the laptop.** `benchmark-suite` passes on `ubuntu-latest` in ~5m46s with
-    `--require-all`, so all sixteen members execute against live oracles and none can be skipped
+    `--require-all`, so all seventeen members execute against live oracles and none can be skipped
     silently. What the same runner caught was not in the new lane at all: the pre-existing
     `build-and-test` lane failed on a README assertion that demanded bit-exact agreement with a
     transcribed price, and glibc's libm is 1.7 ULP from Apple's. Local green said nothing about
@@ -304,8 +304,8 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 447 pytest tests with
-    the `oracles` extra installed, and the same tree collects 378 tests without it — the CI lane
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 458 pytest tests with
+    the `oracles` extra installed, and the same tree collects 389 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -337,7 +337,7 @@ never removed just because a later phase shipped.
     no conclusion moved. The consequence is stated rather than smoothed: `verify_evidence_manifest.py`
     is a same-platform tamper check, and running it on a different libm would report CHANGED on
     result fields that are in fact the same result. CI therefore verifies *execution* on Linux (the
-    `benchmark-suite` lane runs all sixteen members with `--require-all`) and *byte equality* only on
+    `benchmark-suite` lane runs all seventeen members with `--require-all`) and *byte equality* only on
     the platform that produced the artifacts. `test_a_fresh_run_reproduces_the_committed_artifact_exactly`
     encodes the split: relative slack of 1e-12 on floats, exact equality on everything else. Making
     the chain platform-independent would require storing results at a stated precision rather than at
@@ -609,8 +609,9 @@ never removed just because a later phase shipped.
     on a conditioning-limited field a name list had not named; inside `columns` the counts and labels
     stay compared by value, and a guard test plants both directions — a perturbed fit that must be
     tolerated and a perturbed zero count that must be caught — so the exemption is a checked property
-    (audit finding 45). One three-strike ladder, one maturity, one base volatility, and no estimate for
-    a book whose fourth-order terms do not share these signs.
+    (audit finding 45). One three-strike ladder, one maturity, one base volatility: limitation #81
+    measures the radius on four further books and finds the direction transfers while this ladder's
+    `0.05 -> 0.15` does not, and the *amount* at published size stays this book's 16.2 %.
 
 80. **The extension-surface claim is keyed on `[[nodiscard]]`, so an unmarked function is outside it.**
     `tests/python/test_extension_surface_parity.py` closes audit finding 43 by reading
@@ -625,3 +626,27 @@ never removed just because a later phase shipped.
     bindings really declare instead of being read as prose. What remains outside the claim is a
     function the core leaves without the attribute and someone still binds: nothing in the tree would
     notice, which is why the inventory is a list rather than a count.
+
+81. **A crossing radius transfers in direction, not in size, and the mechanism this phase assumed
+    of it is wrong.** `experiments/second_book_crossing_map/` measures v1.6.0's fourth-order radius
+    on five books instead of one, and the answer has three parts. (a) The *direction* transfers: on 5
+    of 5 books the quartic's contiguous radius is at least the cubic's, and on 5 of 5 its worst
+    nearest-zero distance inside the cubic's own radius is the smaller. The *magnitude* does not: the
+    widening factors are 1.3, 2.0, 2.5, 3.0 and 3.0, and the cubic radii themselves are 0.02, 0.05,
+    0.05, 0.10 and 0.15. `0.05 -> 0.15` is one ladder's pair of numbers, and `docs/release_notes_v1.6.0.md`
+    carries a dated correction so the sentence it published is read as that. (b) The set was built to
+    span the order-four-to-three ratio -- 0.015 to 3.887, a factor of 254 -- on the expectation that a
+    small fourth-order piece leaves an added order little to remove, and the measurement rejects that
+    ordering: the book with the smallest ratio tied the widest factor. Five books is too few to look
+    for a better mechanism, so none is claimed; the ratio is published per book so a later book can be
+    checked against it. (c) A radius is decided by the worst column in its range, and a column only
+    counts if the priced error crosses zero in it. The short-dated book has 6 of its 12 columns with a
+    crossing, and the long-dated book's quartic radius sits on the swept edge at 0.30, where "no column
+    failed" is weaker than anywhere else; both are flagged in the artifact rather than rounded down.
+    What makes the four extra books a measurement rather than a re-tune is the equality gate: the
+    re-derived machinery must be bit-identical to the two shipped experiments on the published book --
+    ten coefficients, both truncations and the engine P&L over 30 joint moves, all four differences
+    exactly zero -- so nothing here was adjusted to make a book cooperate. What remains unproven is
+    that any of it is a *bound*: no independent implementation prices a fourth-order column, and the
+    transfer claim is self-consistency of one truncation across five books, not agreement with another
+    library.

@@ -731,3 +731,35 @@ Verification, in the tools' own words: `uv run pytest tests/python -q` — 446 p
 `uv run --frozen clang-format --dry-run -Werror` on all 29 headers — exit 0; the falsification sweep on the
 committed tree — 22/22 planted defects rejected, the new entry
 (`core-declares-a-function-nobody-binds`) caught by the guard it names.
+## Addendum — Phase 18, the transferability claim, and a radius that contradicted its own evidence
+(2026-10-03)
+
+**46. An artifact published a decision and the values it was decided over, and nothing compared them.**
+`experiments/second_book_crossing_map/run.py` measures a crossing radius on five books. Its first version
+walked the twelve columns in order of `|delta|` and stopped at the first failure — which is nearly the
+right rule, and wrong in one respect: a magnitude carries *two* columns, `-x` and `+x`. On the long-dated
+book the `-0.15` column passed at 0.00022, so the walk recorded 0.15 before the `+0.15` partner at 0.02347
+stopped it. The artifact then carried `radius_cubic = 0.15` and, four fields away,
+`worst_distance_inside_cubic_radius.cubic = 0.0235` — a radius containing a column the same file called a
+failure, against a tolerance of 0.005. Both fields were published; both were checkable; no guard read them
+together. It surfaced by accident, when a note-figure test asked for a value the artifact no longer
+carried and the two disagreed.
+
+The fix is in three places rather than one, because one fix would leave the same shape reachable again. The
+rule groups by magnitude and requires every crossing column at that magnitude to pass. `check()` refuses
+to publish a radius whose widest in-range distance exceeds the tolerance, so the contradiction is now
+unrepresentable rather than merely unfashionable. And `tests/python/test_second_book_crossing_map.py`
+re-derives every radius from the artifact's own distances — including re-deriving each stored
+`*_within_tolerance` verdict, so the radius is built from numbers rather than from the producer's yes/no —
+and plants the asymmetric pair in *both* column orders, because the defective walk agreed with itself
+whenever the failing sign happened to come second. The negative control ran on a copy of the tree with
+`all` replaced by `any`: the run refused to publish, naming the book, the 0.3 radius and the 2.347e-02
+distance.
+
+The rule: *a field that is a decision over values another field carries is a second source of truth, and
+publishing both without a comparison between them is how a wrong rule survives its own artifact.* The
+phase also corrected what the published claim had been: the direction of the order-four widening transfers
+to 5 of 5 books and its magnitude to none — `0.05 -> 0.15` is one ladder's pair, the five factors are 1.3
+to 3.0 — and the mechanism v1.6.0's note leaned on, the order-four-to-three ratio, does not order the
+widening at all. `docs/limitations.md` #81, validation row 20, and a dated correction in
+`docs/release_notes_v1.6.0.md` carry that; `docs/analysis/second_book_crossing_map.md` §3 argues it.

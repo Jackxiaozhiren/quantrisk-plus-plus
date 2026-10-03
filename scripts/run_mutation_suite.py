@@ -120,8 +120,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
-        anchor="`8.06×`",
-        replacement="`8.01×`",
+        anchor="`8.69×`",
+        replacement="`8.70×`",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_quote_the_performance_figures_the_artifact_actually_holds"
@@ -156,8 +156,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 80 numbered entries",
-        replacement="carries 77 numbered entries",
+        anchor="carries 81 numbered entries",
+        replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_limitations_agree_with_the_file"
@@ -180,8 +180,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-overcounts-the-suite",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="all 16 members",
-        replacement="all 17 members",
+        anchor="all 17 members",
+        replacement="all 18 members",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_suite_members_agree_with_the_registry"
@@ -221,8 +221,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 378 Python tests",
-        replacement="# 379 Python tests",
+        anchor="# 389 Python tests",
+        replacement="# 390 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
@@ -269,8 +269,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-miscounts-the-matrix-rows",
         kind="prose",
         path="README.md",
-        anchor="is the full table — twenty-two rows over",
-        replacement="is the full table — twenty-three rows over",
+        anchor="is the full table — twenty-three rows over",
+        replacement="is the full table — twenty-four rows over",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_validation_matrix_rows_agree_with_the_table"
@@ -339,6 +339,54 @@ MUTATIONS: tuple[Mutation, ...] = (
         replacement="mixed.spot_spot_sigma = gamma * first * second / sigma;",
         guard="the three mixed third partials are finite differences taken at least two ways",
         claim="V_SSsigma is the sigma-derivative of gamma, every term included",
+    ),
+    Mutation(
+        identifier="readme-undercounts-the-experiment-table",
+        kind="prose",
+        path="README.md",
+        anchor="Twelve experiments, each answering",
+        replacement="Eleven experiments, each answering",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_readme_experiment_count_agrees_with_the_experiments_on_disk"
+        ),
+        claim="the README's experiment sentence and its rows both belong to the tree",
+    ),
+    Mutation(
+        identifier="report-counts-a-suite-the-registry-does-not-have",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="17 benchmark-suite members execute",
+        replacement="16 benchmark-suite members execute",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_suite_members_agree_with_the_registry"
+        ),
+        claim="the report's suite count belongs to the registry, not to the prose",
+    ),
+    Mutation(
+        identifier="report-counts-stale-python-tests",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="and 458 pytest tests with the validation",
+        replacement="and 457 pytest tests with the validation",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
+        ),
+        claim="the report states the collected total, in this environment or the offline one",
+    ),
+    Mutation(
+        identifier="radius-reads-one-signed-column-at-a-time",
+        kind="prose",
+        path="experiments/second_book_crossing_map/run.py",
+        anchor='if not all(row[f"{order}_within_tolerance"] for row in crossing):',
+        replacement='if not any(row[f"{order}_within_tolerance"] for row in crossing):',
+        guard=(
+            "tests/python/test_second_book_crossing_map.py::"
+            "test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_numbers"
+        ),
+        claim="-0.15 and +0.15 are one candidate, and a radius may not contain a column it failed",
     ),
 )
 

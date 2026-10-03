@@ -119,12 +119,15 @@ commit adds the table, so it cannot carry its own freeze; `CONTRIBUTING.md` §4 
 The suite grew from fifteen members to sixteen; the C++ suite from 198 tests to 201. The performance
 artifact moved five times while this release was being verified — `8.12×` → `8.00×` → `7.99×` →
 `8.26×` → `8.57×` → `8.06×` against pure Python, and `0.422×` → `0.450×` → `0.423×` → `0.479×` →
-`0.471×` → `0.444×` against vectorised NumPy, with 38,284,576 paths/s for the core in the run now in the
-tree — because those fields are volatile by declaration and every producer run resamples them. The
+`0.471×` → `0.444×` against vectorised NumPy, with 38,284,576 paths/s for the core in the run this
+release froze — because those fields are volatile by declaration and every producer run resamples them. The
 spread is real and it is machine state, not code: an intermediate run taken while the desktop was busy
 read `7.68×` — below the pinned `7.77×` floor, which is the guard telling the truth about a loaded
-machine — and it was superseded by the quieter `8.06×` run now in the tree rather than accepted, so the
-committed history still spans `7.77×`–`8.70×`. That is why the claim the documents carry is the ordering,
+machine — and it was superseded by the quieter `8.06×` run this release froze rather than accepted, so the
+committed history still spans `7.77×`–`8.70×`. Phase 18's verification run added `8.69×` and `0.455×` with
+21,130,162 paths/s for the core — the ratio inside the pinned range and the absolute rate nearly halved,
+because three other jobs were on the machine — which is the same measurement telling the two claims the
+documents separate: the ordering is stable, the throughput is this machine's. That is why the claim the documents carry is the ordering,
 never the number. `README.md`, `docs/interview_defense.md` and
 `paper/technical_report.tex` were re-synced from the artifact in the same commit as the mutation-anchor
 refresh (`CONTRIBUTING.md` §4 step 2). Both ratios remain inside the pinned history range
@@ -146,3 +149,33 @@ set difference against `HEAD` and restored; that is why the sync is scripted per
   bindings *declare* — `docs/integrity_audit.md` finding 43.
 - One three-strike ladder, one maturity, one volatility; four documents and eleven guards re-derive the
   numbers above from the artifacts rather than from each other.
+
+## Correction, 2026-10-03 (Phase 18): the radius is this ladder's, and three-fold is not general
+
+`experiments/second_book_crossing_map/` (suite member 17) re-measured the radius above on four further
+books, after proving the re-derived machinery bit-identical to this release's on the published ladder —
+ten coefficients, both truncations and the engine P&L over 30 joint moves, every difference exactly
+zero. The direction holds: order four widens the contiguous crossing radius on 5 of 5 books, and on 5
+of 5 its worst nearest-zero distance inside the cubic's own radius is the smaller. The size does not.
+
+| book | cubic radius | quartic radius | widening |
+|---|---|---|---|
+| published ladder (this release's) | 0.05 | 0.15 | ×3.0 |
+| long-dated wide | 0.10 | 0.30 | ×3.0 |
+| short-dated tight | 0.02 | 0.05 | ×2.5 |
+| deep out of the money | 0.15 | 0.20 | ×1.3 |
+| in the money | 0.05 | 0.10 | ×2.0 |
+
+So the sentences above that read "`|delta| <= 0.05` becomes `|delta| <= 0.15`", "a three-fold wider
+radius", and the factor of `11.6` describe this three-strike ladder at `sigma = 0.20` and `T = 0.5`.
+The bullet in "What is still not here" that said nothing estimated how the radius moves for another
+book was correct when written and is now answered rather than assumed away. The mechanism is worse than
+book-specific: the set spans the order-four-to-three ratio 254-fold on the expectation that a small
+fourth-order piece leaves an added order little to remove, and the book built to that spec tied for the
+*largest* widening. No mechanism replaces it. `docs/limitations.md` #81 carries the edges and
+`docs/analysis/second_book_crossing_map.md` the reasoning, including the two ways the radius definition
+was wrong before it was right.
+
+No number this release published moves: the artifact, its gates, and the `0.00162` against `0.01887`
+pair are the published ladder's and still reproduce. What changed is the scope of the sentence around
+them.

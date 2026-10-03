@@ -1,0 +1,1132 @@
+{
+  "generated_at_utc": "2026-10-03T04:31:43.213161+00:00",
+  "command": "uv run python experiments/second_book_crossing_map/run.py",
+  "claim": "the order-four widening is a property of the expansion and not of v1.6.0's ladder: on 5 of 5 books the quartic's contiguous crossing radius is at least the cubic's, and on every book its worst distance inside the cubic's own radius is the smaller -- but the magnitude does not transfer: the published 3.0x is the widest factor in the set, matched by one other book, the four spanning 1.3x to 3.0x",
+  "procedure": {
+    "tolerance": 0.005,
+    "delta_grid": [
+      -0.3,
+      -0.2,
+      -0.15,
+      -0.1,
+      -0.05,
+      -0.02,
+      0.02,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.3
+    ],
+    "volatility_moves_swept": [
+      -0.1,
+      0.2
+    ],
+    "prediction_scan_points": 2001,
+    "measured_scan_points": 401,
+    "bisection_steps": 40,
+    "radius_definition": "the widest |delta| whose every column with a priced crossing has its nearest predicted zero inside the tolerance, contiguous from the smallest magnitude outward, a magnitude passing only when both of its signed columns do",
+    "shared_with": "the grid, the tolerance and _sign_change_roots are imported from restrike_gamma_map/run.py, and v1.6.0's truncation is imported as the control, so a radius here and a radius there mean one thing"
+  },
+  "headline": {
+    "books_measured": 5,
+    "book_labels": [
+      "published ladder",
+      "long-dated wide",
+      "short-dated tight",
+      "deep out of the money",
+      "in the money"
+    ],
+    "radii_cubic": {
+      "published ladder": 0.05,
+      "long-dated wide": 0.1,
+      "short-dated tight": 0.02,
+      "deep out of the money": 0.15,
+      "in the money": 0.05
+    },
+    "radii_quartic": {
+      "published ladder": 0.15,
+      "long-dated wide": 0.3,
+      "short-dated tight": 0.05,
+      "deep out of the money": 0.2,
+      "in the money": 0.1
+    },
+    "published_control_cubic": 0.05,
+    "published_control_quartic": 0.15,
+    "books_where_the_quartic_radius_is_at_least_the_cubic": 5,
+    "books_where_the_quartic_is_closer_inside_the_cubic_radius": 5,
+    "widening_factor_published_book": 2.9999999999999996,
+    "widening_factor_range_other_books": [
+      1.3333333333333335,
+      2.9999999999999996
+    ],
+    "columns_with_a_priced_crossing_minimum": 6,
+    "grid_edge": 0.3,
+    "books_with_a_radius_at_the_grid_edge": [
+      "long-dated wide"
+    ],
+    "measure_column": 0.15,
+    "fits": {
+      "widening_factors": {
+        "published ladder": 2.9999999999999996,
+        "long-dated wide": 2.9999999999999996,
+        "short-dated tight": 2.5,
+        "deep out of the money": 1.3333333333333335,
+        "in the money": 2.0
+      },
+      "order_four_over_three_range": [
+        0.015293511182137896,
+        3.8870859665195145
+      ],
+      "v_sigma_root_T_range": [
+        0.04743416490252569,
+        0.4949747468305833
+      ],
+      "worst_distance_inside_cubic_radius": {
+        "published ladder": {
+          "cubic": 0.0024326646741319596,
+          "quartic": 1.1496688844848946e-05
+        },
+        "long-dated wide": {
+          "cubic": 0.0020606407199528914,
+          "quartic": 3.283129796082668e-05
+        },
+        "short-dated tight": {
+          "cubic": 0.0027280748483932793,
+          "quartic": 3.278316014288917e-05
+        },
+        "deep out of the money": {
+          "cubic": 0.002730858471151081,
+          "quartic": 0.00021293133880963066
+        },
+        "in the money": {
+          "cubic": 0.0005356193341896362,
+          "quartic": 2.4485347807014397e-05
+        }
+      }
+    }
+  },
+  "control": {
+    "book_coefficients_largest_absolute_difference": 0.0,
+    "engine_pnl_largest_absolute_difference": 0.0,
+    "cubic_truncation_largest_absolute_difference": 0.0,
+    "quartic_truncation_largest_absolute_difference": 0.0,
+    "control_moves_compared": 30,
+    "v150_radius_cubic": 0.05,
+    "v160_radius_quartic": 0.15
+  },
+  "books": [
+    {
+      "label": "published ladder",
+      "why_this_book": "v1.5.0 and v1.6.0's book, and the control: its radii must come out at 0.05 and 0.15",
+      "market": {
+        "spot": 100.0,
+        "rate": 0.03,
+        "dividend_yield": 0.0,
+        "volatility": 0.2,
+        "maturity": 0.5,
+        "strikes": [
+          90.0,
+          100.0,
+          110.0
+        ],
+        "quantity": 5000.0
+      },
+      "radius_cubic": 0.05,
+      "radius_quartic": 0.15,
+      "widening_factor": 2.9999999999999996,
+      "radius_quartic_at_grid_edge": false,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 10,
+      "measured_zero_count_total": 13,
+      "cubic_zero_count_total": 14,
+      "quartic_zero_count_total": 14,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 3,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        }
+      ]
+    },
+    {
+      "label": "long-dated wide",
+      "why_this_book": "v = 0.495 against the published 0.141, so the order-four spot piece is the smallest fraction of the order-three one in the set: chosen as the book expected to have least for an added order to remove, which the measured 3.0x widening contradicts",
+      "market": {
+        "spot": 100.0,
+        "rate": 0.03,
+        "dividend_yield": 0.01,
+        "volatility": 0.35,
+        "maturity": 2.0,
+        "strikes": [
+          80.0,
+          100.0,
+          120.0
+        ],
+        "quantity": 3000.0
+      },
+      "radius_cubic": 0.1,
+      "radius_quartic": 0.3,
+      "widening_factor": 2.9999999999999996,
+      "radius_quartic_at_grid_edge": true,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 11,
+      "measured_zero_count_total": 16,
+      "cubic_zero_count_total": 12,
+      "quartic_zero_count_total": 17,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        }
+      ]
+    },
+    {
+      "label": "short-dated tight",
+      "why_this_book": "v = 0.047 and every spot partial divides by v^3, so the higher orders are the largest terms on the book: this is where a widening bought by smallness would die",
+      "market": {
+        "spot": 100.0,
+        "rate": 0.03,
+        "dividend_yield": 0.0,
+        "volatility": 0.15,
+        "maturity": 0.1,
+        "strikes": [
+          95.0,
+          100.0,
+          105.0
+        ],
+        "quantity": 5000.0
+      },
+      "radius_cubic": 0.02,
+      "radius_quartic": 0.05,
+      "widening_factor": 2.5,
+      "radius_quartic_at_grid_edge": false,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 6,
+      "measured_zero_count_total": 10,
+      "cubic_zero_count_total": 14,
+      "quartic_zero_count_total": 9,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        }
+      ]
+    },
+    {
+      "label": "deep out of the money",
+      "why_this_book": "every strike far above spot at a high vol, so the book's partials come from one tail of the distribution rather than straddling the money",
+      "market": {
+        "spot": 100.0,
+        "rate": 0.03,
+        "dividend_yield": 0.0,
+        "volatility": 0.45,
+        "maturity": 0.5,
+        "strikes": [
+          110.0,
+          125.0,
+          140.0
+        ],
+        "quantity": 5000.0
+      },
+      "radius_cubic": 0.15,
+      "radius_quartic": 0.2,
+      "widening_factor": 1.3333333333333335,
+      "radius_quartic_at_grid_edge": false,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 12,
+      "measured_zero_count_total": 14,
+      "cubic_zero_count_total": 14,
+      "quartic_zero_count_total": 14,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        }
+      ]
+    },
+    {
+      "label": "in the money",
+      "why_this_book": "the mirror ladder at the published vol and maturity: convexity on the other side of spot, which is the case v1.6.0's note listed as unanswered",
+      "market": {
+        "spot": 100.0,
+        "rate": 0.03,
+        "dividend_yield": 0.0,
+        "volatility": 0.2,
+        "maturity": 0.5,
+        "strikes": [
+          70.0,
+          80.0,
+          90.0
+        ],
+        "quantity": 5000.0
+      },
+      "radius_cubic": 0.05,
+      "radius_quartic": 0.1,
+      "widening_factor": 2.0,
+      "radius_quartic_at_grid_edge": false,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 9,
+      "measured_zero_count_total": 12,
+      "cubic_zero_count_total": 13,
+      "quartic_zero_count_total": 11,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false
+        }
+      ]
+    }
+  ],
+  "fits": {
+    "published ladder": {
+      "v_sigma_root_T": 0.14142135623730953,
+      "order_four_over_three_at_measure_column": 0.5628541070142362,
+      "worst_distance_inside_cubic_radius": {
+        "cubic": 0.0024326646741319596,
+        "quartic": 1.1496688844848946e-05
+      },
+      "worst_distance_inside_quartic_radius_quartic": 0.0016208684077405958,
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.09341752441547391,
+          "quartic_nearest_zero_distance": 0.03227468405949802
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0348587364364816,
+          "quartic_nearest_zero_distance": 0.005479350133031397
+        },
+        {
+          "cubic_nearest_zero_distance": 0.018873008297375794,
+          "quartic_nearest_zero_distance": 0.0016208684077405958
+        },
+        {
+          "cubic_nearest_zero_distance": 0.008429113338523931,
+          "quartic_nearest_zero_distance": 0.0002783754541479614
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0024326646741319596,
+          "quartic_nearest_zero_distance": 3.9026723058430135e-07
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": 0.00018167485029671297,
+          "quartic_nearest_zero_distance": 4.079183925937563e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0014966152357359895,
+          "quartic_nearest_zero_distance": 1.1496688844848946e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.006658374439378528,
+          "quartic_nearest_zero_distance": 0.0002859752397795928
+        },
+        {
+          "cubic_nearest_zero_distance": 0.01607311885255295,
+          "quartic_nearest_zero_distance": 0.0015956971226373864
+        },
+        {
+          "cubic_nearest_zero_distance": 0.030873804598333235,
+          "quartic_nearest_zero_distance": 0.005419577614849749
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        }
+      ]
+    },
+    "long-dated wide": {
+      "v_sigma_root_T": 0.4949747468305833,
+      "order_four_over_three_at_measure_column": 0.015293511182137896,
+      "worst_distance_inside_cubic_radius": {
+        "cubic": 0.0020606407199528914,
+        "quartic": 3.283129796082668e-05
+      },
+      "worst_distance_inside_quartic_radius_quartic": 0.0010741080208380785,
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.0014476634994783563,
+          "quartic_nearest_zero_distance": 0.0003272088077240151
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0005062442962865052,
+          "quartic_nearest_zero_distance": 0.00011963523643411522
+        },
+        {
+          "cubic_nearest_zero_distance": 0.00022006956346821809,
+          "quartic_nearest_zero_distance": 5.504127281619545e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 5.7787976179868826e-05,
+          "quartic_nearest_zero_distance": 1.6554537928508382e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 2.639799428069342e-06,
+          "quartic_nearest_zero_distance": 1.646870548719162e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 3.013438406888544e-07,
+          "quartic_nearest_zero_distance": 5.650786802466768e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 1.8137108735235977e-06,
+          "quartic_nearest_zero_distance": 8.213325337512109e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 6.961975324716726e-05,
+          "quartic_nearest_zero_distance": 3.921858828289347e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0020606407199528914,
+          "quartic_nearest_zero_distance": 3.283129796082668e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.023474675800179083,
+          "quartic_nearest_zero_distance": 0.0010741080208380785
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": 1.9221189154428053e-05
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        }
+      ]
+    },
+    "short-dated tight": {
+      "v_sigma_root_T": 0.04743416490252569,
+      "order_four_over_three_at_measure_column": 3.8870859665195145,
+      "worst_distance_inside_cubic_radius": {
+        "cubic": 0.0027280748483932793,
+        "quartic": 3.278316014288917e-05
+      },
+      "worst_distance_inside_quartic_radius_quartic": 0.0005666792803906539,
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": 0.06184337768142578,
+          "quartic_nearest_zero_distance": 0.007787410977237431
+        },
+        {
+          "cubic_nearest_zero_distance": 0.014277908960165234,
+          "quartic_nearest_zero_distance": 0.0005666792803906539
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0027280748483932793,
+          "quartic_nearest_zero_distance": 3.278316014288917e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0016006054503744519,
+          "quartic_nearest_zero_distance": 1.7880496035019983e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.011410886539828056,
+          "quartic_nearest_zero_distance": 0.0002851767332621505
+        },
+        {
+          "cubic_nearest_zero_distance": 0.05369063731382422,
+          "quartic_nearest_zero_distance": 0.00033795408486586576
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        }
+      ]
+    },
+    "deep out of the money": {
+      "v_sigma_root_T": 0.3181980515339464,
+      "order_four_over_three_at_measure_column": 0.930778869406997,
+      "worst_distance_inside_cubic_radius": {
+        "cubic": 0.002730858471151081,
+        "quartic": 0.00021293133880963066
+      },
+      "worst_distance_inside_quartic_radius_quartic": 0.0008818791968393728,
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.020157179538720545,
+          "quartic_nearest_zero_distance": 0.0025806340713798795
+        },
+        {
+          "cubic_nearest_zero_distance": 0.005663931149543574,
+          "quartic_nearest_zero_distance": 0.00043309150137715163
+        },
+        {
+          "cubic_nearest_zero_distance": 0.002362621722366198,
+          "quartic_nearest_zero_distance": 0.00013098775024204118
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0006990343108202192,
+          "quartic_nearest_zero_distance": 2.5448319678084315e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 8.811536560728939e-05,
+          "quartic_nearest_zero_distance": 1.6153578699605034e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 5.694907254064576e-06,
+          "quartic_nearest_zero_distance": 4.2461165003276815e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 5.802727454192678e-06,
+          "quartic_nearest_zero_distance": 4.497402287598749e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 9.235750476714575e-05,
+          "quartic_nearest_zero_distance": 1.868165512769319e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0007686834080221127,
+          "quartic_nearest_zero_distance": 3.445127884423515e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.002730858471151081,
+          "quartic_nearest_zero_distance": 0.00021293133880963066
+        },
+        {
+          "cubic_nearest_zero_distance": 0.006901436157542173,
+          "quartic_nearest_zero_distance": 0.0008818791968393728
+        },
+        {
+          "cubic_nearest_zero_distance": 0.027633227090470357,
+          "quartic_nearest_zero_distance": 0.010604366387410304
+        }
+      ]
+    },
+    "in the money": {
+      "v_sigma_root_T": 0.14142135623730953,
+      "order_four_over_three_at_measure_column": 0.2239444414210092,
+      "worst_distance_inside_cubic_radius": {
+        "cubic": 0.0005356193341896362,
+        "quartic": 2.4485347807014397e-05
+      },
+      "worst_distance_inside_quartic_radius_quartic": 0.0009048619251613779,
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": 0.035187507464716536,
+          "quartic_nearest_zero_distance": 0.015806925167341904
+        },
+        {
+          "cubic_nearest_zero_distance": 0.005967485559509128,
+          "quartic_nearest_zero_distance": 0.0009048619251613779
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0005356193341896362,
+          "quartic_nearest_zero_distance": 1.4367617036391105e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 2.8641770475402702e-05,
+          "quartic_nearest_zero_distance": 6.1951072008892966e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 2.231674787940639e-05,
+          "quartic_nearest_zero_distance": 3.7941309761070196e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0002813578338209848,
+          "quartic_nearest_zero_distance": 2.4485347807014397e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.001370624759864457,
+          "quartic_nearest_zero_distance": 0.0006883619465043525
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0013798003609906614,
+          "quartic_nearest_zero_distance": 0.0062982592357838305
+        },
+        {
+          "cubic_nearest_zero_distance": 0.005735881985585431,
+          "quartic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null
+        }
+      ]
+    }
+  },
+  "provenance": {
+    "reimplemented_by_this_file": [
+      "the third- and fourth-order book sums, from the core's closed forms",
+      "the two column truncations",
+      "the map P&L, through quantrisk.stress.run_scenario"
+    ],
+    "imported_unchanged": [
+      "restrike_gamma_map: DELTAS, VOL_MOVES, the scans, the tolerance, BISECTION_STEPS, _sign_change_roots, BASE, COEFFS, truncated_column_error",
+      "fourth_order_crossing_map: COEFFS4, quartic_column_error, WIDENED_LIMIT"
+    ],
+    "equality_gate": "every reimplemented quantity is asserted bit-equal to the shipped one on the published book, over 10 coefficients and 30 joint moves, and both published radii are asserted to recompute exactly; the run raises rather than publishing otherwise"
+  },
+  "refusals": {
+    "five_books_are_not_a_family": "five points in a seven-parameter space, chosen for what each does to the terms; nothing here estimates a distribution of radii over books or a probability that a new book widens",
+    "radius_is_not_accuracy": "every number is about where the map's error crosses zero. On the published book the amount at published size is still 16.2 % off after order four, and no book here changes that",
+    "grid_point_not_crossing": "a radius is one of twelve |delta| labels, so 0.15 says nothing about 0.11, and a book whose radius sits on the swept edge is flagged rather than rounded down",
+    "no_gate_on_the_finding": "the run refuses a book with too few priced crossings and refuses any drift from the shipped machinery, but it does not gate quartic >= cubic: a book where that failed would be measured, published and headlined",
+    "ratio_does_not_explain_the_widening": "the order-four-to-three ratio at the measure column was the axis the set was built to span, on the expectation that a small fourth-order piece leaves an added order little to remove. The measured widening does not follow that ratio: the book with the smallest one tied the widest factor. The per-book ratio is published under `fits` so a later book can be checked against it; no mechanism is offered here",
+    "zeros_are_sign_changes": "a zero is a sign change of a scanned function found by the imported routine, not an analytic root; a column with none is skipped rather than counted as a pass"
+  },
+  "reproduction_policy": {
+    "conditioning_limited": [
+      "fits",
+      "headline.fits"
+    ],
+    "why": "nearest-zero distances are roots of a subtraction of book values and the mechanism ratios divide two such terms, so both reproduce to their conditioning rather than to their last digit. The radii, widening factors, zero counts and every tolerance verdict are compared by value inside the declared families as well, because the comparator exempts floats only and a radius is a grid point",
+    "everything_else": "the truncations are closed forms on each book's own sums, the priced error and the engine P&L are exact arithmetic on the shipped engine, and the published book is additionally pinned to v1.5.0's and v1.6.0's values by `control`, which is gated to be exactly zero"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "platform": "darwin",
+    "packages": {
+      "quantrisk": "1.6.0"
+    }
+  }
+}

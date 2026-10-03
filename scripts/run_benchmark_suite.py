@@ -553,6 +553,44 @@ MEMBERS: tuple[Member, ...] = (
             ),
         ),
     ),
+    Member(
+        key="second_book_crossing_map",
+        title="Does the fourth-order crossing radius hold on books other than the published one",
+        kind=EXPERIMENT,
+        script="experiments/second_book_crossing_map/run.py",
+        artifact="experiments/second_book_crossing_map/results/second_book_crossing_map.json",
+        # No `plot`, for the reason the members above give: a truncation is compared with a
+        # revaluation of the same book, not with an oracle.
+        headline=(
+            ("books measured", ("headline", "books_measured")),
+            ("published ladder, cubic radius", ("headline", "published_control_cubic")),
+            ("published ladder, quartic radius", ("headline", "published_control_quartic")),
+            (
+                "books the quartic widens",
+                ("headline", "books_where_the_quartic_radius_is_at_least_the_cubic"),
+            ),
+            (
+                "books the quartic brings closer inside the cubic radius",
+                ("headline", "books_where_the_quartic_is_closer_inside_the_cubic_radius"),
+            ),
+            (
+                "radius on the book least like the published one",
+                ("headline", "radii_quartic", "short-dated tight"),
+            ),
+            (
+                "fewest columns with a priced crossing",
+                ("headline", "columns_with_a_priced_crossing_minimum"),
+            ),
+            (
+                "largest difference from v1.5.0's engine call",
+                ("control", "engine_pnl_largest_absolute_difference"),
+            ),
+            (
+                "largest difference from v1.6.0's truncation",
+                ("control", "quartic_truncation_largest_absolute_difference"),
+            ),
+        ),
+    ),
 )
 
 

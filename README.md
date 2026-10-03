@@ -128,7 +128,7 @@ Three levels, defined in [`docs/validation_protocol.md`](docs/validation_protoco
   coverage against exact binomial bands; backtest size and power over thousands of
   replications on synthetic data whose truth is known.
 
-[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full table — twenty-two rows over
+[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full table — twenty-three rows over
 those twelve components: method, oracle, the bound the test asserts, the error actually measured,
 and the artifact.
 The four that carry a first reading:
@@ -156,8 +156,8 @@ difference of the order below.
 
 ## Benchmark
 
-`uv run python scripts/run_benchmark_suite.py` runs all sixteen members — four correctness
-benchmarks, eleven statistical experiments, one performance benchmark, and writes JSON, CSV, Markdown and a figure under
+`uv run python scripts/run_benchmark_suite.py` runs all seventeen members — four correctness
+benchmarks, twelve statistical experiments, one performance benchmark, and writes JSON, CSV, Markdown and a figure under
 `benchmarks/suite/results/`. No wall-clock is quoted here on purpose: `wall_seconds` is in
 the artifact, from the run that produced it.
 
@@ -169,9 +169,9 @@ the plot and the table cannot disagree.
 The performance result is deliberately unflattering. On 200,000 terminal-only paths, one
 normal per path:
 
-- **≈8× a pure Python loop** — `8.06×` in the artifact now in the tree (38.3M vs 4.7M paths/s),
+- **≈8× a pure Python loop** — `8.69×` in the artifact now in the tree (21.1M vs 2.4M paths/s, a busy desktop: the same binary measured 38.3M when it was quiet),
   and `7.77×`–`8.70×` across the performance artifacts this repository has committed, and
-- **`0.444×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
+- **`0.455×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
   so the C++ core is *slower* than a NumPy `standard_normal` draw for this workload, on every
   one of those runs.
 
@@ -205,7 +205,7 @@ in [`docs/project_scope.md`](docs/project_scope.md) §10.
 
 ## Experiments
 
-Eight experiments, each answering one question with a distribution rather than a point. Each
+Twelve experiments, each answering one question with a distribution rather than a point. Each
 writes its own JSON, CSV and figures, and each reports its own caveats in the artifact.
 
 | Experiment | Finding |
@@ -219,6 +219,9 @@ writes its own JSON, CSV and figures, and each reports its own caveats in the ar
 | `linearisation_error_bound` | The delta-gamma stress map has a cubic Taylor remainder with a closed-form coefficient: the Lagrange coefficient 6R/h³ stays inside the shocked path's range of V‴ at all 618 shocks tested, the fitted log-log slope converges to 3 (2.9710 → 2.9988 down, 3.0253 → 3.0012 up as the fit window shrinks), and — the part that is a prediction rather than a description — the book's V‴ changes sign along a down path at a 5.45 % move, which puts the remainder's own zero at 21.14 %, inside the 20–30 % bracket where the published curve already changes sign. |
 | `real_data_risk_study` | On 586 out-of-sample days of three real FRED factor series, the synthetic prediction survives — Gaussian 99% VaR over-rejects at 2.048%, exact interval [1.062%, 3.550%] excluding the 1% nominal — while the covariance ranking does not: shrinkage, best on generated data by mean variance ratio (1.169 against sample's 1.183 and EWMA's 1.241), ranks *worst* here (ewma < sample < shrinkage on realised variance over 582 rolling windows). Three coverage tests fail to reject anything (Kupiec 0.160, independence 0.287, conditional 0.211), and the three questions the data cannot answer are recorded as refusals inside the artifact. |
 | `two_factor_error_bound` | The stress map is second order in the equity factor and *linear* in volatility, so a joint shock makes its error quadratic instead of cubic — and at published sizes the leading quadratic is not the largest term: on the repo's own `risk_off` scenario the closed-form quadratic is +787.96 while the error is −5320.79, because ½·V_{SSσ}·h²·k (gamma applied at a volatility the move already changed) is 10.7× the net quadratic (and 7.4× measured against the quadratic's two contributions in absolute value) The Lagrange inclusion holds on 132/132 joint shocks and its interval [−6063.95, −4135.87] excludes zero, so the sign of the published error is proved, not estimated. |
+| `restrike_gamma_map` | Re-striking the gamma at the shocked volatility removes 7258.51 of the 8402.16 `risk_off` error (86.4 %) and improves 75 of 120 grid cells, while the *naive* full re-strike is worse on 116 of 120 and by a factor of 11 on `risk_off` — so the recommendation is one term of the map, not a revaluation, and its local slope (1.98–2.01 for all four variants) says the ordering is asymptotic. |
+| `fourth_order_crossing_map` | Adding the four mixed fourth partials to v1.5.0's column truncation widens the radius over which it predicts *where* the map's error crosses zero, from `|delta| <= 0.05` to `|delta| <= 0.15` (worst distance 0.00162 against the cubic's 0.01887), while the quartic residual falls with log-log slope 4.73–5.01 against the cubic's 3.96–4.37. The amount is not cheaper: `risk_off` is still 16.2 % wrong instead of 22.3 %, now from the other side. |
+| `second_book_crossing_map` | That widening is a property of the expansion, not of one ladder: on five books the quartic's radius is at least the cubic's on 5 of 5 and its worst distance inside the cubic's own radius is smaller on 5 of 5 — and the *size* transfers to none of them, with factors 1.3, 2.0, 2.5, 3.0 and 3.0 over cubic radii 0.02 to 0.15. The set was built to span the order-four-to-three ratio 254-fold expecting that ratio to explain the gain; the book with the smallest ratio tied for the largest, so no mechanism is claimed. The re-derivation is bit-identical to both shipped experiments before any book is measured. |
 
 ## Reproducibility
 
@@ -250,7 +253,7 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 80 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 81 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
 - **The risk layer's instrumented validation is synthetic; only one arm is real.** Six of the

@@ -28,7 +28,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 80
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 81
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -41,9 +41,9 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 201 C++ tests under CTest (548,217 assertions in 200 Catch2
-cases), 447 pytest tests with the `oracles` extra and the same tree collects 378 tests without
+cases), 458 pytest tests with the `oracles` extra and the same tree collects 389 tests without
 it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
-revision's figure on the runner rather than trusting arithmetic here. 16/16 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
+revision's figure on the runner rather than trusting arithmetic here. 17/17 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
 hold (limitation #63). At the `v1.0.0` tag the same commands gave 330 and 261-passed-4-skipped, and
 the suite was 11/11. A guard asserts both figures and asks which environment it is running in
@@ -403,8 +403,8 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 201 C++ tests (548,217 assertions in 200 cases) and 447
-Python tests with the validation oracles installed — 378 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
+variance reduction. Today that is 201 C++ tests (548,217 assertions in 200 cases) and 458
+Python tests with the validation oracles installed — 389 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -437,9 +437,9 @@ in `/tmp` with the commit and the full command list recorded.
 ### Q12. Why use C++ instead of pure Python?
 
 **30 s.** For the hot loops and the memory layout, with a measured number rather than a belief:
-38,284,576 paths/s in the C++ core versus 4,749,979 paths/s in an equivalent pure-Python loop —
-8.06× on this machine. The same measurement gives vectorised NumPy 86,224,157 paths/s, i.e.
-C++ is 0.444× of NumPy for one-normal-per-path work, so the honest claim is narrower than "C++ is
+21,130,162 paths/s in the C++ core versus 2,432,342 paths/s in an equivalent pure-Python loop —
+8.69× on this machine, with the absolutes depressed by a busy desktop (the same binary reached 38,284,576 paths/s on a quiet one). The same measurement gives vectorised NumPy 46,486,278 paths/s, i.e.
+C++ is 0.455× of NumPy for one-normal-per-path work, so the honest claim is narrower than "C++ is
 faster than Python".
 
 **2 min.** Three reasons the boundary is where it is. (1) The regime where C++ genuinely wins is
@@ -458,8 +458,8 @@ binding plus tests in both suites.
 `benchmarks/performance/results/monte_carlo_speed.json`: terminal-only European call
 (`S = K = 100`, `r = 5 %`, `q = 2 %`, `σ = 25 %`, `T = 1`), 200,000 paths per run, 7
 repetitions, single-threaded, `CMAKE_BUILD_TYPE=Release`, AppleClang 21.0.0.21000334, arm64.
-Means: C++ 0.005224 s (std 2.10e-4), pure Python 0.042105 s (std 4.44e-4), NumPy 0.002320 s
-(std 6.09e-4); speedups 8.06× versus pure Python, 0.444× versus NumPy. Those are the digits in the
+Means: C++ 0.009465 s (std 7.82e-4), pure Python 0.082225 s (std 3.77e-3), NumPy 0.004302 s
+(std 3.55e-4); speedups 8.69× versus pure Python, 0.455× versus NumPy. Those are the digits in the
 frozen artifact, and they are not constants: across the fifteen re-freezings in this repository's
 history the C++/Python ratio spans 7.77×–8.70× and the NumPy ratio 0.42×–0.51×, so the answer above
 quotes a run and the claim is the ordering. Three caveats shipped in
@@ -982,6 +982,37 @@ nor a marker, and the Phase 14 two-way comparison stays silent while the new cla
 in-memory plants, `scripts/run_mutation_suite.py` carries a 22nd planted defect that edits the header on
 disk and expects this guard's node to reject it, so the falsifiability is re-executed by CI rather than
 asserted by me.
+### Q28. You published a radius for one book. Does it hold for another?
+
+**30 s.** No, and that is now measured rather than assumed. `v1.6.0` reported that adding the fourth
+order widens the crossing radius from `|delta| <= 0.05` to `|delta| <= 0.15` -- a three-fold gain -- on
+one three-strike ladder, and its own limitation said the radius belongs to that book. The cheap way to
+disrespect that sentence is to test it. `experiments/second_book_crossing_map/` measures the same
+quantity on five books. The control comes first: the file cannot import the shipped book, so it
+re-derives both truncations from the core's closed forms and refuses to publish unless the re-derivation
+is *bit-identical* to v1.5.0's and v1.6.0's on their book -- ten coefficients, both truncations and the
+engine P&L over 30 joint moves, all four differences exactly zero -- and unless that book's two radii
+come back at 0.05 and 0.15. Then the measurement: the direction transfers, 5 of 5 books, and the
+magnitude transfers to none, with factors 1.3, 2.0, 2.5, 3.0 and 3.0. A dated correction sits in
+`docs/release_notes_v1.6.0.md`, because the published sentence was wider than its evidence.
+
+**Deeper.** Two parts, and the second is the one I would bring to a design review. (1) The mechanism
+died with the magnitude. The five books were chosen to span the order-four-to-three ratio 254-fold, on
+the expectation that a small fourth-order piece leaves an added order little to remove; the book built
+to that spec tied for the *largest* widening. Five points cannot buy a replacement mechanism, so none is
+claimed, and the ratio is published per book so a sixth book can be checked against it rather than told
+the story again. (2) Two versions of the radius definition were wrong before the number was right.
+"Some column at this `|delta|` passes" made order four appear to *shrink* the in-the-money book, 0.15 to
+0.10, because the cubic had already failed the other sign at 5.97e-3. Requiring contiguity was not enough
+either, because `-0.15` and `+0.15` are two columns of one magnitude: reading them one at a time let the
+long-dated book publish a 0.15 cubic radius beside a worst in-range distance of 0.0235 -- a radius and
+its own refutation in the same artifact, in a file that had both fields. Three fixes, not one: group by
+magnitude, refuse to publish a radius wider than its own distances support, and re-derive every radius in
+the test from the stored distances, verdicts included, in both column orders. The refusal is proved by a
+plant: `all` replaced by `any` on a copy of the tree, and the run answered
+`long-dated wide: its cubic radius of 0.3 contains a crossing column 2.347e-02 away`. Audit finding 46
+states the rule I am taking forward -- a field that decides over values another field carries is a
+second source of truth, and without a comparison between them the wrong rule survives its own evidence.
 
 ## How to verify each claim in this file
 
@@ -990,7 +1021,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 ```bash
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 201 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 378 Python tests
+  .venv/bin/python -m pytest -q                                          # 389 Python tests
 uv run python scripts/run_mutation_suite.py                            # 18/18 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
@@ -1013,7 +1044,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | Coverage 12/12 inside the exact `Binomial(200, level)` band; example cell 191/200 in [181, 197] | `experiments/monte_carlo_convergence/results/summary.json` (`coverage`, `coverage_intervals_inside_binomial_band`); band construction `run.py:184-188` |
 | Pooled z-scores vs QuantLib analytic (492 rows, 4 scenarios × 3 methods × 40 seeds, 200,000 paths): means −0.0228 / +0.0503 / +0.0310, stds 1.0139 / 0.9232 / 0.9304, 96.25 %–98.75 % inside ±2; `quantlib_mc_engine_used: false` | `benchmarks/quantlib/results/monte_carlo_validation.json` |
 | Out-of-sample MSE reductions: antithetic 1.1155×–2.7741×, control variate 1.9313×–40.468×; 40 seeds; in-sample-`beta` caveat | `experiments/variance_reduction/results/summary.json` (+ `realised_error.csv`); `docs/limitations.md` #19 |
-| Speed: C++ 0.005224 s / 38,284,576 paths/s, pure Python 0.042105 s / 4,749,979, NumPy 0.002320 s / 86,224,157; 8.06× and 0.444×, with the 7.77×–8.70× / 0.42×–0.51× history range; 7 repetitions; three estimates and z-scores; caveats list | `benchmarks/performance/results/monte_carlo_speed.json` |
+| Speed: C++ 0.009465 s / 21,130,162 paths/s, pure Python 0.082225 s / 2,432,342, NumPy 0.004302 s / 46,486,278; 8.69× and 0.455×, with the 7.77×–8.70× / 0.42×–0.51× history range; 7 repetitions; three estimates and z-scores; caveats list | `benchmarks/performance/results/monte_carlo_speed.json` |
 | Antithetic `iid_units = paths / 2`; odd path count throws; pair product identity to 1e-12; drift not negated | `cpp/src/monte_carlo/engine.cpp:87-97,142-154`; `cpp/src/stochastic/gbm.cpp:74-88,104-109`; `tests/cpp/test_monte_carlo.cpp:96-110`; `tests/cpp/test_gbm.cpp:128-167` |
 | Control-variate exactness identity (price to 1e-12, SE < 1e-12, `beta ≈ 1`) and constant-payoff discount factor to 1e-15 | `tests/cpp/test_monte_carlo.cpp:142-168`; `cpp/src/monte_carlo/engine.cpp:57-85` |
 | Physical measure is a separate code path, and `mu = r` reproduces the risk-neutral stream bit-for-bit | `cpp/src/stochastic/gbm.cpp:113-127`; `tests/cpp/test_gbm.cpp:170-186`; convention in `docs/project_scope.md` §10 |
@@ -1035,6 +1066,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | Eigen arrives in Phase 6, not before; single-thread and no-QMC limits; path-matrix memory bound | `docs/limitations.md` #8, #16, #18; `docs/model_cards/monte_carlo_gbm.md` |
 | The extension-surface claim and how it was made falsifiable: 92 namespace-scope `[[nodiscard]]` declarations across 29 headers, 85 names, 24 disclaimed by `// python:` markers whose `via` routes the guard verifies; four planted failure modes plus the differential against the Phase 14 guard; residual inventory pinned to `stats::quantile_linear` | `tests/python/test_extension_surface_parity.py`, `scripts/run_mutation_suite.py` (`core-declares-a-function-nobody-binds`), `docs/limitations.md` #80, `docs/phase_reports/phase-17-surface-coverage.md` |
 | "the tests would catch a wrong formula": nineteen planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green; the sweep's own line on `e5daedc` is `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
+| A one-book claim tested on five: the order-four radius transfers in direction (5 of 5) and in no magnitude (factors 1.3 to 3.0); the equality control is bit-identity over 30 joint moves, not a band; the order-four-to-three ratio spans 254-fold and does not order the widening; two radius definitions were wrong, and the second is planted in both column orders | `experiments/second_book_crossing_map/run.py`, `tests/python/test_second_book_crossing_map.py`, `docs/analysis/second_book_crossing_map.md`, `docs/limitations.md` #81, `docs/integrity_audit.md` finding 46 |
 
 Anything in this file that is not in that table is an opinion about a method, not a result of
 this repository — answer it as an opinion.

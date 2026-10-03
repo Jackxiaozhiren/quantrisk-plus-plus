@@ -310,6 +310,21 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
             f"oracles present: {_oracles_present()}"
         )
 
+    # The report gives the same pair in LaTeX prose -- "458 pytest tests with the validation oracles
+    # installed, 389 collected without them" -- where none of the patterns above reaches it. It said
+    # 411 and 342 until this phase read it, two releases after both numbers stopped being true.
+    report = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
+    tex_high = re.search(
+        r"(\d+)\s+pytest\s+tests\s+with\s+the\s+validation\s+oracles\s+installed", report
+    )
+    tex_low = re.search(r"(\d+)\s+collected\s+without\s+them", report)
+    assert tex_high and tex_low, "the report no longer states both Python test counts"
+    tex_documented = int(tex_high.group(1)) if _oracles_present() else int(tex_low.group(1))
+    assert tex_documented == total, (
+        f"the report says {tex_documented} for this environment; pytest collects {total}. "
+        f"oracles present: {_oracles_present()}"
+    )
+
 
 def _declared_layout(text: str) -> list[str]:
     """The paths named in `docs/architecture.md` §5's fenced block, brace groups expanded."""
@@ -687,6 +702,42 @@ def test_documents_that_count_the_suite_members_agree_with_the_registry() -> Non
     executed = re.search(r"(\d+)/(\d+)\s+benchmark-suite\s+members\s+executed", defense)
     assert executed and int(executed.group(2)) == total, (
         "interview_defense.md counts a different suite than the registry has"
+    )
+
+    # The report's headline paragraph states the same number in its own words, and had drifted to
+    # fourteen while the registry was already at sixteen: a count the prose owns but no reader
+    # compares is a count that goes stale twice.
+    report = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
+    tex_members = re.search(r"(\d+)\s+benchmark-suite\s+members\s+execute", report)
+    assert tex_members, "the report no longer states the suite member count"
+    assert int(tex_members.group(1)) == total, (
+        f"technical_report.tex says {tex_members.group(1)} members, the registry has {total}"
+    )
+
+
+def test_the_readme_experiment_count_agrees_with_the_experiments_on_disk() -> None:
+    """The front page's list of what was measured is a count of directories, not of sentences.
+
+    It had fallen three rows behind: the prose said eight experiments while the table under it
+    listed nine, and twelve scripts existed. Two documents restating one fact and neither owning it
+    is the failure this file exists to close, so both the sentence and the rows are derived from
+    `experiments/*/run.py`.
+    """
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    section = re.search(r"^## Experiments$(.*?)^## ", readme, flags=re.M | re.S)
+    assert section, "README.md no longer carries the experiments section in the counted form"
+    listed = re.findall(r"^\| `([a-z0-9_]+)` \|", section.group(1), flags=re.M)
+    assert listed, "no rows were read out of the experiments table"
+    assert len(set(listed)) == len(listed), f"a row is listed twice: {listed}"
+    on_disk = sorted(path.parent.name for path in (REPO_ROOT / "experiments").glob("*/run.py"))
+    assert sorted(listed) == on_disk, (
+        f"README lists {len(listed)} experiments and the tree has {len(on_disk)}; "
+        f"only one side names {sorted(set(listed) ^ set(on_disk))}"
+    )
+    claim = re.search(r"(\w+) experiments, each answering", section.group(1))
+    assert claim, "README.md no longer states the experiment count"
+    assert _as_int(claim.group(1)) == len(on_disk), (
+        f"README.md says {claim.group(1)!r} experiments, the tree has {len(on_disk)} scripts"
     )
 
 
