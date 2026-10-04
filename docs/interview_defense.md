@@ -1,6 +1,7 @@
 # Interview defense — self-test sheet
 
-Date: 2026-09-27 · Repository state: **Phases 0–10 shipped, `quantrisk` 1.0.0** — the full
+Date: 2026-09-27, state line refreshed 2026-10-04 · Repository state: **Phases 0–22 shipped,
+`quantrisk` 1.7.0, released as the tag `v1.7.0`** — the full
 surface this sheet describes is implemented, validated and frozen in `evidence/manifest.json`.
 Question set: `PROJECT_SPEC.md`, section 最终面试准备材料 — 22 questions in four groups,
 reproduced here one for one and in order. Nothing added, nothing dropped.
