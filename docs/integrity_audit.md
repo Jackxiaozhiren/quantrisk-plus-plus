@@ -927,4 +927,4 @@ Verification, in the tools' own words: `uv run python scripts/run_benchmark_suit
 `uv run ruff format --check .` -- 147 files already formatted; `uv run mypy python/quantrisk` -- no issues
 in 23 source files; `uv run latexmk -pdf` -- 44 pages, 1003152 bytes; the manifest rebuilt over the new
 results directory and verified at `94 OK / 0 CHANGED / 0 VOLATILE / 0 MISSING / 0 unlisted`, then re-frozen
-on the committed tree; `uv run python scripts/run_mutation_suite.py --list` -- 33 plants declared.
+on the committed tree; `uv run python scripts/run_mutation_suite.py --list` -- 34 plants declared; the sweep on `fb556cd` -- `34/34 planted defects were rejected by their guard` (its first run, on `e5bb43e`, reported 32/33 and named the escape).

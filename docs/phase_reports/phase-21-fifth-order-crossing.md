@@ -195,3 +195,12 @@ commit as the plant re-keys, as `CONTRIBUTING.md` §4 requires.
 The falsification sweep refuses a dirty tree, so its verdict is a claim about a revision. It runs on the
 commit this report ships in; the paragraph recording its own line is appended in the commit after that,
 which is how Phases 17, 18, 19 and 20 all recorded it.
+
+The first sweep ran on `e5bb43e` and reported `32/33 planted defects were rejected by their guard`, exit
+code 1, with `FAIL guard-stayed-green fifth-order-sums-drop-the-book-quantity` on its own line. That is
+finding 53: the plant was aimed at a guard that never calls the mutated function. Retargeted, and given a
+counterpart plant the sums guard can actually react to, the sweep re-ran on `fb556cd` with `git status`
+empty before and after it. Its own line: `34/34 planted defects were rejected by their guard.` The three
+plants this phase added beyond the retargeted one all fired: `fifth-order-radius-judged-by-another-orders-range`
+restores the range conflation, `artifact-publishes-a-book-sum-the-core-does-not` perturbs a published sum
+by one digit, `fifth-order-note-quotes-a-stale-widening-count` moves the note's headline count.
