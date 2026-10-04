@@ -928,3 +928,44 @@ Verification, in the tools' own words: `uv run python scripts/run_benchmark_suit
 in 23 source files; `uv run latexmk -pdf` -- 44 pages, 1003152 bytes; the manifest rebuilt over the new
 results directory and verified at `94 OK / 0 CHANGED / 0 VOLATILE / 0 MISSING / 0 unlisted`, then re-frozen
 on the committed tree; `uv run python scripts/run_mutation_suite.py --list` -- 34 plants declared; the sweep on `fb556cd` -- `34/34 planted defects were rejected by their guard` (its first run, on `e5bb43e`, reported 32/33 and named the escape).
+
+---
+
+## Addendum — Phase 22, the runner finding what the laptop could not (2026-10-04)
+
+**54. Two assertions passed on every darwin machine and were wrong, and a third gate described them
+badly.** The `v1.7.0` version bump required re-running the whole suite, and the push that carried it also
+carried Phase 21's tests to a Linux runner for the first time. It went red twice, for two different
+reasons, and green locally each time.
+
+(a) `test_the_core_sums_behind_the_quintic_term_are_the_shipped_ones` compared a published book sum with
+one recomputed from the bindings **bit for bit** -- `-78.60804475268505` against
+`-78.60804475268517`. The gap is `1.5e-15` of the value: `libm`'s `exp`/`log` differing in the last bits
+between the two platforms, which is precisely what `docs/limitations.md` #63 already says the
+reproduction comparator handles with `1e-12` relative slack. The assertion was written as the strongest
+thing that passed locally, and the strongest thing that passes locally is not the claim the repository
+makes. It now asserts the documented slack, and its plant moved with it: a digit flip four places into
+the mantissa, which is `1.3e-5` and cannot be confused with a platform difference.
+
+(b) `docs/limitations.md` still said the offline lane collects `396` tests while `README.md`,
+`docs/reproducibility.md` and the report had all been moved to `408`. The guard that polices this pair
+keys per document, and the sentence in `limitations.md` is phrased a fourth way -- "the same tree
+collects 396 tests without it" -- so nothing caught it until CI ran the lane that has no oracles. This
+is finding 49's shape again one sentence over: pattern coverage is coverage of phrases, not of claims.
+
+(c) The manifest's own wording overstated. After the bump `verify_evidence_manifest.py` reported `8
+CHANGED (result content differs)`, and every one of those eight differed only in a timestamp, the
+embedded `quantrisk` version, the `git_commit`/`binary_git_commit` pair, the `uncommitted_paths` list, a
+sibling CSV's hash, or a wall-clock column. Checked leaf by leaf: no non-timing leaf moved in any of them,
+and the two CSVs were re-parsed with their `runtime_seconds`/`paths_per_second`/`seconds_per_path`
+columns dropped -- 24 and 36 rows, identical. The distinction the tool exists to draw (reproduction
+versus tampering) is therefore right in its verdict and wrong in its sentence: a freeze that moves for
+provenance reasons is described as though a number had moved. Recorded rather than quietly re-labelled,
+because the day something real moves, that is the sentence a reader will trust.
+
+Verification, in the tools' own words: `uv run pytest tests/python -q` -- 477 passed; `uv run ctest
+--preset dev` -- 100 % out of 204; `uv run quantrisk validate` -- 7/7; `uv run ruff check .` -- all
+checks passed; `uv run ruff format --check .` -- 148 files already formatted; `uv run mypy
+python/quantrisk` -- no issues in 23 source files; `uv run clang-format --dry-run -Werror` on the four
+touched C++ files -- exit 0; `uv run python scripts/run_benchmark_suite.py --require-all` -- 18/18
+executed and passed, 158.7 s; `uv run latexmk -pdf` -- 44 pages, 1003118 bytes.

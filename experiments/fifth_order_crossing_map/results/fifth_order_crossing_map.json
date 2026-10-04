@@ -833,7 +833,7 @@
   },
   "environment": {
     "packages": {
-      "quantrisk": "1.6.0"
+      "quantrisk": "1.7.0"
     },
     "platform": "darwin",
     "python": "3.12.14"
@@ -1250,7 +1250,7 @@
       }
     }
   },
-  "generated_at_utc": "2026-10-04T04:30:14.762799+00:00",
+  "generated_at_utc": "2026-10-04T05:11:32.852391+00:00",
   "headline": {
     "books_at_grid_edge": 2,
     "books_measured": 5,

@@ -120,7 +120,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
-        anchor="`8.51×`",
+        anchor="`8.45×`",
         replacement="`8.70×`",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -465,7 +465,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         kind="prose",
         path="experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json",
         anchor='"spot_spot_spot_sigma_sigma": -78.60804475268505,',
-        replacement='"spot_spot_spot_sigma_sigma": -78.6080447526851,',
+        replacement='"spot_spot_spot_sigma_sigma": -78.60904475268505,',
         # The counterpart to the producer-edit plant above: this guard compares the artifact against
         # the bindings, so the only thing that can turn it red is an artifact whose sums are not the
         # core's.

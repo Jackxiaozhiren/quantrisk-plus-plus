@@ -59,7 +59,7 @@ instrumentation is the hard part.
 ```python
 import quantrisk
 
-quantrisk.version()  # '1.6.0'
+quantrisk.version()  # '1.7.0'
 quantrisk.normal_cdf(0.0)  # 0.5
 
 rng = quantrisk.Rng(seed=42)
@@ -169,9 +169,9 @@ the plot and the table cannot disagree.
 The performance result is deliberately unflattering. On 200,000 terminal-only paths, one
 normal per path:
 
-- **≈8× a pure Python loop** — `8.51×` in the artifact now in the tree (33.5M vs 3.9M paths/s on this desktop; the same binary has measured 21.1M under load and 38.3M quiet),
+- **≈8× a pure Python loop** — `8.45×` in the artifact now in the tree (44.5M vs 5.3M paths/s on this quieter desktop; the same binary has measured 21.1M under load),
   and `7.77×`–`8.70×` across the performance artifacts this repository has committed, and
-- **`0.456×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
+- **`0.471×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
   so the C++ core is *slower* than a NumPy `standard_normal` draw for this workload, on every
   one of those runs.
 

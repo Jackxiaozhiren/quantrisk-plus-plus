@@ -149,7 +149,17 @@ def test_the_core_sums_behind_the_quintic_term_are_the_shipped_ones(
     }
     assert set(sums) == set(SUM_FIELDS), sorted(set(sums) ^ set(SUM_FIELDS))
     for field in SUM_FIELDS:
-        assert sums[field] == recomputed[field], (field, sums[field], recomputed[field])
+        # Relative slack, not bit equality. The reproduction comparator's own rule is 1e-12 relative
+        # on floats across platforms (docs/limitations.md #63), and the first CI run measured that
+        # gap: the published V_SSsigmasigma is -78.60804475268505 on this machine and
+        # -78.60804475268517 on the runner, 1.5e-15 of itself, because libm's exp/log differ in the
+        # last bits. Exact equality across platforms is not the claim this repository makes; the
+        # claim is that the number is the core's own, which a 1e-12 band still pins tightly.
+        assert abs(sums[field] - recomputed[field]) <= 1.0e-12 * max(abs(recomputed[field]), 1.0), (
+            field,
+            sums[field],
+            recomputed[field],
+        )
 
 
 def test_every_radius_is_re_computed_from_the_rows_beside_it(payload: dict[str, Any]) -> None:

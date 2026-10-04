@@ -143,9 +143,9 @@ of Section \ref{sec:realdata}, Phase 12 the single-factor remainder bound of Sec
 \ref{sec:bound}, Phase 13 the two-factor bound of Section \ref{sec:twofactor}, which converts
 the refusal Phase 12 recorded into a measured result, and Phase 14 the verification guards of Section
 \ref{sec:reproducibility}, which make a figure, a compiled name or a declared path in the prose impossible
-to state without an owner. Seven release tags exist, \code{v1.0.0},
-\code{v1.1.0}, \code{v1.2.0}, \code{v1.3.0}, \code{v1.4.0}, \code{v1.5.0} and \code{v1.6.0}, each with
-the report, the evidence manifest and the suite results attached. The suite is 204 CTest entries and
+to state without an owner. Eight release tags exist, \code{v1.0.0},
+\code{v1.1.0}, \code{v1.2.0}, \code{v1.3.0}, \code{v1.4.0}, \code{v1.5.0}, \code{v1.6.0} and
+\code{v1.7.0}, each with the report, the evidence manifest and the suite results attached. The suite is 204 CTest entries and
 548{,}368 assertions in 203 Catch2 cases on the C++ side, and 477 pytest tests with the validation
 oracles installed, 408 collected without them (\src{docs/limitations.md}, item 63, explains why one
 command gives two numbers); 18 benchmark-suite members execute under
@@ -1778,17 +1778,17 @@ produced with. Earlier dated runs of the same script are in
 \toprule
 Implementation & mean s.\ & std.\ s. & paths/s & estimate & $z$ vs analytic \\
 \midrule
-C++ core & 0.005972 & 0.000525 & 33{,}491{,}253 & 11.14596 & $+0.537$ \\
-pure Python loop & 0.050804 & 0.003749 & 3{,}936{,}714 & 11.11229 & $-0.292$ \\
-vectorised NumPy & 0.002725 & 0.000501 & 73{,}381{,}193 & 11.11430 & $-0.242$ \\
+C++ core & 0.004489 & 0.000304 & 44{,}549{,}572 & 11.14596 & $+0.537$ \\
+pure Python loop & 0.037936 & 0.000457 & 5{,}271{,}981 & 11.11229 & $-0.292$ \\
+vectorised NumPy & 0.002116 & 0.000321 & 94{,}535{,}778 & 11.11430 & $-0.242$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The measured ratio of C++ to a pure Python loop is $8.51\times$ in the run tabulated here, whose
-absolute throughputs sit between the $21{,}130{,}162$ paths/s this desktop has produced under load and
-the $38{,}284{,}576$ it reached when it was quiet, which is why the claim is the ratio and not the rate;
-against vectorised NumPy it is $0.456\times$, that is, NumPy is faster in this regime, and the artifact says
+The measured ratio of C++ to a pure Python loop is $8.45\times$ in the run tabulated
+here, whose absolute throughputs run from the $21{,}130{,}162$ paths/s a loaded desktop has
+produced to the $44{,}549{,}572$ this quieter one gives, which is why the claim is the ratio and
+not the rate; against vectorised NumPy it is $0.471\times$, that is, NumPy is faster in this regime, and the artifact says
 so (\src{benchmarks/performance/results/monte_carlo_speed.json};
 \src{docs/phase_reports/phase-03-monte-carlo.md}). The claim is scoped by four recorded caveats in
 the same artifact. The work measured is a terminal-only draw, one normal per path, which is exactly
