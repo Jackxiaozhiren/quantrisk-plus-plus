@@ -1,0 +1,1304 @@
+{
+  "books": [
+    {
+      "columns": [
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.3,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.2,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.15,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.1,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.05,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 0,
+          "delta": -0.02,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": 0.02,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 3,
+          "delta": 0.05,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.1,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.15,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.2,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.3,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        }
+      ],
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 10,
+      "cubic_zero_count_total": 14,
+      "label": "published ladder",
+      "quartic_zero_count_total": 14,
+      "quintic_radius_at_grid_edge": false,
+      "quintic_zero_count_total": 13,
+      "radius_cubic": 0.05,
+      "radius_quartic": 0.15,
+      "radius_quintic": 0.2,
+      "why_this_book": "v1.5.0 and v1.6.0's book, and the control: its radii must come out at 0.05 and 0.15",
+      "widening_factor_quartic": 2.9999999999999996,
+      "widening_factor_quintic": 1.3333333333333335
+    },
+    {
+      "columns": [
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.3,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.2,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.15,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.1,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.05,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.02,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": 0.02,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": 0.05,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": 0.1,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.15,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 0,
+          "delta": 0.2,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 0,
+          "delta": 0.3,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        }
+      ],
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 11,
+      "cubic_zero_count_total": 12,
+      "label": "long-dated wide",
+      "quartic_zero_count_total": 17,
+      "quintic_radius_at_grid_edge": true,
+      "quintic_zero_count_total": 16,
+      "radius_cubic": 0.1,
+      "radius_quartic": 0.3,
+      "radius_quintic": 0.3,
+      "why_this_book": "v = 0.495 against the published 0.141, so the order-four spot piece is the smallest fraction of the order-three one in the set: chosen as the book expected to have least for an added order to remove, which the measured 3.0x widening contradicts",
+      "widening_factor_quartic": 2.9999999999999996,
+      "widening_factor_quintic": 1.0
+    },
+    {
+      "columns": [
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.3,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.2,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.15,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.1,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 3
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.05,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": -0.02,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": 0.02,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.05,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.1,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.15,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.2,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.3,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 1
+        }
+      ],
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 6,
+      "cubic_zero_count_total": 14,
+      "label": "short-dated tight",
+      "quartic_zero_count_total": 9,
+      "quintic_radius_at_grid_edge": false,
+      "quintic_zero_count_total": 15,
+      "radius_cubic": 0.02,
+      "radius_quartic": 0.05,
+      "radius_quintic": 0.05,
+      "why_this_book": "v = 0.047 and every spot partial divides by v^3, so the higher orders are the largest terms on the book: this is where a widening bought by smallness would die",
+      "widening_factor_quartic": 2.5,
+      "widening_factor_quintic": 1.0
+    },
+    {
+      "columns": [
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.3,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.2,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.15,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.1,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.05,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": -0.02,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": 0.02,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": 0.05,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": 0.1,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": 0.15,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.2,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.3,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        }
+      ],
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 12,
+      "cubic_zero_count_total": 14,
+      "label": "deep out of the money",
+      "quartic_zero_count_total": 14,
+      "quintic_radius_at_grid_edge": true,
+      "quintic_zero_count_total": 14,
+      "radius_cubic": 0.15,
+      "radius_quartic": 0.2,
+      "radius_quintic": 0.3,
+      "why_this_book": "every strike far above spot at a high vol, so the book's partials come from one tail of the distribution rather than straddling the money",
+      "widening_factor_quartic": 1.3333333333333335,
+      "widening_factor_quintic": 1.4999999999999998
+    },
+    {
+      "columns": [
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 0,
+          "delta": -0.3,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.2,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.15,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": -0.1,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": -0.05,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": -0.02,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.02,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": 0.02,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.05,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 2,
+          "delta": 0.05,
+          "measured_zero_count": 2,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 2,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 2
+        },
+        {
+          "abs_delta": 0.1,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": 0.1,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": true,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.15,
+          "cubic_within_tolerance": true,
+          "cubic_zero_count": 1,
+          "delta": 0.15,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 1,
+          "quintic_within_tolerance": true,
+          "quintic_zero_count": 1
+        },
+        {
+          "abs_delta": 0.2,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 1,
+          "delta": 0.2,
+          "measured_zero_count": 1,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        },
+        {
+          "abs_delta": 0.3,
+          "cubic_within_tolerance": false,
+          "cubic_zero_count": 0,
+          "delta": 0.3,
+          "measured_zero_count": 0,
+          "quartic_within_tolerance": false,
+          "quartic_zero_count": 0,
+          "quintic_within_tolerance": false,
+          "quintic_zero_count": 0
+        }
+      ],
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 9,
+      "cubic_zero_count_total": 13,
+      "label": "in the money",
+      "quartic_zero_count_total": 11,
+      "quintic_radius_at_grid_edge": false,
+      "quintic_zero_count_total": 11,
+      "radius_cubic": 0.05,
+      "radius_quartic": 0.1,
+      "radius_quintic": 0.1,
+      "why_this_book": "the mirror ladder at the published vol and maturity: convexity on the other side of spot, which is the case v1.6.0's note listed as unanswered",
+      "widening_factor_quartic": 2.0,
+      "widening_factor_quintic": 1.0
+    }
+  ],
+  "claim": "order five widens the contiguous paired-magnitude crossing radius on 2 of 5 books and leaves it unchanged on 3: the published ladder goes 0.15 -> 0.20, a factor of 1.33 against the cubic-to-quartic 3.00; 2 books sit at the swept grid edge where a radius cannot be read as a measurement of anything",
+  "command": "uv run python experiments/fifth_order_crossing_map/run.py",
+  "controls": {
+    "fifth_order_book_sums_published_book": {
+      "sigma_sigma_sigma_sigma_sigma": -1623990538.352941,
+      "spot_sigma_sigma_sigma_sigma": -5021892.566314665,
+      "spot_spot_sigma_sigma_sigma": 12481.079623172454,
+      "spot_spot_spot_sigma_sigma": -78.60804475268505,
+      "spot_spot_spot_spot_sigma": 11.024332241945928,
+      "spot_spot_spot_spot_spot": 0.0969119927093902
+    },
+    "machinery_equality_with_v150_and_v160": "verify_control from experiments/second_book_crossing_map/run.py ran on the published book before this artifact was written: the ten third- and fourth-order coefficients, bothtruncations andthe engine P&L over 30 joint moves are exactly equal, and the run refuses to publish otherwise",
+    "multinomial_contraction_of_the_quintic_piece": {
+      "band": 0.05,
+      "rays": [
+        {
+          "closed_form_fifth_directional_derivative": 302.84997721684437,
+          "delta": 0.05,
+          "relative_error_by_rung": {
+            "0.008": 0.029675295069314087,
+            "0.016": 9.754717408381734e-05,
+            "0.032": 1.401942042000986e-05
+          },
+          "relative_error_widest_rung": 1.401942042000986e-05,
+          "vol_move": 0.0
+        },
+        {
+          "closed_form_fifth_directional_derivative": -5.196769722729412,
+          "delta": 0.0,
+          "relative_error_by_rung": {
+            "0.008": 0.33111978298978856,
+            "0.016": 0.008048898376886231,
+            "0.032": 0.0008311406217551367
+          },
+          "relative_error_widest_rung": 0.0008311406217551367,
+          "vol_move": 0.02
+        },
+        {
+          "closed_form_fifth_directional_derivative": -40053.50790700445,
+          "delta": 0.12,
+          "relative_error_by_rung": {
+            "0.008": 0.00019877404964761496,
+            "0.016": 5.074752285817556e-06,
+            "0.032": 3.143996484767019e-06
+          },
+          "relative_error_widest_rung": 3.143996484767019e-06,
+          "vol_move": -0.05
+        },
+        {
+          "closed_form_fifth_directional_derivative": -1191.4398025520954,
+          "delta": -0.03,
+          "relative_error_by_rung": {
+            "0.008": 0.00478915785107713,
+            "0.016": 0.00014204848117443502,
+            "0.032": 4.5864904434300754e-05
+          },
+          "relative_error_widest_rung": 4.5864904434300754e-05,
+          "vol_move": 0.08
+        },
+        {
+          "closed_form_fifth_directional_derivative": 1282483.2473856986,
+          "delta": 0.2,
+          "relative_error_by_rung": {
+            "0.008": 1.441441886912453e-06,
+            "0.016": 3.9701222642626996e-05,
+            "0.032": 0.0006430187286885166
+          },
+          "relative_error_widest_rung": 0.0006430187286885166,
+          "vol_move": 0.15
+        }
+      ],
+      "scales": [
+        0.008,
+        0.016,
+        0.032
+      ]
+    },
+    "order_five_over_four_at_measure_column_published_book": 0.27981864915385096,
+    "published_radii_reproduced": {
+      "cubic": 0.05,
+      "expected_cubic": 0.05,
+      "expected_quartic": 0.15,
+      "quartic": 0.15
+    }
+  },
+  "environment": {
+    "packages": {
+      "quantrisk": "1.6.0"
+    },
+    "platform": "darwin",
+    "python": "3.12.14"
+  },
+  "fits": {
+    "deep out of the money": {
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.020157179538720545,
+          "quartic_nearest_zero_distance": 0.0025806340713798795,
+          "quintic_nearest_zero_distance": 0.002395849513686439
+        },
+        {
+          "cubic_nearest_zero_distance": 0.005663931149543574,
+          "quartic_nearest_zero_distance": 0.00043309150137715163,
+          "quintic_nearest_zero_distance": 0.00021847729184319188
+        },
+        {
+          "cubic_nearest_zero_distance": 0.002362621722366198,
+          "quartic_nearest_zero_distance": 0.00013098775024204118,
+          "quintic_nearest_zero_distance": 4.5849117727392655e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0006990343108202192,
+          "quartic_nearest_zero_distance": 2.5448319678084315e-05,
+          "quintic_nearest_zero_distance": 5.511847758212299e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 8.811536560728939e-05,
+          "quartic_nearest_zero_distance": 1.6153578699605034e-06,
+          "quintic_nearest_zero_distance": 1.617710181190746e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 5.694907254064576e-06,
+          "quartic_nearest_zero_distance": 4.2461165003276815e-08,
+          "quintic_nearest_zero_distance": 1.615826840858643e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 5.802727454192678e-06,
+          "quartic_nearest_zero_distance": 4.497402287598749e-08,
+          "quintic_nearest_zero_distance": 1.5856060144882854e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 9.235750476714575e-05,
+          "quartic_nearest_zero_distance": 1.868165512769319e-06,
+          "quintic_nearest_zero_distance": 1.542695389161828e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0007686834080221127,
+          "quartic_nearest_zero_distance": 3.445127884423515e-05,
+          "quintic_nearest_zero_distance": 5.000847288638894e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.002730858471151081,
+          "quartic_nearest_zero_distance": 0.00021293133880963066,
+          "quintic_nearest_zero_distance": 3.931367597564343e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.006901436157542173,
+          "quartic_nearest_zero_distance": 0.0008818791968393728,
+          "quintic_nearest_zero_distance": 0.00017411879213523112
+        },
+        {
+          "cubic_nearest_zero_distance": 0.027633227090470357,
+          "quartic_nearest_zero_distance": 0.010604366387410304,
+          "quintic_nearest_zero_distance": 0.0013680110240284118
+        }
+      ],
+      "order_five_over_four_at_measure_column": 0.05687116397731155,
+      "order_four_over_three_at_measure_column": 0.930778869406997,
+      "v_sigma_root_T": 0.3181980515339464,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.002730858471151081,
+        "quartic": 0.0008818791968393728,
+        "quintic": 0.002395849513686439
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.006901436157542173,
+        "quartic": 0.0008818791968393728,
+        "quintic": 0.00021847729184319188
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.027633227090470357,
+        "quartic": 0.010604366387410304,
+        "quintic": 0.002395849513686439
+      }
+    },
+    "in the money": {
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": 0.035187507464716536,
+          "quartic_nearest_zero_distance": 0.015806925167341904,
+          "quintic_nearest_zero_distance": 0.005399528027444159
+        },
+        {
+          "cubic_nearest_zero_distance": 0.005967485559509128,
+          "quartic_nearest_zero_distance": 0.0009048619251613779,
+          "quintic_nearest_zero_distance": 6.708086984272277e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0005356193341896362,
+          "quartic_nearest_zero_distance": 1.4367617036391105e-05,
+          "quintic_nearest_zero_distance": 4.603449095159223e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 2.8641770475402702e-05,
+          "quartic_nearest_zero_distance": 6.1951072008892966e-09,
+          "quintic_nearest_zero_distance": 4.790244948046831e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 2.231674787940639e-05,
+          "quartic_nearest_zero_distance": 3.7941309761070196e-07,
+          "quintic_nearest_zero_distance": 4.303845834937887e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0002813578338209848,
+          "quartic_nearest_zero_distance": 2.4485347807014397e-05,
+          "quintic_nearest_zero_distance": 3.5500033270189496e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.001370624759864457,
+          "quartic_nearest_zero_distance": 0.0006883619465043525,
+          "quintic_nearest_zero_distance": 5.554466357456794e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0013798003609906614,
+          "quartic_nearest_zero_distance": 0.0062982592357838305,
+          "quintic_nearest_zero_distance": 0.0006437533527756459
+        },
+        {
+          "cubic_nearest_zero_distance": 0.005735881985585431,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        }
+      ],
+      "order_five_over_four_at_measure_column": 0.060347619800255894,
+      "order_four_over_three_at_measure_column": 0.2239444414210092,
+      "v_sigma_root_T": 0.14142135623730953,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.0005356193341896362,
+        "quartic": 0.0009048619251613779,
+        "quintic": 6.708086984272277e-05
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.005967485559509128,
+        "quartic": 0.0009048619251613779,
+        "quintic": 6.708086984272277e-05
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.005967485559509128,
+        "quartic": 0.0009048619251613779,
+        "quintic": 6.708086984272277e-05
+      }
+    },
+    "long-dated wide": {
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.0014476634994783563,
+          "quartic_nearest_zero_distance": 0.0003272088077240151,
+          "quintic_nearest_zero_distance": 9.979728688695039e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0005062442962865052,
+          "quartic_nearest_zero_distance": 0.00011963523643411522,
+          "quintic_nearest_zero_distance": 1.9498699053745183e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.00022006956346821809,
+          "quartic_nearest_zero_distance": 5.504127281619545e-05,
+          "quintic_nearest_zero_distance": 6.422873011391328e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 5.7787976179868826e-05,
+          "quartic_nearest_zero_distance": 1.6554537928508382e-05,
+          "quintic_nearest_zero_distance": 1.3248122719715025e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 2.639799428069342e-06,
+          "quartic_nearest_zero_distance": 1.646870548719162e-06,
+          "quintic_nearest_zero_distance": 7.491556967397645e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 3.013438406888544e-07,
+          "quartic_nearest_zero_distance": 5.650786802466768e-08,
+          "quintic_nearest_zero_distance": 1.1799686980545204e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 1.8137108735235977e-06,
+          "quartic_nearest_zero_distance": 8.213325337512109e-08,
+          "quintic_nearest_zero_distance": 2.2691478871687126e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 6.961975324716726e-05,
+          "quartic_nearest_zero_distance": 3.921858828289347e-06,
+          "quintic_nearest_zero_distance": 3.7493568070135624e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0020606407199528914,
+          "quartic_nearest_zero_distance": 3.283129796082668e-05,
+          "quintic_nearest_zero_distance": 2.6259430544899043e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.023474675800179083,
+          "quartic_nearest_zero_distance": 0.0010741080208380785,
+          "quintic_nearest_zero_distance": 0.00019819365950876633
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": 1.9221189154428053e-05,
+          "quintic_nearest_zero_distance": 0.0005825390047120294
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        }
+      ],
+      "order_five_over_four_at_measure_column": 0.5875865567378914,
+      "order_four_over_three_at_measure_column": 0.015293511182137896,
+      "v_sigma_root_T": 0.4949747468305833,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.0020606407199528914,
+        "quartic": 0.0010741080208380785,
+        "quintic": 0.0005825390047120294
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.023474675800179083,
+        "quartic": 0.0010741080208380785,
+        "quintic": 0.0005825390047120294
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.023474675800179083,
+        "quartic": 0.0010741080208380785,
+        "quintic": 0.0005825390047120294
+      }
+    },
+    "published ladder": {
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.09341752441547391,
+          "quartic_nearest_zero_distance": 0.03227468405949802,
+          "quintic_nearest_zero_distance": 0.01753772953832005
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0348587364364816,
+          "quartic_nearest_zero_distance": 0.005479350133031397,
+          "quintic_nearest_zero_distance": 0.003812759997119198
+        },
+        {
+          "cubic_nearest_zero_distance": 0.018873008297375794,
+          "quartic_nearest_zero_distance": 0.0016208684077405958,
+          "quintic_nearest_zero_distance": 0.00118094286024557
+        },
+        {
+          "cubic_nearest_zero_distance": 0.008429113338523931,
+          "quartic_nearest_zero_distance": 0.0002783754541479614,
+          "quintic_nearest_zero_distance": 0.00023319006263145849
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0024326646741319596,
+          "quartic_nearest_zero_distance": 3.9026723058430135e-07,
+          "quintic_nearest_zero_distance": 1.6530745599072777e-05
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": 0.00018167485029671297,
+          "quartic_nearest_zero_distance": 4.079183925937563e-07,
+          "quintic_nearest_zero_distance": 2.1384353998546782e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0014966152357359895,
+          "quartic_nearest_zero_distance": 1.1496688844848946e-05,
+          "quintic_nearest_zero_distance": 1.031798893492454e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.006658374439378528,
+          "quartic_nearest_zero_distance": 0.0002859752397795928,
+          "quintic_nearest_zero_distance": 0.00018649418064128898
+        },
+        {
+          "cubic_nearest_zero_distance": 0.01607311885255295,
+          "quartic_nearest_zero_distance": 0.0015956971226373864,
+          "quintic_nearest_zero_distance": 0.001035129877524639
+        },
+        {
+          "cubic_nearest_zero_distance": 0.030873804598333235,
+          "quartic_nearest_zero_distance": 0.005419577614849749,
+          "quintic_nearest_zero_distance": 0.00358894592307428
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        }
+      ],
+      "order_five_over_four_at_measure_column": 0.27981864915385096,
+      "order_four_over_three_at_measure_column": 0.5628541070142362,
+      "v_sigma_root_T": 0.14142135623730953,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.0024326646741319596,
+        "quartic": 0.0016208684077405958,
+        "quintic": 0.003812759997119198
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.018873008297375794,
+        "quartic": 0.0016208684077405958,
+        "quintic": 0.00118094286024557
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.0348587364364816,
+        "quartic": 0.005479350133031397,
+        "quintic": 0.003812759997119198
+      }
+    },
+    "short-dated tight": {
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": 0.06184337768142578,
+          "quartic_nearest_zero_distance": 0.007787410977237431,
+          "quintic_nearest_zero_distance": 0.026481028451300605
+        },
+        {
+          "cubic_nearest_zero_distance": 0.014277908960165234,
+          "quartic_nearest_zero_distance": 0.0005666792803906539,
+          "quintic_nearest_zero_distance": 0.00014131332780951836
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0027280748483932793,
+          "quartic_nearest_zero_distance": 3.278316014288917e-05,
+          "quintic_nearest_zero_distance": 2.7411863276027675e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0016006054503744519,
+          "quartic_nearest_zero_distance": 1.7880496035019983e-05,
+          "quintic_nearest_zero_distance": 2.670721658891255e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.011410886539828056,
+          "quartic_nearest_zero_distance": 0.0002851767332621505,
+          "quintic_nearest_zero_distance": 0.00022906686287201689
+        },
+        {
+          "cubic_nearest_zero_distance": 0.05369063731382422,
+          "quartic_nearest_zero_distance": 0.00033795408486586576,
+          "quintic_nearest_zero_distance": 0.22622793279668776
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        }
+      ],
+      "order_five_over_four_at_measure_column": 0.14292546778574275,
+      "order_four_over_three_at_measure_column": 3.8870859665195145,
+      "v_sigma_root_T": 0.04743416490252569,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.0027280748483932793,
+        "quartic": 0.0005666792803906539,
+        "quintic": 0.00022906686287201689
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.014277908960165234,
+        "quartic": 0.0005666792803906539,
+        "quintic": 0.00022906686287201689
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.014277908960165234,
+        "quartic": 0.0005666792803906539,
+        "quintic": 0.00022906686287201689
+      }
+    }
+  },
+  "generated_at_utc": "2026-10-04T04:30:14.762799+00:00",
+  "headline": {
+    "books_at_grid_edge": 2,
+    "books_measured": 5,
+    "books_unchanged_at_order_five": 3,
+    "books_widening_at_order_five": 2,
+    "books_with_quintic_closer_inside_the_quartic_radius": 5,
+    "columns_with_a_priced_crossing_total": 48,
+    "published_radius_cubic": 0.05,
+    "published_radius_quartic": 0.15,
+    "published_radius_quintic": 0.2,
+    "published_widening_factor_quartic": 2.9999999999999996,
+    "published_widening_factor_quintic": 1.3333333333333335,
+    "quintic_widening_factors": [
+      1.3333333333333335,
+      1.0,
+      1.0,
+      1.4999999999999998,
+      1.0
+    ],
+    "radii_quartic": {
+      "deep out of the money": 0.2,
+      "in the money": 0.1,
+      "long-dated wide": 0.3,
+      "published ladder": 0.15,
+      "short-dated tight": 0.05
+    },
+    "radii_quintic": {
+      "deep out of the money": 0.3,
+      "in the money": 0.1,
+      "long-dated wide": 0.3,
+      "published ladder": 0.2,
+      "short-dated tight": 0.05
+    }
+  },
+  "procedure": {
+    "books": "the five books, the delta grid, the 0.005 tolerance and the contiguous paired-magnitude radius rule are imported from experiments/second_book_crossing_map/run.py, which itself loads v1.5.0's and v1.6.0's files, so this run adds one order and changes nothing else",
+    "not_measured": "residual slopes against shock size: Phase 18's five books had already refuted the mechanism a slope would illustrate, and the arithmetic-floor windowing that governs such fits is this chain's published caveat, not a new one",
+    "quintic_term": "(1/120) times V_SSSSS h^5 + 5 V_SSSSsigma h^4 k + 10 V_SSSsigmasigma h^3 k^2 + 10 V_SSsigmasigmasigma h^2 k^3 + 5 V_Ssigmasigmasigmasigma h k^4 + V_sigmasigmasigmasigmasigma k^5, with the six book sums read from pricing.black_scholes_mixed_fifth_derivatives and h the absolute spot move",
+    "radius_definition": "a |delta| magnitude passes only when every signed column at it that has a priced crossing has this truncation's nearest zero inside 0.005; the radius is the widest magnitude such that all smaller magnitudes pass"
+  },
+  "reproduction_policy": {
+    "conditioning_limited": [
+      "fits",
+      "controls.multinomial_contraction_of_the_quintic_piece.rays",
+      "controls.order_five_over_four_at_measure_column_published_book",
+      "headline.books_with_quintic_closer_inside_the_quartic_radius"
+    ],
+    "everything_else": "the truncations are closed forms on each book's own sums, the priced error and the engine P&L are exact arithmetic on the shipped engine, and the published book is pinned to v1.5.0's and v1.6.0's values by those releases' own equality gate, which this run executes and requires to be exactly zero",
+    "why": "the distances, the closer-verdict they feed, the nested-difference contraction errors and the order-five-to-four ratio all come from subtractions of book values near 1e5, so they reproduce to their conditioning rather than to their last digit; the comparator exempts floats only, and a radius is a grid point"
+  }
+}

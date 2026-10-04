@@ -591,6 +591,40 @@ MEMBERS: tuple[Member, ...] = (
             ),
         ),
     ),
+    Member(
+        key="fifth_order_crossing_map",
+        title="Does the crossing radius widen again at order five, on five books",
+        kind=EXPERIMENT,
+        script="experiments/fifth_order_crossing_map/run.py",
+        artifact="experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json",
+        # No `plot`: a truncation is compared with a revaluation of the same book, not an
+        # oracle.
+        headline=(
+            ("books measured", ("headline", "books_measured")),
+            ("published ladder, quartic radius", ("headline", "published_radius_quartic")),
+            ("published ladder, quintic radius", ("headline", "published_radius_quintic")),
+            (
+                "books the quintic widens",
+                ("headline", "books_widening_at_order_five"),
+            ),
+            (
+                "books the quintic leaves unchanged",
+                ("headline", "books_unchanged_at_order_five"),
+            ),
+            (
+                "books sitting at the swept grid edge",
+                ("headline", "books_at_grid_edge"),
+            ),
+            (
+                "books the quintic brings closer inside the quartic radius",
+                ("headline", "books_with_quintic_closer_inside_the_quartic_radius"),
+            ),
+            (
+                "radius on the book least like the published one",
+                ("headline", "radii_quintic", "short-dated tight"),
+            ),
+        ),
+    ),
 )
 
 

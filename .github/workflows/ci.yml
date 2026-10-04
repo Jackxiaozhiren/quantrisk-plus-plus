@@ -72,7 +72,7 @@ jobs:
 
   benchmark-suite:
     # The published artifacts in benchmarks/ and experiments/ are the evidence the README
-    # and docs/validation_matrix.md quote. This job re-executes all seventeen members against
+    # and docs/validation_matrix.md quote. This job re-executes all eighteen members against
     # live oracles so that evidence cannot rot into something nothing runs.
     #
     # --require-all is the load-bearing flag. Without it a missing oracle would mark members

@@ -120,7 +120,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
-        anchor="`8.69×`",
+        anchor="`8.51×`",
         replacement="`8.70×`",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -156,7 +156,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 82 numbered entries",
+        anchor="carries 83 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -180,8 +180,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-overcounts-the-suite",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="all 17 members",
-        replacement="all 18 members",
+        anchor="all 18 members",
+        replacement="all 19 members",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_suite_members_agree_with_the_registry"
@@ -221,7 +221,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 396 Python tests",
+        anchor="# 408 Python tests",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -269,8 +269,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-miscounts-the-matrix-rows",
         kind="prose",
         path="README.md",
-        anchor="is the full table — twenty-four rows over",
-        replacement="is the full table — twenty-five rows over",
+        anchor="is the full table — twenty-five rows over",
+        replacement="is the full table — twenty-three rows over",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_validation_matrix_rows_agree_with_the_table"
@@ -356,7 +356,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-experiment-table",
         kind="prose",
         path="README.md",
-        anchor="Twelve experiments, each answering",
+        anchor="Thirteen experiments, each answering",
         replacement="Eleven experiments, each answering",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -368,7 +368,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-a-suite-the-registry-does-not-have",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="17 benchmark-suite members execute",
+        anchor="18 benchmark-suite members execute",
         replacement="16 benchmark-suite members execute",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -380,7 +380,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 465 pytest tests with the validation",
+        anchor="and 477 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -432,6 +432,42 @@ MUTATIONS: tuple[Mutation, ...] = (
         replacement="+ 8.0 * first * first * first -",
         guard="the six mixed fifth partials are slopes of partials the core already ships",
         claim="the order-fifth numerators are the polynomials the difference routes agree with",
+    ),
+    Mutation(
+        identifier="fifth-order-radius-judged-by-another-orders-range",
+        kind="prose",
+        path="experiments/fifth_order_crossing_map/run.py",
+        anchor='widest = own_fits["worst_distance_inside_own_radius"][order]',
+        replacement='widest = own_fits["worst_distance_inside_quartic_radius"][order]',
+        guard=(
+            "tests/python/test_fifth_order_crossing_map.py::"
+            "test_a_radius_is_judged_only_by_columns_inside_it"
+        ),
+        claim="a radius is judged only by the columns inside that radius, not by another order's",
+    ),
+    Mutation(
+        identifier="fifth-order-sums-drop-the-book-quantity",
+        kind="prose",
+        path="experiments/fifth_order_crossing_map/run.py",
+        anchor="for o in book.options()) * book.quantity",
+        replacement="for o in book.options()) * 1.0",
+        guard=(
+            "tests/python/test_fifth_order_crossing_map.py::"
+            "test_the_core_sums_behind_the_quintic_term_are_the_shipped_ones"
+        ),
+        claim="the quintic truncation is built on the book's own sums, position for position",
+    ),
+    Mutation(
+        identifier="fifth-order-note-quotes-a-stale-widening-count",
+        kind="prose",
+        path="docs/analysis/fifth_order_crossing_map.md",
+        anchor="widens the radius on 2 of 5 books",
+        replacement="widens the radius on 3 of 5 books",
+        guard=(
+            "tests/python/test_fifth_order_crossing_map.py::"
+            "test_the_note_figures_are_the_artifacts_own"
+        ),
+        claim="the note's headline count is the artifact's, re-counted from the rows",
     ),
 )
 

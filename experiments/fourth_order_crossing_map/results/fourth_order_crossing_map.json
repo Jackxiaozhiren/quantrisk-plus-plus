@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-10-03T04:31:11.379364+00:00",
+  "generated_at_utc": "2026-10-04T04:29:00.992594+00:00",
   "command": "uv run python experiments/fourth_order_crossing_map/run.py",
   "claim": "adding the four mixed fourth partials to the column truncation triples the radius overwhich it predicts the shipped map's crossing -- |delta| <= 0.15 against the cubic's 0.05, worst distance 0.00162 against 0.01887 -- and the residual it leaves falls with a fifth-order slope of 4.73-5.01 against the cubic's 3.96-4.37, but it does not make the map's error cheaper to predict at the size the documents quote: on risk_off the quartic truncation is still 16.2 % wrong, on the other side, and on one ray at full shock size its residual is 1.38x the cubic's",
   "book": {

@@ -1,0 +1,6 @@
+label,radius_cubic,radius_quartic,radius_quintic,widening_factor_quartic,widening_factor_quintic,quintic_radius_at_grid_edge
+published ladder,0.05,0.15,0.2,2.9999999999999996,1.3333333333333335,False
+long-dated wide,0.1,0.3,0.3,2.9999999999999996,1.0,True
+short-dated tight,0.02,0.05,0.05,2.5,1.0,False
+deep out of the money,0.15,0.2,0.3,1.3333333333333335,1.4999999999999998,True
+in the money,0.05,0.1,0.1,2.0,1.0,False

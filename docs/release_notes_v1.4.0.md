@@ -114,7 +114,7 @@ environment that found it, rather than in the one that wrote it.
 
 The suite count moved `388 → 411` with the `oracles` extra and `319 → 342` without it — twenty-three
 cases on each side, none of them oracle-gated, which is why the two numbers move together.
-`docs/limitations.md` carries 82 numbered entries.
+`docs/limitations.md` carries 83 numbered entries.
 
 ## The runner corrected the correction
 

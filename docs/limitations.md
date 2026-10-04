@@ -246,7 +246,7 @@ never removed just because a later phase shipped.
 
 56. **Resolved on first contact: the CI lane is proven on a runner, and the runner disagreed
     with the laptop.** `benchmark-suite` passes on `ubuntu-latest` in ~5m46s with
-    `--require-all`, so all seventeen members execute against live oracles and none can be skipped
+    `--require-all`, so all eighteen members execute against live oracles and none can be skipped
     silently. What the same runner caught was not in the new lane at all: the pre-existing
     `build-and-test` lane failed on a README assertion that demanded bit-exact agreement with a
     transcribed price, and glibc's libm is 1.7 ULP from Apple's. Local green said nothing about
@@ -304,7 +304,7 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 465 pytest tests with
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 477 pytest tests with
     the `oracles` extra installed, and the same tree collects 396 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
@@ -337,7 +337,7 @@ never removed just because a later phase shipped.
     no conclusion moved. The consequence is stated rather than smoothed: `verify_evidence_manifest.py`
     is a same-platform tamper check, and running it on a different libm would report CHANGED on
     result fields that are in fact the same result. CI therefore verifies *execution* on Linux (the
-    `benchmark-suite` lane runs all seventeen members with `--require-all`) and *byte equality* only on
+    `benchmark-suite` lane runs all eighteen members with `--require-all`) and *byte equality* only on
     the platform that produced the artifacts. `test_a_fresh_run_reproduces_the_committed_artifact_exactly`
     encodes the split: relative slack of 1e-12 on floats, exact equality on everything else. Making
     the chain platform-independent would require storing results at a stated precision rather than at
@@ -694,3 +694,39 @@ never removed just because a later phase shipped.
     because a core capability and the measurement that consumes it are separate claims. The row is
     `validated (L1 only)` and the crossing question stays open in the same sense row 19 left it: this
     phase added the arithmetic, not the answer.
+
+83. **Order five widens the radius on two books of five, and the set that was chosen to explain
+    widening explains it no better than before.** `experiments/fifth_order_crossing_map/` adds the six
+    mixed fifth partials to the same column truncation, on the same five books, under the same
+    contiguous paired-magnitude rule at v1.5.0's own 0.005 tolerance, imported from the Phase 18
+    experiment rather than restated. The result has three parts and only the first is a yes. (a) The
+    radius grows again on 2 of 5 books -- the published ladder `0.15 -> 0.20`, a factor of 1.33 where its
+    own cubic-to-quartic step was 3.00, and the deep out-of-the-money ladder `0.20 -> 0.30` -- and does
+    not on the other three. (b) Inside the quartic's radius the quintic is the closest of the three
+    orders to the priced crossing on 5 of 5 books, which is the same direction Phase 18 found one order
+    earlier. (c) The ratio of the order-five spot piece to the order-four one spans 0.057 to 0.588, and
+    it orders the outcome no better than the order-four-to-three ratio did: the smallest ratio in the set
+    produced the largest widening, the second smallest produced none, and the largest sits on a book
+    whose radius was already at the swept grid edge, so it proves nothing either way. Two of the three
+    "unchanged" books are therefore not evidence of anything, and the artifact flags them
+    (`quintic_radius_at_grid_edge`) instead of counting them as results; the only book that is both
+    resolvable and unmoved is the in-the-money mirror.
+
+    What the measurement is not. It is not a bound and not a statement about size: the amount of the map's
+    error at published scale is untouched by this phase, and the base map is still 16.2 % off on
+    `risk_off` after the quartic. It is self-consistency of one truncation family measured against a
+    revaluation of the same book, with no second implementation on the other side -- the fifth partials
+    have no oracle, and limitation #82 keeps their validation caveats. The distance columns, the
+    closer-verdict built from them, the contraction errors and the ratio are declared
+    `conditioning_limited` because they are roots and quotients of subtractions of book values near 1e5;
+    what is gated by value is the counts and the radii, which are grid points. The multinomial
+    contraction is checked against five nested differences of the revaluation at `1e-05` to `8e-04`
+    relative on the widest rung tried and a `5e-2` band, with finer rungs degrading to `3e-02` on the same
+    ray because five nested divisions by the scale are round-off dominated; the run publishes the error at
+    every rung rather than keeping the best, and the independent test re-derives it on four rays the
+    producer never evaluates. Finally, one defect this phase found was in its own refusal: the first
+    version of `check` judged each radius by the worst column inside the *quartic's* range and rejected
+    the published ladder's cubic radius of 0.05 for a column at 0.15 that radius never claimed to cover.
+    A gate that reads the wrong range rejects correct results and accepts incoherent ones, so it announced
+    itself by firing on a book that was fine; `check()` now reads each order against its own radius and the
+    test pins both directions (audit finding 51).

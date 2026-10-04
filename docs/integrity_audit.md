@@ -875,3 +875,42 @@ negative control -- planting a one-unit slip in `q32` produced `q32: worst relat
 `92e8bb61c2527c99768b9d2eef67a0f02865b0f3bf8d09f074d942e6f4bdaf8e` both sides) and exit 0 again. No artifact was
 regenerated, so the manifest frozen at `2e8142a` still verifies: `85 OK / 0 CHANGED / 0 VOLATILE / 0 MISSING /
 0 unlisted`.
+
+---
+
+## Addendum — Phase 21, the gate that fired on a correct result, and the plants my own sync disarmed (2026-10-04)
+
+**51. A refusal can only be trusted on a case it is aimed at.** `experiments/fifth_order_crossing_map`
+publishes, for each order, the contiguous paired-magnitude radius and the worst nearest-zero distance
+inside it, and refuses to write an artifact when a radius contains a column outside the tolerance that
+defines it. The first version looked each order's worst distance up in the *quartic's* range -- a dict
+that already had all three orders keyed by name, so nothing looked wrong about indexing it by order --
+and the run died on its own control book: the published ladder's cubic radius of 0.05 was rejected
+because a column at 0.15 sat 1.89e-02 away, a column that radius never claimed to cover. The defect is
+invisible in the direction a validator is normally tested: it fires, loudly and with a correct-looking
+message, on data that is fine, and it would have *passed* an incoherent radius whose own range happened to
+be clean. So the gate was proved by aiming it at both cases -- a loose column outside the cubic radius
+must not reject it, and identical numbers with the loose column inside it must -- which is what
+`test_a_radius_is_judged_only_by_columns_inside_it` now pins, with `fifth-order-radius-judged-by-another-orders-range`
+planting the original conflation back into the producer to show the guard can still fail. The same
+conflation is what Phase 18 had to fix twice in the radius *rule*; finding it a third time, in the check
+that was written to catch it, says the shape is easy to re-enter and worth a named test each time.
+
+**52. Editing the prose silently disarmed the falsification harness.** Eight of the 30 declared plants key
+on figures this phase moved -- the matrix row count, the suite count, the Python test totals, the README's
+speedup. Re-keying them produced two entries whose `replacement` was identical to the new `anchor`,
+because the documents had caught up with what the plant was trying to assert: the sweep would have
+reported `33/33 planted defects rejected` while those two planted nothing at all. A harness that
+verifies its targets must also police its own list, and `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists`
+did exactly that job -- it refused the identical pair, and separately refused two anchors that no longer
+occurred and one whose edit would have overwritten a tracked file under `kind="tree"`, which in this
+harness means "a file that must not exist yet".
+
+Verification, in the tools' own words: `uv run python scripts/run_benchmark_suite.py --require-all` --
+`18/18 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 174.9s total`;
+`uv run pytest tests/python -q` -- 477 passed; `uv run ctest --preset dev` -- 100 % tests passed out of
+204; `uv run quantrisk validate` -- 7/7; `uv run ruff check .` -- all checks passed;
+`uv run ruff format --check .` -- 147 files already formatted; `uv run mypy python/quantrisk` -- no issues
+in 23 source files; `uv run latexmk -pdf` -- 44 pages, 1003152 bytes; the manifest rebuilt over the new
+results directory and verified at `94 OK / 0 CHANGED / 0 VOLATILE / 0 MISSING / 0 unlisted`, then re-frozen
+on the committed tree; `uv run python scripts/run_mutation_suite.py --list` -- 33 plants declared.
