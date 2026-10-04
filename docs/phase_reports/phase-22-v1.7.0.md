@@ -139,4 +139,25 @@ frozen manifest, with `git status` empty before and after it. Its own line:
 `1e-12` slack of finding 54(a) leaves far outside tolerance --- and so did the two the previous phase
 retargeted.
 
-`[TBD: appended after the tag exists — CI jobs, tag sha, assets and their hashes.]`
+**The tagged revision, read from the API after the fact.** `v1.7.0` is an annotated tag object
+`5ef9e125980607db65c91b9b118506a432098739` on commit `79d536a16eeb`, and that commit's check-run table
+says `{"jobs": 3, "all_success": true}` for the three CI jobs (`Format and static checks`,
+`Configure, build, C++ tests, Python tests`, `Benchmark suite against live oracles`), with SonarCloud
+`neutral` as on every prior head. The GitHub release is `publishedAt 2026-10-04T06:46:51Z`,
+`isDraft: false`, `isPrerelease: false`, with four assets whose sizes the API reports as
+`1003093 / 55188 / 2493 / 144544` bytes.
+
+**Assets were built from the tag, and the digests match in both directions.** `git archive v1.7.0`
+exported into a clean directory and the four files were hashed there, then downloaded back from the
+release and hashed again; all four agree: `technical_report.pdf` `99d1c108…`, `manifest.json`
+`e3f7418d…`, `CITATION.cff` `f6ccac70…`, `quantrisk-suite-results.zip` `84675cb5…`. The zip carries the
+four suite-roll-up files, as every release since `v1.4.0` has.
+
+**What the record still cannot contain.** This commit is after the tag, so the tag does not carry it: the
+release note cannot describe its own publication, the manifest cannot hash itself, and the four commits
+between `v1.6.0` and this tag were frozen before the tag existed. The CI run that verified `79d536a` is
+the release's evidence; the runs on the post-tag record commits are reported in the next paragraph, and
+nothing in this file asserts a run it has not read.
+
+`RANGE_DOCUMENTS` gained `docs/release_notes_v1.7.0.md` in this commit, which is the guard that makes
+the note's `7.77×–8.70×` / `0.42×–0.51×` claim an owned one rather than a remembered number.

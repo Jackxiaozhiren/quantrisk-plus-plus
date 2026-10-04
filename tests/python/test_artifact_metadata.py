@@ -1027,6 +1027,7 @@ RANGE_DOCUMENTS = (
     "docs/interview_defense.md",
     "docs/reproducibility.md",
     "docs/release_notes_v1.5.0.md",
+    "docs/release_notes_v1.7.0.md",
 )
 
 # The spread of the speed benchmark's two ratios over every committed measurement of the artifact —
