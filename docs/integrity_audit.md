@@ -906,6 +906,20 @@ did exactly that job -- it refused the identical pair, and separately refused tw
 occurred and one whose edit would have overwritten a tracked file under `kind="tree"`, which in this
 harness means "a file that must not exist yet".
 
+**53. The sweep caught a plant that proved nothing.** Its own line: `32/33 planted defects were rejected
+by their guard`, and the escape was `fifth-order-sums-drop-the-book-quantity`, which replaces the book
+quantity in the experiment's `fifth_order_sums` and named
+`test_the_core_sums_behind_the_quintic_term_are_the_shipped_ones` as its guard. That guard is a check of
+the *artifact against the bindings*: it recomputes the six sums from `black_scholes_mixed_fifth_derivatives`
+without calling the producer's helper, deliberately, because a test that imported the producer's own
+function would certify only that the file agrees with itself. The consequence is that no edit to the
+producer can turn it red, so the plant was aimed at a wire the mutation never touches -- a link error,
+not a weak guard, and invisible to every check except running the sweep and reading the one line that
+says `guard-stayed-green`. Fixed by pointing the plant at the reproduction test, which does consume the
+helper, and adding the counterpart plant the guard actually needed: `artifact-publishes-a-book-sum-the-core-does-not`
+perturbs one published sum in the artifact by a digit, which is the only thing that check can see. The
+list is now 34 entries, each with a guard that reacts to the edit its identifier describes.
+
 Verification, in the tools' own words: `uv run python scripts/run_benchmark_suite.py --require-all` --
 `18/18 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 174.9s total`;
 `uv run pytest tests/python -q` -- 477 passed; `uv run ctest --preset dev` -- 100 % tests passed out of

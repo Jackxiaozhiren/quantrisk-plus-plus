@@ -30,8 +30,9 @@ that is partly negative and partly unresolvable rather than a clean win.
   directory declared and re-frozen at 94 artifacts, `docs/analysis/fifth_order_crossing_map.md`,
   validation-matrix row 22, limitation #83, and the counts every document repeats (13 experiments,
   25 matrix rows, 83 limitations, 477 Python tests, 18 suite members, the new performance figures).
-- **Falsification:** 3 new plants (33 declared), one per new guard — the own-radius refusal, the
-  core-derived book sums, the note's headline count.
+- **Falsification:** 4 new plants (34 declared) — the own-radius refusal, the producer's book sums,
+  a published sum that is not the core's, and the note's headline count. The second of those was aimed
+  wrong at first and the sweep said so; see §4(e).
 
 ## 2. Mathematical assumptions
 
@@ -63,7 +64,7 @@ of a subtraction of two book values near 1e5, which is why the distances are dec
 | `tests/python/test_fifth_order_crossing_map.py` | new, 12 tests: shipped gate, core sums, fifteen radii re-derived, signed-pair plant, both refusal directions, contraction on other rays, headline re-counts, prose pins, family paths, note figures, temp-tree reproduction |
 | `scripts/run_benchmark_suite.py` | member 18 registered with its headline paths |
 | `scripts/build_evidence_manifest.py` | the new results directory declared |
-| `scripts/run_mutation_suite.py` | 3 plants added; 8 anchors re-keyed to the figures this phase moved |
+| `scripts/run_mutation_suite.py` | 4 plants added (34 declared); 8 anchors re-keyed to the figures this phase moved |
 | `docs/limitations.md` | item 83 |
 | `docs/validation_matrix.md` | row 22, count 24 → 25 |
 | `README.md` | experiment row and count, suite breakdown, matrix and limitation counts, performance figures |
@@ -97,6 +98,14 @@ plants would have "planted" a defect that was the correct text, so the sweep wou
 an identical pair, which is the mechanism that caught it; the same test caught two anchors that no longer
 existed at all. A falsification harness needs its *list* policed as strictly as its targets.
 
+**(e) A plant aimed at a wire the mutation never touches.** `fifth-order-sums-drop-the-book-quantity`
+named the sums test as its guard, and the sweep reported it `guard-stayed-green`: that test compares
+the artifact against the bindings and never calls the producer's helper, on purpose, so no edit to
+the producer can reach it. The plant now names the reproduction test, which does consume the helper,
+and the sums test got the plant it can actually react to -- a digit changed in the published sums.
+Audit finding 53 is the general shape: a guard's power is a property of the path from mutation to
+assertion, and only running the list discovers whether that path exists.
+
 **(d) One more, in the other direction.** `kind="tree"` in this harness means "write a file that must not
 exist" (that is how the two manifest probes work). I declared two producer edits as `tree`, and the
 guard rightly refused to let the sweep overwrite a tracked file. Both are `prose` now.
@@ -112,7 +121,7 @@ uv run ctest --preset dev                                    100% tests passed o
 uv run ruff check .                                          All checks passed!
 uv run ruff format --check .                                 147 files already formatted
 uv run mypy python/quantrisk                                 Success: no issues found in 23 source files
-uv run python scripts/run_mutation_suite.py --list           33 plants declared
+uv run python scripts/run_mutation_suite.py --list           34 plants declared
 uv run python scripts/build_evidence_manifest.py + verify    94 OK / 0 CHANGED / 0 VOLATILE / 0 MISSING / 0 unlisted
 uv run latexmk -pdf paper/technical_report.tex               44 pages, 1003152 bytes
                                                             (1003090 before this phase's counts moved)

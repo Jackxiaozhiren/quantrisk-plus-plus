@@ -451,11 +451,29 @@ MUTATIONS: tuple[Mutation, ...] = (
         path="experiments/fifth_order_crossing_map/run.py",
         anchor="for o in book.options()) * book.quantity",
         replacement="for o in book.options()) * 1.0",
+        # Not the sums test: that one recomputes the sums from the bindings itself, so a producer
+        # edit cannot reach it. The reproduction test is the one that consumes what this function
+        # returns -- the planted radius differs from the committed artifact, which is the link.
+        guard=(
+            "tests/python/test_fifth_order_crossing_map.py::"
+            "test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_numbers"
+        ),
+        claim="the quintic truncation is built on the book's own sums, position for position",
+    ),
+    Mutation(
+        identifier="artifact-publishes-a-book-sum-the-core-does-not",
+        kind="prose",
+        path="experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json",
+        anchor='"spot_spot_spot_sigma_sigma": -78.60804475268505,',
+        replacement='"spot_spot_spot_sigma_sigma": -78.6080447526851,',
+        # The counterpart to the producer-edit plant above: this guard compares the artifact against
+        # the bindings, so the only thing that can turn it red is an artifact whose sums are not the
+        # core's.
         guard=(
             "tests/python/test_fifth_order_crossing_map.py::"
             "test_the_core_sums_behind_the_quintic_term_are_the_shipped_ones"
         ),
-        claim="the quintic truncation is built on the book's own sums, position for position",
+        claim="the quintic truncation's book sums are the shipped core's, to the last bit",
     ),
     Mutation(
         identifier="fifth-order-note-quotes-a-stale-widening-count",
