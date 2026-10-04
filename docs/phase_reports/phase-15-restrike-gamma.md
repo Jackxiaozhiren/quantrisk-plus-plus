@@ -244,3 +244,30 @@ slopes 3.96, 3.98, 3.99 (`delta = +0.05`) and 4.08, 4.05, 4.03 (`+0.15`), i.e. i
 fourth-order term, while at `|delta| = 0.30` the same probe reads 5.64, 2.23, 3.53 and 4.65, 4.43,
 4.26 — the scaling is not clean that far out, which is the honest reason to expect the radius to grow
 rather than the crossing to become exact everywhere.
+
+## 9. Section reconciliation, added 2026-10-04
+
+This report was written in eight sections. Every phase report from Phase 12 onward closes with the same
+nine headings (`Completed`, `Mathematical assumptions`, `Files changed`, `Tests executed`,
+`Exact test results`, `Numerical validation`, `Remaining limitations`, `Technical debt`, `Gate`), and the
+completion audit run at head `dca2907` noticed that this one does not carry them. The section is
+appended rather than the file renumbered, so what `v1.5.0` published stays as published. Where each
+mandated heading lives:
+
+| mandated heading | this report's | what it holds |
+| --- | --- | --- |
+| Completed | §1 | the four priced maps, the five gated claims, the falsified prediction |
+| Mathematical assumptions | §2 (`Decisions, and what they cost`) | the choices made where the maths was underdetermined, each with the cost it bought |
+| Files changed | no list was written | recoverable from `git diff --stat dcc9eaa~1 2ad54059ae28`, the phase's six commits: 51 files, `experiments/restrike_gamma_map/` new at 969 producer lines and 547 test lines |
+| Tests executed | §4's gate rows | each command with the line it printed, read after the command returned |
+| Exact test results | §4 | `423 passed in 23.48s`, `100% tests passed out of 198`, `suite: 15/15` |
+| Numerical validation | §1.2, §1.4, §1.5 | the five claims each able to fail, the prediction's gated regime and its drift outside it, and the byte-identity with Phase 13's artifact |
+| Remaining limitations | §5 item 1 and `docs/limitations.md` #78 | the limitation register is the owner; the report points at it instead of restating it |
+| Technical debt | §5 and §8 | what the next release cycle owes, and the fourth-order groundwork handed forward |
+| Gate | §4 (commands and verdicts), §6 (the release and the two sweep runs), §7 (the heads after the tag) | the falsification evidence is §6's `19/19 planted defects were rejected by their guard.` |
+
+So `Files changed` is the only mandated heading with no home in the original text, and that row above
+says so instead of inventing a table now. Note that §4 is a slot rather than a title: Phases 18, 20, 21
+and 22 each re-titled it to name the defect that phase found, while keeping the executed-test content
+under §5. Nothing else about Phase 15 was found to be missing, and nothing here changes a number that
+§1–§8 published.
