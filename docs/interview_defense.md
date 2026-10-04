@@ -28,7 +28,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 81
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 82
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -40,8 +40,8 @@ contradicted it (the shrinkage covariance that won on synthetic data ranks *wors
 it cannot do is answer the questions that needed a known truth — those are recorded as
 `refusals` inside the artifact rather than proxied.
 
-Current suite as measured at HEAD: 201 C++ tests under CTest (548,217 assertions in 200 Catch2
-cases), 460 pytest tests with the `oracles` extra and the same tree collects 391 tests without
+Current suite as measured at HEAD: 204 C++ tests under CTest (548,368 assertions in 203 Catch2
+cases), 465 pytest tests with the `oracles` extra and the same tree collects 396 tests without
 it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
 revision's figure on the runner rather than trusting arithmetic here. 17/17 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
@@ -403,8 +403,8 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 201 C++ tests (548,217 assertions in 200 cases) and 460
-Python tests with the validation oracles installed — 391 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
+variance reduction. Today that is 204 C++ tests (548,368 assertions in 203 cases) and 465
+Python tests with the validation oracles installed — 396 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -963,7 +963,7 @@ header that declares it. What caught it was a consumer: the Phase 16 experiment 
 made a claim about what should be reachable.
 
 Phase 17 makes the claim and enforces it; Phase 19 widened it from the attribute to the whole surface.
-Every namespace-scope function declaration in `cpp/include/quantrisk/**/*.hpp` (109 declarations, 101
+Every namespace-scope function declaration in `cpp/include/quantrisk/**/*.hpp` (110 declarations, 102
 names) must be registered in `bindings/python_bindings.cpp` or carry a `// python:` marker at its own
 declaration disclaiming it, and every one of them must carry the `[[nodiscard]]` the core chose as its
 own intent marker. 25 declarations are disclaimed, and a disclaimer is a checked fact, not a sentence:
@@ -1022,9 +1022,9 @@ second source of truth, and without a comparison between them the wrong rule sur
 Regenerate, then compare. Commands are the ones recorded in the phase reports.
 
 ```bash
-cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 201 C++ tests
+cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 204 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 391 Python tests
+  .venv/bin/python -m pytest -q                                          # 396 Python tests
 uv run python scripts/run_mutation_suite.py                            # 18/18 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
@@ -1036,8 +1036,8 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 
 | Claim in this file | Source to check |
 |---|---|
-| What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (66 entries) |
-| 190 C++ / 330 Python tests at `v1.0.0`, 201 / 423 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
+| What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (82 entries) |
+| 190 C++ / 330 Python tests at `v1.0.0`, 204 / 465 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
 | BS worst abs 1.49e-13 / rel 3.46e-11; Greeks abs 7.97e-15 … 5.12e-13; rel rho 1.07e-07; 18,816 rows; floors 1e-4 / 1e-6; oracle config (AnalyticEuropeanEngine, Actual365Fixed, day → `days/365`) | `benchmarks/quantlib/results/pricing_vs_quantlib.json` |
 | Put-call parity worst residual 8.00e-15; worst analytic-vs-FD delta 1.17e-4 | `experiments/pricing_validation/results/summary.json` (`worst_*` keys) |
 | CRR slopes −0.99405 / −1.00544 / −0.99244 / −0.999674 with SEs; relative errors at N = 3200 | `experiments/pricing_validation/results/summary.json` (`crr_convergence_slope`, `final_lattice_relative_error`) |
@@ -1067,7 +1067,7 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | ERC condition `wᵢ(Σw)ᵢ = (wᵀΣw)/n` and "validated against independent implementation" | `docs/mathematical_specification.md` §9 |
 | Heston dynamics, Feller condition, full-truncation Euler bias, "validation weaker than Black-Scholes section" | `docs/mathematical_specification.md` §10; `docs/project_scope.md` §4 |
 | Eigen arrives in Phase 6, not before; single-thread and no-QMC limits; path-matrix memory bound | `docs/limitations.md` #8, #16, #18; `docs/model_cards/monte_carlo_gbm.md` |
-| The extension-surface claim and how it was made falsifiable: 109 namespace-scope `[[nodiscard]]` declarations across 29 headers, 101 names, 25 disclaimed by `// python:` markers whose `via` routes the guard verifies; four planted failure modes plus the differential against the Phase 14 guard, and Phase 19 closed the residual it used to inventory | `tests/python/test_extension_surface_parity.py`, `scripts/run_mutation_suite.py` (`core-declares-a-function-nobody-binds`), `docs/limitations.md` #80, `docs/phase_reports/phase-17-surface-coverage.md` |
+| The extension-surface claim and how it was made falsifiable: 110 namespace-scope `[[nodiscard]]` declarations across 29 headers, 102 names, 25 disclaimed by `// python:` markers whose `via` routes the guard verifies; four planted failure modes plus the differential against the Phase 14 guard, and Phase 19 closed the residual it used to inventory | `tests/python/test_extension_surface_parity.py`, `scripts/run_mutation_suite.py` (`core-declares-a-function-nobody-binds`), `docs/limitations.md` #80, `docs/phase_reports/phase-17-surface-coverage.md` |
 | "the tests would catch a wrong formula": nineteen planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green; the sweep's own line on `e5daedc` is `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
 | A one-book claim tested on five: the order-four radius transfers in direction (5 of 5) and in no magnitude (factors 1.3 to 3.0); the equality control is bit-identity over 30 joint moves, not a band; the order-four-to-three ratio spans 254-fold and does not order the widening; two radius definitions were wrong, and the second is planted in both column orders | `experiments/second_book_crossing_map/run.py`, `tests/python/test_second_book_crossing_map.py`, `docs/analysis/second_book_crossing_map.md`, `docs/limitations.md` #81, `docs/integrity_audit.md` finding 46 |
 

@@ -128,7 +128,7 @@ Three levels, defined in [`docs/validation_protocol.md`](docs/validation_protoco
   coverage against exact binomial bands; backtest size and power over thousands of
   replications on synthetic data whose truth is known.
 
-[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full table — twenty-three rows over
+[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full table — twenty-four rows over
 those twelve components: method, oracle, the bound the test asserts, the error actually measured,
 and the artifact.
 The four that carry a first reading:
@@ -253,7 +253,7 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 81 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 82 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
 - **The risk layer's instrumented validation is synthetic; only one arm is real.** Six of the
@@ -287,7 +287,7 @@ uv run pytest -m oracle      # live-oracle tests only (needs `uv sync --extra or
 
 uv run cmake --preset dev           # configure C++
 uv run cmake --build --preset dev   # build core + tests
-uv run ctest --preset dev           # 201 C++ tests, 548,217 assertions
+uv run ctest --preset dev           # 204 C++ tests, 548,368 assertions
 ```
 
 Three CI jobs run on every push: lint and format, the full build with both test suites, and

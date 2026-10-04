@@ -26,6 +26,7 @@ ExerciseStyle: Any
 GEOMETRIC: Any
 Greeks: Any
 MarketParams: Any
+MixedFifthDerivatives: Any
 MixedFourthDerivatives: Any
 MixedThirdDerivatives: Any
 OptionType: Any
@@ -37,6 +38,7 @@ VolCrossDerivatives: Any
 barrier_continuity_constant: Any
 black_scholes: Any
 black_scholes_greeks: Any
+black_scholes_mixed_fifth_derivatives: Any
 black_scholes_mixed_fourth_derivatives: Any
 black_scholes_mixed_third_derivatives: Any
 black_scholes_spot_derivatives: Any

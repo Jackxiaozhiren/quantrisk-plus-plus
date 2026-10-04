@@ -304,8 +304,8 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 460 pytest tests with
-    the `oracles` extra installed, and the same tree collects 391 tests without it — the CI lane
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 465 pytest tests with
+    the `oracles` extra installed, and the same tree collects 396 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -621,8 +621,8 @@ never removed just because a later phase shipped.
     seventeen declarations across four headers -- the statistics primitives, the normal
     PDF/CDF/quantile, the version pair, the three covariance estimators and `stats::quantile_linear`.
     Phase 19 marked every one of them, because a numerical core that returns a value means it, so the
-    attribute and the population are now the same set: the surface holds 109 namespace-scope
-    declarations and 101 distinct names, and 25 of them are disclaimed rather than bound, each
+    attribute and the population are now the same set: the surface holds 110 namespace-scope
+    declarations and 102 distinct names, and 25 of them are disclaimed rather than bound, each
     disclaimer's `via X` route checked against what the bindings really declare and each orphan stale
     exemption caught. Three things stay outside the claim, listed because no guard reaches them: a
     *class member* is not a namespace-scope entry point and is not covered -- the parser blanks type
@@ -654,3 +654,43 @@ never removed just because a later phase shipped.
     that any of it is a *bound*: no independent implementation prices a fourth-order column, and the
     transfer claim is self-consistency of one truncation across five books, not agreement with another
     library.
+
+82. **The fifth-order partials are shipped and checked, and nothing about the crossing map at order
+    five is.** `pricing.black_scholes_mixed_fifth_derivatives` returns the six mixed partials of
+    total order five, the terms the order-four truncation of `docs/analysis/fourth_order_crossing_map.md`
+    leaves behind. Three things are true of them and one is deliberately not. What is true: (a) the
+    closed forms are *derived*, not typed -- each is `P * S^(1-n_spot) * T^(n_vol/2) * R(d1, v) / v^4`
+    for a numerator polynomial obtained by symbolic differentiation of the price function and then
+    re-obtained by Richardson refinement at independent precisions, so the six `R` are what the
+    algebra produced rather than what a transcription of it looked like, and that derivation is a
+    command rather than a sentence: `scripts/derive_fifth_order_partials.py` parses the monomial sums
+    out of `cpp/src/pricing/black_scholes.cpp`, forms the quotient of the symbolic derivative by the
+    prefactor the header claims at 60 markets spread over the `(d1, v)` plane, and reports a worst
+    relative disagreement of 8.7e-58 at 60 digits. No coefficient is adjusted anywhere in that check,
+    so an agreement sitting at the working-precision floor is the two sides being one analytic
+    function rather than a curve through points; its second
+    part recomputes the fields by nested numerical differentiation at 60 digits and meets the
+    extension's float64 output at 4.6e-15, the noise floor of the format; (b) the checks reach them
+    through quantities the core shipped *before* this phase -- ten five-point slope routes over the
+    nine-rung ladder in `tests/cpp/test_black_scholes.cpp`, where the worst of the ninety comparisons
+    sits at 1.9e-3 of its own band, and the same ten routes over five markets in
+    `tests/python/test_fifth_order_partials.py`, where the loosest is 1.5e-4 relative against a
+    `1e-3` band -- plus exact call/put parity and the degenerate limit; and (c) one route touches no
+    mixed struct at all: the multinomial contraction of the six partials against five *nested*
+    differences of `black_scholes` itself, which QuantLib prices (row 1). What is not: no independent
+    library publishes a fifth partial, so five of the six fields are anchored by stencils of this
+    project's own fourth-order family, and a slip that lives in that family would be inherited by the
+    route meant to catch it -- only the contraction route reaches the numerators through the price
+    alone, and it is round-off limited rather than exact, at 6.7 relative on the finest rung tried and
+    4.8e-3 on the widest. The derivation script's second part does reach the numerators through the
+    price, at high precision, but only at four markets and through the compiled extension, so it is a
+    spot check on the shipped pipeline rather than a ladder over the surface. The two `min`-over-rungs assertions are therefore weaker than a fixed-step
+    check would be, and the rungs that fall outside the band (the spot routes reach 1.2e-3 to 9.2e-2
+    at a 1 % step) are reported here instead of asserted away. Finally, and most consequentially:
+    shipping the order-five terms buys no statement about the stress map. The experiment that would
+    use them -- whether the crossing radius widens again at order five, on whose answer §4 of
+    `docs/analysis/second_book_crossing_map.md` says a sixth book should be checked against the
+    published distances rather than retold -- was designed and then deliberately not run this phase,
+    because a core capability and the measurement that consumes it are separate claims. The row is
+    `validated (L1 only)` and the crossing question stays open in the same sense row 19 left it: this
+    phase added the arithmetic, not the answer.

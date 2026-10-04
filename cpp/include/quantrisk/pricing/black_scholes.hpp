@@ -152,6 +152,44 @@ struct MixedFourthDerivatives {
 [[nodiscard]] MixedFourthDerivatives
 black_scholes_mixed_fourth_derivatives(const EuropeanOption &option, const MarketParams &market);
 
+/// The six mixed partials of total order five, the terms the fourth-order truncation leaves behind.
+/// With `MixedFourthDerivatives` they are the six coefficients of the fifth directional derivative
+///     d5V/du5 = V_SSSSS h^5 + 5 V_SSSSsigma h^4 k + 10 V_SSSsigmasigma h^3 k^2
+///               + 10 V_SSsigmasigmasigma h^2 k^3 + 5 V_Ssigmasigmasigmasigma h k^4
+///               + V_sigmasigmasigmasigmasigma k^5
+/// along the joint shock `(h, k)`, which is what decides whether the crossing radius of
+/// `docs/analysis/fourth_order_crossing_map.md` widens again or has stopped meaning anything.
+///
+/// The shape is the order-four one with one more `v`: every partial of total order five is
+///     V = P * S^(1 - n_spot) * T^(n_vol / 2) * R(d1, v) / v^4
+/// for a numerator polynomial `R`, with `v^4` the denominator in all six and neither `r` nor `K`
+/// surviving anywhere but inside `d1`. The numerators come from
+/// `docs/phase_reports/phase-20-fifth-order-partials.md` §2, derived symbolically from the price
+/// function and verified against nested five-point differences by Richardson refinement rather
+/// than by transcription;
+/// each field below is the derivative of a partial this file already publishes, which is what makes
+/// the Catch2 cross-checks checks rather than restatements.
+///
+/// Same regularity as the fourth-order struct: `S, K, sigma, T > 0`, and the `v^4` denominator
+/// means the degenerate case returns the limit rather than an overflow.
+struct MixedFifthDerivatives {
+    /// V_SSSSS: d(V_SSSS)/dS, the fifth pure-spot partial.
+    Real spot_spot_spot_spot_spot = 0.0;
+    /// V_SSSSsigma: d(V_SSSS)/dsigma, and d(V_SSSsigma)/dS.
+    Real spot_spot_spot_spot_sigma = 0.0;
+    /// V_SSSsigmasigma: d(V_SSSsigma)/dsigma, and d(V_SSsigmasigma)/dS.
+    Real spot_spot_spot_sigma_sigma = 0.0;
+    /// V_SSsigmasigmasigma: d(V_SSsigmasigma)/dsigma, and d(V_Ssigmasigmasigma)/dS.
+    Real spot_spot_sigma_sigma_sigma = 0.0;
+    /// V_Ssigmasigmasigmasigma: d(V_Ssigmasigmasigma)/dsigma, and d(V_sigmasigmasigma)/dS.
+    Real spot_sigma_sigma_sigma_sigma = 0.0;
+    /// V_sigmasigmasigmasigmasigma: d(V_sigmasigmasigmasigma)/dsigma.
+    Real sigma_sigma_sigma_sigma_sigma = 0.0;
+};
+
+[[nodiscard]] MixedFifthDerivatives
+black_scholes_mixed_fifth_derivatives(const EuropeanOption &option, const MarketParams &market);
+
 /// Put-call parity residual `C - P - (S e^{-qT} - K e^{-rT})`, which must be
 /// zero for any correct implementation of the same model.
 [[nodiscard]] Real put_call_parity_residual(const MarketParams &market, Real strike);

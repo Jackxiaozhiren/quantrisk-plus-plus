@@ -1011,6 +1011,136 @@ TEST_CASE("the four mixed fourth partials are finite differences taken at least 
     }
 }
 
+TEST_CASE("the six mixed fifth partials are slopes of partials the core already ships") {
+    /// Ten routes over nine rungs: two per partial where both axes have a published parent, one
+    /// for each of the two pure ends, and every route a five-point central slope of a quantity this
+    /// file exported *before* this phase. No route reuses the formula under test, so a dropped
+    /// power of `S`, `T` or `v` moves the number by percent of itself -- three or more orders above
+    /// the band -- while the step-dependent noise sits at 1e-11 of it. Measured worst over the
+    /// ninety comparisons: 1.9e-3 of its own band, on V_SSSsigmasigma taken along the spot axis,
+    /// so every route sits more than 500x inside the tolerance it is held to.
+    const std::vector<MixedRung> &ladder = mixed_ladder();
+
+    for (const MixedRung &rung : ladder) {
+        const EuropeanOption option{rung.type, rung.strike};
+        const auto fifth = quantrisk::black_scholes_mixed_fifth_derivatives(option, rung.market);
+        const Real hs = 1.0e-5 * rung.market.spot;
+        const Real hv = 1.0e-4 * rung.market.volatility;
+        const Real spot = rung.market.spot;
+        const Real vol = rung.market.volatility;
+        CAPTURE(rung.strike, spot, vol, rung.market.maturity);
+
+        /// Published parents, each read at a bumped market so the route is a slope of a number the
+        /// core shipped one phase earlier.
+        const auto bumped = [&](const Real s, const Real v) {
+            MarketParams moved = rung.market;
+            moved.spot = s;
+            moved.volatility = v;
+            return moved;
+        };
+        const auto speed_at = [&](const Real s, const Real v) {
+            return quantrisk::black_scholes_spot_derivatives(option, bumped(s, v)).fourth;
+        };
+        const auto s31_at = [&](const Real s, const Real v) {
+            return quantrisk::black_scholes_mixed_fourth_derivatives(option, bumped(s, v))
+                .spot_spot_spot_sigma;
+        };
+        const auto s22_at = [&](const Real s, const Real v) {
+            return quantrisk::black_scholes_mixed_fourth_derivatives(option, bumped(s, v))
+                .spot_spot_sigma_sigma;
+        };
+        const auto s13_at = [&](const Real s, const Real v) {
+            return quantrisk::black_scholes_mixed_fourth_derivatives(option, bumped(s, v))
+                .spot_sigma_sigma_sigma;
+        };
+        const auto s04_at = [&](const Real s, const Real v) {
+            return quantrisk::black_scholes_mixed_fourth_derivatives(option, bumped(s, v))
+                .sigma_sigma_sigma_sigma;
+        };
+
+        const Real s50 = central_slope([&](const Real s) { return speed_at(s, vol); }, spot, hs);
+        const Real s41_v = central_slope([&](const Real v) { return speed_at(spot, v); }, vol, hv);
+        const Real s41_s = central_slope([&](const Real s) { return s31_at(s, vol); }, spot, hs);
+        const Real s32_v = central_slope([&](const Real v) { return s31_at(spot, v); }, vol, hv);
+        const Real s32_s = central_slope([&](const Real s) { return s22_at(s, vol); }, spot, hs);
+        const Real s23_v = central_slope([&](const Real v) { return s22_at(spot, v); }, vol, hv);
+        const Real s23_s = central_slope([&](const Real s) { return s13_at(s, vol); }, spot, hs);
+        const Real s14_v = central_slope([&](const Real v) { return s13_at(spot, v); }, vol, hv);
+        const Real s14_s = central_slope([&](const Real s) { return s04_at(s, vol); }, spot, hs);
+        const Real s05 = central_slope([&](const Real v) { return s04_at(spot, v); }, vol, hv);
+
+        INFO("V_SSSSS " << fifth.spot_spot_spot_spot_spot << " vs d(V_SSSS)/dS " << s50);
+        INFO("V_SSSSsigma " << fifth.spot_spot_spot_spot_sigma << " vs d(V_SSSS)/dsigma " << s41_v
+                            << ", d(V_SSSsigma)/dS " << s41_s);
+        INFO("V_SSSsigmasigma " << fifth.spot_spot_spot_sigma_sigma << " vs d(V_SSSsigma)/dsigma "
+                                << s32_v << ", d(V_SSsigmasigma)/dS " << s32_s);
+        INFO("V_SSsigmasigmasigma " << fifth.spot_spot_sigma_sigma_sigma
+                                    << " vs d(V_SSsigmasigma)/dsigma " << s23_v
+                                    << ", d(V_Ssigmasigmasigma)/dS " << s23_s);
+        INFO("V_Ssigmasigmasigmasigma " << fifth.spot_sigma_sigma_sigma_sigma
+                                        << " vs d(V_Ssigmasigmasigma)/dsigma " << s14_v
+                                        << ", d(V_sigmasigmasigmasigma)/dS " << s14_s);
+        INFO("V_sigmasigmasigmasigmasigma " << fifth.sigma_sigma_sigma_sigma_sigma
+                                            << " vs d(V_sigmasigmasigmasigma)/dsigma " << s05);
+
+        CHECK(std::abs(fifth.spot_spot_spot_spot_spot - s50) <= slope_tolerance(s50));
+        CHECK(std::abs(fifth.spot_spot_spot_spot_sigma - s41_v) <= slope_tolerance(s41_v));
+        CHECK(std::abs(fifth.spot_spot_spot_spot_sigma - s41_s) <= slope_tolerance(s41_s));
+        CHECK(std::abs(fifth.spot_spot_spot_sigma_sigma - s32_v) <= slope_tolerance(s32_v));
+        CHECK(std::abs(fifth.spot_spot_spot_sigma_sigma - s32_s) <= slope_tolerance(s32_s));
+        CHECK(std::abs(fifth.spot_spot_sigma_sigma_sigma - s23_v) <= slope_tolerance(s23_v));
+        CHECK(std::abs(fifth.spot_spot_sigma_sigma_sigma - s23_s) <= slope_tolerance(s23_s));
+        CHECK(std::abs(fifth.spot_sigma_sigma_sigma_sigma - s14_v) <= slope_tolerance(s14_v));
+        CHECK(std::abs(fifth.spot_sigma_sigma_sigma_sigma - s14_s) <= slope_tolerance(s14_s));
+        CHECK(std::abs(fifth.sigma_sigma_sigma_sigma_sigma - s05) <= slope_tolerance(s05));
+    }
+}
+
+TEST_CASE("the fifth partials are the same for a call and a put, exactly") {
+    /// Put-call parity is `C - P = S e^{-qT} - K e^{-rT}`, linear in the spot and constant in the
+    /// volatility, so every partial of total order five annihilates the difference: the two sides
+    /// are equal as bits, not within a tolerance. This is the same exactness the third- and
+    /// fourth-order structs are held to, and it catches a sign or a power that a slope route could
+    /// hide.
+    const std::vector<MixedRung> &ladder = mixed_ladder();
+    for (const MixedRung &rung : ladder) {
+        const auto call = quantrisk::black_scholes_mixed_fifth_derivatives(
+            EuropeanOption{OptionType::Call, rung.strike}, rung.market);
+        const auto put = quantrisk::black_scholes_mixed_fifth_derivatives(
+            EuropeanOption{OptionType::Put, rung.strike}, rung.market);
+        CAPTURE(rung.strike, rung.market.spot, rung.market.volatility);
+        CHECK(call.spot_spot_spot_spot_spot == put.spot_spot_spot_spot_spot);
+        CHECK(call.spot_spot_spot_spot_sigma == put.spot_spot_spot_spot_sigma);
+        CHECK(call.spot_spot_spot_sigma_sigma == put.spot_spot_spot_sigma_sigma);
+        CHECK(call.spot_spot_sigma_sigma_sigma == put.spot_spot_sigma_sigma_sigma);
+        CHECK(call.spot_sigma_sigma_sigma_sigma == put.spot_sigma_sigma_sigma_sigma);
+        CHECK(call.sigma_sigma_sigma_sigma_sigma == put.sigma_sigma_sigma_sigma_sigma);
+    }
+}
+
+TEST_CASE("the fifth-order struct is finite and reports the degenerate limit") {
+    const std::vector<MarketParams> markets = {
+        MarketParams{
+            .spot = 100.0, .rate = 0.03, .dividend_yield = 0.0, .volatility = 0.0, .maturity = 0.5},
+        MarketParams{
+            .spot = 100.0, .rate = 0.03, .dividend_yield = 0.0, .volatility = 0.2, .maturity = 0.0},
+    };
+    const EuropeanOption option{OptionType::Call, 100.0};
+    for (const MarketParams &market : markets) {
+        REQUIRE_NOTHROW(quantrisk::black_scholes_mixed_fifth_derivatives(option, market));
+        const auto fifth = quantrisk::black_scholes_mixed_fifth_derivatives(option, market);
+        CHECK(std::isfinite(fifth.spot_spot_spot_spot_spot));
+        CHECK(std::isfinite(fifth.sigma_sigma_sigma_sigma_sigma));
+    }
+    CHECK_THROWS_AS(quantrisk::black_scholes_mixed_fifth_derivatives(
+                        EuropeanOption{OptionType::Call, -1.0}, MarketParams{.spot = 100.0,
+                                                                             .rate = 0.03,
+                                                                             .dividend_yield = 0.0,
+                                                                             .volatility = 0.2,
+                                                                             .maturity = 0.5}),
+                    quantrisk::ValidationError);
+}
+
 TEST_CASE("differentiating the published homogeneity relations pins two fourth partials exactly") {
     /// `vega = gamma S^2 sigma T` is an identity of the model, and the two routes out of it
     /// that the third-order case uses are

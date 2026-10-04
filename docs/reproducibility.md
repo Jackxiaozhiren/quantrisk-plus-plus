@@ -69,9 +69,9 @@ that strips too eagerly would pass the re-run test and silently rubber-stamp a c
 git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
 uv sync --extra oracles          # interpreter 3.12, deps, and the validation oracles
 uv pip install -e .              # builds the C++ core and the pybind11 module
-uv run pytest -q                 # 460 tests here; see the note below — the count is not one number
+uv run pytest -q                 # 465 tests here; see the note below — the count is not one number
 uv run cmake --preset dev && uv run cmake --build --preset dev
-uv run ctest --preset dev        # 201 C++ tests, 548,217 assertions
+uv run ctest --preset dev        # 204 C++ tests, 548,368 assertions
 uv run python scripts/run_benchmark_suite.py --require-all   # all 17 members
 uv run quantrisk validate        # 7 identity checks against the build you just made
 ```
@@ -107,9 +107,9 @@ in that state would be claiming a measurement it did not make. The flag turns th
 a failure.
 
 **The pytest count depends on which extras you installed, and a document that prints one number
-without saying which is wrong.** The sequence above yields **460 pytest tests with the `oracles`
+without saying which is wrong.** The sequence above yields **465 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — no `oracles` extra — and the same
-tree collects 391 tests without it, the four oracle-gated modules dropping out at import. At the
+tree collects 396 tests without it, the four oracle-gated modules dropping out at import. At the
 previous revision that lane reported `319 passed, 4 skipped`: 323 outcomes from 319 collected
 items, because the four skips are module-level records reported *in addition to* the items that
 ran.
@@ -123,7 +123,7 @@ Both numbers are guarded now.
 subprocess, asks whether the optional oracle packages are importable, and checks the figure that
 belongs to *that* environment — so the runner validates its own 284 instead of being asked to agree
 with a laptop. The first version of that guard asserted only the local number and failed on CI,
-which is the same class of error as the one it was written to prevent. The C++ side has no such split: 201 tests under
+which is the same class of error as the one it was written to prevent. The C++ side has no such split: 204 tests under
 CTest either way, because the C++ suite has no optional dependencies.
 
 ## What is *not* reproducible

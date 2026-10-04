@@ -197,6 +197,20 @@ PYBIND11_MODULE(_quantrisk, module) {
         .def_readonly("sigma_sigma_sigma_sigma",
                       &quantrisk::MixedFourthDerivatives::sigma_sigma_sigma_sigma);
 
+    py::class_<quantrisk::MixedFifthDerivatives>(pricing, "MixedFifthDerivatives")
+        .def_readonly("spot_spot_spot_spot_spot",
+                      &quantrisk::MixedFifthDerivatives::spot_spot_spot_spot_spot)
+        .def_readonly("spot_spot_spot_spot_sigma",
+                      &quantrisk::MixedFifthDerivatives::spot_spot_spot_spot_sigma)
+        .def_readonly("spot_spot_spot_sigma_sigma",
+                      &quantrisk::MixedFifthDerivatives::spot_spot_spot_sigma_sigma)
+        .def_readonly("spot_spot_sigma_sigma_sigma",
+                      &quantrisk::MixedFifthDerivatives::spot_spot_sigma_sigma_sigma)
+        .def_readonly("spot_sigma_sigma_sigma_sigma",
+                      &quantrisk::MixedFifthDerivatives::spot_sigma_sigma_sigma_sigma)
+        .def_readonly("sigma_sigma_sigma_sigma_sigma",
+                      &quantrisk::MixedFifthDerivatives::sigma_sigma_sigma_sigma_sigma);
+
     py::class_<quantrisk::BumpPolicy>(pricing, "BumpPolicy")
         .def(py::init<>())
         .def_readwrite("spot_relative", &quantrisk::BumpPolicy::spot_relative)
@@ -229,6 +243,9 @@ PYBIND11_MODULE(_quantrisk, module) {
                 py::arg("market"));
     pricing.def("black_scholes_mixed_fourth_derivatives",
                 &quantrisk::black_scholes_mixed_fourth_derivatives, py::arg("option"),
+                py::arg("market"));
+    pricing.def("black_scholes_mixed_fifth_derivatives",
+                &quantrisk::black_scholes_mixed_fifth_derivatives, py::arg("option"),
                 py::arg("market"));
     pricing.def("put_call_parity_residual", &quantrisk::put_call_parity_residual, py::arg("market"),
                 py::arg("strike"));

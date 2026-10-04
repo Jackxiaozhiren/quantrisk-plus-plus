@@ -831,3 +831,47 @@ already formatted; `uv run mypy python/quantrisk` -- no issues in 23 source file
 --dry-run -Werror` on the 29 headers -- exit 0; the falsification sweep on the committed tree
 (`5bb7e12`) -- `29/29 planted defects were rejected by their guard.` No artifact was regenerated, so the
 manifest frozen at `2e8142a` still verifies: `85 OK / 0 CHANGED / 0 MISSING / 0 unlisted`.
+
+---
+
+## Addendum — Phase 20, a count three documents repeated and a check that could not fail (2026-10-04)
+
+**49. A guarded fact is not a guarded document.** `test_documents_that_count_the_cpp_tests_agree_with_the_build`
+owns the C++ totals by matching one pattern per document — `# (\d+) C\+\+ tests` in the README and the
+reproducibility note, `(\d+) C\+\+ tests under CTest` in the interview file. When this phase's three new
+`TEST_CASE`s took CTest from 201 to 204, the guard named the three, went red, and the three were fixed. The
+same two documents carried four more restatements of the same fact that no pattern reaches: `Today that is
+201 C++ tests (548,217 assertions in 200 cases)`, a command line annotated `# 201 C++ tests`, a citation table
+reading `201 / 423 now` against a Python count that had moved twice since, and — in the same table row — `docs/limitations.md`
+`(66 entries)` while the register held 81 at the phase's start and 82 at its end. Pattern-keyed coverage counts
+phrases, not claims, so a document can be simultaneously guarded and wrong about the number it is guarded on; the
+stale `66 entries` had outlived two releases without any gate noticing. All seven spots are synced now and the
+plant `readme-overcounts-the-cpp-suite` re-keys to the new figure. What is *not* fixed is the assertion and
+Catch2-case totals (`548,368` in `203` cases): CTest lists tests, not assertions, so the only cheap owner is a
+count of `TEST_CASE` in `tests/cpp/*.cpp` for the case total, and the assertion total has no derived source at all
+and stays prose. Phase 19 debt item 3 lists that residue and this phase did not close it.
+
+**50. An assertion that returns True whatever the expression is.** The derivation script this phase added
+(`scripts/derive_fifth_order_partials.py`) gated the parsed source numerator with
+`expression.is_polynomial(W, V)`. `sp.symbols("w v", real=True)` and the `Symbol("w")` that `sp.sympify`
+produces from a bare name are *different sympy objects*, so every parsed `w` was treated as a coefficient and
+the check reported True on any expression, including one carrying a stray `sigma` — the counterexample is in
+the phase report. Free-symbol containment (`expression.free_symbols <= {W, V}`) is what gave the assertion a
+population, and the degree caps that came with it replaced a cap I had written from reasoning rather than
+measurement: `total_degree <= 5` is false on this family, whose pure-volatility numerator contains `d1^8`, and
+it fired on `q23` before anything shipped. Same class as finding 48 — a check whose stated population is
+smaller than the fact it names — and worth the record precisely because the defective check was written by the
+phase whose subject was making derivations verifiable.
+
+Verification, in the tools' own words: `uv run ctest --preset dev` -- 100 % tests passed out of 204, and
+`./build/dev/quantrisk_tests --verbosity quiet` -- `All tests passed (548368 assertions in 203 test cases)`;
+`uv run pytest tests/python -q` -- 465 passed; `uv run quantrisk validate` -- 7/7; `uv run ruff check .` -- all
+checks passed; `uv run ruff format --check .` -- 142 files already formatted; `uv run mypy python/quantrisk` --
+no issues in 23 source files; `uv run clang-format --dry-run -Werror` on the eight touched C++ files -- exit 0;
+`uv run --with sympy python scripts/derive_fifth_order_partials.py` -- exit 0, part A's six worst relative
+disagreements between `4.7e-59` and `8.7e-58` over 60 markets and part B's worst `4.619e-15`, and its own
+negative control -- planting a one-unit slip in `q32` produced `q32: worst relative disagreement 300.0` and
+`FAILED: ['q32']`, with the file restored byte-identically (sha256
+`92e8bb61c2527c99768b9d2eef67a0f02865b0f3bf8d09f074d942e6f4bdaf8e` both sides) and exit 0 again. No artifact was
+regenerated, so the manifest frozen at `2e8142a` still verifies: `85 OK / 0 CHANGED / 0 VOLATILE / 0 MISSING /
+0 unlisted`.

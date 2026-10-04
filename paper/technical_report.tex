@@ -145,15 +145,15 @@ the refusal Phase 12 recorded into a measured result, and Phase 14 the verificat
 \ref{sec:reproducibility}, which make a figure, a compiled name or a declared path in the prose impossible
 to state without an owner. Seven release tags exist, \code{v1.0.0},
 \code{v1.1.0}, \code{v1.2.0}, \code{v1.3.0}, \code{v1.4.0}, \code{v1.5.0} and \code{v1.6.0}, each with
-the report, the evidence manifest and the suite results attached. The suite is 201 CTest entries and
-548{,}217 assertions in 200 Catch2 cases on the C++ side, and 460 pytest tests with the validation
-oracles installed, 391 collected without them (\src{docs/limitations.md}, item 63, explains why one
+the report, the evidence manifest and the suite results attached. The suite is 204 CTest entries and
+548{,}368 assertions in 203 Catch2 cases on the C++ side, and 465 pytest tests with the validation
+oracles installed, 396 collected without them (\src{docs/limitations.md}, item 63, explains why one
 command gives two numbers); 17 benchmark-suite members execute under
 \code{--require-all}, and the frozen manifest hashes 85 artifacts with nothing changed, missing or
 unlisted (\src{evidence/manifest.json}). The \emph{end-of-Phase-9} baseline, for contrast, was 190
 CTest entries and 310 pytest tests with no release tag and no suite at all
 (\src{docs/phase_reports/phase-09-research-api.md}). The limitations
-register contains 81 numbered entries (\src{docs/limitations.md}).
+register contains 82 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -1518,6 +1518,21 @@ the smallest ratio tied for the widest gain, so no mechanism replaces the one th
 \src{docs/limitations.md} records the edges, including the two ways the radius definition was wrong
 before the measurement was right.
 
+\paragraph{The next order exists, and no answer comes with it.} The residual the quartic leaves is a
+fifth-order one, so \src{cpp/include/quantrisk/pricing/black\_scholes.hpp} now carries the six mixed
+partials of total order five in the same shape with one further power of $v$,
+$V = P \cdot S^{1-n_{\text{spot}}} \cdot T^{n_{\sigma}/2} \cdot R(d_1, v) / v^4$. The numerators are
+not typed: \src{scripts/derive\_fifth\_order\_partials.py} parses them out of the source, forms the
+quotient of the symbolic derivative of the price by the prefactor the header claims, and meets it at 60
+markets spread over the $(d_1, v)$ plane to $8.7 \times 10^{-58}$ relative worst at 60 working digits.
+Nothing there is fitted, so agreement at the precision floor means the two sides are one function rather
+than a curve through points. The degree in $d_1$ is $8 - n_{\text{spot}}$, which is why a basis truncated
+at total degree five cannot represent this family: the first attempt at that check reported residual
+noise where it should have reported a bad model. What is \emph{not} claimed is any consequence for the
+crossing map. The experiment that would use these terms was specified and then deliberately not run, so
+order five is arithmetic the core can perform and no radius statement, and item 82 of
+\src{docs/limitations.md} keeps the two apart.
+
 % ===========================================================================
 \section{Numerical Validation}
 \label{sec:validation}
@@ -1834,7 +1849,7 @@ stress artifacts are byte-identical between executions
 \label{sec:limitations}
 % ===========================================================================
 
-\src{docs/limitations.md} holds 81 numbered entries, grouped by the phase that introduced them,
+\src{docs/limitations.md} holds 82 numbered entries, grouped by the phase that introduced them,
 with the rule that entries are never removed because a later phase shipped. This section
 summarises them faithfully; the file remains the authority.
 

@@ -156,7 +156,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 81 numbered entries",
+        anchor="carries 82 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -168,8 +168,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-overcounts-the-cpp-suite",
         kind="prose",
         path="README.md",
-        anchor="# 201 C++ tests",
-        replacement="# 202 C++ tests",
+        anchor="# 204 C++ tests",
+        replacement="# 205 C++ tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_cpp_tests_agree_with_the_build"
@@ -221,8 +221,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 391 Python tests",
-        replacement="# 392 Python tests",
+        anchor="# 396 Python tests",
+        replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
@@ -269,8 +269,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-miscounts-the-matrix-rows",
         kind="prose",
         path="README.md",
-        anchor="is the full table — twenty-three rows over",
-        replacement="is the full table — twenty-four rows over",
+        anchor="is the full table — twenty-four rows over",
+        replacement="is the full table — twenty-five rows over",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_validation_matrix_rows_agree_with_the_table"
@@ -380,8 +380,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 460 pytest tests with the validation",
-        replacement="and 457 pytest tests with the validation",
+        anchor="and 465 pytest tests with the validation",
+        replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
@@ -416,13 +416,22 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="limitations-count-a-stale-core-surface",
         kind="prose",
         path="docs/limitations.md",
-        anchor="the surface holds 109 namespace-scope",
-        replacement="the surface holds 108 namespace-scope",
+        anchor="the surface holds 110 namespace-scope",
+        replacement="the surface holds 107 namespace-scope",
         guard=(
             "tests/python/test_extension_surface_parity.py::"
             "test_the_documents_that_count_the_core_surface_count_it_correctly"
         ),
         claim="the size of the core surface belongs to the scan, not to the sentence quoting it",
+    ),
+    Mutation(
+        identifier="fifth-order-numerator-drops-a-cube",
+        kind="core",
+        path="cpp/src/pricing/black_scholes.cpp",
+        anchor="+ 9.0 * first * first * first -",
+        replacement="+ 8.0 * first * first * first -",
+        guard="the six mixed fifth partials are slopes of partials the core already ships",
+        claim="the order-fifth numerators are the polynomials the difference routes agree with",
     ),
 )
 

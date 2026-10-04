@@ -332,6 +332,89 @@ MixedFourthDerivatives black_scholes_mixed_fourth_derivatives(const EuropeanOpti
     return mixed;
 }
 
+MixedFifthDerivatives black_scholes_mixed_fifth_derivatives(const EuropeanOption &option,
+                                                            const MarketParams &market) {
+    market.validate();
+    option.validate();
+
+    MixedFifthDerivatives mixed;
+    if (is_degenerate(market)) {
+        /// The same limit one order further in: with no volatility the value is piecewise linear in
+        /// the forward and flat in the volatility, so there is no fifth-order cross term to report.
+        /// Every line below divides by `v^4`, which at `sigma == 0` or `T == 0` would be an inf
+        /// rather than the limit.
+        return mixed;
+    }
+
+    const Terms terms = terms_of(market, option.strike);
+    const Real first = d1(option, market);
+    const Real root_t = std::sqrt(market.maturity);
+    const Real sigma = market.volatility;
+    const Real v = sigma * root_t;
+    const Real spot = market.spot;
+
+    /// `P = e^{-qT} phi(d1)`, the prefactor the §2 shape puts in front of all six, and `v^4`, the
+    /// denominator all six share -- one more power of `v` than the fourth-order family, which is
+    /// what differentiating `P / (S v)` once more has to produce.
+    const Real prefactor = terms.growth_discount * normal_pdf(first);
+    const Real inv_v4 = 1.0 / (v * v * v * v);
+
+    /// Each numerator is the polynomial `R(d1, v)` of §2, written as an explicit sum of monomials
+    /// rather than Horner so that the emitted text is the polynomial the derivation produced, term
+    /// for term. The derivation and its verification are in
+    /// `docs/phase_reports/phase-20-fifth-order-partials.md` §2; the Catch2 cross-checks below are
+    /// the reason a slip here cannot survive, since each of these six is the derivative of a
+    /// partial this file already publishes.
+    const Real q50 = -first * first * first - 6.0 * first * first * v - 11.0 * first * v * v +
+                     3.0 * first - 6.0 * v * v * v + 6.0 * v;
+    const Real q41 = first * first * first * first + 2.0 * first * first * first * v -
+                     first * first * v * v - 6.0 * first * first - 2.0 * first * v * v * v -
+                     6.0 * first * v + v * v + 3.0;
+    const Real q32 = -first * first * first * first * first + first * first * first * first * v +
+                     first * first * first * v * v + 9.0 * first * first * first -
+                     first * first * v * v * v - 6.0 * first * first * v - 2.0 * first * v * v -
+                     12.0 * first + v * v * v + 3.0 * v;
+    const Real q23 = first * first * first * first * first * first -
+                     3.0 * first * first * first * first * first * v +
+                     3.0 * first * first * first * first * v * v -
+                     12.0 * first * first * first * first - first * first * first * v * v * v +
+                     24.0 * first * first * first * v - 15.0 * first * first * v * v +
+                     27.0 * first * first + 3.0 * first * v * v * v - 27.0 * first * v +
+                     6.0 * v * v - 6.0;
+    const Real q14 = -first * first * first * first * first * first * first +
+                     4.0 * first * first * first * first * first * first * v -
+                     6.0 * first * first * first * first * first * v * v +
+                     15.0 * first * first * first * first * first +
+                     4.0 * first * first * first * first * v * v * v -
+                     42.0 * first * first * first * first * v -
+                     first * first * first * v * v * v * v + 42.0 * first * first * first * v * v -
+                     48.0 * first * first * first - 18.0 * first * first * v * v * v +
+                     78.0 * first * first * v + 3.0 * first * v * v * v * v - 39.0 * first * v * v +
+                     24.0 * first + 6.0 * v * v * v - 12.0 * v;
+    const Real q05 =
+        first * first * first * first * first * first * first * first -
+        4.0 * first * first * first * first * first * first * first * v +
+        6.0 * first * first * first * first * first * first * v * v -
+        18.0 * first * first * first * first * first * first -
+        4.0 * first * first * first * first * first * v * v * v +
+        54.0 * first * first * first * first * first * v +
+        first * first * first * first * v * v * v * v -
+        60.0 * first * first * first * first * v * v + 75.0 * first * first * first * first +
+        30.0 * first * first * first * v * v * v - 150.0 * first * first * first * v -
+        6.0 * first * first * v * v * v * v + 105.0 * first * first * v * v - 60.0 * first * first -
+        30.0 * first * v * v * v + 60.0 * first * v + 3.0 * v * v * v * v - 15.0 * v * v;
+
+    const Real t2 = market.maturity * market.maturity;
+    mixed.spot_spot_spot_spot_spot = prefactor * q50 * inv_v4 / (spot * spot * spot * spot);
+    mixed.spot_spot_spot_spot_sigma = prefactor * q41 * root_t * inv_v4 / (spot * spot * spot);
+    mixed.spot_spot_spot_sigma_sigma = prefactor * q32 * market.maturity * inv_v4 / (spot * spot);
+    mixed.spot_spot_sigma_sigma_sigma =
+        prefactor * q23 * (market.maturity * root_t) * inv_v4 / spot;
+    mixed.spot_sigma_sigma_sigma_sigma = prefactor * q14 * t2 * inv_v4;
+    mixed.sigma_sigma_sigma_sigma_sigma = prefactor * spot * q05 * (t2 * root_t) * inv_v4;
+    return mixed;
+}
+
 Real put_call_parity_residual(const MarketParams &market, const Real strike) {
     const Terms terms = terms_of(market, strike);
     return black_scholes_call(market, strike) - black_scholes_put(market, strike) -
