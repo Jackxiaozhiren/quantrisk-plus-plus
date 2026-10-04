@@ -249,3 +249,14 @@ The falsification sweep refuses a dirty target, so its verdict is a claim about 
 about a working tree: it runs on the commit this report ships in, and the paragraph recording it is
 appended in the commit after that — the ordering `CONTRIBUTING.md` §4 and Phases 17, 18 and 19 all
 describe.
+
+The sweep ran on `631d7c5`, the commit that carries the fifth-order core, its tests and the re-keyed
+anchors, with `git status` empty before and after it. Its own line: `30/30 planted defects were rejected
+by their guard.` The plant this phase added fired --- `fifth-order-numerator-drops-a-cube` removes a
+`d1^3` term from `q32`, the harness rebuilds `quantrisk_tests`, and the new `TEST_CASE` names it --- and
+so did the one Phase 18 left behind for the radius rule (`radius-reads-one-signed-column-at-a-time`),
+which is the check that a fifth-order experiment would still have to pass. Nine other plants key on
+figures this phase moved (the C++ totals, the limitation count, the matrix rows, the experiment table,
+the report counts) and their anchors were refreshed in the same commit that moved the figures, which is
+what makes `tests/python/test_mutation_suite.py` the thing that notices a stale anchor rather than a
+later reader.
