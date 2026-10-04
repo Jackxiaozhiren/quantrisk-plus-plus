@@ -132,4 +132,11 @@ falsification sweep runs on it after it exists — the harness refuses a dirty t
 recording its verdict, the CI run identifiers, the tag and the asset hashes are appended in the commit
 that follows, which is the only place they can honestly live.
 
-`[TBD: appended after the tag exists — sweep verdict, CI jobs, tag sha, assets and their hashes.]`
+The sweep ran on `e86c29f`, the commit that carries the version, the re-executed artifacts and the
+frozen manifest, with `git status` empty before and after it. Its own line:
+`34/34 planted defects were rejected by their guard.` The plant this phase widened fired ---
+`artifact-publishes-a-book-sum-the-core-does-not`, a digit flipped four places into a mantissa, which the
+`1e-12` slack of finding 54(a) leaves far outside tolerance --- and so did the two the previous phase
+retargeted.
+
+`[TBD: appended after the tag exists — CI jobs, tag sha, assets and their hashes.]`
