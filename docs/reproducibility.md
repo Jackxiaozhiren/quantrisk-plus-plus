@@ -109,7 +109,7 @@ a failure.
 **The pytest count depends on which extras you installed, and a document that prints one number
 without saying which is wrong.** The sequence above yields **481 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — no `oracles` extra — and the same
-tree collects 408 tests without it, the four oracle-gated modules dropping out at import. At the
+tree collects 412 tests without it, the four oracle-gated modules dropping out at import. At the
 previous revision that lane reported `319 passed, 4 skipped`: 323 outcomes from 319 collected
 items, because the four skips are module-level records reported *in addition to* the items that
 ran.

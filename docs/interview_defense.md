@@ -42,7 +42,7 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 204 C++ tests under CTest (548,368 assertions in 203 Catch2
-cases), 481 pytest tests with the `oracles` extra and the same tree collects 408 tests without
+cases), 481 pytest tests with the `oracles` extra and the same tree collects 412 tests without
 it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
 revision's figure on the runner rather than trusting arithmetic here. 18/18 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
@@ -405,7 +405,7 @@ existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
 variance reduction. Today that is 204 C++ tests (548,368 assertions in 203 cases) and 481
-Python tests with the validation oracles installed — 408 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
+Python tests with the validation oracles installed — 412 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -1027,7 +1027,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 ```bash
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 204 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 408 Python tests
+  .venv/bin/python -m pytest -q                                          # 412 Python tests
 uv run python scripts/run_mutation_suite.py                            # 38/38 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py

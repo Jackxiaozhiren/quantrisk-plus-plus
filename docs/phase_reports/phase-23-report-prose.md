@@ -101,7 +101,7 @@ restated from the note.
 uv run pytest tests/python -q                                481 passed in 129.10s (0:02:09)
 uv run ctest --preset dev                                    100% tests passed out of 204
 uv run ruff check .                                          All checks passed!
-uv run ruff format --check .                                 149 files already formatted
+uv run ruff format --check .                                 150 files already formatted
 uv run mypy python/quantrisk                                 Success: no issues found in 23 source files
 uv run python scripts/verify_evidence_manifest.py            Evidence is intact.
 uv run quantrisk validate                                    7/7 checks passed
@@ -121,9 +121,22 @@ test_a_command_line_that_counts_plants_counts_the_declared_ones 18/18 annotated,
 The fourth line was obtained by reading `docs/interview_defense.md` as committed at `8680d63` and applying
 the same annotation pattern the guard uses, against `len(MUTATIONS)` loaded from the harness.
 
-Two CI-side items are open at the time of writing and are recorded rather than smoothed over: the
-offline lane's collected count (see §4.3), and this commit's own CI verdict, which a record commit
-cannot contain (§9).
+**The offline count went red on the runner, as §4.3 predicted it would.** `88a4c80`'s CI run
+`37258779954` reports `Configure, build, C++ tests, Python tests: failure`, its own line
+`1 failed, 410 passed, 5 skipped in 154.08s`, and the guard's words:
+
+```
+E  AssertionError: docs/interview_defense.md says 408 for this environment; pytest collects 412.
+   oracles present: False
+```
+
+So the offline reading for this revision is 412 collected, measured by the lane that has no oracles to
+collapse, and the living documents now say 412 (`docs/limitations.md` #63, `docs/reproducibility.md`,
+`docs/interview_defense.md` in three of its phrasings, `paper/technical_report.tex`, and the plant anchor
+over the command comment). `Format and static checks` and `Benchmark suite against live oracles` were
+`success` on that same head. The number was not derived here — #63 forbids deriving one reading from the
+other — and the red run is the evidence that deriving it would have been wrong, because a local
+subtraction assumes a collapse constant this revision does not have.
 
 ## 6. Numerical validation
 

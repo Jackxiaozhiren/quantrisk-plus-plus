@@ -1021,6 +1021,14 @@ harness grew 34 → 38 declared plants, and two anchors that the count sync disa
 `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` before any of this was
 committed -- finding 52's failure mode, firing as designed.
 
+(d) **The same shape repeated inside the phase that fixed it.** Four guards added four tests, the
+with-oracles count was synced 477 → 481 on the laptop, and the offline reading in
+`docs/limitations.md` #63, `docs/reproducibility.md`, `docs/interview_defense.md` and the report still
+said 408 -- the runner, the only environment with no oracles to collapse, collected 412. Finding 54(b)
+was this fault at the previous release, so the lesson is not that one document drifted but that the
+offline count has no local owner at all; it is registered as Phase 23 §8 item 2 rather than patched in
+silence.
+
 **What the released asset cannot be told to do.** `v1.7.0`'s `technical_report.pdf` was built from the
 tag, so the sentences above are in it and cannot be removed without moving the tag, which would break
 the provenance the release records. `docs/release_notes_v1.7.0.md` carries a dated erratum naming both
