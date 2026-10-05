@@ -178,3 +178,15 @@ and its verdict line, this commit's CI run and the offline lane's collected coun
 commit that follows, which is the only place they can honestly live. `docs/limitations.md` #84, finding
 55 and the release note's erratum are in this commit because they describe no measurement that postdates
 it.
+
+**Verdicts, read after the commits they describe.** The sweep ran on `4fb43c2` -- the head that carries the
+offline correction -- with `git status` empty before and after it, and its own line is
+`38/38 planted defects were rejected by their guard.`; the four plants this phase declared
+(`report-counts-a-manifest-the-freeze-does-not-have`, `report-drops-an-experiment-from-its-own-account`,
+`report-quotes-a-stale-order-five-headline`, `docs-command-comment-counts-superseded-plants`) are among
+the 38. CI on that head is `success` for all three jobs (`Format and static checks`,
+`Configure, build, C++ tests, Python tests`, `Benchmark suite against live oracles`, run 37259933573), with
+the offline lane's own line `411 passed, 5 skipped` and the benchmark lane's `suite: 18/18 executed and
+passed, 0 aggregated from disk, 0 failed, 0 skipped, 319.8s total`. The head carrying this paragraph is a
+record commit and its own run is not in it; the same `gh api .../check-runs` command quoted in
+`docs/phase_reports/phase-22-v1.7.0.md` §9 reads it.

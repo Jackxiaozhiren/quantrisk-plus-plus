@@ -161,3 +161,23 @@ nothing in this file asserts a run it has not read.
 
 `RANGE_DOCUMENTS` gained `docs/release_notes_v1.7.0.md` in this commit, which is the guard that makes
 the note's `7.77×–8.70×` / `0.42×–0.51×` claim an owned one rather than a remembered number.
+
+**The heads after the tag, read from the API on 2026-10-05.** This is the paragraph §9's penultimate
+sentence promised and did not write -- a record that says a verdict appears next and then does not print
+it is the same defect class Phase 23 found in the report, caught here in this file. Each head's own
+check-run table, all three CI jobs, with SonarCloud `neutral` as on every prior head:
+
+| head | what it changed | run | verdict |
+| --- | --- | --- | --- |
+| `3193e6d` | the release's own facts: tag object, asset digests, publication time | 37185206784 | `success` — three jobs |
+| `dca2907` | `docs/project_scope.md` §9 and the interview state line brought from Phase 14 to Phase 22 | 37189251814 | `success` — three jobs |
+| `8680d63` | Phase 15's report reconciled to the nine mandated headings | 37256005548 | `success` — three jobs |
+| `88a4c80` | Phase 23: the report's prose corrected, four guards, finding 55, limitation #84 | 37258779954 | `failure` — `Configure, build, C++ tests, Python tests`; the other two `success` |
+| `4fb43c2` | the offline test count taken from that red lane's own message (408 → 412) | 37259933573 | `success` — three jobs, offline line `411 passed, 5 skipped` |
+
+`88a4c80`'s failure is the substance of finding 55(d) and Phase 23 §5: four added tests moved the
+with-oracles count and the offline reading in four documents did not move with it, and only the lane
+without the oracles could say so. The head this paragraph is committed under is the sixth head after the
+tag, and its own run cannot be recorded in the file that records it; read it with
+`gh api repos/Jackxiaozhiren/quantrisk-plus-plus/commits/$(git rev-parse HEAD)/check-runs`, which is the
+same command that produced every row above.
