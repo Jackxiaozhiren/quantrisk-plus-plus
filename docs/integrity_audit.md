@@ -969,3 +969,61 @@ checks passed; `uv run ruff format --check .` -- 148 files already formatted; `u
 python/quantrisk` -- no issues in 23 source files; `uv run clang-format --dry-run -Werror` on the four
 touched C++ files -- exit 0; `uv run python scripts/run_benchmark_suite.py --require-all` -- 18/18
 executed and passed, 158.7 s; `uv run latexmk -pdf` -- 44 pages, 1003118 bytes.
+
+## Addendum — Phase 23, the report that contradicted itself (2026-10-05)
+
+**55. Three present-tense sentences in `paper/technical_report.tex` described a repository that no
+longer existed, and the one that mattered shipped in `v1.7.0`.** The completion audit run after the
+release read the document rather than the gate output, and found what no guard could: a report whose
+guards all compare numbers, in a document whose defects were sentences.
+
+(a) §Limitations opens "The manifest is committed and verified: 69 artifacts, 6,208,835 bytes, of which
+8 correctness benchmarks, 1 performance benchmark, 40 statistical experiment files, 4 suite-aggregate
+files and 16 offline fixtures". That triple is *exactly* `evidence/manifest.json`'s `totals` at
+`v1.1.0` -- 69 / 6208835 / 40, read from the tag -- and the sentence has been shipped in `v1.2.0`,
+`v1.3.0`, `v1.4.0`, `v1.5.0`, `v1.6.0` and `v1.7.0`. The same PDF's §1 prints "the frozen manifest hashes
+94 artifacts". One document, two statements of one fact, the stale one six releases old, and no reader
+between them: `test_the_report_states_the_manifest_the_freeze_produced` now reads all seven numbers out
+of the manifest's `totals` block and compares them with the sentence.
+
+(b) §Stress Testing said, in the present tense, that "the experiment that would use these terms was
+specified and then deliberately not run" -- written at Phase 20 (`631d7c5`) as a true sentence about
+`experiments/fifth_order_crossing_map/`, refuted by Phase 21, which ran it, registered it as member 18
+and published `experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json`. It was still
+in the file when `v1.7.0` was tagged, so the released PDF asserts that a delivered experiment was
+withheld. Phase 21 synced the documents a guard pushes -- matrix row 22, limitation #83, the suite and
+test counts -- and the report's paragraph had no guard, because the claim carried no number. Two guards
+close that shape: the report must name the directory of every experiment the suite registers
+(`test_every_registered_experiment_is_named_in_the_report`, which would have been red from Phase 21
+onward), and the paragraph's five figures are re-derived from the artifact's `headline`, `books` and
+`fits` (`test_the_report_states_the_order_five_headline_the_artifact_holds`).
+
+(c) Two smaller restatements of the same kind. §Limitations said the report's own member count was what
+`README.md` "quotes for ``twelve members executed''" -- README has not contained that string since the
+suite grew past twelve, and the sentence had been rewritten to describe the *kind* of claim rather than
+a value it no longer holds. And `docs/interview_defense.md` annotated the sweep's command with
+`# 18/18 planted defects rejected`, written at Phase 14 (`74359f9`) when the harness held eighteen
+plants, against 38 now: a command comment is an instruction, and an instruction that names a superseded
+count teaches the reader that the falsification harness is a third of its size.
+`test_a_command_line_that_counts_plants_counts_the_declared_ones` reads the annotation, and the dated
+records that quote their own run's verdict stay as they are.
+
+**Falsification, measured rather than asserted.** Each of the three report guards was run against
+`paper/technical_report.tex` as committed at `8680d63` -- the document as shipped -- before the fix was
+written. (a) reported three violations -- 69 artifacts against the freeze's 94, 6,208,835 bytes against
+7,145,018, and 40 statistical experiment files against 65. (b) reported `['experiments/fifth_order_crossing_map/']` as never
+named. (c) reported the widening string and the ratio span absent. All four new guards therefore can
+fail, and four plants declare the defects they catch:
+`report-counts-a-manifest-the-freeze-does-not-have`, `report-drops-an-experiment-from-its-own-account`,
+`report-quotes-a-stale-order-five-headline`, `docs-command-comment-counts-superseded-plants`. The
+harness grew 34 → 38 declared plants, and two anchors that the count sync disarmed
+(`readme-undercounts-the-limitation-register`, `report-counts-stale-python-tests`) were caught by
+`test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` before any of this was
+committed -- finding 52's failure mode, firing as designed.
+
+**What the released asset cannot be told to do.** `v1.7.0`'s `technical_report.pdf` was built from the
+tag, so the sentences above are in it and cannot be removed without moving the tag, which would break
+the provenance the release records. `docs/release_notes_v1.7.0.md` carries a dated erratum naming both
+sentences instead, and the repository's own `paper/technical_report.pdf` is rebuilt from the corrected
+source. `docs/limitations.md` #84 states the residue: the guards own the shapes they name, and a false
+sentence with no number and no registered path is still caught only by a reader.

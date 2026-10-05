@@ -190,3 +190,34 @@ def test_the_selected_mutations_resolve_by_kind_and_identifier(capsys) -> None:
         assert harness.main(["--list", "--kind", kind]) == 0
         listed = capsys.readouterr().out.strip().splitlines()
         assert len(listed) == len(harness.select(kind, [])), (kind, listed)
+
+
+def test_a_command_line_that_counts_plants_counts_the_declared_ones() -> None:
+    """The bash blocks are living prose, and one of them still said 18/18 when the list held 34.
+
+    `docs/integrity_audit.md` finding 49 named this shape for the C++ totals -- a command annotated
+    with `# 201 C++ tests` inside a block the prose guard was already reading, invisible to it
+    because the guard matched a different phrase. The sweep's plant count is the same trap: the
+    dated records quote the verdict their own run printed and must keep it, while a command comment
+    is an instruction, and an instruction that names a superseded count teaches the reader that the
+    harness is smaller than it is.
+
+    Scoped to the annotation rather than the file, because the sentences around it are history.
+    """
+    declared = len(harness.MUTATIONS)
+    pattern = re.compile(r"#\s*(\d+)/(\d+) planted defects")
+    checked = 0
+    for name in (
+        "README.md",
+        "docs/interview_defense.md",
+        "docs/reproducibility.md",
+        "paper/technical_report.tex",
+    ):
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        for numerator, denominator in pattern.findall(text):
+            assert int(numerator) == declared and int(denominator) == declared, (
+                f"{name} annotates the sweep as {numerator}/{denominator} "
+                f"while the harness declares {declared}"
+            )
+            checked += 1
+    assert checked, "no command line annotates the plant count, so this guard checks nothing"

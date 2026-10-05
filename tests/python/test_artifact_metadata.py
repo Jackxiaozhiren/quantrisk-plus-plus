@@ -954,6 +954,152 @@ def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
         )
 
 
+MANIFEST = REPO_ROOT / "evidence" / "manifest.json"
+
+# The report's own sentence, in the order it writes it. `evidence/manifest.json`'s
+# `totals` block is the producer of all seven of these numbers, so the comparison is between a
+# document and the artifact it claims to describe -- not between two documents restating each other.
+_MANIFEST_CLAIMS = (
+    (r"(\d+) artifacts", ("artifacts",)),
+    (r"([\d,]+) bytes", ("bytes",)),
+    (r"(\d+) correctness\s+benchmarks", ("by_category", "correctness_benchmark")),
+    (r"(\d+) performance benchmark", ("by_category", "performance_benchmark")),
+    (r"(\d+) statistical experiment files", ("by_category", "statistical_experiment")),
+    (r"(\d+) suite-aggregate files", ("by_category", "suite_aggregate")),
+    (r"(\d+)\s+offline fixtures", ("by_category", "offline_fixture")),
+)
+
+
+def _tex_manifest_sentence(source: str) -> str:
+    """The window of the report that states the manifest's size, or fail for its absence.
+
+    Anchored on the sentence's own opening words rather than a line number, because the paragraph
+    reflows whenever LaTeX re-breaks it.
+    """
+    start = source.find("The manifest is committed and verified:")
+    assert start >= 0, "the report no longer states the manifest's size in its own words"
+    window = source[start : start + 700].replace("{,}", ",")
+    assert "offline fixtures" in window, "the report's manifest sentence has been cut short"
+    return window
+
+
+def test_the_report_states_the_manifest_the_freeze_produced() -> None:
+    """`paper/technical_report.tex` restated the freeze as it was at `v1.1.0`, for six releases.
+
+    69 artifacts, 6,208,835 bytes and 40 statistical experiment files are exactly
+    `evidence/manifest.json`'s `totals` at the `v1.1.0` tag, and the same document's headline
+    paragraph prints the current 94. One fact, two statements in one PDF, and the stale one survived
+    `v1.2.0` through `v1.7.0` because no reader compared them -- which is what a count with no owner
+    costs.
+    """
+    totals = json.loads(MANIFEST.read_text(encoding="utf-8"))["totals"]
+    window = _tex_manifest_sentence(
+        (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
+    )
+    for pattern, key_path in _MANIFEST_CLAIMS:
+        found = re.search(pattern, window)
+        assert found, f"the report's manifest sentence no longer matches {pattern!r}"
+        expected = totals
+        for step in key_path:
+            expected = expected[step]
+        assert int(found.group(1).replace(",", "")) == expected, (
+            f"the report says {found.group(1)} where the manifest totals say {expected} "
+            f"for {'/'.join(key_path)}"
+        )
+
+
+FIFTH_ORDER_ARTIFACT = (
+    REPO_ROOT
+    / "experiments"
+    / "fifth_order_crossing_map"
+    / "results"
+    / "fifth_order_crossing_map.json"
+)
+
+
+def _report_prose() -> str:
+    """The report's text with LaTeX comments dropped and its escapes for `_` undone.
+
+    Comments are dropped because the source carries commented-out prose no reader sees, and a
+    guard that matches them can be satisfied by a paragraph that is not in the PDF.
+    """
+    source = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
+    lines = [line for line in source.splitlines() if not line.lstrip().startswith("%")]
+    return " ".join(lines).replace("\\_", "_")
+
+
+def test_every_registered_experiment_is_named_in_the_report() -> None:
+    """The report omitted the experiment that answered its own open question.
+
+    Phase 20's paragraph in `paper/technical_report.tex` ended "the experiment that would use these
+    terms was specified and then deliberately not run". Phase 21 ran it, published the answer, and
+    left the sentence standing, because every guard over this document compares numbers and none of
+    them asked whether the document still describes each member of the suite. An experiment that
+    ran, is registered, and appears nowhere in the report is the same evidence hole as a number
+    nobody owns.
+
+    Keyed on the directory rather than the script path, because the report cites most members by
+    their results file (`experiments/real_data_risk_study/results/...`), which the path form would
+    miss while the directory form matches.
+    """
+    prose = _report_prose()
+    directories = {
+        f"experiments/{Path(member.script).parent.name}/"
+        for member in _load_suite_members()
+        if member.script.startswith("experiments/")
+    }
+    absent = sorted(directory for directory in directories if directory not in prose)
+    assert not absent, f"the report never names these registered experiments: {absent}"
+
+
+def test_the_report_states_the_order_five_headline_the_artifact_holds() -> None:
+    """Each figure in the report's order-five paragraph is read from the field that produced it.
+
+    The widening count, the unchanged count, how many books the quintic sits closest on, the two
+    books that widened with their quartic and quintic radii, and the span of the order-five-to-four
+    ratio are all re-derived here. A re-run that moves any of them reddens the document that quotes
+    it, which is the only way a paragraph written from an artifact stays true to it.
+    """
+    payload = json.loads(FIFTH_ORDER_ARTIFACT.read_text(encoding="utf-8"))
+    headline = payload["headline"]
+    books = {book["label"]: book for book in payload["books"]}
+    prose = _report_prose()
+
+    widening = (
+        f"widens the radius on {headline['books_widening_at_order_five']} of the "
+        f"{headline['books_measured']}"
+    )
+    assert widening in prose, "the report no longer states the widening count as the artifact's"
+    assert f"leaves {headline['books_unchanged_at_order_five']} unchanged" in prose, (
+        "the report no longer states the unchanged count"
+    )
+    assert f"the closest of the three truncations on all {headline['books_measured']}" in prose, (
+        "the report no longer states how many books the quintic sits closest on"
+    )
+
+    for label in ("published ladder", "deep out of the money"):
+        book = books[label]
+        claimed = f"from ${book['radius_quartic']:.2f}$ to ${book['radius_quintic']:.2f}$"
+        assert claimed in prose, (
+            f"the report does not state {label}'s quartic-to-quintic radius as {claimed!r} "
+            f"(artifact: {book['radius_quartic']} -> {book['radius_quintic']})"
+        )
+
+    ratios = [entry["order_five_over_four_at_measure_column"] for entry in payload["fits"].values()]
+    span = f"{min(ratios):.3f} to {max(ratios):.3f}"
+    assert span in prose, f"the report does not state the ratio span the artifact gives ({span})"
+
+    smallest = min(
+        payload["fits"],
+        key=lambda label: payload["fits"][label]["order_five_over_four_at_measure_column"],
+    )
+    widest = max(books, key=lambda label: books[label]["widening_factor_quintic"])
+    assert smallest == widest, (
+        f"the report's mechanism-free reading depends on the smallest ratio ({smallest}) being the "
+        f"largest widening ({widest}); the paragraph has to be rewritten if that changes"
+    )
+
+
 SPEED_ARTIFACT = REPO_ROOT / "benchmarks/performance/results/monte_carlo_speed.json"
 
 

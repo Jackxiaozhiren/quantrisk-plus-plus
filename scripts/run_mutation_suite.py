@@ -156,7 +156,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 83 numbered entries",
+        anchor="carries 84 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -380,13 +380,64 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 477 pytest tests with the validation",
+        anchor="and 481 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
         ),
         claim="the report states the collected total, in this environment or the offline one",
+    ),
+    Mutation(
+        identifier="report-counts-a-manifest-the-freeze-does-not-have",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="94 artifacts, 7{,}145{,}018 bytes",
+        replacement="93 artifacts, 7{,}145{,}018 bytes",
+        # The report's §Limitations restatement of the freeze was `v1.1.0`'s totals and shipped in
+        # six releases, while its own headline paragraph said 94 two pages earlier; the guard reads
+        # `totals` from the manifest, so one digit here is enough to redden it.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_states_the_manifest_the_freeze_produced"
+        ),
+        claim="the report's manifest sentence is the frozen manifest's own totals",
+    ),
+    Mutation(
+        identifier="report-drops-an-experiment-from-its-own-account",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="experiments/fifth\\_order\\_crossing\\_map/run.py",
+        replacement="docs/analysis/fifth\\_order\\_crossing\\_map.md",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_registered_experiment_is_named_in_the_report"
+        ),
+        claim="every experiment the suite registers is described by the report",
+    ),
+    Mutation(
+        identifier="report-quotes-a-stale-order-five-headline",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="widens the radius on 2 of the 5",
+        replacement="widens the radius on 3 of the 5",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_states_the_order_five_headline_the_artifact_holds"
+        ),
+        claim="the report's order-five paragraph renders the artifact's headline fields",
+    ),
+    Mutation(
+        identifier="docs-command-comment-counts-superseded-plants",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="# 38/38 planted defects rejected",
+        replacement="# 34/34 planted defects rejected",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_a_command_line_that_counts_plants_counts_the_declared_ones"
+        ),
+        claim="a command line that annotates the sweep's verdict names the list the harness holds",
     ),
     Mutation(
         identifier="radius-reads-one-signed-column-at-a-time",

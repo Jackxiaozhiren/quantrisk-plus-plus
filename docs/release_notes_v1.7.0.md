@@ -87,3 +87,25 @@ test-count sentence in `docs/limitations.md` that no local pattern covered.
   sympy`; the assertion and Catch2-case totals are prose with no derived owner.
 - The rules that were enforced: no PyPI publication, no real market data inside the engine, no
   production-readiness claim, no cost above zero.
+
+## Correction added 2026-10-05 — the attached report contradicts this release
+
+`technical_report.pdf`, one of the four assets on this release, was built from `v1.7.0` and carries two
+present-tense statements the repository had already refuted:
+
+- §Limitations describes the frozen evidence as "69 artifacts, 6,208,835 bytes, of which … 40
+  statistical experiment files". `evidence/manifest.json`, which the same section cites, holds 94
+  artifacts of 7,145,018 bytes with 65 statistical experiment files, and §1 of the same PDF prints
+  the 94. The stale triple is exactly the freeze's `totals` at `v1.1.0`, so the sentence has been true of
+  one release and shipped in six.
+- §Stress Testing says the fifth-order crossing experiment "was specified and then deliberately not
+  run". Phase 21 ran it: `experiments/fifth_order_crossing_map/` is suite member 18, and its artifact
+  is row 22 of `docs/validation_matrix.md`.
+
+The PDF attached to the release is the PDF the tag produced, so it has not been replaced; a release
+asset that was published from a tag is not editable without moving the tag, and moving the tag would
+break the provenance this note records. The tree is fixed instead — `paper/technical_report.tex` with
+three derived guards over it (`docs/phase_reports/phase-23-report-prose.md`), the regenerated PDF in
+the repository, and `docs/limitations.md` #84 stating what the guards do not reach. Anyone reading the
+released PDF should read this section as its erratum; anyone reading the repository is reading the
+corrected text. `docs/integrity_audit.md` finding 55 records how both sentences survived a release.

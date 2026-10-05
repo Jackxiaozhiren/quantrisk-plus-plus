@@ -304,7 +304,7 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 477 pytest tests with
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 481 pytest tests with
     the `oracles` extra installed, and the same tree collects 408 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
@@ -730,3 +730,22 @@ never removed just because a later phase shipped.
     A gate that reads the wrong range rejects correct results and accepts incoherent ones, so it announced
     itself by firing on a book that was fine; `check()` now reads each order against its own radius and the
     test pins both directions (audit finding 51).
+
+84. **The report's prose is guarded figure by figure, and a false sentence that carries no
+    figure is caught only where a phase wrote a guard for that sentence.**
+    `paper/technical_report.tex` restated the frozen manifest's size as 69 artifacts, 6,208,835
+    bytes and 40 statistical experiment files -- exactly `evidence/manifest.json`'s `totals` at
+    `v1.1.0` -- and shipped that sentence in six releases, `v1.2.0` through `v1.7.0`, while its own
+    headline paragraph two pages earlier printed the current 94. One document contradicting itself,
+    because no reader compared the two statements. The same document said, in the present tense, that the fifth-order
+    crossing experiment "was specified and then deliberately not run", which Phase 20 wrote as a
+    true sentence, Phase 21 refuted by running it, and nothing noticed, because every guard over
+    that file compares numbers and a claim that an experiment did not happen is not a number. Three
+    guards own the restatements now: the manifest sentence is compared with
+    `evidence/manifest.json`'s `totals`, the report must name the directory of every experiment the
+    suite registers, and the order-five paragraph's five figures are re-derived from
+    `experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json`. What is *not*
+    covered is any narrative claim outside those three shapes -- a sentence that misdescribes a
+    method, a scope or a refusal without printing a number or a registered path is still only
+    caught by a reader, and the released `v1.7.0` PDF carries the stale sentences this item names
+    because the tag predates the fix. Recorded as audit finding 55.
