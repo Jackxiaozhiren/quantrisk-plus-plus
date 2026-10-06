@@ -305,7 +305,7 @@ never removed just because a later phase shipped.
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
     without saying which is now wrong.** `uv run pytest -q` at HEAD gives 482 pytest tests with
-    the `oracles` extra installed, and the same tree collects 412 tests without it — the CI lane
+    the `oracles` extra installed, and the same tree collects 413 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:

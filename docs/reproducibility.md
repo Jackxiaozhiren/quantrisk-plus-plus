@@ -109,10 +109,12 @@ a failure.
 **The pytest count depends on which extras you installed, and a document that prints one number
 without saying which is wrong.** The sequence above yields **482 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — which installs the `dev` group, now including `sympy`, but no `oracles` extra — and the same
-tree collects 412 tests without it, the four oracle-gated modules dropping out at import. At the
-previous revision that lane reported `319 passed, 4 skipped`: 323 outcomes from 319 collected
-items, because the four skips are module-level records reported *in addition to* the items that
-ran.
+tree collects 413 tests without it, the four oracle-gated modules dropping out at import. The
+lane's own line for this revision is `1 failed, 411 passed, 5 skipped` and the guard's message for
+it is `pytest collects 413`; at the previous revision the same lane collected 412 and printed
+`411 passed, 5 skipped`. Passed plus skipped exceeds collected by four in both cases, because the
+four module-level skips are records reported *in addition to* the items that ran -- which is why
+`docs/limitations.md` #63 forbids deriving either figure from the other.
 Both figures are read off the machine that produces them, and the difference of 69 is four modules that gate on
 a module-level `pytest.importorskip` (for `sklearn`, `QuantLib` twice and `pypfopt`). 69 oracle
 comparison cases go unattempted there, and nothing is broken when they do — what would be broken is

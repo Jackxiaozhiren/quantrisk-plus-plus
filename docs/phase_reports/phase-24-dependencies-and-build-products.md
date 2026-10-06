@@ -156,3 +156,19 @@ not re-run because no C++ file moved, which is stated rather than left for a rea
 absence. The falsification sweep runs on the committed tree after it exists — the harness refuses a dirty
 tree — and its verdict line, this commit's CI run and the offline lane's collected count are appended in
 the commit that follows, which is the only place they can honestly live.
+
+**Verdicts, read after the commits they describe.** `3acdfe8`'s CI run 37409108820 reports
+`Format and static checks: success`, `Benchmark suite against live oracles: success` and
+`Configure, build, C++ tests, Python tests: failure`, the last one failing exactly where §5 said it
+would: `AssertionError: docs/interview_defense.md says 412 for this environment; pytest collects 413`,
+with the lane's own line `1 failed, 411 passed, 5 skipped`. The offline count was then synced from the
+runner's message, the technical report's PDF rebuilt, and the sweep re-run: `39/39 planted defects were
+rejected by their guard.` on the committed tree with `git status` empty before and after.
+
+One by-product worth recording, because it changes the next phase's shape. Before the runner answered,
+a throwaway subprocess that makes `QuantLib`, `pypfopt`, `cvxpy`, `sklearn` and `statsmodels` unimportable
+collected **413** items on this tree -- the number the runner then reported. So the collected count is
+reproducible locally; what the probe did *not* reproduce is the shape, since the four gated modules
+surfaced as collection errors there and as skip records in CI. Phase 26's job is therefore narrower than
+"build a simulator": the simulator has to fail the way the runner fails, and the fidelity test is both
+the count and the skip shape.
