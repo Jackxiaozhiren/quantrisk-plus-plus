@@ -130,3 +130,14 @@ Commands and verdicts are §5's, taken from the working tree before the commit t
 C++ suite was not re-run because no C++ file moved, and the manifest verifier reports the freeze untouched
 rather than re-frozen. The falsification sweep runs on the committed tree after it exists and its verdict,
 this head's CI run and the runner's offline reading are appended in the commit that follows.
+
+**Verdicts, read after the commit they describe.** `413e199`'s CI run 37411531441 is `success` on all
+three jobs — `Format and static checks`, `Configure, build, C++ tests, Python tests`, and `Benchmark suite
+against live oracles` — with the suite lane's own line `suite: 18/18 executed and passed`. Its offline lane
+printed `413 passed, 5 skipped in 143.13s`, and the count guard that ran there accepted the published 414,
+which is the runner's own confirmation of this phase's offline figure: 414 collected, four module-level skip
+records on top, 418 outcomes. The falsification sweep on this tree, after it was committed and with
+`git status` empty before and after, printed `41/41 planted defects were rejected by their guard.` — the
+fortieth being `readme-quotes-a-stale-assertion-total`, which fired on the README as declared. The head
+carrying this paragraph is a record commit, so its own run is read the same way as the two above:
+`gh api repos/Jackxiaozhiren/quantrisk-plus-plus/commits/$(git rev-parse HEAD)/check-runs`.
