@@ -156,7 +156,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 84 numbered entries",
+        anchor="carries 85 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -221,7 +221,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 413 Python tests",
+        anchor="# 414 Python tests",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -380,7 +380,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 482 pytest tests with the validation",
+        anchor="and 483 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -431,7 +431,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 39/39 planted defects rejected",
+        anchor="# 40/40 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -553,6 +553,21 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_derivation_command_agrees_at_the_precision_floor"
         ),
         claim="the derived numerators meet the exact derivative at the precision floor",
+    ),
+    Mutation(
+        identifier="readme-quotes-a-stale-assertion-total",
+        kind="prose",
+        path="README.md",
+        anchor="204 C++ tests, 548,368 assertions",
+        replacement="204 C++ tests, 548,000 assertions",
+        # CTest counts tests, so the assertion total is invisible to every other C++ guard: the
+        # only producer is the Catch2 binary's summary line, and nothing compared a document to it
+        # until Phase 25.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_cpp_assertions_count_the_binarys_own"
+        ),
+        claim="the C++ assertion and case totals are the compiled binary's own",
     ),
 )
 

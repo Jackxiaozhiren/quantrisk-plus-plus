@@ -107,12 +107,14 @@ in that state would be claiming a measurement it did not make. The flag turns th
 a failure.
 
 **The pytest count depends on which extras you installed, and a document that prints one number
-without saying which is wrong.** The sequence above yields **482 pytest tests with the `oracles`
+without saying which is wrong.** The sequence above yields **483 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — which installs the `dev` group, now including `sympy`, but no `oracles` extra — and the same
-tree collects 413 tests without it, the four oracle-gated modules dropping out at import. The
-lane's own line for this revision is `1 failed, 411 passed, 5 skipped` and the guard's message for
-it is `pytest collects 413`; at the previous revision the same lane collected 412 and printed
-`411 passed, 5 skipped`. Passed plus skipped exceeds collected by four in both cases, because the
+tree collects 414 tests without it, the four oracle-gated modules dropping out at import. The
+figure for this revision was measured locally by making `QuantLib`, `pypfopt`, `cvxpy`, `sklearn` and
+`statsmodels` unimportable in a subprocess and collecting there -- 414 against 483 with the oracles --
+which is the probe `docs/limitations.md` #63's ban on derivation permits, because it is a second
+measurement and not a subtraction. The same probe reproduced the runner's own 413 one revision
+earlier, and the runner's reading for this revision is recorded in the Phase 25 report when it exists. Passed plus skipped exceeds collected by four in both cases, because the
 four module-level skips are records reported *in addition to* the items that ran -- which is why
 `docs/limitations.md` #63 forbids deriving either figure from the other.
 Both figures are read off the machine that produces them, and the difference of 69 is four modules that gate on

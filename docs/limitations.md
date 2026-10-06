@@ -304,8 +304,8 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 482 pytest tests with
-    the `oracles` extra installed, and the same tree collects 413 tests without it — the CI lane
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 483 pytest tests with
+    the `oracles` extra installed, and the same tree collects 414 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -753,3 +753,16 @@ never removed just because a later phase shipped.
     method, a scope or a refusal without printing a number or a registered path is still only
     caught by a reader, and the released `v1.7.0` PDF carries the stale sentences this item names
     because the tag predates the fix. Recorded as audit finding 55.
+
+85. **The C++ assertion and case totals have an owner, and it needs a build to read them.**
+    `548,368 assertions in 203 test cases` is quoted in the README, `docs/reproducibility.md`,
+    `docs/interview_defense.md` in two of its own phrasings and `paper/technical_report.tex`.
+    Finding 49 recorded why that pair survived four releases unowned: CTest counts tests, not
+    assertions, so no CTest-side guard could see them. `test_documents_that_count_the_cpp_assertions_count_the_binarys_own`
+    now runs the compiled Catch2 binary, takes its summary line, requires the `TEST_CASE(` blocks in
+    `tests/cpp/*.cpp` to equal the case total the binary reports, and compares each document with
+    both numbers — two producers, not one quoted by five. It skips where nothing has been built, which
+    is the residue: in a source-only checkout the guard is silent rather than wrong, and the CI lane
+    that runs pytest immediately after `cmake --build` is what makes it live. The CTest entry count is
+    not asserted there because `test_documents_that_count_the_cpp_tests_agree_with_the_build` already
+    owns it, and one number is allowed exactly one owner. Phase 25's finding is audit finding 57.

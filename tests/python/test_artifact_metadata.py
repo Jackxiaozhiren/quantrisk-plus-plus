@@ -954,6 +954,92 @@ def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
         )
 
 
+def _cpp_test_binary() -> Path | None:
+    """The built Catch2 binary, or None where nothing has been compiled.
+
+    Located by glob rather than by preset name, because `dev` locally and `ci` on the runner are
+    the same artifact under different directories, and the CTest guard already finds its build
+    tree the same way.
+    """
+    builds = sorted((REPO_ROOT / "build").glob("*")) if (REPO_ROOT / "build").is_dir() else []
+    for directory in builds:
+        candidate = directory / "quantrisk_tests"
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _source_test_case_count() -> int:
+    """`TEST_CASE(` at the start of a line in `tests/cpp/*.cpp`.
+
+    Line-anchored, because a `TEST_CASE` inside a comment or a string would otherwise be counted;
+    the count exists to be compared with the binary's own, so a disagreement is a clue rather than
+    a verdict about the source style.
+    """
+    total = 0
+    for path in sorted((REPO_ROOT / "tests" / "cpp").glob("*.cpp")):
+        total += len(re.findall(r"^\s*TEST_CASE\(", path.read_text(encoding="utf-8"), flags=re.M))
+    return total
+
+
+def test_documents_that_count_the_cpp_assertions_count_the_binarys_own() -> None:
+    """`548,368 assertions in 203 test cases` was prose with no owner in four places.
+
+    Finding 49 named this residue: CTest lists tests, not assertions, and the C++ count guard
+    already owns the 204 entries, so the two numbers no guard reached were the assertion total
+    and the Catch2-case total. This reads both producers. The binary runs `--verbosity quiet` and
+    prints `All tests passed (N assertions in M test cases)`; the source is counted by its own
+    `TEST_CASE(` blocks and required to agree with the binary's M, which is what turns "the
+    documents quote the compiled suite" into "the documents quote the compiled suite, and the
+    compiled suite is the source they describe".
+
+    The CTest entry count is deliberately not asserted here -- finding 49's one-number-one-owner
+    rule -- and skipping happens only where nothing has been built. In CI the lane that runs pytest
+    runs immediately after `cmake --build`, so the check is live there, which is where a stale
+    total would otherwise survive.
+    """
+    binary = _cpp_test_binary()
+    if binary is None:  # pragma: no cover - depends on whether the tree has been built
+        pytest.skip("no built Catch2 binary; the assertion total cannot be measured")
+    run = subprocess.run(
+        [str(binary), "--verbosity", "quiet"], capture_output=True, text=True, check=False
+    )
+    assert run.returncode == 0, run.stdout[-400:] + run.stderr[-400:]
+    summary = re.search(r"All tests passed \(([\d,]+) assertions in (\d+) test cases\)", run.stdout)
+    assert summary, f"no Catch2 summary line in {run.stdout[-400:]!r}"
+    assertions = int(summary.group(1).replace(",", ""))
+    cases = int(summary.group(2))
+
+    sourced = _source_test_case_count()
+    assert sourced == cases, (
+        f"tests/cpp declares {sourced} TEST_CASE blocks and the binary reports {cases}; the two "
+        f"producers disagree, so neither number is quotable by a document yet"
+    )
+
+    claims = {
+        "README.md": r"C\+\+ tests, ([\d,]+) assertions",
+        "docs/reproducibility.md": r"C\+\+ tests, ([\d,]+) assertions",
+        "docs/interview_defense.md": [
+            r"CTest \(([\d,]+) assertions in (\d+) Catch2",
+            r"Today that is \d+ C\+\+ tests \(([\d,]+) assertions in (\d+) cases\)",
+        ],
+        "paper/technical_report.tex": r"([\d{},]+) assertions in (\d+) Catch2 cases",
+    }
+    for name, patterns in claims.items():
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        groups = patterns if isinstance(patterns, list) else [patterns]
+        for pattern in groups:
+            found = re.findall(pattern, text)
+            assert found, f"{name} no longer states the C++ assertion total as {pattern!r}"
+            for row in found:
+                cells = row if isinstance(row, tuple) else (row, str(cases))
+                quoted = int(cells[0].replace("{,}", "").replace(",", ""))
+                assert quoted == assertions, (
+                    f"{name} quotes {cells[0]} assertions, binary {assertions}"
+                )
+                assert int(cells[1]) == cases, f"{name} quotes {cells[1]} cases, binary {cases}"
+
+
 MANIFEST = REPO_ROOT / "evidence" / "manifest.json"
 
 # The report's own sentence, in the order it writes it. `evidence/manifest.json`'s

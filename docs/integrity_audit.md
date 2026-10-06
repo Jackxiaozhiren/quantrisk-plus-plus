@@ -1085,3 +1085,34 @@ project dependency, which the repository has declined on purpose.
 GitHub page never received. Nothing compares them, and a guard that would have to call the API is a network
 test this suite does not run. Registered rather than fixed; the erratum was written into both on 2026-10-06,
 and the pre-edit body is committed at `docs/release_bodies/` so the edit is reversible by anyone.
+
+## Addendum — Phase 25, the two numbers CTest cannot see (2026-10-06)
+
+**57. Four documents quoted a C++ total that no C++ check produced, and the phase that fixed it found
+its own guard was the fifth such quotation.** `548,368 assertions in 203 test cases` sat in the README,
+`docs/reproducibility.md`, `docs/interview_defense.md` twice and `paper/technical_report.tex`. Finding 49
+had named this residue three phases ago -- "CTest lists tests, not assertions, so the only cheap owner is
+a count of `TEST_CASE` in `tests/cpp/*.cpp` for the case total, and the assertion total has no derived
+source at all and stays prose" -- and Phase 25 closed it by taking the second producer seriously as well:
+
+- the assertion total is read from the compiled binary's own summary line
+  (`./build/<preset>/quantrisk_tests --verbosity quiet` prints
+  `All tests passed (548368 assertions in 203 test cases)`);
+- the case total is counted from `tests/cpp/*.cpp` (`203` `TEST_CASE(` blocks) and required to equal the
+  binary's, so the documents are quoting a compiled suite that is the source they describe, not one number
+  quoted by five files;
+- the CTest entry count is left to `test_documents_that_count_the_cpp_tests_agree_with_the_build`, because
+  finding 49's other lesson is that a second owner of one number is a second chance to be wrong.
+
+Falsification, both arms. The document arm is declared as `readme-quotes-a-stale-assertion-total`
+(39 → 40 plants) and was additionally run live before the commit: `548,368` → `548,000` in the README,
+guard red at `tests/python/test_artifact_metadata.py:1037`, README restored to
+`f7df438e01206b8a30c515b9efd67ceddc6ac8080cb3e2d5d73a8f26fdecf770`. The source arm cannot be planted
+textually without recompiling, so it was exercised in memory: appending one
+`TEST_CASE("probe", "[probe]") {}` moved the counter from 203 to 204, which is the difference the guard
+compares against the binary.
+
+The residue this leaves is stated in `docs/limitations.md` #85: the guard skips where nothing has been
+built, so its coverage is exactly the lanes that compile, and the offline Python test count moved again
+with the new test (413 → 414), this time measured by the oracle-free probe rather than waited for --
+`docs/reproducibility.md` says which instrument produced which figure.
