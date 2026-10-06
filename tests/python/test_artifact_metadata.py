@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import importlib.util
 import json
 import re
 import shutil
@@ -1038,6 +1039,76 @@ def test_documents_that_count_the_cpp_assertions_count_the_binarys_own() -> None
                     f"{name} quotes {cells[0]} assertions, binary {assertions}"
                 )
                 assert int(cells[1]) == cases, f"{name} quotes {cells[1]} cases, binary {cases}"
+
+
+OFFLINE_PROBE_SCRIPT = REPO_ROOT / "scripts" / "measure_offline_collection.py"
+
+# Every phrasing in which a living document states the oracle-free count. The older guard
+# `test_the_documents_that_count_python_tests_count_the_ones_that_exist` compares each document's
+# two figures with each other and with the environment it runs in, and the oracle-free half of
+# that comparison has only ever been possible on the runner.
+_OFFLINE_CLAIMS = {
+    "docs/limitations.md": [r"collects (\d+) tests without it"],
+    "docs/reproducibility.md": [r"collects (\d+) tests without it"],
+    "docs/interview_defense.md": [
+        r"collects (\d+) tests without",
+        r"— (\d+) without them",
+        r"python -m pytest -q\s+# (\d+) Python tests",
+    ],
+    "paper/technical_report.tex": [r"(\d+) collected without them"],
+}
+
+
+def _offline_probe() -> dict[str, Any]:
+    """The measurement, taken by calling the script's own function rather than parsing stdout."""
+    spec = importlib.util.spec_from_file_location(
+        "measure_offline_collection", OFFLINE_PROBE_SCRIPT
+    )
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+        result = module.measure()
+    finally:
+        del sys.modules[spec.name]
+    return result
+
+
+def test_the_offline_test_count_is_measurable_before_the_runner() -> None:
+    """#63 forbade deriving the offline count, so this measures it instead of waiting.
+
+    The pair of Python test counts has been checkable in only one of its two environments: the
+    with-oracles half on any development machine, the oracle-free half on the CI lane that installs
+    without the extra. That asymmetry produced findings 54(b) and 55(d) -- a phase adds tests, syncs
+    the figure it can see, and learns the other from a red runner one push later.
+    `scripts/measure_offline_collection.py` is the second producer, so a document can be compared
+    with an oracle-free measurement in the same command that reads the other one.
+
+    Three assertions make `collected` mean the runner's number rather than this machine's: nothing
+    may error during collection, the four oracle-gated modules have to appear as skip records, and
+    the blocked set has to be non-empty. Without them a probe that blocked nothing would report the
+    with-oracles total and look green.
+    """
+    probe = _offline_probe()
+    assert len(probe["blocked_imports"]) >= 4, probe
+    assert probe["collection_errors"] == 0, (
+        f"gated modules became collection errors, which is not the runner's shape: {probe['tail']}"
+    )
+    assert probe["module_skips"] == 4, probe
+    assert probe["collected"] is not None, probe["tail"]
+    collected = int(probe["collected"])
+
+    for name, patterns in _OFFLINE_CLAIMS.items():
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        for pattern in patterns:
+            found = re.findall(pattern, text)
+            assert found, f"{name} no longer states the offline count as {pattern!r}"
+            for value in found:
+                assert int(value) == collected, (
+                    f"{name} quotes {value} tests without the oracles; the probe collects "
+                    f"{collected}"
+                )
 
 
 MANIFEST = REPO_ROOT / "evidence" / "manifest.json"

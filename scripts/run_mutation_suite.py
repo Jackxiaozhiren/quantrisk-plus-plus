@@ -221,7 +221,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 414 Python tests",
+        anchor="# 415 Python tests",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -380,7 +380,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 483 pytest tests with the validation",
+        anchor="and 484 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -431,7 +431,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 40/40 planted defects rejected",
+        anchor="# 41/41 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -568,6 +568,21 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_documents_that_count_the_cpp_assertions_count_the_binarys_own"
         ),
         claim="the C++ assertion and case totals are the compiled binary's own",
+    ),
+    Mutation(
+        identifier="report-quotes-a-count-the-offline-probe-refutes",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="oracles installed, 415 collected without them",
+        replacement="oracles installed, 400 collected without them",
+        # The other count guard sees only the environment it runs in, so with the oracles in
+        # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
+        # and this is the defect shape it exists to catch.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_offline_test_count_is_measurable_before_the_runner"
+        ),
+        claim="the oracle-free count is what the probe measures, not what a document remembers",
     ),
 )
 

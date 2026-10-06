@@ -1116,3 +1116,36 @@ The residue this leaves is stated in `docs/limitations.md` #85: the guard skips 
 built, so its coverage is exactly the lanes that compile, and the offline Python test count moved again
 with the new test (413 → 414), this time measured by the oracle-free probe rather than waited for --
 `docs/reproducibility.md` says which instrument produced which figure.
+
+## Addendum — Phase 26, the number only the runner could see (2026-10-06)
+
+**58. Two findings in a row were caused by a figure that is measurable in exactly one of the two
+environments the repository documents.** `docs/limitations.md` #63 states the Python test count as a pair
+-- with the `oracles` extra and without it -- and forbids deriving one from the other, because the
+oracle-gated modules collapse into module-level skip records whose count is not a constant of the
+difference. The consequence nobody faced was that the second half of the pair had one producer: the CI
+lane. Phase 23's finding 55(d) and Phase 24's §5 are the same event twice -- a phase adds tests, syncs
+the number it can measure, and discovers the other from a red runner one push later.
+
+`scripts/measure_offline_collection.py` is the second producer. It reads the `oracles` extra and the `dev`
+group out of `pyproject.toml` and blocks the difference (`QuantLib`, `cvxpy`, `pypfopt`, `sklearn`,
+`statsmodels` -- not `scipy`, which the CI lane does install), seeds `sys.modules` so an import fails the
+way an absent distribution fails, and collects in a child interpreter. Measured on this tree: 415 items,
+four module skips, zero collection errors, against 484 with the oracles installed.
+
+**The guard checks that the probe is the runner's shape, not this machine's.**
+`test_the_offline_test_count_is_measurable_before_the_runner` refuses a probe that produced collection
+*errors* instead of skips (the first version did, by raising from a finder), requires four skip records,
+and requires the blocked set to be non-empty -- a probe blocking nothing would report the online figure
+and look correct. It then compares every living quotation of the offline count with the measurement, which
+is the assertion the older count guard cannot make in an environment that has the oracles. Falsified before
+the commit by the declared plant `report-quotes-a-count-the-offline-probe-refutes` (40 → 41 plants), and
+twice incidentally by the phase itself: adding the guard's own test moved the measurement to 415 and the
+guard went red against the 414 the documents still said, which is the failure it exists to produce.
+
+**Fidelity, the honest account.** One comparison against the runner exists so far: the probe reported 413
+at the revision where the runner's guard message said `pytest collects 413`. A second is in flight (the
+Phase 25 head, expected 414) and its reading is recorded in `docs/phase_reports/phase-26-offline-count-owner.md`
+§9 when it lands. One agreement does not prove the simulation, so the claim carried here is the
+disagreement-detection property -- the probe says a quotation is stale before the runner has to -- and the
+runner remains the arbiter of the published pair.
