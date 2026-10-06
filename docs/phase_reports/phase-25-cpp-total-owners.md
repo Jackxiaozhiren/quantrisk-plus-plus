@@ -136,8 +136,11 @@ three jobs — `Format and static checks`, `Configure, build, C++ tests, Python 
 against live oracles` — with the suite lane's own line `suite: 18/18 executed and passed`. Its offline lane
 printed `413 passed, 5 skipped in 143.13s`, and the count guard that ran there accepted the published 414,
 which is the runner's own confirmation of this phase's offline figure: 414 collected, four module-level skip
-records on top, 418 outcomes. The falsification sweep on this tree, after it was committed and with
-`git status` empty before and after, printed `41/41 planted defects were rejected by their guard.` — the
-fortieth being `readme-quotes-a-stale-assertion-total`, which fired on the README as declared. The head
+records on top, 418 outcomes. The falsification sweep ran on `413e199`, the head that carries the phase, with `git
+status` empty before and after, and printed `40/40 planted defects were rejected by their guard.` — the
+fortieth being `readme-quotes-a-stale-assertion-total`, which fired on the README quotation as declared.
+This record commit has no sweep line of its own yet: the harness refuses a tree whose mutation targets
+differ from HEAD, and the next phase's work is uncommitted here, so its verdict is appended in the
+accounting commit that follows. The head
 carrying this paragraph is a record commit, so its own run is read the same way as the two above:
 `gh api repos/Jackxiaozhiren/quantrisk-plus-plus/commits/$(git rev-parse HEAD)/check-runs`.
