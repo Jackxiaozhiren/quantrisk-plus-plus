@@ -380,7 +380,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 481 pytest tests with the validation",
+        anchor="and 482 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -431,7 +431,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 38/38 planted defects rejected",
+        anchor="# 39/39 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -537,6 +537,22 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_note_figures_are_the_artifacts_own"
         ),
         claim="the note's headline count is the artifact's, re-counted from the rows",
+    ),
+    Mutation(
+        identifier="derivation-prefactor-exponent-off-by-one",
+        kind="prose",
+        path="scripts/derive_fifth_order_partials.py",
+        anchor="quotient = value * v_value**4 / prefactor",
+        replacement="quotient = value * v_value**3 / prefactor",
+        # Nothing but the derivation gate can see this: the difference-route tests are banded at
+        # 1e-3 relative and the C++ routes at 1e-8, and the identity check runs at 60 working
+        # digits, so a wrong prefactor power is a floor-of-precision failure everywhere else and a
+        # hard failure here.
+        guard=(
+            "tests/python/test_fifth_order_partials.py::"
+            "test_the_derivation_command_agrees_at_the_precision_floor"
+        ),
+        claim="the derived numerators meet the exact derivative at the precision floor",
     ),
 )
 

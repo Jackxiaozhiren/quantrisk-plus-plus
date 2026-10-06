@@ -42,6 +42,9 @@ dev = [
   "pybind11>=2.13",
   "scipy>=1.11",
   "matplotlib>=3.8",
+  # The order-five derivation runs in the gate, not only by hand: `scripts/derive_fifth_order_partials.py`
+  # is the identity check behind matrix row 21's 8.7e-58 claim, and nothing executed it before.
+  "sympy>=1.12",
 ]
 
 [tool.scikit-build]

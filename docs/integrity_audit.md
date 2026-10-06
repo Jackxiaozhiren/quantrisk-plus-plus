@@ -1035,3 +1035,53 @@ the provenance the release records. `docs/release_notes_v1.7.0.md` carries a dat
 sentences instead, and the repository's own `paper/technical_report.pdf` is rebuilt from the corrected
 source. `docs/limitations.md` #84 states the residue: the guards own the shapes they name, and a false
 sentence with no number and no registered path is still caught only by a reader.
+
+## Addendum — Phase 24, a command nobody ran and a build that lagged its source (2026-10-06)
+
+**56. "Re-runnable" is not "run", and two documents were free to agree on a number nothing produced.**
+Phase 20 shipped `scripts/derive_fifth_order_partials.py` as the reason the order-five numerators are
+*derived* rather than typed, and the records quoted its output: `docs/validation_matrix.md` row 21 says
+"8.7e-58 worst relative over 60 markets, re-runnable", and §Stress Testing of the technical report says
+"$8.7 \times 10^{-58}$ relative worst at 60 working digits". Both were true as statements about the file.
+Neither was a measurement the repository performed: `sympy` was not a dependency of any group CI installs,
+and no test invoked the script, so between Phase 20 and this phase the identity ran only when a human chose
+to type `uv run --with sympy ...` -- which after Phase 21 changed the same file's neighbourhood is never.
+A committed command with no executor is worse than a sentence, because it reads like an owner.
+
+(a) **The fix has to make the number produced, not available.** `sympy` moved into
+`[dependency-groups] dev`, which is the group `uv sync` installs in all three CI jobs (the `oracles` extra
+remains opt-in, so the offline lane is still offline), and
+`tests/python/test_fifth_order_partials.py::test_the_derivation_command_agrees_at_the_precision_floor`
+executes the script in a subprocess and asserts part A's six fields at the script's own `1e-40` floor and
+part B's grid summary at the `1e-12` cross-platform slack `docs/limitations.md` #63 documents. Part B is
+banded rather than compared digit for digit because finding 54(a) is exactly what happens when a float64
+`libm` difference is asserted as equality.
+
+(b) **The two quotations now have to agree with each other and with the run.** The test reads row 21 and the
+tex sentence, requires identical `(mantissa, exponent, market count)` triples, and requires the run's worst
+residual to sit in the same order of magnitude as the quoted one. The mantissa is deliberately *not*
+asserted: the last digits of a 60-digit mpmath residual are not a cross-platform fact, and a guard that
+required them would be a false-positive machine. An order of magnitude is portable, and the failure this
+catches moves by dozens of orders.
+
+(c) **Falsification, before the commit.** With `v_value**4` changed to `v_value**3` in the derivation's
+prefactor quotient -- the shape claim, not a coefficient -- part A reported
+`FAILED: ['q50', 'q41', 'q32', 'q23', 'q14', 'q05']`, the script exited 1, and the new test went red on the
+first assertion. Restored from a captured copy and hash-verified: `9b2431c47a9a46e067ce1b569e0467b879fea229c734d10e424acea0f3e65375`
+before and after. The harness carries it as `derivation-prefactor-exponent-off-by-one` (39 plants declared),
+and the routes that check the same numerators by finite difference cannot see it: they are banded at `1e-3`
+relative in Python and `1e-8` in C++.
+
+(d) **A second instance of the hole `docs/reproducibility.md` already names.** While writing the release-page
+erratum I rebuilt `paper/technical_report.pdf` and found the committed copy had been built *before* the
+offline test count moved 408 → 412, so the tree held a PDF quoting a number its own `.tex` no longer
+contained. The note says plainly that nothing on the runner verifies PDF-against-tex, and records a Phase 11
+instance; this is the second. The PDF is rebuilt here and the rule from now on is that a tex edit rebuilds it
+in the same commit, but the *owner* is still missing, because checking it needs a PDF text extractor as a
+project dependency, which the repository has declined on purpose.
+
+(e) **The release body and the release note are two documents restating one release.** `gh release view v1.7.0
+--json body` returns 92 lines; `docs/release_notes_v1.7.0.md` holds 111 and gains dated corrections the
+GitHub page never received. Nothing compares them, and a guard that would have to call the API is a network
+test this suite does not run. Registered rather than fixed; the erratum was written into both on 2026-10-06,
+and the pre-edit body is committed at `docs/release_bodies/` so the edit is reversible by anyone.

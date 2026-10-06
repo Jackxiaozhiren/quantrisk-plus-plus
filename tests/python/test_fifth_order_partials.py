@@ -19,11 +19,18 @@ rung, and why the coarse rungs are reported in limitation #82 rather than assert
 
 from __future__ import annotations
 
+import re
+import subprocess
+import sys
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import pytest
 import quantrisk
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DERIVATION = REPO_ROOT / "scripts" / "derive_fifth_order_partials.py"
 
 PRICING = quantrisk.pricing
 STEPS = (0.002, 0.005, 0.01)
@@ -208,3 +215,77 @@ def test_the_degenerate_market_reports_the_limit_rather_than_an_overflow() -> No
 def test_an_invalid_instrument_is_refused_before_any_polynomial_is_evaluated() -> None:
     with pytest.raises(quantrisk.ValidationError):
         PRICING.black_scholes_mixed_fifth_derivatives(_option(strike=-1.0), _market(MARKETS[0]))
+
+
+def test_the_derivation_command_agrees_at_the_precision_floor() -> None:
+    """The identity behind the `8.7e-58` claim was a command nobody's gate ran.
+
+    `scripts/derive_fifth_order_partials.py` is what makes "the numerators are derived, not typed"
+    a check rather than a sentence: it re-differentiates the price at 60 digits, divides by the
+    prefactor the header claims, and meets the result against the polynomial parsed out of
+    `cpp/src/pricing/black_scholes.cpp`. Until this phase the only way to exercise it was a human
+    typing `uv run --with sympy ...`, so `docs/validation_matrix.md` row 21 and the technical
+    report's §Stress Testing could quote its worst residual with nothing able to disagree. `sympy`
+    is now a dev-group dependency -- the group `uv sync` installs -- so every lane that sets up the
+    development environment runs the identity.
+
+    Part A is asserted against the script's own `1e-40` floor over the six fields. Part B is
+    float64 against 60-digit mpmath, so it is banded with the `1e-12` cross-platform slack
+    `docs/limitations.md` #63 documents rather than compared digit for digit: finding 54(a) is what
+    happens when a last-bit `libm` difference is asserted as equality.
+    """
+    pytest.importorskip("sympy", reason="the derivation is symbolic and needs sympy")
+    completed = subprocess.run(
+        [sys.executable, str(DERIVATION)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stdout[-600:] + completed.stderr[-600:]
+
+    part_a = re.findall(
+        r"worst relative disagreement ([0-9.e+-]+) \(values up to", completed.stdout
+    )
+    assert len(part_a) == 6, f"expected six field lines, read {part_a}"
+    worst_a = max(float(value) for value in part_a)
+    assert worst_a <= 1.0e-40, (
+        f"the parsed numerator diverges from the exact derivative at {worst_a}"
+    )
+
+    part_b = re.search(r"worst relative disagreement over the grid: ([0-9.e+-]+)", completed.stdout)
+    assert part_b, "part B printed no grid summary line"
+    assert float(part_b.group(1)) <= 1.0e-12, (
+        f"the extension disagrees with 60-digit nested differentiation at {part_b.group(1)}"
+    )
+
+    quoted = _quoted_identity_floor()
+    assert _exponent(quoted) == _exponent(worst_a), (
+        f"the documents quote the identity's worst residual as {quoted} while the run reports "
+        f"{worst_a}. The mantissa is deliberately not asserted: the last digits of a 60-digit "
+        f"residual are not a cross-platform fact. An order of magnitude is, and a numerator that "
+        f"stopped matching the exact derivative would move by many more than one"
+    )
+
+
+def _quoted_identity_floor() -> float:
+    """The figure the matrix and the report quote, read from both and required to agree."""
+    matrix = (REPO_ROOT / "docs" / "validation_matrix.md").read_text(encoding="utf-8")
+    tex = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
+    row = [line for line in matrix.splitlines() if line.startswith("| 21 |")]
+    assert row, "validation matrix row 21 is gone"
+    in_matrix = re.search(r"\(([0-9.]+)e-(\d+) worst relative over (\d+) markets", row[0])
+    in_tex = re.search(
+        r"\$([0-9.]+) \\times 10\^\{-(\d+)\}\$ relative worst at (\d+) working digits", tex
+    )
+    assert in_matrix and in_tex, "neither document states the identity floor in a readable form"
+    assert in_matrix.groups() == in_tex.groups(), (
+        f"the matrix quotes {in_matrix.groups()} and the report quotes {in_tex.groups()}"
+    )
+    return float(f"{in_matrix.group(1)}e-{in_matrix.group(2)}")
+
+
+def _exponent(value: float) -> int:
+    """The base-10 exponent of a positive float, from its own scientific rendering."""
+    assert value > 0.0, value
+    return int(f"{value:.0e}".split("e")[1])

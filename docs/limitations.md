@@ -304,7 +304,7 @@ never removed just because a later phase shipped.
     needs ALFRED vintages (`fetch_vintage` exists in `python/quantrisk/data/fred.py` and is
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
-    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 481 pytest tests with
+    without saying which is now wrong.** `uv run pytest -q` at HEAD gives 482 pytest tests with
     the `oracles` extra installed, and the same tree collects 412 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
@@ -666,7 +666,11 @@ never removed just because a later phase shipped.
     command rather than a sentence: `scripts/derive_fifth_order_partials.py` parses the monomial sums
     out of `cpp/src/pricing/black_scholes.cpp`, forms the quotient of the symbolic derivative by the
     prefactor the header claims at 60 markets spread over the `(d1, v)` plane, and reports a worst
-    relative disagreement of 8.7e-58 at 60 digits. No coefficient is adjusted anywhere in that check,
+    relative disagreement of 8.7e-58 at 60 digits. Since Phase 24 that command is executed by
+    `tests/python/test_fifth_order_partials.py::test_the_derivation_command_agrees_at_the_precision_floor`
+    -- `sympy` is a dev-group dependency, so the gate runs the identity instead of offering it to a
+    human -- and the same test requires the two documents quoting 8.7e-58 to agree with each other and
+    with the run's order of magnitude. No coefficient is adjusted anywhere in that check,
     so an agreement sitting at the working-precision floor is the two sides being one analytic
     function rather than a curve through points; its second
     part recomputes the fields by nested numerical differentiation at 60 digits and meets the
