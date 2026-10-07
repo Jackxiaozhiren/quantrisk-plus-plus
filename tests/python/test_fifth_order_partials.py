@@ -259,7 +259,7 @@ def test_the_derivation_command_agrees_at_the_precision_floor() -> None:
         f"the extension disagrees with 60-digit nested differentiation at {part_b.group(1)}"
     )
 
-    quoted = _quoted_identity_floor()
+    quoted = _quoted_identity_floor(completed.stdout)
     assert _exponent(quoted) == _exponent(worst_a), (
         f"the documents quote the identity's worst residual as {quoted} while the run reports "
         f"{worst_a}. The mantissa is deliberately not asserted: the last digits of a 60-digit "
@@ -268,8 +268,16 @@ def test_the_derivation_command_agrees_at_the_precision_floor() -> None:
     )
 
 
-def _quoted_identity_floor() -> float:
-    """The figure the matrix and the report quote, read from both and required to agree."""
+def _quoted_identity_floor(stdout: str) -> float:
+    """The figures the matrix and the report quote, each matched to the thing it counts.
+
+    The matrix row and the report state the same identity's worst residual, a market count, and a
+    working precision, and this helper used to compare three groups at once -- the matrix's *market*
+    count against the report's *digit* count, because both read 60. That is a guard certifying the
+    transcription of two different quantities: it would have stayed green while the report claimed
+    the identity was met at a grid the script never evaluated. Each figure is now read against the
+    run's own printout, which is the producer of both.
+    """
     matrix = (REPO_ROOT / "docs" / "validation_matrix.md").read_text(encoding="utf-8")
     tex = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
     row = [line for line in matrix.splitlines() if line.startswith("| 21 |")]
@@ -278,9 +286,24 @@ def _quoted_identity_floor() -> float:
     in_tex = re.search(
         r"\$([0-9.]+) \\times 10\^\{-(\d+)\}\$ relative worst at (\d+) working digits", tex
     )
-    assert in_matrix and in_tex, "neither document states the identity floor in a readable form"
-    assert in_matrix.groups() == in_tex.groups(), (
-        f"the matrix quotes {in_matrix.groups()} and the report quotes {in_tex.groups()}"
+    tex_markets = re.search(r"meets it at (\d+)\s+markets", tex)
+    run_markets = re.search(r"(\d+) markets, realised d1", stdout)
+    run_digits = re.search(r"part B: (\d+)-digit nested numerical", stdout)
+    assert in_matrix and in_tex and tex_markets and run_markets and run_digits, (
+        "one of the three statements of the identity's grid or precision is gone: "
+        f"matrix={bool(in_matrix)} report={bool(in_tex)} report_markets={bool(tex_markets)} "
+        f"run_markets={bool(run_markets)} run_digits={bool(run_digits)}"
+    )
+    assert in_matrix.group(3) == run_markets.group(1) == tex_markets.group(1), (
+        f"the identity is met at {run_markets.group(1)} markets in the run, while the matrix "
+        f"quotes {in_matrix.group(3)} and the report quotes {tex_markets.group(1)}"
+    )
+    assert in_tex.group(3) == run_digits.group(1), (
+        f"the report says {in_tex.group(3)} working digits; the run differentiated at "
+        f"{run_digits.group(1)}"
+    )
+    assert (in_matrix.group(1), in_matrix.group(2)) == (in_tex.group(1), in_tex.group(2)), (
+        f"the matrix quotes {in_matrix.groups()[:2]} and the report quotes {in_tex.groups()[:2]}"
     )
     return float(f"{in_matrix.group(1)}e-{in_matrix.group(2)}")
 

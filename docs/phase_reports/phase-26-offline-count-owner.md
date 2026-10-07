@@ -135,3 +135,17 @@ the other.
 were not re-run because no C++ file moved. The sweep runs on the committed tree afterwards and its verdict,
 this head's CI run, and the runner's reading of the offline count for the Phase 25 head (the second
 fidelity datapoint) are appended in the commit that follows.
+
+**Verdict, recorded 2026-10-07 from the artifacts rather than from memory of the session.** The head this
+report ships on is `64d39a4`, and its CI run is `37415820564`, `completed`/`success` with all three jobs
+green: `Format and static checks`, `Configure, build, C++ tests, Python tests`, and
+`Benchmark suite against live oracles`. The oracle-free lane's own summary line, read out of that run's
+log, is `414 passed, 5 skipped in 188.30s (0:03:08)` -- and because the lane is green, the guard in it
+compared the documents with the probe *inside that lane*, which is the second agreement Phase 26's §9
+said was in flight: probe and runner agree that the oracle-free suite collects 415 at this revision.
+Two corrections belong here rather than in the paragraph above. First, the executed tally (414 passed plus
+five skip records) is not the collected figure and no document may quote it as one -- the distinction
+`docs/limitations.md` #63 already draws for the older revisions. Second, the sweep verdict for *this* head
+is not re-runnable now: the plant list has since grown to 42, so the harness refuses to sweep a tree that
+is not the one it was declared against, and Phase 27's sweep on its own head is the current evidence that
+the gate works. The 41-plant verdict published in Phase 25's record stands as that revision's reading.

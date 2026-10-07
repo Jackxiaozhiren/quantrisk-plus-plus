@@ -254,16 +254,7 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
     from inside the test session — but it is quoted from the runner's own log, and
     `docs/limitations.md` #63 explains why the two numbers differ.
     """
-    completed = subprocess.run(
-        [sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider"],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    collected = re.search(r"^(\d+) tests? collected", completed.stdout, flags=re.M)
-    assert collected, f"could not read a test count out of pytest: {completed.stdout[-500:]}"
-    total = int(collected.group(1))
+    total = _collect_in_this_environment()
 
     # Both environments are documented, and each one checks its own figure. The CI
     # `build-and-test` lane installs without the `oracles` extra, four oracle-gated modules
@@ -460,17 +451,26 @@ def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
         "README.md": r"carries (\d+) numbered entries",
         "docs/validation_matrix.md": r"The (\d+) numbered limitations",
         "docs/interview_defense.md": r"has all (\d+)\s*\n?numbered entries",
-        "paper/technical_report.tex": r"(?:contains|holds) (\d+) numbered entries",
+        "paper/technical_report.tex": [
+            r"(?:contains|holds) (\d+) numbered entries",
+            # The abstract states the same register's size in its own words, four pages from the
+            # section that cites it. Finding 55's mechanism, one phrasing at a time: the guard
+            # compared the section sentence while the abstract kept shipping `v1.0.0`'s number.
+            r"(\d+)\s+recorded\s+limitations",
+        ],
         # A release note is a living document about the current file, not a record of a past
         # revision: it quoted the count while the count moved. #76 was found by exactly that lag.
         "docs/release_notes_v1.3.0.md": r"all \*\*(\d+) entries\*\*",
         # ... and the same holds for the note that records #77's third case.
         "docs/release_notes_v1.4.0.md": r"carries (\d+) numbered entries",
     }
-    for name, pattern in claims.items():
+    for name, expected in claims.items():
         text = (REPO_ROOT / name).read_text(encoding="utf-8")
-        found = re.findall(pattern, text)
+        patterns = expected if isinstance(expected, list) else [expected]
+        found = [value for pattern in patterns for value in re.findall(pattern, text)]
         assert found, f"{name} no longer states the limitation count in the expected form"
+        for pattern in patterns:
+            assert re.search(pattern, text), f"{name} no longer matches {pattern!r}"
         assert all(int(value) == total for value in found), (
             f"{name} says {found}, docs/limitations.md has {total}"
         )
@@ -525,6 +525,51 @@ def _oracles_present() -> bool:
     import importlib.util
 
     return all(importlib.util.find_spec(module) is not None for module in ORACLE_MODULES)
+
+
+def _collect_in_this_environment() -> int:
+    """What pytest collects here, measured by a child that shares this process's oracle lever.
+
+    The guard compares a document's figure for *this* environment with a collection run, and the
+    collection happens in a subprocess because the parent must not execute the suite. A bare
+    subprocess sees site-packages rather than the parent's import state, so under
+    `scripts/measure_offline_collection.py`'s simulation the parent correctly concluded the oracles
+    were missing while the child collected the with-oracles figure -- measured on 2026-10-07 as
+    `1 failed, 415 passed, 4 skipped` in a blocked child, where the CI lane prints no failure. The
+    block is therefore handed down: absent modules are absent in the child too, which is what the
+    runner's lane actually looks like.
+    """
+    import importlib.util
+
+    blocked = [
+        module
+        for module in ORACLE_MODULES
+        if importlib.util.find_spec(module) is None  # absent, or blocked by a probe
+    ]
+    argv = (
+        ["-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider"]
+        if not blocked
+        else [
+            "-c",
+            "import sys\n"
+            + "".join(f"sys.modules[{name!r}] = None\n" for name in blocked)
+            + "import pytest\n"
+            + "raise SystemExit(pytest.main(['--collect-only', '-q',"
+            + " '-p', 'no:cacheprovider']))",
+        ]
+    )
+    completed = subprocess.run(
+        [sys.executable, *argv],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    collected = re.search(r"^(\d+) tests? collected", completed.stdout, flags=re.M)
+    assert collected, (
+        f"could not read a test count out of pytest: {(completed.stdout + completed.stderr)[-500:]}"
+    )
+    return int(collected.group(1))
 
 
 def _load_suite_members() -> list[Any]:
@@ -946,6 +991,9 @@ def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
         "README.md": r"# (\d+) C\+\+ tests",
         "docs/interview_defense.md": r"(\d+) C\+\+ tests under CTest",
         "docs/reproducibility.md": r"# (\d+) C\+\+ tests",
+        # The report's headline paragraph stated its own CTest total for four releases beside a
+        # section that stated a different one, and no pattern above reached it.
+        "paper/technical_report.tex": r"The suite is (\d+) CTest entries",
     }
     for name, pattern in claims.items():
         found = re.findall(pattern, (REPO_ROOT / name).read_text(encoding="utf-8"))
@@ -1039,6 +1087,283 @@ def test_documents_that_count_the_cpp_assertions_count_the_binarys_own() -> None
                     f"{name} quotes {cells[0]} assertions, binary {assertions}"
                 )
                 assert int(cells[1]) == cases, f"{name} quotes {cells[1]} cases, binary {cases}"
+
+
+# ---------------------------------------------------------------------------------------------
+# The report's countable claims: every one is either compared with a producer by a named guard,
+# or declared here with the reason it is a statement about the past or about a figure whose
+# producer is the artifact named in the same sentence.
+# ---------------------------------------------------------------------------------------------
+
+_REPORT_NOUNS = (
+    r"(artifacts?|bytes|tests?|cases|entries|rows|members|experiments|limitations|assertions"
+    r"|markets|digits|checks|commands|sections|figures|pages|questions|jobs|assets|files"
+    r"|modules|routes|rays|rungs|columns|books|releases|scenarios|fields|identities|steps|series"
+    r"|windows|benchmarks|fixtures|oracles|versions|tags|presets|packages|observations|sides"
+    r"|claims|models|criteria)"
+)
+# A number that is part of a word is not a claim: `(?<![A-Za-z\d])` keeps `Catch2 cases` and
+# `sklearn2011}. Oracle versions` out of the inventory, which a bare lookbehind on digits let in.
+_REPORT_CLAIM = re.compile(
+    r"(?<![A-Za-z\d])(\d[\d{},.]*)\s+(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b", re.I
+)
+
+# Pattern -> (owning test, file that holds it). Each pattern is required to occur verbatim in that
+# file, so this list cannot claim an ownership some guard does not implement.
+_REPORT_OWNED = {
+    r"The suite is (\d+) CTest entries": (
+        "test_documents_that_count_the_cpp_tests_agree_with_the_build",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+)\s+pytest\s+tests\s+with\s+the\s+validation": (
+        "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+) collected without them": (
+        "test_the_offline_test_count_is_measurable_before_the_runner",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"([\d{},]+) assertions in (\d+) Catch2 cases": (
+        "test_documents_that_count_the_cpp_assertions_count_the_binarys_own",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"the frozen manifest hashes (\d+) artifacts": (
+        "test_the_report_states_the_manifest_the_freeze_produced",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(?:contains|holds) (\d+) numbered entries": (
+        "test_documents_that_count_the_limitations_agree_with_the_file",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+)\s+recorded\s+limitations": (
+        "test_documents_that_count_the_limitations_agree_with_the_file",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+) benchmark-suite members execute": (
+        "test_documents_that_count_the_suite_members_agree_with_the_registry",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"meets it at (\d+)\s+markets": (
+        "test_the_derivation_command_agrees_at_the_precision_floor",
+        "tests/python/test_fifth_order_partials.py",
+    ),
+    r"relative worst at (\d+) working digits": (
+        "test_the_derivation_command_agrees_at_the_precision_floor",
+        "tests/python/test_fifth_order_partials.py",
+    ),
+}
+
+# One span the owner guard compares as a block: the manifest sentence, whose seven numbers are
+# checked by `test_the_report_states_the_manifest_the_freeze_produced` against
+# `evidence/manifest.json`. Both anchors and every pattern are required verbatim in that guard, and
+# the span is owned only while it still holds exactly as many numbers as that guard compares.
+_MANIFEST_REGION = {
+    "anchor": "The manifest is committed and verified:",
+    "close": "offline fixtures",
+    "owner": "test_the_report_states_the_manifest_the_freeze_produced",
+    "holder": "tests/python/test_artifact_metadata.py",
+}
+
+_REPORT_SRC = re.compile(r"\\src\{([^}]*)\}")
+
+# Everything else, each entry a literal phrase in the report's prose and what its numbers are a
+# statement about. The guard checks each entry twice: an anchor that stops matching the document is
+# stale, and an anchor that exempts nothing the other rules do not already cover is dead weight, so
+# this list can neither accrete nor be padded to make a paragraph pass.
+_REPORT_DECLARED: dict[str, str] = {
+    "at 200{,}000 paths over 250 steps": (
+        "the Heston xi=0 collapse probe's path and step configuration, recorded in the model card "
+        "the paragraph cites; no frozen artifact carries a Heston result (docs/limitations.md #86)"
+    ),
+    "combined standard errors for 20, 80 and 320 steps": (
+        "the Heston step-refinement probe's rung configuration, recorded in the model card the "
+        "paragraph cites; no frozen artifact carries a Heston result (docs/limitations.md #86)"
+    ),
+    "Level-1 identities": "names a validation level, not a count of anything",
+    "16 later cases had never": (
+        "quoted from the incident this report recounts, in that printout's own words"
+    ),
+    "exposed 6 failing cases": "quoted from the incident this report recounts",
+    "pinned in the Phase 2 test files": "names files by phase rather than counting them",
+    "310 pytest tests with no release tag": (
+        "end-of-Phase-9 baseline, recorded in the phase report it cites"
+    ),
+    "31 CTest entries": "a past CI run quoted as history in the sentence that names it",
+    "1{,}000 steps is about 1.6 GB": "a sizing estimate for a hypothetical, labelled as one",
+}
+
+
+# A declared anchor reaches only the words around it, because an exemption is a claim about one
+# sentence. The citation rule is the one that reads a whole paragraph, since an artifact backs the
+# argument rather than a single clause.
+_DECLARE_RADIUS = 40
+
+
+def _is_declared(flat: str, at: int, anchors: list[str]) -> bool:
+    """Whether one of `anchors` sits within `_DECLARE_RADIUS` characters of this claim."""
+    return any(
+        found.start() - _DECLARE_RADIUS <= at < found.end() + _DECLARE_RADIUS
+        for anchor in anchors
+        for found in re.finditer(re.escape(anchor), flat)
+    )
+
+
+def _tex_inventory_text() -> tuple[str, str]:
+    """The report in two aligned strings, comments blanked and soft breaks turned into spaces.
+
+    Both are the same length, so an offset found in the flat text is an offset in the file, which is
+    how the guard reports a claim's line. LaTeX reflows a sentence across physical lines, so an
+    inventory read line by line would miss `8 correctness\\nbenchmarks` -- one of the seven numbers
+    the manifest guard compares -- and would report the document as quieter than it is.
+    """
+    source = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
+    masked = "\n".join(
+        re.sub(r"\S", " ", line) if line.lstrip().startswith("%") else line
+        for line in source.splitlines()
+    )
+    return masked, masked.replace("\n", " ")
+
+
+def _tex_line(masked: str, offset: int) -> int:
+    return 1 + masked.count("\n", 0, offset)
+
+
+def _paragraph_span(masked: str, offset: int) -> tuple[int, int]:
+    """The paragraph around an offset: LaTeX's own unit of one continuing argument.
+
+    A citation belongs to the paragraph, not to a radius in characters. Reading only the nearest
+    hundred characters would have called the backtesting design unowned while the sentence four
+    lines later named the artifact the design was run to produce.
+    """
+    before = masked.rfind("\n\n", 0, offset)
+    after = masked.find("\n\n", offset)
+    return (0 if before < 0 else before + 2), (len(masked) if after < 0 else after)
+
+
+def _cites_frozen_artifact(window: str, frozen: set[str]) -> bool:
+    """Whether the paragraph names a file or directory the evidence freeze hashes.
+
+    A citation ending in `/` names the experiment, and the freeze carries its result files, so a
+    directory citation counts only when at least one frozen path lives under it.
+    """
+    for path in _REPORT_SRC.findall(window):
+        clean = path.replace("\\_", "_")
+        if clean.endswith("/"):
+            if any(frozen_path.startswith(clean) for frozen_path in frozen):
+                return True
+        elif clean in frozen:
+            return True
+    return False
+
+
+def _frozen_artifact_paths() -> set[str]:
+    """The repo-relative paths `evidence/manifest.json` hashes -- the producers a sentence can cite.
+
+    A number read out of one of these is not a number the report invented: the freeze carries the
+    bytes it was read from, and `test_the_manifest_hashes_every_experiment_results_directory` keeps
+    the freeze honest about which directories it covers.
+    """
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    return {str(entry["path"]) for entry in manifest["artifacts"]}
+
+
+def test_every_countable_claim_in_the_report_is_owned_or_declared() -> None:
+    """The report stated one fact two ways, six releases apart, nothing asked what it owns.
+
+    Finding 55 is the mechanism: `paper/technical_report.tex` printed the current artifact count in
+    one paragraph and the `v1.1.0` count in another, and every guard over the document compares one
+    phrasing each, so neither paragraph was compared with the other. The general form is to
+    inventory each `<number> <countable noun>` claim and require each to be either (a) inside a span
+    a named guard compares with its producer or (b) declared, with the reason it is not a living
+    quantity. Classifying a new numeric sentence is the step missing when the stale count shipped.
+
+    Two things keep the lists honest rather than decorative. An owned pattern must occur verbatim in
+    the source of the guard named, so a claim cannot be exempted by a comparison nobody wrote. And a
+    list entry that stops matching the document is reported stale, so neither list can accrete.
+    """
+    masked, flat = _tex_inventory_text()
+    assert len(masked) == len(flat), "the inventory lost its offset alignment"
+    claims = list(_REPORT_CLAIM.finditer(flat))
+    assert claims, "the extractor matches nothing in the report, so this guard proves nothing"
+
+    owned: list[tuple[int, int]] = []
+    for pattern, (owner, holder) in _REPORT_OWNED.items():
+        holder_source = (REPO_ROOT / holder).read_text(encoding="utf-8")
+        assert pattern in holder_source, (
+            f"{pattern!r} is claimed as owned by {owner}, whose source does not contain it"
+        )
+        hits = list(re.finditer(pattern, flat))
+        assert hits, f"the owned pattern {pattern!r} matches nothing in the report any more"
+        for hit in hits:
+            for group in range(1, hit.lastindex + 1):
+                owned.append(hit.span(group))
+
+    region_source = (REPO_ROOT / _MANIFEST_REGION["holder"]).read_text(encoding="utf-8")
+    for key in ("anchor", "close"):
+        assert _MANIFEST_REGION[key] in region_source, (
+            f"the manifest region is keyed on {_MANIFEST_REGION[key]!r}, which its owner "
+            f"{_MANIFEST_REGION['owner']} no longer searches for"
+        )
+    start = flat.find(_MANIFEST_REGION["anchor"])
+    assert start >= 0, "the report no longer states the manifest's size in its own words"
+    close = start + flat[start:].index(_MANIFEST_REGION["close"]) + len(_MANIFEST_REGION["close"])
+    # The owner reads the sentence the same way it does in its own guard: `{,}` becomes `,` before
+    # the patterns are applied, because LaTeX writes the thousands separators inside braces.
+    region = flat[start:close].replace("{,}", ",")
+    patterns = tuple(pattern for pattern, _ in _MANIFEST_CLAIMS)
+    for pattern in patterns:
+        assert pattern in region_source, f"the manifest guard no longer uses {pattern!r}"
+        assert re.search(pattern, region), f"the manifest sentence no longer matches {pattern!r}"
+    numbers = re.findall(r"(?<![A-Za-z\d])\d[\d{},]*", region)
+    assert len(numbers) == len(patterns), (
+        f"the manifest sentence holds {len(numbers)} numbers but the guard compares "
+        f"{len(patterns)}; the span is no longer owned as a block"
+    )
+
+    for anchor in _REPORT_DECLARED:
+        assert anchor in flat, f"the declared anchor {anchor!r} is not in the report: it is stale"
+
+    frozen = _frozen_artifact_paths()
+    assert frozen, "the evidence manifest lists no artifacts, so a citation could not be matched"
+
+    def classify(match: re.Match[str], without_anchor: str | None = None) -> str:
+        """How this claim is accounted for: `region`, `owned`, `cited`, `declared`, or `unowned`.
+
+        `without_anchor` re-runs the classification with one declared exemption withheld, which is
+        how the guard knows an anchor is load-bearing rather than decorative.
+        """
+        at = match.start(1)
+        if start <= at < close:
+            return "region"
+        if any(lo <= at < hi for lo, hi in owned):
+            return "owned"
+        anchors = [a for a in _REPORT_DECLARED if a != without_anchor]
+        if _is_declared(flat, at, anchors):
+            return "declared"
+        low, high = _paragraph_span(masked, at)
+        return "cited" if _cites_frozen_artifact(flat[low:high], frozen) else "unowned"
+
+    verdicts = [classify(match) for match in claims]
+    unowned = [
+        (_tex_line(masked, m.start(1)), m.group(0), " ".join(flat[: m.start(1)].split()[-90:]))
+        for m, verdict in zip(claims, verdicts, strict=True)
+        if verdict == "unowned"
+    ]
+    assert not unowned, "the report makes countable claims nobody owns:\n" + "\n".join(
+        f"  line {line}: {claim!r} near ...{context}" for line, claim, context in unowned
+    )
+
+    # A declared anchor has to be the reason at least one claim is accounted for. An exemption that
+    # the citation rule or another anchor already covers is dead weight, and dead weight in an
+    # exemption list is how a guard stops being able to fail.
+    decorative = []
+    for anchor, reason in _REPORT_DECLARED.items():
+        if not any(
+            verdict == "declared" and classify(match, without_anchor=anchor) == "unowned"
+            for match, verdict in zip(claims, verdicts, strict=True)
+        ):
+            decorative.append(f"  {anchor!r}: {reason}")
+    assert not decorative, "declared exemptions that exempt nothing:\n" + "\n".join(decorative)
 
 
 OFFLINE_PROBE_SCRIPT = REPO_ROOT / "scripts" / "measure_offline_collection.py"
@@ -1163,6 +1488,19 @@ def test_the_report_states_the_manifest_the_freeze_produced() -> None:
             f"the report says {found.group(1)} where the manifest totals say {expected} "
             f"for {'/'.join(key_path)}"
         )
+
+    # The headline paragraph, two pages from the sentence above, states the same artifact count in
+    # its own words. Finding 55(a) is what happens when only one of the two is compared:
+    # shipped contradicting itself, with the stale copy six releases old.
+    headline = re.search(
+        r"the frozen manifest hashes (\d+) artifacts",
+        (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8"),
+    )
+    assert headline, "the report's headline no longer states the manifest's artifact count"
+    assert int(headline.group(1)) == totals["artifacts"], (
+        f"the report's headline says {headline.group(1)} artifacts, the freeze "
+        f"holds {totals['artifacts']}"
+    )
 
 
 FIFTH_ORDER_ARTIFACT = (

@@ -1149,3 +1149,77 @@ Phase 25 head, expected 414) and its reading is recorded in `docs/phase_reports/
 §9 when it lands. One agreement does not prove the simulation, so the claim carried here is the
 disagreement-detection property -- the probe says a quotation is stale before the runner has to -- and the
 runner remains the arbiter of the published pair.
+
+## Addendum — Phase 27, what a document is allowed to say without an owner (2026-10-07)
+
+**59. A guard over a document only reaches the phrasing it was written to match, and the report had
+three consequences of that.** The instrument this phase added is
+`tests/python/test_artifact_metadata.py::test_every_countable_claim_in_the_report_is_owned_or_declared`:
+it inventories every `<number> <countable noun>` claim in `paper/technical_report.tex` and requires each
+to be owned by a named guard, inside the span a guard compares as a block, cited to an artifact the
+evidence freeze hashes, or declared with a reason. Measured on this tree: 45 claims, 9 owned, 4 inside the
+manifest sentence, 19 cited to a frozen artifact, 13 covered by 9 declared exemptions, 0 unowned.
+
+(a) *The abstract and the section stated one fact two ways, and only one was compared.* The abstract
+carried `55 recorded limitations` while `docs/limitations.md` holds 86 numbered entries and the report's
+own §Limitations said 86 — the same sentence `test_documents_that_count_the_limitations_agree_with_the_file`
+already policed, in a phrasing it did not read. This is finding 55's mechanism, not finding 55's residue:
+that finding was closed by comparing the two statements that existed at the time, and the pattern recurred
+in a paragraph nobody had keyed. Extending the owner to both phrasings went red immediately with
+`paper/technical_report.tex says ['85', '85', '55']` — the defect was in the tree, so no synthetic mutant
+was needed to prove the guard bites.
+
+(b) *A digit guard can certify the transcription of two different quantities.*
+`_quoted_identity_floor` compared `docs/validation_matrix.md` row 21's `(8.7e-58 worst relative over 60
+markets)` against the report's `8.7 × 10^{-58} relative worst at 60 working digits` with one `groups() ==
+groups()` assertion. Its third group is a *market count* on one side and a *working precision* on the other;
+the comparison held because both read 60, and it would have stayed green if the report claimed a grid the
+script never evaluated. Meanwhile the report's own market count -- `meets it at 60 markets` -- was read by
+nothing at all. The helper now matches each figure to its producer in the run's stdout: markets against
+`60 markets, realised d1 from ...`, digits against `part B: 60-digit nested numerical ...`, and the residual
+mantissa and exponent across the two documents.
+
+(c) *Two numeric sentences have no producer, and the guard says so.* `200,000 paths over 250 steps` and
+`20, 80 and 320 steps` describe Heston probes. No Heston artifact exists under `benchmarks/` or
+`experiments/` -- the manifest lists none -- so the only record of those runs is
+`docs/model_cards/heston.md`, which is version-controlled but not content-hashed. They are carried as
+declared exemptions anchored on the sentences themselves, and the asymmetry is registered as
+`docs/limitations.md` #86: a citation makes a number traceable to a producer, a declaration records only
+that a human read the sentence.
+
+(d) *A simulation is only faithful in the lever it copies.* Phase 26's probe blocks the
+`oracles`-only packages by setting `sys.modules[name] = None` in a child interpreter, and this phase
+ran that child as a *test session* instead of a collection to see whether the lane could be predicted
+locally. It could not, and the failure was specific:
+`test_the_documents_that_count_python_tests_count_the_ones_that_exist` answers "what does this
+environment collect" by spawning `pytest --collect-only` in a subprocess of its own -- which does not
+inherit the parent's block, because here the distributions are installed and merely unimportable. The
+parent therefore read the offline figure, the child collected the online one, and the blocked session
+printed `1 failed, 415 passed, 4 skipped` where the CI lane prints no failure. `_collect_in_this_environment`
+now hands the same block down, after which the identical session is green: `416 passed, 4 skipped`,
+exit code 0, and its collected figure equals the probe's. The residual gap is platform state rather
+than instrumentation -- the runner's own tally read `414 passed, 5 skipped` against the 415 items its
+probe collected, one item skipping on Linux where it passes here -- and `docs/limitations.md` #63 now
+says so instead of leaving the simulation's scope implied.
+
+**Two properties keep the lists from becoming decoration.** An owned pattern must occur verbatim in the
+source of the guard named as its owner, so a claim cannot be exempted by a comparison nobody wrote; and
+every declared anchor is re-run with itself withheld, and an anchor that exempts nothing the other rules do
+not already cover is reported as dead weight. That second check paid for itself during the phase, and
+taught the radius lesson with it: three hand-written anchors (`12 of 12 cases`, `492 rows`,
+`4 scenarios`) were genuinely redundant once the sentences cited their artifacts and were deleted, while
+two incident quotations were flagged redundant *spuriously* -- under a paragraph-wide rule, two anchors
+in one paragraph each looked removable because the other still covered the paragraph, and deleting both
+broke the guard. Anchoring declarations to 40 characters made each quotation load-bearing again, and the
+first version of the exemption rule's paragraph reading -- which had let a claim three sentences away
+borrow an exemption -- was replaced by a 40-character radius around the anchor, with the paragraph rule
+reserved for artifact citations, because an artifact backs an argument while a declaration is about one
+sentence.
+
+**Falsification.** Declared plant `report-adds-an-unowned-numeric-claim` inserts `41 modules` into the
+abstract -- a paragraph with no citation and no declaration -- and names the inventory guard as its guard
+(41 → 42 plants). The same edit was run live before it was declared: the guard reported
+`line 59: '41 modules'`, the file was restored to its recorded SHA-256 (`44c2c1d5…`), and the guard went
+green again. Four plant anchors were re-keyed by this phase's own count syncs (85 → 86 limitations, `# 415`
+→ `# 416`, `484 pytest tests` → `485`, `# 41/41` → `# 42/42`), and the harness self-test named each one
+before it could be counted as coverage.

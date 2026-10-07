@@ -156,7 +156,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 85 numbered entries",
+        anchor="carries 86 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -221,7 +221,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 415 Python tests",
+        anchor="# 416 Python tests",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -380,7 +380,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 484 pytest tests with the validation",
+        anchor="and 485 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -431,7 +431,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 41/41 planted defects rejected",
+        anchor="# 42/42 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -573,7 +573,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 415 collected without them",
+        anchor="oracles installed, 416 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -583,6 +583,28 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_offline_test_count_is_measurable_before_the_runner"
         ),
         claim="the oracle-free count is what the probe measures, not what a document remembers",
+    ),
+    Mutation(
+        identifier="report-adds-an-unowned-numeric-claim",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="This report describes the design, implementation and validation of QuantRisk++,",
+        replacement=(
+            "This report describes 41 modules of the design, implementation and validation "
+            "of QuantRisk++,"
+        ),
+        # The abstract is the paragraph the inventory reads with no citation and no declaration, so
+        # a number inserted there has to be classified before it can ship. Phase 23 shipped a stale
+        # count in this same paragraph because every older guard over the document matched only the
+        # phrasing it was written for.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_report_is_owned_or_declared"
+        ),
+        claim=(
+            "each countable claim in the report is owned by a named guard, cited to a frozen "
+            "artifact, or declared with a reason"
+        ),
     ),
 )
 

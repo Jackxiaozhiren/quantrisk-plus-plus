@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 484 pytest tests with
-    the `oracles` extra installed, and the same tree collects 415 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 485 pytest tests with
+    the `oracles` extra installed, and the same tree collects 416 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -322,6 +322,16 @@ never removed just because a later phase shipped.
     `sklearn`, `QuantLib` twice and `pypfopt`), and a module
     that skips at import reports **one** skip instead of the cases it holds. Those 69 are oracle
     comparisons a no-extra run never attempts. Both counts are honest; neither is "the" count.
+    Added 2026-10-07 (Phase 27), because the simulation was finally run end to end rather than
+    trusted: it now reproduces the lane -- `416 passed, 4 skipped`, exit code 0. It did not before.
+    A guard that answers "what does this environment collect" by spawning
+    `pytest --collect-only` in a subprocess escaped the parent's block, since here the distributions
+    are installed and merely unimportable, so the parent read the offline figure while the child
+    collected the online one (`1 failed, 415 passed, 4 skipped`). `_collect_in_this_environment`
+    hands the same block down, which is what makes the probe a *simulation* of the runner instead of
+    a parent-only trick. What remains different is platform state, not instrumentation: the runner's
+    own tally read `414 passed, 5 skipped` against the 415 items its probe collected, one item
+    skipping on Linux where it passes here.
     `v1.0.0`'s own documents quoted 330 and 319 for the same tag with no environment stated; 330 was
     the number that was right, 319 was stale, and the runner printed 261 passed with 4 skipped. The
     guard is `test_the_documents_that_count_python_tests_count_the_ones_that_exist`, and it asks
@@ -771,3 +781,16 @@ never removed just because a later phase shipped.
     that runs pytest immediately after `cmake --build` is what makes it live. The CTest entry count is
     not asserted there because `test_documents_that_count_the_cpp_tests_agree_with_the_build` already
     owns it, and one number is allowed exactly one owner. Phase 25's finding is audit finding 57.
+
+86. **The Heston probes have no frozen artifact, so two of the report's numeric sentences are
+    exempted by hand.** `paper/technical_report.tex` states the ξ=0 collapse check at 200,000 paths
+    over 250 steps and the step-refinement check at 20, 80 and 320 steps. Neither number is read
+    from anything `evidence/manifest.json` hashes: there is no Heston file under `benchmarks/` or
+    `experiments/` at all, and the only record of those runs is `docs/model_cards/heston.md`, which
+    is version-controlled but not content-hashed by the freeze. The inventory guard
+    `test_every_countable_claim_in_the_report_is_owned_or_declared` therefore carries both as
+    declared exemptions anchored on the sentences themselves, with the reason stated next to each.
+    That is the weaker of its two mechanisms: a citation to a frozen artifact makes a number
+    traceable to a producer, while a declaration records only that a human read the sentence and
+    judged it. Closing this means running the Heston comparisons as a registered suite member whose
+    results the freeze hashes, which is not done here.
