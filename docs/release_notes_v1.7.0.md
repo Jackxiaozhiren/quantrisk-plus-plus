@@ -138,3 +138,58 @@ What changed and what did not, verified against the API afterwards:
   freshness, which is the same class of defect finding 55 records one level up; the PDF is rebuilt here and
   the missing owner is registered as `docs/phase_reports/phase-24-dependencies-and-build-products.md` §8
   rather than left as an anecdote.
+
+## Second correction added 2026-10-07 — the attached report contradicts itself on the register's size
+
+The first correction above covered the two sentences Phase 23 found. Phase 27 added an
+inventory guard over `paper/technical_report.tex` -- every `<number> <countable noun>` claim
+must be owned by a named guard, sit inside a span a guard compares, cite an artifact the
+freeze hashes, or be declared with a reason -- and its first run found a third stale
+statement in the same document. Verified against the **released asset**, not the repository:
+
+- `technical_report.pdf` at this release (1,003,093 bytes, digest recorded under
+  "Verification at this release"; unchanged) states on its first page
+  `was not established: 55 recorded limitations` -- pdftotext line 27.
+- The same file states twice that the register `contains 83 numbered entries` and
+  `holds 83 numbered entries` -- pdftotext lines 373 and 2490.
+- `git show v1.7.0:docs/limitations.md` counted with the repo's own numbering rule gives
+  **83**, contiguous from 1, so the section sentences were true at the tag and the abstract's
+  was 28 entries behind. `main` carries 86 as of this correction.
+
+Why no existing guard saw it: `test_documents_that_count_the_limitations_agree_with_the_file`
+compares the phrasings `carries/contains/holds N numbered entries`, and the abstract writes
+the same fact as `N recorded limitations`. That is finding 55's mechanism -- one document, one
+fact, several phrasings, one of them compared -- recurring in a paragraph no guard had been
+keyed to. The owner now reads both phrasings, and it went red the moment the second was added
+(`paper/technical_report.tex says ['85', '85', '55']` against a file holding 85 at that moment),
+which is the defect rather than a mutant. Finding 59(a) is the audit entry;
+`docs/phase_reports/phase-27-claim-inventory.md` is the phase record.
+
+- **Assets: none touched, tag unchanged.** Same rule as the first correction: the tag anchors
+  the provenance of the bytes it carries, so replacing an asset under a released tag would make
+  this page point at bytes that no longer match that anchor. The repository's
+  `paper/technical_report.tex` and the rebuilt `paper/technical_report.pdf` on `main` at
+  `9117403` carry the derived figure, and the inventory guard plus its declared plant
+  `report-adds-an-unowned-numeric-claim` keep a new numeric sentence from arriving unclassified.
+- **Release page:** the block appended to the release body is saved verbatim as
+  `docs/release_bodies/v1.7.0-second-correction-block-2026-10-07.md`
+  (2,027 bytes, sha256 `229c21a64c6ae190d21665e420e0a449dcfdb62f08eaa8f9bbe023a61ba60c3c`), the body
+  as it stood before this edit as
+  `docs/release_bodies/v1.7.0-body-before-2026-10-07.md` (9,639 bytes, sha256
+  `35a39c0d625b0ae67cc1a5c87ac68bc899f8fb75c788a53671df9bd8710b75bf`), and the
+  published body afterwards is exactly the saved-before text plus the saved block -- 11,604
+  characters, sha256 `8122e06b62437d156eb91c3d1c4166df0721c6d50087ac45527d4b71dac3b8a1` over its
+  UTF-8 bytes -- which is the check that the first correction was appended to rather than replaced.
+  The identity is exact as files: `saved-before text + one newline + saved block file == published
+  body`, verified by constructing the published text from the two files. Citing these digests is how
+  this phase found its own slip: the note first named `b0a13681…` for the block, which was the hash of
+  the text before the file was saved with its trailing newline.
+  `test_every_digest_a_release_note_cites_is_its_files_own` now reads every 64-hex digest this note
+  cites for a file under `docs/release_bodies/` and requires that file's own hash.
+- **A present-tense bullet of this note has since moved.** "What is still not here" says
+  `sympy` "is still not a project dependency, so the derivation script runs by hand"; that was true at
+  the tag. Phase 24 added `sympy>=1.12` to the `dev` dependency group, so every lane that runs
+  `uv sync` now executes the identity, and
+  `tests/python/test_fifth_order_partials.py::test_the_derivation_command_agrees_at_the_precision_floor`
+  is gated on it. The bullet is left standing as what this revision said; this line is the dated
+  correction, per the rule that records of a revision are appended to rather than rewritten.

@@ -1161,13 +1161,24 @@ evidence freeze hashes, or declared with a reason. Measured on this tree: 45 cla
 manifest sentence, 19 cited to a frozen artifact, 13 covered by 9 declared exemptions, 0 unowned.
 
 (a) *The abstract and the section stated one fact two ways, and only one was compared.* The abstract
-carried `55 recorded limitations` while `docs/limitations.md` holds 86 numbered entries and the report's
-own §Limitations said 86 — the same sentence `test_documents_that_count_the_limitations_agree_with_the_file`
-already policed, in a phrasing it did not read. This is finding 55's mechanism, not finding 55's residue:
-that finding was closed by comparing the two statements that existed at the time, and the pattern recurred
-in a paragraph nobody had keyed. Extending the owner to both phrasings went red immediately with
-`paper/technical_report.tex says ['85', '85', '55']` — the defect was in the tree, so no synthetic mutant
-was needed to prove the guard bites.
+carried `55 recorded limitations` while `docs/limitations.md` had 85 entries at the start of this
+phase (86 now) and the report's §Limitations said so in another phrasing that
+`test_documents_that_count_the_limitations_agree_with_the_file` did compare. This is finding 55's
+mechanism, not finding 55's residue: that finding was closed by comparing the two statements that
+existed at the time, and the pattern recurred in a paragraph nobody had keyed. Extending the owner to
+both phrasings went red immediately with `paper/technical_report.tex says ['85', '85', '55']` -- the
+defect was in the tree, so no synthetic mutant was needed to prove the guard bites.
+
+The released asset was then read rather than inferred, because a claim about what a published PDF
+says is not answerable from the repository. `gh release download v1.7.0 -p technical_report.pdf`
+(1,003,093 bytes, the digest the release note records) through `pdftotext` puts
+`was not established: 55 recorded limitations` on line 27 of the released text, while lines 373 and
+2490 of the same file state the register `contains`/`holds` **83** numbered entries -- and
+`git show v1.7.0:docs/limitations.md`, counted by the repo's own numbering rule, is 83 contiguous
+from 1. So the shipped report carries three statements of one quantity, one of them 28 entries
+behind, and the stale one is on the first page. Corrected by dated erratum on the release page and in
+`docs/release_notes_v1.7.0.md`; the tag and all four assets are untouched, per the rule the first
+correction stated.
 
 (b) *A digit guard can certify the transcription of two different quantities.*
 `_quoted_identity_floor` compared `docs/validation_matrix.md` row 21's `(8.7e-58 worst relative over 60
@@ -1201,6 +1212,24 @@ exit code 0, and its collected figure equals the probe's. The residual gap is pl
 than instrumentation -- the runner's own tally read `414 passed, 5 skipped` against the 415 items its
 probe collected, one item skipping on Linux where it passes here -- and `docs/limitations.md` #63 now
 says so instead of leaving the simulation's scope implied.
+
+(e) *Two defects this phase produced itself, recorded because the phase's whole subject is a number
+that does not belong to its producer.* First, the dated correction written into
+`docs/release_notes_v1.7.0.md` cited sha256 `b0a13681…` for
+`docs/release_bodies/v1.7.0-second-correction-block-2026-10-07.md`; the file's own digest is
+`229c21a64c6ae190d21665e420e0a449dcfdb62f08eaa8f9bbe023a61ba60c3c`, and the cited value was the hash of
+the text before that file was saved with its trailing newline. It was caught only because the file was
+hashed a second time on the way to the commit, which is the same position a reader restoring the release
+page would be in -- and a snapshot whose digest does not match is a silent failure rather than a loud
+one. `test_every_digest_a_release_note_cites_is_its_files_own` now pairs every snapshot under
+`docs/release_bodies/` with the digest the note cites for it, and the declared plant
+`release-note-cites-a-digest-its-file-does-not-carry` (42 -> 43 plants) is the same edit, run live
+first: the guard named both digests side by side, and the file came back to its recorded SHA-256.
+Second, that same note's "What is still not here" section says `sympy` "is still not a project
+dependency", which Phase 24 made false -- a present-tense bullet in a dated record, decayed in place,
+and no guard reads it because dated records are deliberately outside the count guards. Registered as
+`docs/limitations.md` #87 with the mitigation actually used (a dated correction line beside the stale
+bullet, discoverable but unenforced) rather than resolved.
 
 **Two properties keep the lists from becoming decoration.** An owned pattern must occur verbatim in the
 source of the guard named as its owner, so a claim cannot be exempted by a comparison nobody wrote; and

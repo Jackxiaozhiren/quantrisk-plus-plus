@@ -1366,6 +1366,41 @@ def test_every_countable_claim_in_the_report_is_owned_or_declared() -> None:
     assert not decorative, "declared exemptions that exempt nothing:\n" + "\n".join(decorative)
 
 
+RELEASE_NOTE = REPO_ROOT / "docs" / "release_notes_v1.7.0.md"
+RELEASE_BODIES = REPO_ROOT / "docs" / "release_bodies"
+
+
+def test_every_digest_a_release_note_cites_is_its_files_own() -> None:
+    """A snapshot whose cited hash is not its own is worse than no snapshot at all.
+
+    This phase wrote `b0a13681…` for the saved second-correction block -- the hash of the text
+    before that file was saved with its trailing newline -- and only noticed because the file was
+    hashed a second time on the way to the commit. The erratum rule makes those digests the entire
+    reason a saved body counts as evidence: a reader restoring a release page from a snapshot whose
+    number does not belong to it gets silence where they should get a mismatch.
+
+    Pairing is by proximity rather than by one sentence shape, because the note cites some snapshots
+    as "(`sha256 <hex>`)" right after the path and others as "bytes, sha256 `<hex>`". A path with no
+    digest inside the window is a failure, so the list cannot accrete uncited files.
+    """
+    note = " ".join(RELEASE_NOTE.read_text(encoding="utf-8").split())
+    paths = sorted(RELEASE_BODIES.glob("*.md"))
+    assert paths, "no release-body snapshots exist, so this guard would prove nothing"
+    for path in paths:
+        cited = f"`docs/release_bodies/{path.name}`"
+        at = note.find(cited)
+        assert at >= 0, (
+            f"{path.name} is not named in {RELEASE_NOTE.name}, so nothing pins its digest"
+        )
+        window = note[at : at + 240]
+        found = re.search(r"(?:sha256 )?`?([0-9a-f]{64})`?", window)
+        assert found, f"{path.name} is cited without a 64-hex digest within 240 characters"
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        assert found.group(1) == digest, (
+            f"{path.name} hashes to {digest} while {RELEASE_NOTE.name} cites it as {found.group(1)}"
+        )
+
+
 OFFLINE_PROBE_SCRIPT = REPO_ROOT / "scripts" / "measure_offline_collection.py"
 
 # Every phrasing in which a living document states the oracle-free count. The older guard

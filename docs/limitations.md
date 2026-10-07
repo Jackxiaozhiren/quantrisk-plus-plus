@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 485 pytest tests with
-    the `oracles` extra installed, and the same tree collects 416 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 486 pytest tests with
+    the `oracles` extra installed, and the same tree collects 417 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -794,3 +794,16 @@ never removed just because a later phase shipped.
     traceable to a producer, while a declaration records only that a human read the sentence and
     judged it. Closing this means running the Heston comparisons as a registered suite member whose
     results the freeze hashes, which is not done here.
+
+87. **A dated record's present-tense bullets go stale when a later phase changes the world they
+    describe, and nothing reads them.** `docs/release_notes_v1.7.0.md`'s "What is still not here"
+    section says `sympy` "is still not a project dependency, so the derivation script runs by hand".
+    That was true of the tag it describes; Phase 24 added `sympy>=1.12` to the `dev` group, so the
+    sentence has been false ever since, in a document a reader reaches from the release page. The
+    count guards do not cover it because those documents are deliberately excluded from the
+    register-count and test-count comparisons -- they are records of a revision, and forcing them to
+    track a moving file would rewrite history to keep a test green, which is what #76 was about. The
+    honest mitigation available is the one used here: a dated correction appended beside the stale
+    bullet, which is discoverable by a reader but not enforced by a gate. A guard over this class
+    would have to decide, per document, which sentences claim to describe the present rather than the
+    revision -- and no such decision is made here.

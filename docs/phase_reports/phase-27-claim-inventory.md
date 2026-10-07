@@ -54,7 +54,14 @@ ask whether the oracle-free lane can be predicted locally at all -- produced
 judges the environment by `importlib.util.find_spec` in the parent and measures by spawning
 `pytest --collect-only` in a grandchild, which does not inherit the block. `_collect_in_this_environment`
 now hands the same block down, and the identical session reads `416 passed, 4 skipped`, exit code 0 --
-the lane's shape, reproduced here for the first time (§5).
+the lane's shape, reproduced here for the first time (§5). And the released asset was read, not
+inferred: the PDF attached to `v1.7.0` puts `55 recorded limitations` on its first page while two
+later statements in the same file say 83, which is what `docs/limitations.md` held at that tag
+(83, contiguous from 1, counted by the repo's own numbering rule). The release page and
+`docs/release_notes_v1.7.0.md` carry a dated second correction; the tag and all four assets are
+untouched.
+
+Two guards and one limitation joined the phase for the same reason the inventory did. `test_every_digest_a_release_note_cites_is_its_files_own` pairs every snapshot under `docs/release_bodies/` with the digest the release note cites, because this phase cited `b0a13681…` for a file whose own hash is `229c21a6…` -- the cited value was the text before its trailing newline -- and only a second hashing caught it. `docs/limitations.md` #87 records that the v1.7.0 note's "What is still not here" bullet still says `sympy` is not a project dependency, which Phase 24 falsified: a present-tense bullet in a dated record, decayed in place, unpoliced by design because dated records are deliberately excluded from the count guards. The register is at 87 entries and the suite at 486 with the oracles / 417 without, each re-synced by its guard rather than by hand; the report PDF was rebuilt at 45 pages, 1,004,622 bytes.
 
 ## 2. Mathematical assumptions
 
@@ -76,7 +83,8 @@ count with a working precision.
 | `README.md`, `docs/reproducibility.md`, `docs/interview_defense.md`, `docs/validation_matrix.md`, `docs/release_notes_v1.3.0.md`, `docs/release_notes_v1.4.0.md` | limitation count 85 → 86, test counts 484 → 485 and 415 → 416, plant annotation 41/41 → 42/42 |
 | `scripts/run_mutation_suite.py` | plant `report-adds-an-unowned-numeric-claim` declared; four anchors re-keyed by this phase's own count syncs |
 | `tests/python/conftest.py` | the unowned `hashes 69 artifacts` figure in the module docstring replaced by the structural description of what the script covers |
-| `docs/integrity_audit.md` | Phase 27 addendum, finding 59 (a)-(c) and the two list-honesty properties |
+| `docs/integrity_audit.md` | Phase 27 addendum, finding 59 (a)-(e) and the two list-honesty properties |
+| `docs/release_notes_v1.7.0.md`, `docs/release_bodies/v1.7.0-*-2026-10-07.md` | second dated correction on the register's size, the digest identity `before + newline + block == published body`, and a dated line against the stale `sympy` bullet |
 | `docs/project_scope.md` | §9 Phase 27 row |
 
 ## 4. The instrument, and the two design errors it took to get right
@@ -121,6 +129,13 @@ Quoted from the runs, on this tree, before the commit:
 - `uv run --frozen pytest -q` -- `485 passed in 195.03s (0:03:15)`
 - `uv run --frozen python scripts/verify_evidence_manifest.py` -- `0 MISSING`,
   `0 on disk but not in the manifest`, `Evidence is intact.`
+- `uv run --frozen pytest tests/python/test_artifact_metadata.py tests/python/test_mutation_suite.py -q` after the register and test-count syncs -- `53 passed`
+- Digest guard falsification, run live before being declared: with the cited sha256 replaced by 64 zeros the guard named both values side by side, the file was restored byte-verified and the guard went green again
+- Runner, `gh run view 37570134469 --log`, at this head: `415 passed, 5 skipped in 147.91s` on the
+  fully-offline lane and `100% tests passed out of 204` on CTest, with the lane green against the
+  documents' 416. Read as items rather than records that is 415 passed + 1 skipped item = 416, the
+  same item count this machine ran -- the extra skip is one test that skips on Linux and passes on
+  macOS. Third revision at which the probe's figure and the runner's agree.
 - The oracle-free simulation, run as a session rather than a collection. Before the lever fix:
   `1 failed, 415 passed, 4 skipped in 186.91s`, the one failure
   `test_the_documents_that_count_python_tests_count_the_ones_that_exist`. After it:
@@ -175,6 +190,25 @@ Registered here, not scheduled:
 
 ## 9. Gate
 
-Recorded when the tool reports it, not before. Locally: §5 above is the full pre-commit sequence. The
-mutation sweep cannot run against a dirty tree -- it edits tracked files -- so it runs on the commit;
-its verdict and the CI run identifier for the pushed head are appended below when each lands.
+Locally, before the commit: §5's lint/format/type/clang-format/CTest/pytest/freeze lines, all green,
+and the inventory guard's own falsification run live (plant edit applied, `line 59: '41 modules'`
+reported, file restored to its recorded SHA-256 `44c2c1d5…`, guard green again).
+
+After the commit, on `9117403`:
+
+- `uv run --frozen python scripts/run_mutation_suite.py` --
+  `42/42 planted defects were rejected by their guard.`, exit code 0, working tree restored. This
+  includes the phase's new plant `report-adds-an-unowned-numeric-claim` and the four anchors the
+  phase's own count syncs re-keyed.
+- `git push origin main` -- `64d39a4..9117403 main -> main`.
+- CI run `37570134469` -- `completed` / `success`, all three jobs:
+  `Format and static checks`, `Configure, build, C++ tests, Python tests`,
+  `Benchmark suite against live oracles`. The offline lane's own tallies are quoted in §5.
+- Release page: the second correction is published on `v1.7.0` (body 11,604 characters,
+  sha256 `8122e06b62437d15…`, verified to be the saved 2026-10-06 body plus the saved block), and
+  the four assets and the tag are unchanged.
+
+Two things this phase did NOT prove, stated rather than smoothed. The inventory's noun list bounds
+what is read, so a claim whose noun is absent is invisible (§7). And the simulation now reproduces
+the lane's item count and green-ness, not its platform-conditional skips: one test skips on Linux and
+passes here, so a locally green offline run still is not the runner's verdict (§5).
