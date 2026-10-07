@@ -208,6 +208,22 @@ After the commit, on `9117403`:
   sha256 `8122e06b62437d15…`, verified to be the saved 2026-10-06 body plus the saved block), and
   the four assets and the tag are unchanged.
 
+**Second head, `6f13ce8`, recorded 2026-10-07.** The record work (the release-page correction, the
+digest guard, limitation #87 and the counts it moved) landed after the first head, so the gate was run
+again on it rather than inherited:
+
+- `uv run --frozen python scripts/run_mutation_suite.py` -- `43/43 planted defects were rejected by
+  their guard.`, exit code 0, tree restored. The added plant is
+  `release-note-cites-a-digest-its-file-does-not-carry`.
+- `git push origin main` -- `9117403..6f13ce8 main -> main`.
+- CI run `37582270126` -- `completed` / `success`, all three jobs:
+  `Format and static checks`, `Configure, build, C++ tests, Python tests`,
+  `Benchmark suite against live oracles`. The offline lane read `416 passed, 5 skipped in 189.33s`
+  against the documents' 417 collected -- 416 passing items plus one item that skips on Linux, which is
+  the fourth revision where this machine's probe figure and the runner's collection agree, and the
+  second where the skip that separates the two tallies is identified rather than assumed.
+
+
 Two things this phase did NOT prove, stated rather than smoothed. The inventory's noun list bounds
 what is read, so a claim whose noun is absent is invisible (§7). And the simulation now reproduces
 the lane's item count and green-ness, not its platform-conditional skips: one test skips on Linux and
