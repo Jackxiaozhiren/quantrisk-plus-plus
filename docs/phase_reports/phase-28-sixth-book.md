@@ -220,3 +220,21 @@ Two things the committed tree itself reported, in order:
   history — so the guard was green on the occurrence the plant never touched. Finding 60(f). The claim
   is now a phrase (`` `8.88×` in the artifact now in the tree ``) rather than a digit, and the plant is
   being re-run against that.
+
+Final verdicts, each named with the head it was produced on:
+
+| Verdict | Head | The tool's own line |
+|---|---|---|
+| Sweep, escape recorded | `8779e6e` | `46/47 planted defects were rejected by their guard.` (exit 1) |
+| Guard hardened, single plant | `d2cf2bb` | `1/1 planted defects were rejected by their guard.` for `readme-quotes-a-stale-speedup` |
+| Sweep, complete | `d2cf2bb` | `47/47 planted defects were rejected by their guard.` (exit 0), `git status` empty after |
+| CI, three jobs | `8779e6e` | run `37736336265` — `success`: `Format and static checks`, `Configure, build, C++ tests, Python tests`, `Benchmark suite against live oracles` |
+| CI, three jobs | `d2cf2bb` | run `37737532806` — `success`, with `100% tests passed out of 204`, `424 passed, 5 skipped in 201.20s`, `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 429.6s total` |
+
+The phase closes with every gate green on the pushed head and one claim of its own corrected on the
+record: the harness went red on 46/47, named the escape, and the fix was to the guard rather than to the
+plant. The two halves of the Python count are quoted per environment, as findings 55(d) and 58 require:
+the runner's offline lane reads `424 passed, 5 skipped`, while this machine's probe
+(`scripts/measure_offline_collection.py`) collects `425 tests` with 4 module-level skips and 0 collection
+errors — 494 tests collected with the oracles installed. No arithmetic bridges those, and the guards
+compare each document with the measurement taken in the environment that document describes.
