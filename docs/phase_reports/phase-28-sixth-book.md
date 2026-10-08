@@ -191,6 +191,25 @@ Done on the working tree, before the commit:
   re-keying was forced by the anchor guard going red *on my own count sync*, which is finding 49's
   failure mode recurring exactly as documented.
 
-Pending, and not quoted until each tool has printed it: the commit, the band guard re-run on the
-committed tree, the manifest rebuild and its commit, the 47-plant sweep on the committed tree, the
-push, and CI's three jobs.
+Pending, and not quoted until each tool has printed it: the 47-plant sweep on the committed tree, and
+CI's three jobs on the pushed head.
+
+Two things the committed tree itself reported, in order:
+
+- Re-running the whole lane on the commit (`uv run pytest tests/python -q`) found
+  `test_the_manifest_hashes_every_experiment_results_directory` still red after a rebuild, because the
+  manifest builder's experiment inventory is a hand-maintained tuple that no new experiment knows to
+  append itself to. Fixed in the inventory (`experiments/sixth_book_crossing_map/results` joins the
+  crossing-map family), and the freeze re-run covers 95 artifacts and 7,238,399 bytes — figures the
+  report's manifest sentence then had to be synced to, with the PDF rebuilt in the same commit.
+- That sync disarmed one of its own plants. `report-counts-a-manifest-the-freeze-does-not-have` keyed
+  its anchor to `94 artifacts, 7{,}145{,}018 bytes`, so editing the report to the true totals left the
+  anchor occurring zero times, and
+  `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` went red on the
+  committed tree: `1 failed, 493 passed`. The plant is re-keyed to the new totals, with the count in
+  its replacement still wrong so it still proves the guard can fail. This is finding 49's third
+  occurrence — prose edits and plant anchors are the same file read two ways — and it is worth noting
+  that the harness caught it rather than passing silently: the disarm is only invisible if nobody runs
+  the anchor self-test, and the sweep runs it first.
+
+The lane is being re-run on this tree; its line is quoted below when the tool prints it, and so is the sweep.

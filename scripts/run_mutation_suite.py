@@ -404,8 +404,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-a-manifest-the-freeze-does-not-have",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="94 artifacts, 7{,}145{,}018 bytes",
-        replacement="93 artifacts, 7{,}145{,}018 bytes",
+        anchor="95 artifacts, 7{,}238{,}399 bytes",
+        replacement="94 artifacts, 7{,}238{,}399 bytes",
         # The report's §Limitations restatement of the freeze was `v1.1.0`'s totals and shipped in
         # six releases, while its own headline paragraph said 94 two pages earlier; the guard reads
         # `totals` from the manifest, so one digit here is enough to redden it.
