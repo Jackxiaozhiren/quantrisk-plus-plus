@@ -14,10 +14,12 @@ the claim "the closed forms were derived rather than typed" is a command, not a 
 
 Neither part takes a closed form as an input. Exits non-zero if any check fails.
 
-    uv run --with sympy python scripts/derive_fifth_order_partials.py
+    uv run python scripts/derive_fifth_order_partials.py
 
-`sympy` is not a project dependency and is not added by this command; it is fetched into an
-ephemeral overlay by `--with`, so the environment the release ships is unchanged.
+`sympy` is in the `dev` dependency group, which is what `uv sync` installs, so any lane that sets
+up the development environment can run this identity -- that is how it entered the gate. The runtime
+environment the release ships does not carry it. The older form, `uv run --with sympy python
+scripts/derive_fifth_order_partials.py`, still works and is what the pre-2026-10-06 documents quote.
 """
 
 from __future__ import annotations
