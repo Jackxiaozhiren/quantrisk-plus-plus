@@ -69,6 +69,7 @@ SOURCES: list[tuple[str, str, tuple[str, ...]]] = [
             "experiments/fourth_order_crossing_map/results",
             "experiments/second_book_crossing_map/results",
             "experiments/fifth_order_crossing_map/results",
+            "experiments/sixth_book_crossing_map/results",
         ),
     ),
     (
