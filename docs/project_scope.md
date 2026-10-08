@@ -112,7 +112,7 @@ Phase 0 (this doc set) → 1 engineering skeleton → 2 BS/binomial/Greeks →
 
 Rule: one phase at a time; each phase ends with a Phase Report and stops.
 
-## 9. Current status (honest, refreshed 2026-10-04; first written 2026-09-27)
+## 9. Current status (honest, refreshed 2026-10-08; first written 2026-09-27)
 
 | Item | Status |
 |---|---|
@@ -148,6 +148,7 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 | Phase 25 the two C++ numbers CTest cannot see gained owners: the assertion total is read from the compiled Catch2 binary's summary line and the case total from `TEST_CASE(` blocks in `tests/cpp/*.cpp`, the two required to agree, and five quotations across four documents compared with both; the CTest entry count was left with the guard that already owns it | DONE, post-tag (`docs/phase_reports/phase-25-cpp-total-owners.md`, finding 57, `docs/limitations.md` #85) |
 | Phase 26 the oracle-free test count gained a second producer: `scripts/measure_offline_collection.py` blocks the `oracles`-only packages in a child interpreter, collects there, and a guard refuses the probe unless the gated modules skip rather than error before comparing every living quotation of the offline figure with the measurement -- so a phase that adds tests learns both halves of the pair locally instead of from a red runner (findings 55(d), 58) | DONE, post-tag (`docs/phase_reports/phase-26-offline-count-owner.md`, finding 58, `docs/limitations.md` #63 amended in place) |
 | Phase 27 every countable claim in `paper/technical_report.tex` is accounted for: an inventory guard reads each `<number> <noun>` statement and requires it to be owned by a named guard, inside the manifest sentence's compared span, cited to a frozen artifact, or declared with a reason -- and each owned pattern has to occur verbatim in the guard that claims it, while each declared anchor is re-run with itself withheld so an exemption that exempts nothing is a failure. It found a stale count shipping in the report's own abstract (`55 recorded limitations` beside the section's 86) and a digit guard that had been comparing a market count with a working precision because both read 60 (findings 55, 59) | DONE, post-tag (`docs/phase_reports/phase-27-claim-inventory.md`, finding 59, `docs/limitations.md` #86) |
+| Phase 28 the crossing-radius chain gained a sixth book chosen by a rule written before it was measured: 23 candidates ranked by the order-five-to-four ratio at Phase 20's own measure column, the first with a defined radius taken, and the book it reached has its quintic radius on the grid edge -- so the experiment reports that its own rule cannot distinguish a widening from a truncation, which is a result about the rule, not a null about the expansion. Registered as the 19th suite member, and that registration is the second half of the phase: re-measuring the volatile speed artifact moved five documents' present-tense figures and the committed NumPy band (`0.42×`–`0.57×`), and exposed the one figure the ownership inventory had no rule for -- the caption's timestamp, which says *which* run a table tabulates | DONE, post-tag (`docs/phase_reports/phase-28-sixth-book.md`, finding 60, `docs/limitations.md` #88) |
 
 ## 10. Frozen surfaces
 

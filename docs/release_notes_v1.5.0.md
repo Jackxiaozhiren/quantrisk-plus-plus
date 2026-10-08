@@ -148,3 +148,16 @@ generated *from*, which is necessarily the commit before the one that contains i
 - No market data, no forward-looking claim, no performance claim over any library: the C++ core remains
   roughly 8× an interpreted loop and slower than vectorised NumPy on the benchmarked workload, within
   the committed bands `7.77×–8.70×` and `0.42×–0.51×`.
+
+## Correction added 2026-10-08 — the performance band this note states has moved
+
+The "What is still not here" bullet above claims the committed bands are `7.77×–8.70×` and
+`0.42×–0.51×`. That was the min/max over the artifact's git history on this note's own date. The
+speed benchmark has since been re-frozen, and the upper edge of the pure-Python ratio moved with it:
+over the twenty-one committed measurements now in the tree the bands are `7.77×–8.88×` and
+`0.42×–0.51×`. The NumPy band is unchanged. `docs/reproducibility.md` owns the range and prints the command
+that recomputes it, and
+`test_the_documented_speedup_ranges_match_the_committed_history` fails if the pinned band and the
+history ever disagree, which is what makes this a correction rather than an edit: the sentence above
+is left as it was written because it is a dated record of what the range was on 2026-10-01, and the
+moved range is stated here with its own date.

@@ -72,7 +72,7 @@ uv pip install -e .              # builds the C++ core and the pybind11 module
 uv run pytest -q                 # 481 tests here; see the note below — the count is not one number
 uv run cmake --preset dev && uv run cmake --build --preset dev
 uv run ctest --preset dev        # 204 C++ tests, 548,368 assertions
-uv run python scripts/run_benchmark_suite.py --require-all   # all 18 members
+uv run python scripts/run_benchmark_suite.py --require-all   # all 19 members
 uv run quantrisk validate        # 7 identity checks against the build you just made
 ```
 
@@ -101,17 +101,17 @@ suite with `--require-all`, then re-freeze `evidence/manifest.json` — in that 
 manifest records the commit and the artifacts record the version.
 
 `--require-all` on the suite is what stops the run meaning anything. Without the `oracles`
-extra installed, six of the eighteen members report `skipped` and the suite still exits 0,
+extra installed, six of the nineteen members report `skipped` and the suite still exits 0,
 because skipping is the honest status for a missing dependency. A CI job that reported green
 in that state would be claiming a measurement it did not make. The flag turns that state into
 a failure.
 
 **The pytest count depends on which extras you installed, and a document that prints one number
-without saying which is wrong.** The sequence above yields **486 pytest tests with the `oracles`
+without saying which is wrong.** The sequence above yields **494 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — which installs the `dev` group, now including `sympy`, but no `oracles` extra — and the same
-tree collects 417 tests without it, the four oracle-gated modules dropping out at import. The
+tree collects 425 tests without it, the four oracle-gated modules dropping out at import. The
 figure for this revision comes from `scripts/measure_offline_collection.py`, which makes the
-`oracles`-only packages unimportable in a child interpreter and collects there -- 417 now against 486
+`oracles`-only packages unimportable in a child interpreter and collects there -- 425 now against 494
 with the oracles installed. That is a second *measurement*, not the subtraction #63 forbids, and it is
 guarded: `test_the_offline_test_count_is_measurable_before_the_runner` refuses the probe unless the
 gated modules skip rather than error, so the number it publishes is the runner's shape and not merely a
@@ -148,10 +148,10 @@ every run: `benchmarks/performance/results/monte_carlo_speed.json` entirely, and
 `mean_runtime_seconds` / `seconds_per_path` columns of
 `experiments/variance_reduction/results/variance_by_method.csv` and
 `experiments/monte_carlo_convergence/results/convergence.csv`. The speed benchmark has been
-re-frozen fifteen times, and the ratios of those fifteen committed files are the honest measure of
-how much these digits mean: `7.77×`–`8.70×` against a pure Python loop (11.9% spread) and
-`0.42×`–`0.51×` against vectorised NumPy (21.7% spread), because the NumPy baseline itself ranged
-from 110M to 70M paths/s. Any document quoting a single one of those ratios is quoting one dated
+re-frozen twenty-one times, and the ratios of those twenty-one committed files are the honest measure of
+how much these digits mean: `7.77×`–`8.88×` against a pure Python loop (14.2% spread) and
+`0.42×`–`0.51×` against vectorised NumPy (20.8% spread), because the NumPy baseline itself ranged
+from 110M to 46M paths/s. Any document quoting a single one of those ratios is quoting one dated
 run, which is why the claims are written as ranges and why the point figures in `README.md` and
 `docs/interview_defense.md` are checked against the artifact on disk. Recompute the range with:
 
@@ -168,8 +168,17 @@ roughly an order of magnitude, and loses to vectorised NumPy for terminal-only p
 reproducible part, and it held on every run. One further observation, recorded here rather than in
 a README because no artifact keeps it: a suite re-run taken on this machine while another process
 held a core read 12% below the C++/Python ratio of the quiet re-run that follows it, and
-`var_backtesting` took 103 s instead of 25 s in the same window. Load moves the timings, and the
-ratios with them.
+`var_backtesting` took 103 s instead of 25 s in the same window. The same thing happened on
+2026-10-08 and much larger: a full-suite run that contended with a second concurrent run of itself
+wrote `4.01×` against pure Python and `0.36×` against NumPy — both outside the committed bands
+above, which is why that artifact was restored rather than committed. Two clean idle re-runs of the
+same script four minutes apart then wrote `8.38×` / `0.566×` and `8.88×` / `0.460×`, and the second
+is what the tree carries: a 6% move on the pure-Python ratio and a 19% move on the NumPy one with no
+contention at all, which is why the NumPy band's upper edge is `0.51×` and not the `0.57×` the first
+of those two readings would have set. Neither discarded reading is in the history the bands derive
+from, because no committed artifact carries it; the contended pair is reported here and in
+`docs/limitations.md` #77. Load moves the timings, and the
+ratios with them — and so does the absence of load.
 
 **Metadata.** Every artifact records its own `generated_at_utc` and the running `git_commit`, so
 a re-run always rewrites them. The manifest carries a content hash alongside the byte hash

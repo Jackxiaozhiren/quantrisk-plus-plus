@@ -74,7 +74,7 @@ price comparisons, fitted Monte Carlo convergence slopes of $-0.61$ to $-0.51$ a
 theoretical $-0.5$, a Kupiec test with $5.05\%$ empirical size at a $5\%$ nominal level,
 and portfolio solvers agreeing with two independent reference solver stacks to
 $2.4\times 10^{-12}$ in weights on the quadratic problems. Sections
-\ref{sec:limitations}--\ref{sec:reproducibility} report what was not established: 87
+\ref{sec:limitations}--\ref{sec:reproducibility} report what was not established: 88
 recorded limitations, the fact that every figure in this report is computed from synthetic
 data-generating processes authored by the same person who wrote the code, that no number
 here describes realised markets, and that reproducibility is per platform rather than
@@ -146,14 +146,14 @@ the refusal Phase 12 recorded into a measured result, and Phase 14 the verificat
 to state without an owner. Eight release tags exist, \code{v1.0.0},
 \code{v1.1.0}, \code{v1.2.0}, \code{v1.3.0}, \code{v1.4.0}, \code{v1.5.0}, \code{v1.6.0} and
 \code{v1.7.0}, each with the report, the evidence manifest and the suite results attached. The suite is 204 CTest entries and
-548{,}368 assertions in 203 Catch2 cases on the C++ side, and 486 pytest tests with the validation
-oracles installed, 417 collected without them (\src{docs/limitations.md}, item 63, explains why one
-command gives two numbers); 18 benchmark-suite members execute under
+548{,}368 assertions in 203 Catch2 cases on the C++ side, and 494 pytest tests with the validation
+oracles installed, 425 collected without them (\src{docs/limitations.md}, item 63, explains why one
+command gives two numbers); 19 benchmark-suite members execute under
 \code{--require-all}, and the frozen manifest hashes 94 artifacts with nothing changed, missing or
 unlisted (\src{evidence/manifest.json}). The \emph{end-of-Phase-9} baseline, for contrast, was 190
 CTest entries and 310 pytest tests with no release tag and no suite at all
 (\src{docs/phase_reports/phase-09-research-api.md}). The limitations
-register contains 87 numbered entries (\src{docs/limitations.md}).
+register contains 88 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -1541,7 +1541,23 @@ leaves 3 unchanged, and of those three, 2 sit at the edge of the swept grid, so 
 unresolved rather than refuted. Inside the quartic's own radius the quintic is the closest of the three
 truncations on all 5. The mechanism that would order the outcome is absent again: the ratio of the
 order-five spot piece to the order-four one at the measure column spans 0.057 to 0.588 across the set,
-and the book with the \emph{smallest} of those ratios took the larger widening. Items 82 and 83 of
+and the book with the \emph{smallest} of those ratios took the larger widening.
+
+\paragraph{A sixth book, and what a rule can reach.} The ratio axis is extended by rule rather than by
+choice: \src{experiments/sixth\_book\_crossing\_map/run.py} fixes a 23-candidate grid, ranks it by the
+order-five-to-four piece ratio at the same measure column, and takes the first candidate whose radius is
+\emph{defined} --- at least three swept columns carrying a priced crossing --- reading no radius until the
+choice is made. The winner sits 24-fold below the previous minimum, at ratio $0.0024$, and its quartic
+radius is already $0.3$, the widest swept move, so the quintic cannot rise on that grid whatever the
+truncation does: $0.2 \to 0.3 \to 0.3$, a factor of $1.000$. The arithmetic still improves --- worst
+column inside the quartic's own radius $0.000389$ against the quartic's $0.000461$ --- and across the six
+books the quintic widens 2, leaves 4 unchanged and thins none, with 3 now at the grid edge. The five
+earlier radii come back digit for digit from Phase 20's artifact, and the scan is published with the
+result (\src{experiments/sixth\_book\_crossing\_map/results/sixth\_book\_crossing\_map.json}), so the rule can be
+audited rather than trusted. Item 88 of \src{docs/limitations.md} states
+what the sixth book therefore does not say.
+
+Items 82 and 83 of
 \src{docs/limitations.md} keep the arithmetic, the measurement and the two refusals apart, and
 \src{docs/analysis/fifth\_order\_crossing\_map.md} prints the per-book radii the claim is read from.
 
@@ -1781,7 +1797,7 @@ thread, on the recorded arm64 platform. The price column is the estimate each im
 returned, so the timing comparison cannot be made by implementations that price something else.
 Source: the run in
 \src{benchmarks/performance/results/monte_carlo_speed.json} dated
-2026-09-29T08:58:31+00:00; the manifest binds that file to the revision and toolchain it was
+2026-10-08T05:44:26+00:00; the manifest binds that file to the revision and toolchain it was
 produced with. Earlier dated runs of the same script are in
 \src{docs/phase_reports/phase-03-monte-carlo.md} and
 \src{benchmarks/suite/results/suite_headline.csv}.}
@@ -1791,17 +1807,18 @@ produced with. Earlier dated runs of the same script are in
 \toprule
 Implementation & mean s.\ & std.\ s. & paths/s & estimate & $z$ vs analytic \\
 \midrule
-C++ core & 0.004489 & 0.000304 & 44{,}549{,}572 & 11.14596 & $+0.537$ \\
-pure Python loop & 0.037936 & 0.000457 & 5{,}271{,}981 & 11.11229 & $-0.292$ \\
-vectorised NumPy & 0.002116 & 0.000321 & 94{,}535{,}778 & 11.11430 & $-0.242$ \\
+C++ core & 0.005007 & 0.000177 & 39{,}944{,}978 & 11.14596 & $+0.537$ \\
+pure Python loop & 0.044444 & 0.002316 & 4{,}500{,}031 & 11.11229 & $-0.292$ \\
+vectorised NumPy & 0.002301 & 0.000322 & 86{,}902{,}545 & 11.11430 & $-0.242$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The measured ratio of C++ to a pure Python loop is $8.45\times$ in the run tabulated
+The measured ratio of C++ to a pure Python loop is $8.88\times$ in the run tabulated
 here, whose absolute throughputs run from the $21{,}130{,}162$ paths/s a loaded desktop has
-produced to the $44{,}549{,}572$ this quieter one gives, which is why the claim is the ratio and
-not the rate; against vectorised NumPy it is $0.471\times$, that is, NumPy is faster in this regime, and the artifact says
+produced to the $46{,}382{,}828$ the quietest committed run gives, and this one sits between them at
+$39{,}944{,}978$, which is why the claim is the ratio and not the rate; against vectorised NumPy it
+is $0.460\times$, that is, NumPy is faster in this regime, and the artifact says
 so (\src{benchmarks/performance/results/monte_carlo_speed.json};
 \src{docs/phase_reports/phase-03-monte-carlo.md}). The claim is scoped by four recorded caveats in
 the same artifact. The work measured is a terminal-only draw, one normal per path, which is exactly
@@ -1862,7 +1879,7 @@ stress artifacts are byte-identical between executions
 \label{sec:limitations}
 % ===========================================================================
 
-\src{docs/limitations.md} holds 87 numbered entries, grouped by the phase that introduced them,
+\src{docs/limitations.md} holds 88 numbered entries, grouped by the phase that introduced them,
 with the rule that entries are never removed because a later phase shipped. This section
 summarises them faithfully; the file remains the authority.
 

@@ -120,13 +120,25 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
-        anchor="`8.45×`",
-        replacement="`8.70×`",
+        anchor="`8.88×` in the artifact now in the tree",
+        replacement="`8.70×` in the artifact now in the tree",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_quote_the_performance_figures_the_artifact_actually_holds"
         ),
         claim="the README's present-tense figure is the artifact's current measurement",
+    ),
+    Mutation(
+        identifier="report-cites-a-run-date-the-artifact-does-not-carry",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="2026-10-08T05:44:26+00:00",
+        replacement="2026-09-29T08:58:31+00:00",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_quote_the_performance_figures_the_artifact_actually_holds"
+        ),
+        claim="the table's caption names the timestamp of the run it actually tabulates",
     ),
     Mutation(
         identifier="bindings-declare-a-name-the-binary-cannot-serve",
@@ -156,7 +168,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 87 numbered entries",
+        anchor="carries 88 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -180,8 +192,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-overcounts-the-suite",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="all 18 members",
-        replacement="all 19 members",
+        anchor="all 19 members",
+        replacement="all 20 members",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_documents_that_count_the_suite_members_agree_with_the_registry"
@@ -221,7 +233,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 417 Python tests",
+        anchor="# 425 Python tests",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -269,7 +281,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-miscounts-the-matrix-rows",
         kind="prose",
         path="README.md",
-        anchor="is the full table — twenty-five rows over",
+        anchor="is the full table — twenty-six rows over",
         replacement="is the full table — twenty-three rows over",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -356,7 +368,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-experiment-table",
         kind="prose",
         path="README.md",
-        anchor="Thirteen experiments, each answering",
+        anchor="Fourteen experiments, each answering",
         replacement="Eleven experiments, each answering",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -368,7 +380,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-a-suite-the-registry-does-not-have",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="18 benchmark-suite members execute",
+        anchor="19 benchmark-suite members execute",
         replacement="16 benchmark-suite members execute",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -380,7 +392,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 486 pytest tests with the validation",
+        anchor="and 494 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -431,7 +443,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 43/43 planted defects rejected",
+        anchor="# 47/47 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -573,7 +585,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 417 collected without them",
+        anchor="oracles installed, 425 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -621,6 +633,51 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_every_digest_a_release_note_cites_is_its_files_own"
         ),
         claim="a digest a release note cites for a saved body is that file's own hash",
+    ),
+    Mutation(
+        identifier="sixth-book-ranking-is-not-the-order-the-rule-sorts-in",
+        kind="prose",
+        path="experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+        anchor='      "rank": 12,',
+        replacement='      "rank": 3,',
+        guard=(
+            "tests/python/test_sixth_book_crossing_map.py::"
+            "test_the_selection_rule_is_the_order_the_scan_prints"
+        ),
+        claim="the ranking the artifact publishes is the order the rule's own ratio produces",
+    ),
+    Mutation(
+        identifier="sixth-book-note-quotes-a-radius-the-run-did-not-produce",
+        kind="prose",
+        path="docs/analysis/sixth_book_crossing_map.md",
+        anchor="| candidate T=3y sig=0.45 q=0.05 | 0.2 → 0.3 → 0.3 | 1.000 | **yes** | 0.0024 |",
+        replacement=(
+            "| candidate T=3y sig=0.45 q=0.05 | 0.2 → 0.3 → 0.4 | 1.333 | **yes** | 0.0024 |"
+        ),
+        # The replacement is internally consistent -- 0.3 to 0.4 is a factor of 1.333 -- so only
+        # the artifact can say the book never reached 0.4: a note whose numbers are plausible and
+        # wrong is the shape this guard exists for.
+        guard=(
+            "tests/python/test_sixth_book_crossing_map.py::"
+            "test_the_note_figures_are_the_artifacts_own"
+        ),
+        claim="the note's book rows are the artifact's own radii, factors, edge flags and ratios",
+    ),
+    Mutation(
+        identifier="sixth-book-grid-bound-claim-reads-a-narrower-grid",
+        kind="prose",
+        path="experiments/second_book_crossing_map/run.py",
+        anchor="GRID_EDGE = max(abs(delta) for delta in DELTAS)",
+        replacement="GRID_EDGE = 0.2",
+        # The sixth book's whole message is that its radius could not rise on the ladder that was
+        # swept. Narrow what the code calls the edge and the artifact's grid flag stops matching the
+        # radii it was computed from, which is the only way to show that statement is about the grid
+        # rather than a label copied from the run.
+        guard=(
+            "tests/python/test_sixth_book_crossing_map.py::"
+            "test_a_verdict_bounded_by_the_grid_says_so"
+        ),
+        claim="the grid-bound flag tracks the ladder the radii were swept on",
     ),
 )
 

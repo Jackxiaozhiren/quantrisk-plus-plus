@@ -1,0 +1,1719 @@
+{
+  "schema": "quantrisk.sixth_book_crossing_map.v1",
+  "claim": "the contiguous paired-magnitude crossing radius of the cubic, quartic and quintic column-error truncations on six books, the sixth chosen by the published order-five-to-four ratio rule before its radius was read",
+  "command": "uv run python experiments/sixth_book_crossing_map/run.py",
+  "generated_at_utc": "2026-10-08T05:48:43+00:00",
+  "environment": {
+    "python": "3.12.14",
+    "platform": "darwin",
+    "packages": {
+      "quantrisk": "1.7.0"
+    }
+  },
+  "reproduction_policy": {
+    "conditioning_limited": [
+      "fits",
+      "candidate_scan",
+      "candidate_ranking",
+      "headline.sixth_book_ratio",
+      "headline.published_ratio_span_of_the_five_prior_books",
+      "headline.ratio_span_over_six_books",
+      "headline.sixth_book_ratio_over_the_published_minimum"
+    ],
+    "why": "the order-five-to-four ratios, and the new-low statement derived from the span of those ratios come from subtractions of book values near 1e5, so they reproduce to their conditioning rather than to their last digit; the comparator exempts floats only, and a radius is a grid point",
+    "everything_else": "the truncations are closed forms on each book's sums, the priced error and the engine P&L are exact arithmetic on the shipped engine, the published radii are pinned to Phase 20's artifact bit for bit, and the published book is pinned to v1.5.0's and v1.6.0's values by those releases' own equality gate"
+  },
+  "procedure": {
+    "selection_rule": "candidates = maturity x volatility x dividend at fixed spot, rate, strikes and quantity, minus sets the published books already use; examined in ascending order-five-to-four ratio at the measure column, ties by iteration order; accepted at the first candidate with at least 3 priced-crossing columns",
+    "candidate_grid": {
+      "maturities_years": [
+        0.25,
+        0.5,
+        1.0,
+        3.0
+      ],
+      "volatilities": [
+        0.15,
+        0.25,
+        0.45
+      ],
+      "dividend_yields": [
+        0.0,
+        0.05
+      ],
+      "spot": 100.0,
+      "rate": 0.03,
+      "strikes": [
+        80.0,
+        100.0,
+        120.0
+      ],
+      "quantity": 5000.0,
+      "candidates_after_removing_published_sets": 23
+    },
+    "measure_column_share_of_spot": 0.15,
+    "tolerance": 0.005,
+    "grid_edge": 0.3,
+    "radius_rule": "contiguous paired-magnitude rule, Phase 18's implementation",
+    "orders": [
+      "cubic",
+      "quartic",
+      "quintic"
+    ],
+    "reused_from": [
+      "experiments/fifth_order_crossing_map/run.py",
+      "experiments/second_book_crossing_map/run.py"
+    ]
+  },
+  "headline": {
+    "books_measured": 6,
+    "books_widening_at_order_five": 2,
+    "books_unchanged_at_order_five": 4,
+    "books_thinning_at_order_five": 0,
+    "books_at_grid_edge": 3,
+    "sixth_book": "candidate T=3y sig=0.45 q=0.05",
+    "sixth_book_ratio": 0.002449039099104238,
+    "published_ratio_span_of_the_five_prior_books": [
+      0.05687116397731155,
+      0.5875865567378914
+    ],
+    "ratio_span_over_six_books": [
+      0.002449039099104238,
+      0.5875865567378914
+    ],
+    "sixth_book_is_new_low_of_the_published_span": true,
+    "sixth_book_ratio_over_the_published_minimum": 0.04306293256247172,
+    "sixth_book_quintic_radius_at_grid_edge": true,
+    "sixth_book_radius_verdict_is_grid_bounded": true,
+    "sixth_book_radii": {
+      "cubic": 0.2,
+      "quartic": 0.3,
+      "quintic": 0.3
+    },
+    "sixth_book_widening_factor_quintic": 1.0,
+    "columns_with_a_priced_crossing_total": 60
+  },
+  "controls": {
+    "control": "experiments/fifth_order_crossing_map/run.py::P18.verify_control",
+    "control_ran_on": "published ladder",
+    "published_books_reproduced_bit_for_bit": 5,
+    "published_artifact": "experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json",
+    "radii_from_that_artifact": {
+      "published ladder": {
+        "cubic": 0.05,
+        "quartic": 0.15,
+        "quintic": 0.2
+      },
+      "long-dated wide": {
+        "cubic": 0.1,
+        "quartic": 0.3,
+        "quintic": 0.3
+      },
+      "short-dated tight": {
+        "cubic": 0.02,
+        "quartic": 0.05,
+        "quintic": 0.05
+      },
+      "deep out of the money": {
+        "cubic": 0.15,
+        "quartic": 0.2,
+        "quintic": 0.3
+      },
+      "in the money": {
+        "cubic": 0.05,
+        "quartic": 0.1,
+        "quintic": 0.1
+      }
+    },
+    "sixth_book": "candidate T=3y sig=0.45 q=0.05"
+  },
+  "candidate_scan": [
+    {
+      "label": "candidate T=3y sig=0.45 q=0.05",
+      "maturity_years": 3.0,
+      "volatility": 0.45,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.002449039099104238,
+      "columns_with_a_priced_crossing": 12,
+      "columns_swept": 12,
+      "accepted": true,
+      "rejected_because": null
+    }
+  ],
+  "candidate_ranking": [
+    {
+      "rank": 0,
+      "label": "candidate T=3y sig=0.45 q=0.05",
+      "maturity_years": 3.0,
+      "volatility": 0.45,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.002449039099104238
+    },
+    {
+      "rank": 1,
+      "label": "candidate T=0.5y sig=0.15 q=0",
+      "maturity_years": 0.5,
+      "volatility": 0.15,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.021008120623644943
+    },
+    {
+      "rank": 2,
+      "label": "candidate T=3y sig=0.45 q=0",
+      "maturity_years": 3.0,
+      "volatility": 0.45,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.035920182676632266
+    },
+    {
+      "rank": 3,
+      "label": "candidate T=1y sig=0.15 q=0",
+      "maturity_years": 1.0,
+      "volatility": 0.15,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.05793107215241097
+    },
+    {
+      "rank": 4,
+      "label": "candidate T=0.5y sig=0.25 q=0.05",
+      "maturity_years": 0.5,
+      "volatility": 0.25,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.08999271483862634
+    },
+    {
+      "rank": 5,
+      "label": "candidate T=0.5y sig=0.25 q=0",
+      "maturity_years": 0.5,
+      "volatility": 0.25,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.10190623916344543
+    },
+    {
+      "rank": 6,
+      "label": "candidate T=1y sig=0.15 q=0.05",
+      "maturity_years": 1.0,
+      "volatility": 0.15,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.10440941710744531
+    },
+    {
+      "rank": 7,
+      "label": "candidate T=3y sig=0.15 q=0.05",
+      "maturity_years": 3.0,
+      "volatility": 0.15,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.1725521521923547
+    },
+    {
+      "rank": 8,
+      "label": "candidate T=0.25y sig=0.45 q=0.05",
+      "maturity_years": 0.25,
+      "volatility": 0.45,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.20844533223167053
+    },
+    {
+      "rank": 9,
+      "label": "candidate T=0.25y sig=0.15 q=0.05",
+      "maturity_years": 0.25,
+      "volatility": 0.15,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.21417461113272585
+    },
+    {
+      "rank": 10,
+      "label": "candidate T=1y sig=0.25 q=0.05",
+      "maturity_years": 1.0,
+      "volatility": 0.25,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.21463948564440946
+    },
+    {
+      "rank": 11,
+      "label": "candidate T=0.25y sig=0.45 q=0",
+      "maturity_years": 0.25,
+      "volatility": 0.45,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.2271730303081185
+    },
+    {
+      "rank": 12,
+      "label": "candidate T=0.5y sig=0.45 q=0.05",
+      "maturity_years": 0.5,
+      "volatility": 0.45,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.29433023088799043
+    },
+    {
+      "rank": 13,
+      "label": "candidate T=1y sig=0.25 q=0",
+      "maturity_years": 1.0,
+      "volatility": 0.25,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.3120978373541957
+    },
+    {
+      "rank": 14,
+      "label": "candidate T=3y sig=0.25 q=0.05",
+      "maturity_years": 3.0,
+      "volatility": 0.25,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.33989694546479443
+    },
+    {
+      "rank": 15,
+      "label": "candidate T=0.25y sig=0.25 q=0",
+      "maturity_years": 0.25,
+      "volatility": 0.25,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.351544152230361
+    },
+    {
+      "rank": 16,
+      "label": "candidate T=0.5y sig=0.15 q=0.05",
+      "maturity_years": 0.5,
+      "volatility": 0.15,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.42083582054356555
+    },
+    {
+      "rank": 17,
+      "label": "candidate T=0.25y sig=0.25 q=0.05",
+      "maturity_years": 0.25,
+      "volatility": 0.25,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.4895502262903226
+    },
+    {
+      "rank": 18,
+      "label": "candidate T=0.25y sig=0.15 q=0",
+      "maturity_years": 0.25,
+      "volatility": 0.15,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.6024677130896348
+    },
+    {
+      "rank": 19,
+      "label": "candidate T=3y sig=0.25 q=0",
+      "maturity_years": 3.0,
+      "volatility": 0.25,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.6200031858899637
+    },
+    {
+      "rank": 20,
+      "label": "candidate T=1y sig=0.45 q=0.05",
+      "maturity_years": 1.0,
+      "volatility": 0.45,
+      "dividend_yield": 0.05,
+      "order_five_over_four_at_measure_column": 0.6209214025908955
+    },
+    {
+      "rank": 21,
+      "label": "candidate T=3y sig=0.15 q=0",
+      "maturity_years": 3.0,
+      "volatility": 0.15,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 0.6973777980959901
+    },
+    {
+      "rank": 22,
+      "label": "candidate T=1y sig=0.45 q=0",
+      "maturity_years": 1.0,
+      "volatility": 0.45,
+      "dividend_yield": 0.0,
+      "order_five_over_four_at_measure_column": 6.8462346948288175
+    }
+  ],
+  "books": [
+    {
+      "label": "published ladder",
+      "why_this_book": "v1.5.0 and v1.6.0's book, and the control: its radii must come out at 0.05 and 0.15",
+      "radius_cubic": 0.05,
+      "radius_quartic": 0.15,
+      "radius_quintic": 0.2,
+      "widening_factor_quartic": 2.9999999999999996,
+      "widening_factor_quintic": 1.3333333333333335,
+      "quintic_radius_at_grid_edge": false,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 10,
+      "cubic_zero_count_total": 14,
+      "quartic_zero_count_total": 14,
+      "quintic_zero_count_total": 13,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 3,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        }
+      ]
+    },
+    {
+      "label": "long-dated wide",
+      "why_this_book": "v = 0.495 against the published 0.141, so the order-four spot piece is the smallest fraction of the order-three one in the set: chosen as the book expected to have least for an added order to remove, which the measured 3.0x widening contradicts",
+      "radius_cubic": 0.1,
+      "radius_quartic": 0.3,
+      "radius_quintic": 0.3,
+      "widening_factor_quartic": 2.9999999999999996,
+      "widening_factor_quintic": 1.0,
+      "quintic_radius_at_grid_edge": true,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 11,
+      "cubic_zero_count_total": 12,
+      "quartic_zero_count_total": 17,
+      "quintic_zero_count_total": 16,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        }
+      ]
+    },
+    {
+      "label": "short-dated tight",
+      "why_this_book": "v = 0.047 and every spot partial divides by v^3, so the higher orders are the largest terms on the book: this is where a widening bought by smallness would die",
+      "radius_cubic": 0.02,
+      "radius_quartic": 0.05,
+      "radius_quintic": 0.05,
+      "widening_factor_quartic": 2.5,
+      "widening_factor_quintic": 1.0,
+      "quintic_radius_at_grid_edge": false,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 6,
+      "cubic_zero_count_total": 14,
+      "quartic_zero_count_total": 9,
+      "quintic_zero_count_total": 15,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 3,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        }
+      ]
+    },
+    {
+      "label": "deep out of the money",
+      "why_this_book": "every strike far above spot at a high vol, so the book's partials come from one tail of the distribution rather than straddling the money",
+      "radius_cubic": 0.15,
+      "radius_quartic": 0.2,
+      "radius_quintic": 0.3,
+      "widening_factor_quartic": 1.3333333333333335,
+      "widening_factor_quintic": 1.4999999999999998,
+      "quintic_radius_at_grid_edge": true,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 12,
+      "cubic_zero_count_total": 14,
+      "quartic_zero_count_total": 14,
+      "quintic_zero_count_total": 14,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": true
+        }
+      ]
+    },
+    {
+      "label": "in the money",
+      "why_this_book": "the mirror ladder at the published vol and maturity: convexity on the other side of spot, which is the case v1.6.0's note listed as unanswered",
+      "radius_cubic": 0.05,
+      "radius_quartic": 0.1,
+      "radius_quintic": 0.1,
+      "widening_factor_quartic": 2.0,
+      "widening_factor_quintic": 1.0,
+      "quintic_radius_at_grid_edge": false,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 9,
+      "cubic_zero_count_total": 13,
+      "quartic_zero_count_total": 11,
+      "quintic_zero_count_total": 11,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 0,
+          "cubic_zero_count": 0,
+          "quartic_zero_count": 0,
+          "quintic_zero_count": 0,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": false,
+          "quintic_within_tolerance": false
+        }
+      ]
+    },
+    {
+      "label": "candidate T=3y sig=0.45 q=0.05",
+      "why_this_book": "selected by the lowest order-five-to-four ratio among candidates whose radius is defined",
+      "radius_cubic": 0.2,
+      "radius_quartic": 0.3,
+      "radius_quintic": 0.3,
+      "widening_factor_quartic": 1.4999999999999998,
+      "widening_factor_quintic": 1.0,
+      "quintic_radius_at_grid_edge": true,
+      "columns_swept": 12,
+      "columns_with_a_priced_crossing": 12,
+      "cubic_zero_count_total": 14,
+      "quartic_zero_count_total": 14,
+      "quintic_zero_count_total": 14,
+      "columns": [
+        {
+          "delta": -0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": -0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.02,
+          "abs_delta": 0.02,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.05,
+          "abs_delta": 0.05,
+          "measured_zero_count": 2,
+          "cubic_zero_count": 2,
+          "quartic_zero_count": 2,
+          "quintic_zero_count": 2,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.1,
+          "abs_delta": 0.1,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.15,
+          "abs_delta": 0.15,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.2,
+          "abs_delta": 0.2,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": true,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        },
+        {
+          "delta": 0.3,
+          "abs_delta": 0.3,
+          "measured_zero_count": 1,
+          "cubic_zero_count": 1,
+          "quartic_zero_count": 1,
+          "quintic_zero_count": 1,
+          "cubic_within_tolerance": false,
+          "quartic_within_tolerance": true,
+          "quintic_within_tolerance": true
+        }
+      ]
+    }
+  ],
+  "fits": {
+    "published ladder": {
+      "v_sigma_root_T": 0.14142135623730953,
+      "order_five_over_four_at_measure_column": 0.27981864915385096,
+      "order_four_over_three_at_measure_column": 0.5628541070142362,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.0024326646741319596,
+        "quartic": 0.0016208684077405958,
+        "quintic": 0.003812759997119198
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.018873008297375794,
+        "quartic": 0.0016208684077405958,
+        "quintic": 0.00118094286024557
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.0348587364364816,
+        "quartic": 0.005479350133031397,
+        "quintic": 0.003812759997119198
+      },
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.09341752441547391,
+          "quartic_nearest_zero_distance": 0.03227468405949802,
+          "quintic_nearest_zero_distance": 0.01753772953832005
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0348587364364816,
+          "quartic_nearest_zero_distance": 0.005479350133031397,
+          "quintic_nearest_zero_distance": 0.003812759997119198
+        },
+        {
+          "cubic_nearest_zero_distance": 0.018873008297375794,
+          "quartic_nearest_zero_distance": 0.0016208684077405958,
+          "quintic_nearest_zero_distance": 0.00118094286024557
+        },
+        {
+          "cubic_nearest_zero_distance": 0.008429113338523931,
+          "quartic_nearest_zero_distance": 0.0002783754541479614,
+          "quintic_nearest_zero_distance": 0.00023319006263145849
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0024326646741319596,
+          "quartic_nearest_zero_distance": 3.9026723058430135e-07,
+          "quintic_nearest_zero_distance": 1.6530745599072777e-05
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": 0.00018167485029671297,
+          "quartic_nearest_zero_distance": 4.079183925937563e-07,
+          "quintic_nearest_zero_distance": 2.1384353998546782e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0014966152357359895,
+          "quartic_nearest_zero_distance": 1.1496688844848946e-05,
+          "quintic_nearest_zero_distance": 1.031798893492454e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.006658374439378528,
+          "quartic_nearest_zero_distance": 0.0002859752397795928,
+          "quintic_nearest_zero_distance": 0.00018649418064128898
+        },
+        {
+          "cubic_nearest_zero_distance": 0.01607311885255295,
+          "quartic_nearest_zero_distance": 0.0015956971226373864,
+          "quintic_nearest_zero_distance": 0.001035129877524639
+        },
+        {
+          "cubic_nearest_zero_distance": 0.030873804598333235,
+          "quartic_nearest_zero_distance": 0.005419577614849749,
+          "quintic_nearest_zero_distance": 0.00358894592307428
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        }
+      ]
+    },
+    "long-dated wide": {
+      "v_sigma_root_T": 0.4949747468305833,
+      "order_five_over_four_at_measure_column": 0.5875865567378914,
+      "order_four_over_three_at_measure_column": 0.015293511182137896,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.0020606407199528914,
+        "quartic": 0.0010741080208380785,
+        "quintic": 0.0005825390047120294
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.023474675800179083,
+        "quartic": 0.0010741080208380785,
+        "quintic": 0.0005825390047120294
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.023474675800179083,
+        "quartic": 0.0010741080208380785,
+        "quintic": 0.0005825390047120294
+      },
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.0014476634994783563,
+          "quartic_nearest_zero_distance": 0.0003272088077240151,
+          "quintic_nearest_zero_distance": 9.979728688695039e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0005062442962865052,
+          "quartic_nearest_zero_distance": 0.00011963523643411522,
+          "quintic_nearest_zero_distance": 1.9498699053745183e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.00022006956346821809,
+          "quartic_nearest_zero_distance": 5.504127281619545e-05,
+          "quintic_nearest_zero_distance": 6.422873011391328e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 5.7787976179868826e-05,
+          "quartic_nearest_zero_distance": 1.6554537928508382e-05,
+          "quintic_nearest_zero_distance": 1.3248122719715025e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 2.639799428069342e-06,
+          "quartic_nearest_zero_distance": 1.646870548719162e-06,
+          "quintic_nearest_zero_distance": 7.491556967397645e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 3.013438406888544e-07,
+          "quartic_nearest_zero_distance": 5.650786802466768e-08,
+          "quintic_nearest_zero_distance": 1.1799686980545204e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 1.8137108735235977e-06,
+          "quartic_nearest_zero_distance": 8.213325337512109e-08,
+          "quintic_nearest_zero_distance": 2.2691478871687126e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 6.961975324716726e-05,
+          "quartic_nearest_zero_distance": 3.921858828289347e-06,
+          "quintic_nearest_zero_distance": 3.7493568070135624e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0020606407199528914,
+          "quartic_nearest_zero_distance": 3.283129796082668e-05,
+          "quintic_nearest_zero_distance": 2.6259430544899043e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.023474675800179083,
+          "quartic_nearest_zero_distance": 0.0010741080208380785,
+          "quintic_nearest_zero_distance": 0.00019819365950876633
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": 1.9221189154428053e-05,
+          "quintic_nearest_zero_distance": 0.0005825390047120294
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        }
+      ]
+    },
+    "short-dated tight": {
+      "v_sigma_root_T": 0.04743416490252569,
+      "order_five_over_four_at_measure_column": 0.14292546778574275,
+      "order_four_over_three_at_measure_column": 3.8870859665195145,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.0027280748483932793,
+        "quartic": 0.0005666792803906539,
+        "quintic": 0.00022906686287201689
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.014277908960165234,
+        "quartic": 0.0005666792803906539,
+        "quintic": 0.00022906686287201689
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.014277908960165234,
+        "quartic": 0.0005666792803906539,
+        "quintic": 0.00022906686287201689
+      },
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": 0.06184337768142578,
+          "quartic_nearest_zero_distance": 0.007787410977237431,
+          "quintic_nearest_zero_distance": 0.026481028451300605
+        },
+        {
+          "cubic_nearest_zero_distance": 0.014277908960165234,
+          "quartic_nearest_zero_distance": 0.0005666792803906539,
+          "quintic_nearest_zero_distance": 0.00014131332780951836
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0027280748483932793,
+          "quartic_nearest_zero_distance": 3.278316014288917e-05,
+          "quintic_nearest_zero_distance": 2.7411863276027675e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0016006054503744519,
+          "quartic_nearest_zero_distance": 1.7880496035019983e-05,
+          "quintic_nearest_zero_distance": 2.670721658891255e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.011410886539828056,
+          "quartic_nearest_zero_distance": 0.0002851767332621505,
+          "quintic_nearest_zero_distance": 0.00022906686287201689
+        },
+        {
+          "cubic_nearest_zero_distance": 0.05369063731382422,
+          "quartic_nearest_zero_distance": 0.00033795408486586576,
+          "quintic_nearest_zero_distance": 0.22622793279668776
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        }
+      ]
+    },
+    "deep out of the money": {
+      "v_sigma_root_T": 0.3181980515339464,
+      "order_five_over_four_at_measure_column": 0.05687116397731155,
+      "order_four_over_three_at_measure_column": 0.930778869406997,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.002730858471151081,
+        "quartic": 0.0008818791968393728,
+        "quintic": 0.002395849513686439
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.006901436157542173,
+        "quartic": 0.0008818791968393728,
+        "quintic": 0.00021847729184319188
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.027633227090470357,
+        "quartic": 0.010604366387410304,
+        "quintic": 0.002395849513686439
+      },
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.020157179538720545,
+          "quartic_nearest_zero_distance": 0.0025806340713798795,
+          "quintic_nearest_zero_distance": 0.002395849513686439
+        },
+        {
+          "cubic_nearest_zero_distance": 0.005663931149543574,
+          "quartic_nearest_zero_distance": 0.00043309150137715163,
+          "quintic_nearest_zero_distance": 0.00021847729184319188
+        },
+        {
+          "cubic_nearest_zero_distance": 0.002362621722366198,
+          "quartic_nearest_zero_distance": 0.00013098775024204118,
+          "quintic_nearest_zero_distance": 4.5849117727392655e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0006990343108202192,
+          "quartic_nearest_zero_distance": 2.5448319678084315e-05,
+          "quintic_nearest_zero_distance": 5.511847758212299e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 8.811536560728939e-05,
+          "quartic_nearest_zero_distance": 1.6153578699605034e-06,
+          "quintic_nearest_zero_distance": 1.617710181190746e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 5.694907254064576e-06,
+          "quartic_nearest_zero_distance": 4.2461165003276815e-08,
+          "quintic_nearest_zero_distance": 1.615826840858643e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 5.802727454192678e-06,
+          "quartic_nearest_zero_distance": 4.497402287598749e-08,
+          "quintic_nearest_zero_distance": 1.5856060144882854e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 9.235750476714575e-05,
+          "quartic_nearest_zero_distance": 1.868165512769319e-06,
+          "quintic_nearest_zero_distance": 1.542695389161828e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0007686834080221127,
+          "quartic_nearest_zero_distance": 3.445127884423515e-05,
+          "quintic_nearest_zero_distance": 5.000847288638894e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.002730858471151081,
+          "quartic_nearest_zero_distance": 0.00021293133880963066,
+          "quintic_nearest_zero_distance": 3.931367597564343e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.006901436157542173,
+          "quartic_nearest_zero_distance": 0.0008818791968393728,
+          "quintic_nearest_zero_distance": 0.00017411879213523112
+        },
+        {
+          "cubic_nearest_zero_distance": 0.027633227090470357,
+          "quartic_nearest_zero_distance": 0.010604366387410304,
+          "quintic_nearest_zero_distance": 0.0013680110240284118
+        }
+      ]
+    },
+    "in the money": {
+      "v_sigma_root_T": 0.14142135623730953,
+      "order_five_over_four_at_measure_column": 0.060347619800255894,
+      "order_four_over_three_at_measure_column": 0.2239444414210092,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.0005356193341896362,
+        "quartic": 0.0009048619251613779,
+        "quintic": 6.708086984272277e-05
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.005967485559509128,
+        "quartic": 0.0009048619251613779,
+        "quintic": 6.708086984272277e-05
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.005967485559509128,
+        "quartic": 0.0009048619251613779,
+        "quintic": 6.708086984272277e-05
+      },
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": 0.035187507464716536,
+          "quartic_nearest_zero_distance": 0.015806925167341904,
+          "quintic_nearest_zero_distance": 0.005399528027444159
+        },
+        {
+          "cubic_nearest_zero_distance": 0.005967485559509128,
+          "quartic_nearest_zero_distance": 0.0009048619251613779,
+          "quintic_nearest_zero_distance": 6.708086984272277e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0005356193341896362,
+          "quartic_nearest_zero_distance": 1.4367617036391105e-05,
+          "quintic_nearest_zero_distance": 4.603449095159223e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 2.8641770475402702e-05,
+          "quartic_nearest_zero_distance": 6.1951072008892966e-09,
+          "quintic_nearest_zero_distance": 4.790244948046831e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 2.231674787940639e-05,
+          "quartic_nearest_zero_distance": 3.7941309761070196e-07,
+          "quintic_nearest_zero_distance": 4.303845834937887e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0002813578338209848,
+          "quartic_nearest_zero_distance": 2.4485347807014397e-05,
+          "quintic_nearest_zero_distance": 3.5500033270189496e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.001370624759864457,
+          "quartic_nearest_zero_distance": 0.0006883619465043525,
+          "quintic_nearest_zero_distance": 5.554466357456794e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0013798003609906614,
+          "quartic_nearest_zero_distance": 0.0062982592357838305,
+          "quintic_nearest_zero_distance": 0.0006437533527756459
+        },
+        {
+          "cubic_nearest_zero_distance": 0.005735881985585431,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        },
+        {
+          "cubic_nearest_zero_distance": null,
+          "quartic_nearest_zero_distance": null,
+          "quintic_nearest_zero_distance": null
+        }
+      ]
+    },
+    "candidate T=3y sig=0.45 q=0.05": {
+      "v_sigma_root_T": 0.7794228634059948,
+      "order_five_over_four_at_measure_column": 0.002449039099104238,
+      "order_four_over_three_at_measure_column": 0.048128670187392905,
+      "worst_distance_inside_own_radius": {
+        "cubic": 0.001948853263431279,
+        "quartic": 0.0004612654088886961,
+        "quintic": 0.0003889192195040622
+      },
+      "worst_distance_inside_quartic_radius": {
+        "cubic": 0.014021564417564171,
+        "quartic": 0.0004612654088886961,
+        "quintic": 0.0003889192195040622
+      },
+      "worst_distance_inside_quintic_radius": {
+        "cubic": 0.014021564417564171,
+        "quartic": 0.0004612654088886961,
+        "quintic": 0.0003889192195040622
+      },
+      "columns": [
+        {
+          "cubic_nearest_zero_distance": 0.0012781328736173742,
+          "quartic_nearest_zero_distance": 7.6400469347572e-05,
+          "quintic_nearest_zero_distance": 1.2928077031203189e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.0004405073627229174,
+          "quartic_nearest_zero_distance": 1.1508427408987026e-05,
+          "quintic_nearest_zero_distance": 3.1278700855681685e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.00020547585707414526,
+          "quartic_nearest_zero_distance": 2.969573913647744e-06,
+          "quintic_nearest_zero_distance": 9.88270281010624e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 6.863616212568436e-05,
+          "quartic_nearest_zero_distance": 4.417870880487132e-07,
+          "quintic_nearest_zero_distance": 1.7260699204570823e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 9.88455506862186e-06,
+          "quartic_nearest_zero_distance": 1.8226166996005225e-08,
+          "quintic_nearest_zero_distance": 7.151323832481175e-09
+        },
+        {
+          "cubic_nearest_zero_distance": 6.965946533455075e-07,
+          "quartic_nearest_zero_distance": 3.281646058817282e-10,
+          "quintic_nearest_zero_distance": 8.67873496050546e-11
+        },
+        {
+          "cubic_nearest_zero_distance": 8.035424270928923e-07,
+          "quartic_nearest_zero_distance": 1.7047418621326475e-10,
+          "quintic_nearest_zero_distance": 1.0903772818730926e-10
+        },
+        {
+          "cubic_nearest_zero_distance": 1.4136298143424867e-05,
+          "quartic_nearest_zero_distance": 3.6578690886792872e-09,
+          "quintic_nearest_zero_distance": 1.264713213983918e-08
+        },
+        {
+          "cubic_nearest_zero_distance": 0.00014110659704437813,
+          "quartic_nearest_zero_distance": 7.826821743148193e-08,
+          "quintic_nearest_zero_distance": 5.399725788732615e-07
+        },
+        {
+          "cubic_nearest_zero_distance": 0.000613939307301737,
+          "quartic_nearest_zero_distance": 1.7206566476461738e-06,
+          "quintic_nearest_zero_distance": 5.4685526485603875e-06
+        },
+        {
+          "cubic_nearest_zero_distance": 0.001948853263431279,
+          "quartic_nearest_zero_distance": 1.7172233635485284e-05,
+          "quintic_nearest_zero_distance": 3.057473205094266e-05
+        },
+        {
+          "cubic_nearest_zero_distance": 0.014021564417564171,
+          "quartic_nearest_zero_distance": 0.0004612654088886961,
+          "quintic_nearest_zero_distance": 0.0003889192195040622
+        }
+      ]
+    }
+  }
+}

@@ -193,3 +193,32 @@ which is the defect rather than a mutant. Finding 59(a) is the audit entry;
   `tests/python/test_fifth_order_partials.py::test_the_derivation_command_agrees_at_the_precision_floor`
   is gated on it. The bullet is left standing as what this revision said; this line is the dated
   correction, per the rule that records of a revision are appended to rather than rewritten.
+
+## Third correction added 2026-10-08 — the performance figures this note quotes have moved again
+
+The paragraph above this note's "Verification" section quotes the figures of the run that was behind
+the tag (`8.45×`, `0.471×`, `44,549,572` and `5,271,981` paths/s) and states the committed history as
+`7.77×–8.70×` / `0.42×–0.51×`. Both halves have moved since, and this note is one of the six documents
+the band guard reads, so they are corrected here rather than left to decay:
+
+- The point figures are what the artifact on disk measures now — `8.88×` versus a pure Python loop and
+  `0.460×` versus vectorised NumPy, `39,944,978` paths/s for the core against `4,500,031` for the
+  interpreted loop. Same script, same machine, same workload; the run behind the tag is three
+  re-freezings old.
+- Over the twenty-one committed measurements the history now spans `7.77×–8.88×` / `0.42×–0.51×`: the
+  pure-Python upper edge rose by 0.18, the NumPy band did not move at all, and the spreads are 14.2%
+  and 20.8%. The NumPy baseline ranges from 110M to 46M paths/s across those twenty-one runs, which is
+  why its ratio is the noisier of the two per unit of load.
+- Two clean idle runs of that script four minutes apart on 2026-10-08 wrote `8.378×` / `0.5656×` and
+  `8.877×` / `0.4597×`. Only one of them can ever be quotable, because the tree carries one artifact
+  rather than a sample; the second is what is committed, and the first is recorded here so the 19%
+  swing between them is not lost. A third run, contending with a second concurrent copy of the suite,
+  wrote `4.01×` and `0.36×` — below every edge this repository has printed — and was restored rather
+  than committed.
+
+The paragraph above is left as written because it is dated to the tag. `docs/reproducibility.md` owns
+the range and prints the command that recomputes it;
+`test_documents_quote_the_performance_figures_the_artifact_actually_holds`,
+`test_the_documented_speedup_ranges_contain_the_current_measurement` and
+`test_the_documented_speedup_ranges_match_the_committed_history` are what make leaving a stale figure
+in a present-tense sentence impossible.

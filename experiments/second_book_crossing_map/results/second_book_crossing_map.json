@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-10-04T05:10:47.226673+00:00",
+  "generated_at_utc": "2026-10-08T05:46:30.739998+00:00",
   "command": "uv run python experiments/second_book_crossing_map/run.py",
   "claim": "the order-four widening is a property of the expansion and not of v1.6.0's ladder: on 5 of 5 books the quartic's contiguous crossing radius is at least the cubic's, and on every book its worst distance inside the cubic's own radius is the smaller -- but the magnitude does not transfer: the published 3.0x is the widest factor in the set, matched by one other book, the four spanning 1.3x to 3.0x",
   "procedure": {

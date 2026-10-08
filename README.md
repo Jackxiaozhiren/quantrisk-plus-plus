@@ -128,7 +128,7 @@ Three levels, defined in [`docs/validation_protocol.md`](docs/validation_protoco
   coverage against exact binomial bands; backtest size and power over thousands of
   replications on synthetic data whose truth is known.
 
-[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full table — twenty-five rows over
+[`docs/validation_matrix.md`](docs/validation_matrix.md) is the full table — twenty-six rows over
 those twelve components: method, oracle, the bound the test asserts, the error actually measured,
 and the artifact.
 The four that carry a first reading:
@@ -156,8 +156,8 @@ difference of the order below.
 
 ## Benchmark
 
-`uv run python scripts/run_benchmark_suite.py` runs all eighteen members — four correctness
-benchmarks, thirteen statistical experiments, one performance benchmark, and writes JSON, CSV, Markdown and a figure under
+`uv run python scripts/run_benchmark_suite.py` runs all nineteen members — four correctness
+benchmarks, fourteen statistical experiments, one performance benchmark, and writes JSON, CSV, Markdown and a figure under
 `benchmarks/suite/results/`. No wall-clock is quoted here on purpose: `wall_seconds` is in
 the artifact, from the run that produced it.
 
@@ -169,9 +169,10 @@ the plot and the table cannot disagree.
 The performance result is deliberately unflattering. On 200,000 terminal-only paths, one
 normal per path:
 
-- **≈8× a pure Python loop** — `8.45×` in the artifact now in the tree (44.5M vs 5.3M paths/s on this quieter desktop; the same binary has measured 21.1M under load),
-  and `7.77×`–`8.70×` across the performance artifacts this repository has committed, and
-- **`0.471×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
+- **≈8× a pure Python loop** — `8.88×` in the artifact now in the tree (39.9M vs 4.5M paths/s), and
+  `7.77×`–`8.88×` across the performance artifacts this repository has committed; the same binary
+  has run at 21.1M paths/s under load and 46.4M quiet, and
+- **`0.460×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
   so the C++ core is *slower* than a NumPy `standard_normal` draw for this workload, on every
   one of those runs.
 
@@ -205,7 +206,7 @@ in [`docs/project_scope.md`](docs/project_scope.md) §10.
 
 ## Experiments
 
-Thirteen experiments, each answering one question with a distribution rather than a point. Each
+Fourteen experiments, each answering one question with a distribution rather than a point. Each
 writes its own JSON, CSV and figures, and each reports its own caveats in the artifact.
 
 | Experiment | Finding |
@@ -223,6 +224,7 @@ writes its own JSON, CSV and figures, and each reports its own caveats in the ar
 | `fourth_order_crossing_map` | Adding the four mixed fourth partials to v1.5.0's column truncation widens the radius over which it predicts *where* the map's error crosses zero, from `|delta| <= 0.05` to `|delta| <= 0.15` (worst distance 0.00162 against the cubic's 0.01887), while the quartic residual falls with log-log slope 4.73–5.01 against the cubic's 3.96–4.37. The amount is not cheaper: `risk_off` is still 16.2 % wrong instead of 22.3 %, now from the other side. |
 | `second_book_crossing_map` | That widening is a property of the expansion, not of one ladder: on five books the quartic's radius is at least the cubic's on 5 of 5 and its worst distance inside the cubic's own radius is smaller on 5 of 5 — and the *size* transfers to none of them, with factors 1.3, 2.0, 2.5, 3.0 and 3.0 over cubic radii 0.02 to 0.15. The set was built to span the order-four-to-three ratio 254-fold expecting that ratio to explain the gain; the book with the smallest ratio tied for the largest, so no mechanism is claimed. The re-derivation is bit-identical to both shipped experiments before any book is measured. |
 | `fifth_order_crossing_map` | Order five widens the crossing radius again on 2 of 5 books and leaves it unchanged on 3: the published ladder goes 0.15 → 0.20 (a factor of 1.33 where the cubic-to-quartic step was 3.00), and inside the quartic's own radius the quintic is the closest of the three orders on 5 of 5. Two books sit at the swept grid edge, where no widening could be seen; the order-five-to-four piece ratio spans 0.057 to 0.588 and orders the outcome no better than its predecessor did, so the mechanism stays refuted rather than repaired. |
+| `sixth_book_crossing_map` | A sixth book, picked by the published order-five-to-four ratio rule before its radius was read, lands 24-fold below the previous minimum at ratio 0.0024 — and its quartic radius is already at the swept grid edge, so the quintic cannot rise there whatever the truncation does: radii 0.2 → 0.3 → 0.3, factor 1.000. The arithmetic still improves (worst column inside the quartic's radius 0.000389 against the quartic's own 0.000461), and across six books the quintic widens 2, leaves 4 unchanged and thins none, with 3 now at the edge. The scan is published with the artifact, so the rule can be audited rather than trusted. |
 
 ## Reproducibility
 
@@ -254,7 +256,7 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 87 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 88 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
 - **The risk layer's instrumented validation is synthetic; only one arm is real.** Six of the

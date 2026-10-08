@@ -22,13 +22,13 @@
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.14"
   },
-  "generated_at_utc": "2026-10-04T05:11:32+00:00",
+  "generated_at_utc": "2026-10-08T05:48:43+00:00",
   "members": [
     {
       "artifact": "benchmarks/quantlib/results/pricing_vs_quantlib.json",
-      "artifact_sha256": "1be3bf0ec509ac6f8826e656fefce93bbcc95a8791a8e2352c914ee8ed2e14b8",
+      "artifact_sha256": "459bbe41b044f2c9b451c04b841d4be630c0ad33c1408c49b474d69a3fb01f93",
       "command": "benchmarks/quantlib/pricing_validation.py",
-      "generated_at_utc": "2026-10-04T05:08:55+00:00",
+      "generated_at_utc": "2026-10-08T05:43:55+00:00",
       "key": "pricing_vs_quantlib",
       "kind": "correctness_benchmark",
       "metrics": [
@@ -116,15 +116,15 @@
       ],
       "reason": "",
       "script": "benchmarks/quantlib/pricing_validation.py",
-      "seconds": 2.042,
+      "seconds": 1.877,
       "status": "passed",
       "title": "Black-Scholes, Greeks and CRR lattice vs QuantLib (18,816 rows)"
     },
     {
       "artifact": "benchmarks/quantlib/results/monte_carlo_validation.json",
-      "artifact_sha256": "c0eac01c423361ad8cb2a941ef91b8aa33c64fd7968f80a560f2429825a2dd41",
+      "artifact_sha256": "2c28e5303e100c714f3dc843cb2212d67b95617882535223306b31d13e060e70",
       "command": "uv run python monte_carlo_validation.py --paths 200000",
-      "generated_at_utc": "2026-10-04T05:08:57+00:00",
+      "generated_at_utc": "2026-10-08T05:43:57+00:00",
       "key": "monte_carlo_vs_analytic",
       "kind": "correctness_benchmark",
       "metrics": [
@@ -199,15 +199,15 @@
       ],
       "reason": "",
       "script": "benchmarks/quantlib/monte_carlo_validation.py",
-      "seconds": 2.213,
+      "seconds": 2.063,
       "status": "passed",
       "title": "Monte Carlo, antithetic and control variate vs the analytic oracle"
     },
     {
       "artifact": "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
-      "artifact_sha256": "58b7dc0cd25fa68ce6e46f6b946938a5f597d1c109b81cbb2b3d741ad2c701a5",
+      "artifact_sha256": "430a9595c20f176b870b6c48e35e1d1f3f7ad420e416a599f5a2efaaef088f84",
       "command": "uv run python path_dependent_validation.py",
-      "generated_at_utc": "2026-10-04T05:09:19+00:00",
+      "generated_at_utc": "2026-10-08T05:44:18+00:00",
       "key": "path_dependent_vs_quantlib",
       "kind": "correctness_benchmark",
       "metrics": [
@@ -276,15 +276,15 @@
       ],
       "reason": "",
       "script": "benchmarks/quantlib/path_dependent_validation.py",
-      "seconds": 21.675,
+      "seconds": 21.12,
       "status": "passed",
       "title": "Asian and barrier options, and Heston against closed forms and QuantLib"
     },
     {
       "artifact": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
-      "artifact_sha256": "3659585e38ced289fbd66de7c426d47cf659571380c20e2dcb91c9f2cc8849aa",
+      "artifact_sha256": "fec1591904796595bd9e7f9aa16af18e9f1735f42f63b865dd5aa7cf64aa48f5",
       "command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
-      "generated_at_utc": "2026-10-04T05:09:23+00:00",
+      "generated_at_utc": "2026-10-08T05:44:25+00:00",
       "key": "optimisation_vs_oracles",
       "kind": "correctness_benchmark",
       "metrics": [
@@ -364,15 +364,15 @@
       ],
       "reason": "",
       "script": "benchmarks/pyportfolioopt/optimisation_validation.py",
-      "seconds": 3.437,
+      "seconds": 5.519,
       "status": "passed",
       "title": "Mean-variance, max-Sharpe, risk parity and CVaR vs PyPortfolioOpt and cvxpy"
     },
     {
       "artifact": "benchmarks/performance/results/monte_carlo_speed.json",
-      "artifact_sha256": "ae03ddd2ca96618544350e2db7ce1bb0b51ccd634081a181472280d965bd71c5",
+      "artifact_sha256": "7670be591f50cc429b854b9c5699fb453a230f4b8f6df54e065d50ac70c9178e",
       "command": "uv run python performance monte_carlo_speed.py",
-      "generated_at_utc": "2026-10-04T05:09:23+00:00",
+      "generated_at_utc": "2026-10-08T05:44:26+00:00",
       "key": "mc_speed",
       "kind": "performance_benchmark",
       "metrics": [
@@ -382,7 +382,7 @@
           "source_keys": [
             "speedup_vs_pure_python"
           ],
-          "value": 8.450252845647384
+          "value": 8.876600292221728
         },
         {
           "artifact": "benchmarks/performance/results/monte_carlo_speed.json",
@@ -390,7 +390,7 @@
           "source_keys": [
             "speedup_vs_numpy"
           ],
-          "value": 0.4712456222612986
+          "value": 0.4596525625968165
         },
         {
           "artifact": "benchmarks/performance/results/monte_carlo_speed.json",
@@ -405,15 +405,15 @@
       "plot": [],
       "reason": "",
       "script": "benchmarks/performance/monte_carlo_speed.py",
-      "seconds": 0.442,
+      "seconds": 0.509,
       "status": "passed",
       "title": "C++ Monte Carlo throughput against NumPy and pure Python on one machine"
     },
     {
       "artifact": "experiments/pricing_validation/results/summary.json",
-      "artifact_sha256": "a1a0384c36beb35c43d8186d327a52c4a519627d88dc4a85ef8bbc1792a98171",
+      "artifact_sha256": "92f10f8c17cebd10c94f7687030e38fdcd07a39fdf97e94968abed1704f68dbe",
       "command": "uv run python pricing_validation run.py",
-      "generated_at_utc": "2026-10-04T05:09:24+00:00",
+      "generated_at_utc": "2026-10-08T05:44:26+00:00",
       "key": "pricing_grid",
       "kind": "statistical_experiment",
       "metrics": [
@@ -460,15 +460,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/pricing_validation/run.py",
-      "seconds": 0.718,
+      "seconds": 0.963,
       "status": "passed",
       "title": "Pricing surface, put-call parity and lattice convergence order"
     },
     {
       "artifact": "experiments/monte_carlo_convergence/results/summary.json",
-      "artifact_sha256": "ebc5bd5ceb015dc14516c4c9df8bc2036cb9b388be78bddb2973b6f4cf9b8b7f",
+      "artifact_sha256": "ced30f514cb5fd8855dbec694325e12152edd543a5645004fa2c903752169d86",
       "command": "uv run python run.py",
-      "generated_at_utc": "2026-10-04T05:09:27+00:00",
+      "generated_at_utc": "2026-10-08T05:44:31+00:00",
       "key": "mc_convergence",
       "kind": "statistical_experiment",
       "metrics": [
@@ -510,15 +510,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/monte_carlo_convergence/run.py",
-      "seconds": 3.106,
+      "seconds": 4.204,
       "status": "passed",
       "title": "1/sqrt(N) convergence and confidence-interval coverage of the MC engine"
     },
     {
       "artifact": "experiments/variance_reduction/results/summary.json",
-      "artifact_sha256": "594bd368559e18949a9fd6ea47399bb03c9b85463686269305180414d2f8ff7a",
+      "artifact_sha256": "351808f5729ec01e168fb88a6f5c0c6d4fbbc3577a40725aca25264d8221eeab",
       "command": "uv run python run.py",
-      "generated_at_utc": "2026-10-04T05:09:29+00:00",
+      "generated_at_utc": "2026-10-08T05:44:33+00:00",
       "key": "variance_reduction",
       "kind": "statistical_experiment",
       "metrics": [
@@ -542,15 +542,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/variance_reduction/run.py",
-      "seconds": 1.686,
+      "seconds": 2.406,
       "status": "passed",
       "title": "Antithetic and control-variate gains on out-of-sample mean squared error"
     },
     {
       "artifact": "experiments/var_backtesting/results/var_backtesting_validation.json",
-      "artifact_sha256": "df3442a7fcca857f0bed76e81f146fbaef3f695d97da43d5071092cc6b147bf3",
+      "artifact_sha256": "c71ebb0b38e06862ef151b28d5698afea62d7d8a77ee47a525282acc0031fbd4",
       "command": "uv run python experiments/var_backtesting/run.py",
-      "generated_at_utc": "2026-10-04T05:09:54+00:00",
+      "generated_at_utc": "2026-10-08T05:45:08+00:00",
       "key": "var_backtesting",
       "kind": "statistical_experiment",
       "metrics": [
@@ -594,15 +594,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/var_backtesting/run.py",
-      "seconds": 25.428,
+      "seconds": 35.288,
       "status": "passed",
       "title": "VaR/ES estimator bias, Kupiec and Christoffersen size and power, bootstrap coverage"
     },
     {
       "artifact": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
-      "artifact_sha256": "cc519e8c304c889c1f6fee8f948c3afdc7026a427367fa04be51b03a03f8ab72",
+      "artifact_sha256": "55958cec2343fd497f43e68abb8fb3f7ab46bb28f13f1ef36f512b402872d8e1",
       "command": "uv run python experiments/portfolio_optimization/run.py",
-      "generated_at_utc": "2026-10-04T05:09:57+00:00",
+      "generated_at_utc": "2026-10-08T05:45:12+00:00",
       "key": "portfolio_estimation_cost",
       "kind": "statistical_experiment",
       "metrics": [
@@ -652,15 +652,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/portfolio_optimization/run.py",
-      "seconds": 2.596,
+      "seconds": 3.623,
       "status": "passed",
       "title": "Rolling-origin forward variance each covariance estimator costs an optimiser"
     },
     {
       "artifact": "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
-      "artifact_sha256": "542b7f6de1d518fe42d2f5b6f15c4f8095e8c29e551aee1c660dfeb94377bd9c",
+      "artifact_sha256": "1be38f81432f2776c84f6f929ad6664e4701f374c38fd435dfb2ecb91f0405a5",
       "command": "uv run python experiments/linearisation_error_bound/run.py",
-      "generated_at_utc": "2026-10-04T05:10:03+00:00",
+      "generated_at_utc": "2026-10-08T05:45:18+00:00",
       "key": "linearisation_error_bound",
       "kind": "statistical_experiment",
       "metrics": [
@@ -785,15 +785,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/linearisation_error_bound/run.py",
-      "seconds": 5.664,
+      "seconds": 6.194,
       "status": "passed",
       "title": "Taylor remainder bound for the delta-gamma stress map, and its sign change"
     },
     {
       "artifact": "experiments/two_factor_error_bound/results/two_factor_bound.json",
-      "artifact_sha256": "d7c16a9afed22c36e2d0827f227f33c7de1fe4944eb2b033eecf6f0451bca129",
+      "artifact_sha256": "8b429d93a18e55e735b5beb3af0015480b22e49bff94ac0f90a41f26a6819783",
       "command": "uv run python experiments/two_factor_error_bound/run.py",
-      "generated_at_utc": "2026-10-04T05:10:11+00:00",
+      "generated_at_utc": "2026-10-08T05:45:29+00:00",
       "key": "two_factor_error_bound",
       "kind": "statistical_experiment",
       "metrics": [
@@ -902,15 +902,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/two_factor_error_bound/run.py",
-      "seconds": 8.524,
+      "seconds": 10.694,
       "status": "passed",
       "title": "What a joint spot-and-volatility shock costs the delta-gamma-vega stress map"
     },
     {
       "artifact": "experiments/stress_testing/results/stress_testing_study.json",
-      "artifact_sha256": "10fb4ae4afbd3669f951bd65d147ef1e08fd0832d4f14217697ef8c765a2e13d",
+      "artifact_sha256": "d5965070f7b6f215ba605f22e7f70759315d345a07b6f20e53b5fd9229e8a306",
       "command": "uv run python experiments/stress_testing/run.py",
-      "generated_at_utc": "2026-10-04T05:10:16+00:00",
+      "generated_at_utc": "2026-10-08T05:45:39+00:00",
       "key": "stress_testing",
       "kind": "statistical_experiment",
       "metrics": [
@@ -954,15 +954,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/stress_testing/run.py",
-      "seconds": 4.637,
+      "seconds": 10.766,
       "status": "passed",
       "title": "Stress reversals, attribution closure and delta-gamma linearisation error"
     },
     {
       "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
-      "artifact_sha256": "a2f43efed4f5bf60532a10a73e150ef6cd98cd2f1433efdad6b67e1b5978f671",
+      "artifact_sha256": "af1e963261d54fa5f7f2a5779cfc2e24d93dc853f92d00cca3e48a95719c0d11",
       "command": "uv run python experiments/real_data_risk_study/run.py",
-      "generated_at_utc": "2026-10-04T05:10:18+00:00",
+      "generated_at_utc": "2026-10-08T05:45:45+00:00",
       "key": "real_data_risk_study",
       "kind": "statistical_experiment",
       "metrics": [
@@ -1073,15 +1073,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/real_data_risk_study/run.py",
-      "seconds": 2.872,
+      "seconds": 6.71,
       "status": "passed",
       "title": "Phase 5/6 estimator conclusions re-run on real daily market observations"
     },
     {
       "artifact": "experiments/restrike_gamma_map/results/restrike_gamma_map.json",
-      "artifact_sha256": "7730d90ffd5bf605c7041209a2cc0ce27e5aec230a8ba654441e62297d4c1141",
+      "artifact_sha256": "e2854e1ab1faadfdc0716c56de8c2d2baa7f4b45e0d7e201041239f373a36e8e",
       "command": "uv run python experiments/restrike_gamma_map/run.py",
-      "generated_at_utc": "2026-10-04T05:10:19+00:00",
+      "generated_at_utc": "2026-10-08T05:45:47+00:00",
       "key": "restrike_gamma_map",
       "kind": "statistical_experiment",
       "metrics": [
@@ -1188,15 +1188,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/restrike_gamma_map/run.py",
-      "seconds": 0.654,
+      "seconds": 0.827,
       "status": "passed",
       "title": "What re-striking gamma at the shocked volatility actually buys the stress map"
     },
     {
       "artifact": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
-      "artifact_sha256": "d7a3c86b9230e110e9439a3d39028a35ff3325659207fe6f4019dbff8b27b97a",
+      "artifact_sha256": "8a9b9dd45a5af904efff5f67902114b848408274301797a657a467bd4ff947e4",
       "command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_at_utc": "2026-10-04T05:10:20.272420+00:00",
+      "generated_at_utc": "2026-10-08T05:45:48.548154+00:00",
       "key": "fourth_order_crossing_map",
       "kind": "statistical_experiment",
       "metrics": [
@@ -1323,15 +1323,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/fourth_order_crossing_map/run.py",
-      "seconds": 0.485,
+      "seconds": 0.835,
       "status": "passed",
       "title": "How far a fourth-order truncation predicts the stress map's crossing"
     },
     {
       "artifact": "experiments/second_book_crossing_map/results/second_book_crossing_map.json",
-      "artifact_sha256": "fd267b8cb1f924b1634556cf97ade20b29cbf3d9fabb2e9ce5dbc44dba5bb980",
+      "artifact_sha256": "ab95d06634609c459ba03b3783a527ff92456656fb0be03ad4b70847088de95a",
       "command": "uv run python experiments/second_book_crossing_map/run.py",
-      "generated_at_utc": "2026-10-04T05:10:47.226673+00:00",
+      "generated_at_utc": "2026-10-08T05:46:30.739998+00:00",
       "key": "second_book_crossing_map",
       "kind": "statistical_experiment",
       "metrics": [
@@ -1421,15 +1421,15 @@
       "plot": [],
       "reason": "",
       "script": "experiments/second_book_crossing_map/run.py",
-      "seconds": 26.929,
+      "seconds": 42.163,
       "status": "passed",
       "title": "Does the fourth-order crossing radius hold on books other than the published one"
     },
     {
       "artifact": "experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json",
-      "artifact_sha256": "7c7bca2b0be4be7a01ad9ee63f4ab815de3e69684c0b0ef83f45638837e9ae10",
+      "artifact_sha256": "78b7532fef43ac89f742743bf0befde843784f3798183584bdaae320290613dd",
       "command": "uv run python experiments/fifth_order_crossing_map/run.py",
-      "generated_at_utc": "2026-10-04T05:11:32.852391+00:00",
+      "generated_at_utc": "2026-10-08T05:47:18.389962+00:00",
       "key": "fifth_order_crossing_map",
       "kind": "statistical_experiment",
       "metrics": [
@@ -1510,27 +1510,159 @@
       "plot": [],
       "reason": "",
       "script": "experiments/fifth_order_crossing_map/run.py",
-      "seconds": 45.62,
+      "seconds": 47.644,
       "status": "passed",
       "title": "Does the crossing radius widen again at order five, on five books"
+    },
+    {
+      "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+      "artifact_sha256": "41bede7a36c367e830c37a97d844260f1b1f5eb056892f0c852c149ca2382103",
+      "command": "uv run python experiments/sixth_book_crossing_map/run.py",
+      "generated_at_utc": "2026-10-08T05:48:43+00:00",
+      "key": "sixth_book_crossing_map",
+      "kind": "statistical_experiment",
+      "metrics": [
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "books measured",
+          "source_keys": [
+            "headline",
+            "books_measured"
+          ],
+          "value": 6
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "sixth book",
+          "source_keys": [
+            "headline",
+            "sixth_book"
+          ],
+          "value": "candidate T=3y sig=0.45 q=0.05"
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "sixth book order-five-over-four ratio",
+          "source_keys": [
+            "headline",
+            "sixth_book_ratio"
+          ],
+          "value": 0.002449039099104238
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "that ratio over the published minimum",
+          "source_keys": [
+            "headline",
+            "sixth_book_ratio_over_the_published_minimum"
+          ],
+          "value": 0.04306293256247172
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "sixth book is a new low of the published span",
+          "source_keys": [
+            "headline",
+            "sixth_book_is_new_low_of_the_published_span"
+          ],
+          "value": true
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "sixth book, quartic radius",
+          "source_keys": [
+            "headline",
+            "sixth_book_radii",
+            "quartic"
+          ],
+          "value": 0.3
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "sixth book, quintic radius",
+          "source_keys": [
+            "headline",
+            "sixth_book_radii",
+            "quintic"
+          ],
+          "value": 0.3
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "sixth book's verdict is bounded by the grid",
+          "source_keys": [
+            "headline",
+            "sixth_book_radius_verdict_is_grid_bounded"
+          ],
+          "value": true
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "books the quintic widens",
+          "source_keys": [
+            "headline",
+            "books_widening_at_order_five"
+          ],
+          "value": 2
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "books the quintic leaves unchanged",
+          "source_keys": [
+            "headline",
+            "books_unchanged_at_order_five"
+          ],
+          "value": 4
+        },
+        {
+          "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+          "label": "books sitting at the swept grid edge",
+          "source_keys": [
+            "headline",
+            "books_at_grid_edge"
+          ],
+          "value": 3
+        }
+      ],
+      "plot": [],
+      "reason": "",
+      "script": "experiments/sixth_book_crossing_map/run.py",
+      "seconds": 84.754,
+      "status": "passed",
+      "title": "What a sixth book, chosen by the published ratio rule, says of the radius"
     }
   ],
   "outputs": {
     "figure_status": "generated"
   },
   "repository": {
-    "binary_git_commit": "4010acc8a632",
-    "git_commit": "4010acc8a632",
-    "provenance": "ran from 4010acc8a632 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 4010acc8a632",
+    "binary_git_commit": "c41a63344482",
+    "git_commit": "0de4fc4b2f03",
+    "provenance": "ran from 0de4fc4b2f03 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at c41a63344482",
     "uncommitted_paths": [
-      "CITATION.cff",
-      "CMakeLists.txt",
+      ".github/workflows/ci.yml",
+      "README.md",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
       "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
       "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "benchmarks/suite/results/suite_headline.csv",
+      "benchmarks/suite/results/suite_run.json",
+      "benchmarks/suite/results/suite_summary.md",
+      "docs/analysis/sixth_book_crossing_map.md",
+      "docs/integrity_audit.md",
+      "docs/interview_defense.md",
+      "docs/limitations.md",
+      "docs/phase_reports/phase-28-sixth-book.md",
+      "docs/project_scope.md",
+      "docs/release_notes_v1.3.0.md",
+      "docs/release_notes_v1.4.0.md",
+      "docs/release_notes_v1.5.0.md",
       "docs/release_notes_v1.7.0.md",
+      "docs/reproducibility.md",
+      "docs/validation_matrix.md",
+      "evidence/manifest.json",
       "experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json",
       "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
       "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
@@ -1541,13 +1673,13 @@
       "experiments/real_data_risk_study/results/real_data_risk_study.json",
       "experiments/restrike_gamma_map/results/restrike_gamma_map.json",
       "experiments/second_book_crossing_map/results/second_book_crossing_map.json",
+      "experiments/sixth_book_crossing_map/",
       "experiments/stress_testing/results/stress_testing_study.json",
       "experiments/two_factor_error_bound/results/two_factor_bound.json",
       "experiments/var_backtesting/results/var_backtesting_validation.json",
       "experiments/variance_reduction/results/summary.json",
       "experiments/variance_reduction/results/variance_by_method.csv",
-      "pyproject.toml",
-      "uv.lock"
+      "paper/technical_report.pdf"
     ],
     "working_tree_dirty": true
   },
@@ -1555,10 +1687,10 @@
   "totals": {
     "aggregated_only": 0,
     "failed": 0,
-    "members": 18,
-    "passed": 18,
+    "members": 19,
+    "passed": 19,
     "skipped": 0,
-    "wall_seconds": 158.7
+    "wall_seconds": 288.2
   },
   "trigger": "run"
 }

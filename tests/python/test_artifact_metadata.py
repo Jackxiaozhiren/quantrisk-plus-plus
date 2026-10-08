@@ -502,6 +502,7 @@ SPELLED_NUMBERS = {
     "twenty-three": 23,
     "twenty-four": 24,
     "twenty-five": 25,
+    "twenty-six": 26,
 }
 
 
@@ -1100,7 +1101,8 @@ _REPORT_NOUNS = (
     r"|markets|digits|checks|commands|sections|figures|pages|questions|jobs|assets|files"
     r"|modules|routes|rays|rungs|columns|books|releases|scenarios|fields|identities|steps|series"
     r"|windows|benchmarks|fixtures|oracles|versions|tags|presets|packages|observations|sides"
-    r"|claims|models|criteria)"
+    r"|claims|models|criteria|radii|radius|moves|factors|orders|edges|candidates|ladders"
+    r"|stencils)"
 )
 # A number that is part of a word is not a claim: `(?<![A-Za-z\d])` keeps `Catch2 cases` and
 # `sklearn2011}. Oracle versions` out of the inventory, which a bare lookbehind on digits let in.
@@ -1171,6 +1173,10 @@ _REPORT_SRC = re.compile(r"\\src\{([^}]*)\}")
 # stale, and an anchor that exempts nothing the other rules do not already cover is dead weight, so
 # this list can neither accrete nor be padded to make a paragraph pass.
 _REPORT_DECLARED: dict[str, str] = {
+    "over 30 joint moves": (
+        "the equality control's own move count, published in the artifact's control block and "
+        "re-executed by the run rather than restated from prose"
+    ),
     "at 200{,}000 paths over 250 steps": (
         "the Heston xi=0 collapse probe's path and step configuration, recorded in the model card "
         "the paragraph cites; no frozen artifact carries a Heston result (docs/limitations.md #86)"
@@ -1652,6 +1658,7 @@ def _speed_figures(payload: dict[str, Any]) -> dict[str, str]:
     figures = {
         "python_ratio": f"{payload['speedup_vs_pure_python']:.2f}",
         "numpy_ratio": f"{payload['speedup_vs_numpy']:.3f}",
+        "generated_at": payload["generated_at_utc"],
     }
     for side in ("cpp", "python", "numpy"):
         row = timing[side]
@@ -1691,6 +1698,7 @@ PROSE_FIGURES = {
     "paper/technical_report.tex": (
         "${python_ratio}\\times$",
         "${numpy_ratio}\\times$",
+        "{generated_at}",
         "{mean_cpp} & {std6_cpp} & {tex_pps_cpp} & {estimate_cpp} & {tex_z_cpp}",
         "{mean_python} & {std6_python} & {tex_pps_python} & {estimate_python} & {tex_z_python}",
         "{mean_numpy} & {std6_numpy} & {tex_pps_numpy} & {estimate_numpy} & {tex_z_numpy}",
@@ -1710,7 +1718,7 @@ RANGE_DOCUMENTS = (
 # fourteen at the 1.5.0 freeze, recomputable with the command printed in docs/reproducibility.md.
 # Both edges are the *rounded* min and max, which is what the history guard derives, so a raw value
 # of 0.5104 belongs to the documented band edge 0.51 rather than falling outside it.
-SPEEDUP_BANDS = {"python": (7.77, 8.7), "numpy": (0.42, 0.51)}
+SPEEDUP_BANDS = {"python": (7.77, 8.88), "numpy": (0.42, 0.51)}
 
 
 def _committed_speed_ratios() -> list[tuple[float, float]]:
@@ -1832,8 +1840,21 @@ def test_the_performance_guards_are_not_vacuous() -> None:
     assert cell in tex
     assert cell.replace(figures["mean_cpp"], shifted["mean_cpp"]) not in tex
 
+    # The caption names the run by its own timestamp, so a re-frozen artifact strands that date the
+    # same way it strands the ratios. It is owned now, and the control is a date no run carries.
+    dated = dict(json.loads(SPEED_ARTIFACT.read_text(encoding="utf-8")))
+    dated["generated_at_utc"] = "2000-01-01T00:00:00+00:00"
+    assert _speed_figures(dated)["generated_at"] not in tex, (
+        "the caption's run date is not checked against the artifact"
+    )
+
     matrix = (REPO_ROOT / "docs/validation_matrix.md").read_text(encoding="utf-8")
-    assert (7.77, 8.7) in _documented_ranges(matrix)
+    # The edges are read from the pinned band rather than typed here: this test's job is to show the
+    # band guard can fail, and an anchor that only exists while the band says `8.70` is a plant that
+    # disarms itself the first time the band moves -- finding 49's failure mode, new numbers.
+    low, high = SPEEDUP_BANDS["python"]
+    low_text, high_text = f"{low:.2f}", f"{high:.2f}"
+    assert (low, high) in _documented_ranges(matrix)
 
     # A depth-1 clone sees one measurement, so it can only derive a zero-width band. That is what
     # made this release's first runner attempt red; the pinned band must never be one.
@@ -1841,6 +1862,6 @@ def test_the_performance_guards_are_not_vacuous() -> None:
     assert (one, one) not in SPEEDUP_BANDS.values(), (
         "a single measurement cannot support the documented spread"
     )
-    narrowed = matrix.replace("7.77", "8.00").replace("8.70", "8.40")
+    narrowed = matrix.replace(low_text, "7.00").replace(high_text, "8.40")
     assert narrowed != matrix, "the substitution did not land, so it proved nothing"
-    assert (7.77, 8.7) not in _documented_ranges(narrowed)
+    assert (low, high) not in _documented_ranges(narrowed)

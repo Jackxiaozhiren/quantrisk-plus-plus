@@ -246,7 +246,7 @@ never removed just because a later phase shipped.
 
 56. **Resolved on first contact: the CI lane is proven on a runner, and the runner disagreed
     with the laptop.** `benchmark-suite` passes on `ubuntu-latest` in ~5m46s with
-    `--require-all`, so all eighteen members execute against live oracles and none can be skipped
+    `--require-all`, so all nineteen members execute against live oracles and none can be skipped
     silently. What the same runner caught was not in the new lane at all: the pre-existing
     `build-and-test` lane failed on a README assertion that demanded bit-exact agreement with a
     transcribed price, and glibc's libm is 1.7 ULP from Apple's. Local green said nothing about
@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 486 pytest tests with
-    the `oracles` extra installed, and the same tree collects 417 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 494 pytest tests with
+    the `oracles` extra installed, and the same tree collects 425 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -352,7 +352,7 @@ never removed just because a later phase shipped.
     no conclusion moved. The consequence is stated rather than smoothed: `verify_evidence_manifest.py`
     is a same-platform tamper check, and running it on a different libm would report CHANGED on
     result fields that are in fact the same result. CI therefore verifies *execution* on Linux (the
-    `benchmark-suite` lane runs all eighteen members with `--require-all`) and *byte equality* only on
+    `benchmark-suite` lane runs all nineteen members with `--require-all`) and *byte equality* only on
     the platform that produced the artifacts. `test_a_fresh_run_reproduces_the_committed_artifact_exactly`
     encodes the split: relative slack of 1e-12 on floats, exact equality on everything else. Making
     the chain platform-independent would require storing results at a stated precision rather than at
@@ -581,6 +581,17 @@ never removed just because a later phase shipped.
     the count guard matches the wordings it knows — a restatement phrased a fourth way is a figure
     with no owner inside a sentence that looks checked. Both spellings are policed by that guard now,
     which is the rule restated: policing a number means policing every spelling of it.
+    2026-10-08 re-froze the file twice more and moved the *pure-Python* edge: twenty-one committed
+    measurements now span `7.77×`–`8.88×` (14.2%) and `0.42×`–`0.51×` (20.8%). Two clean idle runs of
+    the same script four minutes apart wrote `8.378×` / `0.5656×` and `8.877×` / `0.4597×`, so a
+    single re-freeze can move the NumPy ratio by 19% with no contention involved at all — and only
+    the second of those two readings can be what the documents quote, because the tree holds one
+    artifact, not a sample. A third run that contended with a second concurrent copy of the suite
+    wrote `4.007×` and `0.3588×`, below every edge this repository has ever printed; that artifact was
+    restored rather than committed. The bands are therefore the spread of *committed* runs, and a
+    reading outside them is evidence about the machine, not about the engine — which is why
+    `docs/reproducibility.md` owns the range and prints the command that recomputes it, and why the
+    point figures are quoted from the artifact rather than from memory.
     Related: #63, #76, #71.
 
 78. **The re-struck-gamma recommendation is now measured, and its scope is the grid, not the map.**
@@ -807,3 +818,17 @@ never removed just because a later phase shipped.
     bullet, which is discoverable by a reader but not enforced by a gate. A guard over this class
     would have to decide, per document, which sentences claim to describe the present rather than the
     revision -- and no such decision is made here.
+
+88. **The sixth book's radius verdict is bounded by the swept grid, and the selection rule that found
+    it cannot tell that in advance.** `experiments/sixth_book_crossing_map/run.py` picks its book by
+    the lowest order-five-to-four piece ratio over a pre-registered candidate grid, measured before any
+    radius is read. The candidate it reached -- 3-year maturity, 45 % volatility, 5 % dividend -- has
+    its *quartic* radius already at 0.3, the widest move the ladder sweeps, so the quintic radius
+    cannot rise inside the grid no matter what the truncation does, and "unchanged" on that book is a
+    statement about the ladder rather than about the expansion. What the book does carry is inside the
+    artifact and the note: the quintic's worst column inside the quartic's own radius is
+    `0.000389` against the quartic's `0.000461`, so the arithmetic improved where the label could not
+    follow. A rule that required a non-edge radius as a precondition would have chosen a different,
+    less extreme book -- but that precondition is a statement about the outcome's shape, so it was not
+    added after the fact here; the scan, the accepted candidate and this limitation are published
+    together instead. Three of the six books now sit at the grid edge.

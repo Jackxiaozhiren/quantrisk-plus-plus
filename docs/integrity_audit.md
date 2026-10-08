@@ -1252,3 +1252,96 @@ abstract -- a paragraph with no citation and no declaration -- and names the inv
 green again. Four plant anchors were re-keyed by this phase's own count syncs (85 → 86 limitations, `# 415`
 → `# 416`, `484 pytest tests` → `485`, `# 41/41` → `# 42/42`), and the harness self-test named each one
 before it could be counted as coverage.
+
+## Addendum — Phase 28, a producer run that edited five documents, and the figure the ownership sweep had no rule for (2026-10-08)
+
+**60. Re-measuring a volatile artifact is a documentation edit in disguise, and of all the figures that
+edit moves, the one no guard owned was the date that names the run.** Phase 28's own work is a radius
+experiment (`docs/phase_reports/phase-28-sixth-book.md`), but registering it as the 19th suite member
+means the suite now re-writes
+`benchmarks/performance/results/monte_carlo_speed.json` on every run, and that single producer pass
+made five documents' present-tense sentences false at once: `README.md`, `docs/validation_matrix.md`,
+three separate blocks of `docs/interview_defense.md`, `docs/reproducibility.md`, and the report's
+timing table plus the sentence under it. Every one was caught, which is the mechanism working; what
+the phase is about is the four things the mechanism did *not* cover.
+
+(a) **The caption's run date had no owner.** `paper/technical_report.tex` tabulates the speed run and
+its caption says "the run in `\src{...monte_carlo_speed.json}` dated 2026-09-29T08:58:31+00:00". That
+timestamp is provenance: it is how a reader tells which of twenty-one measurements the table is. It is
+also not a `<number> <noun>` claim, so Phase 27's inventory never looked at it, and
+`test_documents_quote_the_performance_figures_the_artifact_actually_holds` compared the ratios and the
+means and the z-scores while leaving the date behind — a table that re-freezes silently keeps
+asserting it came from a run that is no longer on disk. The guard now carries `generated_at` as a
+figure, the caption is required to state the artifact's own timestamp, and
+`test_the_performance_guards_are_not_vacuous` plants `2000-01-01T00:00:00+00:00` — a date no run of
+this repository has ever produced — and asserts the caption does not contain it. Declared as
+`report-cites-a-run-date-the-artifact-does-not-carry` (45 → 46 plants) and run live first: the date in
+the committed caption was replaced by the date the *previous* freeze carried, the guard named the
+timestamp the artifact actually holds, and the file returned to its recorded SHA-256
+(`7bb5733e29094ed6a6a48739b175a053751a1f17f0b55c9d5676acc0c99c9e1c`) before the guard went green
+again. The generalised rule: ownership has to cover the fields that *identify* a measurement, not only
+the ones it argues from. A second member of the same class turned up in this phase's own new guard:
+its scan publishes the candidates the rule priced, and the rule stops at its first acceptance, so the
+scan was one row and the "ascending ratio order" assertion had nothing to order. The artifact now also
+publishes the 23-row ranking the rule sorted on -- which it always computed, since sorting requires
+it -- and the guard re-derives that ranking from the module's own `ratio_of` and refuses a published
+order that is not the one the rule produces. Two declared plants:
+`report-cites-a-run-date-the-artifact-does-not-carry` and
+`sixth-book-ranking-is-not-the-order-the-rule-sorts-in` (45 → 47 plants).
+
+(b) **A band derived from git history cannot be green in the tree that creates its new edge, and two
+clean runs of one script can move it twice.**
+`test_the_documented_speedup_ranges_match_the_committed_history` requires the pinned `SPEEDUP_BANDS`
+to equal the min/max over the artifact's *committed* revisions. A clean re-run measured `0.5656×`,
+which made the pinned `0.51` upper edge wrong in both directions at once — too low for the documents,
+still right for the history — so the band was widened to `0.57×` and six documents were re-synced to
+`8.38×` / `0.566×`. The next clean re-run of the same script, four minutes later and also idle,
+measured `8.877×` / `0.4597×`: the `0.57×` edge was wrong again, this time too high, and the
+pure-Python edge moved to `8.88×` instead. Both readings are honest and only one of them can be
+quoted, because the tree carries a single artifact rather than a sample; the one that is committed is
+the one the documents state, and the other is recorded in `docs/reproducibility.md`, in
+`docs/limitations.md` #77 and in this note. Two guards were therefore red in the exact tree being
+committed — that one, and the manifest guard that refuses to hash a results directory the freeze has
+not seen. The temptation was to make the history test also read the working tree. It was not taken,
+because the claim being policed is "what this repository has published", and the working tree is not
+published. Instead the sequence is recorded as it happened: docs and artifact committed together, band
+verified green *on the committed tree*, manifest rebuilt from that commit and verified again. The
+guard is unsatisfiable before its own commit by construction, and a phase that does not say so leaves
+the next reader to conclude the gate is broken.
+
+(c) **A contended re-run wrote a pair no band can hold, and restoring it was the right call — but the
+bands had never said what they mean.** The first suite pass of this phase contended with a second copy
+of itself and wrote `speedup_vs_pure_python = 4.007` and `speedup_vs_numpy = 0.3588`, below every edge
+this repository has ever printed, and its whole run took 761.5 s against 367.9 s and 288.2 s for the
+two clean passes that followed it. That artifact was restored from a pre-run copy rather than
+committed, which was right, and left the bands silent about the thing a reader would most want to
+know: `7.77×–8.88×` is the range of *committed* measurements from one machine, not a confidence
+interval on the engine, and a reading outside it is evidence about the machine. Now stated in
+`docs/limitations.md` #77 and `docs/reproducibility.md` with the numbers and the reason the file was
+restored. The bands' own edges moved twice inside the phase as well, and the NumPy baseline ranges
+from 110M to 46M paths/s across the twenty-one committed readings — the guard doing exactly the job it
+was written for: a producer run obliged a documentation edit, twice.
+
+(d) **A derived verdict whose denominator contains the observation it judges can never be wrong.** The
+new member's first headline carried `published_ratio_span` over *all six* books and
+`sixth_book_is_new_low_of_the_span` alongside it; because the sixth book's ratio was inside the span by
+construction, the flag was false whatever the experiment found, and the note under it would have read
+"the rule picked a book the published ratio range already covers" for any measurement at all. Split
+into `published_ratio_span_of_the_five_prior_books`, `ratio_span_over_six_books`, and
+`sixth_book_ratio_over_the_published_minimum` (0.0431, i.e. the new book's ratio is 4.3% of the
+previous minimum), the flag now reads `true` and names the rule that decided it. The test is
+`test_sixth_book_crossing_map.py::test_the_sixth_book_is_a_new_low_of_the_span_it_was_compared_against`,
+and the question that finds this class before the code does is: *what run of this machinery would make
+the flag false?* If none, it is decoration. Same discipline caught the note's rounding: the table
+prints three decimals, so the guard compares `round(value, 3)`, and a raw-equality version failed on
+`1.333` versus `1.3333333333333335` — the document was right and the check was wrong.
+
+(e) **Two dated records had to be corrected rather than edited.** `docs/release_notes_v1.5.0.md` and
+`docs/release_notes_v1.7.0.md` are both in `RANGE_DOCUMENTS`, so the band guard reads them, and both
+state `0.42×–0.51×` — true on their own dates, false now. Neither paragraph was rewritten; each note
+gained a dated correction section (`Correction added 2026-10-08`, and a *third* correction for 1.7.0)
+that states the moved band and says plainly why the sentence above it is left alone. This is finding
+59's #87 recurring in a new place: the guard's membership list does not distinguish a claim about the
+present from a record of the past, so either the dated record carries the current band or the guard
+must stop reading it — and dropping it from `RANGE_DOCUMENTS` would hide exactly the class of staleness
+the list exists to find.

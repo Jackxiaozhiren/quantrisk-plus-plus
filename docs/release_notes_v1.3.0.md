@@ -188,5 +188,5 @@ No oracle in this dependency set publishes a vanna, a volga or a mixed third par
 Python surface stops at vega — so the new closed forms rest on differences, exact identities and
 parity rather than an external comparison. A bound still says nothing about whether a scenario is
 plausible. And the wider gaps survive unchanged: no expected-return model, no term structure, no
-live feed, no re-pricing inside the stress layer, no PyPI package, no DOI — all **87 entries** in
+live feed, no re-pricing inside the stress layer, no PyPI package, no DOI — all **88 entries** in
 `docs/limitations.md`.

@@ -625,6 +625,40 @@ MEMBERS: tuple[Member, ...] = (
             ),
         ),
     ),
+    Member(
+        key="sixth_book_crossing_map",
+        title=("What a sixth book, chosen by the published ratio rule, says of the radius"),
+        kind=EXPERIMENT,
+        script="experiments/sixth_book_crossing_map/run.py",
+        artifact="experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+        # No `plot`: the artifact's table is the result, and the sixth book's radius is bounded by
+        # the swept grid -- a figure would draw that as if it measured the expansion.
+        headline=(
+            ("books measured", ("headline", "books_measured")),
+            ("sixth book", ("headline", "sixth_book")),
+            ("sixth book order-five-over-four ratio", ("headline", "sixth_book_ratio")),
+            (
+                "that ratio over the published minimum",
+                ("headline", "sixth_book_ratio_over_the_published_minimum"),
+            ),
+            (
+                "sixth book is a new low of the published span",
+                ("headline", "sixth_book_is_new_low_of_the_published_span"),
+            ),
+            ("sixth book, quartic radius", ("headline", "sixth_book_radii", "quartic")),
+            ("sixth book, quintic radius", ("headline", "sixth_book_radii", "quintic")),
+            (
+                "sixth book's verdict is bounded by the grid",
+                ("headline", "sixth_book_radius_verdict_is_grid_bounded"),
+            ),
+            ("books the quintic widens", ("headline", "books_widening_at_order_five")),
+            (
+                "books the quintic leaves unchanged",
+                ("headline", "books_unchanged_at_order_five"),
+            ),
+            ("books sitting at the swept grid edge", ("headline", "books_at_grid_edge")),
+        ),
+    ),
 )
 
 
