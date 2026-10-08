@@ -1678,11 +1678,16 @@ def _speed_figures(payload: dict[str, Any]) -> dict[str, str]:
 
 PROSE_FIGURES = {
     "README.md": (
-        "{python_ratio}×",
+        # A claim, not a digit: the committed run is also the widest measurement the band has, so a
+        # bare `8.88×` survives a tamper of the point figure because the band's own upper edge still
+        # prints it. The 47-plant sweep found this by escaping -- the substitution landed, the bytes
+        # changed, and the guard stayed green reading the other occurrence.
+        "`{python_ratio}×` in the artifact now in the tree",
         "{numpy_ratio}×",
         "{mega_cpp}M vs {mega_python}M paths/s",
     ),
     "docs/interview_defense.md": (
+        "{python_ratio}× on this machine",
         "{pps_cpp} paths/s",
         "{pps_python} paths/s",
         "{pps_numpy} paths/s",

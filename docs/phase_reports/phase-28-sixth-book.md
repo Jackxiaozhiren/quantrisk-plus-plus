@@ -212,4 +212,11 @@ Two things the committed tree itself reported, in order:
   that the harness caught it rather than passing silently: the disarm is only invisible if nobody runs
   the anchor self-test, and the sweep runs it first.
 
-The lane is being re-run on this tree; its line is quoted below when the tool prints it, and so is the sweep.
+- `uv run pytest tests/python -q` on the committed tree `8779e6e`: `494 passed in 119.85s`, exit 0.
+- `uv run python scripts/run_mutation_suite.py` on `8779e6e`: **`46/47 planted defects were rejected by
+  their guard`**, exit 1. The escape was `readme-quotes-a-stale-speedup`, and it was not a broken plant:
+  the substitution landed and the bytes changed, but the README prints `8.88×` twice — as the point
+  figure and as the band's upper edge, because this phase's reading is the widest in the artifact's
+  history — so the guard was green on the occurrence the plant never touched. Finding 60(f). The claim
+  is now a phrase (`` `8.88×` in the artifact now in the tree ``) rather than a digit, and the plant is
+  being re-run against that.

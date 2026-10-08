@@ -1336,6 +1336,21 @@ the flag false?* If none, it is decoration. Same discipline caught the note's ro
 prints three decimals, so the guard compares `round(value, 3)`, and a raw-equality version failed on
 `1.333` versus `1.3333333333333335` — the document was right and the check was wrong.
 
+(f) **The sweep escaped a plant, and the escape was a sixth member of the same class.**
+`readme-quotes-a-stale-speedup` re-keyed to the current point figure should have made
+`test_documents_quote_the_performance_figures_the_artifact_actually_holds` red by writing `8.70×` where
+the artifact measures `8.88×`. It reported `46/47 planted defects were rejected by their guard`: the
+substitution landed, the bytes changed, and the guard stayed green. The reason is that this phase's own
+measurement became the widest reading in the file's history, so the README prints `8.88×` twice — once as
+the point figure the guard certifies and once as the band's upper edge, which the tamper does not touch.
+A substring claim over a document that prints the same digits for two different reasons is satisfied by
+the occurrence nobody meant. Fixed by making the claim a phrase rather than a digit
+(`` `8.88×` in the artifact now in the tree ``), and the same context was added to the
+`interview_defense.md` claim; the guard now fails on the tamper it just survived. This is the
+`net`/`network` lesson from finding 59 applied to digits: windowing the cue is only useful if the cue is
+the *sentence*, and the discovery mechanism was the sweep, not the reading — a green gate that cannot
+fail is invisible from inside it.
+
 (e) **Two dated records had to be corrected rather than edited.** `docs/release_notes_v1.5.0.md` and
 `docs/release_notes_v1.7.0.md` are both in `RANGE_DOCUMENTS`, so the band guard reads them, and both
 state `0.42×–0.51×` — true on their own dates, false now. Neither paragraph was rewritten; each note
