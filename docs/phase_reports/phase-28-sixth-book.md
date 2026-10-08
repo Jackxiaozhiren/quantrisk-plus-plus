@@ -42,6 +42,20 @@ alone cannot tell in advance that the book it reaches will be a grid-edge case, 
 precondition requiring a non-edge radius — is a statement about the outcome's shape and was not added
 after the measurement.
 
+The scan stopped at its first acceptance, so the artifact now publishes two lists rather than one: the
+prefix that was priced, and the full 23-row ranking the rule sorted on — which the rule computes anyway,
+to sort. Without the ranking, "the winner is the grid's lowest-ratio corner" is a claim a one-row scan
+cannot support, and the guard that checked the scan's order was satisfied by a sample of one (§7,
+finding 60(f)).
+
+The second half of this phase was not the experiment. Registering it as the nineteenth suite member means
+every `--require-all` pass re-measures the volatile performance artifact, and that one producer run moved
+present-tense figures in five documents, the committed pure-Python band, two plant anchors, and the
+report's own manifest sentence — plus the discovery that the caption's *timestamp*, the field naming which
+run a table tabulates, was the only figure in the paper Phase 27's ownership sweep had no rule for. All of
+it is §9's record: the lane, the sweep that went 46/47 and named its own escape, and the guards that were
+hardened because of it.
+
 ## 2. Mathematical assumptions
 
 Nothing new. The truncations, the multinomial weights `(1, 5, 10, 10, 5, 1)` with `1/120`, the
@@ -230,6 +244,8 @@ Final verdicts, each named with the head it was produced on:
 | Sweep, complete | `d2cf2bb` | `47/47 planted defects were rejected by their guard.` (exit 0), `git status` empty after |
 | CI, three jobs | `8779e6e` | run `37736336265` — `success`: `Format and static checks`, `Configure, build, C++ tests, Python tests`, `Benchmark suite against live oracles` |
 | CI, three jobs | `d2cf2bb` | run `37737532806` — `success`, with `100% tests passed out of 204`, `424 passed, 5 skipped in 201.20s`, `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 429.6s total` |
+| State line refreshed, lane re-run | `16fd995` | `494 passed in 114.44s` locally; `47/47 planted defects were rejected by their guard.` with `git status` empty after; CI run `37739308821` — `success`, 11m5s, all three jobs |
+
 
 The phase closes with every gate green on the pushed head and one claim of its own corrected on the
 record: the harness went red on 46/47, named the escape, and the fix was to the guard rather than to the
