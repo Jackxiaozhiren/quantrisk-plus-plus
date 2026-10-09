@@ -1458,9 +1458,12 @@ plants and `7{,}238{,}399` → `7{,}211{,}281` bytes broke
 `report-counts-a-manifest-the-freeze-does-not-have`, `interview-doc-overcounts-the-offline-lane`,
 `reproducibility-quotes-a-superseded-pytest-total`,
 `docs-command-comment-counts-superseded-plants` and `readme-undercounts-the-limitation-register`. Two of
-them (`…stale-python-tests`, `…offline-probe-refutes`) were already disarmed at `HEAD`: `pytest
-tests/python/test_mutation_suite.py` reports **one** stale anchor per run, so a phase that fixes the one it
-sees and re-runs will still be holding a disarmed plant at the end. The durable form of the check is the
+them (`…stale-python-tests`, `…offline-probe-refutes`) were already disarmed when this segment began -- by
+the same phase's earlier regeneration, before any commit: `49dc015` carries `and 496 pytest tests…` and
+`oracles installed, 427 collected…` in both the report and the plant list, in agreement, and the counts moved
+to 497/428 then 498/429 with the tests this release added. The reason nobody saw it is that
+`pytest tests/python/test_mutation_suite.py` reports **one** stale anchor per run, so a phase that fixes the
+one it sees and re-runs can still be holding disarmed plants at the end. The durable form of the check is the
 one-pass enumeration of every declared anchor against the file it names, recorded in
 `docs/phase_reports/phase-30-v1.8.0.md` §4(c) -- including the `sys.modules` registration it needs, without
 which loading the harness by path dies inside `dataclasses._is_type` instead of reporting anything useful.

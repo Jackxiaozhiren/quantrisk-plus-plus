@@ -81,8 +81,12 @@ disarmed at `HEAD`.** The count syncs (497 → 498, 428 → 429, 89 → 90, 52 �
 `reproducibility-quotes-a-superseded-pytest-total`,
 `docs-command-comment-counts-superseded-plants` and `readme-undercounts-the-limitation-register`. That is
 finding 49's class, sixth occurrence, and the phase that has the most explicit rule about it. Two of them
-were stale *before* this phase's edits landed, which is how the enumeration -- not a pytest that reports
-one per run -- found the rest:
+were already disarmed when this segment began -- by the same phase's earlier regeneration, before any commit:
+`49dc015` carries the report's `and 496 pytest tests…` and `oracles installed, 427 collected…` in agreement
+with the plant list, and the counts moved to 497/428 then 498/429 with the tests this release added. The
+reason nobody saw it is that `pytest tests/python/test_mutation_suite.py` asserts on **one** stale anchor
+per run, so a phase that fixes the one it sees can still be holding disarmed plants at the end -- which is
+how the enumeration, run in one pass, found the rest:
 
 ```bash
 uv run python - <<'PY'   # every declared anchor, exactly once, in the file it names
