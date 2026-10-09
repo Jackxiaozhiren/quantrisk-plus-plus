@@ -1,0 +1,138 @@
+# v1.8.0 — seven phases, one of them a measurement
+
+Cut on the revision whose CI this note reports below. A release note cannot describe its own
+publication: the tag, the run identifiers and the asset hashes are read from the API afterwards, and
+`docs/phase_reports/phase-30-v1.8.0.md` records them once the tools have said them. Seven phases sit
+between `v1.7.0` and this tag. Exactly one of them adds a measurement; the other six add *producers*,
+and the reason they were worth seven phases is finding 55 of `docs/integrity_audit.md`: a sentence can
+restate a figure the repository already refuted, ship in six releases, and keep every guard green while
+it does — because the guards compared a number with a number, and nothing made the sentence read the
+artifact. The headline of this release is therefore not a new result but a new invariant: a countable
+claim in this project's prose is either derived from something that can disagree with it, or it says
+why it is not.
+
+## What this release adds
+
+- **A sixth crossing-radius book, selected by a rule written before it was measured.**
+  `experiments/sixth_book_crossing_map/` (19th suite member) ranks 23 candidate books by the
+  order-five-to-four ratio at Phase 20's own measure column, takes the first with a defined radius, and
+  gets `candidate T=3y sig=0.45 q=0.05` at `0.002449039099104238` — `0.043` of the published five-book
+  minimum, i.e. the rule reaches outside the span the five prior books define. Its radii are
+  `0.2 → 0.3 → 0.3`, a quintic factor of exactly `1.000`, and that `unchanged` is *bounded by the grid
+  rather than earned*: its quartic radius already sits at `0.3`, the widest move swept, so the quintic
+  could not have risen on this ladder whatever the truncation does. Over six books the quintic widens
+  2, leaves 4 unchanged, thins none, with 3 of the 6 at the grid edge, on 60 columns carrying a priced
+  crossing. All 23 ratios are published in the artifact and a guard re-derives the ranking from the
+  ratio function rather than trusting the row the scan accepted. `docs/limitations.md` #88 records what
+  this buys: a rule that selects on the ratio alone cannot tell in advance that the book it reaches will
+  be a grid-edge case.
+- **An inventory that refuses an unowned count.** `test_every_countable_claim_in_the_report_is_owned_or_declared`
+  reads every `<number> <countable noun>` statement in `paper/technical_report.tex` and requires it to be
+  owned (the pattern occurs verbatim in the named guard's source), inside the span a guard compares as a
+  block, cited to an artifact the freeze hashes, or declared with a reason — with every declared anchor
+  re-run with itself withheld, so an exemption that exempts nothing is a failure. Phase 29 moved the same
+  rule onto `README.md` and `docs/reproducibility.md`
+  (`test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared`), where citations
+  resolve through the suite registry — a findings row is cited by the member its key names, and a key the
+  registry dropped cites nothing.
+- **Producers for three counts no runner could see.** The C++ assertion total is now read from the
+  compiled binary's own summary line and the case total from `TEST_CASE(` blocks, with the two required
+  to agree and five quotations across four documents compared with both. The oracle-free test count is
+  measured locally by `scripts/measure_offline_collection.py`, which blocks the `oracles`-only packages in
+  a child interpreter and collects there; the guard refuses the probe unless the gated modules *skip*
+  rather than error, so `429 against 498` is knowable before a runner says it. The identity-check count
+  is produced by running the installed CLI and parsing `checks`.
+- **The derivation is a gate item, not an offer.** `sympy` moved into the `dev` dependency group that
+  `uv sync` installs, so `scripts/derive_fifth_order_partials.py` — the 60-digit identity behind the
+  published `8.7e-58` worst residual — now runs in every lane that sets up the development environment
+  instead of only when a human types `uv run --with sympy`. The test also requires
+  `docs/validation_matrix.md` and the technical report to quote that same figure.
+- **The report's prose reads its facts out of the tree.** Its description of the frozen evidence was the
+  freeze as it stood at `v1.1.0` (69 artifacts, 6,208,835 bytes, 40 statistical experiment files) while
+  its own §1 printed 94; the sentence is now compared as a block against `evidence/manifest.json`, and
+  the freeze this release carries holds 95 artifacts, 7,211,281 bytes and 66 statistical experiment
+  files. Its claim that the
+  order-five experiment "was specified and then deliberately not run" is gone, because Phase 21 ran it
+  and Phase 28 extended it.
+
+## What this release corrects in itself
+
+Three shipped sentences in the report attached to `v1.7.0` contradicted the repository, and the
+correction is recorded as a dated erratum on that release rather than by moving its tag: the stale freeze
+triple, the not-run claim, and a third the inventory found on its first pass — the abstract's
+`55 recorded limitations` beside the same document's own `83`. The count guard had been reading
+`carries/contains/holds N numbered entries` while the abstract used a fourth phrasing, which is finding
+55's mechanism recurring one paragraph away. Two further defects of the same family were found and fixed
+by the phases in this release: a digit guard that had been silently comparing a *market count* with a
+*working precision* because both read 60, and a stale twin in `docs/reproducibility.md` —
+`# 481 tests here` three lines under a correct 498 — which survived three phases because every existing
+count guard checks the *presence* of the right spelling and none checked the *absence* of a wrong one.
+
+The point figures below are the run behind this tag; the range is the living claim. This release's core
+did not move: 204 CTest entries, `548,368` assertions in 203 Catch2 cases — identical to `v1.7.0`, which
+is what seven phases of prose and one new experiment should look like on the C++ side. Python moved from
+477 to 498 tests with the oracles, 429 without. `10.31×` versus a pure Python loop and `0.495×` versus
+vectorised NumPy, `39,040,079` paths/s for the core against `3,787,943` for the interpreted loop,
+generated `2026-10-09T04:54:37+00:00`. They are not constants: over the twenty-two committed measurements
+of this artifact the history spans `7.77×–10.31×` / `0.42×–0.51×` (32.6% and 20.8%), and three clean idle
+runs of the same script on the same machine wrote `8.378×`, `8.877×` and `10.306×`. A fourth run,
+contending with a second copy of the suite on 2026-10-08, read `4.01×` and `0.36×` — below every edge this
+repository has ever printed — and was restored rather than committed.
+
+## Verification at this release
+
+```text
+uv run python scripts/run_benchmark_suite.py --require-all   19/19 members passed, 0 failed, 0 skipped, 238.4 s wall (suite_run.json totals)
+uv run pytest tests/python -q                                498 passed
+scripts/measure_offline_collection.py                        429 collected with the oracles-only packages blocked
+uv run ctest --test-dir build/dev                            100% tests passed out of 204
+./build/dev/quantrisk_tests                                  All tests passed (548368 assertions in 203 test cases)
+uv run quantrisk validate                                    7/7 checks passed
+uv run ruff check . / ruff format --check .                  All checks passed! / 164 files already formatted
+uv run mypy python/quantrisk                                 Success: no issues found in 23 source files
+find cpp -name '*.cpp' -o -name '*.h' | xargs uv run clang-format --dry-run --Werror   exit 0
+uv run latexmk -pdf paper/technical_report.tex               45 pages, 1,005,768 bytes
+uv run python scripts/run_mutation_suite.py --list           53 plants declared
+uv run python scripts/build_evidence_manifest.py             95 artifacts, 7,211,281 bytes
+```
+
+Two of the release's guards are red *before* the tag and silent *on* the runner, and that is a property of
+releasing, not a defect — see the last section.
+
+## What is still not here
+
+- No bound. A radius is still a grid label. On the published ladder the widened region contains a
+  *looser* worst column than the narrower radius, and the amount of the map's error at published scale is
+  untouched — still 16.2% off on `risk_off` after the quartic, with order five not evaluated against that
+  figure.
+- No oracle for the higher orders. Nothing in this dependency set publishes a third, fourth or fifth
+  spot/vol partial, so five of the six fifth-order fields remain anchored by stencils of this project's own
+  fourth-order family.
+- Six books, not a family. No distribution is estimated from them, and 3 of the 6 sit where the swept grid
+  cannot resolve.
+- The inventory covers three documents. `docs/interview_defense.md` and `docs/validation_matrix.md` are
+  still policed figure by figure rather than by owned-or-declared accounting, which `docs/limitations.md`
+  #89 registers instead of leaving implicit.
+- No version owner for the citation file. `CITATION.cff` states this release's version, its date and the
+  URL of its release-notes page; only the version string is now tied to the package and the build (see the
+  last section), and `date-released` remains a claim that cannot be checked before the day it names.
+- The rules that were enforced: no PyPI publication, no real market data inside the engine, no
+  production-readiness claim, no cost above zero, and no failed or contended measurement deleted to make a
+  band look narrow.
+
+## The two sentences this release cannot verify until it exists
+
+`paper/technical_report.tex` enumerates its own releases — `Nine release tags exist, \code{v1.0.0} …
+\code{v1.8.0}` — and `test_the_report_lists_the_release_tags_the_repository_carries` compares that
+enumeration, and its spelled count, with `git tag --list "v*"`. Until the tag exists the enumeration names
+a tag the object store does not carry, so the guard is red in the working tree *by construction* at the
+moment the report is updated, and it returns rather than fails on CI, which checks the repository out at
+depth 1 with no tags at all. That is the same window `docs/limitations.md` documents for the band-history
+guard: a statement about a release cannot be verified by the commit that makes the release. It is
+recorded here rather than smoothed, because the alternative — writing the sentence after the tag — would
+put the report's prose outside the tagged bytes it describes.
+
+The second is `date-released: 2026-10-09` in `CITATION.cff`. `test_the_version_string_the_project_declares_is_one_number_not_four`
+now requires the version to agree across `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff`, `uv.lock` and
+the compiled extension's own `version()`, and requires the citation's release-notes URL to name that same
+`v1.8.0`; the *date* has no producer, because the only producer of a release date is the release.

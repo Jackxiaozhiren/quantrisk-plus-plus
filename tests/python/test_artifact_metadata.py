@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -1635,7 +1636,129 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
     assert not decorative, f"declared exemptions that exempt nothing: {decorative}"
 
 
-RELEASE_NOTE = REPO_ROOT / "docs" / "release_notes_v1.7.0.md"
+def _repository_release_tags() -> list[str]:
+    """Every `vX.Y.Z` tag this clone carries, sorted."""
+    listed = subprocess.run(
+        ["git", "tag", "--list", "v*", "--sort=v:refname"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if listed.returncode != 0:
+        raise RuntimeError(f"`git tag` failed: {listed.stderr[:200]}")
+    return sorted(listed.stdout.split())
+
+
+def test_the_report_lists_the_release_tags_the_repository_carries() -> None:
+    r"""The report enumerated its own releases and nothing compared the enumeration with git.
+
+    "Eight release tags exist, \code{v1.0.0} ... and \code{v1.7.0}" is a claim about the object
+    store, and the sentence was written by a phase that had just made the eighth tag -- so it was
+    true by luck and uncheckable by design. `git tag` is the producer; the report is the quotation;
+    between Phase 21
+    and this one no guard read either. The spelled count goes through the same producer, because the
+    digits and the words are two spellings of one number and policing one spelling is how the stale
+    twin survived in `docs/reproducibility.md` (finding 61).
+
+    Like the performance band, this compares history rather than content, so a shallow clone -- the
+    CI checkout at depth 1 -- has no tags to compare and the guard says so instead of asserting
+    nothing. It also means the sentence about a release being made cannot be verified before the tag
+    exists: the window in which the guard is red while the report names a tag that is not yet in the
+    object store is a property of tagging, not a defect, and the phase record names it.
+    """
+    tags = _repository_release_tags()
+    if len(tags) < 2:
+        pytest.skip(
+            f"this clone carries {len(tags)} release tag(s) (CI checks out at depth 1, which "
+            "carries none), so the enumeration cannot be compared; recompute with "
+            "`git tag --list 'v*' --sort=v:refname`"
+        )
+
+    report = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
+    flat = " ".join(report.split())
+    start = flat.find("release tags exist,")
+    assert start >= 0, "the report no longer enumerates its release tags in its own words"
+    end = flat.find("each with the report", start)
+    assert end > start, "the release-tag sentence no longer closes with its assets clause"
+    sentence = flat[start:end]
+    listed = re.findall(r"\\code\{(v\d+\.\d+\.\d+)\}", sentence)
+    assert listed == tags, f"the report enumerates {listed} while the object store carries {tags}"
+
+    # The count word sits immediately before the enumeration, so it is read out of the run-in to the
+    # sentence rather than out of the sentence itself.
+    spelled = re.search(r"(\w+)\s+release tags exist", flat[max(0, start - 60) : end])
+    assert spelled, "the count word in the release-tag sentence is unreadable"
+    assert _as_int(spelled.group(1)) == len(tags), (
+        f"the report says {spelled.group(1)!r} release tags and lists {len(listed)}; "
+        f"the repository carries {len(tags)}"
+    )
+
+
+def test_the_version_string_the_project_declares_is_one_number_not_four() -> None:
+    r"""Seven places spell this release's version; one pair was the only thing compared.
+
+    `pyproject.toml`, `CMakeLists.txt`, `CITATION.cff` (twice, plus the URL of its
+    release-notes page), `uv.lock`, `README.md`, `docs/interview_defense.md` and the compiled
+    `quantrisk.version()` all carry `1.8.0`. The owner that existed --
+    `test_python_package_version_matches_pyproject` in `tests/python/test_smoke.py` -- pairs the
+    interpreter's build with the packaging file and nothing else, so a bump that forgot a site
+    shipped silently. `CITATION.cff` is one of the four assets attached to every release: a
+    citation naming the previous version would be downloadable, citable by a reader, and
+    uncheckable by this repository. That is finding 55's mechanism -- one fact, several
+    spellings, one spelling compared -- applied to the release's own metadata.
+
+    Every site is read with a pattern that has to match, so a renamed or deleted field fails
+    the guard instead of vacating it, and the document quotations are matched as phrases rather
+    than as bare digits: `1.8.0` also occurs inside tag names and file paths, and a substring
+    test would pass a sentence that never states the version. `date-released` is deliberately
+    not asserted against anything -- the only producer of a release date is the release, and
+    `docs/limitations.md` plus `docs/release_notes_v1.8.0.md` record that window instead of
+    dressing the field up as verified.
+    """
+    version = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"][
+        "version"
+    ]
+
+    cmake = re.search(
+        r"project\(quantrisk\s+VERSION\s+(\d+\.\d+\.\d+)",
+        (REPO_ROOT / "CMakeLists.txt").read_text(encoding="utf-8"),
+    )
+    assert cmake, "CMakeLists.txt no longer declares a version where this guard reads it"
+
+    citation = (REPO_ROOT / "CITATION.cff").read_text(encoding="utf-8")
+    cited = re.findall(r"^[ ]*version:[ ]*(\d+\.\d+\.\d+)[ ]*$", citation, re.M)
+    assert len(cited) == 2, f"CITATION.cff states the version {len(cited)} times, expected 2"
+    tag_url = re.search(r"releases/tag/(v\d+\.\d+\.\d+)", citation)
+    assert tag_url, "CITATION.cff no longer carries a release-notes URL to compare"
+
+    lock = re.search(
+        r'name = "quantrisk"\nversion = "(\d+\.\d+\.\d+)"',
+        (REPO_ROOT / "uv.lock").read_text(encoding="utf-8"),
+    )
+    assert lock, "uv.lock no longer pins quantrisk's own version where this guard reads it"
+
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    defence = (REPO_ROOT / "docs" / "interview_defense.md").read_text(encoding="utf-8")
+
+    assert version == cmake.group(1) == lock.group(1) == quantrisk.version(), (
+        f"the version disagrees across its declarations: pyproject {version}, "
+        f"cmake {cmake.group(1)}, lock {lock.group(1)}, compiled {quantrisk.version()}"
+    )
+    assert set(cited) == {version}, f"CITATION.cff states {cited} while the package is {version}"
+    assert tag_url.group(1) == f"v{version}", (
+        f"CITATION.cff points its release-notes URL at {tag_url.group(1)}, "
+        f"not the tag this version's release makes"
+    )
+    assert f"quantrisk.version()  # '{version}'" in readme, (
+        f"README's 30-second example does not print version() for {version}"
+    )
+    assert f"`quantrisk` {version}, released as the tag `v{version}`" in defence, (
+        f"the state line of docs/interview_defense.md does not name version {version}"
+    )
+
+
+RELEASE_NOTES = sorted((REPO_ROOT / "docs").glob("release_notes_v*.md"))
 RELEASE_BODIES = REPO_ROOT / "docs" / "release_bodies"
 
 
@@ -1651,23 +1774,32 @@ def test_every_digest_a_release_note_cites_is_its_files_own() -> None:
     Pairing is by proximity rather than by one sentence shape, because the note cites some snapshots
     as "(`sha256 <hex>`)" right after the path and others as "bytes, sha256 `<hex>`". A path with no
     digest inside the window is a failure, so the list cannot accrete uncited files.
+
+    Every release note is read, not one named file. The guard used to point at a hardcoded
+    path, which meant the note the repository is writing *now* was outside it: the first snapshot
+    attached to a future release would have been policed only if someone remembered to repoint the
+    constant, and a forgotten repointing is invisible from inside a green lane. A snapshot cited by
+    no note still fails, and one cited by several must satisfy each of them.
     """
-    note = " ".join(RELEASE_NOTE.read_text(encoding="utf-8").split())
+    notes = {
+        path.name: " ".join(path.read_text(encoding="utf-8").split()) for path in RELEASE_NOTES
+    }
+    assert notes, "no release notes exist, so this guard would prove nothing"
     paths = sorted(RELEASE_BODIES.glob("*.md"))
     assert paths, "no release-body snapshots exist, so this guard would prove nothing"
     for path in paths:
         cited = f"`docs/release_bodies/{path.name}`"
-        at = note.find(cited)
-        assert at >= 0, (
-            f"{path.name} is not named in {RELEASE_NOTE.name}, so nothing pins its digest"
-        )
-        window = note[at : at + 240]
-        found = re.search(r"(?:sha256 )?`?([0-9a-f]{64})`?", window)
-        assert found, f"{path.name} is cited without a 64-hex digest within 240 characters"
+        naming = [name for name, text in notes.items() if cited in text]
+        assert naming, f"{path.name} is named by no release note, so nothing pins its digest"
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        assert found.group(1) == digest, (
-            f"{path.name} hashes to {digest} while {RELEASE_NOTE.name} cites it as {found.group(1)}"
-        )
+        for name in naming:
+            at = notes[name].find(cited)
+            window = notes[name][at : at + 240]
+            found = re.search(r"(?:sha256 )?`?([0-9a-f]{64})`?", window)
+            assert found, f"{path.name} is cited without a 64-hex digest within 240 characters"
+            assert found.group(1) == digest, (
+                f"{path.name} hashes to {digest} while {name} cites it as {found.group(1)}"
+            )
 
 
 OFFLINE_PROBE_SCRIPT = REPO_ROOT / "scripts" / "measure_offline_collection.py"
@@ -1980,13 +2112,14 @@ RANGE_DOCUMENTS = (
     "docs/reproducibility.md",
     "docs/release_notes_v1.5.0.md",
     "docs/release_notes_v1.7.0.md",
+    "docs/release_notes_v1.8.0.md",
 )
 
 # The spread of the speed benchmark's two ratios over every committed measurement of the artifact —
 # fourteen at the 1.5.0 freeze, recomputable with the command printed in docs/reproducibility.md.
 # Both edges are the *rounded* min and max, which is what the history guard derives, so a raw value
 # of 0.5104 belongs to the documented band edge 0.51 rather than falling outside it.
-SPEEDUP_BANDS = {"python": (7.77, 8.88), "numpy": (0.42, 0.51)}
+SPEEDUP_BANDS = {"python": (7.77, 10.31), "numpy": (0.42, 0.51)}
 
 
 def _committed_speed_ratios() -> list[tuple[float, float]]:

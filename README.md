@@ -59,7 +59,7 @@ instrumentation is the hard part.
 ```python
 import quantrisk
 
-quantrisk.version()  # '1.7.0'
+quantrisk.version()  # '1.8.0'
 quantrisk.normal_cdf(0.0)  # 0.5
 
 rng = quantrisk.Rng(seed=42)
@@ -169,10 +169,10 @@ the plot and the table cannot disagree.
 The performance result is deliberately unflattering. On 200,000 terminal-only paths, one
 normal per path:
 
-- **≈8× a pure Python loop** — `8.88×` in the artifact now in the tree (39.9M vs 4.5M paths/s), and
-  `7.77×`–`8.88×` across the performance artifacts this repository has committed; the same binary
-  has run at 21.1M paths/s under load and 46.4M quiet, and
-- **`0.460×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
+- **≈8–10× a pure Python loop** — `10.31×` in the artifact now in the tree (39.0M vs 3.8M paths/s),
+  and `7.77×`–`10.31×` across the performance artifacts this repository has committed; the same
+  binary has run at 21.1M paths/s under load and 46.4M quiet, and
+- **`0.495×` vectorised NumPy in that same artifact** — its committed range is `0.42×`–`0.51×`,
   so the C++ core is *slower* than a NumPy `standard_normal` draw for this workload, on every
   one of those runs.
 
@@ -256,7 +256,7 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 89 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 90 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
 - **The risk layer's instrumented validation is synthetic; only one arm is real.** Six of the

@@ -201,20 +201,20 @@ the tag (`8.45×`, `0.471×`, `44,549,572` and `5,271,981` paths/s) and states t
 `7.77×–8.70×` / `0.42×–0.51×`. Both halves have moved since, and this note is one of the six documents
 the band guard reads, so they are corrected here rather than left to decay:
 
-- The point figures are what the artifact on disk measures now — `8.88×` versus a pure Python loop and
-  `0.460×` versus vectorised NumPy, `39,944,978` paths/s for the core against `4,500,031` for the
-  interpreted loop. Same script, same machine, same workload; the run behind the tag is three
-  re-freezings old.
-- Over the twenty-one committed measurements the history now spans `7.77×–8.88×` / `0.42×–0.51×`: the
-  pure-Python upper edge rose by 0.18, the NumPy band did not move at all, and the spreads are 14.2%
-  and 20.8%. The NumPy baseline ranges from 110M to 46M paths/s across those twenty-one runs, which is
-  why its ratio is the noisier of the two per unit of load.
-- Two clean idle runs of that script four minutes apart on 2026-10-08 wrote `8.378×` / `0.5656×` and
-  `8.877×` / `0.4597×`. Only one of them can ever be quotable, because the tree carries one artifact
-  rather than a sample; the second is what is committed, and the first is recorded here so the 19%
-  swing between them is not lost. A third run, contending with a second concurrent copy of the suite,
-  wrote `4.01×` and `0.36×` — below every edge this repository has printed — and was restored rather
-  than committed.
+- The point figures this correction first quoted (`8.88×`, `0.460×`, `39,944,978`, `4,500,031`) have
+  moved again with the v1.8.0 re-freeze: what the artifact on disk measures now is `10.31×` versus a
+  pure Python loop and `0.495×` versus vectorised NumPy, `39,040,079` paths/s for the core against
+  `3,787,943` for the interpreted loop. Same script, same machine, same workload.
+- Over the twenty-two committed measurements in the tree at v1.8.0 the history spans
+  `7.77×–10.31×` / `0.42×–0.51×`: the pure-Python upper edge rose 1.43 over this correction's own
+  lifetime, the NumPy band did not move, and the spreads are 32.6% and 20.8%. The NumPy baseline
+  ranges from 110M to 46M paths/s across those twenty-two runs.
+- Three clean idle runs of that script wrote `8.378×` / `0.5656×`, `8.877×` / `0.4597×` and
+  `10.306×` / `0.4950×`. Only one of them can ever be quotable, because the tree carries one artifact
+  rather than a sample; the third is what is committed, and the two behind it are recorded here so the
+  16% and 19% swings between consecutive idle runs are not lost. A fourth run, contending with a
+  second concurrent copy of the suite on 2026-10-08, wrote `4.01×` and `0.36×` — below every edge
+  this repository has printed — and was restored rather than committed.
 
 The paragraph above is left as written because it is dated to the tag. `docs/reproducibility.md` owns
 the range and prints the command that recomputes it;

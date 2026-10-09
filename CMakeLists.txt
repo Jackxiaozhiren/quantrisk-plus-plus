@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.26)
 
 project(quantrisk
-  VERSION 1.7.0
+  VERSION 1.8.0
   DESCRIPTION "Reproducible C++/Python engine for stochastic pricing, Monte Carlo, portfolio risk and stress testing"
   LANGUAGES CXX)
 

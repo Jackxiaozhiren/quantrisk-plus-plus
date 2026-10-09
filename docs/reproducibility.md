@@ -69,7 +69,7 @@ that strips too eagerly would pass the re-run test and silently rubber-stamp a c
 git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
 uv sync --extra oracles          # interpreter 3.12, deps, and the validation oracles
 uv pip install -e .              # builds the C++ core and the pybind11 module
-uv run pytest -q                 # 496 pytest tests with the `oracles` extra here — the count is not one number, see below
+uv run pytest -q                 # 498 pytest tests with the `oracles` extra here — the count is not one number, see below
 uv run cmake --preset dev && uv run cmake --build --preset dev
 uv run ctest --preset dev        # 204 C++ tests, 548,368 assertions
 uv run python scripts/run_benchmark_suite.py --require-all   # all 19 members
@@ -107,11 +107,11 @@ in that state would be claiming a measurement it did not make. The flag turns th
 a failure.
 
 **The pytest count depends on which extras you installed, and a document that prints one number
-without saying which is wrong.** The sequence above yields **496 pytest tests with the `oracles`
+without saying which is wrong.** The sequence above yields **498 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — which installs the `dev` group, now including `sympy`, but no `oracles` extra — and the same
-tree collects 427 tests without it, the four oracle-gated modules dropping out at import. The
+tree collects 429 tests without it, the four oracle-gated modules dropping out at import. The
 figure for this revision comes from `scripts/measure_offline_collection.py`, which makes the
-`oracles`-only packages unimportable in a child interpreter and collects there -- 427 now against 496
+`oracles`-only packages unimportable in a child interpreter and collects there -- 429 now against 498
 with the oracles installed. That is a second *measurement*, not the subtraction #63 forbids, and it is
 guarded: `test_the_offline_test_count_is_measurable_before_the_runner` refuses the probe unless the
 gated modules skip rather than error, so the number it publishes is the runner's shape and not merely a
@@ -148,8 +148,8 @@ every run: `benchmarks/performance/results/monte_carlo_speed.json` entirely, and
 `mean_runtime_seconds` / `seconds_per_path` columns of
 `experiments/variance_reduction/results/variance_by_method.csv` and
 `experiments/monte_carlo_convergence/results/convergence.csv`. The speed benchmark has been
-re-frozen twenty-one times, and the ratios of those twenty-one committed files are the honest measure of
-how much these digits mean: `7.77×`–`8.88×` against a pure Python loop (14.2% spread) and
+re-frozen twenty-two times, and the ratios of those twenty-two committed files are the honest measure of
+how much these digits mean: `7.77×`–`10.31×` against a pure Python loop (32.6% spread) and
 `0.42×`–`0.51×` against vectorised NumPy (20.8% spread), because the NumPy baseline itself ranged
 from 110M to 46M paths/s. Any document quoting a single one of those ratios is quoting one dated
 run, which is why the claims are written as ranges and why the point figures in `README.md` and
@@ -172,10 +172,13 @@ held a core read 12% below the C++/Python ratio of the quiet re-run that follows
 2026-10-08 and much larger: a full-suite run that contended with a second concurrent run of itself
 wrote `4.01×` against pure Python and `0.36×` against NumPy — both outside the committed bands
 above, which is why that artifact was restored rather than committed. Two clean idle re-runs of the
-same script four minutes apart then wrote `8.38×` / `0.566×` and `8.88×` / `0.460×`, and the second
-is what the tree carries: a 6% move on the pure-Python ratio and a 19% move on the NumPy one with no
-contention at all, which is why the NumPy band's upper edge is `0.51×` and not the `0.57×` the first
-of those two readings would have set. Neither discarded reading is in the history the bands derive
+same script four minutes apart wrote `8.38×` / `0.566×` and `8.88×` / `0.460×`, and the version bump
+that opens this release wrote a third, `10.31×` / `0.495×`, which is what the tree now carries: a 16%
+move on the pure-Python ratio between two clean idle runs of the same binary, with no contention
+recorded in either. Two consequences are worth keeping. Only one reading can ever be quoted, because
+the tree holds one artifact rather than a sample; and the pinned band's upper edge is set by whichever
+reading was committed last, which is why `docs/limitations.md` #77 says plainly that the bands are a
+record of committed runs on one machine rather than a confidence interval on the engine. Neither discarded reading is in the history the bands derive
 from, because no committed artifact carries it; the contended pair is reported here and in
 `docs/limitations.md` #77. Load moves the timings, and the
 ratios with them — and so does the absence of load.

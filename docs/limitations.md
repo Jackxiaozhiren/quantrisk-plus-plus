@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 496 pytest tests with
-    the `oracles` extra installed, and the same tree collects 427 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 498 pytest tests with
+    the `oracles` extra installed, and the same tree collects 429 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -581,12 +581,12 @@ never removed just because a later phase shipped.
     the count guard matches the wordings it knows — a restatement phrased a fourth way is a figure
     with no owner inside a sentence that looks checked. Both spellings are policed by that guard now,
     which is the rule restated: policing a number means policing every spelling of it.
-    2026-10-08 re-froze the file twice more and moved the *pure-Python* edge: twenty-one committed
-    measurements now span `7.77×`–`8.88×` (14.2%) and `0.42×`–`0.51×` (20.8%). Two clean idle runs of
-    the same script four minutes apart wrote `8.378×` / `0.5656×` and `8.877×` / `0.4597×`, so a
-    single re-freeze can move the NumPy ratio by 19% with no contention involved at all — and only
-    the second of those two readings can be what the documents quote, because the tree holds one
-    artifact, not a sample. A third run that contended with a second concurrent copy of the suite
+    2026-10-08 and the v1.8.0 re-freeze on 2026-10-09 moved the *pure-Python* edge twice more:
+    twenty-two committed measurements now span `7.77×`–`10.31×` (32.6%) and `0.42×`–`0.51×` (20.8%).
+    Three clean idle runs of the same script wrote `8.378×` / `0.5656×`, `8.877×` / `0.4597×` and
+    `10.306×` / `0.4950×` — a 16% swing between the last two, with no contention recorded in either,
+    and only the reading that was committed can be what the documents quote, because the tree holds
+    one artifact rather than a sample. A third run that contended with a second concurrent copy of the suite
     wrote `4.007×` and `0.3588×`, below every edge this repository has ever printed; that artifact was
     restored rather than committed. The bands are therefore the spread of *committed* runs, and a
     reading outside them is evidence about the machine, not about the engine — which is why
@@ -847,3 +847,19 @@ never removed just because a later phase shipped.
     Extending the rule to those two is unwritten work rather than a defect: their prose is denser with
     dated figures, so the value would sit in a per-entry reason list, which should be built against
     real reds rather than by bulk exemption.
+
+90. **The committed report PDF has no freshness owner, so it can quote digits its own source no
+    longer states.** `paper/technical_report.pdf` is generated from `paper/technical_report.tex` and is
+    one of the four assets every release attaches. The tex's numeric sentences are each derived or
+    declared (#86), but nothing re-derives the PDF from them: a phase that edits the tex and commits the
+    old PDF publishes a document quoting the superseded figure, and the guard policing the tex cannot see
+    it because it reads the source, not the render. This has now happened twice -- finding 55 (the PDF
+    released at `v1.7.0` restated a freeze six releases old) and Phase 24 §8 (the tree's PDF lagged an
+    offline test count the tex had already corrected) -- and both times a human found it by running
+    `pdftotext`. At this release the rebuild was performed and checked the same way rather than assumed:
+    the PDF in the tree reads `498 pytest tests with the validation oracles` and `429 collected without
+    them`, extracted from the file. A guard is possible and is not written here. The cheapest form
+    compares each file's last-touch commit and requires the PDF not to predate the tex, which is a real
+    check locally and silently vacuous on the depth-1 checkout CI uses, so it would need the same
+    declared-skip discipline #77 and the release-tag guard carry -- a guard that can only fail on one
+    machine is a guard whose red must be scheduled, not assumed.

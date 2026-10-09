@@ -97,7 +97,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         kind="prose",
         path="README.md",
         anchor="`7.77×`",
-        replacement="`8.00×`",
+        replacement="`9.00×`",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documented_speedup_ranges_contain_the_current_measurement"
@@ -120,7 +120,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
-        anchor="`8.88×` in the artifact now in the tree",
+        anchor="`10.31×` in the artifact now in the tree",
         replacement="`8.70×` in the artifact now in the tree",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -132,7 +132,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-cites-a-run-date-the-artifact-does-not-carry",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="2026-10-08T05:44:26+00:00",
+        anchor="2026-10-09T04:54:37+00:00",
         replacement="2026-09-29T08:58:31+00:00",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -168,7 +168,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 89 numbered entries",
+        anchor="carries 90 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -233,7 +233,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 427 Python tests",
+        anchor="# 429 Python tests",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -392,7 +392,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 496 pytest tests with the validation",
+        anchor="and 498 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -404,8 +404,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-a-manifest-the-freeze-does-not-have",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="95 artifacts, 7{,}238{,}399 bytes",
-        replacement="94 artifacts, 7{,}238{,}399 bytes",
+        anchor="95 artifacts, 7{,}211{,}281 bytes",
+        replacement="94 artifacts, 7{,}211{,}281 bytes",
         # The report's §Limitations restatement of the freeze was `v1.1.0`'s totals and shipped in
         # six releases, while its own headline paragraph said 94 two pages earlier; the guard reads
         # `totals` from the manifest, so one digit here is enough to redden it.
@@ -443,7 +443,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 51/51 planted defects rejected",
+        anchor="# 53/53 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -585,7 +585,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 427 collected without them",
+        anchor="oracles installed, 429 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -710,7 +710,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 496 pytest tests with the `oracles` extra here",
+        anchor="# 498 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -732,6 +732,36 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_identity_checks_the_cli_runs_are_the_ones_the_documents_count"
         ),
         claim="the validate command's check count is the installed CLI's own",
+    ),
+    Mutation(
+        identifier="report-counts-release-tags-the-object-store-does-not-carry",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="Nine release tags exist",
+        replacement="Eight release tags exist",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_lists_the_release_tags_the_repository_carries"
+        ),
+        claim="the report's enumeration of its own releases is the object store's, not a memory",
+    ),
+    Mutation(
+        identifier="citation-declares-a-version-the-package-does-not",
+        kind="prose",
+        path="CITATION.cff",
+        anchor="\nversion: 1.8.0",
+        replacement="\nversion: 1.9.9",
+        # The anchor is newline-anchored because `version: 1.8.0` also occurs indented, inside
+        # the `references` block, and a bare anchor would occur twice -- the class finding 49
+        # records for every prose plant. This file is one of the four assets a release attaches,
+        # so a citation naming a version the package does not build is downloadable and was,
+        # until this plant, uncheckable by anything in the repository.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_version_string_the_project_declares_is_one_number_not_four"
+        ),
+        claim="one release version, spelled the same in the packaging, the build, the lock, the "
+        "citation and the prose",
     ),
 )
 

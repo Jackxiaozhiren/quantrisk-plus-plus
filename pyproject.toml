@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "quantrisk"
-version = "1.7.0"
+version = "1.8.0"
 description = "Reproducible C++/Python engine for stochastic pricing, Monte Carlo simulation, portfolio risk, optimization and stress testing"
 readme = "README.md"
 requires-python = ">=3.12"
