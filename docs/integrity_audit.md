@@ -1423,3 +1423,68 @@ Register grew to 89 with #89, which records the scope that remains: `docs/interv
 (47 → 51), 496 tests passing locally, and the freeze was not rebuilt because no producer re-ran --
 `test_the_manifest_hashes_every_experiment_results_directory` and the evidence-integrity guards are
 what make that statement checkable rather than optimistic.
+
+## Addendum — Phase 30, the release's own numbers, and the one its note published from the wrong vantage (2026-10-09)
+
+**62. The version string was the last figure in the tree with no producer, and a verification line in
+this release's own published note was measured in the wrong environment.**
+
+(a) **`1.8.0` was spelled seven times and compared once.** `pyproject.toml`, `CMakeLists.txt`,
+`CITATION.cff` (its `version`, the nested `references[0].version`, and the release-notes URL), `uv.lock`,
+`README.md`, `docs/interview_defense.md` and the compiled `quantrisk.version()` all state the version;
+`tests/python/test_smoke.py::test_python_package_version_matches_pyproject` paired only the last with the
+first. Nothing could have disagreed with a bump that forgot `CITATION.cff` -- and that file is uploaded as
+a release asset, so the wrong version would be downloadable and citable while every gate stayed green.
+`test_the_version_string_the_project_declares_is_one_number_not_four` reads all seven now, with a pattern
+that must match at each site (a renamed field fails rather than vacates), and compares the citation's tag
+URL with `v` + the version. It was falsified in the same breath it was written: plant
+`\nversion: 1.8.0` → `\nversion: 1.9.9` gives `CITATION.cff states ['1.9.9', '1.8.0'] while the package is
+1.8.0`, and restoring the file to sha `061f61aa7958…` returns it to green. The plant
+`citation-declares-a-version-the-package-does-not` carries the newline in its anchor because the string
+also occurs indented, inside `references`, and a bare anchor would occur twice -- finding 49's shape
+anticipated rather than repeated.
+
+(b) **A guard written to protect release snapshots protected one release.** The digest pairing test read
+`RELEASE_NOTE = docs/release_notes_v1.7.0.md`, a constant, so the note the repository was writing *now* was
+outside its own coverage: `v1.8.0`'s body, and every body after it, would have been uncitable without
+consequence. Repointing the constant would have deferred the same defect by one release, so the guard now
+iterates `docs/release_notes_v*.md` and keeps both properties it had: a snapshot cited by no note fails,
+and a snapshot cited by several must satisfy each citation.
+
+(c) **This phase's count syncs disarmed seven plant anchors -- finding 49's class, sixth occurrence, now
+in the phase that has the rule written down most explicitly.** 497 → 498, 428 → 429, 89 → 90, 52 → 53
+plants and `7{,}238{,}399` → `7{,}211{,}281` bytes broke
+`report-counts-stale-python-tests`, `report-quotes-a-count-the-offline-probe-refutes`,
+`report-counts-a-manifest-the-freeze-does-not-have`, `interview-doc-overcounts-the-offline-lane`,
+`reproducibility-quotes-a-superseded-pytest-total`,
+`docs-command-comment-counts-superseded-plants` and `readme-undercounts-the-limitation-register`. Two of
+them (`…stale-python-tests`, `…offline-probe-refutes`) were already disarmed at `HEAD`: `pytest
+tests/python/test_mutation_suite.py` reports **one** stale anchor per run, so a phase that fixes the one it
+sees and re-runs will still be holding a disarmed plant at the end. The durable form of the check is the
+one-pass enumeration of every declared anchor against the file it names, recorded in
+`docs/phase_reports/phase-30-v1.8.0.md` §4(c) -- including the `sys.modules` registration it needs, without
+which loading the harness by path dies inside `dataclasses._is_type` instead of reporting anything useful.
+
+(d) **A verification figure in the published release body was taken from the working tree, and the runner
+disagrees with it.** `docs/release_notes_v1.8.0.md` states `ruff format --check .` → "164 files already
+formatted". That is what the command printed on this laptop at gate time, and it is not what the same
+command prints for the same commit anywhere else: on a `git archive v1.8.0` export it prints **165**, and
+CI's `Format and static checks` job on `f181427` printed **165** (`2026-10-09T05:44:43Z`). The tracked tree
+holds 82 `.py` files, so neither reading is a file census the reader can reproduce -- the count is this
+Ruff version's walk of one environment, and the honest label for the release's own record is the runner's,
+not the laptop's. The number is cosmetic; the mechanism is not. Every other line in that block is a tool's
+output for the commit that carries it, and this one is a tool's output for a different machine. Corrected
+by a dated block appended to the release body, tag and assets untouched, per the rule that an asset
+published from a tag is not edited.
+
+(e) **The sweep leaves an empty `experiments/_mutation_probe/` tree behind.** Both `tree`-kind plants
+create files that did not exist before and `unlink()` them afterwards, but not the directories, so the
+sweep that reported `53/53` with `git status` empty was empty *because git does not track empty
+directories*. A later "how many files are in the tree" claim would silently include them. Recorded rather
+than fixed here: the cleanup is two `rmdir`s in the harness, and the guard that would catch its absence is
+the same file-census guard §8 of the phase report names.
+
+(f) **`date-released` remains unowned by decision.** The guard could have compared it with the tag's commit
+date, which exists only after the release -- the same window the report's nine-tag enumeration already
+documents, and a second guard with that window would double the pre-tag reds without adding a reader who
+could act on them. Registered as debt with the producer named, not quietly proxied.
