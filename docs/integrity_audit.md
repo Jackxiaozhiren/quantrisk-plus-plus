@@ -1361,7 +1361,7 @@ present from a record of the past, so either the dated record carries the curren
 must stop reading it — and dropping it from `RANGE_DOCUMENTS` would hide exactly the class of staleness
 the list exists to find.
 
-## Addendum — Phase 29, a number the gate had already checked, in a sentence it never read (2026-10-08)
+## Addendum — Phase 29, a number the gate had already checked, in a sentence it never read (2026-10-09)
 
 **61. A presence-only guard cannot see a superseded restatement, and the proof was in the file the
 guard was green over.** `docs/reproducibility.md` line 72 annotated the reproduction command with

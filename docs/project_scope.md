@@ -112,7 +112,7 @@ Phase 0 (this doc set) → 1 engineering skeleton → 2 BS/binomial/Greeks →
 
 Rule: one phase at a time; each phase ends with a Phase Report and stops.
 
-## 9. Current status (honest, refreshed 2026-10-08; first written 2026-09-27)
+## 9. Current status (honest, refreshed 2026-10-09; first written 2026-09-27)
 
 | Item | Status |
 |---|---|

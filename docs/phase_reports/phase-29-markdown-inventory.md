@@ -5,6 +5,9 @@ Phase 28 closed the sixth book and registered one item of its own debt in §8: P
 same producers in their own words. This phase discharges that item. It found what an inventory finds —
 one stale number neither document's owners could see, and one number no producer printed anywhere.
 
+The guards were written on 2026-10-08; the records carry 2026-10-09, the day they were committed, so a
+dated citation to this phase names one day rather than a session.
+
 ## 1. Completed
 
 `tests/python/test_artifact_metadata.py` gained two guards:
@@ -171,5 +174,26 @@ On the working tree, before the commit:
   restored from `HEAD` and the phase's edits re-applied against unique anchors, then the lane re-run.
   Finding 61(e).
 
-Pending, and not quoted until each tool prints it: the commit, the remaining three plants and the 51-plant
-sweep on the committed tree, the push, and CI's three jobs.
+The remaining gates ran after the commit, and each is quoted below with the head it was produced on.
+
+Recorded as the tools printed them, each line naming the head it was produced on:
+
+| Verdict | Head | The tool's own words |
+|---|---|---|
+| Commit | `7adc535` | 14 files, the two guards, #89, finding 61, four plants (47 → 51) |
+| Sweep | `7adc535` | `51/51 planted defects were rejected by their guard.` (exit 0), 51 `ok caught` lines, `git status` empty after — this covers the three plants not run live before the commit |
+| CI, three jobs | `7adc535` | run `37882178468` — `success` in 10m37s: `Format and static checks`, `Configure, build, C++ tests, Python tests`, `Benchmark suite against live oracles` |
+| CI lane lines | `7adc535` | `100% tests passed out of 204`, `426 passed, 5 skipped in 201.40s`, `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 424.8s total` |
+
+The runner's offline lane reports `426 passed, 5 skipped` where this machine's probe collects `427`:
+the two are different measurements — one a run's pass/skip tally, the other a collection count — and #63
+is the register that says so rather than a guard bridging them. The documented offline figure is the
+collection count, and the guard that compares it with every document's claim is green on both machines,
+which is what establishes that the runner's probe also measured 427 rather than inferring it from the
+document.
+
+The guard file itself went through one damage and one recovery inside the phase (§9's last bullet,
+finding 61(e)), so the version the sweep certified is a re-application of the phase's edits against
+unique anchors rather than the first draft — which is worth recording because the lane could not tell
+those two apart, and only reading the diff did.
+
