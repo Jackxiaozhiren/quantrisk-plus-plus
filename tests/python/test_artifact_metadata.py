@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import tomllib
 from pathlib import Path
 from typing import Any
@@ -1692,6 +1693,174 @@ def test_the_report_lists_the_release_tags_the_repository_carries() -> None:
     assert _as_int(spelled.group(1)) == len(tags), (
         f"the report says {spelled.group(1)!r} release tags and lists {len(listed)}; "
         f"the repository carries {len(tags)}"
+    )
+
+
+def _report_builder() -> Any:
+    """The build script as a module, so the guard reads the same parser the producer uses.
+
+    `spec_from_file_location` alone is not enough: a `@dataclass` in the loaded module raises
+    `AttributeError: 'NoneType' object has no attribute '__dict__'` from inside
+    `dataclasses._is_type` unless the module is registered in `sys.modules` before `exec_module`.
+    """
+    path = REPO_ROOT / "scripts" / "build_report.py"
+    spec = importlib.util.spec_from_file_location("build_report", path)
+    assert spec and spec.loader, f"{path} is not importable"
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["build_report"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it() -> None:
+    r"""`docs/limitations.md` #90, closed: the render now has to name the bytes that made it.
+
+    The report exists twice -- as `paper/technical_report.tex`, which every numeric guard
+    reads, and as `paper/technical_report.pdf`, which is what a reader opens and what a
+    release attaches. Nothing re-derived the second from the first, so a phase could edit
+    the tex, commit the old PDF, and ship a document quoting the superseded figure while the
+    whole lane stayed green. It did: `v1.7.0`'s attached PDF restated a freeze six releases
+    old (finding 55), and the tree's own PDF lagged an offline test count the tex had
+    already corrected (Phase 24 §8). Both were found by a human running `pdftotext`.
+
+    The binding is `paper/technical_report.build.json`, written by
+    `scripts/build_report.py`. It records the digest of every source the render consumes,
+    plus the digest of the bytes now in the tree. A reproduction is impossible and is not
+    claimed: pdfTeX stamps the creation date, so two builds of an unchanged source differ
+    (`e72fcfc5…` then `ac7736aa…`, measured 2026-10-09) while the text they typeset is
+    identical. So this guard asks the weaker, answerable question -- is the record still
+    true of the tree? -- and the moment any input moves without a rebuild, it is not.
+
+    The input set is *parsed* from the document rather than listed, because the report does
+    not read only its own file: `\graphicspath{{../}}` plus
+    `\includegraphics{experiments/…}` means a suite re-run that redraws one figure makes the
+    committed PDF stale, and a hand-maintained list would itself go stale -- the defect this
+    closes. The bundle is then cross-checked against a second, cruder count of the same
+    statements in the tex, so a parser that silently stopped seeing the figures could not
+    shrink the bundle to "the tex alone" and keep passing.
+    """
+    builder = _report_builder()
+    sidecar = REPO_ROOT / "paper" / "technical_report.build.json"
+    assert sidecar.is_file(), (
+        f"{sidecar.relative_to(REPO_ROOT)} is missing; run `uv run python scripts/build_report.py`"
+    )
+    record = json.loads(sidecar.read_text(encoding="utf-8"))
+
+    assert record["command"] == "uv run python scripts/build_report.py", (
+        f"the record names {record['command']!r}, which is not this script's own command"
+    )
+    derived = builder.source_bundle()
+    recorded = {entry["path"]: entry for entry in record["source_bundle"]}
+    assert set(recorded) == {entry["path"] for entry in derived}, (
+        f"the record lists {sorted(recorded)} sources while the document now reads "
+        f"{[entry['path'] for entry in derived]}"
+    )
+    for entry in derived:
+        path = REPO_ROOT / entry["path"]
+        stated = recorded[entry["path"]]
+        assert stated["sha256"] == entry["sha256"], (
+            f"{entry['path']} hashes to {entry['sha256'][:12]} while the record, written when the "
+            f"PDF was built, says {stated['sha256'][:12]}: the tree's render came from other bytes"
+        )
+        assert stated["bytes"] == entry["bytes"] == path.stat().st_size
+
+    assert record["bundle_sha256"] == builder.bundle_digest(derived), (
+        "the bundle digest in the record is not the digest of the sources the document reads now"
+    )
+
+    pdf = REPO_ROOT / "paper" / "technical_report.pdf"
+    assert record["pdf_sha256"] == sha256_file(pdf), (
+        "the record does not describe the PDF in the tree: either the render was replaced without "
+        "rewriting the record, or the record was written for bytes that are no longer here"
+    )
+    assert record["pdf_bytes"] == pdf.stat().st_size
+
+    kinds = {"tex": 0, "bib": 0, "image": 0}
+    for entry in derived:
+        if entry["path"].endswith(".tex"):
+            kinds["tex"] += 1
+        elif entry["path"].endswith(".bib"):
+            kinds["bib"] += 1
+        else:
+            kinds["image"] += 1
+    assert kinds["tex"] == 1 and kinds["bib"] >= 1 and kinds["image"] >= 1, (
+        f"the parsed bundle is {kinds}; a render needs the tex, the bibliography and at least one "
+        "at least one figure, so a bundle missing a kind means the parser stopped seeing it"
+    )
+    tex_text = (REPO_ROOT / "paper" / "technical_report.tex").read_text(encoding="utf-8")
+    included = len(re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{", tex_text))
+    assert included == kinds["image"], (
+        f"the document contains {included} \\includegraphics statements and the bundle carries "
+        f"{kinds['image']} images"
+    )
+
+
+def test_rebuilding_the_report_from_the_committed_source_typesets_the_same_text() -> None:
+    r"""The record is one author's word; a second render is the check on it.
+
+    `test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it` can be
+    satisfied by editing the record along with the tex, because both are files in the tree.
+    This guard takes the committed sources, typesets them again in a scratch copy, and
+    compares the *text* the two PDFs render. Text is the right comparator: pdfTeX's date
+    stamp makes the bytes differ on every build, so a byte comparison would fail on an
+    honest rebuild -- and the measured text digest of two builds of one unchanged source is
+    identical (`c5f09b1a…`, 2026-10-09).
+
+    It is also the guard that reproduces finding 55's *shape* rather than its mechanism: put
+    the `v1.7.0` PDF back in the tree with a self-consistent record and the binding stays
+    green, because the record is true of those bytes. Only the re-render notices that the
+    document no longer says what the source says.
+
+    Skipped where no TeX or poppler is installed, which includes CI -- an environment-blind
+    guard, declared rather than quietly vacuous, in the same family as the band-history
+    guard and the release-tag enumeration. Where it does run, it is by a wide margin the
+    slowest test in the lane.
+    """
+    for tool in ("latexmk", "pdftotext"):
+        if shutil.which(tool) is None:  # pragma: no cover - depends on the machine
+            pytest.skip(f"{tool} is not installed, so the report cannot be re-typeset here")
+
+    builder = _report_builder()
+    committed_pdf = REPO_ROOT / "paper" / "technical_report.pdf"
+    committed_text = subprocess.run(
+        ["pdftotext", str(committed_pdf), "-"], capture_output=True, check=False
+    )
+    assert committed_text.returncode == 0, "pdftotext refused the committed PDF"
+    assert committed_text.stdout, "the committed PDF extracted to nothing"
+
+    with tempfile.TemporaryDirectory(prefix="quantrisk-report-rebuild-") as scratch:
+        root = Path(scratch)
+        for entry in builder.source_bundle():
+            target = root / entry["path"]
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(REPO_ROOT / entry["path"], target)
+        completed = subprocess.run(
+            ["latexmk", "-pdf", "-g", "-interaction=nonstopmode", "technical_report.tex"],
+            cwd=root / "paper",
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        rebuilt = root / "paper" / "technical_report.pdf"
+        assert completed.returncode == 0 and rebuilt.is_file(), (
+            f"the committed source does not build: {completed.stdout[-800:]}"
+        )
+        rebuilt_text = subprocess.run(
+            ["pdftotext", str(rebuilt), "-"], capture_output=True, check=False
+        )
+    assert rebuilt_text.stdout, "the rebuild produced an extractable-but-empty PDF"
+
+    rendered = hashlib.sha256(rebuilt_text.stdout).hexdigest()
+    shipped = hashlib.sha256(committed_text.stdout).hexdigest()
+    assert rendered == shipped, (
+        "re-typesetting the committed source yields text the PDF in the tree does not "
+        "shipped render is not what this source says: rebuild with "
+        "`uv run python scripts/build_report.py`"
+    )
+    # Two truncated extractions would compare equal too, so the control is that the render says
+    # something a reader of this document expects to find in it.
+    assert b"release tags exist" in rebuilt_text.stdout, (
+        "the re-rendered text lacks a sentence a whole document of this report is expected to hold"
     )
 
 

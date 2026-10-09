@@ -1,0 +1,43 @@
+{
+  "schema": "quantrisk-report-build/1",
+  "command": "uv run python scripts/build_report.py",
+  "generated_at_utc": "2026-10-09T09:55:49+00:00",
+  "engine": "This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.17)  9 OCT 2026 17:55",
+  "source_bundle": [
+    {
+      "path": "experiments/monte_carlo_convergence/results/convergence_slope.png",
+      "bytes": 66850,
+      "sha256": "cdbe4a20bfc3f96cbe535856bc5976b8e386d2ae02930b0363872a5f67837fa9"
+    },
+    {
+      "path": "experiments/portfolio_optimization/results/estimator_cost_by_window.png",
+      "bytes": 64942,
+      "sha256": "4714c124ad499c14987d031a46c23ba2163cc3f7b40d0f734ebf06fcb4210d5e"
+    },
+    {
+      "path": "experiments/pricing_validation/results/lattice_convergence.png",
+      "bytes": 77385,
+      "sha256": "1cf47761a4930cc73acd00992043ed592fb7017fe3231f9fa92d924f8fd1cf80"
+    },
+    {
+      "path": "experiments/stress_testing/results/linearisation_error.png",
+      "bytes": 43839,
+      "sha256": "bf781c077aa6d034b61e1d492a1b46c9b10f6356962305c55b5c52f2da6a5d1d"
+    },
+    {
+      "path": "paper/references.bib",
+      "bytes": 6776,
+      "sha256": "52a6241c8c5674bda02de300c83fc54df98691f5fd291f935649c7146a000040"
+    },
+    {
+      "path": "paper/technical_report.tex",
+      "bytes": 146530,
+      "sha256": "2603c97b0b02071bf4629ac45b9575902481e10f44e03b802f35b7c01d6bb4a3"
+    }
+  ],
+  "bundle_sha256": "cd3d0199c1fd0ad57787348fbc865e0236c66bf10128d88b198a393376f4a3b7",
+  "pdf_bytes": 1005769,
+  "pdf_sha256": "e62cb615c3866f2453c4ba286d80cd1e75dfe0ca76971d6389fa71cb3d3d33d5",
+  "pdf_text_sha256": "75b1fe9961f997b2d4dea74b9c4aa28c97446ea4089b6238f17d898fbf116c1f",
+  "note": "pdf_sha256 changes on every rebuild because pdfTeX embeds the creation date, so it binds this record to these bytes rather than reproducing them. pdf_text_sha256 is the property that survives the stamp and is what a rebuild is compared against."
+}

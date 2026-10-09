@@ -68,15 +68,20 @@ ordering below is the one `v1.4.0` and `v1.5.0` learned the expensive way: three
 performed out of order in Phase 15, and every one of those produced a red gate rather a review comment.
 
 1. Land the change, then run the gates: `ctest`, the suite with `--require-all`, `quantrisk validate`,
-   `pytest`, `ruff`, `mypy`, `clang-format` on any touched C++, `latexmk`, then
-   `build_evidence_manifest.py` and `verify_evidence_manifest.py`.
+   `pytest`, `ruff`, `mypy`, `clang-format` on any touched C++, then `build_evidence_manifest.py` and
+   `verify_evidence_manifest.py`. The report render is not in this list: it comes after step 2, because
+   step 2 edits the very source it is built from.
 2. **Sync the prose last among the regenerations.** Re-running the suite rewrites
    `benchmarks/performance/results/monte_carlo_speed.json`, whose ratios, means, standard deviations
    and paths/s are quoted in `README.md`, `docs/interview_defense.md`, `docs/validation_matrix.md`,
    `docs/reproducibility.md` and the report — and the guards re-derive all of them from the artifact.
    Snapshot the spellings the documents currently carry before re-running anything: once a session has
    re-run twice, `git show HEAD:<artifact>` is no longer what the prose says, and replacing from it
-   silently no-ops.
+   silently no-ops. The report is the last thing rebuilt, not the first: the sync edits
+   `paper/technical_report.tex`, so `uv run python scripts/build_report.py` runs *after* the prose is
+   settled and before the commit. Its record is what
+   `test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it` reads, which is how Phase 31's
+   own test-count sync was caught mid-flight.
 3. Refresh the falsification harness's anchors, in the same commit as step 2. Several defects in
    `scripts/run_mutation_suite.py` key on exactly the figures step 2 moves, and
    `tests/python/test_mutation_suite.py` fails on an anchor that no longer occurs — that failure is

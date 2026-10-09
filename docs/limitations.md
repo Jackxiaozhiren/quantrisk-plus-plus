@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 498 pytest tests with
-    the `oracles` extra installed, and the same tree collects 429 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 500 pytest tests with
+    the `oracles` extra installed, and the same tree collects 431 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -863,3 +863,21 @@ never removed just because a later phase shipped.
     check locally and silently vacuous on the depth-1 checkout CI uses, so it would need the same
     declared-skip discipline #77 and the release-tag guard carry -- a guard that can only fail on one
     machine is a guard whose red must be scheduled, not assumed.
+
+    **Closed 2026-10-09 by Phase 31, and the closure is a binding rather than a reproduction.**
+    `scripts/build_report.py` typesets the report and writes `paper/technical_report.build.json`, which
+    records the digest of every file the render consumes -- the tex, the bibliography, and each figure
+    `\includegraphics` names, parsed from the document rather than listed -- plus the digest of the bytes
+    it produced. `test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it` re-derives that
+    set and runs in every environment, so a source edit not followed by a rebuild is now a red gate: the
+    phase's own test-count sync was caught by it within minutes of the guard being written. The
+    last-touch-commit form sketched above was not built, because a render is not older or newer than its
+    source in any sense the repository can see, and because a history-keyed guard cannot be falsified at
+    all -- the harness edits working-tree files, never commits. What stays outside the closure is stated
+    in `docs/reproducibility.md`: pdfTeX stamps the creation date, so an honest rebuild always changes the
+    bytes and the record binds rather than reproduces (measured: `e72fcfc5…` then `ac7736aa…` for one
+    unchanged source, with the extracted text `c5f09b1a…` both times). The stronger check,
+    `test_rebuilding_the_report_from_the_committed_source_typesets_the_same_text`, re-typesets and compares
+    that text, and needs a TeX distribution and a PDF text extractor, so it reports a skip on the runner.
+    Its value is not decorative: a hand-forged record made self-consistent with an edited tex left the
+    binding green and this guard red.

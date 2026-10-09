@@ -1491,3 +1491,58 @@ the same file-census guard §8 of the phase report names.
 date, which exists only after the release -- the same window the report's nine-tag enumeration already
 documents, and a second guard with that window would double the pre-tag reds without adding a reader who
 could act on them. Registered as debt with the producer named, not quietly proxied.
+
+## Addendum — Phase 31, the render that had no owner, and the guard shape that falsification ruled out (2026-10-09)
+
+**63. A guard's input set has to include the surface the falsification harness can touch, or its red is
+unreachable.** #90 was registered with a suggested design -- compare each file's last-touch commit and
+require the PDF not to predate the tex. It is not buildable as this repository understands a guard, and the
+reason is procedural rather than mathematical: every plant in `scripts/run_mutation_suite.py` edits a
+working-tree file and restores it, while a history-keyed assertion reads only commits. Such a guard can be
+written green, can be described as covering the defect, and can never be shown to fail by the mechanism
+this project uses to show that. The shipped design keys on file digests in the tree, which the harness can
+move, and it went red on a real drift within minutes of being written (item (d)).
+
+(a) **The render reads more than its own source.** `paper/technical_report.tex` sets
+`\graphicspath{{../}}` and names four `experiments/**/results/*.png` figures, and `references.bib`
+contributes the bibliography -- so a suite re-run that redraws one figure makes the committed PDF stale
+even when the tex is untouched. The input set is therefore parsed from the document by
+`scripts/build_report.py` and re-derived by the guard, and cross-checked against an independent count of
+the same `\includegraphics` statements, because a hand-maintained list would rot in exactly the way #90
+describes. A bundle that parses down to the tex alone is a failure, not a smaller passing set.
+
+(b) **Bytes were the wrong comparator and the measurement said so before the guard shipped.** Two builds
+of one unchanged source produced `e72fcfc5…` then `ac7736aa…` (identical size, `1005768`), because pdfTeX
+writes the creation date into the file. A byte-equality gate would reject an honest rebuild, which is the
+class of error finding 54(a) records for `libm` last bits -- asserted equality where the environment is
+supposed to vary. Extracted text is the stable property (`c5f09b1a…` from both builds), so the record binds
+bytes and the re-render guard compares text.
+
+(c) **The record is one author's word, and the control that proves the second guard is not decoration is a
+forgery.** Editing the tex reddens both guards. The interesting case is a *self-consistent* tamper: with
+the tex edited and the record's per-file digests and aggregate recomputed to match it -- which is what an
+author who wanted to keep a stale PDF would do -- the binding guard stays green and
+`test_rebuilding_the_report_from_the_committed_source_typesets_the_same_text` is the only thing that
+notices. That is finding 55's shape reproduced on demand: a released PDF whose own metadata is
+self-consistent and whose content no longer matches its source. Both states were measured, then the two
+files were restored and their sha256 compared with the pre-experiment snapshots.
+
+(d) **The guard caught this phase's own drift, which is the best evidence it is not a ceremony.** After it
+was written, the phase synced the report's test counts 498 → 500 and 429 → 431 in the tex, and the next
+lane failed with `paper/technical_report.tex hashes to 2603c97b0b02 while the record … says 3972934ef89d`.
+The fix was the producer, not the assertion. A gate that goes red on its own author within one sitting is a
+gate that is wired to the thing it claims to watch.
+
+(e) **Anchors were keyed on stable symbols this time, and four still needed re-keying.** The three new
+plants use `\section{Limitations}` and `"pdf_sha256": "` rather than a figure a release moves -- a plant
+anchored on the record's current digest would disarm itself the first time anybody re-typesets the report.
+The lesson was taken from finding 62(c), where seven anchors were disarmed by a count sync. Four of this
+phase's anchors did still key on the pytest pair and were re-synced with it, and the one-pass enumeration
+of all 56 declared anchors against their files is what shows the remainder sound.
+
+(f) **What the closure does not reach, stated where a reader will meet it.** The runner cannot re-typeset,
+so the text-level guard reports a skip on CI and the byte binding is the only freshness property CI checks;
+a future phase that wants the stronger claim needs a TeX-bearing lane, and the skip is declared in the test
+itself rather than left as silence. `docs/reproducibility.md` now says all of this in the present tense,
+including that the earlier sentence "Nothing on the runner verifies that the committed PDF matches the
+committed `.tex`" was true until this phase and is not now.

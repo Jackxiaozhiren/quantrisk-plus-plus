@@ -233,7 +233,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 429 Python tests",
+        anchor="# 431 Python tests",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -392,7 +392,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 498 pytest tests with the validation",
+        anchor="and 500 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -443,7 +443,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 53/53 planted defects rejected",
+        anchor="# 56/56 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -585,7 +585,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 429 collected without them",
+        anchor="oracles installed, 431 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -710,7 +710,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 498 pytest tests with the `oracles` extra here",
+        anchor="# 500 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -762,6 +762,53 @@ MUTATIONS: tuple[Mutation, ...] = (
         ),
         claim="one release version, spelled the same in the packaging, the build, the lock, the "
         "citation and the prose",
+    ),
+    Mutation(
+        identifier="report-source-edited-without-a-rebuild",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="\\section{Limitations}",
+        replacement="\\section{Limitations register}",
+        # The defect #90 registered: the tex moves and the render does not. The heading is the
+        # anchor because it is stable across releases -- an anchor on a count or a tag name would be
+        # disarmed by the next phase's own sync, which is finding 49's class and happened seven
+        # times in Phase 30 alone.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it"
+        ),
+        claim="the build record still names the bytes the document is made of",
+    ),
+    Mutation(
+        identifier="report-source-edited-without-a-rebuild-seen-from-the-render",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="\\section{Limitations}",
+        replacement="\\section{Limitations register}",
+        # The same defect against the other guard: the binding can be satisfied by
+        # editing the record with the tex, and only re-typesetting notices that the
+        # shipped page no longer says what the source says. Hand-proved before it was
+        # written down (Phase 31 §5): a self-consistent forged record left the binding
+        # green and this guard red.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_rebuilding_the_report_from_the_committed_source_typesets_the_same_text"
+        ),
+        claim="a re-render of the committed source typesets the text the shipped PDF carries",
+    ),
+    Mutation(
+        identifier="report-record-names-a-digest-the-pdf-does-not-carry",
+        kind="prose",
+        path="paper/technical_report.build.json",
+        anchor='"pdf_sha256": "',
+        replacement='"pdf_sha256": "00',
+        # Anchored on the key rather than a digest value: `pdf_sha256` changes on every honest
+        # rebuild, so a value-anchored plant would disarm itself the next time anyone typesets.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it"
+        ),
+        claim="the record describes the render that is actually in the tree",
     ),
 )
 
