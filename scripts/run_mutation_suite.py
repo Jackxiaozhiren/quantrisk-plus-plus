@@ -168,7 +168,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 88 numbered entries",
+        anchor="carries 89 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -233,7 +233,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 425 Python tests",
+        anchor="# 427 Python tests",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -392,7 +392,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 494 pytest tests with the validation",
+        anchor="and 496 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -443,7 +443,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 47/47 planted defects rejected",
+        anchor="# 51/51 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -585,7 +585,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 425 collected without them",
+        anchor="oracles installed, 427 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -678,6 +678,60 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_a_verdict_bounded_by_the_grid_says_so"
         ),
         claim="the grid-bound flag tracks the ladder the radii were swept on",
+    ),
+    Mutation(
+        identifier="readme-states-an-unowned-module-count",
+        kind="prose",
+        path="README.md",
+        anchor="numbered entries grouped by phase.",
+        replacement="numbered entries grouped by phase; 41 core modules are named in them.",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
+        ),
+        claim="a countable claim in README has an owner, a citation or a stated reason",
+    ),
+    Mutation(
+        identifier="readme-cites-a-suite-key-the-registry-dropped",
+        kind="prose",
+        path="README.md",
+        anchor="| `fifth_order_crossing_map` |",
+        replacement="| `fifth_order_crossing_map_v2` |",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
+        ),
+        claim=(
+            "a findings row is cited through a key the registry resolves to a frozen artifact, not "
+            "through a string that merely looks like a member"
+        ),
+    ),
+    Mutation(
+        identifier="reproducibility-quotes-a-superseded-pytest-total",
+        kind="prose",
+        path="docs/reproducibility.md",
+        anchor="# 496 pytest tests with the `oracles` extra here",
+        replacement="# 494 pytest tests with the `oracles` extra here",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
+        ),
+        claim=(
+            "the command annotation carries the figure the prose two lines below it carries -- the "
+            "stale twin this phase's extension was written to catch"
+        ),
+    ),
+    Mutation(
+        identifier="readme-quotes-an-identity-count-the-cli-does-not-run",
+        kind="prose",
+        path="README.md",
+        anchor="# 7 identity checks",
+        replacement="# 9 identity checks",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_identity_checks_the_cli_runs_are_the_ones_the_documents_count"
+        ),
+        claim="the validate command's check count is the installed CLI's own",
     ),
 )
 

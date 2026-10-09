@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 494 pytest tests with
-    the `oracles` extra installed, and the same tree collects 425 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 496 pytest tests with
+    the `oracles` extra installed, and the same tree collects 427 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -832,3 +832,18 @@ never removed just because a later phase shipped.
     less extreme book -- but that precondition is a statement about the outcome's shape, so it was not
     added after the fact here; the scan, the accepted candidate and this limitation are published
     together instead. Three of the six books now sit at the grid edge.
+
+89. **The claim inventory covers three documents; the two it skips still restate producers.**
+    `test_every_countable_claim_in_the_report_is_owned_or_declared` reads
+    `paper/technical_report.tex` and
+    `test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared` reads
+    `README.md` and `docs/reproducibility.md`. `docs/interview_defense.md` and
+    `docs/validation_matrix.md` -- which between them restate the suite's member count, the C++ totals
+    in four shapes, the crossing-radius book table and the size of this register -- are policed only
+    per figure, by each number's own owner. That is a weaker property: an unowned restatement in those
+    files is caught only when it happens to match a spelling an owner already reads, which is exactly
+    how `docs/reproducibility.md` carried "# 481 tests here" beside a correct 494 for three phases and
+    every gate stayed green (Phase 29 found it by widening the inventory, not by reading the file).
+    Extending the rule to those two is unwritten work rather than a defect: their prose is denser with
+    dated figures, so the value would sit in a per-entry reason list, which should be built against
+    real reds rather than by bulk exemption.

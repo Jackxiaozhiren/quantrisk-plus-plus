@@ -991,13 +991,22 @@ def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
     claims = {
         "README.md": r"# (\d+) C\+\+ tests",
         "docs/interview_defense.md": r"(\d+) C\+\+ tests under CTest",
-        "docs/reproducibility.md": r"# (\d+) C\+\+ tests",
+        "docs/reproducibility.md": [
+            r"# (\d+) C\+\+ tests",
+            # The same file states the count a second way, three paragraphs below the command that
+            # annotates it -- "204 tests under CTest either way" -- and only the first spelling was
+            # compared. That is Phase 27's abstract defect inside a document this phase began
+            # inventorying, found by the inventory rather than by reading.
+            r"(\d+) tests under CTest",
+        ],
         # The report's headline paragraph stated its own CTest total for four releases beside a
         # section that stated a different one, and no pattern above reached it.
         "paper/technical_report.tex": r"The suite is (\d+) CTest entries",
     }
-    for name, pattern in claims.items():
-        found = re.findall(pattern, (REPO_ROOT / name).read_text(encoding="utf-8"))
+    for name, expected in claims.items():
+        patterns = expected if isinstance(expected, list) else [expected]
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        found = [value for pattern in patterns for value in re.findall(pattern, text)]
         assert found, f"{name} no longer states the C++ test count"
         assert all(int(value) == total for value in found), (
             f"{name} says {found}, CTest lists {total}"
@@ -1096,6 +1105,48 @@ def test_documents_that_count_the_cpp_assertions_count_the_binarys_own() -> None
 # producer is the artifact named in the same sentence.
 # ---------------------------------------------------------------------------------------------
 
+
+def test_the_identity_checks_the_cli_runs_are_the_ones_the_documents_count() -> None:
+    """`7 identity checks` was a shipped number no producer printed.
+
+    README and `docs/reproducibility.md` annotate the `validate` command with its check count, and
+    the report states the same quantity spelled ("it runs seven identity checks"), while nothing
+    compared any of the three with the checks the CLI actually runs. That is the class findings 55
+    and 57 registered for the C++ totals -- a figure several documents repeat and no producer
+    prints -- and it survived here because the report's inventory read only the report.
+
+    The producer is the entry point itself, in its JSON mode, resolved beside the running
+    interpreter so the guard measures the build under test rather than a source checkout. Every
+    document is then required to state what that run reports, which makes a fifth check in the CLI
+    oblige three documentation edits. That is the point: the alternative is three documents
+    agreeing with each other about a number nothing was asked.
+    """
+    script = Path(sys.executable).with_name("quantrisk")
+    argv = ([str(script)] if script.exists() else [sys.executable, "-m", "quantrisk.cli"]) + [
+        "validate",
+        "--json",
+    ]
+    run = subprocess.run(argv, capture_output=True, text=True, check=False)
+    assert run.returncode == 0, run.stdout[-400:] + run.stderr[-400:]
+    checks = json.loads(run.stdout[run.stdout.index("{") :])["checks"]
+    assert checks, "the CLI reported no checks at all, so the count compared below would be vacuous"
+    count = len(checks)
+
+    spellings = {
+        "README.md": r"(\d+) identity checks",
+        "docs/reproducibility.md": r"(\d+) identity checks",
+        "paper/technical_report.tex": r"runs (\w+) identity checks",
+    }
+    for name, pattern in spellings.items():
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        found = re.findall(pattern, text)
+        assert found, f"{name} states no identity-check count, so nothing pins it to {count}"
+        for token in found:
+            assert _as_int(token) == count, (
+                f"{name} says {token} identity checks while the installed CLI runs {count}: {found}"
+            )
+
+
 _REPORT_NOUNS = (
     r"(artifacts?|bytes|tests?|cases|entries|rows|members|experiments|limitations|assertions"
     r"|markets|digits|checks|commands|sections|figures|pages|questions|jobs|assets|files"
@@ -1106,8 +1157,16 @@ _REPORT_NOUNS = (
 )
 # A number that is part of a word is not a claim: `(?<![A-Za-z\d])` keeps `Catch2 cases` and
 # `sklearn2011}. Oracle versions` out of the inventory, which a bare lookbehind on digits let in.
+# Two more exclusions, from reading markdown with this rule (Phase 29): a `#` before a number is a
+# cross-reference (`docs/limitations.md` #77), not a quantity, and a number followed directly by a
+# period is a list marker or the end of a sentence. Without them the inventory called
+# "#77. Load moves the timings" and "on 5 of 5. Two books sit at the grid edge" countable claims --
+# an extractor that invents work for itself, and trains the reader to distrust the list it prints.
+# The number group keeps `{,}` (LaTeX thousands separators) and allows a decimal tail, so a bare
+# trailing period is the only shape excluded.
 _REPORT_CLAIM = re.compile(
-    r"(?<![A-Za-z\d])(\d[\d{},.]*)\s+(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b", re.I
+    r"(?<![A-Za-z\d#])(\d[\d{},]*(?:\.\d+)?)\s+(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b",
+    re.I,
 )
 
 # Pattern -> (owning test, file that holds it). Each pattern is required to occur verbatim in that
@@ -1370,6 +1429,210 @@ def test_every_countable_claim_in_the_report_is_owned_or_declared() -> None:
         ):
             decorative.append(f"  {anchor!r}: {reason}")
     assert not decorative, "declared exemptions that exempt nothing:\n" + "\n".join(decorative)
+
+
+# ---------------------------------------------------------------------------------------------
+# The same inventory over the two documents that route a reader to those producers.
+#
+# Phase 28 registered this debt. The report's claims were inventoried while `README.md` and
+# `docs/reproducibility.md` restated the same producers in their own spellings, and reading those
+# two files with the rule found a stale twin on the first pass: `docs/reproducibility.md` carried
+# "# 481 tests here" three lines above its own correct "494 pytest tests with the `oracles` extra",
+# where the prose had been synced in Phase 23 and the command annotation had not been synced at all.
+# A guard that requires the right number to be *present* cannot see a wrong number beside it; an
+# inventory that requires every number to be *accounted for* can. That is the difference between the
+# count guards this repository already has and this one.
+
+_MARKDOWN_INVENTORY = ("README.md", "docs/reproducibility.md")
+
+_MD_BACKTICK = re.compile(r"`([^`\n]+)`")
+
+
+def _markdown_inventory_text(relative: str) -> tuple[str, str]:
+    """A markdown document as (masked, flat), offset-aligned the way the tex inventory is.
+
+    Only HTML comments are blanked. A fenced code block is not a comment: the command annotations in
+    these two documents are where most of their countable claims live, and skipping the blocks would
+    read the files as quieter than they are -- which is how the stale count survived a decade of
+    green gates.
+    """
+    source = (REPO_ROOT / relative).read_text(encoding="utf-8")
+    masked = re.sub(r"<!--.*?-->", lambda match: " " * len(match.group(0)), source, flags=re.S)
+    return masked, masked.replace("\n", " ")
+
+
+def _markdown_claim_window(masked: str, at: int) -> tuple[int, int]:
+    """The paragraph around a claim, except inside a table, where a row is the unit.
+
+    Markdown reflows a paragraph across physical lines the way LaTeX does, so `_paragraph_span`
+    carries over. A table does not: each row describes a different artifact, and letting one row's
+    citation excuse the block would rate a findings table as safely as repeating the path in every
+    row -- and the findings table is exactly where these documents put their result numbers.
+    """
+    line_start = masked.rfind("\n", 0, at) + 1
+    if masked[line_start : line_start + 1] == "|":
+        line_end = masked.find("\n", at)
+        return line_start, len(masked) if line_end < 0 else line_end
+    return _paragraph_span(masked, at)
+
+
+def _suite_key_artifacts(frozen: set[str]) -> set[str]:
+    """The suite's member keys whose artifact the evidence freeze hashes.
+
+    README's findings table keys its rows by member name rather than by path. The registry is the
+    only thing that says which artifact a row describes, so a row counts as cited when its key
+    resolves to a frozen file -- and a key the registry has dropped resolves to nothing, which is
+    why the citation is read through the registry instead of by pasting a path into the prose.
+    """
+    return {member.key for member in _load_suite_members() if str(member.artifact) in frozen}
+
+
+def _cites_frozen_artifact_markdown(window: str, frozen: set[str], keys: set[str]) -> bool:
+    """Whether this claim's paragraph or row names a producer the freeze carries."""
+    for token in _MD_BACKTICK.findall(window):
+        clean = token.strip()
+        if clean in frozen or clean in keys:
+            return True
+        if clean.endswith("/") and any(frozen_path.startswith(clean) for frozen_path in frozen):
+            return True
+        if any(frozen_path.startswith(clean + "/") for frozen_path in frozen):
+            return True
+    return False
+
+
+# Each pattern has to occur verbatim in the guard named as its owner, exactly as in the report's
+# list, so a claim here cannot be exempted by a comparison nobody wrote.
+_MARKDOWN_OWNED: dict[str, tuple[str, str]] = {
+    r"(\d+) identity checks": (
+        "test_the_identity_checks_the_cli_runs_are_the_ones_the_documents_count",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"all\s+(\d+)\s+members": (
+        "test_documents_that_count_the_suite_members_agree_with_the_registry",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+) tests under CTest": (
+        "test_documents_that_count_the_cpp_tests_agree_with_the_build",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"C\+\+ tests, ([\d,]+) assertions": (
+        "test_documents_that_count_the_cpp_assertions_count_the_binarys_own",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"carries (\d+) numbered entries": (
+        "test_documents_that_count_the_limitations_agree_with_the_file",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+)\s+pytest\s+tests\s+with\s+the\s+`oracles`\s+extra": (
+        "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"collects\s+(\d+)\s+tests\s+without\s+it": (
+        "test_the_offline_test_count_is_measurable_before_the_runner",
+        "tests/python/test_artifact_metadata.py",
+    ),
+}
+
+# Literal phrases whose numbers are not living quantities, and why. Checked twice, as the report's
+# list is: an anchor in neither document is stale, and an anchor that excuses nothing anywhere is
+# dead weight -- so this list cannot be padded to make a paragraph pass, and an owner invented here
+# fails the verbatim check above rather than passing quietly.
+_MARKDOWN_DECLARED: dict[str, str] = {
+    "12 artifacts reported VOLATILE": (
+        "a dated end-to-end verification of one suite re-run in one fresh clone, recorded in the "
+        "paragraph that names that clone; the freeze carries the artifacts, not the tally of a run "
+        "whose tree was discarded"
+    ),
+}
+
+
+def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared() -> None:
+    """Every `<number> <countable noun>` these two documents print has to answer for itself."""
+    frozen = _frozen_artifact_paths()
+    assert frozen, "the evidence manifest lists no artifacts, so a citation could not be matched"
+    keys = _suite_key_artifacts(frozen)
+    assert keys, "no suite member's artifact is frozen, so a table row could not cite one"
+
+    documents = {name: _markdown_inventory_text(name) for name in _MARKDOWN_INVENTORY}
+    for name, (masked, flat) in documents.items():
+        assert len(masked) == len(flat), f"{name}: the inventory lost its offset alignment"
+
+    for pattern, (owner, holder) in _MARKDOWN_OWNED.items():
+        assert pattern in (REPO_ROOT / holder).read_text(encoding="utf-8"), (
+            f"{pattern!r} is claimed as owned by {owner}, whose source does not contain it"
+        )
+    dead = [
+        pattern
+        for pattern in _MARKDOWN_OWNED
+        if not any(re.search(pattern, flat) for _, flat in documents.values())
+    ]
+    assert not dead, f"owned patterns neither document states, so the list has accreted: {dead}"
+
+    # The exemption list is shared by two documents here, where the report's is not, so presence is
+    # a property of the set and load-bearing is a property of the verdicts: an anchor only has to be
+    # in one of the files, but it has to excuse a claim in at least one of them.
+    for anchor in _MARKDOWN_DECLARED:
+        assert any(anchor in flat for _, flat in documents.values()), (
+            f"the declared anchor {anchor!r} is in neither document: it is stale"
+        )
+
+    classified: dict[str, tuple[list, list, object]] = {}
+    for name, (masked, flat) in documents.items():
+        claims = list(_REPORT_CLAIM.finditer(flat))
+        assert claims, f"{name} yields no countable claims, so this guard proves nothing about it"
+
+        owned: list[tuple[int, int]] = []
+        for pattern in _MARKDOWN_OWNED:
+            for hit in re.finditer(pattern, flat):
+                for group in range(1, (hit.lastindex or 0) + 1):
+                    owned.append(hit.span(group))
+
+        def classify(
+            match: re.Match[str],
+            *,
+            skip_anchor: str | None = None,
+            flat: str = flat,
+            masked: str = masked,
+            owned: list[tuple[int, int]] = owned,
+        ) -> str:
+            at = match.start(1)
+            if any(lo <= at < hi for lo, hi in owned):
+                return "owned"
+            anchors = [a for a in _MARKDOWN_DECLARED if a != skip_anchor]
+            if _is_declared(flat, at, anchors):
+                return "declared"
+            low, high = _markdown_claim_window(masked, at)
+            return (
+                "cited"
+                if _cites_frozen_artifact_markdown(flat[low:high], frozen, keys)
+                else "unowned"
+            )
+
+        verdicts = [classify(match) for match in claims]
+        unowned = [
+            (
+                1 + masked.count("\n", 0, match.start(1)),
+                match.group(0),
+                " ".join(flat[: match.start(1)].split()[-70:]),
+            )
+            for match, verdict in zip(claims, verdicts, strict=True)
+            if verdict == "unowned"
+        ]
+        assert not unowned, f"{name} makes countable claims nobody owns:\n" + "\n".join(
+            f"  line {line}: {claim!r} near ...{context}" for line, claim, context in unowned
+        )
+        classified[name] = (claims, verdicts, classify)
+
+    decorative = [
+        anchor
+        for anchor in _MARKDOWN_DECLARED
+        if not any(
+            verdict == "declared" and classify(match, skip_anchor=anchor) == "unowned"
+            for claims, verdicts, classify in classified.values()
+            for match, verdict in zip(claims, verdicts, strict=True)
+        )
+    ]
+    assert not decorative, f"declared exemptions that exempt nothing: {decorative}"
 
 
 RELEASE_NOTE = REPO_ROOT / "docs" / "release_notes_v1.7.0.md"

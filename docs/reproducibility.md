@@ -69,7 +69,7 @@ that strips too eagerly would pass the re-run test and silently rubber-stamp a c
 git clone https://github.com/Jackxiaozhiren/quantrisk-plus-plus && cd quantrisk-plus-plus
 uv sync --extra oracles          # interpreter 3.12, deps, and the validation oracles
 uv pip install -e .              # builds the C++ core and the pybind11 module
-uv run pytest -q                 # 481 tests here; see the note below — the count is not one number
+uv run pytest -q                 # 496 pytest tests with the `oracles` extra here — the count is not one number, see below
 uv run cmake --preset dev && uv run cmake --build --preset dev
 uv run ctest --preset dev        # 204 C++ tests, 548,368 assertions
 uv run python scripts/run_benchmark_suite.py --require-all   # all 19 members
@@ -107,11 +107,11 @@ in that state would be claiming a measurement it did not make. The flag turns th
 a failure.
 
 **The pytest count depends on which extras you installed, and a document that prints one number
-without saying which is wrong.** The sequence above yields **494 pytest tests with the `oracles`
+without saying which is wrong.** The sequence above yields **496 pytest tests with the `oracles`
 extra** installed. Run the same tree after a plain `uv sync` — which installs the `dev` group, now including `sympy`, but no `oracles` extra — and the same
-tree collects 425 tests without it, the four oracle-gated modules dropping out at import. The
+tree collects 427 tests without it, the four oracle-gated modules dropping out at import. The
 figure for this revision comes from `scripts/measure_offline_collection.py`, which makes the
-`oracles`-only packages unimportable in a child interpreter and collects there -- 425 now against 494
+`oracles`-only packages unimportable in a child interpreter and collects there -- 427 now against 496
 with the oracles installed. That is a second *measurement*, not the subtraction #63 forbids, and it is
 guarded: `test_the_offline_test_count_is_measurable_before_the_runner` refuses the probe unless the
 gated modules skip rather than error, so the number it publishes is the runner's shape and not merely a

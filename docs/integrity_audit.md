@@ -1360,3 +1360,66 @@ that states the moved band and says plainly why the sentence above it is left al
 present from a record of the past, so either the dated record carries the current band or the guard
 must stop reading it — and dropping it from `RANGE_DOCUMENTS` would hide exactly the class of staleness
 the list exists to find.
+
+## Addendum — Phase 29, a number the gate had already checked, in a sentence it never read (2026-10-08)
+
+**61. A presence-only guard cannot see a superseded restatement, and the proof was in the file the
+guard was green over.** `docs/reproducibility.md` line 72 annotated the reproduction command with
+`# 481 tests here`, while line 110 of the same file said **494 pytest tests with the `oracles`
+extra** and line 112 said the offline lane collects 425. Every gate passed. Each count guard compares
+a *named spelling* with its producer, `481` matched none of the named spellings, and "the document
+contains the right number somewhere" is a claim about presence, not about the absence of a wrong one.
+The 481 entered with Phase 23's count sync and survived Phase 26 and Phase 28 -- two phases that
+re-synced that very pair -- because the annotation was inside a fenced block no reader looked at. It was
+found only by running the report's claim inventory over the two documents it had never read
+(`README.md`, `docs/reproducibility.md`), which is Phase 28's §8 item 2 discharged.
+
+Four things the extension settled rather than worked around.
+
+(a) **A markdown citation has to be read through the registry, not through a path.** The findings table
+in README keys its rows by member (`fifth_order_crossing_map`) and never prints the artifact path, so
+`_cites_frozen_artifact_markdown` resolves the key through `scripts/run_benchmark_suite.py`'s own
+members and requires the resolved artifact to be frozen. A pasted path would have made the rule vacuous
+in the one place it matters: a row whose key no longer resolves now cites nothing, which is the
+declared defect `readme-cites-a-suite-key-the-registry-dropped`. Relatedly, citing
+`docs/limitations.md` does *not* excuse a count -- the freeze hashes evidence, not prose -- so the
+register's size has to be owned by the guard that counts the file, as it is.
+
+(b) **The extractor needed sentence sense before it needed more nouns.** Applied unchanged to markdown,
+the report's rule produced two fake claims per file: `#77. Load moves the timings` (a cross-reference
+followed by a sentence beginning with a policed noun) and `on 5 of 5. Two books sit at the grid edge`
+(a list/sentence period read as part of the number). Both exclusions were added -- no `#` before the
+number, no bare trailing period -- and verified to be inert on the report: 46 claims before, 46 after,
+byte-identical classification. The direction matters: an inventory that invents claims trains the reader
+to wave it through, and the point of the exercise was that a human had already waved through the real
+one in that file.
+
+(c) **One number in those documents had no producer in any environment.** `7 identity checks` appears in
+both command annotations and, spelled, in the report; nothing compared any of them with what
+`quantrisk validate` runs. The new owner executes the installed entry point in JSON mode -- resolved
+beside the running interpreter, so it measures the build under test -- and requires each document to
+state that count; a plant (`readme-quotes-an-identity-count-the-cli-does-not-run`) proves it fires. This
+is finding 55 and 57's shape a third time, and it reached the two most-read files in the repository.
+
+(d) **The count syncs disarmed four plants, as they now reliably do.** Re-keying `425 → 427`,
+`494 → 496` and `88 → 89` broke the anchors of
+`interview-doc-overcounts-the-offline-lane`, `report-counts-stale-python-tests`,
+`report-quotes-a-count-the-offline-probe-refutes` and
+`readme-undercounts-the-limitation-register`; the harness's anchor self-test named each one before it
+could be counted as coverage, and each was re-keyed with its replacement still wrong. Finding 49,
+fifth occurrence, inside the same phase that extended the mechanism.
+
+(e) **The phase's own tooling damaged the guard file, and the lane is what caught it.** A comment
+re-wrapping script applied to `tests/python/test_artifact_metadata.py` dropped a trailing newline and
+then split inside words at 18 places (`...against this run's t.` / `otal: each belongs to`), producing
+unparseable Python. Nothing was committed with it: the recovery was a snapshot, a restore of that one
+file from `HEAD`, and a re-application of the phase's edits against unique anchors -- then a full-lane
+run before the commit. The durable rule is the one already written down (a bulk text rewrite must
+measure its numeric and structural delta against `HEAD`, and a green lane is not a substitute for
+reading the diff), and the reason it held here is that the damaged file never reached a commit.
+
+Register grew to 89 with #89, which records the scope that remains: `docs/interview_defense.md` and
+`docs/validation_matrix.md` are still policed per figure rather than inventoried. Four declared plants
+(47 → 51), 496 tests passing locally, and the freeze was not rebuilt because no producer re-ran --
+`test_the_manifest_hashes_every_experiment_results_directory` and the evidence-integrity guards are
+what make that statement checkable rather than optimistic.
