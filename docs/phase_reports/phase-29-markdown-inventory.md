@@ -197,3 +197,10 @@ finding 61(e)), so the version the sweep certified is a re-application of the ph
 unique anchors rather than the first draft — which is worth recording because the lane could not tell
 those two apart, and only reading the diff did.
 
+One of my own mistakes is recorded rather than erased: the commit that carries this record, `f7d897b`,
+has Phase 28's subject line — pasted from the previous record — while its body and its diff are this
+phase's. The head was already pushed, and the discipline the release errata follow says a published
+record is answered by the next one rather than rewritten, so the mismatch stays visible in `git log` and
+is named here instead of being amended away. The substance it mislabels — `51/51`, run
+`37882178468`, #89 — is correct in the body and in the table above.
+
