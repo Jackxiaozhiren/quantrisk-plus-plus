@@ -136,6 +136,16 @@ only event that can own a release date is the release. It is listed in §8 as re
 commit date is the candidate producer, with the shallow-clone caveat the enumeration guard already carries)
 rather than guarded by a proxy that would certify the wrong thing.
 
+(h) **The record's first version misattributed its own defect, and the correction is a commit of its own.**
+`9c80878` wrote that two plant anchors were "already disarmed at `HEAD`". One command refutes it --
+`git show 49dc015:paper/technical_report.tex` carries `oracles installed, 427 collected…` and
+`git show 49dc015:scripts/run_mutation_suite.py` carries 427 as its anchor, so the two agreed and Phase 29's
+self-test was green on its own head. What disarmed them was Phase 30's *earlier* regeneration, in the
+working tree, before any commit of this phase. The accurate sentence describes a worse mechanism: an
+uncommitted value change can silently disarm the plant meant to police it, and the lane says nothing until
+somebody runs the anchor self-test -- which asserts on the first stale anchor and stops. `6abaa7b` corrects
+both documents; the release, its tag, its assets and its published body are untouched by it.
+
 ## 5. Exact test results
 
 Every line below is the tool's own output, quoted from the run named.
@@ -162,6 +172,13 @@ Every line below is the tool's own output, quoted from the run named.
 against live oracles` success, workflow conclusion `success`. A fourth check, `SonarCloud Code Analysis`,
 reports `neutral` -- it is a third-party app that does not analyse this repository, and the honest verb is
 "did not report", not "passed".
+
+**CI on the record commits.** `9c80878` (run `37892890641`) reached `success` on `Format and static checks`
+and `Configure, build, C++ tests, Python tests`, and its `Benchmark suite against live oracles` job was
+**cancelled** when the correction `6abaa7b` arrived in the same concurrency group -- so that head's workflow
+conclusion is `cancelled`, not green, and it is not evidence the record was sound. `6abaa7b` (run
+`37893658010`) is the head `main` points at: three jobs `success`, workflow conclusion `success`,
+`SonarCloud Code Analysis` `neutral`.
 
 **Tag and release.** Annotated tag `v1.8.0` → `f1814275453c2cb0bc69d1c86938ded6b5b5b9a5`, pushed. Release
 id `407572247`, published `2026-10-09T06:00:29Z`, not draft, not prerelease,
