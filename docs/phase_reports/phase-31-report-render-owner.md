@@ -30,6 +30,13 @@ outliving `/tmp`). No number in this file is quoted from the lost run.
   `test_rebuilding_the_report_from_the_committed_source_typesets_the_same_text` copies the bundle to a
   scratch tree, re-typesets it, and compares the extracted text of the two PDFs; it skips with a named
   reason where TeX Live or poppler is absent.
+- **A denominator named, after the fact.** Verifying this phase against CI's own log showed the runner
+  printing `428 passed, 7 skipped` for the oracle-free lane while every document prints 431. The number was
+  right and the noun was not: the probe publishes what an oracle-free interpreter *collects*, and the four
+  oracle-gated modules are skipped *items* outside that count (`428 + 7 = 431 + 4 = 435`). Registered as
+  `docs/limitations.md` #91, and `docs/interview_defense.md`'s command annotation now reads
+  `# 431 tests collected offline`, with the guard's pattern and the plant's anchor relabelled in the same
+  commit.
 - **Three plants** (`report-source-edited-without-a-rebuild`,
   `…-seen-from-the-render`, `report-record-names-a-digest-the-pdf-does-not-carry`) plus the hand-proved
   forgery control described in §4(c). Declared plants 53 → 56; tests 498 → 500 with the oracles and
@@ -87,7 +94,20 @@ report's test counts in the tex, and the next lane failed with `paper/technical_
 the strongest evidence in the file that the binding is wired to the thing it claims to watch -- and it
 mirrors Phase 30's experience, where the version guard reddened on the first tamper.
 
-(e) **Anchor choice is a falsification decision, not a formatting one.** `pdf_sha256` changes on every
+(e) **The binding reddened a second time in the same phase, on a second real drift.** Register 90 → 91
+moved three sentences in the tex, and the next producer-less run failed on it exactly as designed; the fix
+again was the build, not the assertion. Two live catches in one sitting, from two different edits, is the
+evidence this guard is not a ceremony -- a plant proves a guard *can* fail, and only a real drift proves it
+fails at the right moment.
+
+(f) **Reading the runner's log instead of its badge produced the phase's second finding.** The CI job was
+green, and the log line inside it -- `428 passed, 7 skipped` -- disagreed with the published 431. A verdict
+alone would have hidden that; the number that reconciles them also confirmed the new guard's skip fired
+where predicted (`SKIPPED [1] tests/python/test_artifact_metadata.py:1821: latexmk is not installed, so the
+report cannot be re-typeset here`), which is the same line that explains why the previous head reported
+six skips and this one seven.
+
+(g) **Anchor choice is a falsification decision, not a formatting one.** `pdf_sha256` changes on every
 honest rebuild, so a plant anchored on the record's current digest would disarm itself the first time
 anybody re-typesets the report -- the Phase 30 failure mode (seven anchors in one phase) anticipated. The
 three new plants anchor on a section heading and a JSON key. Four older anchors keyed on the pytest pair
@@ -97,9 +117,9 @@ still had to be re-synced with it, which is the recurring cost of anchoring on f
 
 | Gate | Command | Result |
 |---|---|---|
-| Python | `uv run pytest tests/python -q` | `500 passed in 92.82s`, re-run on 2026-10-11 after the sweep rerun |
+| Python | `uv run pytest tests/python -q` | `500 passed in 90.59s` on the final tree (register 91, render rebuilt) |
 | Offline lane | `uv run python scripts/measure_offline_collection.py` | collected 431, 4 module skips, 0 collection errors |
-| New guards | `uv run pytest tests/python/test_artifact_metadata.py -q` | 53 passed; red before the first build with `paper/technical_report.build.json is missing` |
+| Docs + harness lanes | `uv run pytest tests/python/test_artifact_metadata.py tests/python/test_mutation_suite.py -q` | 59 passed; the first build of this guard was red before the producer ran (`paper/technical_report.build.json is missing`) |
 | C++ | `uv run ctest --test-dir build/dev` | 100% tests passed out of 204 |
 | Catch2 | `./build/dev/quantrisk_tests` | All tests passed (548368 assertions in 203 test cases) |
 | Identity | `uv run quantrisk validate` | 7/7 checks passed |
@@ -107,8 +127,11 @@ still had to be re-synced with it, which is the recurring cost of anchoring on f
 | Types | `uv run mypy python/quantrisk` | Success: no issues found in 23 source files |
 | Producer | `uv run python scripts/build_report.py` | wrote the record: 6 sources, PDF 1,005,769 bytes |
 | Falsification (the lost run) | `uv run python scripts/run_mutation_suite.py` started 2026-10-09 18:50 | log destroyed with the CLI scratch directory; no verdict quoted from it |
+| Anchor census | one-pass enumeration of every declared plant against the file it names | 56 declared, 54 "
+| file-backed, 0 with a non-unique or missing anchor |
+| Render text (register) | `pdftotext paper/technical_report.pdf` | carries `91 recorded limitations` and `register contains 91 numbered entries` |
 | Falsification (rerun) | `uv run python scripts/run_mutation_suite.py` on `772fc42`, logged to `build/mutation-sweep-31.log` | `56/56 planted defects were rejected by their guard.`, zero escapes, `git status` empty afterwards; the three new plants each read `ok caught` |
-| Render text | `pdftotext paper/technical_report.pdf` | carries `500 pytest tests with the validation` and `431 collected without them` |
+| Render text (counts) | `pdftotext paper/technical_report.pdf` | carries `500 pytest tests with the validation` and `431 collected without them` |
 
 ## 6. Numerical validation
 
@@ -124,6 +147,9 @@ enters the manifest.
 - The runner still cannot re-typeset: on CI the text guard reports a skip and only the byte binding is
   checked. A phase that wants the stronger claim needs a TeX-bearing lane; until then the split is declared
   in the test, and `docs/reproducibility.md` says so in the present tense.
+- Nothing ties the probe's collection figure to a runner's `passed, skipped` summary (#91). The
+  reconciliation is arithmetic a reader can do but no check can assert, because its right-hand side exists
+  only on a machine the repository does not own.
 - The binding is trust-able in one direction only: an author who edits the tex *and* recomputes the record
   without rebuilding satisfies Tier 1. Tier 2 catches it where TeX and poppler exist, which is the dev
   machine and not CI -- so the residual risk is a stale PDF committed from an environment with no toolchain.

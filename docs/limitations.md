@@ -881,3 +881,17 @@ never removed just because a later phase shipped.
     that text, and needs a TeX distribution and a PDF text extractor, so it reports a skip on the runner.
     Its value is not decorative: a hand-forged record made self-consistent with an edited tex left the
     binding green and this guard red.
+
+91. **The oracle-free pytest figure is a *collection* count, and the runner prints a different
+    denominator for the same tree.** `scripts/measure_offline_collection.py` publishes what an
+    oracle-free interpreter collects -- at `cbaeffd` it reported `collected: 431`, `module_skips: 4`,
+    `collection_errors: 0` -- and every document quoting 431 is quoting that producer. The same commit's
+    CI lane (run `38110131841`) printed `428 passed, 7 skipped in 116.75s`. A reader who expects one
+    number to be the other will think a document is wrong. They are the same set: of the 431 collected, 3
+    skip per-test, and the 4 oracle-gated modules are reported by pytest as skipped *items* that never
+    enter `collected`, so `428 + 7 = 431 + 4 = 435`. The reconciliation is only observable from a runner,
+    which is why the probe cannot be made to publish it and why no guard ties the two halves together:
+    `module_skips` and `collection_errors` are pinned so the probe cannot drift into reporting a lane that
+    errored rather than skipped, and the runner's own summary is quoted here with its run id rather than
+    asserted from a file. A guard that demanded `428 + 7` would be keyed to a machine this repository does
+    not own -- the same environment split item 63 was written about, one level further down.

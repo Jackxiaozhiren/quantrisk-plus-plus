@@ -1540,7 +1540,19 @@ The lesson was taken from finding 62(c), where seven anchors were disarmed by a 
 phase's anchors did still key on the pytest pair and were re-synced with it, and the one-pass enumeration
 of all 56 declared anchors against their files is what shows the remainder sound.
 
-(f) **What the closure does not reach, stated where a reader will meet it.** The runner cannot re-typeset,
+(f) **Reading the runner's own log turned up a denominator the documents never named.** CI on `cbaeffd`
+printed `428 passed, 7 skipped` where every document prints 431 for the oracle-free lane. Both are right
+and neither says so: the probe reports what an oracle-free interpreter *collects* (431), pytest on the
+runner counts the four oracle-gated modules as skipped *items* that never enter `collected`, so
+`428 + 7 = 431 + 4 = 435`, and the three per-test skips are inside the 431. The reconciliation was only
+visible from a run, and the same comparison independently proved the new environment-blind guard behaves as
+designed -- `SKIPPED [1] tests/python/test_artifact_metadata.py:1821: latexmk is not installed, so the
+report cannot be re-typeset here` -- because that line is also the difference between six skips at
+`f181427` and seven here. Registered as `docs/limitations.md` #91, and the rehearsal sheet's command
+annotation was relabelled from `# 431 Python tests` to `# 431 tests collected offline`, with the guard's
+pattern and the plant's anchor moved in the same commit: the number was never wrong, the noun was.
+
+(g) **What the closure does not reach, stated where a reader will meet it.** The runner cannot re-typeset,
 so the text-level guard reports a skip on CI and the byte binding is the only freshness property CI checks;
 a future phase that wants the stronger claim needs a TeX-bearing lane, and the skip is declared in the test
 itself rather than left as silence. `docs/reproducibility.md` now says all of this in the present tense,

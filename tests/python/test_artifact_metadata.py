@@ -1983,7 +1983,7 @@ _OFFLINE_CLAIMS = {
     "docs/interview_defense.md": [
         r"collects (\d+) tests without",
         r"— (\d+) without them",
-        r"python -m pytest -q\s+# (\d+) Python tests",
+        r"python -m pytest -q\s+# (\d+) tests collected offline",
     ],
     "paper/technical_report.tex": [r"(\d+) collected without them"],
 }

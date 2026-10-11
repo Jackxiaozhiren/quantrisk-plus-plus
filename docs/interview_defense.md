@@ -29,7 +29,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 90
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 91
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -1027,7 +1027,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 ```bash
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 204 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 431 Python tests
+  .venv/bin/python -m pytest -q                                          # 431 tests collected offline
 uv run python scripts/run_mutation_suite.py                            # 56/56 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
