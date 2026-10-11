@@ -896,6 +896,13 @@ never removed just because a later phase shipped.
     asserted from a file. A guard that demanded `428 + 7` would be keyed to a machine this repository does
     not own -- the same environment split item 63 was written about, one level further down.
 
+    Amended 2026-10-11, same rule, one revision later: CI on `4cd9109` (run `38121511275`) printed
+    `429 passed, 8 skipped in 200.19s` against the 433 this tree's probe collects. The eighth skip is
+    Phase 32's own release-date guard declaring that a depth-1 clone carries no tags, so the arithmetic
+    moved with the corpus rather than the reconciliation breaking: `429 + 8 = 433 + 4 = 437`. The skip is
+    the guard behaving as designed on the runner, observed in its log rather than inferred from a green
+    job.
+
 92. **A band's *pair* has two owners now; its spread percentage has none, and the report's
     performance prose is outside the inventory guard's vocabulary.** The band census
     (`test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated`) and the membership

@@ -132,8 +132,9 @@ plants, two corrected documents and one register entry.
 | Census | `_candidate_band_documents()` / `_speed_band_printers()` measured directly | 38 candidates, 16 printers, 12 policed, 4 dated, 0 unaccounted after the corrections; exempt families hold 5 and 3 printers |
 | Anchor census | one-pass enumeration of every declared plant against the file it names | 59 declared, 57 file-backed, 0 stale |
 | Falsification, the three new plants | `uv run python scripts/run_mutation_suite.py --only <id>` for each | each printed `caught`: guard red on the mutated tree, green after the sha-verified restore |
-| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on the committed tree, logged to `build/mutation-sweep-32.log` | pending — the sweep refuses a dirty target, so its verdict is a claim about the commit this report is landed in and is recorded in the follow-up commit, not here |
-| CI | `gh api` on `commits/<sha>/check-runs` after the push | pending — not yet run at the time of writing |
+| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on `4cd9109`, logged to `build/mutation-sweep-32.log` | `59/59 planted defects were rejected by their guard.` — 59 lines of `ok caught`, no other status in the log, and `git status --porcelain` empty afterwards, so nothing was left mutated |
+| CI on the pushed record | run `38121511275` on `4cd9109` | `Format and static checks`, `Configure, build, C++ tests, Python tests` and `Benchmark suite against live oracles` all `success`; `SonarCloud Code Analysis` reports `neutral`, which is "did not report", not "passed" |
+| CI's own words on the new guard | job `114417034714`, step `Python tests (pytest, fully offline)` | `100% tests passed out of 204`, then `429 passed, 8 skipped in 200.19s` including `SKIPPED [1] tests/python/test_artifact_metadata.py:2071: this clone carries no tags, so no release date has a producer to compare` — the depth-1 skip observed in the runner's log rather than assumed, and the reason `docs/limitations.md` #91 gained its 2026-10-11 amendment |
 
 ## 6. Numerical validation
 
@@ -157,9 +158,11 @@ render and its record do not enter the manifest.
   spreads. The report's own sentence was rewritten into the anchored form as part of the fix, so this
   corpus reads; a future document in the bare form would not be noticed, and the guard's docstring says
   so rather than claiming coverage.
-- **The release-date guard cannot check anything on CI.** A checkout at depth 1 carries no tags, so the
-  guard skips there with its named reason, and the plant that tests it is only decidable on a full
-  clone. The field is owned where the history is.
+- **The release-date guard cannot check anything on CI.** A checkout at depth 1 carries no tags, and the
+  runner says so in its own log for this commit: `SKIPPED [1] tests/python/test_artifact_metadata.py:2071:
+  this clone carries no tags, so no release date has a producer to compare`. The plant that tests the
+  field is only decidable on a full clone, which is why the sweep's environment is named in §5. The field
+  is owned where the history is.
 - **Dated versus living is a judgement the guard cannot make for itself.** `docs/project_scope.md` and
   `docs/release_notes_v1.0.0.md` were declared dated because a reader can see the date each statement
   belongs to; nothing proves a future editor will not declare a present-tense sentence dated to escape
