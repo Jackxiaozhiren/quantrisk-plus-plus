@@ -132,9 +132,14 @@ plants, two corrected documents and one register entry.
 | Census | `_candidate_band_documents()` / `_speed_band_printers()` measured directly | 38 candidates, 16 printers, 12 policed, 4 dated, 0 unaccounted after the corrections; exempt families hold 5 and 3 printers |
 | Anchor census | one-pass enumeration of every declared plant against the file it names | 59 declared, 57 file-backed, 0 stale |
 | Falsification, the three new plants | `uv run python scripts/run_mutation_suite.py --only <id>` for each | each printed `caught`: guard red on the mutated tree, green after the sha-verified restore |
-| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on `4cd9109`, logged to `build/mutation-sweep-32.log` | `59/59 planted defects were rejected by their guard.` — 59 lines of `ok caught`, no other status in the log, and `git status --porcelain` empty afterwards, so nothing was left mutated |
+| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on the committed tree, logged to `build/mutation-sweep-32.log` and `build/mutation-sweep-32b.log` | `59/59 planted defects were rejected by their guard.` on both revisions — `4cd9109` (the phase) and `d054418` (this record commit, which edits `docs/limitations.md`, a file some plants key on), exit 0, 59 lines of `ok caught`, no other status in either log, and `git status --porcelain` empty after each run |
 | CI on the pushed record | run `38121511275` on `4cd9109` | `Format and static checks`, `Configure, build, C++ tests, Python tests` and `Benchmark suite against live oracles` all `success`; `SonarCloud Code Analysis` reports `neutral`, which is "did not report", not "passed" |
 | CI's own words on the new guard | job `114417034714`, step `Python tests (pytest, fully offline)` | `100% tests passed out of 204`, then `429 passed, 8 skipped in 200.19s` including `SKIPPED [1] tests/python/test_artifact_metadata.py:2071: this clone carries no tags, so no release date has a producer to compare` — the depth-1 skip observed in the runner's log rather than assumed, and the reason `docs/limitations.md` #91 gained its 2026-10-11 amendment |
+
+Every row above was re-run at the head this record lands in (`d054418`, 2026-10-11) and printed the
+same values: `502 passed in 86.09s`, `433 collected / 4 module skips / 0 collection errors`,
+`100% tests passed out of 204`, `548368 assertions in 203 test cases`, `7/7 checks passed`,
+`All checks passed!` and `Evidence is intact.`
 
 ## 6. Numerical validation
 
