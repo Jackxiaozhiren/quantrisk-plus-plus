@@ -125,13 +125,14 @@ still had to be re-synced with it, which is the recurring cost of anchoring on f
 | Identity | `uv run quantrisk validate` | 7/7 checks passed |
 | Lint | `uv run ruff check .` / `uv run ruff format --check .` | All checks passed! / "170 files already formatted" -- three consecutive runs on 2026-10-11 all printed 170, and the tracked census is `git ls-files '*.py' \| wc -l` = 83, so the tool's number is quoted as a walk of this machine, not as a count of files (`docs/integrity_audit.md` finding 62(d)) |
 | Types | `uv run mypy python/quantrisk` | Success: no issues found in 23 source files |
-| Producer | `uv run python scripts/build_report.py` | wrote the record: 6 sources, PDF 1,005,769 bytes |
-| Falsification (the lost run) | `uv run python scripts/run_mutation_suite.py` started 2026-10-09 18:50 | log destroyed with the CLI scratch directory; no verdict quoted from it |
-| Anchor census | one-pass enumeration of every declared plant against the file it names | 56 declared, 54 "
-| file-backed, 0 with a non-unique or missing anchor |
-| Render text (register) | `pdftotext paper/technical_report.pdf` | carries `91 recorded limitations` and `register contains 91 numbered entries` |
-| Falsification (rerun) | `uv run python scripts/run_mutation_suite.py` on `772fc42`, logged to `build/mutation-sweep-31.log` | `56/56 planted defects were rejected by their guard.`, zero escapes, `git status` empty afterwards; the three new plants each read `ok caught` |
-| Render text (counts) | `pdftotext paper/technical_report.pdf` | carries `500 pytest tests with the validation` and `431 collected without them` |
+| Producer | `uv run python scripts/build_report.py` | wrote the record: 6 sources, PDF 1,005,769 bytes; run twice more as the phase's own edits moved the tex |
+| Render text | `pdftotext paper/technical_report.pdf` | carries `500 pytest tests with the validation`, `431 collected without them`, `91 recorded limitations` and `register contains 91 numbered entries` |
+| Anchor census | one-pass enumeration of every declared plant against the file it names | 56 declared, 54 file-backed (the other two create their own file at run time), 0 with a missing or non-unique anchor |
+| Falsification, run one | `uv run python scripts/run_mutation_suite.py` started 2026-10-09 18:50 | log destroyed with the CLI scratch directory before it reported; no verdict quoted from it |
+| Falsification, run two | same command on `772fc42`, logged to `build/mutation-sweep-31.log` | `56/56 planted defects were rejected by their guard.`, zero escapes, `git status` empty afterwards |
+| Falsification, final | same command on `1c62a69`, logged to `build/mutation-sweep-31b.log` | `56/56` again, with `report-source-edited-without-a-rebuild`, `…-seen-from-the-render` and `report-record-names-a-digest-the-pdf-does-not-carry` each printed `ok caught`, and a clean tree after |
+| CI on the final head | run `38110131841` on `cbaeffd`, then the head after this table | `Format and static checks`, `Configure, build, C++ tests, Python tests` and `Benchmark suite against live oracles` all `success`; `SonarCloud Code Analysis` `neutral`, which is "did not report", not "passed" |
+| CI's own words on the new guard | `…/actions/runs/38110131841`, step `Python tests (pytest, fully offline)` | `428 passed, 7 skipped in 116.75s` and `SKIPPED [1] tests/python/test_artifact_metadata.py:1821: latexmk is not installed, so the report cannot be re-typeset here` -- the declared skip observed rather than assumed |
 
 ## 6. Numerical validation
 
@@ -168,9 +169,9 @@ enters the manifest.
 
 ## 9. The gate
 
-The first sweep run was lost with the scratch directory that held its log (§Date), so the verdict below is
-from the rerun on `772fc42`, logged to `build/mutation-sweep-31.log`. The push and the runner's three
-conclusions are appended in the record commit that follows this file, and what no commit of this phase can
+The first sweep run was lost with the scratch directory that held its log (§Date), so §5 quotes the two
+runs that did report -- on `772fc42` and on the final head `1c62a69` -- both logged under `build/`, which
+the repository ignores and no session cleanup owns. Both read `56/56`. What no commit of this phase can
 contain is the CI behaviour of
 `test_rebuilding_the_report_from_the_committed_source_typesets_the_same_text`, which will report a skip
 there by design -- a green CI on this phase therefore evidences the binding, not the re-render, and the
