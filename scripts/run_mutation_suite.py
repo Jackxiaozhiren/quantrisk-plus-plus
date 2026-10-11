@@ -168,7 +168,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 91 numbered entries",
+        anchor="carries 92 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -233,7 +233,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 431 tests collected offline",
+        anchor="# 433 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -392,7 +392,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 500 pytest tests with the validation",
+        anchor="and 502 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -414,6 +414,55 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_report_states_the_manifest_the_freeze_produced"
         ),
         claim="the report's manifest sentence is the frozen manifest's own totals",
+    ),
+    Mutation(
+        identifier="citation-declares-a-release-date-the-tag-does-not-carry",
+        kind="prose",
+        path="CITATION.cff",
+        anchor="\ndate-released: 2026-10-09",
+        replacement="\ndate-released: 2027-01-01",
+        # The last field of the citation asset, and the only one whose producer is an event rather
+        # than a file: the annotated tag's tagger date. Newline-anchored because `date-released`
+        # occurs once at top level and could otherwise collide with a reference entry. This plant
+        # is only decidable where the clone carries tags -- a checkout at depth 1 has none, and the
+        # guard says so and skips, which is why the sweep runs on the full clone.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_release_date_the_citation_declares_is_the_tag_that_cut_it"
+        ),
+        claim="the release date a downloadable citation states is the date its own tag was cut",
+    ),
+    Mutation(
+        identifier="document-states-an-unowned-speedup-band",
+        kind="prose",
+        path="docs/model_cards/portfolio_covariance_and_optimisation.md",
+        anchor="1.13×–1.26× across cells",
+        replacement="7.77×–8.70× across cells",
+        # The census's own defect class: a document that states a speedup spread and appears in
+        # neither the policed list nor the dated list. A model card is the natural target because
+        # nothing has ever read its numbers -- no guard references the file at all -- so the plant
+        # puts a superseded band into a document no gate was looking at.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated"
+        ),
+        claim="every document printing a speedup spread is policed or declared dated",
+    ),
+    Mutation(
+        identifier="dated-band-record-brought-up-to-date",
+        kind="prose",
+        path="docs/release_notes_v1.4.0.md",
+        anchor="`7.77×`–`8.70×` (11.9% spread)",
+        replacement="`7.77×`–`10.31×` (32.6% spread)",
+        # The other half of the rule. A dated exemption is only honest while the record still
+        # prints a superseded spread; rewrite it to the current band and the document is making a
+        # living claim under cover of an exemption written for a dead one, which is the way a
+        # declaration turns decorative.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated"
+        ),
+        claim="a dated band record stays a dated record, or joins the policed set",
     ),
     Mutation(
         identifier="report-drops-an-experiment-from-its-own-account",
@@ -443,7 +492,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 56/56 planted defects rejected",
+        anchor="# 59/59 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -585,7 +634,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 431 collected without them",
+        anchor="oracles installed, 433 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -710,7 +759,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 500 pytest tests with the `oracles` extra here",
+        anchor="# 502 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"

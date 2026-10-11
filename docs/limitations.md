@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 500 pytest tests with
-    the `oracles` extra installed, and the same tree collects 431 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 502 pytest tests with
+    the `oracles` extra installed, and the same tree collects 433 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -895,3 +895,18 @@ never removed just because a later phase shipped.
     errored rather than skipped, and the runner's own summary is quoted here with its run id rather than
     asserted from a file. A guard that demanded `428 + 7` would be keyed to a machine this repository does
     not own -- the same environment split item 63 was written about, one level further down.
+
+92. **A band's *pair* has two owners now; its spread percentage has none, and the report's
+    performance prose is outside the inventory guard's vocabulary.** The band census
+    (`test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated`) and the membership
+    test compare two decimal edges, so the sentences that read "…(32.6% spread)" beside a policed band
+    are only half owned: the ratio pair is checked, the percentage beside it is transcribed. It is not
+    derivable from the pinned band either -- `SPEEDUP_BANDS` holds rounded edges, and the same arithmetic
+    on them gives 32.7% and 21.4% where the committed history gives 32.6% and 20.8% -- so a guard for it
+    would have to read git history, which a checkout at depth 1 does not carry. Second half: the report
+    inventory guard matches `<number> <countable noun>` over a fixed noun list, and that list has no
+    `spread`, `run`, `reading`, `re-freezing` or `path`, so "twenty-two committed re-freezings" and
+    "110M to 46M paths per second" are classified by nothing in `paper/technical_report.tex`. What the
+    phase did own is the pair inside that sentence; the counts around it were measured by hand for this
+    revision (22 readings, min and max as printed in `docs/reproducibility.md`) and are registered here
+    as the remaining gap rather than quietly treated as covered.

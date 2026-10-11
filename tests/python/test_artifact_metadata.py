@@ -1927,6 +1927,159 @@ def test_the_version_string_the_project_declares_is_one_number_not_four() -> Non
     )
 
 
+def _band_edges() -> set[float]:
+    return {value for pair in SPEEDUP_BANDS.values() for value in pair}
+
+
+def _speed_band_printers(paths: list[Path]) -> dict[str, set[tuple[float, float]]]:
+    """Which of these documents print a pair that shares an edge with a policed speedup band.
+
+    The predicate is edge-based, not pair-based, on purpose: a document whose band has *drifted*
+    (`0.42×`–`0.52×`) still shares an edge with the policed pair, and it is exactly such a document
+    that a name-list guard loses track of.
+    """
+    edges = _band_edges()
+    printers: dict[str, set[tuple[float, float]]] = {}
+    for path in paths:
+        found = _band_pairs(path.read_text(encoding="utf-8"))
+        sharing = {pair for pair in found if pair[0] in edges or pair[1] in edges}
+        if sharing:
+            printers[str(path.relative_to(REPO_ROOT))] = sharing
+    return printers
+
+
+def _candidate_band_documents() -> list[Path]:
+    """Every tracked document that could hold a living band claim.
+
+    That is the README, `docs/**.md`, and the technical report.
+
+    Enumerated from the tree rather than listed, because the whole point of the census is that a
+    document nobody thought to list is where the stale spread lived. The two exempt families are
+    excluded here and required to be load-bearing by the guard.
+    """
+    files = [REPO_ROOT / "README.md", REPO_ROOT / "paper" / "technical_report.tex"]
+    files += sorted((REPO_ROOT / "docs").rglob("*.md"))
+    return [
+        path
+        for path in files
+        if path.is_file() and not str(path.relative_to(REPO_ROOT)).startswith(BAND_EXEMPT_FAMILIES)
+    ]
+
+
+def test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated() -> None:
+    r"""A hand-maintained list of policed documents does not notice what it omits.
+
+    `RANGE_DOCUMENTS` is a literal, so a document printing a stale spread today is simply absent
+    from it and no gate reads the sentence. Writing `v1.8.0` made that concrete: the list has to be
+    edited at the one moment nobody is looking at it, which is why Phase 30 registered it as debt
+    and Phase 32 went looking. Measured with this guard's own predicate, over the 38 documents the
+    census reads, 16 state a spread sharing an edge with a policed band -- and four of those sixteen
+    were wrong in two different ways, which is why the rule has two halves.
+
+    Nothing owned two of them, and both turned out to be honest dated records:
+    `docs/project_scope.md` quotes `0.42×`–`0.57×` inside the Phase 28 row of §9, which is what that
+    phase's re-freeze moved the committed band to, and `docs/release_notes_v1.0.0.md` quotes
+    `0.42×`–`0.48×` as the spread of the four dated runs behind that release. They are declared, not
+    policed.
+
+    Two more were owned by the membership test and red on it, because they speak in the present
+    tense of a range the history had already widened. `paper/technical_report.tex` attributed
+    `7.77×`–`8.70×`, "an `11.9%` spread", to "thirteen committed re-freezings" -- a prefix of the
+    sample presented as the sample, in the document a reviewer opens; the tree holds twenty-two
+    readings spanning `7.77×`–`10.31×` (32.6%). `docs/release_notes_v1.6.0.md` wrote that both
+    ratios "remain inside the pinned history range". The report was corrected in place, being living
+    prose; the release note received a dated amendment, being a record of its own tag.
+
+    The rule is therefore two-sided, and its reach is `_band_pairs`: a spread only counts when both
+    of its edges carry the multiplication sign, so a document writing "between 0.42 and 0.51" is
+    invisible here. That spelling is real -- the report used it for its NumPy band -- and rewriting
+    it to `$0.42\times$--$0.51\times$` is part of this phase's fix rather than a style choice,
+    because the anchored form is the one a guard can read. A declaration must stay load-bearing, so
+    a dated record ever brought up to date has to join the policed set; an exempt family with no
+    printer in it is removed rather than kept as a shrug; and the census shares `_band_pairs` with
+    the membership test so the two cannot disagree about what a printed pair is.
+    """
+    printers = _speed_band_printers(_candidate_band_documents())
+    assert printers, "no document prints a speedup band, so this census would prove nothing"
+
+    unaccounted = sorted(set(printers) - set(RANGE_DOCUMENTS) - set(DATED_BAND_RECORDS))
+    assert not unaccounted, (
+        "these documents state a speedup spread that nothing owns and nothing declares dated: "
+        f"{unaccounted}; either add them to RANGE_DOCUMENTS with the spreads they claim, or "
+        "declare them in DATED_BAND_RECORDS with the reason they are dated"
+    )
+
+    current = set(SPEEDUP_BANDS.values())
+    for name, reason in DATED_BAND_RECORDS.items():
+        assert reason.strip(), f"{name} is declared dated without a reason"
+        assert name in printers, (
+            f"{name} is declared as a dated band record but prints no speedup spread any more"
+        )
+        stale = {pair for pair in printers[name] if pair not in current}
+        assert stale, (
+            f"{name} is exempt as a dated record yet prints only the current band ({reason}); a "
+            "living claim belongs in RANGE_DOCUMENTS"
+        )
+
+    for family in BAND_EXEMPT_FAMILIES:
+        members = _speed_band_printers(sorted((REPO_ROOT / family).rglob("*.md")))
+        assert members, (
+            f"the exempt family {family} holds no document printing a speedup spread; the "
+            "exemption outlived its purpose and should be deleted"
+        )
+
+
+def test_the_release_date_the_citation_declares_is_the_tag_that_cut_it() -> None:
+    r"""`date-released` was the last unowned field in a downloadable release asset.
+
+    Phase 30 owned the version string and left this field alone on purpose: the only event that
+    produces a release date is the release. That event has now happened nine times, and every
+    annotated tag knows when it was cut, so the date the citation publishes is checkable against the
+    release it names -- `v1.8.0` was tagged on 2026-10-09 and `CITATION.cff` says `2026-10-09`.
+
+    The producer is the tag's *tagger* date, not the commit's author date. The commit date records
+    when work was written; the tagger date records when the release was made, and the field claims
+    the second. Reading the wrong one would certify a date the repository never released on.
+
+    Two skips, both named rather than silent. A clone carrying no tags has nothing to compare
+    against, which is what CI looks like at depth 1. And the current version's tag may not exist
+    yet, because the tag is cut from the commit that carries this guard -- a release in progress is
+    exactly when the field is being written, and no check may demand the future.
+    """
+    citation = (REPO_ROOT / "CITATION.cff").read_text(encoding="utf-8")
+    declared = re.search(r"^date-released:[ \t]*(\d{4}-\d{2}-\d{2})[ \t]*$", citation, re.M)
+    assert declared, "CITATION.cff no longer states a date-released this guard can read"
+
+    version = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"][
+        "version"
+    ]
+    listed = subprocess.run(
+        [
+            "git",
+            "for-each-ref",
+            "--format=%(refname:lstrip=2) %(taggerdate:format:%Y-%m-%d)",
+            "refs/tags",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert listed.returncode == 0, f"git could not list tags: {listed.stderr[:200]}"
+    tagged = dict(line.split() for line in listed.stdout.splitlines() if line.strip())
+    if not tagged:
+        pytest.skip("this clone carries no tags, so no release date has a producer to compare")
+
+    tag = f"v{version}"
+    if tag not in tagged:
+        pytest.skip(f"{tag} does not exist yet, so this release's date cannot be checked")
+
+    assert declared.group(1) == tagged[tag], (
+        f"CITATION.cff dates the release to {declared.group(1)} while {tag} was tagged on "
+        f"{tagged[tag]}"
+    )
+
+
 RELEASE_NOTES = sorted((REPO_ROOT / "docs").glob("release_notes_v*.md"))
 RELEASE_BODIES = REPO_ROOT / "docs" / "release_bodies"
 
@@ -2274,15 +2427,44 @@ PROSE_FIGURES = {
     ),
 }
 
-RANGE_DOCUMENTS = (
-    "README.md",
-    "docs/validation_matrix.md",
-    "docs/interview_defense.md",
-    "docs/reproducibility.md",
-    "docs/release_notes_v1.5.0.md",
-    "docs/release_notes_v1.7.0.md",
-    "docs/release_notes_v1.8.0.md",
-)
+# Each policed document names the spreads it is required to state. `docs/findings.md` and
+# `docs/portfolio_audit.md` make a NumPy-only claim and are not obliged to print the Python spread;
+# everything else carries both. The census guard below stops this dict shrinking silently.
+RANGE_DOCUMENTS: dict[str, tuple[str, ...]] = {
+    "README.md": ("python", "numpy"),
+    "docs/validation_matrix.md": ("python", "numpy"),
+    "docs/interview_defense.md": ("python", "numpy"),
+    "docs/reproducibility.md": ("python", "numpy"),
+    "docs/limitations.md": ("python", "numpy"),
+    "paper/technical_report.tex": ("python", "numpy"),
+    "docs/findings.md": ("numpy",),
+    "docs/portfolio_audit.md": ("numpy",),
+    "docs/release_notes_v1.5.0.md": ("python", "numpy"),
+    "docs/release_notes_v1.6.0.md": ("python", "numpy"),
+    "docs/release_notes_v1.7.0.md": ("python", "numpy"),
+    "docs/release_notes_v1.8.0.md": ("python", "numpy"),
+}
+
+# Dated records that print a superseded spread on purpose. Each reason has to be load-bearing: the
+# census requires the file to still print a pair that is *not* the current band, so a record that is
+# ever brought up to date stops qualifying as dated and must be policed like the others.
+DATED_BAND_RECORDS: dict[str, str] = {
+    "docs/release_notes_v1.4.0.md": (
+        "scopes its span to `the thirteen committed measurements of that file`, a prefix of history"
+    ),
+    "docs/integrity_audit.md": "finding entries state the revision each audited",
+    "docs/release_notes_v1.0.0.md": (
+        "quotes the four dated runs behind `v1.0.0` and their spread, `0.42×`–`0.48×`"
+    ),
+    "docs/project_scope.md": (
+        "§9 carries one row per phase, and the Phase 28 row's `0.42×`–`0.57×` is what that phase's "
+        "re-freeze moved the committed band to"
+    ),
+}
+
+# Families exempt wholesale because every file in them is a dated record. The census asserts each
+# family still contains a printer, so an exemption cannot outlive its purpose.
+BAND_EXEMPT_FAMILIES = ("docs/phase_reports/", "docs/release_bodies/")
 
 # The spread of the speed benchmark's two ratios over every committed measurement of the artifact —
 # fourteen at the 1.5.0 freeze, recomputable with the command printed in docs/reproducibility.md.
@@ -2327,6 +2509,36 @@ def _documented_ranges(text: str) -> set[tuple[float, float]]:
     }
 
 
+# A gap-wide detector would have to be trusted, and the census cannot trust one: the
+# `(\d+\.\d+)[^\d\n]{1,16}?` form pairs any two decimals that happen to sit near each other, so a
+# document reading "at 0.15 the residual is 0.42" would be reported as printing the band 0.15-0.42.
+# Under a membership test that only ever asks for one specific pair that sloppiness was harmless;
+# under a census that names the documents holding a stale spread it fabricates findings. So the
+# shape is anchored twice: both numbers carry a multiplication sign, and the gap between them
+# carries a range mark. `7.77×–10.31×` and `$7.77\times$--$10.31\times$` qualify, as does
+# "between $0.42\times$ and $0.51\times$", which is how the report words two of its own bands. A
+# neighbour pair like `8.378×` / `0.5656×` -- two readings of one run, not a spread -- does not.
+_BAND_SHAPE = re.compile(
+    r"(between|from)?[\s$]{0,4}(\d+\.\d+)[\s`'”‘\"]*(?:×|\\times)"
+    r"([^\d\n]{0,16}?)(\d+\.\d+)[\s`'”‘\"]*(?:×|\\times)",
+    re.IGNORECASE,
+)
+
+# The marks the corpus really uses between a band's two edges.
+_RANGE_MARKS = ("–", "—", "--")
+
+
+def _band_pairs(text: str) -> set[tuple[float, float]]:
+    """Every speedup spread the document states, in the spellings the corpus actually uses."""
+    pairs = set()
+    for lead, low, gap, high in _BAND_SHAPE.findall(text):
+        marked = any(mark in gap for mark in _RANGE_MARKS)
+        spoken = " and " in gap.lower() and (lead or "").lower() in ("between", "from")
+        if marked or spoken:
+            pairs.add((float(low), float(high)))
+    return pairs
+
+
 def test_documents_quote_the_performance_figures_the_artifact_actually_holds() -> None:
     """A ratio that regenerates on every run still has to match the file it claims to quote."""
     figures = _speed_figures(json.loads(SPEED_ARTIFACT.read_text(encoding="utf-8")))
@@ -2363,11 +2575,12 @@ def test_the_documented_speedup_ranges_contain_the_current_measurement() -> None
             f"the artifact measures {current[kind]:.3f}, which rounds to {rounded} and falls "
             f"outside the documented {low}-{high}; widen the band where the range is owned"
         )
-    for name in RANGE_DOCUMENTS:
-        documented = _documented_ranges((REPO_ROOT / name).read_text(encoding="utf-8"))
-        for low, high in SPEEDUP_BANDS.values():
+    for name, required in RANGE_DOCUMENTS.items():
+        documented = _band_pairs((REPO_ROOT / name).read_text(encoding="utf-8"))
+        for kind in required:
+            low, high = SPEEDUP_BANDS[kind]
             assert (low, high) in documented, (
-                f"{name} states no `{low}-{high}` range for a speedup ratio"
+                f"{name} states no `{low}-{high}` range for the {kind} speedup ratio"
             )
 
 

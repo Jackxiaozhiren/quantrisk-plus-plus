@@ -1558,3 +1558,63 @@ a future phase that wants the stronger claim needs a TeX-bearing lane, and the s
 itself rather than left as silence. `docs/reproducibility.md` now says all of this in the present tense,
 including that the earlier sentence "Nothing on the runner verifies that the committed PDF matches the
 committed `.tex`" was true until this phase and is not now.
+
+## Addendum — Phase 32, the list that polices a band, and the release date a citation never had (2026-10-11)
+
+**64. A policed set maintained by hand is a claim about the corpus, and nothing was comparing it with
+the corpus.** Phase 30 owned the version string in `CITATION.cff` and registered two debts it deliberately
+did not take on: `date-released`, whose producer did not exist yet, and the completeness of
+`RANGE_DOCUMENTS` -- the literal that names every document required to quote the committed speedup
+bands. Both are closed here, and the second is the one that found defects.
+
+(a) **The census, and what it found on its first measurement.** `RANGE_DOCUMENTS` had grown one entry per
+release for eight releases, and each addition happened in the same commit as the note it named -- which is
+the moment nobody checks the list. The new guard enumerates candidates from the tree (38 documents: the
+README, the report, `docs/**.md` less two exempt families) and asks, of each, whether it prints a spread
+sharing an edge with a policed band. Sixteen do. Two printed a band that appeared in no list at all
+(`docs/project_scope.md`'s `0.42×`–`0.57×` inside the Phase 28 row of §9, and `docs/release_notes_v1.0.0.md`'s
+`0.42×`–`0.48×`), and both turned out to be honest dated records rather than defects -- which is a result of
+the guard, not an escape from it: they are now declared with the reason each is dated, and the declaration
+has to stay load-bearing. Two more were already in the policed set and red on membership, because they speak
+in the present tense about a range the history had widened: `paper/technical_report.tex` attributed
+`7.77×`–`8.70×` to "thirteen committed re-freezings", and `docs/release_notes_v1.6.0.md` wrote that both
+ratios "remain inside the pinned history range". Twenty-two committed readings span `7.77×`–`10.31×`. The
+report is living prose and was corrected in place; the release note is a record of its own tag and received
+a dated amendment.
+
+(b) **A detector wide enough for a membership test is too wide for a census.** The old `_band_pairs` was
+`(\d+\.\d+)[^\d\n]{1,16}?(\d+\.\d+)`: asked "is the pair 7.77-10.31 anywhere in this file?" it is reliable,
+because a false neighbour must reproduce both edges. Asked "which files state a band?", the same shape
+answers about any two decimals that sit near each other -- and a census that names documents is a claim
+about which files state a band. Measured before the shape was fixed, it produced `8.378× / 0.5656×` as a
+spread and `10.31× and 0.495×` as another: two readings of one run, and two numbers from one sentence.
+The shape now requires a multiplication sign on both edges and a range mark between them, so the three
+spellings the corpus really uses (`7.77×`–`10.31×`, `$7.77\times$--$10.31\times$`, "between … and …") all
+read, and the neighbour pairs do not. What it still cannot see is stated in `docs/limitations.md` #92: a
+band written without its unit -- the report's own "between $0.42$ and $0.51$" -- is invisible, which is why
+rewriting that sentence was part of the fix rather than a stylistic choice.
+
+(c) **The exemptions are tested against their own purpose.** A dated record that has been quietly brought
+up to date prints only current bands, at which point its exemption covers nothing and the guard fails; a
+family exempted wholesale (`docs/phase_reports/`, `docs/release_bodies/`) must still contain at least one
+printer or the exemption is deleted. Both halves have a plant: `document-states-an-unowned-speedup-band`
+puts a superseded band into a model card no guard has ever read, and
+`dated-band-record-brought-up-to-date` rewrites `v1.4.0`'s stale edge to the current one.
+
+(d) **`date-released` now has a producer, and it is not the commit's date.** `CITATION.cff` has shipped nine
+times with a release date nothing could disagree with; Phase 30 left it alone because the only event that
+produces it is the release, and by Phase 32 that event had happened nine times and every annotated tag
+records when. The guard reads `git for-each-ref`'s *tagger* date, not the commit's author date -- the commit
+date says when work was written, the tagger date says when it was released, and reading the wrong one would
+certify a date the repository never released on. Two skips, both named: a clone with no tags (what CI looks
+like at depth 1) has nothing to compare, and the current version's tag may legitimately not exist yet,
+because the tag is cut from the commit that carries the guard. `citation-declares-a-release-date-the-tag-does-not-carry` is only decidable where tags exist, so the sweep runs on the full clone and says so in its comment.
+
+(e) **Three plants, two counts, and one cascade that had already been learned.** The pytest pair moved
+500 → 502 and 431 → 433 with the two new guards, four documents and five plant anchors moved with it, and
+the register gained #92 -- which is also the entry that keeps this addendum honest about the half the phase
+did not close: a band's percentage has no owner, because the rounded edges in `SPEEDUP_BANDS` give 32.7 %
+and 21.4 % while the committed history gives 32.6 % and 20.8 %, and the arithmetic that is right needs
+history a shallow clone does not have. The plant count in the rehearsal sheet's command annotation moved
+56 → 59 in the same commit as the list, because `test_a_command_line_that_counts_plants_counts_the_declared_ones`
+is exactly the guard that phase 21 wished it had had earlier.

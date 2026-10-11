@@ -179,3 +179,17 @@ was wrong before it was right.
 No number this release published moves: the artifact, its gates, and the `0.00162` against `0.01887`
 pair are the published ladder's and still reproduce. What changed is the scope of the sentence around
 them.
+
+## Correction added 2026-10-11 — the pinned range this note says both ratios "remain inside" has moved
+
+The verification paragraph above ends "Both ratios remain inside the pinned history range
+`7.77×`–`8.70×` and `0.42×`–`0.51×`". Written in the present tense, and true on the day it was
+written: those were the min and max over the artifact's committed history at v1.6.0. The band is not
+a constant, and since this note the pure-Python edge moved — over the twenty-two committed
+measurements now in the tree the ranges are `7.77×`–`10.31×` and `0.42×`–`0.51×`, so the sentence's
+upper edge is three re-freezings behind while its NumPy half still holds.
+
+The paragraph above is left as written because it is dated to the tag. The owner of the range is
+`docs/reproducibility.md`, which prints the command that recomputes it, and
+`test_the_documented_speedup_ranges_match_the_committed_history` reddens the whole suite if the band
+in the documents and the band in the history are ever different numbers.
