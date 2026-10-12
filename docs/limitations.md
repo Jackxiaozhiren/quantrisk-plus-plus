@@ -943,7 +943,9 @@ never removed just because a later phase shipped.
     same length and restored within the same clock second is indistinguishable from a file that never
     changed -- the mechanism `docs/integrity_audit.md` finding 66 records as a false sweep escape. The
     harness no longer depends on that: every guard subprocess it spawns runs with `PYTHONPYCACHEPREFIX`
-    pointed at a directory created for that sweep, and
+    pointed at a directory created for *that invocation* — a prefix allocated per sweep was the first
+    fix and it left the verdict unchanged, because a plant's mutated run and its restored re-run are two
+    invocations of one sweep — and
     `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache` proves both halves, including
     a control that must show the stale read happening before it credits the isolation. What stays outside
     the closure is everything that is not this harness. A restore performed by another tool, a backup copy

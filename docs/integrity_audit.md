@@ -1705,18 +1705,23 @@ code, so a stale cache cannot manufacture `caught` — it manufactured the oppos
 harness that reports a clean tree as broken is a harness whose verdicts stop being usable, and the failure
 was only visible because the sweep prints the whole table and the tree was checked afterwards.
 
-(c) **Fixed by giving each sweep its own cache directory, not by deleting caches after the fact.**
-`isolation_environment()` sets `PYTHONPYCACHEPREFIX` to a fresh per-run directory and every guard
-subprocess inherits it, so no invocation can read bytecode another wrote. Removing `__pycache__` between
-steps would have been the weaker answer: it depends on doing it everywhere, and it destroys the caches
-that make an ordinary test run fast.
+(c) **The first fix was wrong, and the second sweep said so.** Redirecting the prefix *once per sweep*
+left the verdict unchanged: `60/61` again, same plant, same `tree-did-not-recover`, clean tree — while
+the same plant run alone printed `caught`. That difference located the window precisely: a plant's
+mutated run and its restored re-run are two invocations of one sweep, so a prefix shared across the
+sweep is shared across exactly the pair that must not see each other's bytecode. `next_environment()`
+now allocates a fresh prefix per invocation. Removing `__pycache__` between steps would have been a
+third wrong answer: it depends on doing it everywhere, and it throws away the caches that make an
+ordinary test run fast.
 
 (d) **The new guard carries its own negative control, because a fix that is only asserted is a fix that is
 only claimed.** `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache` writes a module,
 imports it so a cache exists, performs a same-length edit with the mtime pinned back to the recorded
 second, and asserts in order that (i) an un-isolated re-run really does print the stale value — if that
-fails, the test says so instead of passing vacuously — and (ii) the harness's environment prints the fresh
-one. The control is the part that would silently rot if CPython's cache key ever changed.
+fails, the test says so instead of passing vacuously — (ii) the harness's environment prints the fresh
+one, and (iii) two *consecutive* environments differ, which is the property the wrong fix lacked. Item
+(iii) is what the first sweep's second failure proves is necessary, and it is the assertion the first
+version of the test did not have.
 
 (e) **The residual is registered rather than argued away.** The isolation lives inside this harness; the
 property belongs to CPython, so any other route that restores a same-length file within one second — a

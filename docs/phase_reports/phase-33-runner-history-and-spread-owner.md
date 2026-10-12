@@ -53,16 +53,15 @@ a third thing by itself: its own falsification harness printed a false verdict o
    edit changes two characters of identical length, the restore lands inside the same second, and the
    bytecode written while the defect was in place is still considered current. The cache file's 13:19
    timestamp is the mutated run's, and deleting `__pycache__` made the same node pass.
-8. **Fixed by isolating the cache rather than by clearing it.** `isolation_environment()` gives every guard
-   subprocess a `PYTHONPYCACHEPREFIX` under a directory created for that sweep, so no invocation can read
-   bytecode another wrote. Clearing `__pycache__` between steps would have been the weaker answer — it has
-   to be remembered everywhere, and it throws away the caches that make an ordinary test run fast.
-   `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache` polices it with the control
-   first: it reproduces the stale read in an un-isolated subprocess (and fails the test if the stale read
-   does *not* happen, because then the isolation would be untested), then requires the harness's own
-   environment to read the restored source. `docs/integrity_audit.md` finding 66 is the incident and
-   `docs/limitations.md` #93 the boundary that remains: the isolation is this harness's, the mechanism is
-   the interpreter's.
+8. **Two attempts were needed, and the second one's failure is the sharper fact.** The first fix gave each
+   *sweep* its own `PYTHONPYCACHEPREFIX`. The sweep re-run printed `60/61` again — same plant, same status,
+   clean tree — while that plant run alone printed `caught`. That pair of results located the window
+   precisely: a plant's mutated run and its restored re-run are two invocations of one sweep, so a prefix
+   shared across the sweep is shared across exactly the two steps that must not see each other's bytecode.
+   `Harness.next_environment()` therefore allocates a fresh prefix per invocation, and the isolation test
+   gained a third assertion that two consecutive environments differ — the property the first fix lacked.
+   Clearing `__pycache__` between steps was the third option and stayed unchosen: it has to be remembered
+   everywhere, and it discards the caches that make an ordinary test run fast.
 
 ## 2. Assumptions this rests on
 
@@ -83,7 +82,7 @@ a third thing by itself: its own falsification harness printed a false verdict o
 |---|---|
 | `.github/workflows/ci.yml` | `fetch-depth: 0` and `fetch-tags: true` on the pytest lane, with the measured cost recorded in the comment |
 | `tests/python/test_artifact_metadata.py` | `SPEEDUP_SPREADS`, `SPREAD_CLAIMS`, `_spread_fields()`, two new guards, the vacuity control extended, six premise sentences rewritten |
-| `scripts/run_mutation_suite.py` | two plants; five count anchors and the sweep-count anchor re-keyed; `isolation_environment()` and the per-sweep `PYTHONPYCACHEPREFIX` on every guard subprocess |
+| `scripts/run_mutation_suite.py` | two plants; five count anchors and the sweep-count anchor re-keyed; `isolation_environment()` plus `Harness.next_environment()`, which gives every guard subprocess its own `PYTHONPYCACHEPREFIX` |
 | `tests/python/test_mutation_suite.py` | the stale-bytecode regression test, with the negative control that must fire before the isolation is credited |
 | `docs/reproducibility.md` | the denominator stated; the two living spread blocks; test totals synced |
 | `docs/limitations.md` | #92 amended with its dated closure, #77 amended with the runner measurement, #90's premise put in the past tense, #93 opened for the cache boundary, living totals and the register count synced |
@@ -117,7 +116,8 @@ a third thing by itself: its own falsification harness printed a false verdict o
 - **A plant that edits a Python file teaches something about the interpreter, not only the guard.** The
   phase's own plant against `SPEEDUP_SPREADS` produced a false `60/61` because CPython's cache key is
   (size, whole-second mtime) and the edit-and-restore kept both. Two lessons followed. The harness now
-  isolates bytecode per sweep rather than trusting a restore, and a *verdict* is not the same object as a
+  isolates bytecode per invocation rather than trusting a restore, and a *verdict* is not the same
+  object as a
   *tree*: `git status` clean plus a red guard is not a contradiction until the input set of the red run is
   known. The first sweep's log is kept at `build/mutation-sweep-33.log` precisely because it is evidence
   about the tool rather than about the code.
@@ -153,8 +153,9 @@ a third thing by itself: its own falsification harness printed a false verdict o
 | Anchor census | one-pass enumeration of every declared plant against the file it names | 61 declared, 59 file-backed (two create their own probe file), 0 missing or non-unique |
 | CI premise, before | run `38149012780` on `466e564`, job `114498318376` | `429 passed, 8 skipped in 202.38s`, checkout step 1.29 s (03:07:05 baseline 14:53:33.155 → 14:53:34.446), three skips naming the missing history |
 | CI premise, after | run `38198483490` on branch `ci-prove-full-history`, job `114646369537` | `432 passed, 5 skipped in 149.42s`, checkout 03:07:05.235 → 03:07:07.407 = 2.17 s, and the only remaining `test_artifact_metadata.py` skip is `1821: latexmk is not installed` |
-| Falsification, first sweep | `uv run python scripts/run_mutation_suite.py` on `c9f7732`, logged to `build/mutation-sweep-33.log` | `60/61 planted defects were rejected by their guard.` with `FAIL tree-did-not-recover pinned-spread-constant-disagrees-with-the-history` while `git status --porcelain` was empty — the false verdict of §1 item 7, kept because it is evidence about the tool. The tree it ran on is superseded by the isolation fix |
-| Falsification, sweep after the fix | same command on the final commit, logged to `build/mutation-sweep-33b.log` | pending — the harness refuses a dirty target, so this verdict belongs to the commit that carries it and is recorded in the follow-up commit, not here |
+| Falsification, sweep one | `uv run python scripts/run_mutation_suite.py` on `c9f7732`, logged to `build/mutation-sweep-33.log` | `60/61` with `FAIL tree-did-not-recover pinned-spread-constant-disagrees-with-the-history` while `git status --porcelain` was empty — the false verdict of §1 item 7, kept because it is evidence about the tool |
+| Falsification, sweep two | same command after the per-sweep prefix, logged to `build/mutation-sweep-33b.log` | `60/61` again, identical status — the insufficient fix of §1 item 8, and the measurement that located the window. The same plant run alone in that state printed `caught 1/1`, which is what made the two-runs-of-one-sweep reading unavoidable |
+| Falsification, sweep three | same command on the final commit, logged to `build/mutation-sweep-33c.log` | pending — the harness refuses a dirty target, so this verdict belongs to the commit that carries it and is recorded in the follow-up commit, not here |
 | CI on the pushed record | `gh api …/commits/<sha>/check-runs` after the push | pending — not yet run at the time of writing |
 
 ## 6. Numerical validation
@@ -220,5 +221,6 @@ checked there. The speedup bands' percentages stopped being transcribed for the 
 needed choosing, `(max - min) / min`, and the alternatives needed measuring before the pinned figures could
 be defended rather than repeated. And the sweep that should have certified the work instead reported a
 false escape on a clean tree, which turned out to be CPython's cache key rather than the code's, and left
-the harness with per-sweep bytecode isolation, a test whose first assertion is that the bug is real, and
+the harness with per-invocation bytecode isolation — after one fix that was not enough — a test whose
+first assertion is that the bug is real, and
 #93 saying plainly where that boundary does not reach.

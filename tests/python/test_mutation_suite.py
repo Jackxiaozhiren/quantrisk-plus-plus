@@ -239,8 +239,9 @@ def test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache(
 
     Two assertions, in the order that matters. The control first: without isolation the stale cache
     is genuinely read, so a test that skipped this step could pass while proving nothing. Then the
-    harness's own environment: the guard subprocesses it spawns must not be able to inherit bytecode
-    from a previous invocation.
+    harness's own environment -- and specifically that *consecutive* invocations cannot share one,
+    because a plant's mutated run and its restored re-run are two invocations of the same sweep,
+    which is the window finding 66 measured.
     """
     module = tmp_path / "policed_module.py"
     module.write_text("VALUE = 32.6\n", encoding="utf-8")
@@ -283,9 +284,17 @@ def test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache(
         capture_output=True,
         text=True,
         check=True,
-        env=harness.isolation_environment(tmp_path / "per-run-bytecode"),
+        env=harness.isolation_environment(tmp_path / "one-invocation"),
     )
     assert isolated.stdout.strip() == "99.9", (
         "the harness's environment still reads another invocation's bytecode, so a "
         "same-length plant can be reported as an unrestored tree"
+    )
+
+    sweep = harness.Harness(build_dir="build/dev")
+    first = sweep.next_environment()["PYTHONPYCACHEPREFIX"]
+    second = sweep.next_environment()["PYTHONPYCACHEPREFIX"]
+    assert first != second, (
+        "two guard invocations of one sweep share a bytecode prefix, which is the window the "
+        "mutated run and the restored re-run both sit in"
     )

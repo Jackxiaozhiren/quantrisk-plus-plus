@@ -950,8 +950,10 @@ def isolation_environment(cache_dir: Path) -> dict[str, str]:
     CPython keys its cache on identical too. The mutated module's `.pyc` is then still "valid" for
     the restored file, so the step that re-runs the guard after the tree went clean again reads the
     defect back out of `__pycache__` and reports a clean tree as unrestored. Phase 33 met that as a
-    false `tree-did-not-recover` on its own new plant. Redirecting the prefix per sweep means no
-    guard invocation can inherit another's bytecode.
+    false `tree-did-not-recover` on its own new plant, and the prefix has to be fresh per
+    *invocation* for that pair of runs -- a plant's mutated step and its restored step are two
+    invocations of one sweep, which is exactly the window the defect lives in. See
+    `Harness.next_environment`.
     """
     environment = os.environ.copy()
     environment["PYTHONPYCACHEPREFIX"] = str(cache_dir)
@@ -981,11 +983,20 @@ class Harness:
     def __init__(self, build_dir: str, verbose: bool = False) -> None:
         self.build_dir = build_dir
         self.verbose = verbose
-        self.cache_dir = Path(tempfile.mkdtemp(prefix="quantrisk-mutation-pycache-")) / "bytecode"
-        self.environment = isolation_environment(self.cache_dir)
+        self.cache_root = Path(tempfile.mkdtemp(prefix="quantrisk-mutation-pycache-"))
+        self._invocation = 0
+
+    def next_environment(self) -> dict[str, str]:
+        """The environment for one subprocess, with a bytecode prefix nothing has written to.
+
+        Counted per invocation rather than allocated once per sweep, because the failure finding 66
+        records happens between a plant's mutated run and its restored re-run.
+        """
+        self._invocation += 1
+        return isolation_environment(self.cache_root / f"invocation-{self._invocation}")
 
     def uv(self, *arguments: str) -> subprocess.CompletedProcess[str]:
-        return _run(("uv", "run", "--frozen", *arguments), self.verbose, self.environment)
+        return _run(("uv", "run", "--frozen", *arguments), self.verbose, self.next_environment())
 
     def build(self) -> bool:
         built = self.uv("cmake", "--build", self.build_dir, "--target", TEST_BINARY_TARGET)
