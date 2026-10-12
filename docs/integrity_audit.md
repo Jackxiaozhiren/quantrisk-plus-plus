@@ -1639,8 +1639,9 @@ own wall time varies more than the fetch does.
 
 (b) **Proven on a throwaway branch first, which is how the claim got its numbers.** `on: pull_request` and
 `workflow_dispatch` are the only ways a non-main ref runs this workflow, so the branch was dispatched
-rather than merged; the log was read, not the badge. The branch exists to hold that evidence and is deleted
-after main carries the same change.
+rather than merged; the log was read, not the badge. The branch is kept as the ref that probe run was
+dispatched against — deleting a branch is a shared-state action this repository does not take unasked —
+and main now carries the same change.
 
 (c) **The percentage needed a denominator chosen, not inherited.** #92's first half was that documents
 print "(32.6% spread)" beside a policed band and nothing recomputes it. Recomputing requires picking the
