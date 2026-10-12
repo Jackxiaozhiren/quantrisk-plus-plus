@@ -51,6 +51,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Three guards read the repository's own history rather than its working tree: the
+          # release-tag enumeration in the report, the citation's `date-released`, and the speedup
+          # bands derived from every committed reading of the speed artifact. At the default depth
+          # they all skipped on the runner and only ran on a laptop, which is a weaker claim than
+          # the documents made. The pack is ~8 MiB over 180 commits, and the depth-1 checkout step
+          # measured 1.29 s (run 38149012780), so this buys the guards their input set for seconds.
+          fetch-depth: 0
+          fetch-tags: true
       - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: "3.12"
