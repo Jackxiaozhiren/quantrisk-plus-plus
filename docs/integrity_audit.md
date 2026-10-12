@@ -1618,3 +1618,66 @@ and 21.4 % while the committed history gives 32.6 % and 20.8 %, and the arithmet
 history a shallow clone does not have. The plant count in the rehearsal sheet's command annotation moved
 56 → 59 in the same commit as the list, because `test_a_command_line_that_counts_plants_counts_the_declared_ones`
 is exactly the guard that phase 21 wished it had had earlier.
+
+## Addendum — Phase 33, the guard that only failed on one machine, and the percentage that had no denominator (2026-10-12)
+
+**65. A check that cannot run where the release happens is a laptop note, not a gate.** Phase 32 shipped
+`test_the_release_date_the_citation_declares_is_the_tag_that_cut_it` knowing it would skip on CI, and the
+reason given was the environment: `actions/checkout` at depth 1 carries no tags and no history. That is
+true of the *default*, not of the workflow, and nobody had asked whether the lane could afford the
+difference. The pytest lane now fetches `fetch-depth: 0` with `fetch-tags: true`, which turns three guards
+from always-skipping-on-the-runner into checked-on-the-runner: the report's release-tag enumeration, the
+citation's `date-released`, and the speedup bands derived from every committed reading of the artifact.
+
+(a) **Measured before and after, on the runner, from its log.** At `466e564` the lane printed
+`429 passed, 8 skipped in 202.38s`, and three of those eight skips named the missing history. The probe
+run `38198483490` on branch `ci-prove-full-history` printed `432 passed, 5 skipped in 149.42s` on the same
+code: exactly the three guards moved from skip to pass, and the five remaining skips are the four
+oracle-import module skips plus `latexmk is not installed`. The cost was the checkout step going from
+1.29 s to 2.17 s for a 7.93 MiB pack over 180 commits, and the total job got *shorter* because the lane's
+own wall time varies more than the fetch does.
+
+(b) **Proven on a throwaway branch first, which is how the claim got its numbers.** `on: pull_request` and
+`workflow_dispatch` are the only ways a non-main ref runs this workflow, so the branch was dispatched
+rather than merged; the log was read, not the badge. The branch exists to hold that evidence and is deleted
+after main carries the same change.
+
+(c) **The percentage needed a denominator chosen, not inherited.** #92's first half was that documents
+print "(32.6% spread)" beside a policed band and nothing recomputes it. Recomputing requires picking the
+formula, and over the same 22 committed readings `(max-min)/min` gives 32.572 and 20.778 -- which round to
+the two printed figures -- while `(max-min)/max` gives 24.569 and 17.203 and `(max-min)/mean` gives 30.327
+and 19.374. Two of the three are within a rounding of nothing, so a guard written without naming the
+denominator would have policed an arithmetic the documents never chose. `docs/reproducibility.md` now
+states the choice next to the figures, which is the same rule finding 22 and 24 recorded for ratios: a
+number that can be formed several ways has to say which.
+
+(d) **The living documents that quote it are compared as blocks.** `SPREAD_CLAIMS` pairs each document with
+its own wording -- `` `7.77×`–`10.31×` against a pure Python loop (32.6% spread) `` in
+`docs/reproducibility.md`, the LaTeX equivalent in the report, the collapsed one in `docs/limitations.md`,
+the combined one in the `v1.8.0` note -- and the guard builds the string from the pinned band and the pinned
+spread. A bare-number search would have been the weaker check Phase 29 found twice: `docs/limitations.md`
+and `docs/reproducibility.md` each carry a living and a superseded figure in the same file, so presence of
+the right spelling says nothing about the sentence that is speaking now.
+
+(e) **Two plants, and one of them edits the guard itself.**
+`living-document-quotes-a-superseded-spread` puts the old 11.9 % into the living sentence -- a true number
+from the wrong revision, which is finding 55's mechanism exactly. The derivation guard's only reachable
+defect is its own constant, so `pinned-spread-constant-disagrees-with-the-history` edits
+`SPEEDUP_SPREADS` and runs that node; the harness restores by hash and refuses a dirty target, which is why
+the drift is planted in the file that holds the pin rather than argued. `test_the_performance_guards_are_not_
+vacuous` gained the same two-sided control in-memory, so the guards are shown to move when the sample moves
+without needing a plant at all.
+
+(f) **Changing a premise means finding every sentence that states it.** Six living passages in
+`tests/python/test_artifact_metadata.py` and two in `docs/limitations.md` said the runner checks out at
+depth 1; after the workflow change two of them were false in the present tense. The skip messages now name
+the *clone* ("a clone fetched without tags carries none") instead of the machine, because a message that
+names a specific CI configuration is a claim about infrastructure that will move again -- and two dated
+records (`docs/release_notes_v1.4.0.md`, this file's finding 49 entry) quote the old wording verbatim, which
+is left alone as what it was: a record of the revision it names.
+
+(g) **The phase also manufactured a new instance of the gap it did not close.** The sentence added to
+`docs/reproducibility.md` to name the denominator introduces 24.6 % and 30.3 %, and the inventory guard's
+`<number> <countable noun>` matcher reads neither -- measured as zero claims from that sentence -- because
+its noun list has no `%`, `spread`, `reading` or `re-freezing`. #92 was amended rather than deleted: the
+arithmetic now has an owner, the vocabulary still does not.

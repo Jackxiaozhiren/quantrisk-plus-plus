@@ -233,7 +233,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 433 tests collected offline",
+        anchor="# 435 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -392,7 +392,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 502 pytest tests with the validation",
+        anchor="and 504 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -465,6 +465,38 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="a dated band record stays a dated record, or joins the policed set",
     ),
     Mutation(
+        identifier="living-document-quotes-a-superseded-spread",
+        kind="prose",
+        path="docs/reproducibility.md",
+        anchor="(32.6% spread)",
+        replacement="(11.9% spread)",
+        # Phase 32 policed the band's two edges and left the percentage beside them transcribed;
+        # this is that figure's defect class. The 11.9 % is not invented -- it is the spread of the
+        # superseded `7.77x`-`8.70x` band, so the plant puts a true number from the wrong revision
+        # into a living sentence, which is how finding 55's mechanism actually arrives.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_living_documents_quote_the_spread_percentage_the_history_produces"
+        ),
+        claim="a quoted spread percentage is the one the committed readings produce",
+    ),
+    Mutation(
+        identifier="pinned-spread-constant-disagrees-with-the-history",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='SPEEDUP_SPREADS = {"python": 32.6,',
+        replacement='SPEEDUP_SPREADS = {"python": 99.9,',
+        # The derivation guard's only reachable defect lives in the guard itself: the pinned
+        # constant and the recomputed spread are different sources, and nothing but a planted
+        # drift proves the comparison runs. 99.9 % is outside anything the artifact measured,
+        # the derivation disagreeing with the pin rather than a rounding argument.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_documented_spread_percentages_are_the_committed_historys"
+        ),
+        claim="the pinned spread equals (max - min) / min over every committed reading",
+    ),
+    Mutation(
         identifier="report-drops-an-experiment-from-its-own-account",
         kind="prose",
         path="paper/technical_report.tex",
@@ -492,7 +524,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 59/59 planted defects rejected",
+        anchor="# 61/61 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -634,7 +666,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 433 collected without them",
+        anchor="oracles installed, 435 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -759,7 +791,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 502 pytest tests with the `oracles` extra here",
+        anchor="# 504 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"

@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 502 pytest tests with
-    the `oracles` extra installed, and the same tree collects 433 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 504 pytest tests with
+    the `oracles` extra installed, and the same tree collects 435 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -570,9 +570,14 @@ never removed just because a later phase shipped.
     the current artifact to sit inside it and the documents to state it, while
     `test_the_documented_speedup_ranges_match_the_committed_history` requires the pinned band to
     equal the min/max over the artifact's git history and *declares a skip* when the clone does not
-    carry that history — which is the CI case, `actions/checkout` at depth 1, where the first
+    carry that history — which was the CI case at `actions/checkout` depth 1, where the first
     version derived a `0.45–0.45` spread from the single visible revision and went red for a reason
-    that had nothing to do with the documents. `test_the_performance_guards_are_not_vacuous`
+    that had nothing to do with the documents. **Amended 2026-10-12 by Phase 33:** the pytest lane now
+    fetches `fetch-depth: 0` with tags, so that guard, the release-tag enumeration and the citation's
+    `date-released` comparison are checked on the runner rather than only on the machine that froze the
+    artifact — measured as `429 passed, 8 skipped` at depth 1 against `432 passed, 5 skipped` at depth 0
+    on the same tree (`docs/integrity_audit.md` finding 65). The skip is left for a reader's own shallow
+    clone, and its wording no longer names CI. `test_the_performance_guards_are_not_vacuous`
     multiplies the artifact by 1.5, narrows one band by hand, and asserts a one-measurement band can
     never equal the pinned one. So a re-run of the speed benchmark now obliges a documentation edit,
     which is the point: the alternative was a green gate over a stale claim. The class then
@@ -860,7 +865,7 @@ never removed just because a later phase shipped.
     the PDF in the tree reads `498 pytest tests with the validation oracles` and `429 collected without
     them`, extracted from the file. A guard is possible and is not written here. The cheapest form
     compares each file's last-touch commit and requires the PDF not to predate the tex, which is a real
-    check locally and silently vacuous on the depth-1 checkout CI uses, so it would need the same
+    check locally and silently vacuous on the depth-1 checkout CI used at the time, so it would need the same
     declared-skip discipline #77 and the release-tag guard carry -- a guard that can only fail on one
     machine is a guard whose red must be scheduled, not assumed.
 
@@ -917,3 +922,18 @@ never removed just because a later phase shipped.
     phase did own is the pair inside that sentence; the counts around it were measured by hand for this
     revision (22 readings, min and max as printed in `docs/reproducibility.md`) and are registered here
     as the remaining gap rather than quietly treated as covered.
+
+    **Amended 2026-10-12 by Phase 33 — the first half is closed, and this entry narrowed rather than
+    deleted.** The spread percentages now have a producer:
+    `test_the_documented_spread_percentages_are_the_committed_historys` recomputes `(max − min) / min`
+    over every committed reading and compares it with the pinned `SPEEDUP_SPREADS`, and
+    `test_living_documents_quote_the_spread_percentage_the_history_produces` compares each living
+    document's band-plus-percentage *block* rather than the bare number, so a document cannot keep the
+    pair and change the percentage beside it. The premise that made this unbuildable when #92 was
+    written -- that a guard needing history could not run on the runner -- went with the pytest lane's
+    `fetch-depth: 0`, and `docs/reproducibility.md` now names the denominator because the same sample
+    yields 24.6 % or 30.3 % under other choices. The second half is still open, and Phase 33 produced a
+    fresh instance of it: the sentence that explains those alternatives adds two new numbers, and the
+    inventory guard's noun list reads neither, because it matches `<number> <countable noun>` and has no
+    `%`, `spread`, `reading` or `re-freezing`. Measured: 0 claims from that sentence reach the guard.
+    What remains is therefore the vocabulary, not the arithmetic.

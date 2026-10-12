@@ -1662,16 +1662,19 @@ def test_the_report_lists_the_release_tags_the_repository_carries() -> None:
     digits and the words are two spellings of one number and policing one spelling is how the stale
     twin survived in `docs/reproducibility.md` (finding 61).
 
-    Like the performance band, this compares history rather than content, so a shallow clone -- the
-    CI checkout at depth 1 -- has no tags to compare and the guard says so instead of asserting
-    nothing. It also means the sentence about a release being made cannot be verified before the tag
-    exists: the window in which the guard is red while the report names a tag that is not yet in the
-    object store is a property of tagging, not a defect, and the phase record names it.
+    Like the performance band, this compares history rather than content, so a clone fetched without
+    tags has none to compare and the guard says so instead of asserting nothing. That used to
+    describe the runner: the pytest lane checked out at depth 1 until Phase 33 gave it `fetch-depth:
+    0` with tags, which is what moved its summary from `429 passed, 8 skipped` to `432 passed, 5
+    skipped` on an unchanged tree. The skip is left for a reader's own shallow clone. It also means
+    the sentence about a release being made cannot be verified before the tag exists: the window in
+    which the guard is red while the report names a tag that is not yet in the object store is a
+    property of tagging, not a defect, and the phase record names it.
     """
     tags = _repository_release_tags()
     if len(tags) < 2:
         pytest.skip(
-            f"this clone carries {len(tags)} release tag(s) (CI checks out at depth 1, which "
+            f"this clone carries {len(tags)} release tag(s) (a clone fetched without tags "
             "carries none), so the enumeration cannot be compared; recompute with "
             "`git tag --list 'v*' --sort=v:refname`"
         )
@@ -2042,7 +2045,8 @@ def test_the_release_date_the_citation_declares_is_the_tag_that_cut_it() -> None
     the second. Reading the wrong one would certify a date the repository never released on.
 
     Two skips, both named rather than silent. A clone carrying no tags has nothing to compare
-    against, which is what CI looks like at depth 1. And the current version's tag may not exist
+    against -- what a `--depth 1` clone looks like, and what the runner looked like until Phase 33
+    gave the pytest lane its tags and history. And the current version's tag may not exist
     yet, because the tag is cut from the commit that carries this guard -- a release in progress is
     exactly when the field is being written, and no check may demand the future.
     """
@@ -2472,6 +2476,45 @@ BAND_EXEMPT_FAMILIES = ("docs/phase_reports/", "docs/release_bodies/")
 # of 0.5104 belongs to the documented band edge 0.51 rather than falling outside it.
 SPEEDUP_BANDS = {"python": (7.77, 10.31), "numpy": (0.42, 0.51)}
 
+# The spread each band is printed with, in percent: (max - min) / min over the committed readings,
+# to one decimal. Pinned for the same reason the bands are pinned: a guard that could only read
+# the one revision a shallow clone carries would derive a zero-width spread. Phase 33 gives the
+# runner a full clone, so this constant is compared with the history on CI too.
+SPEEDUP_SPREADS = {"python": 32.6, "numpy": 20.8}
+
+# The living documents that state those spreads, written in their own words. Each entry is compared
+# as a block, band edges and all, so a document cannot keep the pair and quietly change the number
+# beside it -- the half of `docs/limitations.md` #92 that this phase closes.
+SPREAD_CLAIMS: dict[str, tuple[str, ...]] = {
+    "docs/reproducibility.md": (
+        "`{py_lo}×`–`{py_hi}×` against a pure Python loop ({py_spread}% spread)",
+        "`{np_lo}×`–`{np_hi}×` against vectorised NumPy ({np_spread}% spread)",
+    ),
+    "docs/limitations.md": (
+        "`{py_lo}×`–`{py_hi}×` ({py_spread}%) and `{np_lo}×`–`{np_hi}×` ({np_spread}%)",
+    ),
+    "docs/release_notes_v1.8.0.md": (
+        "`{py_lo}×–{py_hi}×` / `{np_lo}×–{np_hi}×` ({py_spread}% and {np_spread}%)",
+    ),
+    "paper/technical_report.tex": (
+        "${py_lo}\\times$--${py_hi}\\times$ --- a ${py_spread}\\%$ spread",
+        "${np_lo}\\times$--${np_hi}\\times$, a ${np_spread}\\%$ spread",
+    ),
+}
+
+
+def _spread_fields() -> dict[str, str]:
+    """The pinned band and spread, rendered the way the documents write them."""
+    (py_lo, py_hi), (np_lo, np_hi) = SPEEDUP_BANDS["python"], SPEEDUP_BANDS["numpy"]
+    return {
+        "py_lo": f"{py_lo:.2f}",
+        "py_hi": f"{py_hi:.2f}",
+        "np_lo": f"{np_lo:.2f}",
+        "np_hi": f"{np_hi:.2f}",
+        "py_spread": f"{SPEEDUP_SPREADS['python']:.1f}",
+        "np_spread": f"{SPEEDUP_SPREADS['numpy']:.1f}",
+    }
+
 
 def _committed_speed_ratios() -> list[tuple[float, float]]:
     """The ratio of every version of the artifact in this repository's history."""
@@ -2555,10 +2598,11 @@ def test_documents_quote_the_performance_figures_the_artifact_actually_holds() -
 def test_the_documented_speedup_ranges_contain_the_current_measurement() -> None:
     """The ranges are claims about a sample, and the current artifact has to be inside them.
 
-    `SPEEDUP_BANDS` is written down rather than derived because CI checks the repository out at
-    depth 1: a guard that recomputes the band from history sees one measurement there and demands
+    `SPEEDUP_BANDS` is written down rather than derived because a clone fetched with a depth limit
+    sees one measurement: a guard that recomputes the band from history there demands
     that the documents quote `0.45-0.45`, which is how this release's first runner attempt went
-    red. The history is still checked, in the test below, wherever a clone carries it.
+    red -- on the runner, which checked out at depth 1 until Phase 33. The history is still checked,
+    in the test below, wherever a clone carries it.
     """
     payload = json.loads(SPEED_ARTIFACT.read_text(encoding="utf-8"))
     current = {
@@ -2590,8 +2634,8 @@ def test_the_documented_speedup_ranges_match_the_committed_history() -> None:
     if len(revisions) < 2:
         pytest.skip(
             "this clone carries "
-            f"{len(revisions)} revision of the artifact (CI uses actions/checkout at depth 1), "
-            "so no spread can be derived; see the command in docs/reproducibility.md"
+            f"{len(revisions)} revision of the artifact (a clone fetched with a depth limit "
+            "carries one), so no spread can be derived; see the command in docs/reproducibility.md"
         )
     python = [pair[0] for pair in revisions]
     numpy = [pair[1] for pair in revisions]
@@ -2602,6 +2646,71 @@ def test_the_documented_speedup_ranges_match_the_committed_history() -> None:
     assert derived == SPEEDUP_BANDS, (
         f"the {len(revisions)} committed measurements span {derived}, but the documents and "
         "the guard claim SPEEDUP_BANDS"
+    )
+
+
+def test_the_documented_spread_percentages_are_the_committed_historys() -> None:
+    """A percentage beside a band is a second claim about the sample, and it gets its own owner.
+
+    Phase 32 gave every documented speedup *pair* a producer and registered what it left open: the
+    documents also print "(32.6% spread)" next to those pairs, and nothing recomputed it -- a
+    transcribed digit in four documents with no way to disagree, which is finding 55's mechanism one
+    character further along the sentence.
+
+    The population is the band's own: every committed reading of the speed artifact. The formula is
+    the one the documents mean by "spread", `(max - min) / min`, to one decimal, and fixing that
+    denominator was this phase's actual work rather than its code -- measured over the same 22
+    readings, `(max - min) / max` gives 24.6 % and `(max - min) / mean` gives 30.3 %, and neither is
+    what any document prints. A guard written without choosing the denominator would have had to
+    accept either number.
+    """
+    revisions = _committed_speed_ratios()
+    if len(revisions) < 2:
+        pytest.skip(
+            "this clone carries "
+            f"{len(revisions)} revision of the artifact, so no spread can be recomputed; "
+            "see the command in docs/reproducibility.md"
+        )
+    derived = {}
+    for index, kind in ((0, "python"), (1, "numpy")):
+        values = [pair[index] for pair in revisions]
+        low, high = min(values), max(values)
+        derived[kind] = round(100 * (high - low) / low, 1)
+    assert derived == SPEEDUP_SPREADS, (
+        f"the {len(revisions)} committed measurements spread {derived} by (max - min) / min, but "
+        "the documents and the guard claim SPEEDUP_SPREADS"
+    )
+
+
+def test_living_documents_quote_the_spread_percentage_the_history_produces() -> None:
+    """Each document that quotes a spread has to quote the one the committed readings produce.
+
+    Presence-per-file is not enough and was the trap Phase 29 recorded: `docs/limitations.md` and
+    `docs/reproducibility.md` carry both a living figure and a dated one, so a guard that only asked
+    "does this file contain 32.6%?" would stay green while the living sentence drifted. The
+    comparison is therefore a block -- the band's two edges and the percentage in one string --
+    built from the pinned values rather than searched for as an isolated number.
+
+    Dated records are absent on purpose: `docs/release_notes_v1.4.0.md` prints 11.9 % beside
+    `7.77×`–`8.70×` and that pair of figures belongs to the revision it records, so policing it as
+    living prose would rewrite history to keep a test green. The boundary this leaves is stated
+    rather than papered over: a new document that quotes a spread has to be added here, and until it
+    is, its percentage is read by nobody -- which is what `docs/limitations.md` #92 keeps open after
+    this phase narrows it.
+    """
+    fields = _spread_fields()
+    policed = 0
+    for name, claims in SPREAD_CLAIMS.items():
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        for claim in claims:
+            expected = claim.format(**fields)
+            assert expected in text, (
+                f"{name} no longer states {expected!r}, which is what the committed speedup "
+                "history spreads"
+            )
+            policed += 1
+    assert policed >= 4, (
+        f"only {policed} spread statements are policed, so this guard has narrowed into a stub"
     )
 
 
@@ -2639,8 +2748,9 @@ def test_the_performance_guards_are_not_vacuous() -> None:
     low_text, high_text = f"{low:.2f}", f"{high:.2f}"
     assert (low, high) in _documented_ranges(matrix)
 
-    # A depth-1 clone sees one measurement, so it can only derive a zero-width band. That is what
-    # made this release's first runner attempt red; the pinned band must never be one.
+    # A clone fetched with a depth limit sees one measurement, so it can only derive a zero-width
+    # band. That is what made this release's first runner attempt red; the pinned band must never be
+    # one.
     one = float(figures["python_ratio"])
     assert (one, one) not in SPEEDUP_BANDS.values(), (
         "a single measurement cannot support the documented spread"
@@ -2648,3 +2758,29 @@ def test_the_performance_guards_are_not_vacuous() -> None:
     narrowed = matrix.replace(low_text, "7.00").replace(high_text, "8.40")
     assert narrowed != matrix, "the substitution did not land, so it proved nothing"
     assert (low, high) not in _documented_ranges(narrowed)
+
+    # The spread guards, with the same two-sided control. The derivation is shown to move when the
+    # sample moves -- a guard that would print the pinned number whatever the history said is not
+    # watching anything -- and the block comparison is shown to reject a stale percentage placed in
+    # the sentence that carries the current one.
+    fields = _spread_fields()
+    readings = _committed_speed_ratios()
+    if len(readings) > 1:
+        values = [pair[0] for pair in readings]
+        pinned = round(100 * (max(values) - min(values)) / min(values), 1)
+        widened = values + [max(values) * 1.2]
+        shifted = round(100 * (max(widened) - min(widened)) / min(widened), 1)
+        assert pinned != shifted, (
+            "one more reading does not change the computed spread, so the derivation is not reading"
+        )
+        assert f"{pinned:.1f}" == fields["py_spread"], (
+            "the guard's own arithmetic disagrees with the pinned spread it polices"
+        )
+    block = SPREAD_CLAIMS["docs/reproducibility.md"][0].format(**fields)
+    doc = (REPO_ROOT / "docs/reproducibility.md").read_text(encoding="utf-8")
+    assert block in doc
+    stale = block.replace(fields["py_spread"], "11.9")
+    assert stale not in doc, "a superseded percentage already sits in the living sentence"
+    edited = doc.replace(block, stale)
+    assert edited != doc, "the substitution did not land, so it proved nothing"
+    assert block not in edited, "the sentence still carries the policed block after its edit"
