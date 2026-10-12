@@ -1728,3 +1728,42 @@ version of the test did not have.
 property belongs to CPython, so any other route that restores a same-length file within one second — a
 hand restore from a backup, two processes editing the tree, a different tool's own plant step — can still
 read stale bytecode. `docs/limitations.md` #93 records that boundary.
+
+## Addendum — Phase 34, the settings a green job cannot testify about, and the plant that cannot point at its own file (2026-10-12)
+
+**67. Phase 33 made a workflow setting load-bearing and left it unasserted.** Giving the pytest lane
+`fetch-depth: 0` and tags turned three skipping guards into three checked ones; the same phase wrote the
+limitation that nothing asserts the lane keeps them. That is the weaker position than it looks, because the
+failure mode is not a red build: remove the setting and the guards *skip with a named reason*, the job prints
+success, and the only witness that anything was checked is a line in a YAML file nobody reads.
+
+(a) **The workflow is now read as structure by a guard.**
+`test_the_ci_lane_that_runs_the_guards_fetches_what_they_read` parses `.github/workflows/ci.yml`, takes the
+jobs whose steps run `pytest`, and requires the checkout before that step to carry `fetch-depth: 0` and
+`fetch-tags: true`. Parsing rather than grepping is the point: the only other comparison against this file
+matches one phrase about suite members with a regex, and a step can hide in a block sequence or a folded
+scalar without hiding from a human. The guard also requires that *some* job runs pytest, so an empty
+selection cannot report success.
+
+(b) **`pyyaml` entered the `dev` group to make that possible**, the way `sympy` did in Phase 24 — a guard
+that needs a parser has to have it in the environment every lane installs, not in a `--with` someone types
+by hand. The same sentence in `docs/reproducibility.md` now names both, because that is where a reader learns
+what `uv sync` provides.
+
+(c) **The harness's own plumbing is policed by intercepting it.**
+`test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated` replaces `subprocess.run` with a
+recorder, drives two guard steps through `Harness.pytest`, and asserts every recorded call carries
+`PYTHONPYCACHEPREFIX` and that consecutive calls carry different prefixes. Phase 33's test proved the
+environment builder works; this proves nothing bypasses it, which is the half a builder test cannot reach —
+a later edit passing `None` would leave that one green.
+
+(d) **And one plant turned out to be impossible, for a reason now written down.** The natural plant for (c)
+anchors on the line in `Harness.uv` that passes the environment. The harness requires its anchor to occur
+exactly once in the target file — that is finding 25's failure mode — and a plant whose anchor lives in the
+file holding the plant list always sees two occurrences: the code and the plant's own string. So the case is
+refused before it runs. Phase 34 demonstrated the guard red by hand instead (drop the argument, run the
+node, read `a guard subprocess was spawned with no environment at all`, restore, pass) and registered
+`docs/limitations.md` #94 saying what that leaves weak: a demonstration is not re-run by CI and can be
+forgotten, while the structural fix — moving `MUTATIONS` into a data module the harness loads — would change
+the file every future phase edits. The CI guard has no such problem and does have a declared plant,
+`ci-lane-drops-the-history-its-guards-read`, which is what proves (a) reads the file instead of restating it.

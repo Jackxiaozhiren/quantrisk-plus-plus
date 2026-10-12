@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 505 pytest tests with
-    the `oracles` extra installed, and the same tree collects 436 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 507 pytest tests with
+    the `oracles` extra installed, and the same tree collects 438 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -951,6 +951,28 @@ never removed just because a later phase shipped.
     the closure is everything that is not this harness. A restore performed by another tool, a backup copy
     brought back with its attributes, or two processes touching the same tree inside one second can still
     make a clean file read as its previous contents, and no guard here sees that -- the caches are
-    gitignored, so no committed artifact records them and no CI lane can compare against them. The general
+    gitignored, so no committed artifact records them and no CI lane can compare against them.
+
+    **Amended 2026-10-12 by Phase 34:** the first sentence is now policed rather than only controlled.
+    `test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated` intercepts the harness's single
+    `subprocess.run` and requires every guard step to carry a prefix, and requires two consecutive steps to
+    carry different ones -- the property the per-sweep fix lacked. What remains outside is unchanged: other
+    tools, and #94's reason this guard cannot have a declared plant. The general
     form of the fault is stated plainly because it is not this repository's to fix: a check that reads
     Python source is a check on whichever copy the interpreter chose.
+
+94. **A plant cannot anchor on the file that holds the plant list, so two guards in this repository are
+    proven by demonstration rather than by a declared defect.** `scripts/run_mutation_suite.py` requires
+    its anchor to occur exactly once in the target file — that is finding 25's failure mode, an edit that
+    lands on nothing and is then counted as caught. A plant whose anchor is a line of that same file
+    therefore contains a second copy of the line it is looking for, so the count is always two and the case
+    is refused before it runs. One guard sits behind that wall: 
+    `test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated`, whose defect is dropping the
+    isolation argument in `Harness.uv` -- unlike the plant-count guard, which is planted through the
+    annotation in a *document* rather than through the list itself. Phase 34 showed the first one red the
+    first one red the only way left: edit the call to pass no environment, run the node, read
+    `AssertionError: a guard subprocess was spawned with no environment at all`, restore, run again. That is
+    a demonstration rather than an instrument, which means it is not re-run by CI, is not repeated when the
+    guard next changes, and can be forgotten. The structural answer would be to move the plant list out of
+    the file that interprets it -- `MUTATIONS` into a data module the harness loads -- and nothing here does
+    that yet, because it changes the file every future phase edits.

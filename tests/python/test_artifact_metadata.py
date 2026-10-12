@@ -23,6 +23,7 @@ from typing import Any
 
 import pytest
 import quantrisk
+import yaml
 from quantrisk.experiments.evidence import content_digest
 from quantrisk.experiments.metadata import (
     REPO_ROOT,
@@ -2784,3 +2785,54 @@ def test_the_performance_guards_are_not_vacuous() -> None:
     edited = doc.replace(block, stale)
     assert edited != doc, "the substitution did not land, so it proved nothing"
     assert block not in edited, "the sentence still carries the policed block after its edit"
+
+
+CI_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+
+
+def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
+    """A guard that reads commits is a claim about the checkout, and nothing checked the checkout.
+
+    Phase 33 gave the pytest lane its history and tags, which turned three skipping guards into
+    three checked ones. That made the workflow load-bearing in a new way: with the fetch settings
+    removed the guards do not fail, they *skip with a named reason*, and a green job is then the
+    colour of an absent test. The repository has met the other direction of the same divorce --
+    `docs/integrity_audit.md` finding 35 is a guard that derived a band from `git log`, saw one
+    revision on the depth-1 runner and reddened run `36550420085` -- but nothing tied a guard's
+    input set to the step that provides it.
+
+    So this reads the workflow as the structure it is. It is the first guard to: the only other
+    thing CI is compared against is one phrase about suite members, matched by regex. YAML folds,
+    comments and block sequences are exactly where a grep loses a step, and a check that silently
+    examines fewer jobs than the file contains would report this guard green while the lane it cares
+    about went unconfigured.
+    """
+    workflow = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
+    lanes = []
+    for name, job in sorted((workflow.get("jobs") or {}).items()):
+        steps = job.get("steps") or []
+        runs = [index for index, step in enumerate(steps) if "pytest" in str(step.get("run", ""))]
+        if runs:
+            lanes.append((name, steps, min(runs)))
+    assert lanes, "no CI job runs pytest, so this guard would certify an empty set"
+
+    for name, steps, first_run in lanes:
+        checks_out = [
+            step
+            for step in steps[:first_run]
+            if str(step.get("uses", "")).startswith("actions/checkout@")
+        ]
+        assert checks_out, (
+            f"the {name} job runs the guards before any checkout, so they can read no "
+            "history at all"
+        )
+        settings = checks_out[-1].get("with") or {}
+        depth = str(settings.get("fetch-depth", "1"))
+        assert depth == "0", (
+            f"the {name} job fetches depth {depth!r}, which silently vacates every guard that "
+            "reads commits: the ones needing the artifact's history and the ones needing its tags"
+        )
+        assert settings.get("fetch-tags") is True, (
+            f"the {name} job does not fetch tags, so the release-date and release-tag guards skip "
+            "there and the lane still passes"
+        )

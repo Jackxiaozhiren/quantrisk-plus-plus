@@ -45,16 +45,17 @@ dev = [
   # The order-five derivation runs in the gate, not only by hand: `scripts/derive_fifth_order_partials.py`
   # is the identity check behind matrix row 21's 8.7e-58 claim, and nothing executed it before.
   "sympy>=1.12",
+  "pyyaml>=6.0",
 ]
 
 [tool.scikit-build]
 cmake.version = ">=3.26"
 ninja.version = ">=1.11"
 wheel.packages = ["python/quantrisk"]
+wheel.cmake = true
 # Keeps the CMake tree between installs so a C++ edit only relinks instead of
 # re-fetching Catch2/pybind11 from scratch.
 build-dir = "build/wheel"
-wheel.cmake = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]

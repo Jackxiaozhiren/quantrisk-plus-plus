@@ -19,6 +19,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_PATH = REPO_ROOT / "scripts" / "run_mutation_suite.py"
 
@@ -297,4 +299,40 @@ def test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache(
     assert first != second, (
         "two guard invocations of one sweep share a bytecode prefix, which is the window the "
         "mutated run and the restored re-run both sit in"
+    )
+
+
+def test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The isolation has to be a property of the plumbing, not of one hand-written call.
+
+    `docs/limitations.md` #93 says the cache defect is the interpreter's, not this harness's, and
+    that is true of the mechanism. It is not an excuse: the harness reaches the interpreter through
+    exactly one function, so *every* guard step can be required to carry a fresh prefix. Phase 33's
+    in-test control proved the environment builder works; this proves nothing bypasses it, which is
+    the half a control cannot cover -- a later edit that passes `None` instead would keep that
+    control green.
+    """
+    seen: list[dict[str, str] | None] = []
+
+    def spy(command: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+        seen.append(kwargs.get("env"))
+        return subprocess.CompletedProcess(list(command or []), 0, "", "")
+
+    monkeypatch.setattr(harness.subprocess, "run", spy)
+    swept = harness.Harness(build_dir="build/dev")
+    for node in ("tests/python/a.py::test_one", "tests/python/b.py::test_two"):
+        assert swept.pytest(node) == 0
+
+    assert len(seen) == 2, "the guard steps did not both reach the one subprocess function"
+    prefixes = []
+    for environment in seen:
+        assert environment, "a guard subprocess was spawned with no environment at all"
+        prefix = environment.get(harness.BYTECODE_PREFIX)
+        assert prefix, "a guard subprocess runs without bytecode isolation"
+        prefixes.append(str(prefix))
+    assert len(set(prefixes)) == len(prefixes), (
+        f"two guard steps share {prefixes[0]}, which is the window the mutated run and its "
+        "restored re-run both sit in"
     )

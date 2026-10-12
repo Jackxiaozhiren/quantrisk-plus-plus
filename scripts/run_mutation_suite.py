@@ -170,7 +170,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 93 numbered entries",
+        anchor="carries 94 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -235,7 +235,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 436 tests collected offline",
+        anchor="# 438 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -394,7 +394,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 505 pytest tests with the validation",
+        anchor="and 507 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -526,7 +526,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 61/61 planted defects rejected",
+        anchor="# 62/62 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -668,7 +668,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 436 collected without them",
+        anchor="oracles installed, 438 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -793,7 +793,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 505 pytest tests with the `oracles` extra here",
+        anchor="# 507 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -893,6 +893,22 @@ MUTATIONS: tuple[Mutation, ...] = (
         ),
         claim="the record describes the render that is actually in the tree",
     ),
+    Mutation(
+        identifier="ci-lane-drops-the-history-its-guards-read",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor="          fetch-depth: 0",
+        replacement="          fetch-depth: 1",
+        # Phase 33 made the workflow load-bearing: with a depth-limited checkout the history- and
+        # tag-keyed guards do not fail there, they skip with a named reason, and the lane still
+        # prints success. The configuration it checks is correct today, so this plant is the only
+        # way to show the guard watches the file rather than restating it.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read"
+        ),
+        claim="the job that runs the guards fetches the history and tags they read",
+    ),
 )
 
 
@@ -942,6 +958,11 @@ def decide(
     return CAUGHT
 
 
+# The environment variable CPython reads its bytecode-cache location from. Named once so the
+# guard that polices it and the code that sets it cannot drift apart.
+BYTECODE_PREFIX = "PYTHONPYCACHEPREFIX"
+
+
 def isolation_environment(cache_dir: Path) -> dict[str, str]:
     """An environment whose bytecode cache cannot be shared with the repository.
 
@@ -956,7 +977,7 @@ def isolation_environment(cache_dir: Path) -> dict[str, str]:
     `Harness.next_environment`.
     """
     environment = os.environ.copy()
-    environment["PYTHONPYCACHEPREFIX"] = str(cache_dir)
+    environment[BYTECODE_PREFIX] = str(cache_dir)
     return environment
 
 
