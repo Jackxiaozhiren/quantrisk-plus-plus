@@ -102,8 +102,8 @@ those two runs into, registered as `docs/limitations.md` #94.
 | Producer | `uv run python scripts/build_report.py` | 6 sources, bundle `9d21b877d8ac…`, PDF `eff4cf0335ae…`, 1,005,777 bytes |
 | Evidence | `uv run python scripts/verify_evidence_manifest.py` | 0 missing, 0 unlisted — Evidence is intact |
 | Anchor census | one-pass enumeration of every declared plant against the file it names | 62 declared, 60 file-backed, 0 missing or non-unique |
-| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on the committed tree, logged to `build/mutation-sweep-34.log` | pending — the harness refuses a dirty target, so the verdict belongs to the commit that carries it and is recorded in the follow-up commit |
-| CI on the pushed record | `gh api …/commits/<sha>/check-runs` after the push | pending — not yet run at the time of writing |
+| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on `8760b5a`, logged to `build/mutation-sweep-34.log` | `62/62 planted defects were rejected by their guard.` exit 0, 62 lines of `ok caught`, no other status, and `git status --porcelain` empty afterwards |
+| CI on the pushed record | `gh api …/commits/<sha>/check-runs` after the push | pending — recorded in the follow-up commit, which is the only place its run id can come from |
 
 ## 6. Numerical validation
 
