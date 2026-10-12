@@ -42,10 +42,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import re
 import signal
 import subprocess
 import sys
+import tempfile
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -168,7 +170,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 92 numbered entries",
+        anchor="carries 93 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -233,7 +235,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 435 tests collected offline",
+        anchor="# 436 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -392,7 +394,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 504 pytest tests with the validation",
+        anchor="and 505 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -666,7 +668,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 435 collected without them",
+        anchor="oracles installed, 436 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -791,7 +793,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 504 pytest tests with the `oracles` extra here",
+        anchor="# 505 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -940,9 +942,32 @@ def decide(
     return CAUGHT
 
 
-def _run(command: Sequence[str], verbose: bool) -> subprocess.CompletedProcess[str]:
+def isolation_environment(cache_dir: Path) -> dict[str, str]:
+    """An environment whose bytecode cache cannot be shared with the repository.
+
+    A prose plant that edits a Python file without changing its length -- `32.6` to `99.9` -- leaves
+    the source size identical, and a restore inside the same clock second leaves the integer mtime
+    CPython keys its cache on identical too. The mutated module's `.pyc` is then still "valid" for
+    the restored file, so the step that re-runs the guard after the tree went clean again reads the
+    defect back out of `__pycache__` and reports a clean tree as unrestored. Phase 33 met that as a
+    false `tree-did-not-recover` on its own new plant. Redirecting the prefix per sweep means no
+    guard invocation can inherit another's bytecode.
+    """
+    environment = os.environ.copy()
+    environment["PYTHONPYCACHEPREFIX"] = str(cache_dir)
+    return environment
+
+
+def _run(
+    command: Sequence[str], verbose: bool, environment: dict[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
     completed = subprocess.run(
-        list(command), cwd=REPO_ROOT, capture_output=True, text=True, check=False
+        list(command),
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        env=environment,
     )
     if verbose:
         tail = (completed.stdout + completed.stderr).strip().splitlines()[-2:]
@@ -956,9 +981,11 @@ class Harness:
     def __init__(self, build_dir: str, verbose: bool = False) -> None:
         self.build_dir = build_dir
         self.verbose = verbose
+        self.cache_dir = Path(tempfile.mkdtemp(prefix="quantrisk-mutation-pycache-")) / "bytecode"
+        self.environment = isolation_environment(self.cache_dir)
 
     def uv(self, *arguments: str) -> subprocess.CompletedProcess[str]:
-        return _run(("uv", "run", "--frozen", *arguments), self.verbose)
+        return _run(("uv", "run", "--frozen", *arguments), self.verbose, self.environment)
 
     def build(self) -> bool:
         built = self.uv("cmake", "--build", self.build_dir, "--target", TEST_BINARY_TARGET)

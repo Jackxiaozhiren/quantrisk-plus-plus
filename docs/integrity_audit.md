@@ -1681,3 +1681,44 @@ is left alone as what it was: a record of the revision it names.
 `<number> <countable noun>` matcher reads neither -- measured as zero claims from that sentence -- because
 its noun list has no `%`, `spread`, `reading` or `re-freezing`. #92 was amended rather than deleted: the
 arithmetic now has an owner, the vocabulary still does not.
+
+## Addendum — Phase 33, a plant that restored the file but not the verdict (2026-10-12)
+
+**66. A same-length edit and a same-second restore are invisible to CPython's cache key, so a clean tree
+can be reported as unrestored.** The first sweep on the phase commit printed
+`60/61 planted defects were rejected by their guard.` and named
+`pinned-spread-constant-disagrees-with-the-history` with status `tree-did-not-recover`, while
+`git status --porcelain` was empty. Both were true: the harness had written the file back correctly, and
+the guard re-run afterwards still saw the mutation.
+
+(a) **The mechanism, and why this plant was the one to meet it.** CPython validates a `.pyc` against the
+source's *size and its mtime truncated to whole seconds*. The plant changes `32.6` to `99.9` — thirteen
+characters either way — and the restore lands in the same second as the mutation, so the cache entry
+written while the defect was in place remains "valid" for the restored file, and the re-run imports the
+mutated constants out of `tests/python/__pycache__/test_artifact_metadata.cpython-312-pytest-9.1.1.pyc`
+rather than the bytes on disk. The evidence is in the timestamps: the file on disk says
+`SPEEDUP_SPREADS = {"python": 32.6, …}`, the cache beside it was written at 13:19 during the mutated run,
+and deleting `__pycache__` makes the same node pass.
+
+(b) **Why the status is the right one and the verdict was still wrong.** `decide()` reads the guard's exit
+code, so a stale cache cannot manufacture `caught` — it manufactured the opposite, a false escape. A
+harness that reports a clean tree as broken is a harness whose verdicts stop being usable, and the failure
+was only visible because the sweep prints the whole table and the tree was checked afterwards.
+
+(c) **Fixed by giving each sweep its own cache directory, not by deleting caches after the fact.**
+`isolation_environment()` sets `PYTHONPYCACHEPREFIX` to a fresh per-run directory and every guard
+subprocess inherits it, so no invocation can read bytecode another wrote. Removing `__pycache__` between
+steps would have been the weaker answer: it depends on doing it everywhere, and it destroys the caches
+that make an ordinary test run fast.
+
+(d) **The new guard carries its own negative control, because a fix that is only asserted is a fix that is
+only claimed.** `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache` writes a module,
+imports it so a cache exists, performs a same-length edit with the mtime pinned back to the recorded
+second, and asserts in order that (i) an un-isolated re-run really does print the stale value — if that
+fails, the test says so instead of passing vacuously — and (ii) the harness's environment prints the fresh
+one. The control is the part that would silently rot if CPython's cache key ever changed.
+
+(e) **The residual is registered rather than argued away.** The isolation lives inside this harness; the
+property belongs to CPython, so any other route that restores a same-length file within one second — a
+hand restore from a backup, two processes editing the tree, a different tool's own plant step — can still
+read stale bytecode. `docs/limitations.md` #93 records that boundary.

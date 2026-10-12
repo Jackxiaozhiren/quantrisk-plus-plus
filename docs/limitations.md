@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 504 pytest tests with
-    the `oracles` extra installed, and the same tree collects 435 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 505 pytest tests with
+    the `oracles` extra installed, and the same tree collects 436 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -937,3 +937,18 @@ never removed just because a later phase shipped.
     inventory guard's noun list reads neither, because it matches `<number> <countable noun>` and has no
     `%`, `spread`, `reading` or `re-freezing`. Measured: 0 claims from that sentence reach the guard.
     What remains is therefore the vocabulary, not the arithmetic.
+
+93. **Cache isolation covers the falsification harness, not the interpreter's habit.** CPython decides
+    whether a `.pyc` is current from the source's size and its whole-second mtime, so a file edited to the
+    same length and restored within the same clock second is indistinguishable from a file that never
+    changed -- the mechanism `docs/integrity_audit.md` finding 66 records as a false sweep escape. The
+    harness no longer depends on that: every guard subprocess it spawns runs with `PYTHONPYCACHEPREFIX`
+    pointed at a directory created for that sweep, and
+    `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache` proves both halves, including
+    a control that must show the stale read happening before it credits the isolation. What stays outside
+    the closure is everything that is not this harness. A restore performed by another tool, a backup copy
+    brought back with its attributes, or two processes touching the same tree inside one second can still
+    make a clean file read as its previous contents, and no guard here sees that -- the caches are
+    gitignored, so no committed artifact records them and no CI lane can compare against them. The general
+    form of the fault is stated plainly because it is not this repository's to fix: a check that reads
+    Python source is a check on whichever copy the interpreter chose.

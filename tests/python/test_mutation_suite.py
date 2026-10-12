@@ -13,7 +13,9 @@ exercised against every way a cycle can lie.
 from __future__ import annotations
 
 import importlib.util
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -221,3 +223,69 @@ def test_a_command_line_that_counts_plants_counts_the_declared_ones() -> None:
             )
             checked += 1
     assert checked, "no command line annotates the plant count, so this guard checks nothing"
+
+
+def test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache(
+    tmp_path: Path,
+) -> None:
+    """Phase 33 produced a false verdict this way, and the control below reproduces it.
+
+    A prose plant edits a file and the sweep restores it. When the edit does not change the file's
+    length -- `32.6` to `99.9` is the case that happened -- and the restore lands in the same whole
+    second as the mutation, CPython's cache key (source mtime in seconds, source size) still matches
+    the `.pyc` written while the defect was in place. The guard then re-runs against clean bytes on
+    disk and reports the *restored* tree as still failing, which is how a sound plant came back as
+    `tree-did-not-recover` and the sweep printed 60/61 over a clean `git status`.
+
+    Two assertions, in the order that matters. The control first: without isolation the stale cache
+    is genuinely read, so a test that skipped this step could pass while proving nothing. Then the
+    harness's own environment: the guard subprocesses it spawns must not be able to inherit bytecode
+    from a previous invocation.
+    """
+    module = tmp_path / "policed_module.py"
+    module.write_text("VALUE = 32.6\n", encoding="utf-8")
+    read = ["-c", "import policed_module; print(policed_module.VALUE)"]
+
+    first = subprocess.run(
+        [sys.executable, *read],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert first.stdout.strip() == "32.6", first.stdout
+
+    stamp = int(module.stat().st_mtime)
+    size = module.stat().st_size
+    module.write_text("VALUE = 99.9\n", encoding="utf-8")
+    os.utime(module, (stamp, stamp))
+    assert module.stat().st_size == size and int(module.stat().st_mtime) == stamp, (
+        "the plant's edit and restore no longer look identical to a cache key, so the "
+        "control below would prove nothing"
+    )
+
+    shared = subprocess.run(
+        [sys.executable, *read],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+        env={key: value for key, value in os.environ.items() if key != "PYTHONPYCACHEPREFIX"},
+    )
+    assert shared.stdout.strip() == "32.6", (
+        "the stale cache was not read, so this test no longer reproduces the defect and the "
+        "isolation it polices is untested"
+    )
+
+    isolated = subprocess.run(
+        [sys.executable, *read],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+        env=harness.isolation_environment(tmp_path / "per-run-bytecode"),
+    )
+    assert isolated.stdout.strip() == "99.9", (
+        "the harness's environment still reads another invocation's bytecode, so a "
+        "same-length plant can be reported as an unrestored tree"
+    )
