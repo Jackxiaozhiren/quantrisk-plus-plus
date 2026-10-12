@@ -103,7 +103,8 @@ those two runs into, registered as `docs/limitations.md` #94.
 | Evidence | `uv run python scripts/verify_evidence_manifest.py` | 0 missing, 0 unlisted — Evidence is intact |
 | Anchor census | one-pass enumeration of every declared plant against the file it names | 62 declared, 60 file-backed, 0 missing or non-unique |
 | Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on `8760b5a`, logged to `build/mutation-sweep-34.log` | `62/62 planted defects were rejected by their guard.` exit 0, 62 lines of `ok caught`, no other status, and `git status --porcelain` empty afterwards |
-| CI on the pushed record | `gh api …/commits/<sha>/check-runs` after the push | pending — recorded in the follow-up commit, which is the only place its run id can come from |
+| CI on the pushed head | `gh api …/commits/891edd1/check-runs` after the push | run `38254160632`, all three jobs `completed/success` (SonarCloud `neutral`, as in every prior run) |
+| CI's own pytest summary | `gh api repos/…/actions/jobs/114827777586/logs`, read rather than inferred from the green | `437 passed, 5 skipped in 203.65s`; the five skips are the four oracle-gated modules plus `latexmk is not installed`. The lane now carries one skip the local run has never had: the Phase 33 history guard would have been a sixth skip had the fetch settings regressed, and it is not, which is the new guard's first evidence on the runner. `437 + 5 = 442 = 438 + 4` -- the pair the documents publish stays reconciled with the extra skip accounted for in `docs/reproducibility.md`, which already states the local figure as 438. |
 
 ## 6. Numerical validation
 
