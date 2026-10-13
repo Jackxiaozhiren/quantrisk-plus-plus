@@ -1841,3 +1841,33 @@ of the shape across the five inventoried documents -- including `twenty-two comm
 instance #92 registered and this phase did not close, because the first run of a spelled detector classifies
 sentence-openers and idioms as work. `docs/limitations.md` #95 carries that, and the symmetric cost of the
 exclusions: a label rule keyed on surrounding text can hide a claim as easily as excuse one.
+
+**70. The sweep's escape was not a bad plant; it was a guard that had stopped reading the sentence it
+polices.** `67/68 planted defects were rejected` on the first run of Phase 35's list, and the one that came
+back `guard-stayed-green` was `sheet-states-a-case-gap-the-collected-pair-does-not-give`: the plant put a 70
+where the sheet says `instead of the 69 cases they hold`, and the guard that compares that figure with the
+document's own pair of collected totals passed. Both readings were true. The file wraps the sentence as
+`... the 69 cases they` / `hold ...`; the guard's pattern was written with a literal space, so it found only
+the *other* occurrence -- two pages later, `rather than the 69 cases they hold` -- compared it with the
+headline pair, agreed, and reported green. The claim inventory meanwhile reads a whitespace-folded view of
+every document, so it had marked the wrapped span `owned` by a comparison that could not see it.
+
+(a) **The escape generalised into a second, older finding.** Checking every owned pattern for the same blind
+spot turned up `(\d+) tests under CTest` in `docs/reproducibility.md`: the file states its C++ total twice,
+Phase 27 recorded the second spelling precisely because only the first was compared, and a later edit had
+moved a line break inside it -- so the pattern had matched nothing since, while the guard stayed green because
+it asserted only that *some* of its patterns matched the file. Measured after the fix: the wrapped spelling
+mutated to 199 reddens `test_documents_that_count_the_cpp_tests_agree_with_the_build`, which it did not do
+before.
+
+(b) **The fix is a reading convention, not two patches.** `_folded_document()` now gives the four
+prose-counting guards -- Python test totals, CTest entries, Catch2 assertions, the limitation register -- the
+same folded text the inventory reads, and the CTest guard reports a listed spelling that matches nothing
+instead of passing over it. That makes the inventory's `owned` label mean what it says: a span is owned by a
+comparison that can reach it.
+
+(c) **And the boundary is registered rather than smeared over.** Other guards still search documents as
+written -- `PROSE_FIGURES` by substring, the band census by shape, the analysis-note figure guard by note --
+and folding those changes what they can match, so each needs its own before/after measurement.
+`docs/limitations.md` #96 carries that, with the two instances this finding turned up as the evidence that
+the class is real rather than theoretical.

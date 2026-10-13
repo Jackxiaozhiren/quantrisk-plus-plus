@@ -245,6 +245,18 @@ def _numbered_limitation_entries() -> int:
     return len(numbers)
 
 
+def _folded_document(relative: str) -> str:
+    """A document with its line breaks folded to single spaces.
+
+    Prose re-wraps and a claim is one statement, so a pattern written with a literal space is blind
+    to the occurrence the file happens to split. The claim inventory reads this view, and a spelling
+    it marks owned has to be a spelling its owner guard can actually see --
+    `docs/reproducibility.md` carried `204 tests under` / `CTest either way` unpoliced since a later
+    edit moved that break.
+    """
+    return " ".join((REPO_ROOT / relative).read_text(encoding="utf-8").split())
+
+
 def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> None:
     """A test count is the third number this repository restates in prose and gets stale.
 
@@ -285,7 +297,12 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
     offline_prose = r"[—-]\s*(\d+)\s+without them"
     documents = ("docs/interview_defense.md", "docs/limitations.md", "docs/reproducibility.md")
     for name in documents:
-        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        # Fold the document's line breaks before searching it. A claim is one statement and prose
+        # re-wraps it: `... the 69 cases they` / `hold ...` is invisible to a pattern written with a
+        # literal space, and the reading of `docs/reproducibility.md`'s C++ count had been silently
+        # unpoliced since a later edit moved that break (finding 70). The claim inventory reads the
+        # same folded view, so a span it calls owned is a span these comparisons actually see.
+        text = _folded_document(name)
         high = re.search(with_oracles, text)
         low = re.search(without_oracles, text)
         assert high and low, f"{name} does not state both Python test counts"
@@ -304,7 +321,7 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
         # ("the 69 cases they hold") and the right-hand half of its own provenance row
         # ("`v1.0.0`, 204 / 507 now"), and neither pattern above reaches either, so a re-freeze
         # that moves 507 would leave both behind beside a headline that had been synced.
-        case_gap = r"(?:instead of|rather than) the (\d+) cases they hold"
+        case_gap = r"(?:instead of|rather than) the (\d+) cases they\s+hold"
         now_pair = r"`v1\.0\.0`, \d+ / (\d+) now"
         for pattern, expected, label in (
             (
@@ -495,7 +512,7 @@ def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
         "docs/release_notes_v1.4.0.md": r"carries (\d+) numbered entries",
     }
     for name, expected in claims.items():
-        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        text = _folded_document(name)
         patterns = expected if isinstance(expected, list) else [expected]
         found = [value for pattern in patterns for value in re.findall(pattern, text)]
         assert found, f"{name} no longer states the limitation count in the expected form"
@@ -1040,7 +1057,12 @@ def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
     }
     for name, expected in claims.items():
         patterns = expected if isinstance(expected, list) else [expected]
-        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        text = _folded_document(name)
+        for pattern in patterns:
+            assert re.search(pattern, text), (
+                f"{name} no longer states the C++ test count as {pattern!r}, so that spelling "
+                f"is unpoliced while still sitting in this guard's list"
+            )
         found = [value for pattern in patterns for value in re.findall(pattern, text)]
         assert found, f"{name} no longer states the C++ test count"
         assert all(int(value) == total for value in found), (
@@ -1120,7 +1142,7 @@ def test_documents_that_count_the_cpp_assertions_count_the_binarys_own() -> None
         "paper/technical_report.tex": r"([\d{},]+) assertions in (\d+) Catch2 cases",
     }
     for name, patterns in claims.items():
-        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        text = _folded_document(name)
         groups = patterns if isinstance(patterns, list) else [patterns]
         for pattern in groups:
             found = re.findall(pattern, text)
@@ -1755,7 +1777,7 @@ _MARKDOWN_OWNED: dict[str, tuple[str, str]] = {
         "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
         "tests/python/test_artifact_metadata.py",
     ),
-    r"(?:instead of|rather than) the (\d+) cases they hold": (
+    r"(?:instead of|rather than) the (\d+) cases they\s+hold": (
         "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
         "tests/python/test_artifact_metadata.py",
     ),
@@ -2560,7 +2582,7 @@ def test_the_offline_test_count_is_measurable_before_the_runner() -> None:
     collected = int(probe["collected"])
 
     for name, patterns in _OFFLINE_CLAIMS.items():
-        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        text = _folded_document(name)
         for pattern in patterns:
             found = re.findall(pattern, text)
             assert found, f"{name} no longer states the offline count as {pattern!r}"

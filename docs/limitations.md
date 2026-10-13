@@ -1029,3 +1029,28 @@ never removed just because a later phase shipped.
     would each escape the inventory. Nothing here polices that. What does exist is the self-test's
     requirement that every word in `_LABEL_WORDS` fire on a real document -- it keeps the excuse list
     from growing, which limits the surface a writer can hide behind to one word today.
+
+96. **A pattern written with a literal space cannot read a claim the document splits across lines, and
+    four guards have been taught that; the rest of the corpus still reads raw text.** The falsification
+    sweep's one escape was `sheet-states-a-case-gap-the-collected-pair-does-not-give`: the guard compared
+    `the (\d+) cases they hold` against `docs/interview_defense.md`, the sheet wraps that sentence as
+    `... the 69 cases they` / `hold ...`, so the pattern saw only the twin occurrence two pages later,
+    agreed with itself, and stayed green over a planted 70. The same sweep led to the check that found a
+    second instance already dormant: `docs/reproducibility.md` states its C++ total twice, and the second
+    spelling -- `204 tests under` / `CTest either way` -- had been invisible to
+    `test_documents_that_count_the_cpp_tests_agree_with_the_build` since a later edit moved that line
+    break, because the guard asserted only that *some* of its patterns matched the file. Measured after the
+    fix: mutating the wrapped spelling to 199 reddens the guard, which it did not do before.
+
+    (a) What closed is a reading convention, not a patch: `_folded_document()` gives the count guards the
+    same whitespace-folded view the claim inventory already reads, so a span the inventory calls owned is a
+    span its owner can see, and the CTest guard now reports a listed spelling that matches nothing instead of
+    passing over it.
+
+    (b) What is still open is every guard that reads a document raw. `PROSE_FIGURES` asks whether a
+    formatted value occurs *in* a file, the band census matches `--band-shape--` against raw markdown, and
+    the analysis-note figure guard searches the note as written; each of them can lose a claim to a line
+    break the same way, and none of them is checked for it today. The reason it is registered rather than
+    fixed here is that folding changes what those guards can match -- a note whose figure sits at a line end
+    may also gain matches -- so each needs its own before/after measurement, which is how #95's spelled
+    detector was handled too.
