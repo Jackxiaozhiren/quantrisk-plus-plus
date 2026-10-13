@@ -244,10 +244,18 @@ def test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache(
     harness's own environment -- and specifically that *consecutive* invocations cannot share one,
     because a plant's mutated run and its restored re-run are two invocations of the same sweep,
     which is the window finding 66 measured.
+
+    A third assertion pins the control's premise rather than inheriting it: the first run must have
+    written its bytecode beside the module, because that is the file the control reads. An exported
+    prefix silently moved it elsewhere, and the control then failed three lines later blaming the
+    fixture for the caller's variable.
     """
     module = tmp_path / "policed_module.py"
     module.write_text("VALUE = 32.6\n", encoding="utf-8")
     read = ["-c", "import policed_module; print(policed_module.VALUE)"]
+
+    # Both runs must look for the cache in the same place, so the prefix is absent from both.
+    unisolated = {key: value for key, value in os.environ.items() if key != harness.BYTECODE_PREFIX}
 
     first = subprocess.run(
         [sys.executable, *read],
@@ -255,8 +263,13 @@ def test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache(
         capture_output=True,
         text=True,
         check=True,
+        env=unisolated,
     )
     assert first.stdout.strip() == "32.6", first.stdout
+    assert any((tmp_path / "__pycache__").glob("policed_module*.pyc")), (
+        "the first run wrote no bytecode beside the module, so the control below has no stale "
+        "cache to read and this test cannot reproduce the defect"
+    )
 
     stamp = int(module.stat().st_mtime)
     size = module.stat().st_size
@@ -273,7 +286,7 @@ def test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache(
         capture_output=True,
         text=True,
         check=True,
-        env={key: value for key, value in os.environ.items() if key != "PYTHONPYCACHEPREFIX"},
+        env=unisolated,
     )
     assert shared.stdout.strip() == "32.6", (
         "the stale cache was not read, so this test no longer reproduces the defect and the "
