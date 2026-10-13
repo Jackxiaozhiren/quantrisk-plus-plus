@@ -1767,3 +1767,77 @@ node, read `a guard subprocess was spawned with no environment at all`, restore,
 forgotten, while the structural fix — moving `MUTATIONS` into a data module the harness loads — would change
 the file every future phase edits. The CI guard has no such problem and does have a declared plant,
 `ci-lane-drops-the-history-its-guards-read`, which is what proves (a) reads the file instead of restating it.
+
+## Addendum — Phase 35, two documents outside the inventory, and an extractor with five judgements in it (2026-10-13)
+
+**68. `docs/limitations.md` #89 predicted the shape of what extending the inventory would find, and all
+three cases arrived.** The rule that asks every `<number> <countable noun>` in a document to be owned,
+cited or declared read three files. `docs/interview_defense.md` and `docs/validation_matrix.md` -- the
+rehearsal sheet and the validation matrix, the two documents that restate the most producers -- were
+policed per figure only, so a restatement was caught exactly when it happened to match a spelling a guard
+already reads.
+
+(a) **The stale twin was inside one file, six lines apart.** The sheet's prose said
+`docs/limitations.md` has all 94 numbered entries while its own claim-provenance table said
+`(84 entries)`. Both figures were in the same document, one policed by
+`test_documents_that_count_the_limitations_agree_with_the_file` and the other by nothing, and the register
+had passed 84 three phases earlier. The parenthetical spelling is now in that guard's per-file list, and a
+plant (`sheet-provenance-cell-quotes-a-stale-register-count`) puts the 84 back to prove the comparison runs.
+
+(b) **A quoted rate is owned by its phrase, not by its digits.** The sheet prints three current readings
+and one superseded one in the same sentence: `39,040,079 paths/s in the C++ core versus 3,787,943 paths/s
+in an equivalent pure-Python loop ... between the 21,130,162 paths/s a loaded desktop has shown`. The
+existing owner compared the artifact's formatted values with the document as substrings, which certifies
+that the digits appear somewhere, not that each belongs to the implementation named beside it -- and a
+number shape like `\d[\d,]{5,} paths/s` would have handed ownership to the stale reading too. The guard now
+also reads three `_RATE_PHRASES` (anchor-phrase patterns whose captured number must equal the artifact's
+`paths_per_second_mean`), and the superseded rate is declared instead, with the reason naming it as history.
+
+(c) **The sheet's opening sentence was false, and nothing could have noticed.** "22 questions in four
+groups, reproduced here one for one and in order. Nothing added, nothing dropped." The brief's section asks
+22 questions (25 bullets, three of which give an answer's shape rather than asking anything) and the sheet
+carries 28 headings: six questions the project raised itself. So the count gained a producer --
+`test_the_rehearsal_sheet_reproduces_the_question_set_it_cites` reads `PROJECT_SPEC.md`, requires the
+group names and the first 22 titles to match in order, requires the Q labels to be consecutive, and refuses
+an added title that repeats a briefed one -- and the clause was rewritten to say what is true. Measured
+before writing: 22 briefed, 28 headings, the first 22 equal title for title.
+
+(d) **And one restatement was the difference of two others.** "four oracle-gated modules collapse into four
+skip records instead of the 69 cases they hold" states the collected pair as a subtraction; the guard that
+owns that pair now checks the subtraction against the document's own headline figures, in both environments,
+because the difference is 69 whether the run has the oracles or not.
+
+**69. The inventory's extractor had five judgements built into it and no reader.** Phase 27 wrote the
+`<number> <noun>` rule, Phase 29 added two exclusions and a comment explaining them, and this phase widened
+the noun list -- `spread`, `runs`, `reading`, `re-freezing`, `path` -- and allowed a `%` between a number and
+its noun, which is the shape #92 recorded as invisible (`32.6% spread`). Widening made the exclusions
+load-bearing rather than cosmetic: with `oracles` in the list and `%` allowed, the matrix's `cvxpy 1.9.3 are
+oracles` became a claim about 9.3 oracles, and `quintic factor 1.000, quartic radius` a claim about 000
+radii.
+
+(a) **Three exclusions, each measured on this repository's own text before it was written.** A number that
+begins inside a longer dotted token is a slice of it (measured: the exclusion removes exactly those two
+claims across seven documents and no other); a number that closes a namespace name is a label, not a
+quantity (measured: `Phase` fires four times, and `Finding`, `Limitation`, `Section`, `Figure`, `Table` and
+bare `Q` fire zero times, so only `Phase` is in the list); and `runs` is a countable noun while `run` is a
+verb in this repository's command blocks (measured: the singular's only hit in the corpus is
+`200000 uv run`).
+
+(b) **The widened rule retired one declaration, and the guard said so.** `pinned in the Phase 2 test
+files` had been exempted as "names files by phase rather than counting them"; once the label rule refused
+the claim outright, the exemption covered nothing and the report's decorative-anchor assertion reported it.
+Deleting it is the proof that the exemption list is coupled to the extractor rather than accreted around it.
+
+(c) **`test_the_claim_extractor_reads_percentages_and_refuses_labels` reads all five judgements**, each
+twice: the shipped rule must refuse a claim the looser reconstruction finds, and must keep the claims it is
+supposed to see. Two of the three exclusions also carry a declared plant
+(`extractor-accepts-a-phase-label-as-a-countable-claim`,
+`extractor-slices-a-number-out-of-a-dotted-token`), because a filter that is only tested by re-running the
+filter's own logic in the same file would pass on a vacuous loop.
+
+(d) **What the rule still cannot see is registered, not assumed away.** Its pattern is numeric, so a count
+written in words is invisible: a probe with the repository's own `SPELLED_NUMBERS` table finds 112 phrases
+of the shape across the five inventoried documents -- including `twenty-two committed re-freezings`, the
+instance #92 registered and this phase did not close, because the first run of a spelled detector classifies
+sentence-openers and idioms as work. `docs/limitations.md` #95 carries that, and the symmetric cost of the
+exclusions: a label rule keyed on surrounding text can hide a claim as easily as excuse one.

@@ -137,7 +137,7 @@ The four that carry a first reading:
 |---|---|---|
 | Black-Scholes vs QuantLib, 2,464 price comparisons | 1.0e-10 rel | 3.46e-11 rel, 1.49e-13 abs |
 | CRR convergence order | slope −1 | −0.99405 ± 0.00313 (1.90 SE) |
-| Monte Carlo z, pooled over 160 runs | mean 0, std 1 | mean ≤ 0.05, std 0.92–1.01 |
+| Monte Carlo z, pooled over 160 runs (`benchmarks/quantlib/results/monte_carlo_validation.json`) | mean 0, std 1 | mean ≤ 0.05, std 0.92–1.01 |
 | Six solvers vs cvxpy + PyPortfolioOpt, 75 problems | per-problem 1e-11 to 1e-5 | objective 4.48e-9, bound violation exactly 0 |
 
 Three rows in the full matrix are the ones to interrogate, because they are where a weaker
@@ -256,7 +256,7 @@ touches a socket, by blocking `socket.socket` and running anyway.
 
 ## Limitations
 
-[`docs/limitations.md`](docs/limitations.md) carries 94 numbered entries grouped by phase.
+[`docs/limitations.md`](docs/limitations.md) carries 95 numbered entries grouped by phase.
 That file is the honest boundary of this project, and three entries matter more than the rest:
 
 - **The risk layer's instrumented validation is synthetic; only one arm is real.** Six of the

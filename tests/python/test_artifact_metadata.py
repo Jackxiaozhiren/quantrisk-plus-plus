@@ -299,6 +299,27 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
                 assert value == expected, (
                     f"{name} states {label} as {value} while its headline says {expected}"
                 )
+        # Two more restatements of the same pair, both found by the inventory rather than by
+        # reading. The rehearsal sheet gives the difference the four oracle-gated modules make
+        # ("the 69 cases they hold") and the right-hand half of its own provenance row
+        # ("`v1.0.0`, 204 / 507 now"), and neither pattern above reaches either, so a re-freeze
+        # that moves 507 would leave both behind beside a headline that had been synced.
+        case_gap = r"(?:instead of|rather than) the (\d+) cases they hold"
+        now_pair = r"`v1\.0\.0`, \d+ / (\d+) now"
+        for pattern, expected, label in (
+            (
+                case_gap,
+                int(high.group(1)) - int(low.group(1)),
+                "the cases the four oracle-gated modules hold",
+            ),
+            (now_pair, high.group(1), "the with-oracles half of the provenance row"),
+        ):
+            for value in re.findall(pattern, text):
+                assert int(value) == int(expected), (
+                    f"{name} states {label} as {value}, while its own headline pair is "
+                    f"{high.group(1)} with the oracles and {low.group(1)} without "
+                    f"(the difference is {expected})"
+                )
         documented = int(high.group(1)) if _oracles_present() else int(low.group(1))
         assert documented == total, (
             f"{name} says {documented} for this environment; pytest collects {total}. "
@@ -453,7 +474,13 @@ def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
     claims = {
         "README.md": r"carries (\d+) numbered entries",
         "docs/validation_matrix.md": r"The (\d+) numbered limitations",
-        "docs/interview_defense.md": r"has all (\d+)\s*\n?numbered entries",
+        "docs/interview_defense.md": [
+            r"has all (\d+)\s*\n?numbered entries",
+            # The sheet's own claim-provenance table repeats the register's size as a parenthetical,
+            # and it was three phases behind the sentence above it: the prose read 94 while the cell
+            # read 84. Found by the inventory, not by reading (limitation #89's prediction).
+            r"docs/limitations\.md` \((\d+) entries\)",
+        ],
         "paper/technical_report.tex": [
             r"(?:contains|holds) (\d+) numbered entries",
             # The abstract states the same register's size in its own words, four pages from the
@@ -993,7 +1020,12 @@ def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
 
     claims = {
         "README.md": r"# (\d+) C\+\+ tests",
-        "docs/interview_defense.md": r"(\d+) C\+\+ tests under CTest",
+        "docs/interview_defense.md": [
+            r"(\d+) C\+\+ tests under CTest",
+            # The same total in the slash pair of the sheet's provenance row, "`v1.0.0`, 204 / 507
+            # now", which the spelling above does not reach. Found by the inventory (#89).
+            r"`v1\.0\.0`, (\d+) / \d+ now",
+        ],
         "docs/reproducibility.md": [
             r"# (\d+) C\+\+ tests",
             # The same file states the count a second way, three paragraphs below the command that
@@ -1103,6 +1135,93 @@ def test_documents_that_count_the_cpp_assertions_count_the_binarys_own() -> None
 
 
 # ---------------------------------------------------------------------------------------------
+# The rehearsal brief's question set, counted from `PROJECT_SPEC.md`.
+#
+# #89 predicted exactly this finding: a document outside the inventory restates a producer in its
+# own spelling and nothing asks it. The sheet's opening line says its question set is "22 questions
+# in four groups, reproduced here one for one and in order. Nothing added, nothing dropped." The
+# brief's section carries 22 question bullets -- 25 bullets, three of which give the answer's shape
+# rather than asking anything -- and the sheet has 28 `### Q` headings, because six were added as
+# the work itself raised them. So the count needed a producer and the last clause was simply wrong;
+# both are fixed here, in that order.
+
+BRIEF_SECTION = "最终面试准备材料"
+
+
+def _brief_question_groups() -> list[tuple[str, list[str]]]:
+    """The brief's question set as (group, titles), in the order `PROJECT_SPEC.md` writes them.
+
+    A bullet is a question when it ends in a question mark. That is the rule the section itself
+    follows: its three non-question bullets -- `30秒版本`, `2分钟版本`,
+    `deeper technical version` -- describe the shape of an answer, and every other bullet asks
+    something.
+    """
+    text = (REPO_ROOT / "PROJECT_SPEC.md").read_text(encoding="utf-8")
+    start = text.index(f"## {BRIEF_SECTION}")
+    following = re.search(r"^## ", text[start + 3 :], re.M)
+    end = start + 3 + following.start() if following else len(text)
+    section = text[start + 3 : end]
+    groups: list[tuple[str, list[str]]] = []
+    for line in section.splitlines():
+        if line.startswith("### "):
+            groups.append((line[4:].strip(), []))
+        elif line.startswith("- ") and line.rstrip().endswith("?") and groups:
+            groups[-1][1].append(line[2:].strip())
+    return groups
+
+
+def test_the_rehearsal_sheet_reproduces_the_question_set_it_cites() -> None:
+    """The sheet counts a question set, claims to reproduce it in order, and adds six of its own.
+
+    Three claims in one sentence, none of them read by anything: the size of the brief's set, that
+    the sheet reproduces it "one for one and in order", and that nothing was added. Counting is the
+    cheap half; the order is the half that matters for a rehearsal sheet, because the numbering is
+    how the answers get cited from the brief during an interview.
+
+    The sixth, unclaimed property here is that the sheet's *added* questions never reuse a briefed
+    title: a duplicate would let the same question carry two answers, one policed by this guard and
+    one not.
+    """
+    groups = _brief_question_groups()
+    briefed = [title for _, titles in groups for title in titles]
+    assert briefed, "PROJECT_SPEC.md states no question bullets, so this guard checks nothing"
+
+    text = (REPO_ROOT / "docs/interview_defense.md").read_text(encoding="utf-8")
+    stated = re.search(r"(\d+) questions in four groups", text)
+    assert stated, "the sheet no longer states the size of the question set it reproduces"
+    assert int(stated.group(1)) == len(briefed), (
+        f"the sheet cites {stated.group(1)} questions; PROJECT_SPEC.md's {BRIEF_SECTION} "
+        f"section asks {len(briefed)}"
+    )
+    assert len(groups) == 4, f"the brief has {len(groups)} groups, not the four the sheet cites"
+
+    sheet_groups = re.findall(r"^## \d+\. (.+)$", text, re.M)
+    assert sheet_groups[: len(groups)] == [name for name, _ in groups], (
+        f"the sheet's groups {sheet_groups[: len(groups)]} are not the brief's "
+        f"{[name for name, _ in groups]}"
+    )
+
+    headings = re.findall(r"^### (Q(\d+))\. (.+)$", text, re.M)
+    numbers = [int(row[1]) for row in headings]
+    assert numbers == list(range(1, len(numbers) + 1)), (
+        f"the sheet's Q labels are not consecutive from 1: {numbers}"
+    )
+    titles = [row[2].strip() for row in headings]
+    assert titles[: len(briefed)] == briefed, (
+        "the sheet does not reproduce the brief's questions one for one and in order:\n"
+        + "\n".join(
+            f"  Q{i + 1}: {title!r} where the brief asks {expected!r}"
+            for i, (title, expected) in enumerate(zip(titles, briefed, strict=False))
+            if title != expected
+        )
+    )
+    added = titles[len(briefed) :]
+    assert added, "the sheet adds no questions, so its 'plus six' clause needs rewriting"
+    overlap = sorted(set(added) & set(briefed))
+    assert not overlap, f"an added question repeats a briefed title: {overlap}"
+
+
+# ---------------------------------------------------------------------------------------------
 # The report's countable claims: every one is either compared with a producer by a named guard,
 # or declared here with the reason it is a statement about the past or about a figure whose
 # producer is the artifact named in the same sentence.
@@ -1156,21 +1275,67 @@ _REPORT_NOUNS = (
     r"|modules|routes|rays|rungs|columns|books|releases|scenarios|fields|identities|steps|series"
     r"|windows|benchmarks|fixtures|oracles|versions|tags|presets|packages|observations|sides"
     r"|claims|models|criteria|radii|radius|moves|factors|orders|edges|candidates|ladders"
-    r"|stencils)"
+    r"|stencils|spreads?|runs|readings?|re-freezings?|paths?)"
 )
 # A number that is part of a word is not a claim: `(?<![A-Za-z\d])` keeps `Catch2 cases` and
 # `sklearn2011}. Oracle versions` out of the inventory, which a bare lookbehind on digits let in.
-# Two more exclusions, from reading markdown with this rule (Phase 29): a `#` before a number is a
-# cross-reference (`docs/limitations.md` #77), not a quantity, and a number followed directly by a
-# period is a list marker or the end of a sentence. Without them the inventory called
-# "#77. Load moves the timings" and "on 5 of 5. Two books sit at the grid edge" countable claims --
-# an extractor that invents work for itself, and trains the reader to distrust the list it prints.
+# Three more exclusions, each from reading a real document with this rule (Phase 29 for the first
+# two, Phase 35 for the third):
+#   `#` -- a cross-reference (`docs/limitations.md` #77) is not a quantity;
+#   a bare trailing period -- a list marker or the end of a sentence;
+#   `.` -- a number that starts inside a longer dotted token is a slice of it, not a claim.
+# Without them the inventory called "#77. Load moves the timings" and "on 5 of 5. Two books sit at
+# the grid edge" countable claims, and read `cvxpy 1.9.3 are oracles` as 9.3 oracles and
+# `quintic factor 1.000, quartic radius` as 000 radii -- an extractor that invents work for itself,
+# and trains the reader to distrust the list it prints. Measured on this repository's seven
+# documents, the `.` exclusion removes those two and no other claim.
 # The number group keeps `{,}` (LaTeX thousands separators) and allows a decimal tail, so a bare
 # trailing period is the only shape excluded.
+# A percentage is a spelling of the quantity rather than a new claim kind: `32.6% spread` is a
+# countable claim about spreads and the rule missed it because `%` is neither a digit nor a letter.
+# Allowing `%` there does not sweep in `99 % VaR` or `100% volatility`, which have no countable
+# noun after them and stay outside the inventory.
+# `run` is deliberately absent while `runs` is present: in this corpus the singular fires only on
+# `uv run` inside a command block, which the extractor would then report as paths-per-second
+# claims (measured: `200000 uv run`), while `67 runs` and `160 runs` are real.
 _REPORT_CLAIM = re.compile(
-    r"(?<![A-Za-z\d#])(\d[\d{},]*(?:\.\d+)?)\s+(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b",
+    r"(?<![A-Za-z\d#.])"
+    r"(\d[\d{},]*(?:\.\d+)?)\s*%?\s+(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b",
     re.I,
 )
+
+# `the Phase 1 consistency test` is one test named by the phase that wrote it, and `pinned in the
+# Phase 2 test files` names files rather than counting them, so the number after the word is a
+# label. One word, measured: across the five inventoried documents `Finding`, `Limitation`,
+# `Section`, `Figure`, `Table` and bare `Q` produce no claim at all -- their numbers are either
+# reached by `#` or sit before a noun that is not in the list -- so adding them here would be an
+# exemption with nothing to exempt. The extractor self-test requires every entry to fire.
+_LABEL_WORDS = ("Phase",)
+_LABEL_BEFORE = re.compile(
+    r"(?:^|\W)(?:" + "|".join(_LABEL_WORDS) + r")\s*$",
+    re.I,
+)
+
+
+def _is_labelled(flat: str, at: int) -> bool:
+    """Whether this number is the last element of a name rather than a quantity.
+
+    Only the words before the number can matter and the pattern is anchored at its end, so the
+    window is the last 60 characters rather than the prefix: scanning the prefix instead made this
+    quadratic in the document's length, which the extractor self-test measured at 30 seconds.
+    """
+    return bool(_LABEL_BEFORE.search(flat[max(0, at - 60) : at]))
+
+
+def _extract_claims(flat: str) -> list[re.Match[str]]:
+    """Every countable claim the rule finds, with the label shapes removed.
+
+    Both inventories go through here, so a document cannot be read by a looser rule than the report.
+    """
+    return [
+        match for match in _REPORT_CLAIM.finditer(flat) if not _is_labelled(flat, match.start(1))
+    ]
+
 
 # Pattern -> (owning test, file that holds it). Each pattern is required to occur verbatim in that
 # file, so this list cannot claim an ownership some guard does not implement.
@@ -1247,12 +1412,23 @@ _REPORT_DECLARED: dict[str, str] = {
         "the Heston step-refinement probe's rung configuration, recorded in the model card the "
         "paragraph cites; no frozen artifact carries a Heston result (docs/limitations.md #86)"
     ),
+    "and variance value over": (
+        "the Heston positivity probe's path configuration, in the same card as the two entries "
+        "above and for the same reason (docs/limitations.md #86)"
+    ),
+    "Monte Carlo stress VaR at": (
+        "the path count of the stress sampler's cross-check, recorded in the phase report the "
+        "sentence cites; the frozen stress artifact carries the ranking and multipliers, not the "
+        "Monte Carlo configuration"
+    ),
     "Level-1 identities": "names a validation level, not a count of anything",
     "16 later cases had never": (
         "quoted from the incident this report recounts, in that printout's own words"
     ),
     "exposed 6 failing cases": "quoted from the incident this report recounts",
-    "pinned in the Phase 2 test files": "names files by phase rather than counting them",
+    # `pinned in the Phase 2 test files` was declared here until this phase's label rule made the
+    # extractor refuse it: `Phase 2` names the files rather than counting them, so the claim the
+    # exemption existed for is no longer a claim. The guard reported the entry as exempting nothing.
     "310 pytest tests with no release tag": (
         "end-of-Phase-9 baseline, recorded in the phase report it cites"
     ),
@@ -1351,7 +1527,7 @@ def test_every_countable_claim_in_the_report_is_owned_or_declared() -> None:
     """
     masked, flat = _tex_inventory_text()
     assert len(masked) == len(flat), "the inventory lost its offset alignment"
-    claims = list(_REPORT_CLAIM.finditer(flat))
+    claims = _extract_claims(flat)
     assert claims, "the extractor matches nothing in the report, so this guard proves nothing"
 
     owned: list[tuple[int, int]] = []
@@ -1446,7 +1622,13 @@ def test_every_countable_claim_in_the_report_is_owned_or_declared() -> None:
 # inventory that requires every number to be *accounted for* can. That is the difference between the
 # count guards this repository already has and this one.
 
-_MARKDOWN_INVENTORY = ("README.md", "docs/reproducibility.md")
+_MARKDOWN_INVENTORY = (
+    "README.md",
+    "docs/reproducibility.md",
+    "docs/interview_defense.md",
+    "docs/validation_matrix.md",
+)
+
 
 _MD_BACKTICK = re.compile(r"`([^`\n]+)`")
 
@@ -1534,6 +1716,73 @@ _MARKDOWN_OWNED: dict[str, tuple[str, str]] = {
         "test_the_offline_test_count_is_measurable_before_the_runner",
         "tests/python/test_artifact_metadata.py",
     ),
+    # The rehearsal sheet's and the matrix's own spellings, added with the inventory extension
+    # (#89). Each is the literal pattern the named guard searches with, which is what the verbatim
+    # check below enforces: the sheet does not become exempt because a guard *could* read it.
+    r"collects (\d+) tests without": (
+        "test_the_offline_test_count_is_measurable_before_the_runner",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"python -m pytest -q\s+# (\d+) tests collected offline": (
+        "test_the_offline_test_count_is_measurable_before_the_runner",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"has all (\d+)\s*\n?numbered entries": (
+        "test_documents_that_count_the_limitations_agree_with_the_file",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"docs/limitations\.md` \((\d+) entries\)": (
+        "test_documents_that_count_the_limitations_agree_with_the_file",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+) C\+\+ tests under CTest": (
+        "test_documents_that_count_the_cpp_tests_agree_with_the_build",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"`v1\.0\.0`, (\d+) / \d+ now": (
+        "test_documents_that_count_the_cpp_tests_agree_with_the_build",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"CTest \(([\d,]+) assertions in (\d+) Catch2": (
+        "test_documents_that_count_the_cpp_assertions_count_the_binarys_own",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"Today that is \d+ C\+\+ tests \(([\d,]+) assertions in (\d+) cases\)": (
+        "test_documents_that_count_the_cpp_assertions_count_the_binarys_own",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+)\s+Python tests with the validation oracles installed": (
+        "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(?:instead of|rather than) the (\d+) cases they hold": (
+        "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"`v1\.0\.0`, \d+ / (\d+) now": (
+        "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+) questions in four groups": (
+        "test_the_rehearsal_sheet_reproduces_the_question_set_it_cites",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d[\d,]{5,}) paths/s in the C\+\+ core": (
+        "test_documents_quote_the_performance_figures_the_artifact_actually_holds",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"versus (\d[\d,]{5,}) paths/s in an equivalent pure-Python loop": (
+        "test_documents_quote_the_performance_figures_the_artifact_actually_holds",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"vectorised NumPy (\d[\d,]{5,}) paths/s": (
+        "test_documents_quote_the_performance_figures_the_artifact_actually_holds",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"\(([0-9.]+)e-(\d+) worst relative over (\d+) markets": (
+        "test_the_derivation_command_agrees_at_the_precision_floor",
+        "tests/python/test_fifth_order_partials.py",
+    ),
 }
 
 # Literal phrases whose numbers are not living quantities, and why. Checked twice, as the report's
@@ -1545,6 +1794,46 @@ _MARKDOWN_DECLARED: dict[str, str] = {
         "a dated end-to-end verification of one suite re-run in one fresh clone, recorded in the "
         "paragraph that names that clone; the freeze carries the artifacts, not the tally of a run "
         "whose tree was discarded"
+    ),
+    # Added with the two documents this phase brings in (#89). Each is load-bearing: the inventory
+    # re-runs its own classification with one anchor withheld and reports an exemption that then
+    # exempts nothing.
+    "on this machine, between the": (
+        "a rate from an earlier committed run, quoted as the low of the range the sentence is "
+        "describing; the sheet's current readings are owned, this one is history"
+    ),
+    "memory-light; at the": (
+        "another committed reading, in the sentence that says its own workload arithmetic is "
+        "arithmetic"
+    ),
+    "of the same loop": (
+        "a workload size chosen to make the division legible, not a measurement of anything"
+    ),
+    "moved one mutation's anchor from": (
+        "quoted from the incident the answer recounts, in the printout's own words -- the same "
+        "class as the report's `16 later cases had never`"
+    ),
+    "let the long-dated book publish a": (
+        "the radius a superseded definition of the measure published, named in the sentence that "
+        "refutes it"
+    ),
+    "tests at `v1.0.0`": (
+        "the suite's size at that tag, stated by docs/release_notes_v1.0.0.md, which is the "
+        "revision the row is about"
+    ),
+    "corner gaps 1.819909 / 0.456807 /": (
+        "the third corner gap rounded to two decimals, printed beside the value it rounds"
+    ),
+    "the equality control is bit-identity over": (
+        "the move count of the equality control, the same figure the report declares and the "
+        "artifact's control block publishes"
+    ),
+    "relative, best of": (
+        "the step sizes the Python route tries, a configuration of the test the row names"
+    ),
+    "A CRR lattice at": (
+        "the lattice depth docs/model_cards/crr_binomial.md states beside its measured error; "
+        "the frozen artifact carries the slopes and final errors, not the depth"
     ),
 }
 
@@ -1581,7 +1870,7 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
 
     classified: dict[str, tuple[list, list, object]] = {}
     for name, (masked, flat) in documents.items():
-        claims = list(_REPORT_CLAIM.finditer(flat))
+        claims = _extract_claims(flat)
         assert claims, f"{name} yields no countable claims, so this guard proves nothing about it"
 
         owned: list[tuple[int, int]] = []
@@ -1636,6 +1925,89 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
         )
     ]
     assert not decorative, f"declared exemptions that exempt nothing: {decorative}"
+
+
+def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
+    """Four shapes of the extractor were stated in comments, and a comment cannot fail.
+
+    Phase 29 wrote the `#` and trailing-period exclusions into the rule and recorded why in the
+    block above it; nothing asked whether they fire. This phase added three more shapes -- a `%`
+    allowance, a dotted-token exclusion and a label filter -- and one deletion (`run` stays out of
+    the noun list while `runs` is in it), so the rule now has five judgements embedded in it and no
+    reader. Each property below is two-sided on this repository's own documents: the rule must find
+    what it is meant to find and refuse what it is meant to refuse, and the refusal has to be
+    demonstrated by the looser rule finding something the shipped one does not.
+    """
+    corpus = {
+        "paper/technical_report.tex": _tex_inventory_text()[1],
+        **{name: _markdown_inventory_text(name)[1] for name in _MARKDOWN_INVENTORY},
+    }
+
+    # 1. The label filter fires, and no word sits in its list without firing.
+    assert _LABEL_WORDS, "the label list is empty, so property 1 below cannot fail"
+    refused: list[tuple[str, str]] = []
+    for word in _LABEL_WORDS:
+        marker = re.compile(rf"(?:^|\W){word}\s*$", re.I)
+        rows = [
+            (name, match.group(0))
+            for name, flat in corpus.items()
+            for match in _REPORT_CLAIM.finditer(flat)
+            if marker.search(flat[max(0, match.start(1) - 60) : match.start(1)])
+        ]
+        assert rows, f"`{word}` labels nothing in the inventoried documents; drop it from the list"
+        refused += rows
+    for name, text in refused:
+        assert text not in {m.group(0) for m in _extract_claims(corpus[name])}, (
+            f"the label filter did not refuse {text!r}, so property 1 checks nothing"
+        )
+
+    # 2. A percentage written beside its noun is a claim about that noun.
+    assert r"\s*%?\s+" in _REPORT_CLAIM.pattern, "the `%` allowance is no longer in the rule"
+    unpercent = re.compile(_REPORT_CLAIM.pattern.replace(r"\s*%?\s+", r"\s+"), re.I)
+    percentages = [
+        (name, match.group(0))
+        for name, flat in corpus.items()
+        for match in _REPORT_CLAIM.finditer(flat)
+        if "%" in match.group(0)
+    ]
+    assert percentages, "no inventoried document states a percentage beside a countable noun"
+    for name, text in percentages:
+        assert not any(hit.group(0) == text for hit in unpercent.finditer(corpus[name])), (
+            f"{text!r} was already a claim without the `%` allowance, so it proves nothing"
+        )
+
+    # 3. A number that begins inside a longer dotted token is a slice of it, not a quantity -- the
+    #    shape that read `cvxpy 1.9.3 are oracles` as 9.3 oracles.
+    undotted = re.compile(
+        _REPORT_CLAIM.pattern.replace("(?<![A-Za-z\\d#.])", "(?<![A-Za-z\\d#])"), re.I
+    )
+    assert undotted.pattern != _REPORT_CLAIM.pattern, "the reconstruction did not loosen the rule"
+    sliced = [
+        (name, match.group(0))
+        for name, flat in corpus.items()
+        for match in undotted.finditer(flat)
+        if match.group(0) not in {m.group(0) for m in _extract_claims(flat)}
+        and not _is_labelled(flat, match.start(1))
+    ]
+    assert sliced, "the dotted-token exclusion removes nothing from this corpus, so it is untested"
+
+    # 4. `runs` is a countable noun and `run` is a verb in this repository's own command blocks.
+    assert "|runs|" in _REPORT_CLAIM.pattern, "the noun list no longer carries `runs` on its own"
+    singular = re.compile(_REPORT_CLAIM.pattern.replace("|runs|", "|run|"), re.I)
+    commands = [
+        match.group(0)
+        for flat in corpus.values()
+        for match in singular.finditer(flat)
+        if match.group(0) not in {m.group(0) for m in _extract_claims(flat)}
+    ]
+    assert commands, (
+        "no `uv run` shape survives the singular noun, so the exclusion of `run` is unmeasured"
+    )
+    assert any(
+        match.group(0).endswith("runs")
+        for flat in corpus.values()
+        for match in _extract_claims(flat)
+    ), "the plural earns nothing either, so the noun list has accreted"
 
 
 def _repository_release_tags() -> list[str]:
@@ -2432,6 +2804,17 @@ PROSE_FIGURES = {
     ),
 }
 
+# The rehearsal sheet quotes the artifact's three rates in running prose, where a formatted
+# substring proves only that the digits appear *somewhere* in the file. These phrases bind each
+# number to the implementation named beside it, and the claim inventory reads exactly these
+# patterns -- so `21,130,162 paths/s a loaded desktop has shown`, a superseded reading, cannot
+# borrow the current value's ownership.
+_RATE_PHRASES = {
+    r"(\d[\d,]{5,}) paths/s in the C\+\+ core": "cpp",
+    r"versus (\d[\d,]{5,}) paths/s in an equivalent pure-Python loop": "python",
+    r"vectorised NumPy (\d[\d,]{5,}) paths/s": "numpy",
+}
+
 # Each policed document names the spreads it is required to state. `docs/findings.md` and
 # `docs/portfolio_audit.md` make a NumPy-only claim and are not obliged to print the Python spread;
 # everything else carries both. The census guard below stops this dict shrinking silently.
@@ -2594,6 +2977,14 @@ def test_documents_quote_the_performance_figures_the_artifact_actually_holds() -
                 f"{name} does not carry {expected!r}, which is what "
                 f"{SPEED_ARTIFACT.relative_to(REPO_ROOT)} measures"
             )
+
+    sheet = (REPO_ROOT / "docs/interview_defense.md").read_text(encoding="utf-8")
+    for pattern, side in _RATE_PHRASES.items():
+        found = re.findall(pattern, sheet)
+        assert found == [figures[f"pps_{side}"]], (
+            f"the sheet's {pattern!r} carries {found} where the artifact measures "
+            f"{figures[f'pps_{side}']} paths/s for {side}"
+        )
 
 
 def test_the_documented_speedup_ranges_contain_the_current_measurement() -> None:

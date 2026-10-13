@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 507 pytest tests with
-    the `oracles` extra installed, and the same tree collects 438 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 509 pytest tests with
+    the `oracles` extra installed, and the same tree collects 440 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -853,6 +853,22 @@ never removed just because a later phase shipped.
     dated figures, so the value would sit in a per-entry reason list, which should be built against
     real reds rather than by bulk exemption.
 
+    **Closed 2026-10-13 by Phase 35, and the entry's prediction was exact.** Both documents are now in
+    `_MARKDOWN_INVENTORY`, and reading them with the rule found three live defects on the first pass,
+    none of which any per-figure owner could have seen. (a) The sheet's claim-provenance table said
+    `docs/limitations.md` (84 entries)` three phases after the register passed 84, while the prose six
+    lines above it said 94 -- the stale twin, in the same file. (b) The sheet's rates in running prose
+    (`3,787,943 paths/s`) were policed by one spelling and not by the one actually used, and the same
+    sentence quotes a *superseded* rate beside the current one, which is why the new owners read phrases
+    (`paths/s in an equivalent pure-Python loop`) rather than number shapes. (c) The entry said the
+    value would sit in a per-entry reason list "built against real reds": it was, ten anchors, each
+    reported decorative by the guard if it exempts nothing, and one of them was -- the first version of
+    the rate exclusion exempted a claim its neighbour already covered. `docs/validation_matrix.md`
+    needed no exemption for its densest row: the identity grid in it was already read by
+    `test_the_derivation_command_agrees_at_the_precision_floor`, and the inventory's owned list had
+    never been told. What the extension did *not* close is #95: the rule still reads digits, so a count
+    written in words is invisible to it.
+
 90. **The committed report PDF has no freshness owner, so it can quote digits its own source no
     longer states.** `paper/technical_report.pdf` is generated from `paper/technical_report.tex` and is
     one of the four assets every release attaches. The tex's numeric sentences are each derived or
@@ -938,6 +954,20 @@ never removed just because a later phase shipped.
     `%`, `spread`, `reading` or `re-freezing`. Measured: 0 claims from that sentence reach the guard.
     What remains is therefore the vocabulary, not the arithmetic.
 
+    **Amended 2026-10-13 by Phase 35 — the second half is closed for digits, and #95 records the part
+    that is not.** The noun list gained `spread`, `run`(plural only), `reading`, `re-freezing` and
+    `path`, and the rule now allows a `%` between a number and its noun, which is the shape the entry
+    could not see: `32.6% spread` is a countable claim about spreads, and the sentence that explains the
+    24.6 %/30.3 % alternatives is now inventoried like the rest. Two precision exclusions came with it,
+    because the widened list made them matter: a number that begins inside a longer dotted token is a
+    slice of it (`cvxpy 1.9.3 are oracles` read as 9.3 oracles, `quintic factor 1.000, quartic radius`
+    as 000 radii), and a number that closes a namespace name is a label (`the Phase 1 consistency test`
+    is one test, and `pinned in the Phase 2 test files` names files). The report's declared list lost one
+    entry to the label rule -- the exemption became unnecessary when the claim stopped being a claim --
+    and the extractor now has a self-test that requires every one of those five judgements to fire on
+    this repository's own documents, with a plant on each of the two new ones. `run` stayed out while
+    `runs` came in, measured: the singular fires only on `uv run` in a command block.
+
 93. **Cache isolation covers the falsification harness, not the interpreter's habit.** CPython decides
     whether a `.pyc` is current from the source's size and its whole-second mtime, so a file edited to the
     same length and restored within the same clock second is indistinguishable from a file that never
@@ -976,3 +1006,26 @@ never removed just because a later phase shipped.
     guard next changes, and can be forgotten. The structural answer would be to move the plant list out of
     the file that interprets it -- `MUTATIONS` into a data module the harness loads -- and nothing here does
     that yet, because it changes the file every future phase edits.
+
+95. **The claim inventory reads digits, so a count written in words is invisible to it, and its two
+    exclusion rules can be used to hide a claim as easily as to excuse one.**
+    `_REPORT_CLAIM` matches a numeric token, so the shape is `142 rows` and not `one hundred and
+    forty-two rows` -- which is fine, because prose does not write counts that way. What prose *does*
+    write is the small spoken count: a probe over the five inventoried documents, using the
+    repository's own `SPELLED_NUMBERS` table and the widened noun list, finds 112 phrases of that shape
+    before any judgement of which are claims -- `twenty-two committed re-freezings` (the exact instance
+    #92 registered and Phase 35 did not close), `twenty-six rows`, `four correctness benchmarks`,
+    `nineteen members`, `three coverage tests`. Several of those are already owned, per figure, by a
+    guard that reads the spelled form (`test_documents_that_count_the_suite_members_agree_with_the_registry`
+    resolves `nineteen` through the registry); none of them is *inventoried*, so a spelled restatement in
+    an owned document still needs a reader to notice it. The cheaper half of the fix is to give the
+    extractor a spelled alternative and let `SPELLED_NUMBERS` decide what counts as a number; the reason
+    it has not been done is that the 112 include sentence-openers (`Three scenarios`, `Nine release tags`)
+    and idioms (`one test` inside `no more than one test`), so the first run would classify noise as work
+    -- which is the failure mode the `#` and trailing-period exclusions were written for, and the reason
+    the detector has to be re-validated when its question widens rather than assumed to transfer.
+    Second half, stated because it is a cost and not a defect: the label and dotted-token exclusions are
+    keyed on the text *around* a number, so `the Phase 507 Python tests` and `v1.9.3 are oracles here`
+    would each escape the inventory. Nothing here polices that. What does exist is the self-test's
+    requirement that every word in `_LABEL_WORDS` fire on a real document -- it keeps the excuse list
+    from growing, which limits the surface a writer can hide behind to one word today.

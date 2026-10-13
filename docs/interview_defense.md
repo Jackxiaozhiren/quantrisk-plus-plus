@@ -1,10 +1,11 @@
 # Interview defense — self-test sheet
 
-Date: 2026-09-27, state line refreshed 2026-10-12 · Repository state: **Phases 0–34 shipped,
+Date: 2026-09-27, state line refreshed 2026-10-13 · Repository state: **Phases 0–35 shipped,
 `quantrisk` 1.8.0, released as the tag `v1.8.0` — the release that carries Phases 23–29** — the full
 surface this sheet describes is implemented, validated and frozen in `evidence/manifest.json`.
 Question set: `PROJECT_SPEC.md`, section 最终面试准备材料 — 22 questions in four groups,
-reproduced here one for one and in order. Nothing added, nothing dropped.
+reproduced here one for one and in order as Q1–Q22, plus six this project's own work raised
+after the sheet was first written (Q23–Q28). Nothing of the specified set is dropped.
 
 **What this file is for.** It is a rehearsal sheet, not a script. Every number and every
 "we did X because Y" below is traceable to a source file or a committed artifact; the last
@@ -29,7 +30,7 @@ Python facades and the three-command CLI.
 **What is genuinely not here** — and this is the list to reach for under pressure, not a list
 of unbuilt phases: no expected-return model, no term structure, no Heston Greeks or smile
 calibration, no multi-period rebalancing, no short positions or leverage, no reverse stress
-testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 94
+testing, and no re-pricing inside the stress layer. `docs/limitations.md` has all 95
 numbered entries; `docs/validation_matrix.md` marks two components `partially validated` and
 says why.
 
@@ -42,7 +43,7 @@ it cannot do is answer the questions that needed a known truth — those are rec
 `refusals` inside the artifact rather than proxied.
 
 Current suite as measured at HEAD: 204 C++ tests under CTest (548,368 assertions in 203 Catch2
-cases), 507 pytest tests with the `oracles` extra and the same tree collects 438 tests without
+cases), 509 pytest tests with the `oracles` extra and the same tree collects 440 tests without
 it — the runner printed `284 passed, 4 skipped` at the 353-test commit, and the guard checks this
 revision's figure on the runner rather than trusting arithmetic here. 19/19 benchmark-suite members executed, `quantrisk validate` 7/7. The gap is structural, not a quality
 difference: four oracle-gated modules collapse into four skip records instead of the 69 cases they
@@ -404,8 +405,8 @@ rather than replaced.
 existed. L1: analytic identities and limits — parity, `u·d = 1`, `d₂ = d₁ − σ√T`, degenerate
 edges, the no-early-exercise theorem. L2: a live independent oracle — QuantLib 1.43 and SciPy,
 never pasted. L3: statistical behaviour — convergence rate, interval coverage, measured
-variance reduction. Today that is 204 C++ tests (548,368 assertions in 203 cases) and 507
-Python tests with the validation oracles installed — 438 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
+variance reduction. Today that is 204 C++ tests (548,368 assertions in 203 cases) and 509
+Python tests with the validation oracles installed — 440 without them, because four oracle-gated modules then skip as four records rather than the 69 cases they hold. Every published number has a committed artifact, and a manifest hashes them.
 
 **2 min.** Each level catches a different class of error, which is why all three are run. L1
 catches structural mistakes: a sign error breaks put-call parity on every grid point. L2 catches
@@ -417,8 +418,10 @@ installed SWIG bindings, so the artifact records `quantlib_mc_engine_used: false
 and the independent yardsticks that *are* used are QuantLib's analytic price (the exact limit)
 plus a NumPy/PCG64 simulation.
 
-**Deeper.** L2 for Black-Scholes: 18,816 rows over 7 maturities × 11 strikes × 4 volatilities ×
-2 rates × 2 dividend yields, both option types, plus all five Greeks (2,464 price comparisons) —
+**Deeper.** L2 for Black-Scholes
+(`benchmarks/quantlib/results/pricing_vs_quantlib.json`): 18,816 rows over 7 maturities ×
+11 strikes × 4 volatilities × 2 rates × 2 dividend yields, both option types, plus all five
+Greeks (2,464 price comparisons) —
 worst absolute errors: price 1.49e-13, delta 7.97e-15, gamma 1.90e-14, vega 1.75e-13, theta
 5.12e-13, rho 5.12e-13; worst relative above the recorded floors (1e-4 price, 1e-6 Greek): price
 3.46e-11, rho 1.07e-07. A second oracle path with no QuantLib anywhere: independent
@@ -1027,8 +1030,8 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 ```bash
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 204 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
-  .venv/bin/python -m pytest -q                                          # 438 tests collected offline
-uv run python scripts/run_mutation_suite.py                            # 62/62 planted defects rejected
+  .venv/bin/python -m pytest -q                                          # 440 tests collected offline
+uv run python scripts/run_mutation_suite.py                            # 68/68 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
 uv run python experiments/variance_reduction/run.py
@@ -1039,8 +1042,8 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 
 | Claim in this file | Source to check |
 |---|---|
-| What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (84 entries) |
-| 190 C++ / 330 Python tests at `v1.0.0`, 204 / 507 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
+| What exists, and what is deliberately not claimed | `docs/project_scope.md` §9 status table; `docs/validation_matrix.md`; `docs/limitations.md` (95 entries) |
+| 190 C++ / 330 Python tests at `v1.0.0`, 204 / 509 now; 53/112 at Phase 2; 31/41 at Phase 1 | `docs/phase_reports/phase-03-monte-carlo.md` §5; `phase-02-deterministic-pricing.md` §5; `phase-01-engineering-foundation.md` §5 |
 | BS worst abs 1.49e-13 / rel 3.46e-11; Greeks abs 7.97e-15 … 5.12e-13; rel rho 1.07e-07; 18,816 rows; floors 1e-4 / 1e-6; oracle config (AnalyticEuropeanEngine, Actual365Fixed, day → `days/365`) | `benchmarks/quantlib/results/pricing_vs_quantlib.json` |
 | Put-call parity worst residual 8.00e-15; worst analytic-vs-FD delta 1.17e-4 | `experiments/pricing_validation/results/summary.json` (`worst_*` keys) |
 | CRR slopes −0.99405 / −1.00544 / −0.99244 / −0.999674 with SEs; relative errors at N = 3200 | `experiments/pricing_validation/results/summary.json` (`crr_convergence_slope`, `final_lattice_relative_error`) |

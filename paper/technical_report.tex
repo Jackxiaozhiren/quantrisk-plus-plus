@@ -74,7 +74,7 @@ price comparisons, fitted Monte Carlo convergence slopes of $-0.61$ to $-0.51$ a
 theoretical $-0.5$, a Kupiec test with $5.05\%$ empirical size at a $5\%$ nominal level,
 and portfolio solvers agreeing with two independent reference solver stacks to
 $2.4\times 10^{-12}$ in weights on the quadratic problems. Sections
-\ref{sec:limitations}--\ref{sec:reproducibility} report what was not established: 94
+\ref{sec:limitations}--\ref{sec:reproducibility} report what was not established: 95
 recorded limitations, the fact that every figure in this report is computed from synthetic
 data-generating processes authored by the same person who wrote the code, that no number
 here describes realised markets, and that reproducibility is per platform rather than
@@ -146,14 +146,14 @@ the refusal Phase 12 recorded into a measured result, and Phase 14 the verificat
 to state without an owner. Nine release tags exist, \code{v1.0.0},
 \code{v1.1.0}, \code{v1.2.0}, \code{v1.3.0}, \code{v1.4.0}, \code{v1.5.0}, \code{v1.6.0},
 \code{v1.7.0} and \code{v1.8.0}, each with the report, the evidence manifest and the suite results attached. The suite is 204 CTest entries and
-548{,}368 assertions in 203 Catch2 cases on the C++ side, and 507 pytest tests with the validation
-oracles installed, 438 collected without them (\src{docs/limitations.md}, item 63, explains why one
+548{,}368 assertions in 203 Catch2 cases on the C++ side, and 509 pytest tests with the validation
+oracles installed, 440 collected without them (\src{docs/limitations.md}, item 63, explains why one
 command gives two numbers); 19 benchmark-suite members execute under
 \code{--require-all}, and the frozen manifest hashes 95 artifacts with nothing changed, missing or
 unlisted (\src{evidence/manifest.json}). The \emph{end-of-Phase-9} baseline, for contrast, was 190
 CTest entries and 310 pytest tests with no release tag and no suite at all
 (\src{docs/phase_reports/phase-09-research-api.md}). The limitations
-register contains 94 numbered entries (\src{docs/limitations.md}).
+register contains 95 numbered entries (\src{docs/limitations.md}).
 
 Two design decisions shape everything that follows, and both are stated in the repository
 before the corresponding code exists.
@@ -911,7 +911,8 @@ on data nobody generated it realised 2.048\,\% against 1\,\% nominal with an int
 the nominal rate, while historical simulation at 1.365\,\% covers it. \textbf{The coverage tests do
 not discriminate on this sample}: Kupiec $p = 0.160$, Christoffersen independence $0.287$,
 conditional coverage $0.211$ --- none rejects, and a runs test gives $z = -1.17$ (67 runs against
-70.33 expected), the right sign with no power. The machinery was shown to reject 55.4\,\% of
+70.33 expected, \src{experiments/real_data_risk_study/results/real_data_risk_study.json}), the
+right sign with no power. The machinery was shown to reject 55.4\,\% of
 clustered synthetic series, so this is evidence about the sample, not against the tests, and it is
 published rather than dropped. \textbf{The truth-free version of the bootstrap question agrees}:
 the moving-block standard error is 1.072$\times$ the iid one, a mild 7\,\% understatement
@@ -1879,7 +1880,7 @@ stress artifacts are byte-identical between executions
 \label{sec:limitations}
 % ===========================================================================
 
-\src{docs/limitations.md} holds 94 numbered entries, grouped by the phase that introduced them,
+\src{docs/limitations.md} holds 95 numbered entries, grouped by the phase that introduced them,
 with the rule that entries are never removed because a later phase shipped. This section
 summarises them faithfully; the file remains the authority.
 

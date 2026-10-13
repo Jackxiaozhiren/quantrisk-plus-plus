@@ -170,7 +170,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 94 numbered entries",
+        anchor="carries 95 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -235,7 +235,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 438 tests collected offline",
+        anchor="# 440 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -394,7 +394,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 507 pytest tests with the validation",
+        anchor="and 509 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -526,7 +526,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 62/62 planted defects rejected",
+        anchor="# 68/68 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -668,7 +668,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 438 collected without them",
+        anchor="oracles installed, 440 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -793,7 +793,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 507 pytest tests with the `oracles` extra here",
+        anchor="# 509 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -908,6 +908,98 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read"
         ),
         claim="the job that runs the guards fetches the history and tags they read",
+    ),
+    Mutation(
+        identifier="sheet-restates-the-question-set-at-the-wrong-size",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="22 questions in four groups",
+        replacement="24 questions in four groups",
+        # The rehearsal sheet's opening line counts a set that lives in another file, and nothing
+        # read either until this phase. The plant is the cheapest way to show the guard compares
+        # the count with `PROJECT_SPEC.md` rather than with the sheet's own heading tally.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_rehearsal_sheet_reproduces_the_question_set_it_cites"
+        ),
+        claim="the question set the sheet cites is the size the brief states",
+    ),
+    Mutation(
+        identifier="sheet-provenance-cell-quotes-a-stale-register-count",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="`docs/limitations.md` (95 entries)",
+        replacement="`docs/limitations.md` (84 entries)",
+        # The defect this phase actually found: the sheet's prose said 94 while its own
+        # claim-provenance table said 84, three phases behind, and the guard that owns the register
+        # count read only the prose spelling. The plant re-opens the cell's spelling.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_limitations_agree_with_the_file"
+        ),
+        claim="every spelling of the register count, the table's parenthetical too, is the file's",
+    ),
+    Mutation(
+        identifier="sheet-quotes-a-path-rate-the-artifact-does-not-measure",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="versus 3,787,943 paths/s in an equivalent pure-Python loop",
+        replacement="versus 3,787,944 paths/s in an equivalent pure-Python loop",
+        # The sheet states three rates in running prose beside the current band, and a superseded
+        # fourth beside the words that say it is history. Proving the phrase patterns distinguish
+        # them is what keeps `21,130,162 paths/s a loaded desktop has shown` from being certified
+        # by the reading next to it.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_quote_the_performance_figures_the_artifact_actually_holds"
+        ),
+        claim="each rate the sheet prints in running prose is the artifact's own measurement",
+    ),
+    Mutation(
+        identifier="sheet-states-a-case-gap-the-collected-pair-does-not-give",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="instead of the 69 cases they",
+        replacement="instead of the 70 cases they",
+        # "four oracle-gated modules collapse into four skip records instead of the 69 cases they
+        # hold" is the two collected totals spoken as a difference, in a document outside the
+        # inventory. Nothing compared the difference with the pair above it.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
+        ),
+        claim="the cases the gated modules hold is the sheet's own pair of totals subtracted",
+    ),
+    Mutation(
+        identifier="extractor-accepts-a-phase-label-as-a-countable-claim",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_LABEL_WORDS = ("Phase",)',
+        replacement="_LABEL_WORDS: tuple[str, ...] = ()",
+        # The label filter is an exclusion, and an exclusion's red is a document the inventory
+        # invents work for: with the list empty, `pinned in the Phase 2 test files` becomes a claim
+        # about two files again and the report's declared list no longer covers it. The self-test
+        # also refuses an empty list, so the filter cannot be deleted into vacuity.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_extractor_reads_percentages_and_refuses_labels"
+        ),
+        claim="a number that closes a namespace name is not a quantity the inventory asks about",
+    ),
+    Mutation(
+        identifier="extractor-slices-a-number-out-of-a-dotted-token",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='r"(?<![A-Za-z\\d#.])"',
+        replacement='r"(?<![A-Za-z\\d#])"',
+        # The exclusion added when the matrix's `cvxpy 1.9.3 are oracles` was read as 9.3 oracles.
+        # Loosening the lookbehind does not raise; it silently hands the inventory a version number
+        # and a slice of `1.000`, which is how an extractor teaches a reader to ignore its list.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
+        ),
+        claim="a claim's number starts a token rather than continuing one",
     ),
 )
 

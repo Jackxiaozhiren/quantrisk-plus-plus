@@ -75,7 +75,8 @@ watching a number is marked *(measured)*.
 ## Five rows that need the prose to be honest
 
 **The rho tolerance is not one number.** `test_pricing_vs_quantlib.py` asserts `1e-8`
-relative on five curated cases and passes. The benchmark sweeps 18,816 rows including
+relative on five curated cases and passes. The benchmark
+(`benchmarks/quantlib/results/pricing_vs_quantlib.json`) sweeps 18,816 rows including
 negative rates and 100% volatility, where rho passes through zero: an absolute error of
 `5.12e-13` on a rho of `4.8e-6` is a relative error of `1.07e-7`, which is a larger *number*
 and a smaller *problem* than the same relative error on a rho of 50. That is why the
@@ -130,7 +131,7 @@ order without the size would read as "expect ~800 of error" where the defensible
   over the runs this repository has committed — that is, slower than a vectorised NumPy path at
   200k paths on every one of them. The ratios move by more than 10% between runs, so no single
   figure from that file should be quoted as if it were a constant.
-- **The 94 numbered limitations in `docs/limitations.md` are the complete list of what is
+- **The 95 numbered limitations in `docs/limitations.md` are the complete list of what is
   not claimed.** Where a row above says "weaker" or "partially", it points into that file.
 
 ## Regenerating
