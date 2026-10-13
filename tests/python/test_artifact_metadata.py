@@ -2349,19 +2349,16 @@ def _speed_band_printers(paths: list[Path]) -> dict[str, set[tuple[float, float]
 def _candidate_band_documents() -> list[Path]:
     """Every tracked document that could hold a living band claim.
 
-    That is the README, `docs/**.md`, and the technical report.
-
-    Enumerated from the tree rather than listed, because the whole point of the census is that a
-    document nobody thought to list is where the stale spread lived. The two exempt families are
-    excluded here and required to be load-bearing by the guard.
+    That is the README, the technical report and `docs/**.md` -- all of it. Enumerated from the tree
+    rather than listed, because the whole point of the census is that a document nobody thought to
+    list is where the stale spread lived. Nothing is exempted by path any more: the two families
+    that used to be (`docs/phase_reports/`, `docs/release_bodies/`) are named file by file in the
+    two dated lists, so a new report that prints a band has to be looked at rather than waved
+    through by the directory it happens to sit in.
     """
     files = [REPO_ROOT / "README.md", REPO_ROOT / "paper" / "technical_report.tex"]
     files += sorted((REPO_ROOT / "docs").rglob("*.md"))
-    return [
-        path
-        for path in files
-        if path.is_file() and not str(path.relative_to(REPO_ROOT)).startswith(BAND_EXEMPT_FAMILIES)
-    ]
+    return [path for path in files if path.is_file()]
 
 
 def test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated() -> None:
@@ -2388,19 +2385,25 @@ def test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated(
     ratios "remain inside the pinned history range". The report was corrected in place, being living
     prose; the release note received a dated amendment, being a record of its own tag.
 
-    The rule is therefore two-sided, and its reach is `_band_pairs`: a spread only counts when both
-    of its edges carry the multiplication sign, so a document writing "between 0.42 and 0.51" is
-    invisible here. That spelling is real -- the report used it for its NumPy band -- and rewriting
-    it to `$0.42\times$--$0.51\times$` is part of this phase's fix rather than a style choice,
-    because the anchored form is the one a guard can read. A declaration must stay load-bearing, so
-    a dated record ever brought up to date has to join the policed set; an exempt family with no
-    printer in it is removed rather than kept as a shrug; and the census shares `_band_pairs` with
-    the membership test so the two cannot disagree about what a printed pair is.
+    The rule is therefore two-sided, and its reach is `_band_pairs`: a spread counts when both of
+    its edges carry the multiplication sign, or when a dash or a spoken lead joins two bare
+    decimals. The second half is Phase 36's addition -- the report used to write "between
+    $0.42\times$ and $0.51\times$", which the anchored form reads, and nothing in the tree wrote the
+    band without its unit at all, which it now also reads. Measured: the loose shapes fire 44 times
+    over 80 documents and none of those pairs is a policed band's, so this widening changes no
+    verdict today; it closes the door a document could leave by deleting two characters, and the
+    plant (`living-document-drops-the-multiplication-unit`) is what proves the new shape is not
+    decoration. A declaration has to stay load-bearing in both of its kinds -- a dated record ever
+    brought up to date stops qualifying as superseded and has to join the policed set, and a record
+    exempted because it states *today's* band stops being exempt the moment the band moves. And the
+    census shares `_band_pairs` with the membership test so the two cannot disagree about what a
+    printed pair is.
     """
     printers = _speed_band_printers(_candidate_band_documents())
     assert printers, "no document prints a speedup band, so this census would prove nothing"
 
-    unaccounted = sorted(set(printers) - set(RANGE_DOCUMENTS) - set(DATED_BAND_RECORDS))
+    declared = set(DATED_BAND_RECORDS) | set(TAGGED_BAND_RECORDS)
+    unaccounted = sorted(set(printers) - set(RANGE_DOCUMENTS) - declared)
     assert not unaccounted, (
         "these documents state a speedup spread that nothing owns and nothing declares dated: "
         f"{unaccounted}; either add them to RANGE_DOCUMENTS with the spreads they claim, or "
@@ -2419,11 +2422,20 @@ def test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated(
             "living claim belongs in RANGE_DOCUMENTS"
         )
 
-    for family in BAND_EXEMPT_FAMILIES:
-        members = _speed_band_printers(sorted((REPO_ROOT / family).rglob("*.md")))
-        assert members, (
-            f"the exempt family {family} holds no document printing a speedup spread; the "
-            "exemption outlived its purpose and should be deleted"
+    # The other dated kind: a record whose band happens to be today's, so there is nothing stale to
+    # hold the exemption up. Its exemption is therefore self-terminating -- the first re-freeze that
+    # moves the band turns it into a superseded record, and this is the assertion that says so. A
+    # A file cannot sit in both lists: one asks for a non-current pair and the other forbids it, so
+    # an overlap would let a record choose whichever property it already satisfies.
+    for name, reason in TAGGED_BAND_RECORDS.items():
+        assert reason.strip(), f"{name} is declared as a record of today's band without a reason"
+        assert name not in DATED_BAND_RECORDS, f"{name} is declared both superseded and current"
+        assert name in printers, (
+            f"{name} is declared as printing the current band but prints no speedup spread"
+        )
+        assert printers[name] <= current, (
+            f"{name} prints {sorted(printers[name] - current)}, which is no longer the band "
+            f"the tree carries ({reason}); move it to DATED_BAND_RECORDS with its revision"
         )
 
 
@@ -2870,11 +2882,60 @@ DATED_BAND_RECORDS: dict[str, str] = {
         "§9 carries one row per phase, and the Phase 28 row's `0.42×`–`0.57×` is what that phase's "
         "re-freeze moved the committed band to"
     ),
+    # Named file by file from Phase 36. These nine were exempted by path prefix -- the two families
+    # `docs/phase_reports/` and `docs/release_bodies/` -- so the census never read them and a report
+    # writing a band in the present tense was invisible. Each reason states the revision the file
+    # records, and the guard requires it to still print a pair that is NOT today's band: a dated
+    # record brought up to date stops qualifying here and joins the policed set instead.
+    "docs/phase_reports/phase-14-verification-debt.md": (
+        "records the run whose committed band was `7.77×`–`8.70×`, beside the `0.42×`–`0.51×` "
+        "of its own date and the gap it found"
+    ),
+    "docs/phase_reports/phase-18-five-book-radius.md": (
+        "the five-book phase's band reading, `7.77×`–`8.70×`, before two re-freezings widened it"
+    ),
+    "docs/phase_reports/phase-22-v1.7.0.md": (
+        "states the band as `v1.7.0` shipped it, which is the revision this report is about"
+    ),
+    "docs/phase_reports/phase-28-sixth-book.md": (
+        "records `7.77×`–`8.88×`, the band the sixth book's re-freeze produced before Phase 30"
+    ),
+    "docs/phase_reports/phase-32-band-census-and-release-date.md": (
+        "quotes the superseded `0.42×`–`0.48×` and `7.77×`–`8.70×` as the bands the census "
+        "it records found stale, and the raw `7.774`–`10.306` edges it chose to round"
+    ),
+    "docs/release_bodies/v1.7.0-body-before-2026-10-06.md": (
+        "a superseded draft of the `v1.7.0` asset body, kept as the revision history of a "
+        "published release note; its band predates the next re-freeze"
+    ),
+    "docs/release_bodies/v1.7.0-body-before-2026-10-07.md": (
+        "the second superseded `v1.7.0` body draft, same reason; neither is the tagged asset"
+    ),
+    # The first document the renamed census caught was the phase that renamed it: this report
+    # quotes the planted and the superseded bands while discussing the rule, so it prints a
+    # spread. The honest disposition of a dated record printing a superseded spread is to be
+    # declared -- not reworded until the guard stops seeing it.
+    "docs/phase_reports/phase-36-band-census-without-its-unit.md": (
+        "quotes planted and superseded spellings while describing the census that had to "
+        "declare this file"
+    ),
 }
 
-# Families exempt wholesale because every file in them is a dated record. The census asserts each
-# family still contains a printer, so an exemption cannot outlive its purpose.
-BAND_EXEMPT_FAMILIES = ("docs/phase_reports/", "docs/release_bodies/")
+# Dated records that state TODAY's band, and are exempt from tracking it only while they do.
+#
+# These two are the release's own documents, written at the revision whose artifact produced the
+# current band, so nothing in them is stale yet -- and the point of listing them is that the status
+# is self-terminating: the moment the band moves, the guard below reports them as printing a pair
+# that is no longer today's and they belong in `DATED_BAND_RECORDS`, with a reason naming the
+# revision they record -- which is exactly how the two `v1.7.0` bodies got there.
+TAGGED_BAND_RECORDS: dict[str, str] = {
+    "docs/phase_reports/phase-30-v1.8.0.md": (
+        "the release report for `v1.8.0`, whose re-freeze produced the band the tree carries now"
+    ),
+    "docs/release_bodies/v1.8.0-body-2026-10-09.md": (
+        "the body of the published `v1.8.0` asset, which states the band as that release shipped it"
+    ),
+}
 
 # The spread of the speed benchmark's two ratios over every committed measurement of the artifact —
 # fourteen at the 1.5.0 freeze, recomputable with the command printed in docs/reproducibility.md.
@@ -2976,10 +3037,46 @@ _BAND_SHAPE = re.compile(
 # The marks the corpus really uses between a band's two edges.
 _RANGE_MARKS = ("–", "—", "--")
 
+# Two unit-less spellings of the same claim, each with a gap the corpus cannot use by accident.
+#
+# `7.77–10.31` and "`0.42`–`0.51`": a dash between two decimals with nothing between them but
+# quotation and spacing. `between 0.42 and 0.51`: the spoken form, which requires its lead word --
+# because the corpus contains the counter-example twice. `10.31× and 0.495×` is two readings of one
+# run, not a spread, and `docs/integrity_audit.md` records that an earlier gap-wide detector paired
+# exactly those numbers; the audit's lesson is that a mark alone does not make a range. Neither
+# shape allows a unit inside the gap: a band carrying `×` on both edges belongs to `_BAND_SHAPE`,
+# which is stricter about what may sit between the two units.
+#
+# What this costs and what it buys is measured, not assumed: over the tree's 81 documents the united
+# shape finds 68 decimal pairs and these two find 52 more. Three of the 52 share an edge with a
+# policed band, and all three are in `docs/phase_reports/phase-36-…md` -- the report that wrote the
+# rule, quoting the bands it had to discuss. So the first document the widened census caught was the
+# phase's own, which is the cleanest available evidence that the shape reads rather than decorates:
+# that file would have been invisible to the old rule, and it is now declared like every other dated
+# record. The rest of the widening is latent -- a rule a document used to be able to leave by
+# deleting two characters -- and its reachable red is a plant
+# (`unlisted-document-states-a-band-without-its-unit`). The deferred cost is stated plainly: pairs
+# like `(0.05, 0.15)` and `(1.07, 1.22)` sit unclaimed in dated records today and would read as band
+# claims the day a radius edge joins `SPEEDUP_BANDS`.
+_LOOSE_DASHED = re.compile(
+    r"(?<![\d.])(\d+\.\d+)[\s`'\"”‘]*(?:[–—]|--)[\s`'\"”‘]*(\d+\.\d+)(?![\d.])"
+)
+_LOOSE_SPOKEN = re.compile(
+    r"\b(?:between|from)\s+(\d+\.\d+)\s+(?:to|and)\s+(\d+\.\d+)",
+    re.I,
+)
+
 
 def _band_pairs(text: str) -> set[tuple[float, float]]:
-    """Every speedup spread the document states, in the spellings the corpus actually uses."""
-    pairs = set()
+    """Every speedup spread the document states, with its unit or without one.
+
+    Three shapes, one predicate each. The anchored form needs the multiplication unit on both edges;
+    the two loose forms read a dash or a spoken lead between bare decimals. A pair only becomes a
+    claim once the census's edge test recognises it, so a loose match between two unrelated decimals
+    costs the census nothing.
+    """
+    pairs = {(float(low), float(high)) for low, high in _LOOSE_DASHED.findall(text)}
+    pairs |= {(float(low), float(high)) for low, high in _LOOSE_SPOKEN.findall(text)}
     for lead, low, gap, high in _BAND_SHAPE.findall(text):
         marked = any(mark in gap for mark in _RANGE_MARKS)
         spoken = " and " in gap.lower() and (lead or "").lower() in ("between", "from")

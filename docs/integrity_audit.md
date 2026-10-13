@@ -1871,3 +1871,40 @@ written -- `PROSE_FIGURES` by substring, the band census by shape, the analysis-
 and folding those changes what they can match, so each needs its own before/after measurement.
 `docs/limitations.md` #96 carries that, with the two instances this finding turned up as the evidence that
 the class is real rather than theoretical.
+
+## Addendum — Phase 36, a band that needed no unit to be a band, and the exemptions that stopped being directories (2026-10-13)
+
+**71. The census's shape was the census's limit, and the corpus had already said so.**
+`test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated` decided which documents
+state a speedup spread by asking `_band_pairs`, and `_band_pairs` required a multiplication sign on *both*
+edges. The guard's own docstring named the consequence: a document writing `7.77–8.70` is not a printer,
+so it is neither policed nor declared nor reported -- it simply is not there. Two things were true at once
+about that gap: no living document used the spelling, and the exemption that hid the dated records was a
+path prefix, so the two blind spots were the same blind spot seen from different sides.
+
+(a) **The widening was bounded by a counter-example the repository owns.** The first version allowed any
+mark between two decimals, and it immediately produced `(10.31, 0.495)` from
+`10.31× and 0.495×` -- two readings of one run, not a spread. That is not a new worry: the same pairing is
+recorded in this file as what an earlier gap-wide detector got wrong, together with `8.378× / 0.5656×`. So
+the two loose shapes require a gap holding nothing but quotation, spacing and one mark (`7.77–10.31`,
+`` `0.42`–`0.51` ``) or a lead word (`between 0.42 and 0.51`), and neither admits a unit into the gap.
+
+(b) **Measured before it was written, because a detector's blast radius is the question.** Over the tree's
+81 documents the united shape finds 68 decimal pairs and the two loose shapes find 52 more; three of the 52
+share an edge with a policed band, and all three are quoted by `docs/phase_reports/phase-36-…md` -- the report
+of the phase that wrote the rule, which the census then reported as a document stating a spread nothing owned.
+It was declared with a reason rather than reworded. Everything else the widening does is latent, so it ships
+with a plant as well as a declaration (`unlisted-document-states-a-band-without-its-unit`: an unlisted
+document printing `7.77–8.70`, a defect the old shape could not see at all). The deferred cost is stated in
+the same place: `(0.05, 0.15)` and `(1.07, 1.22)` sit unclaimed in dated records today, and would read as band
+claims the day a radius edge joins `SPEEDUP_BANDS`.
+
+(c) **The nine exempt files are now nine names.** `docs/phase_reports/` (6 printers of 36) and
+`docs/release_bodies/` (3 of 6) stopped being directories and became entries with reasons, each of which the
+census holds to a property: a superseded record must still print a pair that is not today's band, or it joins
+the policed set. Two of the nine print *only* the current band, because the release they record is the one
+that produced it, so they sit in a third list whose exemption is self-terminating: the guard requires them to
+keep printing today's band, and the first re-freeze that widens it moves them to the superseded list -- which
+is precisely how the two `v1.7.0` body drafts got there. A plant
+(`record-of-todays-band-quietly-states-a-superseded-one`) rewrites one of them to a stale spread to show the
+status is checked rather than assumed.

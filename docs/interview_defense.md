@@ -1,6 +1,6 @@
 # Interview defense — self-test sheet
 
-Date: 2026-09-27, state line refreshed 2026-10-13 · Repository state: **Phases 0–35 shipped,
+Date: 2026-09-27, state line refreshed 2026-10-13 · Repository state: **Phases 0–36 shipped,
 `quantrisk` 1.8.0, released as the tag `v1.8.0` — the release that carries Phases 23–29** — the full
 surface this sheet describes is implemented, validated and frozen in `evidence/manifest.json`.
 Question set: `PROJECT_SPEC.md`, section 最终面试准备材料 — 22 questions in four groups,
@@ -1031,7 +1031,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 204 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
   .venv/bin/python -m pytest -q                                          # 440 tests collected offline
-uv run python scripts/run_mutation_suite.py                            # 68/68 planted defects rejected
+uv run python scripts/run_mutation_suite.py                            # 70/70 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
 uv run python experiments/variance_reduction/run.py

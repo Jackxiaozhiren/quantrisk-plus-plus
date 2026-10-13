@@ -526,7 +526,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 68/68 planted defects rejected",
+        anchor="# 70/70 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -1000,6 +1000,42 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
         ),
         claim="a claim's number starts a token rather than continuing one",
+    ),
+    Mutation(
+        identifier="unlisted-document-states-a-band-without-its-unit",
+        kind="tree",
+        path="docs/_mutation_probe_band.md",
+        anchor="",
+        replacement=(
+            "# Probe written by the mutation sweep; never committed.\n\n"
+            "The C++ core runs `7.77–8.70` times the pure-Python loop on this machine.\n"
+        ),
+        # The old shape saw a spread only when both edges carried the unit, so a document writing
+        # `7.77–8.70` was not a printer at all: neither policed, nor declared, nor reported. A
+        # united version of this file would have been caught before this phase too, which is why the
+        # planted sentence drops the units -- the defect must be one only the new shape can see.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated"
+        ),
+        claim="a band is a band whether or not either edge carries its unit",
+    ),
+    Mutation(
+        identifier="record-of-todays-band-quietly-states-a-superseded-one",
+        kind="prose",
+        path="docs/release_bodies/v1.8.0-body-2026-10-09.md",
+        anchor="`7.77×–10.31×`",
+        replacement="`7.77×–8.88×`",
+        # The exemption this file holds is the fragile kind: it is dated but holds no superseded
+        # spread, because the release it records is the one that produced today's band. That status
+        # has to end on its own, so the guard requires the file to still print the band the tree
+        # carries -- and rewriting the band to a superseded one under the same exemption is the only
+        # way to show the check is live rather than a name on a list.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated"
+        ),
+        claim="an exemption for a record stating today's band ends when it states another one",
     ),
 )
 
