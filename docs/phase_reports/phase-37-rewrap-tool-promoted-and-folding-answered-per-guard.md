@@ -113,7 +113,8 @@ decided reader by reader with a measurement each way, including one reader delib
 | Evidence | `uv run python scripts/verify_evidence_manifest.py` | 0 missing, 0 unlisted — Evidence is intact |
 | Anchor census | `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` | 72 declared plants, every anchor unique in its file, every guard present in its named file |
 | Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on `3d7ec5d`, logged to `build/mutation-sweep-37.log` | **`72/72 planted defects were rejected by their guard.`**, no line with any other status, tree clean afterwards. Both new plants are in that count, including `rewrap-tool-hardcodes-a-wider-line` -- the width fudge that leaves the tool's own report tidy (`lines still longer than 120: []`) and is caught only by the test reading the configuration separately |
-| CI on the pushed head | `gh api …/commits/<sha>/check-runs` after the push | pending — recorded in the follow-up commit, which is the only place its run id can come from |
+| CI on the pushed head | `gh api …/commits/db92d22/check-runs` after the push | run `38400266802`, all three jobs `completed/success` (SonarCloud `neutral`, as ever). The push itself needed a retry: the first `git push` failed to reach github.com:443 after 75 s and the second went through, which is the only difference between this line and a claim about a commit nobody built |
+| CI's own pytest summary | `gh api …/actions/jobs/<id>/logs`, read rather than inferred from the green | `444 passed, 5 skipped in 202.15s`; the skips are the four oracle-gated modules plus `latexmk is not installed`, and the #91 reconciliation holds with five new tests on each side: `444 + 5 = 449 = 445 + 4` |
 
 ## 6. Numerical validation
 
