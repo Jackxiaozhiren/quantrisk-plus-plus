@@ -114,7 +114,8 @@ it is a consequence of a decision rather than unwritten work.
 | Report render | not re-run | No render input changed: the tex, its bibliography and its figures are untouched, and `test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it` is green in the lane above, which is what makes "unchanged" a measured claim rather than an assertion |
 | Anchor census | `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` | 70 declared plants, every anchor unique in its file, every guard present in its named file |
 | Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on `d114c35`, logged to `build/mutation-sweep-36.log` | **`70/70 planted defects were rejected by their guard.`**, exit 0, no line with any other status, and `git status --porcelain` empty afterwards. Both plants this phase added are in that count: the unlisted unit-less document and the tagged record rewritten to a stale spread |
-| CI on the pushed head | `gh api …/commits/<sha>/check-runs` after the push | pending — recorded in the follow-up commit, which is the only place its run id can come from |
+| CI on the pushed head | `gh api …/commits/f06bd30/check-runs` after the push | run `38394438794`, all three jobs `completed/success` (SonarCloud `neutral`, as in every prior run). The run id belongs to the record commit, which is the only place it can come from; `d114c35`, the commit carrying the phase's content, is the tree the sweep above was run on |
+| CI's own pytest summary | `gh api …/actions/jobs/<id>/logs`, read rather than inferred from the green | `439 passed, 5 skipped in 114.95s`; the five skips are the four oracle-gated modules plus `latexmk is not installed`. Nothing new skipped and no history-keyed skip returned, and the pair still reconciles the way #91 states it: `439 + 5 = 444 = 440 + 4` |
 
 ## 6. Numerical validation
 
