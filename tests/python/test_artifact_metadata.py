@@ -406,7 +406,7 @@ def test_documents_that_count_the_paper_chapters_agree_with_the_source() -> None
         "docs/release_notes_v1.4.0.md": r"(\d+|\w+) chapters",
     }
     for name, pattern in claims.items():
-        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        text = _folded_document(name)
         found = re.findall(pattern, text)
         assert found, f"{name} no longer states a chapter count"
         values = [int(word) if word.isdigit() else SPELLED_NUMBERS[word.lower()] for word in found]
@@ -785,14 +785,14 @@ def test_documents_that_count_the_suite_members_agree_with_the_registry() -> Non
         ".github/workflows/ci.yml": r"re-executes\s+all\s+(\w+)\s+members",
     }
     for name, pattern in claims.items():
-        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        text = _folded_document(name)
         found = re.search(pattern, text)
         assert found, f"{name} no longer states the suite member count in the expected form"
         assert _as_int(found.group(1)) == total, (
             f"{name} says {found.group(1)!r}, the registry has {total} members"
         )
 
-    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    readme = _folded_document("README.md")
     breakdown = re.search(
         r"(\w+)\s+correctness\s+benchmarks,\s+(\w+)\s+statistical\s+experiments,\s+"
         r"(\w+)\s+performance\s+benchmark",
@@ -804,7 +804,7 @@ def test_documents_that_count_the_suite_members_agree_with_the_registry() -> Non
     assert _as_int(breakdown.group(3)) == by_kind["performance benchmark"]
     assert sum(by_kind.values()) == total, "a member kind is not one of the three the suite claims"
 
-    reproducibility = (REPO_ROOT / "docs" / "reproducibility.md").read_text(encoding="utf-8")
+    reproducibility = _folded_document("docs/reproducibility.md")
     skips = re.search(r"(\w+)\s+of\s+the\s+(\w+)\s+members\s+report\s+`skipped`", reproducibility)
     assert skips, "docs/reproducibility.md no longer states how many members need oracles"
     assert _as_int(skips.group(1)) == skippable, (
@@ -1282,7 +1282,7 @@ def test_the_identity_checks_the_cli_runs_are_the_ones_the_documents_count() -> 
         "paper/technical_report.tex": r"runs (\w+) identity checks",
     }
     for name, pattern in spellings.items():
-        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        text = _folded_document(name)
         found = re.findall(pattern, text)
         assert found, f"{name} states no identity-check count, so nothing pins it to {count}"
         for token in found:
@@ -3089,7 +3089,7 @@ def test_documents_quote_the_performance_figures_the_artifact_actually_holds() -
     """A ratio that regenerates on every run still has to match the file it claims to quote."""
     figures = _speed_figures(json.loads(SPEED_ARTIFACT.read_text(encoding="utf-8")))
     for name, claims in PROSE_FIGURES.items():
-        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        text = _folded_document(name)
         for claim in claims:
             expected = claim.format(**figures)
             assert expected in text, (
@@ -3097,7 +3097,7 @@ def test_documents_quote_the_performance_figures_the_artifact_actually_holds() -
                 f"{SPEED_ARTIFACT.relative_to(REPO_ROOT)} measures"
             )
 
-    sheet = (REPO_ROOT / "docs/interview_defense.md").read_text(encoding="utf-8")
+    sheet = _folded_document("docs/interview_defense.md")
     for pattern, side in _RATE_PHRASES.items():
         found = re.findall(pattern, sheet)
         assert found == [figures[f"pps_{side}"]], (

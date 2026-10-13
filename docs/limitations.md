@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 509 pytest tests with
-    the `oracles` extra installed, and the same tree collects 440 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 514 pytest tests with
+    the `oracles` extra installed, and the same tree collects 445 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1054,3 +1054,17 @@ never removed just because a later phase shipped.
     fixed here is that folding changes what those guards can match -- a note whose figure sits at a line end
     may also gain matches -- so each needs its own before/after measurement, which is how #95's spelled
     detector was handled too.
+
+    **Amended 2026-10-13 by Phase 37: the convention now covers every prose-counting guard in the
+    repository, and one reader is deliberately left raw.** Folded reading was extended to the chapter
+    counts, the suite-member counts (including README's per-kind breakdown and the reproducibility note's
+    skippable count), the identity-check counts, the report's own prose figures and the three rate phrases
+    `test_documents_quote_the_performance_figures_the_artifact_actually_holds` reads -- each switched only
+    after the raw and folded match counts were compared per pattern and found equal, which is the
+    before/after this entry asked for. The band census is *not* folded, measured rather than assumed: over
+    81 documents folding adds a pair `(10.7, 7.4)` that the tex does not state -- two unrelated numbers at
+    the ends of adjacent lines -- because the united shape forbids a newline inside a gap on purpose. Line
+    structure is load-bearing there, so a reader that needs it says so in the guard's comment instead of
+    being folded for consistency. Still outside: the analysis-note ratchet, which searches test *sources*
+    for a filename and would be broken by folding a Python file, and any per-token `x in text` figure check,
+    which cannot be split by a wrap because a token has no space in it.

@@ -235,7 +235,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 440 tests collected offline",
+        anchor="# 445 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -394,7 +394,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 509 pytest tests with the validation",
+        anchor="and 514 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -526,7 +526,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 70/70 planted defects rejected",
+        anchor="# 72/72 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -668,7 +668,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 440 collected without them",
+        anchor="oracles installed, 445 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -793,7 +793,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 509 pytest tests with the `oracles` extra here",
+        anchor="# 514 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -1036,6 +1036,33 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_every_document_that_prints_a_speedup_band_is_policed_or_declared_dated"
         ),
         claim="an exemption for a record stating today's band ends when it states another one",
+    ),
+    Mutation(
+        identifier="rewrap-tool-accepts-the-rewrite-it-exists-to-refuse",
+        kind="prose",
+        path="scripts/rewrap_docstrings.py",
+        anchor="    if signature(after) != signature(source):",
+        replacement="    if signature(after) == signature(source):",
+        # The promoted tool's whole claim is its proof, and a proof that appends a problem when
+        # nothing changed is as useless as one that appends nothing: it reddens an honest re-wrap
+        # and waves through a rewrite that ate a word. Inverting the comparison is the mistake a
+        # later edit can actually make while every printed line still says `whitespace-only`.
+        guard="tests/python/test_rewrap_docstrings.py::"
+        "test_the_rewrite_moves_line_breaks_and_nothing_else",
+        claim="a re-wrap is accepted only when the folded parse is identical",
+    ),
+    Mutation(
+        identifier="rewrap-tool-hardcodes-a-wider-line",
+        kind="prose",
+        path="scripts/rewrap_docstrings.py",
+        anchor='            return int(line.split("=", 1)[1].strip())',
+        replacement='            return int(line.split("=", 1)[1].strip()) + 20',
+        # The tool reads the project's line length rather than carrying its own, so that a
+        # change to the gate moves the tool. Adding a fudge factor keeps the printed report
+        # tidy -- `lines still longer than 120: []` -- while the files it writes violate E501.
+        guard="tests/python/test_rewrap_docstrings.py::"
+        "test_the_tool_takes_its_width_from_the_configuration_not_from_itself",
+        claim="the tool wraps at the width ruff enforces, read from pyproject.toml",
     ),
 )
 

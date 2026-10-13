@@ -1908,3 +1908,43 @@ keep printing today's band, and the first re-freeze that widens it moves them to
 is precisely how the two `v1.7.0` body drafts got there. A plant
 (`record-of-todays-band-quietly-states-a-superseded-one`) rewrites one of them to a stale spread to show the
 status is checked rather than assumed.
+
+## Addendum — Phase 37, a tool that was only real because a conversation remembered it, and the reader that must not be folded (2026-10-13)
+
+**72. `build/rewrap_docstrings.py` had done four phases of work from a directory git does not see.**
+The promoted tool is at `scripts/rewrap_docstrings.py` now, and `tests/python/test_rewrap_docstrings.py`
+holds the two properties that make it worth running: a rewrite that loses a word is refused and nothing is
+written, and the width comes from `pyproject.toml` rather than from a second copy of the number. The reason
+to insist on the second is that the first version of the script carried `WIDTH = 100`, which is a fact about
+the gate -- and the copy of a fact is what goes stale here, in a repository that has spent thirty-seven
+phases on copies of facts going stale.
+
+(a) **A refusal has to be tested by attempting it.** The tests hand the tool a rewrite that deletes three
+words from a docstring and require exit 1 with the file untouched, then hand it a real over-long docstring and
+require the words, the code literals and the whitespace-folded parse to all survive. A proof that only ever
+prints `whitespace-only` has shown nothing; the two cases together are what show it can say either thing.
+
+(b) **Two plants, both on the tool itself.**
+`rewrap-tool-accepts-the-rewrite-it-exists-to-refuse` inverts the parse comparison -- which reddens on the
+honest rewrite as well as on the lossy one, so a proof that has been turned around cannot pass either
+direction -- and `rewrap-tool-hardcodes-a-wider-line` adds 20 to the configured width, the change that keeps
+the tool's own report tidy (`lines still longer than 120: []`) while the files it writes break the gate.
+Plant count 70 → 72.
+
+**73. #96's folding question was answered per reader, with a measurement each way, and one reader was left
+alone on purpose.** Six more prose-counting readers now go through `_folded_document()` -- chapter counts,
+the suite-member counts with README's per-kind breakdown and the reproducibility note's skippable count, the
+identity-check counts, the report's own performance templates, and the three rate phrases -- and each was
+switched only after its raw and folded match counts were compared pattern by pattern and found equal, which is
+what #96 asked for instead of a sweep-wide substitution.
+
+(a) **The band census is not folded, and the reason is a number.** Folding all 81 census documents adds the
+pair `(10.7, 7.4)` in `paper/technical_report.tex`: two unrelated values at the ends of adjacent lines, made
+adjacent by the fold. The united shape forbids a newline inside its gap precisely so that a band must be one
+statement, so line structure is load-bearing there and the reader says so in its comment rather than being
+made consistent with the others.
+
+(b) **And a guard that reads source files is out of scope for a rule about prose.** The analysis-note ratchet
+searches test sources for a note's filename; folding a Python file would neither help nor be harmless. The
+per-token figure checks are the same story from the other side: a token contains no space, so a wrap cannot
+split it and folding changes nothing -- recorded so the next phase does not re-derive the boundary.
