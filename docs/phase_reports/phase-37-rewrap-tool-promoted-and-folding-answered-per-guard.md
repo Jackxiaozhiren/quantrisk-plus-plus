@@ -112,7 +112,7 @@ decided reader by reader with a measurement each way, including one reader delib
 | Producer | `uv run python scripts/build_report.py` | 6 sources, bundle `338d51fb2e50…`, PDF `b821d3315650…`, 1,005,796 bytes — re-run because the tex's collected-test sentence moved |
 | Evidence | `uv run python scripts/verify_evidence_manifest.py` | 0 missing, 0 unlisted — Evidence is intact |
 | Anchor census | `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` | 72 declared plants, every anchor unique in its file, every guard present in its named file |
-| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on the committed tree | pending — recorded in the follow-up commit |
+| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on `3d7ec5d`, logged to `build/mutation-sweep-37.log` | **`72/72 planted defects were rejected by their guard.`**, no line with any other status, tree clean afterwards. Both new plants are in that count, including `rewrap-tool-hardcodes-a-wider-line` -- the width fudge that leaves the tool's own report tidy (`lines still longer than 120: []`) and is caught only by the test reading the configuration separately |
 | CI on the pushed head | `gh api …/commits/<sha>/check-runs` after the push | pending — recorded in the follow-up commit, which is the only place its run id can come from |
 
 ## 6. Numerical validation
