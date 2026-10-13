@@ -170,7 +170,8 @@ check that found it turned up a second, older instance that had been dormant sin
 | Producer | `uv run python scripts/build_report.py` | 6 sources, bundle `dbb73c704ea0…`, PDF `3965281a4e08…`, 1,005,797 bytes — run once after the prose sync, which is the order §9 requires, and the register's second bump made it necessary again |
 | Evidence | `uv run python scripts/verify_evidence_manifest.py` | 0 missing, 0 unlisted — Evidence is intact |
 | Anchor census | the harness's own `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` | 68 declared plants, every anchor unique in its file, every guard present in its named file |
-| CI on the pushed head | `gh api …/commits/<sha>/check-runs` after the push | pending — recorded in the follow-up commit, which is the only place its run id can come from |
+| CI on the pushed head | `gh api …/commits/f437644/check-runs` after the push | run `38387224491`, all three jobs `completed/success` (SonarCloud `neutral`, as in every prior run) |
+| CI's own pytest summary | `gh api …/actions/jobs/115261877855/logs`, read rather than inferred from the green | `439 passed, 5 skipped in 149.76s`; the five skips are the four oracle-gated modules plus `latexmk is not installed`. No history- or tag-keyed guard appears in the skip list, so Phase 33's fetch settings were still doing their job on this head. The pair reconciles the way #91 says it must: `439 + 5 = 444 = 440 collected + 4 module records`, with 440 the figure this tree's probe publishes |
 
 ## 6. Numerical validation
 
