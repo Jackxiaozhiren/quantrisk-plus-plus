@@ -1029,7 +1029,19 @@ never removed just because a later phase shipped.
     would each escape the inventory. Nothing here polices that. What does exist is the self-test's
     requirement that every word in `_LABEL_WORDS` fire on a real document -- it keeps the excuse list
     from growing, which limits the surface a writer can hide behind to one word today.
-
+    **Measured again on 2026-10-13, so the size of this is known rather than guessed:** a spelled-numeral
+    variant of the extractor's own shape, run over the five inventoried documents with the noun list as it
+    now stands *and* the label rule applied, finds **109** spelled claims -- 45 in the report, 22 in
+    `docs/validation_matrix.md`, 18 in `README.md`, 14 in `docs/interview_defense.md`, 10 in
+    `docs/reproducibility.md` -- against the 112 phrases above, which is the same corpus before the label
+    rule. Of the 109, 19 begin a sentence, which is the group whose number may name rather than count
+    (`One implementation rule` names one rule; `Three scenarios` counts three). None is owned today,
+    because every owner pattern the inventory lists captures digits, including the ones whose *guards*
+    accept a spelled word through `\w+`. The work is therefore two things and not one: let the extractor
+    read a numeral spelled, and let the owned list carry the spelled spelling of each owner -- and a first
+    run over 109 claims would be a diff nobody can review, so the next phases take it document group by
+    document group, each with its own load-bearing declarations and plants, starting with the pair that has
+    the fewest (28 across `README.md` and `docs/reproducibility.md`).
 96. **A pattern written with a literal space cannot read a claim the document splits across lines, and
     four guards have been taught that; the rest of the corpus still reads raw text.** The falsification
     sweep's one escape was `sheet-states-a-case-gap-the-collected-pair-does-not-give`: the guard compared
