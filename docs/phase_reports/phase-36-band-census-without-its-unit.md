@@ -113,7 +113,7 @@ it is a consequence of a decision rather than unwritten work.
 | Evidence | `uv run python scripts/verify_evidence_manifest.py` | 0 missing, 0 unlisted — Evidence is intact |
 | Report render | not re-run | No render input changed: the tex, its bibliography and its figures are untouched, and `test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it` is green in the lane above, which is what makes "unchanged" a measured claim rather than an assertion |
 | Anchor census | `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` | 70 declared plants, every anchor unique in its file, every guard present in its named file |
-| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on the committed tree | pending — recorded in the follow-up commit |
+| Falsification, full sweep | `uv run python scripts/run_mutation_suite.py` on `d114c35`, logged to `build/mutation-sweep-36.log` | **`70/70 planted defects were rejected by their guard.`**, exit 0, no line with any other status, and `git status --porcelain` empty afterwards. Both plants this phase added are in that count: the unlisted unit-less document and the tagged record rewritten to a stale spread |
 | CI on the pushed head | `gh api …/commits/<sha>/check-runs` after the push | pending — recorded in the follow-up commit, which is the only place its run id can come from |
 
 ## 6. Numerical validation
