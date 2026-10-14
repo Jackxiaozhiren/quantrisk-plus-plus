@@ -141,14 +141,15 @@ of the three was visible to any reader that existed, because all three numbers a
 | Benchmark suite | `.venv/bin/python scripts/run_benchmark_suite.py --require-all` | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 368.3s total` |
 | Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | 0 CHANGED, 0 VOLATILE, 0 MISSING, 0 unlisted -- "Evidence is intact". The re-run above rewrote 22 artifacts with identical result content; because no experiment or benchmark *input* changed in this phase those bytes were discarded rather than re-frozen, and the diff is preserved at `build/accidental-rerun-38.patch` so the decision can be undone |
 | Python suite | `env -u PYTHONPYCACHEPREFIX .venv/bin/python -m pytest tests/python -q` | `515 passed in 116.93s (0:01:56)`, no skips |
-| Docs + harness lanes | `.venv/bin/python -m pytest tests/python/test_artifact_metadata.py tests/python/test_mutation_suite.py -q` | 68 passed (60 docs, 8 harness) |
+| Docs + harness lanes | `.venv/bin/python -m pytest tests/python/test_artifact_metadata.py tests/python/test_mutation_suite.py -q` | 69 passed (61 docs, 8 harness), each lane counted on its own rather than subtracted from the pair |
 | Spelled inventory, measured | verdicts replayed through the guard's own classification (`build/probe_spelled_verdicts.py`) | 28 spelled claims: 15 owned, 9 cited, 2 declared, 0 unowned |
 | Table-derivedness, measured | shipped rule vs the same rule with `twenty-two` deleted, on the corpus's own sentence | shipped reads `twenty-two`, narrowed reads `two` -- the difference this phase's plant attacks |
 | Producer | `.venv/bin/python scripts/build_report.py` | 6 sources, bundle `febf7cf7d384…`, PDF `3b5e4c401974…`, 1,005,797 bytes; `--if-stale` afterwards prints "report is current", which is the record the freshness guard reads |
 | Anchor census | `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` | 76 declared plants, every anchor unique in its file, every guard present in its named file |
 | Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `7cbb287`, logged to `build/mutation-sweep-38.log` | **`76/76 planted defects were rejected by their guard.`**, no line with any other status, tree clean afterwards. All four new plants are in that count. The record revision is swept again below, because four of the files the count cascade touched are themselves plant targets |
-| Falsification, re-run on the record revision | same command, logged to `build/mutation-sweep-38b.log` | recorded in the next row added after this file, since a sweep cannot testify about the commit that contains its own record |
-| CI on the pushed head | `gh api …/commits/<sha>/check-runs`, job logs read rather than inferred | recorded after the push, in the commit that carries the runner's own numbers |
+| Falsification, re-run on the record revision | same command on `28e8fda`, logged to `build/mutation-sweep-38b.log` | **`76/76 planted defects were rejected by their guard.`** -- re-run rather than inherited, because four of the files the count cascade moved are plant targets themselves; tree clean afterwards, no line with any other status |
+| CI on the pushed head | `gh api …/commits/28e8fda/check-runs` after the push | run `38514077667`, three jobs `completed/success` (SonarCloud `neutral`, as ever). The two commits ahead of it in the same push (`7cbb287`, and `f8559d4`/`cd1c7df` in the earlier queue) carry no runs of their own -- GitHub builds the tip of a push, so `d1306a4` was the run that verified that batch and `28e8fda` verifies this one, contents included |
+| CI's own pytest summary | the job log, read rather than inferred from the green | `445 passed, 5 skipped in 153.41s (0:02:33)`; `100% tests passed out of 204`; the benchmark lane prints `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 426.6s total`; the lint lane `All checks passed!` / `179 files already formatted` / `Success: no issues found in 23 source files`. The #91 reconciliation holds with one test added on each side: `445 + 5 = 450 = 446 + 4` |
 
 ## 6. Numerical validation
 
@@ -209,3 +210,7 @@ by the list it counts rather than retyped above it; four new failure modes each 
 a named guard; the falsification sweep runs on the committed tree and its verdict is quoted from its own
 log; and CI's three jobs are read from their job logs rather than from a badge, with the Python pair
 reconciled against the offline probe the way #91 requires.
+
+One boundary in this file's own shape: the commit that adds the sweep and CI rows cannot carry the verdict
+of its own run -- a record checks the revision it names, so `28e8fda` is what `38514077667` verified, and
+the row commit is read from `commits/<head>/check-runs` by whoever next opens the lane.
