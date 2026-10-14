@@ -1948,3 +1948,61 @@ made consistent with the others.
 searches test sources for a note's filename; folding a Python file would neither help nor be harmless. The
 per-token figure checks are the same story from the other side: a token contains no space, so a wrap cannot
 split it and folding changes nothing -- recorded so the next phase does not re-derive the boundary.
+
+## Addendum — Phase 38, a count written in words, and the three things it was hiding (2026-10-14)
+
+**74. The front page had enumerated four rows under a sentence saying three, for 25 phases.**
+`README.md` introduced its weakest-validation discussion with "Three rows in the full matrix are the ones
+to interrogate"; the paragraph then named the Heston comparison, the bootstrap interval coverage, row 13
+and the stress-map bound. Phase 11 wrote the sentence over three of them and Phase 12 appended the fourth
+without touching the count, which `git log -S "the other kind of"` dates exactly. Nothing could see it:
+every count guard and the claim inventory match a *numeric* token, and this number is a word -- #95's
+first clause, stated as a cost and now demonstrated as a defect.
+
+(a) **What closed it.** The extractor's number group is generated from `SPELLED_NUMBERS`, the table
+`_as_int()` has resolved words through since Phase 22, and the widening is switched on per document
+(`_SPELLED_DOCUMENTS`) because the register's own measurement said 109 claims across five documents -- a
+diff nobody can review at once. The 28 in `README.md` and `docs/reproducibility.md` are classified: 15
+owned, 9 cited, 2 declared.
+
+(b) **And the count is now produced, not retyped.** The new guard
+`test_documents_that_count_their_own_enumerations_agree_with_their_lists` counts the items under each
+enumeration -- the bullets the rows live in, the bullets under "three entries matter more than the rest",
+and the artifact paths the timing paragraph names -- and compares them with the spelled number above, with
+the two restatements in the front page's evidence section read against the same derivation rather than
+against each other.
+
+**75. A citation can name an existing row and still point at the wrong one.** The same paragraph said
+"Row 14 is the other kind of weakness: the bound on the stress map's truncation error is
+`validated (L1 only)`". Row 14 is the third-and-fourth spot sensitivities and is validated with a caveat;
+the bound is row 15, whose status cell does say `validated (L1 only)`. The prose quoted the right status
+and the wrong label, so no malformed-citation check would have flagged it -- the matrix's own
+`row (\d+)` rule only asks whether a cited number exists. Registered as #99 with the parse that would
+close it.
+
+**76. "Quietly skipping four members" was wrong in the commit that first wrote it.** The front page's
+argument for `--require-all` named four benchmark members as the population that would skip silently; the
+registry in the same revision, `216839c`, declared five with a `requires` clause and today declares six.
+The number was spelled, so the inventory never listed it and no owner compared it. It is now compared
+with the registry's own `requires` count, in the guard that already resolves `six of the nineteen members`
+from the same field.
+
+**77. A comment claimed the rule's alternation order was load-bearing; measuring it showed it was not,
+and the plant written from the comment would not have fired.** The spelled alternatives are offered
+longest-first, and the comment said this was needed so `twenty-two committed files` is not read as two.
+Rebuilding the rule shortest-first still reads `twenty-two`, because the tail requires whitespace after
+the numeral, so the short branch cannot complete and backtracking reaches the long one -- which means the
+plant designed to prove the ordering would have been recorded as a defect that no guard catches, and the
+sweep would have reported it as an escape of a non-defect. The claim was rewritten to what measurement
+supports: the generation from the table is what matters, because dropping one key really does turn
+`twenty-two committed files` into a claim about two of them. The self-test now asserts exactly that,
+comparing the shipped rule with a hand-narrowed one on the corpus's own sentence.
+
+**78. A guard's premise was inherited from the caller's environment rather than forced.**
+`test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache` reproduces CPython's stale-cache
+defect by running an import, editing the module to the same length in the same second, and re-running.
+The control run strips `PYTHONPYCACHEPREFIX` from its environment; the *first* run did not, so exporting
+the variable -- the very one the harness exists to isolate -- put the first bytecode outside the place the
+control looked, the control compiled fresh, and the test reddened on a clean tree with a message blaming
+the fixture. Both runs now take the same environment, the premise is asserted where it is established,
+and the assertion was shown to fire by sending the first run's cache away on purpose.

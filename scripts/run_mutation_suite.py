@@ -170,7 +170,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 96 numbered entries",
+        anchor="carries 99 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -928,7 +928,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-provenance-cell-quotes-a-stale-register-count",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="`docs/limitations.md` (96 entries)",
+        anchor="`docs/limitations.md` (99 entries)",
         replacement="`docs/limitations.md` (84 entries)",
         # The defect this phase actually found: the sheet's prose said 94 while its own
         # claim-provenance table said 84, three phases behind, and the guard that owns the register

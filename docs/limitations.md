@@ -1042,6 +1042,21 @@ never removed just because a later phase shipped.
     run over 109 claims would be a diff nobody can review, so the next phases take it document group by
     document group, each with its own load-bearing declarations and plants, starting with the pair that has
     the fewest (28 across `README.md` and `docs/reproducibility.md`).
+
+    **Amended 2026-10-14 by Phase 38: the first slice is closed and the rest is named rather than
+    guessed.** The extractor's number group is now generated from `SPELLED_NUMBERS` -- the table
+    `_as_int()` has resolved words through since Phase 22 -- and the widening is switched on per document
+    through `_SPELLED_DOCUMENTS`, seeded with that 28-claim pair. All 28 answer for themselves now: 15
+    owned by the pattern their owner searches with, 9 cited through the frozen artifact their paragraph
+    names, 2 declared with a reason. Reading them found three defects no digit-only inventory could see,
+    all of them in living prose: the front page's "Three rows in the full matrix are the ones to
+    interrogate" had enumerated four since Phase 12, the same paragraph cited "Row 14" while describing
+    the bound the matrix numbers 15, and "quietly skipping four members" was already wrong in the commit
+    that first wrote it, which declared five then and six now. What is left is 81 claims in three
+    documents -- 45 in `paper/technical_report.tex`, 22 in `docs/validation_matrix.md`, 14 in
+    `docs/interview_defense.md` -- and each needs the same two halves: the spelled spelling of every owner
+    that already reads the figure, and a stated reason for every claim no owner covers. #97 records why
+    the first is bounded by the table's ceiling.
 96. **A pattern written with a literal space cannot read a claim the document splits across lines, and
     four guards have been taught that; the rest of the corpus still reads raw text.** The falsification
     sweep's one escape was `sheet-states-a-case-gap-the-collected-pair-does-not-give`: the guard compared
@@ -1080,3 +1095,41 @@ never removed just because a later phase shipped.
     being folded for consistency. Still outside: the analysis-note ratchet, which searches test *sources*
     for a filename and would be broken by folding a Python file, and any per-token `x in text` figure check,
     which cannot be split by a wrap because a token has no space in it.
+97. **The spelled-numeral table stops at twenty-six, so the rule that now reads words is blind above its
+    ceiling, and the owner that reads them raises instead of reporting.** `_SPELLED_WORDS` is generated
+    from `SPELLED_NUMBERS`, whose keys run `one`…`twenty-six` because that is what the corpus needed when
+    Phase 22 wrote the table. A count above it is not a claim the inventory can see at all, and
+    `_as_int()` -- which the *owners* use to resolve the same words -- raises `KeyError` on an unknown
+    numeral, so `twenty-seven rows` would leave the inventory silent and the comparison guard erroring
+    rather than naming the drift. The trigger is dated and near: `docs/validation_matrix.md` carries
+    exactly twenty-six rows today, so the next row either extends the prose to a numeral the table does
+    not hold or moves the sentence to digits, and only the second is policed. Extending the table changes
+    a fixture every spelled reading resolves through, so it should arrive with the claim that needs it
+    rather than as insurance -- and the honest version of that change adds the keys together with a guard
+    that every key the table holds is matched by something in the corpus.
+
+98. **A claim is credited to its owner because the owner's source contains the pattern string, which is
+    transcription rather than application -- and Phase 38 leaned on that five times.** The inventory's
+    ownership rule is `assert pattern in holder_source`, so `(\w+)\s+correctness\s+benchmarks` credits
+    README's spelled breakdown to
+    `test_documents_that_count_the_suite_members_agree_with_the_registry` because that string really does
+    sit in the guard -- as a prefix of the longer pattern its `re.search` actually uses. The five fragment
+    entries added here are honest for exactly that reason, and the rule cannot tell them from a fragment
+    that lives in a comment, or from an owner that later stops searching with it while the text survives.
+    What does police the edges: every entry has to match one of the inventoried documents, so a fragment
+    that matches nothing is reported as accretion, and every figure the fragments name is separately
+    compared with its producer by the guard itself. The structural answer is to resolve the named test's
+    own source and require the string inside a `re.search` / `re.findall` / `re.finditer` call rather than
+    anywhere in the file -- the AST-not-substring rule this repository already applies elsewhere and has
+    not applied here.
+
+99. **A citation that names an existing row is credited even when the sentence around it describes a
+    different one.** Phase 38 found the defect while widening the inventory: the front page said "Row 14
+    is the other kind of weakness: the bound on the stress map's truncation error", and row 14 is the
+    third-and-fourth spot sensitivities -- the bound is row 15. Row 14 exists, so nothing about the
+    citation was malformed; the sentence pointed a reader at another row's status while quoting the right
+    one. What the new guard proves is that each cited label appears in the matrix's own numbering and that
+    the spelled count above the list equals the list. What it does not prove is that the prose matches the
+    row: that needs the cited row's validation-status cell read and the backticked status the sentence
+    quotes required to appear in it, which is buildable from the same table parse and should be built
+    against the next real mis-citation rather than speculatively.
