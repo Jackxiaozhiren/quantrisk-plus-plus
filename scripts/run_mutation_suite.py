@@ -235,7 +235,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 445 tests collected offline",
+        anchor="# 446 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -394,7 +394,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 514 pytest tests with the validation",
+        anchor="and 515 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -526,7 +526,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 72/72 planted defects rejected",
+        anchor="# 76/76 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -668,7 +668,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 445 collected without them",
+        anchor="oracles installed, 446 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -793,7 +793,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 514 pytest tests with the `oracles` extra here",
+        anchor="# 515 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -1063,6 +1063,73 @@ MUTATIONS: tuple[Mutation, ...] = (
         guard="tests/python/test_rewrap_docstrings.py::"
         "test_the_tool_takes_its_width_from_the_configuration_not_from_itself",
         claim="the tool wraps at the width ruff enforces, read from pyproject.toml",
+    ),
+    Mutation(
+        identifier="readme-restates-a-spelled-member-count-the-registry-refutes",
+        kind="prose",
+        path="README.md",
+        anchor="quietly skipping six members",
+        replacement="quietly skipping four members",
+        # The register's reader has resolved `six` through SPELLED_NUMBERS since Phase 22, but the
+        # number was written in words, so the claim inventory could not see it at all (#95) -- which
+        # is how this phrase sat at four for 25 phases while the registry already declared five.
+        # Restoring the stale figure is the defect the widening exists to catch.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_suite_members_agree_with_the_registry"
+        ),
+        claim="the members --require-all keeps from skipping is the registry's `requires` count",
+    ),
+    Mutation(
+        identifier="enumeration-count-disagrees-with-the-list-below-it",
+        kind="prose",
+        path="README.md",
+        anchor="Four rows in the full matrix are the ones",
+        replacement="Three rows in the full matrix are the ones",
+        # The defect Phase 38's own reader found: the front page said three while listing four, and
+        # no guard could see the sentence because its number was a word. The count is derived from
+        # the bullets now, so this edit reddens instead of waiting for a human to recount.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_their_own_enumerations_agree_with_their_lists"
+        ),
+        claim="a spelled enumeration is the count of the items printed under it",
+    ),
+    Mutation(
+        identifier="spelled-rule-stops-being-generated-from-the-number-table",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_SPELLED_WORDS = "|".join(sorted(SPELLED_NUMBERS, key=len, reverse=True))',
+        replacement=(
+            '_SPELLED_WORDS = "|".join(\n'
+            '    sorted((w for w in SPELLED_NUMBERS if w != "twenty-two"), key=len, reverse=True)\n'
+            ")"
+        ),
+        # Dropping one key from the generated alternation does not raise: `twenty-two committed
+        # files` stops being a claim of twenty-two and is read as a claim about two of them, because
+        # the shorter branch still completes the tail. The self-test compares the shipped rule with
+        # exactly this narrowing, so the generation is what fails rather than the prose.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_extractor_reads_percentages_and_refuses_labels"
+        ),
+        claim="the spelled alternatives come from the table the guards resolve through",
+    ),
+    Mutation(
+        identifier="spelled-rule-widened-to-a-document-nobody-classified",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_SPELLED_DOCUMENTS = ("README.md", "docs/reproducibility.md")',
+        replacement="_SPELLED_DOCUMENTS = _MARKDOWN_INVENTORY",
+        # #95's staging is the review decision: 22 spelled claims sit in the matrix and 14 in the
+        # rehearsal sheet, none of them classified. A rule switched on corpus-wide would report the
+        # inventory complete while silently stopping answering for those claims, so the wider read
+        # has to red here -- and the extractor self-test's staging assertion reddens with it.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
+        ),
+        claim="a document joins the spelled inventory only after its claims answer for themselves",
     ),
 )
 

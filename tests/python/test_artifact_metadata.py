@@ -813,6 +813,15 @@ def test_documents_that_count_the_suite_members_agree_with_the_registry() -> Non
     )
     assert _as_int(skips.group(2)) == total
 
+    # The front page's reason for passing `--require-all` names the same population in its own
+    # words, and had named four since the commit that first shipped the sentence declared five.
+    skipping = re.search(r"quietly skipping (\w+) members", readme)
+    assert skipping, "README.md no longer states how many members would skip without --require-all"
+    assert _as_int(skipping.group(1)) == skippable, (
+        f"README says {skipping.group(1)!r} members skip quietly, {skippable} registry members "
+        "declare an oracle in `requires`"
+    )
+
     defense = (REPO_ROOT / "docs" / "interview_defense.md").read_text(encoding="utf-8")
     executed = re.search(r"(\d+)/(\d+)\s+benchmark-suite\s+members\s+executed", defense)
     assert executed and int(executed.group(2)) == total, (
@@ -1003,6 +1012,94 @@ def test_the_validation_matrix_heading_counts_its_own_caveat_paragraphs() -> Non
     assert _as_int(match.group(1)) == paragraphs, (
         f"the heading says {match.group(1)} rows and the section has {paragraphs} paragraphs"
     )
+
+
+def test_documents_that_count_their_own_enumerations_agree_with_their_lists() -> None:
+    """Three counts in the living documents enumerate the items beside them, not a memory.
+
+    The spelled inventory exists because a digit-only reader cannot see these, and widening it found
+    one stale on arrival: Phase 11 wrote "Three rows in the full matrix are the ones to interrogate"
+    over three rows, Phase 12 added a fourth -- the stress-map bound -- under the same sentence, and
+    25 phases of green gates passed it. The same paragraph cited "Row 14" for a bound the matrix
+    numbers 15, so the front page pointed a reader at another row while quoting the right status.
+    Neither number is retyped now: each is counted from the items under it, every row label the list
+    cites has to exist in the matrix it cites, and the two restatements elsewhere are compared with
+    the same derivation rather than with each other.
+    """
+    matrix = (REPO_ROOT / "docs" / "validation_matrix.md").read_text(encoding="utf-8")
+    labels = {match.group(1) for match in re.finditer(r"^\| (\d+[a-z]?) \|", matrix, flags=re.M)}
+    assert labels, "the matrix no longer numbers its rows, so no citation can be checked"
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+    def bulleted(text: str, lead: str, marker: re.Pattern[str]) -> tuple[str, list[str]]:
+        """The spelled count `lead` states and the list of items that immediately follows it.
+
+        A bullet's continuation is indented, so only a non-indented line ends the list; stopping at
+        the first line that is not an item would read a four-bullet list as one.
+        """
+        found = re.search(lead, text)
+        assert found, f"{lead!r} no longer introduces a countable list"
+        listed: list[str] = []
+        for line in text[found.end() :].split("\n"):
+            if marker.match(line):
+                listed.append(line)
+            elif listed and line.strip() and not line.startswith((" ", "\t")):
+                break
+        assert listed, f"nothing follows {lead!r}, so the count it states has no producer"
+        return found.group(1), listed
+
+    row_item = re.compile(r"^- \*\*Row (\d+[a-z]?)\b")
+    stated, rows = bulleted(
+        readme,
+        r"(\w+) rows in the full matrix are the ones",
+        row_item,
+    )
+    assert _as_int(stated) == len(rows), (
+        f"README says {stated!r} rows are the ones to interrogate and lists {len(rows)}"
+    )
+    cited = [row_item.match(line).group(1) for line in rows]
+    assert len(set(cited)) == len(cited), f"a row is enumerated twice in README: {cited}"
+    outside = sorted(set(cited) - labels)
+    assert not outside, (
+        f"README interrogates matrix rows {outside}, which the table does not number"
+    )
+
+    stated, entries = bulleted(
+        readme,
+        r"and (\w+) entries matter more than the rest",
+        re.compile(r"^- \*\*[^*\n]+\*\*"),
+    )
+    assert _as_int(stated) == len(entries), (
+        f"README says {stated!r} limitations matter most and lists {len(entries)}"
+    )
+
+    artifacts = {
+        entry["path"] for entry in json.loads(MANIFEST.read_text(encoding="utf-8"))["artifacts"]
+    }
+    reproducibility = (REPO_ROOT / "docs" / "reproducibility.md").read_text(encoding="utf-8")
+    lead = re.search(r"(\w+) artifacts carry wall-clock columns", reproducibility)
+    assert lead, "docs/reproducibility.md no longer enumerates the wall-clock artifacts"
+    low, high = _paragraph_span(reproducibility, lead.start())
+    named = [
+        match.group(1)
+        for match in re.finditer(r"`([\w./-]+\.(?:json|csv))`", reproducibility[low:high])
+        if match.group(1) in artifacts
+    ]
+    assert named, "the timing paragraph names no artifact the evidence freeze carries"
+    assert _as_int(lead.group(1)) == len(named), (
+        f"the note says {lead.group(1)!r} artifacts carry wall-clock columns and names {len(named)}"
+    )
+
+    for restatement in (
+        r"for (\w+) files its wall-clock columns",
+        r"The (\w+) artifacts that do move",
+    ):
+        found = re.search(restatement, _folded_document("README.md"))
+        assert found, f"README.md no longer restates the wall-clock count as {restatement!r}"
+        assert _as_int(found.group(1)) == len(named), (
+            f"README restates {found.group(1)!r} against the {len(named)} artifacts the timing "
+            "paragraph names"
+        )
 
 
 def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
@@ -1320,11 +1417,30 @@ _REPORT_NOUNS = (
 # `run` is deliberately absent while `runs` is present: in this corpus the singular fires only on
 # `uv run` inside a command block, which the extractor would then report as paths-per-second
 # claims (measured: `200000 uv run`), while `67 runs` and `160 runs` are real.
-_REPORT_CLAIM = re.compile(
-    r"(?<![A-Za-z\d#.])"
-    r"(\d[\d{},]*(?:\.\d+)?)\s*%?\s+(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b",
-    re.I,
+_CLAIM_TAIL = r"\s*%?\s+(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b"
+# One exclusion and one number shape, shared by the digit rule and the spelled rule below. Written
+# twice they would drift, and the drift is invisible: a lookbehind loosened in only one of the two
+# hands one reader a version number as a quantity while the other stays clean.
+_CLAIM_EXCLUDE = r"(?<![A-Za-z\d#.])"
+_CLAIM_DIGITS = r"\d[\d{},]*(?:\.\d+)?"
+_CLAIM_NUMBER = _CLAIM_EXCLUDE + r"(" + _CLAIM_DIGITS + r")"
+_REPORT_CLAIM = re.compile(_CLAIM_NUMBER + _CLAIM_TAIL, re.I)
+
+# A count written in words is the same claim about the same quantity: `nineteen members` and
+# `19 members` disagree exactly as often, and the register's own reader has resolved spelled words
+# through `SPELLED_NUMBERS` since Phase 22 while the extractor could not see them (#95). The spelled
+# alternatives are generated from that table rather than copied out of it, and property 5 measures
+# the generation: drop one key from the list and `twenty-two committed files` stops being a claim of
+# twenty-two and becomes a claim about two of them, which no reader would notice in a diff.
+# The widening is enabled per document, not globally, and that is a review decision rather than a
+# convenience: measured on 2026-10-13 the five inventoried documents carry 109 spelled claims, and a
+# first run that classified all of them at once would be a diff nobody can read. #95 records the
+# staged rollout; `_SPELLED_DOCUMENTS` is the stage.
+_SPELLED_WORDS = "|".join(sorted(SPELLED_NUMBERS, key=len, reverse=True))
+_CLAIM_NUMBER_OR_WORD = (
+    _CLAIM_EXCLUDE + r"((?:" + _CLAIM_DIGITS + r")|\b(?:" + _SPELLED_WORDS + r"))"
 )
+_SPELLED_REPORT_CLAIM = re.compile(_CLAIM_NUMBER_OR_WORD + _CLAIM_TAIL, re.I)
 
 # `the Phase 1 consistency test` is one test named by the phase that wrote it, and `pinned in the
 # Phase 2 test files` names files rather than counting them, so the number after the word is a
@@ -1349,14 +1465,15 @@ def _is_labelled(flat: str, at: int) -> bool:
     return bool(_LABEL_BEFORE.search(flat[max(0, at - 60) : at]))
 
 
-def _extract_claims(flat: str) -> list[re.Match[str]]:
+def _extract_claims(flat: str, *, spelled: bool = False) -> list[re.Match[str]]:
     """Every countable claim the rule finds, with the label shapes removed.
 
     Both inventories go through here, so a document cannot be read by a looser rule than the report.
+    `spelled` selects the rule that also reads a numeral written in words; it is per document, and a
+    document is only opted in once its claims have been classified -- see `_SPELLED_DOCUMENTS`.
     """
-    return [
-        match for match in _REPORT_CLAIM.finditer(flat) if not _is_labelled(flat, match.start(1))
-    ]
+    rule = _SPELLED_REPORT_CLAIM if spelled else _REPORT_CLAIM
+    return [match for match in rule.finditer(flat) if not _is_labelled(flat, match.start(1))]
 
 
 # Pattern -> (owning test, file that holds it). Each pattern is required to occur verbatim in that
@@ -1651,6 +1768,13 @@ _MARKDOWN_INVENTORY = (
     "docs/validation_matrix.md",
 )
 
+# The documents whose spelled-numeral claims the inventory reads. Bringing one in is a phase's work:
+# its owners have to carry the spelled spelling of each pattern they already own, and every residual
+# claim has to answer with a reason. This pair is the smallest group #95 measured (28 of the 109).
+# A document joins by being listed here, and the inventory guard refuses a listing whose claims are
+# not all classified, so the set cannot grow quietly and cannot be decorative.
+_SPELLED_DOCUMENTS = ("README.md", "docs/reproducibility.md")
+
 
 _MD_BACKTICK = re.compile(r"`([^`\n]+)`")
 
@@ -1805,6 +1929,80 @@ _MARKDOWN_OWNED: dict[str, tuple[str, str]] = {
         "test_the_derivation_command_agrees_at_the_precision_floor",
         "tests/python/test_fifth_order_partials.py",
     ),
+    # The spelled spellings (#95). A count written in words is the same claim as the same count
+    # written in digits, and the guards below have always read the words through `SPELLED_NUMBERS`
+    # -- what they never had was a spelling the inventory could match a claim against. Each entry is
+    # the literal its owner searches with, so the credit is transcription, not invention; the last
+    # five are fragments or lead phrases of a pattern the owner holds, which the verbatim check
+    # admits because the owner really does search with them.
+    r"is the full table . (\w+(?:-\w+)?) rows over": (
+        "test_documents_that_count_the_validation_matrix_rows_agree_with_the_table",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"runs\s+all\s+(\w+)\s+members": (
+        "test_documents_that_count_the_suite_members_agree_with_the_registry",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+)\s+correctness\s+benchmarks": (
+        "test_documents_that_count_the_suite_members_agree_with_the_registry",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+)\s+statistical\s+experiments": (
+        "test_documents_that_count_the_suite_members_agree_with_the_registry",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+)\s+of\s+the\s+(\w+)\s+members\s+report\s+`skipped`": (
+        "test_documents_that_count_the_suite_members_agree_with_the_registry",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"quietly skipping (\w+) members": (
+        "test_documents_that_count_the_suite_members_agree_with_the_registry",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+) experiments, each answering": (
+        "test_the_readme_experiment_count_agrees_with_the_experiments_on_disk",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+) CI jobs run on every push": (
+        "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"is (\w+) modules that gate": (
+        "test_the_offline_test_count_is_measurable_before_the_runner",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"re-frozen (\w+(?:-\w+)?) times": (
+        "test_documents_quote_the_performance_figures_the_artifact_actually_holds",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"those (\w+(?:-\w+)?) committed files": (
+        "test_documents_quote_the_performance_figures_the_artifact_actually_holds",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"same (\w+(?:-\w+)?) readings give": (
+        "test_documents_quote_the_performance_figures_the_artifact_actually_holds",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+) rows in the full matrix are the ones": (
+        "test_documents_that_count_their_own_enumerations_agree_with_their_lists",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"and (\w+) entries matter more than the rest": (
+        "test_documents_that_count_their_own_enumerations_agree_with_their_lists",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+) artifacts carry wall-clock columns": (
+        "test_documents_that_count_their_own_enumerations_agree_with_their_lists",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"for (\w+) files its wall-clock columns": (
+        "test_documents_that_count_their_own_enumerations_agree_with_their_lists",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"The (\w+) artifacts that do move": (
+        "test_documents_that_count_their_own_enumerations_agree_with_their_lists",
+        "tests/python/test_artifact_metadata.py",
+    ),
 }
 
 # Literal phrases whose numbers are not living quantities, and why. Checked twice, as the report's
@@ -1857,6 +2055,18 @@ _MARKDOWN_DECLARED: dict[str, str] = {
         "the lattice depth docs/model_cards/crr_binomial.md states beside its measured error; "
         "the frozen artifact carries the slopes and final errors, not the depth"
     ),
+    # The two spelled claims in the opted-in pair that are not a quantity of anything in this tree
+    # (#95). Each is load-bearing: withholding it leaves the claim unowned, so neither is a spare.
+    "restated a freeze": (
+        "the release gap finding 55 counted on the revision graph when it was written, a property "
+        "of that superseded PDF rather than of this tree -- the guard policing the render compares "
+        "its sources, not the number of tags between two releases"
+    ),
+    "within the last one or": (
+        "an idiom for agreement in the last place or two of a floating-point reading; no producer "
+        "counts digits, and the readings it summarises are each owned by the guard that publishes "
+        "them"
+    ),
 }
 
 
@@ -1870,6 +2080,23 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
     documents = {name: _markdown_inventory_text(name) for name in _MARKDOWN_INVENTORY}
     for name, (masked, flat) in documents.items():
         assert len(masked) == len(flat), f"{name}: the inventory lost its offset alignment"
+
+    assert set(_SPELLED_DOCUMENTS) <= set(_MARKDOWN_INVENTORY), (
+        f"{sorted(set(_SPELLED_DOCUMENTS) - set(_MARKDOWN_INVENTORY))} reads spelled claims but is "
+        "not in the inventoried corpus"
+    )
+    for name in _SPELLED_DOCUMENTS:
+        flat = documents[name][1]
+        digits = {match.group(0) for match in _extract_claims(flat)}
+        only_spelled = [
+            match.group(0)
+            for match in _extract_claims(flat, spelled=True)
+            if match.group(0) not in digits
+        ]
+        assert only_spelled, (
+            f"{name} is listed as spelled-inventoried but the rule finds no claim there that the "
+            "digit-only rule misses, so the listing exempts nothing"
+        )
 
     for pattern, (owner, holder) in _MARKDOWN_OWNED.items():
         assert pattern in (REPO_ROOT / holder).read_text(encoding="utf-8"), (
@@ -1892,7 +2119,7 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
 
     classified: dict[str, tuple[list, list, object]] = {}
     for name, (masked, flat) in documents.items():
-        claims = _extract_claims(flat)
+        claims = _extract_claims(flat, spelled=name in _SPELLED_DOCUMENTS)
         assert claims, f"{name} yields no countable claims, so this guard proves nothing about it"
 
         owned: list[tuple[int, int]] = []
@@ -1950,15 +2177,20 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
 
 
 def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
-    """Four shapes of the extractor were stated in comments, and a comment cannot fail.
+    """Five shapes of the extractor were stated in comments, and a comment cannot fail.
 
     Phase 29 wrote the `#` and trailing-period exclusions into the rule and recorded why in the
-    block above it; nothing asked whether they fire. This phase added three more shapes -- a `%`
+    block above it; nothing asked whether they fire. That phase added three more shapes -- a `%`
     allowance, a dotted-token exclusion and a label filter -- and one deletion (`run` stays out of
-    the noun list while `runs` is in it), so the rule now has five judgements embedded in it and no
+    the noun list while `runs` is in it), so the rule had five judgements embedded in it and no
     reader. Each property below is two-sided on this repository's own documents: the rule must find
     what it is meant to find and refuse what it is meant to refuse, and the refusal has to be
     demonstrated by the looser rule finding something the shipped one does not.
+
+    The sixth shape is Phase 38's: a numeral written in words, which the guards have resolved
+    through `SPELLED_NUMBERS` since Phase 22 while the extractor could not see it at all (#95).
+    Property 5 reads it two-sided too, and pins that the widening is staged per document rather
+    than switched on for the corpus in one diff nobody can review.
     """
     corpus = {
         "paper/technical_report.tex": _tex_inventory_text()[1],
@@ -2030,6 +2262,43 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
         for flat in corpus.values()
         for match in _extract_claims(flat)
     ), "the plural earns nothing either, so the noun list has accreted"
+
+    # 5. A count written in words is the same claim as the same count in digits, and the rule that
+    #    reads it is switched on per document rather than across the corpus in one step (#95).
+    assert set(_SPELLED_DOCUMENTS) < set(_MARKDOWN_INVENTORY), (
+        "every inventoried document now reads spelled claims, so the staged rollout has no step "
+        "left and this assertion should be retired with the staging"
+    )
+    # The alternation is generated from the table, and that generation is the load-bearing part:
+    # with one key missing, the sentence below stops stating a claim of twenty-two and states a
+    # claim about two of them instead -- a quantity the document never printed.
+    without_a_key = "|".join(
+        sorted((word for word in SPELLED_NUMBERS if word != "twenty-two"), key=len, reverse=True)
+    )
+    narrower = re.compile(
+        _CLAIM_NUMBER_OR_WORD.replace(_SPELLED_WORDS, without_a_key) + _CLAIM_TAIL, re.I
+    )
+    assert narrower.pattern != _SPELLED_REPORT_CLAIM.pattern, "the reconstruction did not narrow"
+    sentence = "the ratios of those twenty-two committed files are the honest measure"
+    shipped = [match.group(1) for match in _SPELLED_REPORT_CLAIM.finditer(sentence)]
+    missed = [match.group(1) for match in narrower.finditer(sentence)]
+    assert shipped == ["twenty-two"], shipped
+    assert missed == ["two"], (
+        f"removing one table key left {missed} rather than a shorter reading of the same claim, so "
+        "this control certifies nothing about the generation"
+    )
+    for name in _SPELLED_DOCUMENTS:
+        flat = corpus[name]
+        digits = {match.group(0) for match in _REPORT_CLAIM.finditer(flat)}
+        spelled = {match.group(0) for match in _SPELLED_REPORT_CLAIM.finditer(flat)}
+        assert digits <= spelled, f"{name} loses a digit claim when the spelled rule reads it"
+        gained = sorted(spelled - digits)
+        assert gained, f"{name} gains nothing from the spelled rule, so the rule is untested here"
+        for claim in gained:
+            word = claim.split()[0].rstrip(".,;")
+            assert word.lower() in SPELLED_NUMBERS, (
+                f"{name}'s {claim!r} does not begin with a numeral the table resolves"
+            )
 
 
 def _repository_release_tags() -> list[str]:
@@ -2590,6 +2859,16 @@ def test_the_offline_test_count_is_measurable_before_the_runner() -> None:
         f"gated modules became collection errors, which is not the runner's shape: {probe['tail']}"
     )
     assert probe["module_skips"] == 4, probe
+
+    # The note states the same figure in words, and #95's reader can now see it: a count written as
+    # `four modules` was invisible to a digit-only inventory, so nothing compared it with the skip
+    # records the probe collects.
+    gated = re.search(r"is (\w+) modules that gate", _folded_document("docs/reproducibility.md"))
+    assert gated, "docs/reproducibility.md no longer states how many modules gate at module level"
+    assert _as_int(gated.group(1)) == probe["module_skips"], (
+        f"the note says {gated.group(1)!r} modules gate on an oracle import; the probe collected "
+        f"{probe['module_skips']} module-level skip records"
+    )
     assert probe["collected"] is not None, probe["tail"]
     collected = int(probe["collected"])
 
@@ -3287,6 +3566,20 @@ def test_the_performance_guards_are_not_vacuous() -> None:
         assert f"{pinned:.1f}" == fields["py_spread"], (
             "the guard's own arithmetic disagrees with the pinned spread it polices"
         )
+        # The same history is counted in words three times over in the note that explains the band,
+        # and a spelled count is exactly what the digit-only inventory could not see (#95).
+        counted = _folded_document("docs/reproducibility.md")
+        for spelling in (
+            r"re-frozen (\w+(?:-\w+)?) times",
+            r"those (\w+(?:-\w+)?) committed files",
+            r"same (\w+(?:-\w+)?) readings give",
+        ):
+            found = re.search(spelling, counted)
+            assert found, f"the note no longer states the reading count as {spelling!r}"
+            assert _as_int(found.group(1)) == len(readings), (
+                f"{spelling!r} reads {found.group(1)!r} while the committed history holds "
+                f"{len(readings)} readings of the speed artifact"
+            )
     block = SPREAD_CLAIMS["docs/reproducibility.md"][0].format(**fields)
     doc = (REPO_ROOT / "docs/reproducibility.md").read_text(encoding="utf-8")
     assert block in doc
@@ -3325,6 +3618,14 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
         if runs:
             lanes.append((name, steps, min(runs)))
     assert lanes, "no CI job runs pytest, so this guard would certify an empty set"
+
+    claimed_jobs = re.search(r"(\w+) CI jobs run on every push", _folded_document("README.md"))
+    assert claimed_jobs, "README.md no longer states how many CI jobs run on a push"
+    jobs = sorted(workflow.get("jobs") or {})
+    assert _as_int(claimed_jobs.group(1)) == len(jobs), (
+        f"README says {claimed_jobs.group(1)!r} CI jobs run on every push, the workflow defines "
+        f"{len(jobs)}: {jobs}"
+    )
 
     for name, steps, first_run in lanes:
         checks_out = [

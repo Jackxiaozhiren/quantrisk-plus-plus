@@ -140,19 +140,21 @@ The four that carry a first reading:
 | Monte Carlo z, pooled over 160 runs (`benchmarks/quantlib/results/monte_carlo_validation.json`) | mean 0, std 1 | mean ≤ 0.05, std 0.92–1.01 |
 | Six solvers vs cvxpy + PyPortfolioOpt, 75 problems | per-problem 1e-11 to 1e-5 | objective 4.48e-9, bound violation exactly 0 |
 
-Three rows in the full matrix are the ones to interrogate, because they are where a weaker
-project would have stopped. The Heston comparison reaches 4.5e-3 relative, and that number is *our
-discretisation bias plus the oracle's own integration tolerance* — recorded as
-`partially validated` rather than rounded into a pass. The bootstrap interval coverage on
-clustered data is 0.693 against a nominal 0.900, which is a real failure of the method and
-not of the implementation; it is published as the finding. And row 13, the real-data arm, has
-**no oracle at all** — a sample carries no independent truth to check against, so it reports
-realised violation rates with exact binomial intervals and is labelled `validated (L1 only)`
-rather than being quietly promoted into the oracle-validated block. Row 14 is the other kind of
-weakness: the bound on the stress map's truncation error is `validated (L1 only)` too, because a
-Taylor remainder has no second implementation to compare against — it is checked by trapping the
-coefficient between the extremes of a function along the path, and independently against a finite
-difference of the order below.
+Four rows in the full matrix are the ones to interrogate, because they are where a weaker project
+would have stopped. Each is named by the row it interrogates.
+
+- **Row 6, the Heston comparison,** reaches 4.5e-3 relative, and that number is *our discretisation
+  bias plus the oracle's own integration tolerance* — recorded as `partially validated` rather than
+  rounded into a pass.
+- **Row 9b, the bootstrap interval coverage,** is 0.693 against a nominal 0.900 on clustered data,
+  which is a real failure of the method and not of the implementation; it is published as the finding.
+- **Row 13, the real-data arm,** has **no oracle at all** — a sample carries no independent truth to
+  check against, so it reports realised violation rates with exact binomial intervals and is labelled
+  `validated (L1 only)` rather than being quietly promoted into the oracle-validated block.
+- **Row 15 is the other kind of weakness:** the bound on the stress map's truncation error is
+  `validated (L1 only)` too, because a Taylor remainder has no second implementation to compare
+  against — it is checked by trapping the coefficient between the extremes of a function along the
+  path, and independently against a finite difference of the order below.
 
 ## Benchmark
 
@@ -295,7 +297,7 @@ uv run ctest --preset dev           # 204 C++ tests, 548,368 assertions
 
 Three CI jobs run on every push: lint and format, the full build with both test suites, and
 the benchmark suite against live oracles with `--require-all` so a missing oracle fails the
-job rather than quietly skipping four members. The third job is new and has not yet completed
+job rather than quietly skipping six members. The third job is new and has not yet completed
 on a GitHub-hosted runner; see `docs/reproducibility.md`.
 
 ---
