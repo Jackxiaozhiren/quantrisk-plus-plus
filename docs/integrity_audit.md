@@ -2006,3 +2006,38 @@ the variable -- the very one the harness exists to isolate -- put the first byte
 control looked, the control compiled fresh, and the test reddened on a clean tree with a message blaming
 the fixture. Both runs now take the same environment, the premise is asserted where it is established,
 and the assertion was shown to fire by sending the first run's cache away on purpose.
+
+## Addendum — Phase 39, the wall that moved with the list, and a count that spoke in the wrong tense (2026-10-14)
+
+**79. `MUTATIONS` and its interpreter shared a file, so the one guard whose defect is in the
+interpreter could not be planted at all.** The harness requires an anchor to occur exactly once in its
+target. A plant naming a line of `scripts/run_mutation_suite.py` therefore put a second copy of that
+line in the same file -- the entry's own `anchor=` literal -- so the count was always two, the case was
+refused before it ran, and
+`test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated` could only be shown red by
+editing the file, running the node by hand, reading the assertion, and restoring it. Phase 34 recorded
+that demonstration as #94; a demonstration is not re-run when the plumbing next changes, which is
+exactly the failure the harness exists to prevent for everyone else's guards.
+
+(a) **The fix is a file boundary, and the phase asserts the boundary rather than trusting it.** The list
+   and the `Mutation` type moved to `scripts/mutation_plants.py`, loaded by path (`scripts/` is not a
+   package, so the harness loads it the way the self-test loads the harness). The new guard
+   `test_the_plant_list_lives_where_a_plant_can_reach_the_harness` proves the list is defined in the data
+   module, proves no part of it crept back into the interpreter, and proves the plant that needed the
+   move has exactly one anchor there. `harness-spawns-a-guard-subprocess-without-a-bytecode-prefix` is
+   that plant: its anchor is the single call site in `Harness.uv`, its replacement drops the isolation
+   argument, and its guard is the check Phase 34 could only demonstrate.
+
+(b) **The wall moved with the list, and that is stated rather than fixed.** A plant still cannot anchor
+   on a line of the file holding the plant list -- now `scripts/mutation_plants.py`. What that leaves
+   unplantable is a defect *in the list data*: a blank claim, a duplicated identifier, an entry whose
+   guard node does not exist. Each of those is a structural property the self-test reads off the loaded
+   objects, not an effect a tree edit can produce, so the residual boundary is #94(a) rather than a gap
+   in coverage.
+
+(c) **Cascading the plant count surfaced a wrong-tense claim in living prose.** The rehearsal sheet's
+   Q24 said "Nineteen are declared", in the present, of a list that has since grown to 77; the sentence
+   sits two lines above a quotation of `19/19` from the revision it actually describes. It now names its
+   revision, and points at the sweep annotation as the living figure, which a guard compares with the
+   declared list. Note the shape: the count was spelled ("Nineteen"), which is #95's remaining group --
+   the sheet carries 14 spelled claims and is the next document in that rollout.

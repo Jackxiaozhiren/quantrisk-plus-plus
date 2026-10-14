@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 515 pytest tests with
-    the `oracles` extra installed, and the same tree collects 446 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 516 pytest tests with
+    the `oracles` extra installed, and the same tree collects 447 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -996,16 +996,31 @@ never removed just because a later phase shipped.
     its anchor to occur exactly once in the target file — that is finding 25's failure mode, an edit that
     lands on nothing and is then counted as caught. A plant whose anchor is a line of that same file
     therefore contains a second copy of the line it is looking for, so the count is always two and the case
-    is refused before it runs. One guard sits behind that wall: 
+    is refused before it runs. One guard sits behind that wall:
     `test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated`, whose defect is dropping the
     isolation argument in `Harness.uv` -- unlike the plant-count guard, which is planted through the
-    annotation in a *document* rather than through the list itself. Phase 34 showed the first one red the
-    first one red the only way left: edit the call to pass no environment, run the node, read
+    annotation in a *document* rather than through the list itself. Phase 34 showed it red the only way
+    left: edit the call to pass no environment, run the node, read
     `AssertionError: a guard subprocess was spawned with no environment at all`, restore, run again. That is
     a demonstration rather than an instrument, which means it is not re-run by CI, is not repeated when the
     guard next changes, and can be forgotten. The structural answer would be to move the plant list out of
     the file that interprets it -- `MUTATIONS` into a data module the harness loads -- and nothing here does
     that yet, because it changes the file every future phase edits.
+
+    **Amended 2026-10-14 by Phase 39: the move is done, and the guard behind it has a declared defect.**
+    `Mutation` and `MUTATIONS` now live in `scripts/mutation_plants.py`, which the harness loads by file
+    path (`PLANTS_PATH`, asserted to be the list's only definition by
+    `test_the_plant_list_lives_where_a_plant_can_reach_the_harness`). The unlocked plant is
+    `harness-spawns-a-guard-subprocess-without-a-bytecode-prefix`, whose anchor is the single call site in
+    `Harness.uv` and whose guard is the isolation check Phase 34 could only demonstrate by hand.
+    (a) The boundary moved with the list rather than vanishing: a plant still cannot anchor on a line of
+    the file that holds the plant list, because its own entry would be the second copy. What that leaves
+    unplantable is a defect *in the list data* -- an entry with a blank claim, a duplicated identifier --
+    and those are structural properties the self-test reads off the loaded objects rather than effects a
+    tree edit can produce, so the residual is stated, not fixed.
+    (b) One measured cost of the split: `--list`, `--kind` and `--only` all resolve through the loaded
+    tuple, so the CLI is unchanged, while the file a future phase edits for a plant is now two files and
+    the anchor census reads both.
 
 95. **The claim inventory reads digits, so a count written in words is invisible to it, and its two
     exclusion rules can be used to hide a claim as easily as to excuse one.**

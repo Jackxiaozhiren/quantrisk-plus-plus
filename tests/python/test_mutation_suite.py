@@ -38,6 +38,40 @@ ALL_CPP_TESTS = "\n".join(
 )
 
 
+def test_the_plant_list_lives_where_a_plant_can_reach_the_harness() -> None:
+    """#94's fix is a file boundary, and a boundary is one refactor away from being undone.
+
+    While the list and the interpreter shared `scripts/run_mutation_suite.py`, a plant naming a line
+    of that file found the line twice -- once in the code and once in its own entry -- so the sweep
+    refused the case and the bytecode-isolation guard could only be shown red by hand, which CI
+    never re-runs. The split is what makes that plant legal, so this asserts three things: the list
+    is defined in the data module, no part of it has crept back into the interpreter, and the single
+    plant that needed the move really does have a unique anchor there.
+    """
+    plants_path = REPO_ROOT / "scripts" / "mutation_plants.py"
+    assert plants_path.is_file(), "the plant list has no module to live in"
+    plants_source = plants_path.read_text(encoding="utf-8")
+    harness_source = HARNESS_PATH.read_text(encoding="utf-8")
+    definition = "MUTATIONS: tuple[Mutation, ...] = ("
+    assert definition in plants_source, "the data module no longer defines the list"
+    assert definition not in harness_source, (
+        "a plant list has reappeared in the interpreter, which is the duplication #94 records: any "
+        "plant naming a line of that file would find it twice"
+    )
+    assert harness.MUTATIONS and all(
+        type(item) is harness.Mutation for item in harness.MUTATIONS
+    ), "the harness reads a different Mutation type than the list defines"
+
+    pointed = [item for item in harness.MUTATIONS if item.path == "scripts/run_mutation_suite.py"]
+    assert len(pointed) == 1, f"expected the one plant the split unlocked, found {len(pointed)}"
+    occurrences = harness_source.count(pointed[0].anchor)
+    assert occurrences == 1, (
+        f"{pointed[0].identifier}'s anchor occurs {occurrences} times in the interpreter, so "
+        "the sweep would refuse it before running"
+    )
+    assert pointed[0].replacement != pointed[0].anchor, "the plant would edit the line into itself"
+
+
 def test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists() -> None:
     """The list may not rot: a stale anchor or a renamed guard would make the harness report a lie.
 
