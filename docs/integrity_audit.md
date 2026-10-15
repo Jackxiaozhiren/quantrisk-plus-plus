@@ -2068,3 +2068,28 @@ count that made this visible: `2` is not one of the texts #100 measured, so the 
 loudly instead of quietly widening the expectation. Property 3, which had used the same replace-the-literal
 trick since Phase 35, was safe only because `.` is not load-bearing inside `A-Z` -- a coincidence about
 punctuation, not a property of the method, and the helper now slices the trailing dash instead.
+
+## Addendum — Phase 40 record, the gate table contradicted itself across the two vantages (2026-10-15)
+
+**81. The Phase 40 §5 row for `ruff format --check .` reported `181 files already formatted` on a tree
+that formats as 182, and the CI row of the same table reported 182.** The walk is not a Python-only
+census: the pinned ruff's own `file_resolver.include` carries `*.md` beside `*.py`/`*.pyi`/`*.ipynb`, and
+measured on the `99c69bb` export the included set is 88 markdown documents, 86 `.py` and 8 `.pyi` -- 182
+files, where `git ls-files '*.py' '*.pyi'` counts 94. The row had been taken during the gate sequence,
+*before* the phase's own report existed, so the file that carries the number is one of the files the
+number counts. The two vantages agree on the commit; the disagreement was between the commit and the
+working tree at the moment the gate was launched.
+
+(a) **The catch was reading the runner's log instead of quoting the local number.** Had this phase's CI
+row been written from the badge, or from the earlier local run, the table would have carried one wrong
+figure and no disagreement to notice. The rule this phase re-confirms: a §5 row is a measurement of the
+revision the report names, so it is re-run on that revision (here `git archive 99c69bb` into a scratch
+directory) rather than inherited from the working tree the phase happened to be sitting in.
+
+(b) **A prose-last release order moves a lint denominator, and nothing said so.** `CONTRIBUTING.md` §4
+puts the document sync last among regenerations, which is right for the evidence and wrong for the
+format lane: the reports and release bodies that step adds are files the lane counts. Measured across
+three revisions -- `d1306a4` 178, `bf656a9` 181, `99c69bb` 182 -- the walk has never been stable for two
+phases running, and every earlier report that recorded it is recording the tree at its own launch. The
+correction is appended with its date rather than written over, and the row now names both the number and
+where it came from.

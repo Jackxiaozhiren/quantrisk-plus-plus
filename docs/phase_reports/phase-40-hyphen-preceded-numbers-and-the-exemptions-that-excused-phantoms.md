@@ -88,12 +88,16 @@ extractor invented.
 | Gate | Command | Measured result |
 |---|---|---|
 | Lint | `.venv/bin/ruff check .` | All checks passed! |
-| Format | `.venv/bin/ruff format --check .` | 181 files already formatted -- a walk of this directory, not a census (finding 62(d)) |
+| Format | `.venv/bin/ruff format --check .` | 182 files already formatted on the `99c69bb` export and on this tree -- a walk of markdown as well as Python, not a census (finding 62(d)). **Dated correction:** this row first read `181`, measured before this report existed, which is one of the 182 files (finding 81) |
 | Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
 | Docs + harness lanes | `.venv/bin/python -m pytest tests/python/test_artifact_metadata.py tests/python/test_mutation_suite.py -q` | 70 passed (61 docs, 9 harness) |
 | Anchor census | `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` | 78 declared plants, every anchor unique in its file, every guard present in its named file |
-| Falsification, full sweep | recorded below from `build/mutation-sweep-40.log` | measured on the committed tree, in the row this file cannot carry about itself |
-| CI on the pushed head | `gh api …/commits/<sha>/check-runs` and the job logs | recorded after the push, from the runner's own logs |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `99c69bb`, logged to `build/mutation-sweep-40.log` | **`78/78 planted defects were rejected by their guard.`**, 78 rows of that status and no other, tree clean afterwards. The phase's own plant is among them: `extractor-reads-a-hyphenated-compound-tail-as-a-quantity ... ok caught` |
+| CI on the pushed head | `gh api …/commits/99c69bb/check-runs` after the push, and again when the last job concluded | run `38676271809`, three jobs `completed/success` (SonarCloud `neutral`, as ever) |
+| CI's own lane numbers | the job log, read rather than inferred from the green | `All checks passed!`, `182 files already formatted`, `Success: no issues found in 23 source files`; `100% tests passed out of 204`; `446 passed, 5 skipped in 205.84s (0:03:25)`; `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 427.9s total`. The #91 reconciliation holds on the runner's numbers: `446 + 5 = 451 = 447 + 4` |
+
+The runner's format count, `182`, is what the same command reports on a `git archive` of `99c69bb`, so
+the local and remote vantages agree and the row above was the stale one (finding 81).
 
 ## 6. Numerical validation
 
@@ -128,6 +132,7 @@ No measurement is published. What moves and why:
 |---|---|---|
 | #100 (closed) | the hyphen exclusion, the six phantoms measured, the two exemptions that fell | fixed here; the entry keeps the shape of the failure on the record |
 | #95 (corrected) | 108 spelled-only claims under the shipped rule, 80 remaining | the counts are measurements of a rule, so a rule change re-measures them |
+| finding 81 (record, no register entry) | the §5 format row counted 181 on a commit that formats as 182, because the lane walks markdown and this report is one of the files | the mechanism is a release-order step, not a standing limitation: `CONTRIBUTING.md` §4 step 4 now says any lane whose count the report quotes is re-measured on the committed tree |
 | -- | no new entries opened by this phase | the residual in §7 is stated rather than numbered because it is the same mechanism as #100's, now fixed |
 
 ## 9. The gate

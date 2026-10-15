@@ -87,7 +87,9 @@ performed out of order in Phase 15, and every one of those produced a red gate r
    `tests/python/test_mutation_suite.py` fails on an anchor that no longer occurs — that failure is
    the mechanism working, not a nuisance to route around.
 4. Commit, then re-run the sweep **on the committed tree**, because it refuses a dirty target and its
-   verdict is a claim about the revision it ran on.
+   verdict is a claim about the revision it ran on. Re-measure any lane whose *count* the report quotes
+   at the same time: `ruff format --check .` walks markdown as well as Python, so a phase report written
+   after that lane ran records a file count one smaller than the commit it describes (finding 81).
 5. Tag the commit the runner verified, never a later one. `commits/<sha>/check-runs` is the ground
    truth; `gh run watch` can report completion while the run is still `in_progress`, and its
    `--exit-status` is not the verdict (`docs/integrity_audit.md` finding 36).
