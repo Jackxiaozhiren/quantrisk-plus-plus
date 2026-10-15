@@ -107,8 +107,9 @@ checked it.
 | Python | `.venv/bin/python -m pytest -q` | 517 passed in 275.09s |
 | Docs + harness lanes | `.venv/bin/python -m pytest tests/python/test_artifact_metadata.py tests/python/test_mutation_suite.py -q` | 71 passed (62 docs, 9 harness) |
 | Anchor census | `test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists` | 86 declared plants, every anchor unique in its file, every guard present in its named file |
-| Falsification, full sweep | recorded in the next commit, on the sha the sweep ran on | pending |
-| CI on the pushed head | recorded in the next commit, from the runner's own logs | pending |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `8713a59`, logged to `build/mutation-sweep-41.log` | **`86/86 planted defects were rejected by their guard.`** -- 86 rows carrying that status and none other. The phase's two new mechanisms are among them: `sheet-counts-rays-the-crossing-map-did-not-measure ... ok caught` and `declaration-anchor-for-the-backtest-families-stops-matching ... ok caught`. Tree clean afterwards (0 paths) |
+| CI on the pushed head | `gh api …/commits/8713a59/check-runs`, polled until the last job concluded | run `38686832039`, three jobs `completed/success` (SonarCloud `neutral`, as ever) |
+| CI's own lane numbers | the job log, read rather than inferred from the green | `All checks passed!`, `183 files already formatted`, `Success: no issues found in 23 source files`; `100% tests passed out of 204`; `447 passed, 5 skipped in 203.92s (0:03:23)`; `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 269.1s total`. The #91 reconciliation holds on the runner's numbers: `447 + 5 = 452 = 448 + 4` |
 
 ## 6. Numerical validation
 
