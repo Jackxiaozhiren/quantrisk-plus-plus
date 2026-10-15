@@ -1166,6 +1166,15 @@ never removed just because a later phase shipped.
     rather than as insurance -- and the honest version of that change adds the keys together with a guard
     that every key the table holds is matched by something in the corpus.
 
+    **Amended 2026-10-15 by Phase 44: closed by generation.** The table is built from its parts --
+    ones, teens, tens, and the hyphenated compounds the corpus's own style uses -- and covers every
+    value below one hundred, with property 7 of the extractor self-test proving the generation
+    two-sided: a twenty-seven-count sentence becomes a claim, and withholding one compound key
+    silences exactly that claim. The ceiling's first real consumer, Phase 43's report-file count,
+    had taken the digits fallback the entry predicted; the fallback is retired and the count is owned
+    spelled again. The matrix's row count now disagrees above twenty-six instead of crashing, which
+    the plant demonstrates by moving it to twenty-seven and reddening as a comparison.
+
 98. **A claim is credited to its owner because the owner's source contains the pattern string, which is
     transcription rather than application -- and Phase 38 leaned on that five times.** The inventory's
     ownership rule is `assert pattern in holder_source`, so `(\w+)\s+correctness\s+benchmarks` credits

@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 99/99 planted defects rejected",
+        anchor="# 102/102 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -1409,5 +1409,51 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_report_counts_what_the_studies_and_the_gates_have"
         ),
         claim="a growth sentence has to agree with the registry minus its own quoted past",
+    ),
+    Mutation(
+        identifier="matrix-row-count-survives-the-old-ceiling",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="It has twenty-six rows rather",
+        replacement="It has twenty-seven rows rather",
+        # #97's own prediction was that a twenty-seventh row would fail as a KeyError, because the
+        # flat numeral table stopped at twenty-six. The table generates to ninety-nine now, so this
+        # plant must fail as a *disagreement* -- the guard reads twenty-seven and compares it with
+        # the twenty-six labels the table carries -- which is the ceiling's closure, demonstrated.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_validation_matrix_rows_agree_with_the_table"
+        ),
+        claim="a spelled row count above the old flat dict's limit disagrees instead of crashing",
+    ),
+    Mutation(
+        identifier="report-counts-files-past-the-old-ceiling",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="forty-five report files, one per phase",
+        replacement="forty-six report files, one per phase",
+        # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
+        # generated table retires that fallback, and the spelled form is owned again. The plant
+        # moves the count one up so the disagreement, not a resolution failure, is what reddens.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_counts_what_the_studies_and_the_gates_have"
+        ),
+        claim="a report count above twenty-six is owned spelled, as the fallback promised",
+    ),
+    Mutation(
+        identifier="numeral-table-loses-its-hyphenated-compounds",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='f"{_SPELLED_TENS[tens]}-{_SPELLED_ONES[ones]}"',
+        replacement='f"{_SPELLED_TENS[tens]}{_SPELLED_ONES[ones]}"',
+        # The compound is the generation's product, and the hyphen is the corpus's own spelling of
+        # one (`twenty-two committed files`). Dropping it unnames every compound key, so the
+        # sentence in property 7 stops being two claims and the generation control names the loss.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_extractor_reads_percentages_and_refuses_labels"
+        ),
+        claim="a compound numeral exists because the generation builds it, hyphen and all",
     ),
 )

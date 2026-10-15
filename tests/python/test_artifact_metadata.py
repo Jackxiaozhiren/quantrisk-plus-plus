@@ -550,33 +550,49 @@ def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
         )
 
 
+# The numeral table, generated from its parts to every value below one hundred (#97). A flat dict
+# had to stop somewhere, and it stopped at twenty-six -- exactly the matrix's row count -- so the
+# first prose count above the ceiling was invisible to the inventory and a `KeyError` to any guard
+# that read it. Phase 43 hit that wall writing `forty-three report files` and fell back to digits;
+# the generation below retires the fallback. The compounds are hyphenated per the corpus's own
+# style (`twenty-two committed files`), which is what the spelled rule matches, and the first tens
+# are absent because nothing says `ten-three`.
+_SPELLED_ONES = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+_SPELLED_TEENS = (
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+)
+_SPELLED_TENS = (
+    "",
+    "",
+    "twenty",
+    "thirty",
+    "forty",
+    "fifty",
+    "sixty",
+    "seventy",
+    "eighty",
+    "ninety",
+)
+
 SPELLED_NUMBERS = {
-    "one": 1,
-    "two": 2,
-    "three": 3,
-    "four": 4,
-    "five": 5,
-    "six": 6,
-    "seven": 7,
-    "eight": 8,
-    "nine": 9,
-    "ten": 10,
-    "eleven": 11,
-    "twelve": 12,
-    "thirteen": 13,
-    "fourteen": 14,
-    "fifteen": 15,
-    "sixteen": 16,
-    "seventeen": 17,
-    "eighteen": 18,
-    "nineteen": 19,
-    "twenty": 20,
-    "twenty-one": 21,
-    "twenty-two": 22,
-    "twenty-three": 23,
-    "twenty-four": 24,
-    "twenty-five": 25,
-    "twenty-six": 26,
+    **{word: value for value, word in enumerate(_SPELLED_ONES)},
+    **{word: 10 + value for value, word in enumerate(_SPELLED_TEENS)},
+    **{
+        (_SPELLED_TENS[tens] if ones == 0 else f"{_SPELLED_TENS[tens]}-{_SPELLED_ONES[ones]}"): 10
+        * tens
+        + ones
+        for tens in range(2, 10)
+        for ones in range(0, 10)
+    },
 }
 
 
@@ -1411,7 +1427,7 @@ def test_the_report_counts_what_the_studies_and_the_gates_have() -> None:
         (r"runs (\w+) identity checks", validate_checks),
         (r"(\w+) questions are refused", len(refusals)),
         (r"(\w+) committed fixtures of real responses", len(fixtures)),
-        (r"(\d+) report files, one per phase", len(reports)),
+        (r"(?<![A-Za-z\d#.-])(\w+(?:-\w+)?) report files, one per phase", len(reports)),
     ]
     for spelling, count in pairs:
         assert count > 0, f"{spelling!r} compares against an empty producer"
@@ -1931,7 +1947,7 @@ _REPORT_OWNED = {
         "test_the_report_counts_what_the_studies_and_the_gates_have",
         "tests/python/test_artifact_metadata.py",
     ),
-    r"(\d+) report files, one per phase": (
+    r"(?<![A-Za-z\d#.-])(\w+(?:-\w+)?) report files, one per phase": (
         "test_the_report_counts_what_the_studies_and_the_gates_have",
         "tests/python/test_artifact_metadata.py",
     ),
@@ -2952,6 +2968,32 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
         f"handing the hyphen back yields {sorted(hyphened)}, which is not the pair #100 "
         "measured: either the corpus no longer holds those phantoms or a real claim now sits "
         "after a hyphen"
+    )
+
+    # 7. The numeral table is generated, not typed, and that is what #97 needed: a ceiling that
+    #    truncates silently. The compounds must exist past the old flat dict's limit, and the
+    #    generation must be what makes them -- with one compound key withheld, the sentence below
+    #    stops being a claim of twenty-seven at all, the same silence property 5 proved for the
+    #    table the generation replaced.
+    sentence = "the matrix has twenty-seven rows, and the index holds forty-four files"
+    shipped = [match.group(1) for match in _SPELLED_REPORT_CLAIM.finditer(sentence)]
+    assert shipped == ["twenty-seven", "forty-four"], shipped
+    for withheld in ("twenty-seven", "forty-four"):
+        without = "|".join(
+            sorted((word for word in SPELLED_NUMBERS if word != withheld), key=len, reverse=True)
+        )
+        narrower = re.compile(
+            _CLAIM_NUMBER_OR_WORD.replace(_SPELLED_WORDS, without) + _CLAIM_TAIL, re.I
+        )
+        assert narrower.pattern != _SPELLED_REPORT_CLAIM.pattern
+        missed = [match.group(1) for match in narrower.finditer(sentence)]
+        assert len(missed) == len(shipped) - 1 and withheld not in missed, (
+            f"withholding {withheld!r} reads {missed}, so the compound is not the generation's "
+            "product and this control certifies nothing"
+        )
+    assert _as_int("forty-four") == 44 and _as_int("ninety-nine") == 99, (
+        "the table resolves a compound its reader cannot, so the ceiling moved for the rule but "
+        "not for the guards"
     )
 
 
