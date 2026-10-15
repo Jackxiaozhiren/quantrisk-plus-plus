@@ -109,6 +109,14 @@ failure, and putting the file back -- a demonstration that nothing re-runs.
    key, not this repository's to fix), and the evidence freeze -- no experiment or benchmark input
    changed, so `run_benchmark_suite.py` was not run at all, and `verify_evidence_manifest.py` reports the
    tree's bytes identical to the manifest.
+7. **A directory glob staged an incomplete cascade, and the harness's preflight is what said so.** The
+   register moved 99 → 100 across seven spellings and `git add -A docs paper scripts` carried six of them:
+   the seventh lives in the repository root. Every local gate stayed green, because pytest reads the
+   working tree and the working tree was whole -- so the *commit* was the inconsistent artifact, and what
+   refused to proceed was the sweep, whose targets have to be clean against HEAD. `2d7498b` carries the
+   missing line. The general form: a tool that only ever looks at the committed state (an export gate, a
+   dirty-target preflight) is a staging check as much as a falsification check, and after a cascade the
+   thing to read is `git show --stat` beside the list of files touched, not just the next green suite.
 
 ## 5. Exact test results
 
@@ -126,8 +134,8 @@ failure, and putting the file back -- a demonstration that nothing re-runs.
 | CLI, refusal | the same with `--only harness-spawns-a-...` on the in-progress tree | `target-already-modified: ... -> scripts/run_mutation_suite.py`, no file touched |
 | Producer | `.venv/bin/python scripts/build_report.py` | 6 sources, bundle `30b13b26d6ee…`, PDF `7683f21e6647…`, 1,005,815 bytes |
 | Hyphen exclusion, measured | both rules replayed over the five inventoried documents, every match whose number is preceded by `-` | digit rule: 2 phantoms in documents read today (the report's `1 identities` ×2, the matrix's `1 % steps`); spelled rule: 3 more where it is not yet enabled (the sheet's `four radius`, the matrix's `five crossing radius` and `five radius`); zero in the two opted-in documents, which is why no live figure is wrong |
-| Falsification, the 77-plant sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `39bf119`, logged to `build/mutation-sweep-39.log` | **`77/77 planted defects were rejected by their guard.`**, no line with any other status, tree clean afterwards. The new row is the phase's own: `harness-spawns-a-guard-subprocess-without-a-bytecode-prefix ... ok caught`, which is the guard #94 said could only be shown red by hand. The register entry added after that revision is prose-only in its effect on plants, so the list is swept again below |
-| Falsification, re-run after the register cascade | same command on the revision named in the row below it, logged to `build/mutation-sweep-39b.log` | recorded there -- a sweep cannot testify about the commit carrying its own verdict, and this cascade moved two plant anchors |
+| Falsification, the 77-plant sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `39bf119`, logged to `build/mutation-sweep-39.log` | **`77/77 planted defects were rejected by their guard.`**, no line with any other status, tree clean afterwards. The new row is the phase's own: `harness-spawns-a-guard-subprocess-without-a-bytecode-prefix ... ok caught`, which is the guard #94 said could only be shown red by hand |
+| Falsification, re-run after the register cascade | same command on `2d7498b`, logged to `build/mutation-sweep-39b.log` | **`77/77 planted defects were rejected by their guard.`**, 77 rows of that one status and no other, tree clean afterwards |
 | CI on the pushed head | `gh api …/commits/<sha>/check-runs` and the job logs | recorded below, after the push, from the runner's own logs rather than the badge |
 
 ## 6. Numerical validation
