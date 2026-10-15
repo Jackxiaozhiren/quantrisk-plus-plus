@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 102/102 planted defects rejected",
+        anchor="# 105/105 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="forty-five report files, one per phase",
-        replacement="forty-six report files, one per phase",
+        anchor="forty-six report files, one per phase",
+        replacement="forty-seven report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1455,5 +1455,56 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_claim_extractor_reads_percentages_and_refuses_labels"
         ),
         claim="a compound numeral exists because the generation builds it, hyphen and all",
+    ),
+    Mutation(
+        identifier="owned-credit-names-a-guard-that-does-not-exist",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor=(
+            'r"(\\d+)/(\\d+) benchmark-suite members executed": (\n'
+            '        "test_documents_that_count_the_suite_members_agree_with_the_registry",'
+        ),
+        replacement=(
+            'r"(\\d+)/(\\d+) benchmark-suite members executed": (\n'
+            '        "test_documents_that_count_the_suite_members_agree_with_the_regisTRY",'
+        ),
+        # The old credit check was `pattern in holder_source`, and the table sits in the holder's
+        # file -- so an entry naming a guard that does not exist passed by construction. The
+        # syntax check resolves the named function before it looks at anything else.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
+        ),
+        claim="an owned pattern's owner is a function that exists",
+    ),
+    Mutation(
+        identifier="owned-credit-outlives-its-reader",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='r"(\\d+)/(\\d+) benchmark-suite members executed", sheet',
+        replacement='r"(\\d+)/(\\d+) benchmark-suite members ran", sheet',
+        # Moving the search away from the pattern leaves the entry matching the document (so the
+        # dead-pattern check stays green) while no guard searches with it any more -- precisely the
+        # state the old substring check scored as owned, and the syntax check refuses by name.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
+        ),
+        claim="a credit lasts exactly as long as the guard that searches with its pattern",
+    ),
+    Mutation(
+        identifier="owned-credit-loses-the-helper-it-reads-through",
+        kind="prose",
+        path="tests/python/test_fifth_order_partials.py",
+        anchor=r"worst relative over (\d+) markets",
+        replacement=r"worst relative across (\d+) markets",
+        # The derivation entries are searched inside `_quoted_identity_floor`, a helper the named
+        # guard calls -- the credit is real because of the call closure, and this plant cuts the
+        # helper's literal away to prove the closure is what carries it.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_report_is_owned_or_declared"
+        ),
+        claim="a guard owns what it searches for through the helpers it calls",
     ),
 )

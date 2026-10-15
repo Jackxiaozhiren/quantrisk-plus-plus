@@ -2178,3 +2178,38 @@ extension or a digits fallback, and this phase took the fallback.
 #100) sit in the same artifact index as the fixed count. #102's recall half already records the noun
 gap; what is new here is where it matters -- an index is exactly the document whose job is to count
 things, so its unlisted nouns are the likeliest place for the next stale number to live.
+
+## Addendum — Phase 45, a credit that policed nothing, and the check that could not see it (2026-10-15)
+
+**85. `_MARKDOWN_OWNED` carried an entry whose pattern no guard searches with, and the verbatim check
+that was supposed to prevent exactly that had passed it since the entry was written.** The check was
+`pattern in holder_source`: is the pattern's text somewhere in the named holder's file? But the owned
+tables live in the holder's file -- every entry's holder is `tests/python/test_artifact_metadata.py` or a
+sibling tests file that holds no table -- so for the table's own file the check was satisfied by the
+table itself. An invented pattern was indistinguishable from a transcribed one, which is the failure
+mode the table's founding comment explicitly claimed could not happen ("an owner invented here fails the
+verbatim check above rather than passing quietly").
+
+(a) **Measuring before the change found eight bad credits out of 84, of two kinds.** Four named the wrong
+reader: the three committed-reading spellings and the offline-collection pattern were credited to guards
+that never search with them (Phase 41 put the real readers in a sibling function and credited the
+sibling's name -- the author's own entry, wrong from the commit that wrote it). One --
+`(\d+) benchmark-suite members executed` -- was searched by no guard anywhere; it matched prose in the
+rehearsal sheet, so even the dead-pattern check stayed green, and nothing in the tree compared its number
+with the registry. The syntax check now refuses both kinds: it resolves the named function in the named
+holder, walks that function's body plus the same-file helpers it calls plus the module-level structures
+the body reads, and demands the pattern be a string constant of one of those.
+
+(b) **The fix made one honest credit honest by construction.** The sheet's `19/19 benchmark-suite members
+executed` is now searched by the registry guard itself, both slash halves compared with the registry's
+size -- so the claim the invented entry gestured at is a checked claim, and the entry's pattern is the
+literal its owner searches with. The derivation entries needed the check to follow calls: their patterns
+live in `_quoted_identity_floor`, a helper the named guard calls, and the closure over same-file callees
+is what keeps those credits real without inlining the helper's body.
+
+(c) **The plants are two-sided against the old check, not just red.** Pointing an entry at a
+non-existent guard name leaves every old check green -- the pattern is still in the file -- and reddens
+only the syntax check; moving a search away from its pattern leaves the dead-pattern check green and
+reddens only the syntax check. A third plant cuts the helper's literal away in the fifth-order suite's
+own file, proving the call closure is what carries that credit. All three would have passed every gate
+before this phase; that is the size of the hole.

@@ -1190,6 +1190,18 @@ never removed just because a later phase shipped.
     anywhere in the file -- the AST-not-substring rule this repository already applies elsewhere and has
     not applied here.
 
+    **Amended 2026-10-15 by Phase 45: closed by syntax.** The credit check is `_pattern_is_owned_by`:
+    it resolves the named function in the named holder, walks that function's body plus the bodies of
+    the same-file helpers it calls, plus the module-level structures the body reads, and demands the
+    pattern be a string constant of one of those. Measuring before the change made the mechanism
+    concrete: of 84 credits, 68 lived in the owner's body, 8 in a structure it reads -- and 8 failed.
+    Four named the wrong reader (Phase 41's own misattributions, invisible for four phases); one --
+    `N/N benchmark-suite members executed` -- was searched by **no guard at all**, a credit that
+    polices nothing and had passed every gate since it was written, because the table sits in the
+    holder's file and a substring check over that file is satisfied by the table itself. The four
+    attributions are corrected, the sheet's N/N restatement is owned by the registry guard for real,
+    and two plants hold the line: an entry naming a guard that does not exist reddens, and a search
+    moved away from its pattern reddens while the dead-pattern check stays green.
 99. **A citation that names an existing row is credited even when the sentence around it describes a
     different one.** Phase 38 found the defect while widening the inventory: the front page said "Row 14
     is the other kind of weakness: the bound on the stress map's truncation error", and row 14 is the

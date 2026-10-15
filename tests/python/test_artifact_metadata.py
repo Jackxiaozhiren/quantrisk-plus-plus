@@ -835,6 +835,16 @@ def test_documents_that_count_the_suite_members_agree_with_the_registry() -> Non
             f"{name} says {found.group(1)!r}, the registry has {total} members"
         )
 
+    # The sheet restates the sweep's own count as N/N executed; both halves must be the registry,
+    # which is what makes the slash reading a claim about the same registry rather than arithmetic.
+    sheet = _folded_document("docs/interview_defense.md")
+    paired = re.search(r"(\d+)/(\d+) benchmark-suite members executed", sheet)
+    assert paired, "the sheet no longer restates the sweep as N/N benchmark-suite members executed"
+    assert (int(paired.group(1)), int(paired.group(2))) == (total, total), (
+        f"the sheet says {paired.group(1)}/{paired.group(2)} members executed; the registry has "
+        f"{total}"
+    )
+
     readme = _folded_document("README.md")
     breakdown = re.search(
         r"(\w+)\s+correctness\s+benchmarks,\s+(\w+)\s+statistical\s+experiments,\s+"
@@ -1246,6 +1256,78 @@ def _literal_list(source: str, name: str) -> list[ast.expr]:
             if isinstance(target, ast.Name) and target.id == name:
                 return list(value.elts)
     raise AssertionError(f"`{name}` is no longer a module-level list or tuple literal")
+
+
+def _pattern_is_owned_by(pattern: str, owner: str, holder: str) -> None:
+    """The named guard must really search with this pattern, read as syntax.
+
+    Crediting used to be `pattern in holder_source`, which is vacuous when the holder is the file
+    that holds the table -- which is every entry: the pattern's presence was the table's own doing,
+    so an invented pattern, one no guard searches with, was indistinguishable from a real one, and
+    so was an entry naming a guard that does not exist. The check walks the holder's syntax and
+    demands the pattern be a string constant of the named function's body, or of a module-level
+    structure that body reads. Finding 82's mechanism, one level up: a substring test over a corpus
+    that contains the tester counts the tester.
+    """
+    tree = ast.parse((REPO_ROOT / holder).read_text(encoding="utf-8"))
+    function = next(
+        (node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == owner),
+        None,
+    )
+    assert function is not None, (
+        f"{owner} is not a module-level function of {holder}: the entry names a guard that "
+        "does not exist"
+    )
+    # The named function's body, plus the bodies of the same-file helpers it calls: a guard that
+    # delegates its searching to a private reader (the fifth-order suite's `_quoted_identity_floor`)
+    # still owns what the helper searches with, and the closure is what says so. Module-level
+    # structures the body reads are covered below, by Load-name.
+    functions = {node.name: node for node in tree.body if isinstance(node, ast.FunctionDef)}
+    scope, queue = [function], [function]
+    while queue:
+        current = queue.pop()
+        for call in ast.walk(current):
+            if not isinstance(call, ast.Call) or not isinstance(call.func, ast.Name):
+                continue
+            callee = functions.get(call.func.id)
+            if callee is not None and callee not in scope:
+                scope.append(callee)
+                queue.append(callee)
+    body = [
+        node.value
+        for reached in scope
+        for node in ast.walk(reached)
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+    ]
+    if any(pattern in constant for constant in body):
+        return
+    referenced = {
+        node.id
+        for node in ast.walk(function)
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+    }
+    for node in tree.body:
+        targets, value = [], None
+        if isinstance(node, ast.Assign):
+            targets, value = node.targets, node.value
+        elif isinstance(node, ast.AnnAssign):
+            targets, value = [node.target], node.value
+        if value is None:
+            continue
+        names = {target.id for target in targets if isinstance(target, ast.Name)}
+        if not names & referenced:
+            continue
+        constants = [
+            found.value
+            for found in ast.walk(value)
+            if isinstance(found, ast.Constant) and isinstance(found.value, str)
+        ]
+        if any(pattern in constant for constant in constants):
+            return
+    raise AssertionError(
+        f"{owner} never searches with {pattern!r}: the credit polices nothing "
+        "(the old substring check passed this because the table sits in the holder's file)"
+    )
 
 
 def _guard_syntax(function_name: str) -> ast.FunctionDef:
@@ -1866,10 +1948,6 @@ _REPORT_OWNED = {
         "test_documents_that_count_the_limitations_agree_with_the_file",
         "tests/python/test_artifact_metadata.py",
     ),
-    r"(\d+) benchmark-suite members execute": (
-        "test_documents_that_count_the_suite_members_agree_with_the_registry",
-        "tests/python/test_artifact_metadata.py",
-    ),
     r"meets it at (\d+)\s+markets": (
         "test_the_derivation_command_agrees_at_the_precision_floor",
         "tests/python/test_fifth_order_partials.py",
@@ -2154,10 +2232,7 @@ def test_every_countable_claim_in_the_report_is_owned_or_declared() -> None:
 
     owned: list[tuple[int, int]] = []
     for pattern, (owner, holder) in _REPORT_OWNED.items():
-        holder_source = (REPO_ROOT / holder).read_text(encoding="utf-8")
-        assert pattern in holder_source, (
-            f"{pattern!r} is claimed as owned by {owner}, whose source does not contain it"
-        )
+        _pattern_is_owned_by(pattern, owner, holder)
         hits = list(re.finditer(pattern, flat))
         assert hits, f"the owned pattern {pattern!r} matches nothing in the report any more"
         for hit in hits:
@@ -2349,7 +2424,7 @@ _MARKDOWN_OWNED: dict[str, tuple[str, str]] = {
         "tests/python/test_artifact_metadata.py",
     ),
     r"collects\s+(\d+)\s+tests\s+without\s+it": (
-        "test_the_offline_test_count_is_measurable_before_the_runner",
+        "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
         "tests/python/test_artifact_metadata.py",
     ),
     # The rehearsal sheet's and the matrix's own spellings, added with the inventory extension
@@ -2461,16 +2536,19 @@ _MARKDOWN_OWNED: dict[str, tuple[str, str]] = {
         "test_the_offline_test_count_is_measurable_before_the_runner",
         "tests/python/test_artifact_metadata.py",
     ),
+    # These three live in `test_the_performance_guards_are_not_vacuous`, whose readings loop
+    # compares the committed history; Phase 41 had credited them to the sibling figures guard,
+    # which the syntax check below could not have tolerated.
     r"re-frozen (\w+(?:-\w+)?) times": (
-        "test_documents_quote_the_performance_figures_the_artifact_actually_holds",
+        "test_the_performance_guards_are_not_vacuous",
         "tests/python/test_artifact_metadata.py",
     ),
     r"those (\w+(?:-\w+)?) committed files": (
-        "test_documents_quote_the_performance_figures_the_artifact_actually_holds",
+        "test_the_performance_guards_are_not_vacuous",
         "tests/python/test_artifact_metadata.py",
     ),
     r"same (\w+(?:-\w+)?) readings give": (
-        "test_documents_quote_the_performance_figures_the_artifact_actually_holds",
+        "test_the_performance_guards_are_not_vacuous",
         "tests/python/test_artifact_metadata.py",
     ),
     r"(\w+) rows in the full matrix are the ones": (
@@ -2522,6 +2600,10 @@ _MARKDOWN_OWNED: dict[str, tuple[str, str]] = {
     ),
     r"The (\w+) cases I would be pushed on": (
         "test_documents_that_count_their_own_enumerations_agree_with_their_lists",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+)/(\d+) benchmark-suite members executed": (
+        "test_documents_that_count_the_suite_members_agree_with_the_registry",
         "tests/python/test_artifact_metadata.py",
     ),
     r"across the (\w+(?:-\w+)?) re-freezings": (
@@ -2711,9 +2793,7 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
         )
 
     for pattern, (owner, holder) in _MARKDOWN_OWNED.items():
-        assert pattern in (REPO_ROOT / holder).read_text(encoding="utf-8"), (
-            f"{pattern!r} is claimed as owned by {owner}, whose source does not contain it"
-        )
+        _pattern_is_owned_by(pattern, owner, holder)
     dead = [
         pattern
         for pattern in _MARKDOWN_OWNED
