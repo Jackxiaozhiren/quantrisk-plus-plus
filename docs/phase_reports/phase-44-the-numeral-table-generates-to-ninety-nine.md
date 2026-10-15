@@ -77,15 +77,20 @@ which now **disagrees** instead of raising the `KeyError` #97 predicted.
 | Gate | Command | Measured result |
 |---|---|---|
 | Lint | `.venv/bin/ruff check .` | All checks passed! |
-| Format | `.venv/bin/ruff format --check .` | measured on the committed tree in the record commit (finding 81's rule) |
+| Format | `.venv/bin/ruff format --check .` | 186 files already formatted on the `fff4e03` export and in CI -- see the note below the table |
 | Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
 | C++ | `ctest --preset dev` | 100% tests passed out of 204 |
 | Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
 | Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | Evidence is intact -- zero artifacts re-frozen |
 | Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 450 tests collected |
 | Python | `.venv/bin/python -m pytest -q` | 519 passed |
-| Falsification, full sweep | recorded in the next commit, on the sha it ran on | pending |
-| CI on the pushed head | recorded in the next commit, from the runner's own logs | pending |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `fff4e03`, logged to `build/mutation-sweep-44.log` | **`102/102 planted defects were rejected by their guard.`** -- 102 rows carrying that status and none other; tree clean afterwards. The ceiling-closure plants are among them: `matrix-row-count-survives-the-old-ceiling ... ok caught` (a twenty-seventh row now *disagrees*) and `numeral-table-loses-its-hyphenated-compounds ... ok caught` |
+| CI on the pushed head | `gh api …/commits/fff4e03/check-runs`, polled until the last job concluded | run `38755973431`, three jobs `completed/success` (SonarCloud `neutral`, as ever) |
+| CI's own lane numbers | the job log, read rather than inferred from the green | `All checks passed!`, `186 files already formatted`, `Success: no issues found in 23 source files`; `100% tests passed out of 204`; `449 passed, 5 skipped in 204.76s (0:03:24)`; `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 416.4s total`. The #91 reconciliation holds on the runner's numbers: `449 + 5 = 454 = 450 + 4` |
+
+The format count is `186` in two agreeing vantages -- CI's lane and the `git archive` export of `fff4e03`.
+This tree's own walk reports `187`, and the extra file is again `REFACTOR_PROMPT.md`, the parallel
+session's untracked V2 prompt; finding 81's rule keeps it out of the record, as it did in Phase 43.
 
 ## 6. Numerical validation
 
