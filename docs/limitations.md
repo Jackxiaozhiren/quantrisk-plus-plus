@@ -1072,6 +1072,13 @@ never removed just because a later phase shipped.
     `docs/interview_defense.md` -- and each needs the same two halves: the spelled spelling of every owner
     that already reads the figure, and a stated reason for every claim no owner covers. #97 records why
     the first is bounded by the table's ceiling.
+
+    **Corrected 2026-10-14 by Phase 40, which changed the measuring rule.** Re-run through the shipped
+    extractor after #100's hyphen exclusion, the corpus holds **108** spelled-only claims rather than 109:
+    45 in the report, 21 in `docs/validation_matrix.md`, 18 in `README.md`, 14 in
+    `docs/interview_defense.md`, 10 in `docs/reproducibility.md`. The 28 in the opted-in pair are
+    classified, so **80 remain** across the three documents, and the earlier figure counted one phantom the
+    rule no longer produces.
 96. **A pattern written with a literal space cannot read a claim the document splits across lines, and
     four guards have been taught that; the rest of the corpus still reads raw text.** The falsification
     sweep's one escape was `sheet-states-a-case-gap-the-collected-pair-does-not-give`: the guard compared
@@ -1164,3 +1171,22 @@ never removed just because a later phase shipped.
     not to remove a real claim, which is the same two-sided re-validation #95 asked for when its question
     widened. The digit-rule half of this entry is a pre-existing limit, not a Phase 38 regression: the
     spelled rule inherits the exclusion rather than inventing it.
+
+    **Amended 2026-10-14 by Phase 40: closed, and the measurement came out with one surprise about the
+    instrument rather than the corpus.** `-` is excluded now, and the two-sided check is property 6 of
+    `test_the_claim_extractor_reads_percentages_and_refuses_labels`, which hands the character back and
+    names what returns: three occurrences of two texts under the digit rule -- `1 identities` twice in the
+    report (both from `Level-1 identities`) and `1 % steps` in the matrix's `best of 0.2 %-1 % steps` --
+    and three more only where the spelled rule is not yet enabled (`four radius` in the rehearsal sheet,
+    `five crossing radius` and `five radius` in the matrix). Nothing real was lost, measured: no claim in
+    these documents legitimately follows a hyphen.
+    (a) The proof the entry had absorbed the phantoms is that deleting them reddened two guards. Both
+    declarations that existed for them -- `Level-1 identities` in the report's list, `relative, best of`
+    in the markdown's -- failed their own decorative check the moment the exclusion landed, which is the
+    designed behaviour of that check and still the first time it has caught an exemption that was paying
+    for a phantom rather than excusing a real claim.
+    (b) The surprise was in the phase's own instrument. The first version of property 6 loosened the
+    exclusion by string-replacing `-` in the assembled class, which also deleted the range dash inside
+    `A-Z` and produced a rule that matched nothing anybody had measured -- six phantoms including a
+    `2 cases` that no document contains. The two-sided control was the thing that caught it: an
+    expectation written as a name rather than a count is what made a broken reconstruction visible at all.

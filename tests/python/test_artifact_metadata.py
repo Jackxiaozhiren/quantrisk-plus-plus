@@ -1398,11 +1398,13 @@ _REPORT_NOUNS = (
 )
 # A number that is part of a word is not a claim: `(?<![A-Za-z\d])` keeps `Catch2 cases` and
 # `sklearn2011}. Oracle versions` out of the inventory, which a bare lookbehind on digits let in.
-# Three more exclusions, each from reading a real document with this rule (Phase 29 for the first
-# two, Phase 35 for the third):
+# Four more exclusions, each from reading a real document with this rule (Phase 29 for the first
+# two, Phase 35 for the third, Phase 40 for the fourth):
 #   `#` -- a cross-reference (`docs/limitations.md` #77) is not a quantity;
 #   a bare trailing period -- a list marker or the end of a sentence;
-#   `.` -- a number that starts inside a longer dotted token is a slice of it, not a claim.
+#   `.` -- a number that starts inside a longer dotted token is a slice of it, not a claim;
+#   `-` -- a number after a hyphen is the second half of a compound (`Level-1 identities`,
+#        `order-four radius`), which #100 recorded as the rule's own over-inclusion.
 # Without them the inventory called "#77. Load moves the timings" and "on 5 of 5. Two books sit at
 # the grid edge" countable claims, and read `cvxpy 1.9.3 are oracles` as 9.3 oracles and
 # `quintic factor 1.000, quartic radius` as 000 radii -- an extractor that invents work for itself,
@@ -1421,7 +1423,18 @@ _CLAIM_TAIL = r"\s*%?\s+(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b"
 # One exclusion and one number shape, shared by the digit rule and the spelled rule below. Written
 # twice they would drift, and the drift is invisible: a lookbehind loosened in only one of the two
 # hands one reader a version number as a quantity while the other stays clean.
-_CLAIM_EXCLUDE = r"(?<![A-Za-z\d#.])"
+# The excluded set is letters, digits, `#`, `.` and `-`; the last is #100's fix, because a hyphen is
+# what joins `order` to `four` and so let `the order-four radius` be read as a claim of four radii.
+# Refusing it was measured over the six inventoried texts: exactly the five phantoms the two rules
+# produce today disappear -- the report's `1 identities` twice, the matrix's `1 % steps`,
+# and, where the spelled rule is not yet enabled, its `four radius`, `five crossing radius`
+# and `five radius` -- and nothing is gained, because no real claim in this corpus sits
+# after a hyphen. That measurement is
+# the half of the change that has to be demonstrated rather than assumed; property 6 re-runs it.
+# The excluded characters, with the dash written last because that is where it is a literal inside a
+# character class: surgery on this string has to remove the trailing dash, not the one in `A-Z`.
+_CLAIM_EXCLUDE_CHARS = r"A-Za-z\d#.-"
+_CLAIM_EXCLUDE = rf"(?<![{_CLAIM_EXCLUDE_CHARS}])"
 _CLAIM_DIGITS = r"\d[\d{},]*(?:\.\d+)?"
 _CLAIM_NUMBER = _CLAIM_EXCLUDE + r"(" + _CLAIM_DIGITS + r")"
 _REPORT_CLAIM = re.compile(_CLAIM_NUMBER + _CLAIM_TAIL, re.I)
@@ -1430,8 +1443,8 @@ _REPORT_CLAIM = re.compile(_CLAIM_NUMBER + _CLAIM_TAIL, re.I)
 # `19 members` disagree exactly as often, and the register's own reader has resolved spelled words
 # through `SPELLED_NUMBERS` since Phase 22 while the extractor could not see them (#95). The spelled
 # alternatives are generated from that table rather than copied out of it, and property 5 measures
-# the generation: drop one key from the list and `twenty-two committed files` stops being a claim of
-# twenty-two and becomes a claim about two of them, which no reader would notice in a diff.
+# the generation: drop one key and `twenty-two committed files` stops being a claim about twenty-two
+# files at all, which no reader would notice in a diff.
 # The widening is enabled per document, not globally, and that is a review decision rather than a
 # convenience: measured on 2026-10-13 the five inventoried documents carry 109 spelled claims, and a
 # first run that classified all of them at once would be a diff nobody can read. #95 records the
@@ -1560,7 +1573,10 @@ _REPORT_DECLARED: dict[str, str] = {
         "sentence cites; the frozen stress artifact carries the ranking and multipliers, not the "
         "Monte Carlo configuration"
     ),
-    "Level-1 identities": "names a validation level, not a count of anything",
+    # `"Level-1 identities"` was declared here until #100: the claim it excused was the
+    # extractor reading `1` out of `Level-1` as a count of identities. With a hyphen
+    # excluded the claim is never raised, so the exemption would have been keeping
+    # nothing -- which is what the decorative check is for, and why this is a comment.
     "16 later cases had never": (
         "quoted from the incident this report recounts, in that printout's own words"
     ),
@@ -2048,9 +2064,9 @@ _MARKDOWN_DECLARED: dict[str, str] = {
         "the move count of the equality control, the same figure the report declares and the "
         "artifact's control block publishes"
     ),
-    "relative, best of": (
-        "the step sizes the Python route tries, a configuration of the test the row names"
-    ),
+    # `"relative, best of"` was declared for the matrix's `1 % steps`, which was the
+    # extractor reading `1` out of `best of 1 %-...` after a hyphen. #100's exclusion
+    # removes the claim, so the exemption removed itself.
     "A CRR lattice at": (
         "the lattice depth docs/model_cards/crr_binomial.md states beside its measured error; "
         "the frozen artifact carries the slopes and final errors, not the depth"
@@ -2177,7 +2193,7 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
 
 
 def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
-    """Five shapes of the extractor were stated in comments, and a comment cannot fail.
+    """Every shape of the extractor was once only a comment, and a comment cannot fail.
 
     Phase 29 wrote the `#` and trailing-period exclusions into the rule and recorded why in the
     block above it; nothing asked whether they fire. That phase added three more shapes -- a `%`
@@ -2187,10 +2203,12 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
     what it is meant to find and refuse what it is meant to refuse, and the refusal has to be
     demonstrated by the looser rule finding something the shipped one does not.
 
-    The sixth shape is Phase 38's: a numeral written in words, which the guards have resolved
+    The spelled numeral is Phase 38's shape: a count written in words, which the guards
+    have resolved
     through `SPELLED_NUMBERS` since Phase 22 while the extractor could not see it at all (#95).
     Property 5 reads it two-sided too, and pins that the widening is staged per document rather
-    than switched on for the corpus in one diff nobody can review.
+    than switched on for the corpus in one diff nobody can review. The hyphen is Phase 40's (#100),
+    which property 6 checks by handing the character back and naming the two phantoms that return.
     """
     corpus = {
         "paper/technical_report.tex": _tex_inventory_text()[1],
@@ -2232,9 +2250,21 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
 
     # 3. A number that begins inside a longer dotted token is a slice of it, not a quantity -- the
     #    shape that read `cvxpy 1.9.3 are oracles` as 9.3 oracles.
-    undotted = re.compile(
-        _REPORT_CLAIM.pattern.replace("(?<![A-Za-z\\d#.])", "(?<![A-Za-z\\d#])"), re.I
-    )
+    def loosened(character: str) -> re.Pattern[str]:
+        """The shipped rule with one excluded character handed back to it.
+
+        Every character in the lookbehind is a claim that this corpus contains a shape it refuses,
+        so the claim is checkable by removing that character and naming what comes back. The dash is
+        sliced off rather than replaced: it sits at the end of the class, and replacing it by value
+        would delete the range dash in `A-Z` too and test a rule nobody shipped.
+        """
+        if character == "-":
+            kept = _CLAIM_EXCLUDE_CHARS[:-1]
+        else:
+            kept = _CLAIM_EXCLUDE_CHARS.replace(character, "")
+        return re.compile(rf"(?<![{kept}])(" + _CLAIM_DIGITS + r")" + _CLAIM_TAIL, re.I)
+
+    undotted = loosened(".")
     assert undotted.pattern != _REPORT_CLAIM.pattern, "the reconstruction did not loosen the rule"
     sliced = [
         (name, match.group(0))
@@ -2269,9 +2299,10 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
         "every inventoried document now reads spelled claims, so the staged rollout has no step "
         "left and this assertion should be retired with the staging"
     )
-    # The alternation is generated from the table, and that generation is the load-bearing part:
-    # with one key missing, the sentence below stops stating a claim of twenty-two and states a
-    # claim about two of them instead -- a quantity the document never printed.
+    # The alternation is generated from the table, and that generation is what is load-bearing:
+    # with one key missing, the sentence below stops being a claim of twenty-two at all. Before
+    # #100 the narrowed rule read it as a claim about *two* of them; the hyphen exclusion now
+    # refuses that, so the failure is a silent absence -- the same drift, worse to notice.
     without_a_key = "|".join(
         sorted((word for word in SPELLED_NUMBERS if word != "twenty-two"), key=len, reverse=True)
     )
@@ -2283,9 +2314,9 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
     shipped = [match.group(1) for match in _SPELLED_REPORT_CLAIM.finditer(sentence)]
     missed = [match.group(1) for match in narrower.finditer(sentence)]
     assert shipped == ["twenty-two"], shipped
-    assert missed == ["two"], (
-        f"removing one table key left {missed} rather than a shorter reading of the same claim, so "
-        "this control certifies nothing about the generation"
+    assert missed == [], (
+        f"removing one table key still reads {missed}, so the generation is no longer what "
+        "makes the claim and this control certifies nothing"
     )
     for name in _SPELLED_DOCUMENTS:
         flat = corpus[name]
@@ -2299,6 +2330,33 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
             assert word.lower() in SPELLED_NUMBERS, (
                 f"{name}'s {claim!r} does not begin with a numeral the table resolves"
             )
+
+    # 6. A hyphen is excluded, because `Level-1 identities` is one validation level and not a
+    #    count of identities (#100). The phantoms the loosened rule finds are named, so a corpus
+    #    that stops holding them reddens this rather than passing quietly -- and so does a real
+    #    claim that moves beside one.
+    dashed = loosened("-")
+    assert dashed.pattern != _REPORT_CLAIM.pattern, "the hyphen is no longer in the excluded set"
+    # The shipped rule refusing these is the load-bearing half, so it is asserted directly: a plant
+    # that narrows the class then reddens by naming the exclusion it removed, not by a set mismatch.
+    refused = ("1 identities", "1 % steps")
+    assert not any(
+        match.group(0) in refused
+        for flat in corpus.values()
+        for match in _REPORT_CLAIM.finditer(flat)
+    ), f"the shipped rule already states {refused}, so the exclusion has gone"
+    hyphened = {
+        (name, match.group(0))
+        for name, flat in corpus.items()
+        for match in dashed.finditer(flat)
+        if match.group(0) not in {m.group(0) for m in _extract_claims(flat)}
+        and not _is_labelled(flat, match.start(1))
+    }
+    assert {text for _, text in hyphened} == {"1 identities", "1 % steps"}, (
+        f"handing the hyphen back yields {sorted(hyphened)}, which is not the pair #100 "
+        "measured: either the corpus no longer holds those phantoms or a real claim now sits "
+        "after a hyphen"
+    )
 
 
 def _repository_release_tags() -> list[str]:

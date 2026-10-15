@@ -2041,3 +2041,30 @@ exactly the failure the harness exists to prevent for everyone else's guards.
    revision, and points at the sweep annotation as the living figure, which a guard compares with the
    declared list. Note the shape: the count was spelled ("Nineteen"), which is #95's remaining group --
    the sheet carries 14 spelled claims and is the next document in that rollout.
+
+## Addendum — Phase 40, two exemptions that were paying for phantoms, and a control that caught its own bug (2026-10-14)
+
+**80. The register's `Level-1 identities` and the matrix's `relative, best of` were declared because the
+extractor invented those claims, not because the documents stated them.** #100 recorded that the number's
+lookbehind excludes letters, digits, `#` and `.` but not a hyphen, so `Level-1 identities` is read as one
+identity and `best of 0.2 %-1 % steps` as one step. Each phantom had been given a permanent exemption -- an
+anchor in the declared list with a reason that was true of the *text* and false of the *claim*. Excluding
+the hyphen removed the claims, and both exemptions then failed the decorative check that asks whether an
+anchor excuses anything: the lists are policed for staleness and for exemptions that stop doing work, which
+is the first time that check has caught an entry whose whole purpose was a phantom.
+
+(a) **The fix was measured in both directions before it was made, and the direction that mattered was not
+the one expected.** Removing the phantoms was easy to show; the risk is the claim nobody notices being
+lost, so the loosened rule was run over all six inventoried texts and every hyphen-preceded match
+enumerated: three occurrences of two texts under the digit rule, three more under the spelled rule where
+it is not yet enabled, and no real claim after a hyphen anywhere. Property 6 of the extractor self-test now
+carries those names, so the exclusion cannot be narrowed back without a red.
+
+(b) **The phase's own control found a bug in the control.** The first implementation loosened the exclusion
+by string-replacing `-` inside the assembled character class, which also deleted the dash of the `A-Z`
+range and built a rule that matched things no document contains -- six phantoms, including a `2 cases`
+that is in no sentence in the corpus. It was the assertion written as a *named set* rather than as a
+count that made this visible: `2` is not one of the texts #100 measured, so the reconstruction failed
+loudly instead of quietly widening the expectation. Property 3, which had used the same replace-the-literal
+trick since Phase 35, was safe only because `.` is not load-bearing inside `A-Z` -- a coincidence about
+punctuation, not a property of the method, and the helper now slices the trailing dash instead.

@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 77/77 planted defects rejected",
+        anchor="# 78/78 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -938,11 +938,13 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="extractor-slices-a-number-out-of-a-dotted-token",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='r"(?<![A-Za-z\\d#.])"',
-        replacement='r"(?<![A-Za-z\\d#])"',
+        anchor='_CLAIM_EXCLUDE_CHARS = r"A-Za-z\\d#.-"',
+        replacement='_CLAIM_EXCLUDE_CHARS = r"A-Za-z\\d#-"',
         # The exclusion added when the matrix's `cvxpy 1.9.3 are oracles` was read as 9.3 oracles.
         # Loosening the lookbehind does not raise; it silently hands the inventory a version number
         # and a slice of `1.000`, which is how an extractor teaches a reader to ignore its list.
+        # The `.` is lifted out of the middle of the class here, leaving the dash trailing where it
+        # is still a literal, so this narrows one exclusion rather than corrupting the set.
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
@@ -1054,9 +1056,11 @@ MUTATIONS: tuple[Mutation, ...] = (
             ")"
         ),
         # Dropping one key from the generated alternation does not raise: `twenty-two committed
-        # files` stops being a claim of twenty-two and is read as a claim about two of them, because
-        # the shorter branch still completes the tail. The self-test compares the shipped rule with
-        # exactly this narrowing, so the generation is what fails rather than the prose.
+        # files` stops being a claim of twenty-two. Before #100 the narrowed rule read it as a claim
+        # about two of them; with the hyphen excluded it reads no claim at all, which is the quieter
+        # failure -- a published quantity that simply stops being policed. Either way the cause is a
+        # rule that stopped being generated from the table, and the self-test compares the shipped
+        # rule with exactly this narrowing.
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claim_extractor_reads_percentages_and_refuses_labels"
@@ -1099,5 +1103,22 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated"
         ),
         claim="no guard step bypasses the isolation, because one named call site carries it",
+    ),
+    Mutation(
+        identifier="extractor-reads-a-hyphenated-compound-tail-as-a-quantity",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_CLAIM_EXCLUDE_CHARS = r"A-Za-z\\d#.-"',
+        replacement='_CLAIM_EXCLUDE_CHARS = r"A-Za-z\\d#."',
+        # Taking `-` out of the exclusion does not raise either: it hands back the two phantoms #100
+        # measured -- `Level-1 identities` read as one identity, `best of 1 %` as one
+        # step -- and the self-test's property 6 compares the shipped rule with precisely
+        # this loosening and names
+        # them, so the exclusion cannot be dropped or quietly narrowed.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_extractor_reads_percentages_and_refuses_labels"
+        ),
+        claim="a number after a hyphen is the second half of a compound, not a count of the noun",
     ),
 )
