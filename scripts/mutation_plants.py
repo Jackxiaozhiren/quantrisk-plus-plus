@@ -1077,11 +1077,11 @@ MUTATIONS: tuple[Mutation, ...] = (
         # four markdown documents answer for their spelled counts (63 of the 108 measured) and the
         # report's 45 do not. Switching the report on here would let the inventory report itself
         # complete while quietly stopping answering for those 45, so the wider read has to red.
-        # Phase 42's own sweep found this plant green for one reason only: the mutation site moved to
-        # the report's extractor call and the `guard` field had stayed on the markdown inventory
-        # guard, which the change cannot reach. A plant is caught by the guard that reads the line it
-        # mutates, so moving an anchor moves the guard with it -- and property 5's staging pin reddens
-        # on the same edit, naming the guard that answers for the call.
+        # Phase 42's own sweep found this plant green for one reason only: the mutation site moved
+        # to the report's extractor call while the `guard` field stayed on the markdown inventory
+        # guard, which the change cannot reach. A plant is caught by the guard that reads the line
+        # it mutates, so moving an anchor moves the guard with it -- and property 5's staging pin
+        # reddens on the same edit, naming the guard that answers for the call.
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_every_countable_claim_in_the_report_is_owned_or_declared"
