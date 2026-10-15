@@ -32,13 +32,23 @@ failure, and putting the file back -- a demonstration that nothing re-runs.
   annotation as the living figure, which the count guard compares with the declared list. The count was
   spelled, which is #95's remaining group: the sheet carries 14 spelled claims and is the next document in
   that rollout.
-* **Register #94 amended** with the closure, the residual, and one measured cost. The register's own text
-  also carried a duplicated phrase in that entry ("showed the first one red the first one red the only way
+* **A new limitation registered from measurement, #100: the number may be preceded by a hyphen.** The
+  exclusion is `(?<![A-Za-z\d#.])` and a hyphen is none of those, so `the order-four radius` reads as a
+  claim of four radii. Replayed through both shipped rules over all five inventoried documents: the digit
+  rule already yields two phantoms in documents it reads today (`1 identities` twice in the report,
+  `1 % steps` in the matrix), and the spelled rule would add three more where it is not yet switched on
+  (`four radius` in the sheet, `five crossing radius` and `five radius` in the matrix). The uncomfortable
+  half is not the spelled rule's -- it is that the inventory has been classifying phantoms since Phase 27
+  and nothing complained, because a phantom that lands in `cited` costs nothing. The lists are audited for
+  staleness and for exemptions that excuse nothing, not for entries that should not exist.
+* **Register #94 amended** with the closure, the residual, and one measured cost; #100 opened. The entry's
+  own text also carried a duplicated phrase ("showed the first one red the first one red the only way
   left"), which was corrected while reading it.
 * **The count cascade this phase caused**, in the order the guards named it: plants 76 → 77 (the sheet's
   annotation, and the plant anchoring on it); one new test moved the Python pair 515 / 446 → 516 / 447
-  across twelve spellings in four documents and the tex; four plant anchors re-keyed to the new figures;
-  the report re-typeset.
+  across twelve spellings in four documents and the tex; the register 99 → 100 across seven spellings and
+  the two plant anchors that key on them; four further anchors re-keyed to the new figures; the report
+  re-typeset.
 
 ## 2. Assumptions this rests on
 
@@ -60,9 +70,11 @@ failure, and putting the file back -- a demonstration that nothing re-runs.
 | `scripts/mutation_plants.py` | new: the `Mutation` type, 77 plant entries, and the reason in its docstring |
 | `scripts/run_mutation_suite.py` | list and type removed; `PLANTS_PATH`, `_load_plants()`, `importlib.util` added; statuses, restore logic, `Harness`, and the CLI untouched |
 | `tests/python/test_mutation_suite.py` | the boundary guard, and one docstring re-wrapped by `scripts/rewrap_docstrings.py` |
-| `docs/interview_defense.md` | the sweep annotation 76/76 → 77/77, the two Python counts, the provenance row, Q24's tense, the state line to Phases 0–39 |
-| `docs/reproducibility.md`, `docs/limitations.md`, `paper/technical_report.tex` (+ `.pdf`, `.build.json`) | the two Python counts; #94 amended and its duplicated phrase corrected; the report re-typeset |
+| `docs/interview_defense.md` | the sweep annotation 76/76 → 77/77, the two Python counts, the provenance row, the register size in two spellings, Q24's tense, the state line to Phases 0–39 |
+| `README.md`, `docs/validation_matrix.md`, `docs/release_notes_v1.3.0.md`, `docs/release_notes_v1.4.0.md` | the register size 99 → 100, in the sentences that point at the current file |
+| `docs/reproducibility.md`, `docs/limitations.md`, `paper/technical_report.tex` (+ `.pdf`, `.build.json`) | the two Python counts; the register size in the report's three spellings; #94 amended, #100 opened, and #94's duplicated phrase corrected; the report re-typeset |
 | `docs/integrity_audit.md` | finding 79 with (a) the fix, (b) the boundary that moved, (c) the wrong-tense count |
+| `docs/project_scope.md` | the §9 row, the refresh date |
 | `docs/project_scope.md` | the §9 row |
 
 ## 4. What the phase learned, including about its own first design
@@ -112,9 +124,11 @@ failure, and putting the file back -- a demonstration that nothing re-runs.
 | Harness lane | `.venv/bin/python -m pytest tests/python/test_mutation_suite.py -q` | 9 passed (8 before the split, plus the boundary guard) |
 | CLI, smoke | `.venv/bin/python scripts/run_mutation_suite.py --list` | 77 rows, the new plant among them, exit 0 |
 | CLI, refusal | the same with `--only harness-spawns-a-...` on the in-progress tree | `target-already-modified: ... -> scripts/run_mutation_suite.py`, no file touched |
-| Producer | `.venv/bin/python scripts/build_report.py` | 6 sources, bundle `e4b80aa00ac7…`, PDF `3dc1dcea6c97…`, 1,005,797 bytes |
-| Falsification, full sweep | logged to `build/mutation-sweep-39.log` | recorded below, measured on the committed tree |
-| CI on the pushed head | `gh api …/commits/<sha>/check-runs` and the job logs | recorded below, after the push |
+| Producer | `.venv/bin/python scripts/build_report.py` | 6 sources, bundle `30b13b26d6ee…`, PDF `7683f21e6647…`, 1,005,815 bytes |
+| Hyphen exclusion, measured | both rules replayed over the five inventoried documents, every match whose number is preceded by `-` | digit rule: 2 phantoms in documents read today (the report's `1 identities` ×2, the matrix's `1 % steps`); spelled rule: 3 more where it is not yet enabled (the sheet's `four radius`, the matrix's `five crossing radius` and `five radius`); zero in the two opted-in documents, which is why no live figure is wrong |
+| Falsification, the 77-plant sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `39bf119`, logged to `build/mutation-sweep-39.log` | **`77/77 planted defects were rejected by their guard.`**, no line with any other status, tree clean afterwards. The new row is the phase's own: `harness-spawns-a-guard-subprocess-without-a-bytecode-prefix ... ok caught`, which is the guard #94 said could only be shown red by hand. The register entry added after that revision is prose-only in its effect on plants, so the list is swept again below |
+| Falsification, re-run after the register cascade | same command on the revision named in the row below it, logged to `build/mutation-sweep-39b.log` | recorded there -- a sweep cannot testify about the commit carrying its own verdict, and this cascade moved two plant anchors |
+| CI on the pushed head | `gh api …/commits/<sha>/check-runs` and the job logs | recorded below, after the push, from the runner's own logs rather than the badge |
 
 ## 6. Numerical validation
 
@@ -129,6 +143,9 @@ No measurement is published. What moves and why:
 * **Zero** artifacts re-frozen and **zero** benchmarks re-run: no experiment input changed, so the
   performance bands, their 22 committed readings and every quoted ratio are untouched -- which is the
   point of not running the suite on a phase like this one.
+* **100** -- the register's size after #100, up from 99, with seven living spellings moving to it (the
+  report in three, the front page, the matrix, the rehearsal sheet in two) and two of the sheet's cells
+  being plant anchors that had to be re-keyed in the same commit.
 
 ## 7. Remaining limitations
 
@@ -139,6 +156,10 @@ No measurement is published. What moves and why:
   mitigation is now falsifiable while the underlying behaviour is not this repository's to fix.
 * **The rehearsal sheet still holds 14 spelled claims** (#95's remaining group, along with 22 in the
   matrix and 45 in the report), and Q24's neighbour counts are exactly the kind the next slice will sort.
+* **The hyphen exclusion is registered as #100 and not fixed here.** Adding `-` to the lookbehind is one
+  character, and the work is the other half: showing that no real claim is preceded by a hyphen anywhere in
+  the corpus, which is a per-document measurement and belongs with the phase that opts the next document in
+  -- the two documents opted in today contain zero such shapes, measured, so nothing published is wrong.
 * **One historical count remains unpoliced by design:** the sheet's `19/19` quotation is a record of
   `e5daedc`. Nothing compares it with the current list, and nothing should -- that is the dated-record
   rule, not a gap.
@@ -148,7 +169,7 @@ No measurement is published. What moves and why:
 | Entry | What it records |
 |---|---|
 | #94 (amended) | closed by the split; (a) the self-reference boundary moved with the list, (b) the CLI is unaffected while the anchor census now reads two files |
-| -- | no new entries: the wrong-tense count found here was fixed in the same change rather than registered |
+| #100 (opened) | the lookbehind admits a hyphen, so `the order-four radius` is a claim of four radii: 2 phantoms the digit rule already produces in inventoried documents and 3 more the spelled rule would add, plus the uncomfortable inference that an inventory absorbing phantoms into `cited` never reports that it is over-inclusive |
 
 ## 9. The gate
 

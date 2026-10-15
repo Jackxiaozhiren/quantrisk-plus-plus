@@ -1148,3 +1148,19 @@ never removed just because a later phase shipped.
     row: that needs the cited row's validation-status cell read and the backticked status the sentence
     quotes required to appear in it, which is buildable from the same table parse and should be built
     against the next real mis-citation rather than speculatively.
+
+100. **The extractor's number may not be preceded by a letter, a digit, `#` or `.`, and a hyphen is none
+    of those, so a hyphenated ordinal's number reads as a quantity.** `the order-four radius transfers` is
+    one radius defined at order four; the rule sees `four` followed by whitespace and the noun `radius`, and
+    the inventory then asks who owns four radii. Measured on 2026-10-14 across the five inventoried
+    documents, replayed through the shipped rules: the *digit* rule already produces two such claims in
+    documents it reads today -- `1 identities` twice in `paper/technical_report.tex` and `1 % steps` in
+    `docs/validation_matrix.md` -- and the *spelled* rule adds three more wherever it is not yet switched on
+    (`four radius` in the rehearsal sheet, `five crossing radius` and `five radius` in the matrix). Two
+    things follow, and neither is comfortable. First, the inventory has been classifying phantoms since
+    Phase 27 and nothing complained, because a phantom that lands in `cited` costs nothing: the lists are
+    audited for staleness and for exemptions that excuse nothing, not for entries that should not exist.
+    Second, adding `-` to the lookbehind is the obvious fix and it is not free either -- it must be shown
+    not to remove a real claim, which is the same two-sided re-validation #95 asked for when its question
+    widened. The digit-rule half of this entry is a pre-existing limit, not a Phase 38 regression: the
+    spelled rule inherits the exclusion rather than inventing it.
