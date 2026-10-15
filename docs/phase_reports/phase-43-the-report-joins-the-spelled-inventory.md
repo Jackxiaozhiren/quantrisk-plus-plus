@@ -85,15 +85,22 @@ fields" -- each with the reason no structure in the tree enumerates it.
 | Gate | Command | Measured result |
 |---|---|---|
 | Lint | `.venv/bin/ruff check .` | All checks passed! |
-| Format | `.venv/bin/ruff format --check .` | measured on the committed tree in the record commit (finding 81's rule) |
+| Format | `.venv/bin/ruff format --check .` | 185 files already formatted on the `d5b51d4` export, in CI, and nowhere else -- see the note below the table |
 | Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
 | C++ | `ctest --preset dev` | 100% tests passed out of 204 |
 | Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
 | Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | Evidence is intact -- zero artifacts re-frozen |
 | Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 450 tests collected |
 | Python | `.venv/bin/python -m pytest -q` | 519 passed |
-| Falsification, full sweep | recorded in the next commit, on the sha it ran on | pending |
-| CI on the pushed head | recorded in the next commit, from the runner's own logs | pending |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `d5b51d4`, logged to `build/mutation-sweep-43.log` | **`99/99 planted defects were rejected by their guard.`** -- 99 rows carrying that status and none other; tree clean afterwards. The report's plants are among them, including `report-grows-the-suite-by-the-wrong-member-count ... ok caught`, which reintroduces the false six the prose shipped |
+| CI on the pushed head | `gh api …/commits/d5b51d4/check-runs`, polled until the last job concluded | run `38750480153`, three jobs `completed/success` (SonarCloud `neutral`, as ever) |
+| CI's own lane numbers | the job log, read rather than inferred from the green | `All checks passed!`, `185 files already formatted`, `Success: no issues found in 23 source files`; `100% tests passed out of 204`; `449 passed, 5 skipped in 201.46s (0:03:21)`; `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 271.2s total`. The #91 reconciliation holds on the runner's numbers: `449 + 5 = 454 = 450 + 4` |
+
+The format count is `185` in three agreeing vantages -- CI's lane, the `git archive` export of `d5b51d4`,
+and none other: this tree's own walk reports `186`, and the extra file is `REFACTOR_PROMPT.md`, the V2
+master prompt a parallel session left untracked at the repo root. Finding 81's rule (measure the lane on
+the committed tree) is what makes the foreign file visible; a record that quoted the local walk would
+have published a count of a file nobody committed.
 
 ## 6. Numerical validation
 
