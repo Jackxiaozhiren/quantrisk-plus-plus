@@ -90,6 +90,15 @@ grids of rows 19 to 23), and promoting a citation to an owner is worth the diff 
   state, so the plant would have been a no-op; the anchor is now the report's own extractor call. A
   falsification plant whose target becomes true is not a broken plant, it is a phase that finished a step.
 
+* **The sweep caught this phase's own wiring, in the way it exists to.** The first full run reported
+  `91/92`: `spelled-rule-widened-to-a-document-nobody-classified` came back `guard-stayed-green`. Its
+  mutation site had moved correctly -- from the `_SPELLED_DOCUMENTS` tuple to the report's extractor
+  call -- while its `guard` field had stayed on the markdown inventory guard, which the new mutation
+  cannot reach. So the plant was not proving the claim it names; it was changing a line and watching a
+  different function. A plant is caught by the guard that reads the line it mutates, and re-keying an
+  anchor re-keys the guard with it. Fixed in the follow-up commit, which re-ran the plant alone
+  (`1/1 ... caught`) before the whole sweep was re-run on the committed tree.
+
 ## 5. Exact test results
 
 | Gate | Command | Measured result |

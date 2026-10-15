@@ -1076,11 +1076,15 @@ MUTATIONS: tuple[Mutation, ...] = (
         # #95's staging is the review decision, and after Phase 42 it has exactly one step left: the
         # four markdown documents answer for their spelled counts (63 of the 108 measured) and the
         # report's 45 do not. Switching the report on here would let the inventory report itself
-        # complete while quietly stopping answering for those 45, so the wider read has to red --
-        # and property 5 reads the report guard's own call keywords to say so.
+        # complete while quietly stopping answering for those 45, so the wider read has to red.
+        # Phase 42's own sweep found this plant green for one reason only: the mutation site moved to
+        # the report's extractor call and the `guard` field had stayed on the markdown inventory
+        # guard, which the change cannot reach. A plant is caught by the guard that reads the line it
+        # mutates, so moving an anchor moves the guard with it -- and property 5's staging pin reddens
+        # on the same edit, naming the guard that answers for the call.
         guard=(
             "tests/python/test_artifact_metadata.py::"
-            "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
+            "test_every_countable_claim_in_the_report_is_owned_or_declared"
         ),
         claim="a document joins the spelled inventory only after its claims answer for themselves",
     ),
