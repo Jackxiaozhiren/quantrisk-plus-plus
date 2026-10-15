@@ -136,7 +136,8 @@ failure, and putting the file back -- a demonstration that nothing re-runs.
 | Hyphen exclusion, measured | both rules replayed over the five inventoried documents, every match whose number is preceded by `-` | digit rule: 2 phantoms in documents read today (the report's `1 identities` ×2, the matrix's `1 % steps`); spelled rule: 3 more where it is not yet enabled (the sheet's `four radius`, the matrix's `five crossing radius` and `five radius`); zero in the two opted-in documents, which is why no live figure is wrong |
 | Falsification, the 77-plant sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `39bf119`, logged to `build/mutation-sweep-39.log` | **`77/77 planted defects were rejected by their guard.`**, no line with any other status, tree clean afterwards. The new row is the phase's own: `harness-spawns-a-guard-subprocess-without-a-bytecode-prefix ... ok caught`, which is the guard #94 said could only be shown red by hand |
 | Falsification, re-run after the register cascade | same command on `2d7498b`, logged to `build/mutation-sweep-39b.log` | **`77/77 planted defects were rejected by their guard.`**, 77 rows of that one status and no other, tree clean afterwards |
-| CI on the pushed head | `gh api …/commits/<sha>/check-runs` and the job logs | recorded below, after the push, from the runner's own logs rather than the badge |
+| CI on the pushed head | `gh api …/commits/bf656a9/check-runs` after the push | run `38672193365`, three jobs `completed/success` (SonarCloud `neutral`, as ever) |
+| CI's own lane numbers | the job log, read rather than inferred from the green | `446 passed, 5 skipped in 113.68s (0:01:53)`; `100% tests passed out of 204`. The #91 reconciliation holds with one test added on each side: `446 + 5 = 451 = 447 + 4` |
 
 ## 6. Numerical validation
 
@@ -181,9 +182,15 @@ No measurement is published. What moves and why:
 
 ## 9. The gate
 
-Closed when the sweep runs 77 declared plants on the committed tree with no line at any other status and
+Closed when the sweep runs 78 declared plants on the committed tree with no line at any other status and
 the tree clean afterwards; when CI's three jobs are read from their own logs on the pushed revision; when
 the #91 reconciliation holds for the new pair; and when the register, the audit, the scope table and the
 sheet all state the same plant count and the same Python pair, each from its own producer. As in every
-phase before it, the commit that carries these rows cannot contain the verdict of its own run -- a record
-checks the revision it names.
+phase before it, a record checks the revision it names: the two sweep rows above are measurements of
+`39bf119` and `2d7498b`, and the CI row is `bf656a9`, so the head the runner built is the commit that
+carried the sweep record rather than the one carrying its own.
+
+**Correction, same day:** the paragraph above was written against 77 plants, and the exclusion tightened
+while this was being set down needed a falsification of its own, which brings the declared list to 78.
+The sweep and CI rows for that revision are Phase 40's, not this file's -- a phase report is not allowed
+to be a promise about a tree that does not exist yet.
