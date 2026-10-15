@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 449 tests collected offline",
+        anchor="# 450 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 518 pytest tests with the validation",
+        anchor="and 519 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 92/92 planted defects rejected",
+        anchor="# 99/99 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 449 collected without them",
+        anchor="oracles installed, 450 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 518 pytest tests with the `oracles` extra here",
+        anchor="# 519 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -1068,25 +1068,23 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="the spelled alternatives come from the table the guards resolve through",
     ),
     Mutation(
-        identifier="spelled-rule-widened-to-a-document-nobody-classified",
+        identifier="report-stops-reading-spelled-claims",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor="claims = _extract_claims(flat)",
-        replacement="claims = _extract_claims(flat, spelled=True)",
-        # #95's staging is the review decision, and after Phase 42 it has exactly one step left: the
-        # four markdown documents answer for their spelled counts (63 of the 108 measured) and the
-        # report's 45 do not. Switching the report on here would let the inventory report itself
-        # complete while quietly stopping answering for those 45, so the wider read has to red.
-        # Phase 42's own sweep found this plant green for one reason only: the mutation site moved
-        # to the report's extractor call while the `guard` field stayed on the markdown inventory
-        # guard, which the change cannot reach. A plant is caught by the guard that reads the line
-        # it mutates, so moving an anchor moves the guard with it -- and property 5's staging pin
-        # reddens on the same edit, naming the guard that answers for the call.
+        anchor="claims = _extract_claims(flat, spelled=True)",
+        replacement="claims = _extract_claims(flat)",
+        # #95's rollout finished with the report (Phase 43), so the staging plant's original
+        # mutation -- widening the document list -- became the shipped state and had to be replaced
+        # by its inverse: switching the report's spelled reading back off. The report's own guard
+        # stays green under that edit, because every *digit* claim is still classified; the only
+        # reader of the regression is property 5's pin, which reads the report guard's call keywords
+        # and demands the spelled reading stay on. Same lesson as the 91/92 sweep: the named
+        # guard is the one that reads the mutated line.
         guard=(
             "tests/python/test_artifact_metadata.py::"
-            "test_every_countable_claim_in_the_report_is_owned_or_declared"
+            "test_the_claim_extractor_reads_percentages_and_refuses_labels"
         ),
-        claim="a document joins the spelled inventory only after its claims answer for themselves",
+        claim="a document that joined the spelled inventory does not quietly leave it",
     ),
     Mutation(
         identifier="harness-spawns-a-guard-subprocess-without-a-bytecode-prefix",
@@ -1321,5 +1319,95 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_documents_that_count_the_studies_grids_agree_with_their_producers"
         ),
         claim="the distinct partials a route reads are counted from the route table",
+    ),
+    Mutation(
+        identifier="report-counts-rays-the-restrike-fitted-on-three",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="of each of three rays the error",
+        replacement="of each of two rays the error",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_counts_what_the_studies_and_the_gates_have"
+        ),
+        claim="a study's ray count in the report is the artifact's own ray block",
+    ),
+    Mutation(
+        identifier="report-counts-joint-rays-the-bound-did-not-fit",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="windows for the four joint rays",
+        replacement="windows for the five joint rays",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_counts_what_the_studies_and_the_gates_have"
+        ),
+        claim="the two-factor bound's ray count is the asymptotics block it publishes",
+    ),
+    Mutation(
+        identifier="report-counts-columns-the-map-did-not-sweep",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="across the twelve columns it finds",
+        replacement="across the eleven columns it finds",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_counts_what_the_studies_and_the_gates_have"
+        ),
+        claim="the crossing map's column count is the headline that names it",
+    ),
+    Mutation(
+        identifier="report-counts-books-the-experiment-did-not-measure",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="on all five books, and its worst",
+        replacement="on all six books, and its worst",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_counts_what_the_studies_and_the_gates_have"
+        ),
+        claim="the book count is the five-book experiment's own headline",
+    ),
+    Mutation(
+        identifier="report-counts-fixtures-the-directory-outgrew",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="Sixteen committed fixtures of real responses",
+        replacement="Fifteen committed fixtures of real responses",
+        # This is the plant for the count the phase found false at thirteen: the directory outgrew
+        # the sentence by three fixtures, and nothing could see it until the spelled reader reached
+        # the report. The corrected count is owned by the directory listing itself.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_counts_what_the_studies_and_the_gates_have"
+        ),
+        claim="a fixture count is what the fixtures directory holds",
+    ),
+    Mutation(
+        identifier="report-counts-identity-checks-the-gate-does-not-run",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="checks seven identities",
+        replacement="checks eight identities",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_counts_what_the_studies_and_the_gates_have"
+        ),
+        claim="the validate gate's check count is its own code, read as syntax",
+    ),
+    Mutation(
+        identifier="report-grows-the-suite-by-the-wrong-member-count",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="the suite has grown by seven members since",
+        replacement="the suite has grown by six members since",
+        # The value the report shipped for four phases: twelve plus six is eighteen, the registry
+        # carries nineteen, and no gate could see either spelled number until the report read them.
+        # The owner is the relation, so this edit reddens without any constant being retyped.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_report_counts_what_the_studies_and_the_gates_have"
+        ),
+        claim="a growth sentence has to agree with the registry minus its own quoted past",
     ),
 )

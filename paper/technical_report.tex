@@ -146,8 +146,8 @@ the refusal Phase 12 recorded into a measured result, and Phase 14 the verificat
 to state without an owner. Nine release tags exist, \code{v1.0.0},
 \code{v1.1.0}, \code{v1.2.0}, \code{v1.3.0}, \code{v1.4.0}, \code{v1.5.0}, \code{v1.6.0},
 \code{v1.7.0} and \code{v1.8.0}, each with the report, the evidence manifest and the suite results attached. The suite is 204 CTest entries and
-548{,}368 assertions in 203 Catch2 cases on the C++ side, and 518 pytest tests with the validation
-oracles installed, 449 collected without them (\src{docs/limitations.md}, item 63, explains why one
+548{,}368 assertions in 203 Catch2 cases on the C++ side, and 519 pytest tests with the validation
+oracles installed, 450 collected without them (\src{docs/limitations.md}, item 63, explains why one
 command gives two numbers); 19 benchmark-suite members execute under
 \code{--require-all}, and the frozen manifest hashes 95 artifacts with nothing changed, missing or
 unlisted (\src{evidence/manifest.json}). The \emph{end-of-Phase-9} baseline, for contrast, was 190
@@ -449,7 +449,7 @@ provides SEC EDGAR, FRED/ALFRED and CFTC adapters behind a transport that rate-l
 across processes, caches by URL, and refuses to send an anonymous request to a SEC host rather
 than sending one; provenance is an immutable record of source, download timestamp, series
 identifier and a SHA-256 digest taken over the bytes as served, and reading refuses a payload
-that no longer matches. Thirteen committed fixtures of real responses, totalling roughly 150 KB, back every test path,
+that no longer matches. Sixteen committed fixtures of real responses, totalling roughly 300\,KB, back every test path,
 with the 2.4 MB CFTC archive kept as a labelled excerpt, and a socket-blocking test drives all
 three adapters with the sockets replaced by raisers, so the offline requirement is executed
 rather than asserted (\src{docs/phase_reports/phase-08-public-data.md}). No number in this
@@ -1987,7 +1987,7 @@ through a registry (\src{docs/limitations.md}, item 57). The fifth category is i
 correction: the suite's own roll-up is what \src{README.md} quotes for its member count, and until that
 phase the roll-up sat outside the chain that exists to protect quoted numbers. The sentence it quoted
 said twelve members, which was true when \src{docs/phase\_reports/phase-11-real-data-risk-study.md}
-wrote it; the suite has grown by six members since, and nothing in the gate set read that sentence
+wrote it; the suite has grown by seven members since, and nothing in the gate set read that sentence
 until the drift was found by comparing this report's own two statements of the manifest's size.
 
 % ===========================================================================
@@ -2152,7 +2152,7 @@ The following committed files are the sole evidence for every measurement in thi
       \code{crr_binomial}, \code{monte_carlo_gbm}, \code{path_dependent_options},
       \code{heston}, \code{var_es}, \code{portfolio_covariance_and_optimisation},
       \code{scenario_stress_testing}.
-\item \srcin{docs/phase_reports/} --- ten report files covering phases 1 to 9 (Phase 1 has two),
+\item \srcin{docs/phase_reports/} --- 44 report files, one per phase (Phase 1 has two),
       each with its gate table and technical-debt list.
 \item \srcin{benchmarks/quantlib/results/pricing_vs_quantlib.json},
       \code{monte_carlo_validation.json}, \code{path_dependent_vs_quantlib.json};

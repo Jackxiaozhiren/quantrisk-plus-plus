@@ -2150,3 +2150,31 @@ name, which also means an annotated assignment (`PARENTS: tuple[...] = ...`) is 
 would have had to guess the shape. The first version asked for `ast.Assign` only and reported that
 `PARENTS` was not a literal at all -- a false statement about a file that had not changed, caught by
 running the guard rather than by reading the diff.
+
+## Addendum — Phase 43, three false counts in the last document the rollout reached (2026-10-15)
+
+**84. Widening the spelled reader to `paper/technical_report.tex` found three living claims that were
+not merely unsupervised but false, and the report had carried all three through seven phases of green
+gates.** The fixture sentence said `Thirteen committed fixtures` where `data/fixtures` holds sixteen
+payloads; the artifact index said `ten report files covering phases 1 to 9` where the directory holds
+forty-three; and the suite-growth sentence said `grown by six members since` from a quoted twelve, while
+the registry carries nineteen. Phase 42 found one false claim in the matrix; the report, being the
+oldest and largest prose surface, held three.
+
+(a) **The growth claim is owned as a relation, not a number.** Both spelled counts come out of the same
+sentence, and the guard requires the second to equal the registry's size minus the first -- so the
+sentence survives every future suite member, and neither the twelve nor the seven is ever retyped. This
+is the shape the register has been asking for since #92: a sentence that states a derivation should be
+checked as one, not as two constants that happen to agree today.
+
+(b) **One of the three could not be owned spelled.** `forty-three` is past the numeral table's ceiling
+(#97), so an owned spelled count would have failed as a `KeyError` rather than a disagreement; the
+report-file count is written in digits instead, and its owner reads the directory. The ceiling is now
+load-bearing in a place nobody planned: the first prose count above twenty-six forces either a table
+extension or a digits fallback, and this phase took the fallback.
+
+(c) **The index's remaining counts are invisible to the rule for a different reason.** `eight cards`
+(names a noun the list does not carry) and `55-entry register` (hyphenated, refused by design since
+#100) sit in the same artifact index as the fixed count. #102's recall half already records the noun
+gap; what is new here is where it matters -- an index is exactly the document whose job is to count
+things, so its unlisted nouns are the likeliest place for the next stale number to live.

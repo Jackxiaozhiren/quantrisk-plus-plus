@@ -1315,6 +1315,123 @@ def test_documents_that_count_the_studies_grids_agree_with_their_producers() -> 
         )
 
 
+def test_the_report_counts_what_the_studies_and_the_gates_have() -> None:
+    """Fourteen spelled counts in the report say how wide a study was or how big a gate is.
+
+    The report's artifact index and its study sections are the last place #95's rollout reaches, and
+    they are where the Phase 42 lesson pays: reading them found two counts that had quietly gone
+    false -- the fixture count, which the data directory outgrew by three, and the artifact index's
+    report count, which was written when the directory held ten files and now holds forty-three --
+    plus one arithmetic claim whose two spelled numbers had to agree with each other and did not
+    (the suite had grown by seven members from twelve, not six). Each is owned here against the
+    thing it counts, and the two Python-source producers are read with `ast`, per finding 82. The
+    report-file count is written in digits on purpose: `forty-three` is past the numeral table's
+    ceiling (#97), and owning a count the table cannot resolve would trade a stale sentence for a
+    KeyError.
+
+    The members sentence is owned as a *relation*, not as a constant: the guard reads both spelled
+    numbers from the sentence and requires the second to be the registry minus the first, so the
+    sentence stays true as the suite grows and no phase ever retypes the twelve.
+    """
+    restrike = json.loads(
+        (REPO_ROOT / "experiments/restrike_gamma_map/results/restrike_gamma_map.json").read_text(
+            encoding="utf-8"
+        )
+    )["asymptotics"]
+    two_factor = json.loads(TWO_FACTOR_BOUND.read_text(encoding="utf-8"))["asymptotics"]
+    fourth = json.loads(FOURTH_ORDER_MAP.read_text(encoding="utf-8"))["headline"]
+    second = json.loads(SECOND_BOOK_MAP.read_text(encoding="utf-8"))["headline"]
+    fifth = json.loads(
+        (
+            REPO_ROOT / "experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json"
+        ).read_text(encoding="utf-8")
+    )["headline"]
+    stress = json.loads(
+        (REPO_ROOT / "experiments/stress_testing/results/stress_testing_study.json").read_text(
+            encoding="utf-8"
+        )
+    )["ranking"]
+    refusals = json.loads(
+        (
+            REPO_ROOT / "experiments/real_data_risk_study/results/real_data_risk_study.json"
+        ).read_text(encoding="utf-8")
+    )["refusals"]
+    stress_data_files = [
+        entry["path"]
+        for entry in json.loads(MANIFEST.read_text(encoding="utf-8"))["artifacts"]
+        if "stress_testing" in entry["path"] and not entry["path"].endswith(".png")
+    ]
+    fixtures = [
+        path
+        for path in (REPO_ROOT / "data" / "fixtures").iterdir()
+        if path.is_file() and not path.name.endswith(".provenance.json")
+    ]
+    reports = list((REPO_ROOT / "docs" / "phase_reports").glob("*.md"))
+    provenance_cases = sum(
+        1
+        for node in ast.walk(
+            ast.parse((REPO_ROOT / "python/quantrisk/experiments/metadata.py").read_text("utf-8"))
+        )
+        if isinstance(node, ast.FunctionDef) and node.name == "describe_provenance"
+        for statement in ast.walk(node)
+        if isinstance(statement, ast.Return)
+    )
+    validate_checks = sum(
+        1
+        for node in ast.walk(ast.parse((REPO_ROOT / "python/quantrisk/cli.py").read_text("utf-8")))
+        if isinstance(node, ast.FunctionDef) and node.name == "command_validate"
+        for call in ast.walk(node)
+        if isinstance(call, ast.Call)
+        and isinstance(call.func, ast.Name)
+        and call.func.id == "_record"
+    )
+    suite_members = len(
+        _literal_list(
+            (REPO_ROOT / "scripts/run_benchmark_suite.py").read_text(encoding="utf-8"), "MEMBERS"
+        )
+    )
+    report = _tex_inventory_text()[1].replace("{,}", ",")
+
+    pairs: list[tuple[str, int]] = [
+        (r"of each of (\w+) rays the error", len(restrike)),
+        (r"windows for the (\w+) joint rays", len(two_factor)),
+        (r"across the (\w+) columns it finds", fourth["columns_swept"]),
+        (
+            r"that ladder's (\w+) radii come back at",
+            len([key for key in second if key.startswith("radii_")]),
+        ),
+        (r"on all (\w+) books, and its worst", second["books_measured"]),
+        (r"re-measures it on (\w+) further books", second["books_measured"] - 1),
+        (r"rule on the same (\w+) books", fifth["books_measured"]),
+        (r"(\w+) books were built by the Phase", next(iter(stress.values()))["books"]),
+        (r"of (\w+) named scenarios", len(stress)),
+        (r"all (\w+) stress artifacts are", len(stress_data_files)),
+        (r"differs for the (\w+) reachable cases", provenance_cases),
+        (r"checks (\w+) identities", validate_checks),
+        (r"runs (\w+) identity checks", validate_checks),
+        (r"(\w+) questions are refused", len(refusals)),
+        (r"(\w+) committed fixtures of real responses", len(fixtures)),
+        (r"(\d+) report files, one per phase", len(reports)),
+    ]
+    for spelling, count in pairs:
+        assert count > 0, f"{spelling!r} compares against an empty producer"
+        found = re.search(spelling, report)
+        assert found, f"the report no longer states the count as {spelling!r}"
+        assert _as_int(found.group(1)) == count, (
+            f"{spelling!r} reads {found.group(1)!r} where the tree carries {count}"
+        )
+
+    # The one relation: both numbers come out of the sentence, and the second must be the suite's
+    # growth from the first, so the sentence cannot drift one member at a time.
+    members = re.search(r"said (\w+) members.*?grown by (\w+) members since", report, re.S)
+    assert members, "the report no longer relates the suite's growth to its quoted past"
+    original, grown = _as_int(members.group(1)), _as_int(members.group(2))
+    assert grown == suite_members - original, (
+        f"the report says the suite grew by {grown} members from {original}, while the registry "
+        f"carries {suite_members}"
+    )
+
+
 def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
     """The C++ totals are quoted in six places and changed under everyone this phase.
 
@@ -1745,6 +1862,89 @@ _REPORT_OWNED = {
         "test_the_derivation_command_agrees_at_the_precision_floor",
         "tests/python/test_fifth_order_partials.py",
     ),
+    # The report's spelled group (#95, Phase 43). The tag count's guard has read the spelled form
+    # since Phase 21 -- it resolves `Nine` through the same table -- and what was missing was the
+    # inventory's credit, not a producer.
+    r"(\w+)\s+release tags exist": (
+        "test_the_report_lists_the_release_tags_the_repository_carries",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    # The report's study-and-gate shapes (#95, Phase 43), owned by the guard that reads the artifact
+    # block, the manifest, the directory, or the Python structure that performs the count.
+    r"of each of (\w+) rays the error": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"windows for the (\w+) joint rays": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"across the (\w+) columns it finds": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"that ladder's (\w+) radii come back at": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"on all (\w+) books, and its worst": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"re-measures it on (\w+) further books": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"rule on the same (\w+) books": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+) books were built by the Phase": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"of (\w+) named scenarios": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"all (\w+) stress artifacts are": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"differs for the (\w+) reachable cases": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"checks (\w+) identities": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"runs (\w+) identity checks": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+) committed fixtures of real responses": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+) questions are refused": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\d+) report files, one per phase": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    # The one relation in the group: both spelled numbers come out of the sentence and the second is
+    # the registry's growth from the first, so neither is ever retyped.
+    r"said (\w+) members": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"grown by (\w+) members since": (
+        "test_the_report_counts_what_the_studies_and_the_gates_have",
+        "tests/python/test_artifact_metadata.py",
+    ),
 }
 
 # One span the owner guard compares as a block: the manifest sentence, whose seven numbers are
@@ -1802,6 +2002,44 @@ _REPORT_DECLARED: dict[str, str] = {
     ),
     "31 CTest entries": "a past CI run quoted as history in the sentence that names it",
     "1{,}000 steps is about 1.6 GB": "a sizing estimate for a hypothetical, labelled as one",
+    # The report's narrative numerals (#95, Phase 43): counts of idiom, assumption and incident that
+    # no structure in the tree enumerates. Each reason names what a producer would have to be.
+    "Convexity buys": (
+        "an order-of-magnitude idiom about how much a second-order term dominates, read off the "
+        "table beside it; the table's own ratios are the claims, and they are quoted as digits"
+    ),
+    "one volatility,": (
+        "the fixture's composition, named in the same parenthesis as the equities and the rate it "
+        "sits beside; the fixture is defined in the stress experiment's code, not counted anywhere"
+    ),
+    "holds only while": (
+        "the bound's assumption -- one factor moving -- restated as a scope, not a measurement; "
+        "the two-factor extension the next subsection takes up is what was measured"
+    ),
+    "Two checks say the added piece": (
+        "the paragraph's own roadmap of the two arguments it then makes in full; the arguments are "
+        "the claims, and each is owned where its numbers live"
+    ),
+    "agreement at the precision floor means": (
+        "an equivalence statement -- two computations agreeing to 1e-11 are one function at that "
+        "precision -- which is a reading of the agreement figures, not a count of anything"
+    ),
+    "comparisons by roughly": (
+        "an order-of-magnitude improvement quoted from an incident; the before and after "
+        "tolerances are the claims and are quoted as digits in the same sentence"
+    ),
+    "steepener; credit is": (
+        "the register's own wording for limitation 46, restated; the register is the source and "
+        "its size is owned, not this paraphrase of one entry"
+    ),
+    "macOS-committed artifact in the last digits of": (
+        "the shape of a recorded platform disagreement -- which fields disagreed -- quoted from "
+        "the incident the audit carries; no artifact counts float fields by disagreement"
+    ),
+    "The same bound when": (
+        "a section heading naming its own subject; the section's content measures the bound, and "
+        "the count of factors in the title is not a quantity the section produces"
+    ),
 }
 
 
@@ -1895,7 +2133,7 @@ def test_every_countable_claim_in_the_report_is_owned_or_declared() -> None:
     """
     masked, flat = _tex_inventory_text()
     assert len(masked) == len(flat), "the inventory lost its offset alignment"
-    claims = _extract_claims(flat)
+    claims = _extract_claims(flat, spelled=True)
     assert claims, "the extractor matches nothing in the report, so this guard proves nothing"
 
     owned: list[tuple[int, int]] = []
@@ -2652,10 +2890,10 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
         if isinstance(node, ast.Call)
         for keyword in node.keywords
     )
-    assert not report_reads_spelled, (
-        "the report now reads spelled claims too, so #95's staged rollout is finished and this "
-        "assertion should be retired with the staging rather than left describing a step that "
-        "no longer exists"
+    assert report_reads_spelled, (
+        "the report's spelled reading is off, which would strand its spelled-only claims unread: "
+        "#95's rollout finished with the report, and this pin keeps the last step from being "
+        "quietly refactored away"
     )
     # The alternation is generated from the table, and that generation is what is load-bearing:
     # with one key missing, the sentence below stops being a claim of twenty-two at all. Before

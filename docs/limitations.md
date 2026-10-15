@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 518 pytest tests with
-    the `oracles` extra installed, and the same tree collects 449 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 519 pytest tests with
+    the `oracles` extra installed, and the same tree collects 450 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1105,6 +1105,16 @@ never removed just because a later phase shipped.
     distinct fourth-order partials, so the sentence carried its denominator from the wrong side of the
     relation, and the corrected prose states both numbers against the structures they name (finding 83).
     #102 records what the rule still cannot see.
+
+    **Amended 2026-10-15 by Phase 43: the report is in, and the rollout is complete.** The report's 45
+    spelled-only claims resolve to 18 owned, 10 declared and 17 cited -- none unowned -- and reading them
+    found **three more living counts that had gone false**: the fixture sentence said thirteen where the
+    directory holds sixteen, the artifact index said ten report files where it holds forty-three, and the
+    suite-growth sentence said six members where the registry has grown by seven from the twelve it
+    quotes. All three are corrected and owned -- the last as a *relation* (the growth must equal the
+    registry minus the sentence's own quoted past), so neither number is ever retyped. #95's open
+    residue is now only what #102 records: the rule's recall on prose is bounded by the nouns it lists
+    and the modifiers it allows, and the corpus's "complete" means complete-within-the-rule.
 96. **A pattern written with a literal space cannot read a claim the document splits across lines, and
     four guards have been taught that; the rest of the corpus still reads raw text.** The falsification
     sweep's one escape was `sheet-states-a-case-gap-the-collected-pair-does-not-give`: the guard compared
