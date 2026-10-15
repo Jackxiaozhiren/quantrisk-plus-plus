@@ -2093,3 +2093,34 @@ three revisions -- `d1306a4` 178, `bf656a9` 181, `99c69bb` 182 -- the walk has n
 phases running, and every earlier report that recorded it is recording the tree at its own launch. The
 correction is appended with its date rather than written over, and the row now names both the number and
 where it came from.
+
+## Addendum — Phase 41, a producer that counted itself, and the first measured precision of the spelled rule (2026-10-15)
+
+**82. The guard written to own `one test re-executes the published benchmark script` first reported two
+such tests, and the second one was the guard.** The producer it needed was a count over
+`tests/python/*.py`, and the obvious predicate -- the file's text contains the flag `--quick` -- matched
+the searching file's own source, because a guard that names what it looks for writes it down. The sheet's
+claim was therefore refuted by a string literal in a comment, in the file that was doing the refuting,
+and the failure looked like prose having gone stale.
+
+(a) The predicate is now the *spawn shape*: a line carrying both the interpreter and the flag. That is
+also what makes the claim mean something -- the sentence says a test re-executes a script in a
+subprocess, and a file that merely mentions the flag does not. Measured on the current tree exactly one
+module matches, and the plant `sheet-counts-two-tests-re-executing-the-benchmark-script` rewrites the
+sentence to two so the comparison, not the presence check, is what reddens. The same trap is what #94
+was about (a plant whose anchor is a line of the harness), reached from the other side: not a mutation
+list that reads its own file, but a count that reads the directory it lives in.
+
+(b) **The spelled rule's precision got its first measurement, and it is not one.** Of the rehearsal
+sheet's 14 spelled-only claims -- the first prose-heavy document opted into `_SPELLED_DOCUMENTS` -- 9
+have a producer in this tree and 5 do not, and the five are not one shape: a count of *families* where
+the core declares three functions (`the two tests specified here`), a count of rejected designs
+(`Two versions of the radius definition were wrong`), a property of one `ctest -R` run, a sign-symmetric
+pair quoted beside a column count that is owned elsewhere, and a matrix row repeating the sheet's own
+answer. The digit rule never had this problem at this rate: `2 tests` is always a count. One candidate
+fix was measured and rejected -- requiring a determiner before the numeral, since the narrative uses
+mostly lack it -- but `The two cases I would be pushed on` and `the two tests specified here` are both
+determiner-led and both real claims, so the rule would have excused two of the nine owners. What is
+recorded here is the ratio, because the two groups still closed (`docs/validation_matrix.md`'s 21 and
+the report's 45) will be judged by the same hand, and a reader is entitled to know that in the one
+prose document measured so far, a spelled count is a quantity about two times in three.

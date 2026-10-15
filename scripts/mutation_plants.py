@@ -118,7 +118,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 100 numbered entries",
+        anchor="carries 101 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 447 tests collected offline",
+        anchor="# 448 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 516 pytest tests with the validation",
+        anchor="and 517 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 78/78 planted defects rejected",
+        anchor="# 86/86 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 447 collected without them",
+        anchor="oracles installed, 448 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 516 pytest tests with the `oracles` extra here",
+        anchor="# 517 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -876,7 +876,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-provenance-cell-quotes-a-stale-register-count",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="`docs/limitations.md` (100 entries)",
+        anchor="`docs/limitations.md` (101 entries)",
         replacement="`docs/limitations.md` (84 entries)",
         # The defect this phase actually found: the sheet's prose said 94 while its own
         # claim-provenance table said 84, three phases behind, and the guard that owns the register
@@ -1071,12 +1071,14 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="spelled-rule-widened-to-a-document-nobody-classified",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='_SPELLED_DOCUMENTS = ("README.md", "docs/reproducibility.md")',
+        anchor='_SPELLED_DOCUMENTS = ("README.md", "docs/reproducibility.md", '
+        '"docs/interview_defense.md")',
         replacement="_SPELLED_DOCUMENTS = _MARKDOWN_INVENTORY",
-        # #95's staging is the review decision: 22 spelled claims sit in the matrix and 14 in the
-        # rehearsal sheet, none of them classified. A rule switched on corpus-wide would report the
-        # inventory complete while silently stopping answering for those claims, so the wider read
-        # has to red here -- and the extractor self-test's staging assertion reddens with it.
+        # #95's staging is the review decision: 21 spelled claims sit in the validation
+        # matrix and 45 in the report, none of them classified. A rule switched on corpus-wide
+        # would report the inventory complete while silently stopping answering for those claims, so
+        # the wider read has to red here -- and the extractor self-test's staging assertion reddens
+        # with it.
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
@@ -1120,5 +1122,121 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_claim_extractor_reads_percentages_and_refuses_labels"
         ),
         claim="a number after a hyphen is the second half of a compound, not a count of the noun",
+    ),
+    Mutation(
+        identifier="sheet-counts-rays-the-crossing-map-did-not-measure",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="along four rays scaled down",
+        replacement="along five rays scaled down",
+        # The spelled inventory's value is that the words answer to an artifact rather than to
+        # another document: the map publishes its own `rays_number_of`, so a sheet that says five is
+        # refuted by the frozen file and not by a reader's memory (#95).
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_artifacts"
+        ),
+        claim="a spelled count of the map's shape is compared with what the map published",
+    ),
+    Mutation(
+        identifier="sheet-counts-books-the-five-book-experiment-did-not-measure",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="The five books were chosen to span",
+        replacement="The six books were chosen to span",
+        # The sixth book exists in this tree (`experiments/sixth_book_crossing_map/`), which is
+        # exactly why the claim needs the artifact rather than a directory listing: the sentence
+        # is about the five-book study's own `books_measured`, and a reader who retyped it to
+        # match the newer experiment would be writing a different claim.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_artifacts"
+        ),
+        claim="the book count is that experiment's headline, not a count of its directories",
+    ),
+    Mutation(
+        identifier="sheet-counts-a-radius-family-the-artifact-does-not-publish",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="that book's two radii",
+        replacement="that book's three radii",
+        # The count and the pair beside it are read together: with three claimed, the guard
+        # reddens on the number of `radii_*` tables the artifact publishes, before the values.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_artifacts"
+        ),
+        claim="how many radii a book carries is what the artifact's headline tables say",
+    ),
+    Mutation(
+        identifier="sheet-claims-a-third-route-to-the-same-statement",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="Two equivalent routes to the same statement",
+        replacement="Three equivalent routes to the same statement",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_their_own_enumerations_agree_with_their_lists"
+        ),
+        claim="a count of the paragraph's own `Xxx route:` labels is counted from those labels",
+    ),
+    Mutation(
+        identifier="sheet-numbers-more-cases-than-it-enumerates",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="The two cases I would be pushed on",
+        replacement="The three cases I would be pushed on",
+        # The producer is the `(1)` / `(2)` sequence inside the same paragraph, and the assertion
+        # compares the whole sequence with the count, so an extra case is caught whether or not the
+        # answer goes on to number it.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_their_own_enumerations_agree_with_their_lists"
+        ),
+        claim="an inline enumeration has to be numbered as far as the count it states",
+    ),
+    Mutation(
+        identifier="sheet-counts-two-tests-re-executing-the-benchmark-script",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="And one test re-executes the",
+        replacement="And two tests re-execute the",
+        # The suite is the producer: exactly one module spawns the published script with the flag.
+        # The replacement keeps the guard's pattern matching, so the *comparison* reddens rather
+        # than the presence check; the tree is restored from the recorded digest either way.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
+        ),
+        claim="a behavioural count of the suite is counted from the suite, not from the prose",
+    ),
+    Mutation(
+        identifier="sheet-reads-the-refreeze-count-as-a-longer-history",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="across the twenty-two re-freezings",
+        replacement="across the twenty-three re-freezings",
+        # The same committed history the note in `docs/reproducibility.md` counts three times
+        # over; the sheet is its fourth spelling, and a re-freeze moves all four together or the
+        # guard says which one lagged.
+        guard=(
+            "tests/python/test_artifact_metadata.py::test_the_performance_guards_are_not_vacuous"
+        ),
+        claim="every spelled count of the frozen reading history is compared with that history",
+    ),
+    Mutation(
+        identifier="declaration-anchor-for-the-backtest-families-stops-matching",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="the two tests specified here",
+        replacement="the two tests specified below",
+        # A declaration is only as good as the sentence it is anchored to. Moving the words without
+        # touching the list makes the anchor stale, and the inventory guard reports an
+        # exemption that no longer excuses anything -- the check that caught #100's two phantoms.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
+        ),
+        claim="a declaration has to sit beside the sentence that made it necessary",
     ),
 )

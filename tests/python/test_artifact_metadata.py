@@ -358,6 +358,32 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
         f"oracles present: {_oracles_present()}"
     )
 
+    # The sheet's behavioural spelled count (#95) is not a total: it claims exactly one test
+    # re-executes the published benchmark script. The suite is the producer, and a second test
+    # taking up the same trick is the failure this catches rather than a fact somebody has to
+    # retype. The predicate is the spawn shape rather than the flag, because a guard's own source
+    # has to name the flag it searches for: a file that merely mentions it in a comment would be
+    # counted by the file doing the counting.
+    flag = '"--quick"'
+    interpreter = "sys.executable"
+    sheet_text = _folded_document("docs/interview_defense.md")
+
+    def re_executes_the_script(text: str) -> bool:
+        return any(flag in line and interpreter in line for line in text.splitlines())
+
+    re_runners = sorted(
+        path.name
+        for path in (REPO_ROOT / "tests" / "python").glob("*.py")
+        if re_executes_the_script(path.read_text(encoding="utf-8"))
+    )
+    assert re_runners, "no test re-executes the published benchmark script, so the count is zero"
+    found = re.search(r"(\w+) tests? re-executes? the published benchmark script", sheet_text)
+    assert found, "the sheet no longer counts the test that re-executes the benchmark script"
+    assert _as_int(found.group(1)) == len(re_runners), (
+        f"the sheet reads {found.group(1)!r} test re-executing the published script while "
+        f"{re_runners} spawn it"
+    )
+
 
 def _declared_layout(text: str) -> list[str]:
     """The paths named in `docs/architecture.md` §5's fenced block, brace groups expanded."""
@@ -1015,7 +1041,7 @@ def test_the_validation_matrix_heading_counts_its_own_caveat_paragraphs() -> Non
 
 
 def test_documents_that_count_their_own_enumerations_agree_with_their_lists() -> None:
-    """Three counts in the living documents enumerate the items beside them, not a memory.
+    """The counts the living documents state about their own lists are counted from those lists.
 
     The spelled inventory exists because a digit-only reader cannot see these, and widening it found
     one stale on arrival: Phase 11 wrote "Three rows in the full matrix are the ones to interrogate"
@@ -1025,6 +1051,12 @@ def test_documents_that_count_their_own_enumerations_agree_with_their_lists() ->
     Neither number is retyped now: each is counted from the items under it, every row label the list
     cites has to exist in the matrix it cites, and the two restatements elsewhere are compared with
     the same derivation rather than with each other.
+
+    The rehearsal sheet adds the inline shape: its counts enumerate inside one paragraph rather than
+    down a bulleted list, so the producer is the paragraph's own `(1)` / `(2)` markers and the two
+    `Xxx route:` labels, read over the span the claim sits in. Scoping matters -- `(1)` and `(2)`
+    recur in other answers on the same page, and a document-wide count would have credited the
+    sheet's claim from a neighbouring paragraph.
     """
     matrix = (REPO_ROOT / "docs" / "validation_matrix.md").read_text(encoding="utf-8")
     labels = {match.group(1) for match in re.finditer(r"^\| (\d+[a-z]?) \|", matrix, flags=re.M)}
@@ -1100,6 +1132,81 @@ def test_documents_that_count_their_own_enumerations_agree_with_their_lists() ->
             f"README restates {found.group(1)!r} against the {len(named)} artifacts the timing "
             "paragraph names"
         )
+
+    sheet = (REPO_ROOT / "docs" / "interview_defense.md").read_text(encoding="utf-8")
+
+    def paragraph_containing(pattern: str) -> tuple[str, re.Match[str]]:
+        """The folded paragraph that carries `pattern`, and the match itself.
+
+        An answer's enumeration is one markdown paragraph; the next `(1)` on the page belongs to a
+        different answer, so the producer has to be the paragraph the claim lives in.
+        """
+        found = re.search(pattern, sheet)
+        assert found, f"the sheet no longer states a count as {pattern!r}"
+        low, high = _paragraph_span(sheet, found.start())
+        return " ".join(sheet[low:high].split()), found
+
+    paragraph, stated = paragraph_containing(r"(\w+) equivalent routes to the same statement")
+    routes = re.findall(r"[A-Za-z]+ route:", paragraph)
+    assert routes, "the paragraph that counts the routes names none of them"
+    assert _as_int(stated.group(1)) == len(routes), (
+        f"the sheet says {stated.group(1)!r} routes to the statement and names {routes}"
+    )
+
+    paragraph, stated = paragraph_containing(r"The (\w+) cases I would be pushed on")
+    markers = [int(item) for item in re.findall(r"\((\d+)\)", paragraph)]
+    assert markers, "the paragraph that counts the cases numbers none of them"
+    assert markers == list(range(1, _as_int(stated.group(1)) + 1)), (
+        f"the sheet says {stated.group(1)!r} cases and numbers them {markers}"
+    )
+
+
+FOURTH_ORDER_MAP = (
+    REPO_ROOT / "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
+)
+SECOND_BOOK_MAP = (
+    REPO_ROOT / "experiments/second_book_crossing_map/results/second_book_crossing_map.json"
+)
+
+
+def test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_artifacts() -> None:
+    """Five spelled counts in the rehearsal sheet are fields the crossing artifacts already publish.
+
+    #95's remaining group is prose, and prose is where a number outlives its measurement: the sheet
+    says `four rays`, `the twelve columns`, `five books` twice and `that book's two radii`, and
+    every one of those is a figure a frozen artifact prints in its own `headline`. Phase 38 put the
+    spelled reader beside the digits it could already read; this is the half that compares the words
+    with a producer rather than with another document. The radii sentence is read twice on purpose
+    -- the count of radius families, and the pair of values quoted beside it -- because a stale
+    *value* in a sentence about how many values there are would otherwise pass as prose.
+    """
+    fourth = json.loads(FOURTH_ORDER_MAP.read_text(encoding="utf-8"))["headline"]
+    second = json.loads(SECOND_BOOK_MAP.read_text(encoding="utf-8"))["headline"]
+    sheet = _folded_document("docs/interview_defense.md")
+
+    expected: dict[str, int] = {
+        r"along (\w+) rays scaled down": fourth["rays_number_of"],
+        r"across the (\w+) columns, the cubic finds": fourth["columns_swept"],
+        r"the same quantity on (\w+) books": second["books_measured"],
+        r"The (\w+) books were chosen to span": second["books_measured"],
+        r"that book's (\w+) radii come back at": len(
+            [key for key in second if key.startswith("radii_")]
+        ),
+    }
+    for spelling, count in expected.items():
+        found = re.search(spelling, sheet)
+        assert found, f"the sheet no longer states the count as {spelling!r}"
+        assert _as_int(found.group(1)) == count, (
+            f"{spelling!r} reads {found.group(1)!r} where the frozen crossing artifacts publish "
+            f"{count}"
+        )
+
+    quoted = re.search(r"radii come back at (\d+\.\d+) and (\d+\.\d+)", sheet)
+    assert quoted, "the radii sentence no longer quotes the pair it means"
+    published = [second["published_control_cubic"], second["published_control_quartic"]]
+    assert [float(quoted.group(1)), float(quoted.group(2))] == published, (
+        f"the sheet quotes {quoted.groups()} where the artifact's control publishes {published}"
+    )
 
 
 def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
@@ -1786,10 +1893,12 @@ _MARKDOWN_INVENTORY = (
 
 # The documents whose spelled-numeral claims the inventory reads. Bringing one in is a phase's work:
 # its owners have to carry the spelled spelling of each pattern they already own, and every residual
-# claim has to answer with a reason. This pair is the smallest group #95 measured (28 of the 109).
-# A document joins by being listed here, and the inventory guard refuses a listing whose claims are
-# not all classified, so the set cannot grow quietly and cannot be decorative.
-_SPELLED_DOCUMENTS = ("README.md", "docs/reproducibility.md")
+# claim has to answer with a reason. #95 measured 108 spelled-only claims over the five inventoried
+# texts; these three carry 42 of them (18 + 10 + 14, counted as occurrences, so a phrase the sheet
+# states twice counts twice), and the matrix's 21 and the report's 45 are what is left. A document
+# joins by being listed here, and the inventory guard refuses a listing whose claims are not all
+# classified, so the set cannot grow quietly and cannot be decorative.
+_SPELLED_DOCUMENTS = ("README.md", "docs/reproducibility.md", "docs/interview_defense.md")
 
 
 _MD_BACKTICK = re.compile(r"`([^`\n]+)`")
@@ -2019,6 +2128,45 @@ _MARKDOWN_OWNED: dict[str, tuple[str, str]] = {
         "test_documents_that_count_their_own_enumerations_agree_with_their_lists",
         "tests/python/test_artifact_metadata.py",
     ),
+    # The rehearsal sheet's group (#95, Phase 41). The first five are read by the guard that
+    # compares them with the crossing artifacts' own `headline`; the next two are the sheet's
+    # inline enumerations; the last is its fourth spelling of the committed-reading count.
+    r"along (\w+) rays scaled down": (
+        "test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_artifacts",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"across the (\w+) columns, the cubic finds": (
+        "test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_artifacts",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"the same quantity on (\w+) books": (
+        "test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_artifacts",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"The (\w+) books were chosen to span": (
+        "test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_artifacts",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"that book's (\w+) radii come back at": (
+        "test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_artifacts",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+) equivalent routes to the same statement": (
+        "test_documents_that_count_their_own_enumerations_agree_with_their_lists",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"The (\w+) cases I would be pushed on": (
+        "test_documents_that_count_their_own_enumerations_agree_with_their_lists",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"across the (\w+(?:-\w+)?) re-freezings": (
+        "test_the_performance_guards_are_not_vacuous",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"(\w+) tests? re-executes? the published benchmark script": (
+        "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
+        "tests/python/test_artifact_metadata.py",
+    ),
 }
 
 # Literal phrases whose numbers are not living quantities, and why. Checked twice, as the report's
@@ -2083,11 +2231,43 @@ _MARKDOWN_DECLARED: dict[str, str] = {
         "counts digits, and the readings it summarises are each owned by the guard that publishes "
         "them"
     ),
+    # The rehearsal sheet's group (#95, Phase 41). Five counts have a producer and are owned;
+    # these five are counts of things no artifact enumerates, and each reason says what the
+    # producer would have to be to disagree.
+    "tests specified here": (
+        "the two *families* of coverage test the sentence names. The core declares three functions "
+        "across them -- `kupiec_pof_test`, and Christoffersen's independence and "
+        "conditional-coverage tests, all three inventoried by the extension-surface guard -- so "
+        "the count is of families and nothing in this tree counts families"
+    ),
+    "resolves to exactly": (
+        "what one `ctest -R` name matched at the run the answer describes, proved by the `-N` "
+        "listing in the same sentence; the tree's CTest total is owned elsewhere and fixes no "
+        "name's width"
+    ),
+    "versions of the radius definition": (
+        "the two superseded definitions the same answer goes on to describe, which finding 46 "
+        "records; they are rejected designs, and no artifact publishes a count of the definitions "
+        "it did not keep"
+    ),
+    "`+0.15` are": (
+        "the sign-symmetric pair the sentence quotes, `-0.15` and `+0.15`; how many columns the "
+        "artifact sweeps is owned by the crossing-map guard, and this says nothing about that"
+    ),
+    "radius definitions were wrong": (
+        "the matrix row's restatement of the sheet's own answer, declared there for the same reason"
+    ),
 }
 
 
 def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared() -> None:
-    """Every `<number> <countable noun>` these two documents print has to answer for itself."""
+    """Every `<number> <countable noun>` the inventoried documents print answers for itself.
+
+    The name still says README and reproducibility because that is the pair Phase 29 brought in, and
+    the dated records that cite it -- the `v1.8.0` note, the Phase 29 report, `docs/limitations.md`
+    -- are records. The corpus is `_MARKDOWN_INVENTORY`, which Phase 35 grew to four documents and
+    Phase 41 opted three of into the spelled reader; the report has its own sibling guard.
+    """
     frozen = _frozen_artifact_paths()
     assert frozen, "the evidence manifest lists no artifacts, so a citation could not be matched"
     keys = _suite_key_artifacts(frozen)
@@ -3627,6 +3807,7 @@ def test_the_performance_guards_are_not_vacuous() -> None:
         # The same history is counted in words three times over in the note that explains the band,
         # and a spelled count is exactly what the digit-only inventory could not see (#95).
         counted = _folded_document("docs/reproducibility.md")
+        counted_sheet = _folded_document("docs/interview_defense.md")
         for spelling in (
             r"re-frozen (\w+(?:-\w+)?) times",
             r"those (\w+(?:-\w+)?) committed files",
@@ -3638,6 +3819,14 @@ def test_the_performance_guards_are_not_vacuous() -> None:
                 f"{spelling!r} reads {found.group(1)!r} while the committed history holds "
                 f"{len(readings)} readings of the speed artifact"
             )
+        # The sheet carries the same history in its own words, and a count that only the note gets
+        # compared is a count the sheet can still get wrong (#95).
+        found = re.search(r"across the (\w+(?:-\w+)?) re-freezings", counted_sheet)
+        assert found, "the sheet no longer counts the history as `across the N re-freezings`"
+        assert _as_int(found.group(1)) == len(readings), (
+            f"the sheet reads {found.group(1)!r} re-freezings where the committed history holds "
+            f"{len(readings)}"
+        )
     block = SPREAD_CLAIMS["docs/reproducibility.md"][0].format(**fields)
     doc = (REPO_ROOT / "docs/reproducibility.md").read_text(encoding="utf-8")
     assert block in doc

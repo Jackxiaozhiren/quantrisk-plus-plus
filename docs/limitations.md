@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 516 pytest tests with
-    the `oracles` extra installed, and the same tree collects 447 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 517 pytest tests with
+    the `oracles` extra installed, and the same tree collects 448 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1079,6 +1079,20 @@ never removed just because a later phase shipped.
     `docs/interview_defense.md`, 10 in `docs/reproducibility.md`. The 28 in the opted-in pair are
     classified, so **80 remain** across the three documents, and the earlier figure counted one phantom the
     rule no longer produces.
+
+    **Amended 2026-10-15 by Phase 41: the rehearsal sheet's 14 are classified, and the shape of the rest
+    is now visible.** The sheet joins `_SPELLED_DOCUMENTS`, and its 14 spelled-only claims resolve to 9
+    owned and 5 declared, none left cited-and-unchecked. Four of the nine are read from the crossing
+    artifacts themselves (`rays_number_of`, `columns_swept`, `books_measured`, the `radii_*` tables), which
+    is the half #95 asked for: the words answer to a producer, not to another document. Two are the
+    sheet's own inline enumerations -- the two `Xxx route:` labels and the `(1)` / `(2)` sequence -- which
+    needed the paragraph as the denominator because `(1)` recurs in a neighbouring answer. One is the
+    committed reading history's fourth spelling, and one counts the test modules that carry `--quick`. The
+    five declarations are #101's subject rather than this item's: they are counts of families, of rejected
+    designs and of a single run's name resolution, and no producer in this tree enumerates them.
+    **66 spelled-only claims remain** -- 45 in `paper/technical_report.tex` and 21 in
+    `docs/validation_matrix.md` -- and the sheet's group says what each will need: about two thirds an
+    owner that already exists in another spelling, about one third a stated reason.
 96. **A pattern written with a literal space cannot read a claim the document splits across lines, and
     four guards have been taught that; the rest of the corpus still reads raw text.** The falsification
     sweep's one escape was `sheet-states-a-case-gap-the-collected-pair-does-not-give`: the guard compared
@@ -1190,3 +1204,29 @@ never removed just because a later phase shipped.
     `A-Z` and produced a rule that matched nothing anybody had measured -- six phantoms including a
     `2 cases` that no document contains. The two-sided control was the thing that caught it: an
     expectation written as a name rather than a count is what made a broken reconstruction visible at all.
+101. **The spelled reader's precision on prose is not measured, only its recall, and a declaration is a
+    hand-written reason that nothing tests.** `_REPORT_CLAIM` asks whether a numeral is followed by a
+    countable noun; English answers that question with narrative as often as with a quantity. Measured on
+    the first prose-heavy document opted in (Phase 41, `docs/interview_defense.md`): of its 14 spelled-only
+    claims, 9 have a producer in this tree and 5 are answered by a declaration instead, and the five are
+    not one shape. `Two versions of the radius definition were wrong` counts rejected designs, which no
+    artifact enumerates. `the two tests specified here` counts *families* while the core declares three
+    functions across them -- `kupiec_pof_test`, and Christoffersen's independence and conditional-coverage
+    tests -- so a writer who later says "three tests" is excused by the same anchor that excuses this one,
+    and the anchor's reason is the only thing distinguishing the two claims. `resolves to exactly one
+    test` describes one `ctest -R` run, and `two columns of one magnitude` names the sign pair `-0.15` and
+    `+0.15` beside a column count that *is* owned elsewhere.
+    (a) What the inventory does check about a declaration is staleness and usefulness -- an anchor that
+    appears in no document, or excuses no claim, reddens -- and both checks fired during this phase's
+    plants. What it cannot check is whether the sentence's *number* is the one the reason describes,
+    because that would require the producer the declaration says does not exist. So the residue is
+    explicit: 5 of 14 claims in the document that has been widened so far rest on a prose judgement, and
+    the two remaining groups (the report's 45, the matrix's 21) will be judged the same way by whoever
+    opens them.
+    (b) One candidate rule was measured and rejected. A determiner before the numeral ("the five books",
+    "those twenty-two files") looked like a marker of a counting use, and the narrative claims mostly lack
+    it; but `The two cases I would be pushed on` and `the two tests specified here` are both determiner-
+    led, and both are real claims, so the rule would have excused claims this phase instead turned into
+    owners. The exclusion is therefore not written, and the finding stays open as a design question rather
+    than a defect: a claim's denominator has to be named by something other than the shape of the words
+    around it. Related: #100 recorded the same mechanism on the digit rule, where the fix *was* mechanical.
