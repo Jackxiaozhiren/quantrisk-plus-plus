@@ -118,7 +118,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 101 numbered entries",
+        anchor="carries 102 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 448 tests collected offline",
+        anchor="# 449 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 517 pytest tests with the validation",
+        anchor="and 518 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 86/86 planted defects rejected",
+        anchor="# 92/92 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 448 collected without them",
+        anchor="oracles installed, 449 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 517 pytest tests with the `oracles` extra here",
+        anchor="# 518 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -876,7 +876,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-provenance-cell-quotes-a-stale-register-count",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="`docs/limitations.md` (101 entries)",
+        anchor="`docs/limitations.md` (102 entries)",
         replacement="`docs/limitations.md` (84 entries)",
         # The defect this phase actually found: the sheet's prose said 94 while its own
         # claim-provenance table said 84, three phases behind, and the guard that owns the register
@@ -1071,14 +1071,13 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="spelled-rule-widened-to-a-document-nobody-classified",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='_SPELLED_DOCUMENTS = ("README.md", "docs/reproducibility.md", '
-        '"docs/interview_defense.md")',
-        replacement="_SPELLED_DOCUMENTS = _MARKDOWN_INVENTORY",
-        # #95's staging is the review decision: 21 spelled claims sit in the validation
-        # matrix and 45 in the report, none of them classified. A rule switched on corpus-wide
-        # would report the inventory complete while silently stopping answering for those claims, so
-        # the wider read has to red here -- and the extractor self-test's staging assertion reddens
-        # with it.
+        anchor="claims = _extract_claims(flat)",
+        replacement="claims = _extract_claims(flat, spelled=True)",
+        # #95's staging is the review decision, and after Phase 42 it has exactly one step left: the
+        # four markdown documents answer for their spelled counts (63 of the 108 measured) and the
+        # report's 45 do not. Switching the report on here would let the inventory report itself
+        # complete while quietly stopping answering for those 45, so the wider read has to red --
+        # and property 5 reads the report guard's own call keywords to say so.
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
@@ -1238,5 +1237,85 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
         ),
         claim="a declaration has to sit beside the sentence that made it necessary",
+    ),
+    Mutation(
+        identifier="matrix-reads-a-row-count-the-table-does-not-carry",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="It has twenty-six rows rather",
+        replacement="It has twenty-five rows rather",
+        # The row count already had a guard that read `twenty-six`; what it lacked was a spelling
+        # the inventory could credit, so the claim sat unowned while its producer ran on every
+        # gate. The
+        # plant moves the count down rather than up on purpose: `twenty-seven` is past the numeral
+        # table's ceiling (#97) and would fail as a KeyError, which proves less than a disagreement.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_validation_matrix_rows_agree_with_the_table"
+        ),
+        claim="the matrix's spelled row count is the table's own labels, not a remembered number",
+    ),
+    Mutation(
+        identifier="matrix-heading-counts-more-caveats-than-it-holds",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="## Five rows that need the prose",
+        replacement="## Six rows that need the prose",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_validation_matrix_heading_counts_its_own_caveat_paragraphs"
+        ),
+        claim="a heading that counts its paragraphs is checked against the paragraphs under it",
+    ),
+    Mutation(
+        identifier="matrix-counts-rays-the-two-factor-bound-fitted-on-three",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="2.0 on four rays, 3.0 on",
+        replacement="2.0 on three rays, 3.0 on",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_studies_grids_agree_with_their_producers"
+        ),
+        claim="how many rays a slope was fitted along is the artifact's own ray block",
+    ),
+    Mutation(
+        identifier="matrix-counts-markets-the-derivation-does-not-iterate",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="differentiation at 4.6e-15 on four markets",
+        replacement="differentiation at 4.6e-15 on five markets",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_studies_grids_agree_with_their_producers"
+        ),
+        claim="a study's grid is counted from the loop that walks it, read as syntax",
+    ),
+    Mutation(
+        identifier="matrix-counts-fields-the-partials-module-defines-six",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="the six fields reached by",
+        replacement="the seven fields reached by",
+        # This is the plant for the sentence the phase found wrong: the matrix had said five fields
+        # where the module defines six and five distinct parents. The corrected prose carries both
+        # numbers, so a drift in either direction is a disagreement with a structure, not a reread.
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_studies_grids_agree_with_their_producers"
+        ),
+        claim="the count of fields is the module's own literal, not the sentence's memory",
+    ),
+    Mutation(
+        identifier="matrix-counts-parents-the-difference-routes-do-not-read",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="across five fourth-order partials",
+        replacement="across six fourth-order partials",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_studies_grids_agree_with_their_producers"
+        ),
+        claim="the distinct partials a route reads are counted from the route table",
     ),
 )

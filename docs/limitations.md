@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 517 pytest tests with
-    the `oracles` extra installed, and the same tree collects 448 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 518 pytest tests with
+    the `oracles` extra installed, and the same tree collects 449 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1093,6 +1093,18 @@ never removed just because a later phase shipped.
     **66 spelled-only claims remain** -- 45 in `paper/technical_report.tex` and 21 in
     `docs/validation_matrix.md` -- and the sheet's group says what each will need: about two thirds an
     owner that already exists in another spelling, about one third a stated reason.
+
+    **Amended 2026-10-15 by Phase 42: the validation matrix is in, and 45 remain.** Its 21 spelled-only
+    claims resolve to 5 owned, 5 declared and 11 cited -- none unowned. Two of the five owned are
+    counts the table's own guards had read for phases without the inventory being able to see the words
+    (`twenty-six rows`, the caveat heading's `Five rows`); the other three are the shape of a study --
+    how many rays a slope was fitted along, how many markets a nested differentiation walked, how many
+    fields a partials module defines -- counted now from the artifact's own block or from the structure
+    with `ast`. Reading that group found the first *false* spelled claim of the rollout: row 21 said
+    "the five fields reached by difference routes" where the module defines six fields and reads five
+    distinct fourth-order partials, so the sentence carried its denominator from the wrong side of the
+    relation, and the corrected prose states both numbers against the structures they name (finding 83).
+    #102 records what the rule still cannot see.
 96. **A pattern written with a literal space cannot read a claim the document splits across lines, and
     four guards have been taught that; the rest of the corpus still reads raw text.** The falsification
     sweep's one escape was `sheet-states-a-case-gap-the-collected-pair-does-not-give`: the guard compared
@@ -1230,3 +1242,28 @@ never removed just because a later phase shipped.
     owners. The exclusion is therefore not written, and the finding stays open as a design question rather
     than a defect: a claim's denominator has to be named by something other than the shape of the words
     around it. Related: #100 recorded the same mechanism on the digit rule, where the fix *was* mechanical.
+102. **The tail of the claim rule allows one word between a numeral and its noun, and that choice is
+    unmeasured on the recall side: a real claim phrased with two modifiers is invisible to the
+    inventory.** `_CLAIM_TAIL` is `\s*%?\s+(?:[A-Za-z]+\.?\s+)?` plus the noun list, so `twelve columns`
+    and `three coverage tests` are claims while `ten five-point slope routes` is not -- the numeral and
+    its noun are two words apart, and the hyphenated modifier is not matched by `[A-Za-z]+\.?` anyway.
+    (a) Measured both ways on the current corpus with the spelled alternatives and the label rule in
+    place, widening the allowance from one modifier to two adds **14 phrases**: 1 in
+    `docs/validation_matrix.md` (`ten five-point slope routes`), 1 in the rehearsal sheet (`three FRED
+    factor series`), 3 each in README and `docs/reproducibility.md` (`two clean idle runs`, `four in both
+    cases`, `one or two digits`), 6 in the report (`five widens the radius`, `one normal per path`,
+    `three from both sides`). Of those 14, at most three are claims about an inventoried quantity; the
+    rest are the numeral doing another job in the sentence -- `five widens the radius` has *five* as its
+    subject, not a count of radii, and `one of those runs` is a pronoun. The rule's one-word allowance is
+    therefore a precision choice that was never priced, exactly as #100 and #101 priced two of its other
+    edges, and the honest number to carry forward is that the inventory's recall on prose is unknown
+    rather than assumed complete.
+    (b) It was not widened here because the measurement says the fix trades a known-good guard for a
+    queue of non-claims: each extra phrase is a claim somebody must classify, and three quarters of them
+    would answer "this is not a quantity", which is #101's declaration pile rebuilt at a larger scale. The
+    cheaper half of the same problem is the noun list: `five points`, `two methods` and `six partials` are
+    counts of real things in these documents and are missed because the words are not in
+    `_REPORT_NOUNS`, and no guard measures how many nouns the list leaves out. What is missing is a
+    recall instrument -- a corpus of sentences with known quantities and their spellings, run against the
+    rule to count what it fails to see. Until one exists, #95's "66 remain" bounds only what the rule can
+    find. Related: #101, whose precision half this mirrors.

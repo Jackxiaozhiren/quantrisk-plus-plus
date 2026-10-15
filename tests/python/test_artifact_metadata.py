@@ -8,6 +8,7 @@ chain of Phase 10 would be quietly unverifiable.
 
 from __future__ import annotations
 
+import ast
 import csv
 import hashlib
 import importlib.util
@@ -1209,6 +1210,111 @@ def test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_arti
     )
 
 
+TWO_FACTOR_BOUND = REPO_ROOT / "experiments/two_factor_error_bound/results/two_factor_bound.json"
+DERIVATION = REPO_ROOT / "scripts/derive_fifth_order_partials.py"
+PARTIALS_TEST = REPO_ROOT / "tests/python/test_fifth_order_partials.py"
+
+
+def _literal_list(source: str, name: str) -> list[ast.expr]:
+    """The elements of a module-level `name = [...]` or `name: T = (...)` literal."""
+    for node in ast.walk(ast.parse(source)):
+        value = None
+        targets: list[ast.expr] = []
+        if isinstance(node, ast.Assign):
+            value, targets = node.value, list(node.targets)
+        elif isinstance(node, ast.AnnAssign):
+            value, targets = node.value, [node.target]
+        if value is None or not isinstance(value, (ast.List, ast.Tuple)):
+            continue
+        for target in targets:
+            if isinstance(target, ast.Name) and target.id == name:
+                return list(value.elts)
+    raise AssertionError(f"`{name}` is no longer a module-level list or tuple literal")
+
+
+def _guard_syntax(function_name: str) -> ast.FunctionDef:
+    """One function's syntax, read from this module's own source.
+
+    The rollout pin needs a call's keywords, and keywords are structure: the same question asked by
+    searching text would match the four call sites that *do* read spelled claims and report the
+    fifth's absence as a presence.
+    """
+    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == function_name:
+            return node
+    raise AssertionError(f"`{function_name}` is no longer a module-level function of this file")
+
+
+def _elements_of(node: ast.expr) -> list[ast.expr]:
+    """The members of a list or tuple literal node, so a nesting level can be counted."""
+    assert isinstance(node, (ast.List, ast.Tuple)), f"not a sequence literal: {type(node).__name__}"
+    return list(node.elts)
+
+
+def _string_arguments(call: ast.AST) -> list[str]:
+    return [
+        argument.value
+        for argument in getattr(call, "args", [])
+        if isinstance(argument, ast.Constant) and isinstance(argument.value, str)
+    ]
+
+
+def _part_b_grid(source: str) -> int:
+    """The number of markets the derivation's part B iterates, read from its own loop."""
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(node, ast.For) or not isinstance(node.target, ast.Tuple):
+            continue
+        iterable = node.iter
+        if isinstance(iterable, ast.Tuple) and all(
+            isinstance(row, ast.Tuple) for row in iterable.elts
+        ):
+            return len(iterable.elts)
+    raise AssertionError("no loop over a literal tuple of market tuples survives in the script")
+
+
+def test_documents_that_count_the_studies_grids_agree_with_their_producers() -> None:
+    """Four spelled counts in the validation matrix say how wide a study swept, and the study says.
+
+    The matrix is prose-dense in a different way from the rehearsal sheet: its numerals describe the
+    *shape of a run* -- how many rays a slope was fitted along, how many markets a nested
+    differentiation was evaluated at, how many partials a difference route reads. Each of those is a
+    structure the tree already carries: the two-factor artifact publishes its own ray block, the
+    derivation script's part B iterates a literal grid, and the fifth-order test names its fields
+    and its parents. The last two are counted with `ast` rather than by searching text, because a
+    count of a Python literal read as a substring also counts the file that reads it (finding 82).
+
+    This guard is what found the phase's stale claim: the matrix said "the five fields reached by
+    difference routes" where the module defines six fields and five distinct fourth-order parents --
+    the sentence's denominator was the parents', not the fields'. The prose now says both numbers,
+    and both are compared with the structure they name.
+    """
+    two_factor = json.loads(TWO_FACTOR_BOUND.read_text(encoding="utf-8"))["asymptotics"]
+    derivation = DERIVATION.read_text(encoding="utf-8")
+    partials = PARTIALS_TEST.read_text(encoding="utf-8")
+    fields = len(_literal_list(derivation, "FIELDS"))
+    parents: set[str] = set()
+    for group in _literal_list(partials, "PARENTS"):
+        for route in _elements_of(group):
+            reader = _elements_of(route)[0]
+            parents.update(_string_arguments(reader) or [getattr(reader, "id", "")])
+    parents.discard("")
+    matrix = _folded_document("docs/validation_matrix.md")
+    expected: dict[str, int] = {
+        r"on (\w+) rays, 3\.0 on a pure-spot ray": len(two_factor),
+        r"nested differentiation at [0-9.e-]+ on (\w+) markets": _part_b_grid(derivation),
+        r"the (\w+) fields reached by": fields,
+        r"across (\w+) fourth-order partials": len(parents),
+    }
+    for spelling, count in expected.items():
+        assert count > 0, f"{spelling!r} compares against an empty producer"
+        found = re.search(spelling, matrix)
+        assert found, f"the matrix no longer states the count as {spelling!r}"
+        assert _as_int(found.group(1)) == count, (
+            f"{spelling!r} reads {found.group(1)!r} where the study's own structure carries {count}"
+        )
+
+
 def test_documents_that_count_the_cpp_tests_agree_with_the_build() -> None:
     """The C++ totals are quoted in six places and changed under everyone this phase.
 
@@ -1894,11 +2000,16 @@ _MARKDOWN_INVENTORY = (
 # The documents whose spelled-numeral claims the inventory reads. Bringing one in is a phase's work:
 # its owners have to carry the spelled spelling of each pattern they already own, and every residual
 # claim has to answer with a reason. #95 measured 108 spelled-only claims over the five inventoried
-# texts; these three carry 42 of them (18 + 10 + 14, counted as occurrences, so a phrase the sheet
-# states twice counts twice), and the matrix's 21 and the report's 45 are what is left. A document
-# joins by being listed here, and the inventory guard refuses a listing whose claims are not all
-# classified, so the set cannot grow quietly and cannot be decorative.
-_SPELLED_DOCUMENTS = ("README.md", "docs/reproducibility.md", "docs/interview_defense.md")
+# texts (counted as occurrences, so a phrase a document states twice counts twice); these four carry
+# 63 of them -- 18 README, 10 reproducibility, 14 sheet, 21 matrix -- and the report's 45 are what
+# is left. A document joins by being listed here, and the inventory guard refuses a listing whose
+# claims are not all classified, so the set cannot grow quietly and cannot be decorative.
+_SPELLED_DOCUMENTS = (
+    "README.md",
+    "docs/reproducibility.md",
+    "docs/interview_defense.md",
+    "docs/validation_matrix.md",
+)
 
 
 _MD_BACKTICK = re.compile(r"`([^`\n]+)`")
@@ -2167,6 +2278,34 @@ _MARKDOWN_OWNED: dict[str, tuple[str, str]] = {
         "test_the_documents_that_count_python_tests_count_the_ones_that_exist",
         "tests/python/test_artifact_metadata.py",
     ),
+    # The validation matrix's group (#95, Phase 42). The first two counts already had a guard that
+    # read them in digits and `(\w+)`; what was missing was the spelling the inventory could credit.
+    r"It has (\w+(?:-\w+)?) rows rather than twelve": (
+        "test_documents_that_count_the_validation_matrix_rows_agree_with_the_table",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"## (\w+) rows that need the prose to be honest": (
+        "test_the_validation_matrix_heading_counts_its_own_caveat_paragraphs",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    # The rest are the shape of a study: how wide the sweep was, counted from the artifact or
+    # from the structure that performs it.
+    r"on (\w+) rays, 3\.0 on a pure-spot ray": (
+        "test_documents_that_count_the_studies_grids_agree_with_their_producers",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"nested differentiation at [0-9.e-]+ on (\w+) markets": (
+        "test_documents_that_count_the_studies_grids_agree_with_their_producers",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"the (\w+) fields reached by": (
+        "test_documents_that_count_the_studies_grids_agree_with_their_producers",
+        "tests/python/test_artifact_metadata.py",
+    ),
+    r"across (\w+) fourth-order partials": (
+        "test_documents_that_count_the_studies_grids_agree_with_their_producers",
+        "tests/python/test_artifact_metadata.py",
+    ),
 }
 
 # Literal phrases whose numbers are not living quantities, and why. Checked twice, as the report's
@@ -2256,6 +2395,29 @@ _MARKDOWN_DECLARED: dict[str, str] = {
     ),
     "radius definitions were wrong": (
         "the matrix row's restatement of the sheet's own answer, declared there for the same reason"
+    ),
+    # The validation matrix's group (#95, Phase 42). Its counts of a study's shape are owned; these
+    # five count routes, axes and a layout rule -- things no producer in this tree enumerates.
+    "ways gets": (
+        "the table's layout rule: a component validated by two methods carries two rows. The row "
+        "count and the component count are owned by the guard beside it; this names neither"
+    ),
+    "Schwarz makes": (
+        "the closed form and the slope along the other factor, both named in the same cell. No "
+        "artifact enumerates routes of a derivative, and the residuals they produce are the row's "
+        "measured claim"
+    ),
+    "routes agree to": (
+        "the same pair restated in the row's measured half, where the agreement figure is the "
+        "claim and the count of routes is only the sentence's subject"
+    ),
+    "and nothing second-order in": (
+        "the two axes a missing mixed partial would span. QuantLib stops at first order in each of "
+        "them, so this is a statement about an oracle's absence, which no producer counts"
+    ),
+    "vanna share no": (
+        "the pair of difference routes the closed-form identity is checked against -- a "
+        "property of the derivation recorded in the phase report that made it, not of this tree"
     ),
 }
 
@@ -2474,10 +2636,26 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
     ), "the plural earns nothing either, so the noun list has accreted"
 
     # 5. A count written in words is the same claim as the same count in digits, and the rule that
-    #    reads it is switched on per document rather than across the corpus in one step (#95).
-    assert set(_SPELLED_DOCUMENTS) < set(_MARKDOWN_INVENTORY), (
-        "every inventoried document now reads spelled claims, so the staged rollout has no step "
-        "left and this assertion should be retired with the staging"
+    #    reads it was switched on document by document (#95). The markdown half of that rollout is
+    #    complete as of Phase 42, so the pin went two ways: the set has to stay complete, and the
+    #    report has to stay the one remaining step. Its state is read from the call's keywords with
+    #    `ast`, because a search for `spelled=` in the file would find the four markdown call sites
+    #    and report the report's absence as a presence -- finding 82's trap, in a different guise.
+    assert set(_SPELLED_DOCUMENTS) == set(_MARKDOWN_INVENTORY), (
+        "the spelled rollout regressed: the inventory no longer reads words in "
+        f"{sorted(set(_MARKDOWN_INVENTORY) - set(_SPELLED_DOCUMENTS))}"
+    )
+    report = _guard_syntax("test_every_countable_claim_in_the_report_is_owned_or_declared")
+    report_reads_spelled = any(
+        keyword.arg == "spelled"
+        for node in ast.walk(report)
+        if isinstance(node, ast.Call)
+        for keyword in node.keywords
+    )
+    assert not report_reads_spelled, (
+        "the report now reads spelled claims too, so #95's staged rollout is finished and this "
+        "assertion should be retired with the staging rather than left describing a step that "
+        "no longer exists"
     )
     # The alternation is generated from the table, and that generation is what is load-bearing:
     # with one key missing, the sentence below stops being a claim of twenty-two at all. Before

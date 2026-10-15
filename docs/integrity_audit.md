@@ -2124,3 +2124,29 @@ determiner-led and both real claims, so the rule would have excused two of the n
 recorded here is the ratio, because the two groups still closed (`docs/validation_matrix.md`'s 21 and
 the report's 45) will be judged by the same hand, and a reader is entitled to know that in the one
 prose document measured so far, a spelled count is a quantity about two times in three.
+
+## Addendum — Phase 42, the first false spelled claim, and its denominator came from the wrong side (2026-10-15)
+
+**83. `docs/validation_matrix.md` row 21 said "the five fields reached by difference routes" where the
+module it cites defines six.** This is the first spelled count the widened inventory found *wrong* rather
+than merely unowned: Phase 38 found stale spelled counts in README, Phase 40 found phantoms the rule
+itself manufactured, and this is a claim that was simply false and had no reader. Nothing caught it in
+five phases because there is no digit twin -- nowhere in the corpus does a `6 fields` sentence exist -- so
+the only instrument that could see the number at all was the spelled rule, and the spelled rule was not yet
+reading that document.
+
+(a) **The number was not a random error; it was the other quantity in the same relation.** The fifth-order
+module enumerates six fields, and its difference routes read five distinct fourth-order partials
+(`_spot_fourth` plus four mixed). A writer holding both facts in one sentence attached the smaller to the
+noun in front of it. The corrected prose states both, and the guard that owns them counts each from the
+structure: `len(FIELDS)` from the derivation script's own literal, and the parents from the route table's
+call arguments.
+
+(b) **The producers are read with `ast`, and that was forced by finding 82.** A substring count of
+`"--quick"` had already made a guard count its own source one phase earlier; a substring count of a
+Python literal would do the same here, and worse quietly, because the pattern's own text contains the
+brackets. `_literal_list` and `_part_b_grid` therefore parse the module and ask for an assignment to the
+name, which also means an annotated assignment (`PARENTS: tuple[...] = ...`) is found where a text search
+would have had to guess the shape. The first version asked for `ast.Assign` only and reported that
+`PARENTS` was not a literal at all -- a false statement about a file that had not changed, caught by
+running the guard rather than by reading the diff.
