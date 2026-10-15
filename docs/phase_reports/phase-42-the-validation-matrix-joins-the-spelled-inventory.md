@@ -104,15 +104,21 @@ grids of rows 19 to 23), and promoting a citation to an owner is worth the diff 
 | Gate | Command | Measured result |
 |---|---|---|
 | Lint | `.venv/bin/ruff check .` | All checks passed! |
-| Format | `.venv/bin/ruff format --check .` | measured on the committed tree in the record commit (finding 81's rule) |
+| Format | `.venv/bin/ruff format --check .` | 184 files already formatted -- the same number on the `git archive` export of `b610cb6` and in CI's lane (finding 81's rule, applied this time before the record was written) |
 | Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
 | C++ | `ctest --preset dev` | 100% tests passed out of 204 |
 | Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
 | Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | Evidence is intact -- zero artifacts re-frozen |
 | Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 449 tests collected |
 | Python | `.venv/bin/python -m pytest -q` | 518 passed |
-| Falsification, full sweep | recorded in the next commit, on the sha it ran on | pending |
-| CI on the pushed head | recorded in the next commit, from the runner's own logs | pending |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `b610cb6`, logged to `build/mutation-sweep-42c.log` | **`92/92 planted defects were rejected by their guard.`** -- 92 rows carrying that status and none other; tree clean afterwards. The first run on `8138275` said `91/92` and named this phase's own wiring defect (§4); the re-run on the fixed tree is the verdict that stands |
+| CI on the pushed head | `gh api …/commits/b610cb6/check-runs`, polled until the last job concluded | run `38738596549`, three jobs `completed/success` (SonarCloud `neutral`, as ever) |
+| CI's own lane numbers | the job log, read rather than inferred from the green | `All checks passed!`, `184 files already formatted`, `Success: no issues found in 23 source files`; `100% tests passed out of 204`; `448 passed, 5 skipped in 204.46s (0:03:24)`; `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 255.1s total`. The #91 reconciliation holds on the runner's numbers: `448 + 5 = 453 = 449 + 4` |
+
+**What the runner saw that the local tree did not.** The implementation head `8138275` cleared the static
+lane locally and CI's lint lane then failed with three `E501` -- in the comment of the *next* commit. The
+lesson is now a memory entry and a commit subject: an amendment commit inherits no green from the commit
+before it, and `b610cb6` exists to pay that debt. Its own gate sequence was the full one.
 
 ## 6. Numerical validation
 
