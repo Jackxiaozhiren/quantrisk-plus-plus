@@ -1500,10 +1500,12 @@ MUTATIONS: tuple[Mutation, ...] = (
         replacement=r"worst relative across (\d+) markets",
         # The derivation entries are searched inside `_quoted_identity_floor`, a helper the named
         # guard calls -- the credit is real because of the call closure, and this plant cuts the
-        # helper's literal away to prove the closure is what carries it.
+        # helper's literal away to prove the closure is what carries it. The pattern is a
+        # `_MARKDOWN_OWNED` key, so the reader that polices it is the documents' inventory guard,
+        # not the report's.
         guard=(
             "tests/python/test_artifact_metadata.py::"
-            "test_every_countable_claim_in_the_report_is_owned_or_declared"
+            "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
         ),
         claim="a guard owns what it searches for through the helpers it calls",
     ),
