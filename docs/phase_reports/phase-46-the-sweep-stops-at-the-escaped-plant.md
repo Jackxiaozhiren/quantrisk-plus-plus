@@ -19,11 +19,12 @@ mitigated procedurally and left open on the static half.
   `test_the_plant_list_lives_where_a_plant_can_reach_the_harness` asserted `len(pointed) == 1` -- one
   plant may point at the interpreter -- when what #94 actually requires is that each such plant's
   anchor occurs once there. It loops now, and four plants point at the interpreter.
-* **4 plants (105 -> 109)**, each mutating a line of the interpreter and naming the assertion that
+* **5 plants (105 -> 110)**, each mutating a line of the interpreter and naming the assertion that
   reddens: the stop made never-fires, the stop made always-fires, the stop counting `len(results)`
-  instead of `len(selected)`, and `--all` inverted to `store_false`.
+  instead of `len(selected)`, the census counting the same wrong thing, and `--all` inverted to
+  `store_false`.
 * **The cascade the phase owes**: register 102 -> 103 across its nine spellings and the plant that
-  moves that count; the sweep annotation 105/105 -> 109/109; the test pair 519/450 -> 522/453; the
+  moves that count; the sweep annotation 105/105 -> 110/110; the test pair 519/450 -> 522/453; the
   artifact index `forty-six report files` -> `forty-seven`; the report re-typeset.
 
 ## 2. Assumptions this rests on
@@ -68,6 +69,13 @@ mitigated procedurally and left open on the static half.
 * **`--all` was decorative until it had a plant.** The flag's meaning is `store_true`; flipping it to
   `store_false` keeps every assertion about stopping green, because the default path never reads the
   flag. Naming that plant is what makes the flag a behaviour rather than a string in `--help`.
+* **The live demo caught the fix's own version of the bug it fixes.** To show the stop working, one
+  plant was mis-pointed by hand and the real harness run against two selected plants. It printed
+  `sweep-stopped-early: 1 of 2 declared plants were never run` and, two lines later,
+  `0/1 planted defects were rejected` -- the stop naming the declared list while the census named the
+  cycles that happened to finish. No unit test could see it: every status the three guards feed the loop
+  is chosen so the two denominators agree. The fifth plant marks the census line, and the assertion
+  pinning `1/3` was written after the terminal showed the wrong number, not before.
 * **The denominator of a stop line is the declared list.** `{skipped} of {len(results)}` reads as a
   count of what ran and is the mistake this project has now made in four different instruments; the
   plant marks it, so the sentence cannot drift back.
@@ -89,9 +97,9 @@ mitigated procedurally and left open on the static half.
 
 ## 6. Numerical validation
 
-* **109** declared plants; each is proven against its own guard by the sweep named in §5.
+* **110** declared plants; each is proven against its own guard by the sweep named in §5.
 * **103** register entries, from the producer that counts the file's numbered entries.
-* **3** guards added, **1** generalised; **4** plants added, all four mutating the interpreter.
+* **3** guards added, **1** generalised; **5** plants added, all five mutating the interpreter.
 * **522 / 453** -- this environment's pair after three new tests, each measured by its own producer
   rather than transcribed from §5.
 
@@ -115,11 +123,12 @@ mitigated procedurally and left open on the static half.
 
 ## 9. The gate
 
-Closed when the sweep on the committed tree runs to `109/109` with the tree clean afterwards; when a
-deliberately mis-pointed plant is shown to stop the run at that plant rather than at the end, which is
-`--only` against the guard named in §1; when CI's three jobs are read from their own logs on the pushed
-revision; when the register size, the plant count and the test pair each come from their own producer in
-every document that quotes them; and when #103's entry states the measured 7-of-10 rather than the
-anecdote, since the measurement is what makes the static half a decision instead of an omission. A
-record checks the revision it names: the sweep and CI rows land in the commit after this file, on the
-sha the runner built.
+Closed when the sweep on the committed tree runs to `110/110` with the tree clean afterwards; when a
+deliberately mis-pointed plant is shown stopping the run at that plant, which was done for real against
+the harness on two selected plants and printed `sweep-stopped-early: 1 of 2 declared plants were never
+run` before it was reverted byte-for-byte -- the census line that run exposed is the fifth plant's
+anchor; when CI's three jobs are read from their own logs on the pushed revision; when the register
+size, the plant count and the test pair each come from their own producer in every document that quotes
+them; and when #103's entry states the measured 7-of-10 rather than the anecdote, since the measurement
+is what makes the static half a decision instead of an omission. A record checks the revision it names:
+the sweep and CI rows land in the commit after this file, on the sha the runner built.

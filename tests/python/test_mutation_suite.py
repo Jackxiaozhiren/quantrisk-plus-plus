@@ -253,6 +253,12 @@ def test_an_escaped_defect_stops_the_sweep_and_names_what_it_never_ran(
     assert harness.STOPPED in output, output
     assert "synthetic-1" in output, f"the stop did not name the plant: {output}"
     assert "1 of 3" in output, f"the stop did not count what it skipped: {output}"
+    # The census line takes the same denominator, because the demo of this behaviour in the terminal
+    # read `0/1 planted defects were rejected` over a declared list of two -- the run-so-far count
+    # wearing the declared count's clothes, which is the mistake #103's plant marks one line above.
+    assert "1/3 planted defects were rejected" in output, (
+        f"the census counted what ran rather than what was declared: {output}"
+    )
 
 
 def test_the_all_flag_runs_every_declared_plant_after_a_stop_would_fire(

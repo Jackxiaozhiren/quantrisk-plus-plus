@@ -451,7 +451,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     caught = [result for result in results if result["status"] == CAUGHT]
     left = [path for path in snapshots if git_status(str(path.relative_to(REPO_ROOT)))]
-    print(f"\n{len(caught)}/{len(results)} planted defects were rejected by their guard.")
+    print(f"\n{len(caught)}/{len(selected)} planted defects were rejected by their guard.")
     if left:
         names = ", ".join(sorted(str(path.relative_to(REPO_ROOT)) for path in left))
         print(f"{NOT_RESTORED}: {len(left)} target(s) still differ from HEAD: {names}")

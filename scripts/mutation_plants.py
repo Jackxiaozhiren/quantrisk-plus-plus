@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 109/109 planted defects rejected",
+        anchor="# 110/110 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -1547,6 +1547,18 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_an_escaped_defect_stops_the_sweep_and_names_what_it_never_ran"
         ),
         claim="the stop names its denominator as the declared list, not the plants already run",
+    ),
+    Mutation(
+        identifier="sweep-census-counts-what-ran-not-what-was-declared",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="{len(caught)}/{len(selected)} planted defects were rejected by their guard.",
+        replacement="{len(caught)}/{len(results)} planted defects were rejected by their guard.",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_an_escaped_defect_stops_the_sweep_and_names_what_it_never_ran"
+        ),
+        claim="the census denominator is the declared list, not the cycles that happened to finish",
     ),
     Mutation(
         identifier="sweep-all-flag-inverts-its-own-meaning",
