@@ -2278,3 +2278,28 @@ it fail in both directions. The comparison folds `ies`/`es`/`s`/`ed` on both sid
 are the claiming shape; the other eight are pointers or comparisons, and a wrong number in one of those still
 passes, because deciding "the same truncations as row 19" needs the comparing row's cells as well. #99's
 amendment states that number rather than closing on the strength of the nine.
+
+## Addendum — Phase 47 record, a commit whose subject described a different commit (2026-10-16)
+
+**88. `ab5ba54` was pushed with the subject "Phase 46 record: 110/110 on dd4bb9d, and run
+38885708023 green on that same sha" while its diff touches only
+`docs/phase_reports/phase-47-a-row-claim-must-describe-its-row.md` -- and Phase 46's record had already
+landed, as `ec47ddc`, eight hours earlier.** The subject is a claim about what the commit carries, so this
+is not a cosmetic mislabel: a reader following `git log` for the sha that recorded Phase 46's sweep finds a
+second one that says it did that job, and the rows Phase 47 actually recorded are discoverable only by
+opening the diff.
+
+(a) **The mechanism was reuse under a template, and the check that caught it was re-reading `git log` to
+answer "is everything done".** The previous record's subject was still in the shell's history and in my
+own working text; the message was written from that shape rather than from the file list `git add` had
+just staged. Nothing in the tree could have failed on it: no gate reads a commit subject, and the diff
+was exactly the three rows it claimed in the body -- the body, not the subject, was the true statement.
+
+(b) **The fix is an erratum, not a rewrite.** `ab5ba54` is on `origin/main`, so amending it would move a
+pushed commit for everyone else's benefit. The Phase 47 report's §5 now names the sha that carries its
+rows and states that its own commit subject is wrong, and this entry records why a dated note is the
+right instrument: the doctrine in `CONTRIBUTING.md` §4 is that a record checks the revision it names, so
+a record that names the wrong revision is corrected by saying so in the record, not by editing the
+history. The generalisation is cheap and worth keeping: the commit message has to be written from the
+staged file list, because the file list is the only thing in the transaction that cannot be remembered
+wrongly.

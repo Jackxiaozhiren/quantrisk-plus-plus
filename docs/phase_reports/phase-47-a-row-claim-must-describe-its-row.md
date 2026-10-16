@@ -85,6 +85,13 @@ with its rebuilt PDF and `build.json`.
 | Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `242bcff` | 113/113 planted defects were rejected by their guard, tree clean afterwards |
 | CI on the pushed head | run 38891664575, `242bcff`, read from each job's own log | lint `All checks passed!`, `191 files already formatted`, mypy `Success: no issues found in 23 source files`; C++ and Python `100% tests passed out of 204` and `453 passed, 5 skipped in 122.40s`, which is #91's reconciliation against the 454 the probe collects; benchmark `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 404.5s total` |
 
+**Dated correction, 2026-10-16: the commit that filled these three rows is `ab5ba54`, and its subject is
+wrong.** It reads "Phase 46 record: 110/110 on `dd4bb9d` …" while its diff touches only this file --
+Phase 46's record had already landed as `ec47ddc`. The numbers above are what their own runners printed;
+the history is corrected by this note rather than by rewriting a pushed commit, and the mechanism is
+finding 88. The true subject for `ab5ba54` would have been "Phase 47 record: 113/113 on `242bcff`, and
+run 38891664575 green on that same sha".
+
 ## 6. Numerical validation
 
 * **113** declared plants, from the harness's own list; **9** registered row claims; **17** citations
