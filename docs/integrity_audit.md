@@ -2213,3 +2213,36 @@ only the syntax check; moving a search away from its pattern leaves the dead-pat
 reddens only the syntax check. A third plant cuts the helper's literal away in the fifth-order suite's
 own file, proving the call closure is what carries that credit. All three would have passed every gate
 before this phase; that is the size of the hole.
+
+## Addendum — Phase 45 record, a plant that named a reader which never reads it (2026-10-16)
+
+**86. A falsification plant's `guard` field is a hand-typed string, and the registry has no way to ask
+whether the named guard is the one that reads the line the plant mutates.** The helper-closure plant cut
+`_quoted_identity_floor`'s literal `\(([0-9.]+)e-(\d+) worst relative over (\d+) markets` out of
+`tests/python/test_fifth_order_partials.py`, and its `guard` field named
+`test_every_countable_claim_in_the_report_is_owned_or_declared`. That guard does read the pattern --
+through `_pattern_is_owned_by` -- but not this pattern: `worst relative over` is a `_MARKDOWN_OWNED` key,
+policed by `test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared`. The
+reader was never asked, so the first sweep stopped at `104/105` with the plant at `guard-stayed-green`,
+and the mutation's only effect was on the tree the harness restored afterwards.
+
+(a) **The status was honest; the naming was not.** `guard-stayed-green` is the harness reporting that the
+guard it was told to run did not object, which is exactly what happened and is not a bug in the harness.
+Re-pointing the field at the documents' inventory guard turns the same mutation into a red, and the sweep
+then reads `105/105`. Nothing else about the plant changed: the anchor, the replacement, the holder file
+and the claim are all as written in Phase 45.
+
+(b) **This is the second occurrence, which is the finding.** Phase 41's record carries the same sentence
+about a staged-rollout plant whose `guard` still named the markdown inventory guard after its anchor moved
+into the report guard -- the mirror image of the same mistake. A lesson that recurs within four phases was
+never in the instrument: no check before the sweep compares a plant's named reader with the guard that
+actually loads the line it mutates, so the discovery costs a full sweep and lands at the end of the run
+rather than at registration time.
+
+(c) **What is and is not claimed here.** The plant set as shipped is sound -- all 105 are caught on
+`caddda9`, and the two plants that only the new syntax check can redden are among them. What the record
+declines is the stronger reading of a green sweep: `105/105` proves each named guard objects to its own
+mutation, and proves nothing about whether that guard is the *only* or the *intended* reader. A plant
+pointed at a reader that objects for a different reason -- a file-level claim it also happens to police --
+would report `caught` while testing a different edge than its `claim` text advertises. The next phase turns
+(b)'s gap into a pre-sweep check.

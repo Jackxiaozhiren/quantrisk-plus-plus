@@ -71,21 +71,31 @@ keeps those credits real without inlining the helper.
   pre-Phase-45 check green -- the pattern is still in the file -- and reddens only the syntax check;
   moving a search away from its pattern leaves the dead-pattern check green for the same reason. Plants
   that merely redden under the new check would not have shown the old one was blind; these show it.
+* **The harness's silence is not the code's consent, and this mistake is a recurrence, not a first
+  occurrence.** The helper-closure plant cut `_quoted_identity_floor`'s literal away, and the first
+  sweep read `104/105` with that plant `guard-stayed-green`: its `guard` field named the report
+  inventory, while the planted pattern is a `_MARKDOWN_OWNED` key, so the only reader that could object
+  was the documents' inventory guard and it was never asked. Re-pointed in `caddda9` and re-swept, the
+  plant reddens exactly that guard. Phase 41's record carries the same sentence about a staged-rollout
+  plant, four phases earlier -- which is the evidence that the rule lived in the sweep log and not in
+  the registry. Nothing before this line could fail on a mis-named reader, so the next phase registers
+  that as open debt and gives the registry a pre-sweep proof that a plant's named guard reads the line
+  the plant mutates.
 
 ## 5. Exact test results
 
 | Gate | Command | Measured result |
 |---|---|---|
 | Lint | `.venv/bin/ruff check .` | All checks passed! |
-| Format | `.venv/bin/ruff format --check .` | measured on the committed tree in the record commit (finding 81's rule) |
+| Format | `.venv/bin/ruff format --check .` | 188 files already formatted, measured on the `git archive` export of `caddda9` (finding 81's rule) |
 | Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
 | C++ | `ctest --preset dev` | 100% tests passed out of 204 |
 | Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
 | Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | Evidence is intact -- zero artifacts re-frozen |
 | Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 450 tests collected |
 | Python | `.venv/bin/python -m pytest -q` | 519 passed |
-| Falsification, full sweep | recorded in the next commit, on the sha it ran on | pending |
-| CI on the pushed head | recorded in the next commit, from the runner's own logs | pending |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `caddda9` | 105/105 planted defects were rejected by their guard |
+| CI on the pushed head | run 38874405963, `caddda9`, read from each job's own log | lint `All checks passed!` and `188 files already formatted` and mypy `Success: no issues found in 23 source files`; C++ and Python `100% tests passed out of 204` and `449 passed, 5 skipped in 206.69s`, which is #91's reconciliation against the 450 the probe collects; benchmark `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 427.1s total` |
 
 ## 6. Numerical validation
 
