@@ -30,11 +30,18 @@ never overwrites anything, and refuses the case outright if the path is already 
 Refuses to start if any file it would edit is not clean at `HEAD`: the harness must never overwrite
 work in progress, and finding 25's second half is what happens when two writers share one tree.
 
+A plant whose guard never objects stops the run: `sweep-stopped-early` names the plant and counts
+the declared plants it never ran. Finding 86 measured what the alternative costs -- the registry's
+`guard` field is hand-typed, a mis-named reader produces no output of its own, and a census that
+only reports at the end turns one bad line into a full sweep before anyone reads it.
+``--all`` restores the census for the records that quote it.
+
 Usage::
 
     uv run python scripts/run_mutation_suite.py --list
     uv run python scripts/run_mutation_suite.py --kind prose --verbose
     uv run python scripts/run_mutation_suite.py --only volga-uses-its-own-square
+    uv run python scripts/run_mutation_suite.py --all
 
 """
 
@@ -67,6 +74,7 @@ NOT_RESTORED = "restore-mismatch"
 NOT_GREEN_AGAIN = "tree-did-not-recover"
 DIRTY_TARGET = "target-already-modified"
 PROBE_EXISTS = "probe-file-already-in-the-tree"
+STOPPED = "sweep-stopped-early"
 
 
 def _load_plants() -> tuple[type, tuple[Mutation, ...]]:
@@ -360,6 +368,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--kind", choices=tuple(sorted(kinds_of(MUTATIONS))), help="run just one kind"
     )
     parser.add_argument("--build-dir", default=DEFAULT_BUILD_DIR, help="cmake build directory")
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="keep going after a plant escapes its guard, for the full census",
+    )
     parser.add_argument("--verbose", action="store_true", help="echo each guard's own tail")
     arguments = parser.parse_args(argv)
 
@@ -410,11 +423,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     for number in (signal.SIGINT, signal.SIGTERM):
         signal.signal(number, on_signal)
+    stopped_at: str | None = None
     try:
         for mutation in selected:
             print(f"- {mutation.identifier} ({mutation.kind}) ...", flush=True)
             results.append(run_one(mutation, harness))
             print(f"    {results[-1]['status']}", flush=True)
+            if not arguments.all and results[-1]["status"] != CAUGHT:
+                stopped_at = mutation.identifier
+                break
     finally:
         for number in (signal.SIGINT, signal.SIGTERM):
             signal.signal(
@@ -426,6 +443,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     for result in results:
         marker = "ok  " if result["status"] == CAUGHT else "FAIL"
         print(f"{marker} {result['status']:<22} {result['id']:<{width}}  {result['claim']}")
+    if stopped_at is not None:
+        skipped = len(selected) - len(results)
+        print(
+            f"\n{STOPPED}: {skipped} of {len(selected)} declared plants were never run, after "
+            f"{stopped_at}. Pass --all for the full census."
+        )
     caught = [result for result in results if result["status"] == CAUGHT]
     left = [path for path in snapshots if git_status(str(path.relative_to(REPO_ROOT)))]
     print(f"\n{len(caught)}/{len(results)} planted defects were rejected by their guard.")

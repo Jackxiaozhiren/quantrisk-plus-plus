@@ -45,8 +45,8 @@ def test_the_plant_list_lives_where_a_plant_can_reach_the_harness() -> None:
     of that file found the line twice -- once in the code and once in its own entry -- so the sweep
     refused the case and the bytecode-isolation guard could only be shown red by hand, which CI
     never re-runs. The split is what makes that plant legal, so this asserts three things: the list
-    is defined in the data module, no part of it has crept back into the interpreter, and the single
-    plant that needed the move really does have a unique anchor there.
+    is defined in the data module, no part of it has crept back into the interpreter, and every
+    plant that points at the interpreter has one anchor there and no more.
     """
     plants_path = REPO_ROOT / "scripts" / "mutation_plants.py"
     assert plants_path.is_file(), "the plant list has no module to live in"
@@ -63,13 +63,17 @@ def test_the_plant_list_lives_where_a_plant_can_reach_the_harness() -> None:
     ), "the harness reads a different Mutation type than the list defines"
 
     pointed = [item for item in harness.MUTATIONS if item.path == "scripts/run_mutation_suite.py"]
-    assert len(pointed) == 1, f"expected the one plant the split unlocked, found {len(pointed)}"
-    occurrences = harness_source.count(pointed[0].anchor)
-    assert occurrences == 1, (
-        f"{pointed[0].identifier}'s anchor occurs {occurrences} times in the interpreter, so "
-        "the sweep would refuse it before running"
+    assert pointed, "no plant can reach the interpreter, so #94's split is unprotected"
+    harness_source_occurrences = {
+        item.identifier: harness_source.count(item.anchor) for item in pointed
+    }
+    assert all(count == 1 for count in harness_source_occurrences.values()), (
+        f"plants whose anchor is not unique in the interpreter: {harness_source_occurrences}; "
+        "the sweep would refuse those cases before running them"
     )
-    assert pointed[0].replacement != pointed[0].anchor, "the plant would edit the line into itself"
+    assert all(item.replacement != item.anchor for item in pointed), (
+        "a plant would edit a line of the interpreter into itself"
+    )
 
 
 def test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists() -> None:
@@ -174,6 +178,118 @@ def test_a_control_that_would_not_apply_is_reported_rather_than_counted() -> Non
         )
         == harness.ANCHOR_NOT_UNIQUE
     )
+
+
+def _synthetic_plants(count: int = 3) -> tuple[object, ...]:
+    """Plants that name real files and real guards but are never applied.
+
+    The CLI is exercised against these instead of the declared list because the behaviour under test
+    is the loop's, not any plant's: a fake `run_one` decides the statuses, so the only thing read
+    from disk is the snapshot the harness takes before the cycle.
+    """
+    guard = (
+        "tests/python/test_mutation_suite.py::"
+        "test_the_status_table_only_calls_a_case_caught_when_every_step_fired"
+    )
+    return tuple(
+        harness.Mutation(
+            identifier=f"synthetic-{number}",
+            kind="prose",
+            path="scripts/mutation_plants.py",
+            anchor="MUTATIONS: tuple[Mutation, ...] = (",
+            replacement="MUTATIONS: tuple[Mutation, ...] = (  #",
+            guard=guard,
+            claim=f"synthetic plant {number}",
+        )
+        for number in range(count)
+    )
+
+
+def _run_with_statuses(
+    monkeypatch: pytest.MonkeyPatch, arguments: list[str], statuses: list[str]
+) -> tuple[int, int]:
+    """`main`'s exit code and how many cycles it ran, with the cycle itself replaced."""
+    plants = _synthetic_plants(len(statuses))
+    calls: list[str] = []
+
+    def fake_run_one(mutation: object, _harness: object) -> dict[str, str]:
+        calls.append(mutation.identifier)  # type: ignore[attr-defined]
+        status = statuses[len(calls) - 1]
+        return {
+            "id": mutation.identifier,  # type: ignore[attr-defined]
+            "kind": mutation.kind,  # type: ignore[attr-defined]
+            "status": status,
+            "reason": "",
+            "guard": mutation.guard,  # type: ignore[attr-defined]
+            "claim": mutation.claim,  # type: ignore[attr-defined]
+        }
+
+    monkeypatch.setattr(harness, "MUTATIONS", plants)
+    monkeypatch.setattr(harness, "run_one", fake_run_one)
+    monkeypatch.setattr(harness, "git_status", lambda _path: "")
+    code = harness.main(arguments)
+    return code, len(calls)
+
+
+def test_an_escaped_defect_stops_the_sweep_and_names_what_it_never_ran(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The first plant a guard does not reject ends the run, and says how much was skipped.
+
+    Finding 86 is the reason: a mis-pointed plant reports `guard-stayed-green`, and before this
+    behaviour the run carried on through the whole list and printed its verdict at the end, so the
+    cost of naming the wrong reader was a full sweep and the discovery was a line in the middle of a
+    log nobody re-read. Stopping at the first non-caught status is the sound half of that fix; the
+    static half -- proving from the registry that a named guard reads the line it mutates --
+    measured seven false alarms out of ten test-file plants and is #103's residual, not this gate's
+    claim.
+    """
+    code, ran = _run_with_statuses(
+        monkeypatch, [], [harness.CAUGHT, harness.ESCAPED, harness.CAUGHT]
+    )
+    assert ran == 2, f"the sweep ran {ran} cycles, so an escaped defect does not stop it"
+    assert code == 1, "a sweep that stopped on an escaped defect still reported success"
+    output = capsys.readouterr().out
+    assert harness.STOPPED in output, output
+    assert "synthetic-1" in output, f"the stop did not name the plant: {output}"
+    assert "1 of 3" in output, f"the stop did not count what it skipped: {output}"
+
+
+def test_the_all_flag_runs_every_declared_plant_after_a_stop_would_fire(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The census is still available, because a phase record quotes the full list.
+
+    Two assertions so the flag cannot be decorative: the same statuses run to the end, and the stop
+    line -- which is what tells a reader the census was truncated -- is absent.
+    """
+    code, ran = _run_with_statuses(
+        monkeypatch,
+        ["--all"],
+        [harness.CAUGHT, harness.ESCAPED, harness.CAUGHT],
+    )
+    assert ran == 3, f"--all still stopped after {ran} cycles"
+    assert code == 1, "a census with an escaped defect in it must not report success"
+    output = capsys.readouterr().out
+    assert harness.STOPPED not in output, output
+    assert "2/3 planted defects were rejected" in output, output
+
+
+def test_a_sweep_that_needs_no_stop_prints_the_census_it_always_printed(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Fail-fast changes the behaviour only when something escapes.
+
+    Without this, the stop branch could be tested and the ordinary path left unproven, and the
+    default invocation is the one a phase record quotes: it has to run all three and print no stop
+    line, or `105/105` would no longer mean the whole list.
+    """
+    code, ran = _run_with_statuses(monkeypatch, [], [harness.CAUGHT] * 3)
+    assert ran == 3, f"a clean sweep stopped after {ran} cycles"
+    assert code == 0, "a clean sweep reported failure"
+    output = capsys.readouterr().out
+    assert harness.STOPPED not in output, output
+    assert "3/3 planted defects were rejected by their guard." in output, output
 
 
 def test_the_status_table_only_calls_a_case_caught_when_every_step_fired() -> None:

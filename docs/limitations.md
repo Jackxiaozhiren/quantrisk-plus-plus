@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 519 pytest tests with
-    the `oracles` extra installed, and the same tree collects 450 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 522 pytest tests with
+    the `oracles` extra installed, and the same tree collects 453 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1298,3 +1298,26 @@ never removed just because a later phase shipped.
     recall instrument -- a corpus of sentences with known quantities and their spellings, run against the
     rule to count what it fails to see. Until one exists, #95's "66 remain" bounds only what the rule can
     find. Related: #101, whose precision half this mirrors.
+103. **A falsification plant's `guard` field is a hand-typed string, and nothing before the sweep can
+    tell a plant that points at the wrong reader from a plant that points at nothing.** The harness's
+    `check_exists` proves the named test is *defined* in the named file and the registry guard re-asserts
+    that on every run; neither can see whether that guard is the one that reads the line the plant
+    mutates. Finding 86 is the measurement: `owned-credit-loses-the-helper-it-reads-through` named the
+    report inventory guard while its pattern is a `_MARKDOWN_OWNED` key, so the sweep ran to completion
+    and printed `104/105`, with the one honest line -- `guard-stayed-green` -- sitting in the middle of a
+    log nobody re-reads.
+    (a) The half fixed here is procedural. The sweep stops at the first plant whose guard does not reject
+    the mutation and prints `sweep-stopped-early`, naming the plant and counting the declared plants it
+    never ran; `--all` keeps the full census a phase record quotes. That turns a 25-minute discovery into
+    the first cycle that fails, which is the cost this entry names. It does not make a mis-pointed plant
+    impossible to register, only expensive to leave in.
+    (b) The static half was tried and rejected on measurement. The candidate -- the plant's anchor must
+    occur inside the named guard's reachability closure (its body, the same-file helpers it calls, the
+    module-level structures those read) -- misfired on **7 of the 10 plants that mutate a test module**,
+    for three ordinary reasons: the anchor is a fragment of a literal the formatter wrapped across lines;
+    the reachability is real but transits a *nested* helper the module-level walk never enters; and a
+    guard can read a mutated line by reading the file as text instead of referencing the name. A pre-flight
+    that cries wolf on 70 per cent of its inputs is worse than the sweep it would replace, because it runs
+    at every registration. What would settle it is dynamic and costs a suite per plant: run the named
+    guard *and* its neighbours under one mutation and require that exactly the named one objects. Related:
+    #98, whose fix is this same shape applied to a table rather than a list; findings 85 and 86.

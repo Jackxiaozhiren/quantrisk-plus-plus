@@ -118,7 +118,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 102 numbered entries",
+        anchor="carries 103 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 450 tests collected offline",
+        anchor="# 453 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 519 pytest tests with the validation",
+        anchor="and 522 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 105/105 planted defects rejected",
+        anchor="# 109/109 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 450 collected without them",
+        anchor="oracles installed, 453 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 519 pytest tests with the `oracles` extra here",
+        anchor="# 522 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -876,7 +876,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-provenance-cell-quotes-a-stale-register-count",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="`docs/limitations.md` (102 entries)",
+        anchor="`docs/limitations.md` (103 entries)",
         replacement="`docs/limitations.md` (84 entries)",
         # The defect this phase actually found: the sheet's prose said 94 while its own
         # claim-provenance table said 84, three phases behind, and the guard that owns the register
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="forty-six report files, one per phase",
-        replacement="forty-seven report files, one per phase",
+        anchor="forty-seven report files, one per phase",
+        replacement="forty-eight report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1508,5 +1508,56 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_declared"
         ),
         claim="a guard owns what it searches for through the helpers it calls",
+    ),
+    # Phase 46: the fail-fast stop, its three ways of lying, and the flag that opts out of it. The
+    # anchors are lines of the interpreter itself, which #94's split is what makes legal -- the list
+    # is data in another file, so each of these occurs once where it is applied.
+    Mutation(
+        identifier="sweep-keeps-going-past-an-escaped-defect",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor=r'if not arguments.all and results[-1]["status"] != CAUGHT:',
+        replacement=r'if False and not arguments.all and results[-1]["status"] != CAUGHT:',
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_an_escaped_defect_stops_the_sweep_and_names_what_it_never_ran"
+        ),
+        claim="an escaped defect stops the sweep at the plant",
+    ),
+    Mutation(
+        identifier="sweep-stops-at-every-plant-not-just-an-escaped-one",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor=r'if not arguments.all and results[-1]["status"] != CAUGHT:',
+        replacement=r"if not arguments.all:",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_a_sweep_that_needs_no_stop_prints_the_census_it_always_printed"
+        ),
+        claim="a clean sweep still runs the whole declared list",
+    ),
+    Mutation(
+        identifier="sweep-stop-counts-what-ran-not-what-was-declared",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor=r"{skipped} of {len(selected)} declared plants",
+        replacement=r"{skipped} of {len(results)} declared plants",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_an_escaped_defect_stops_the_sweep_and_names_what_it_never_ran"
+        ),
+        claim="the stop names its denominator as the declared list, not the plants already run",
+    ),
+    Mutation(
+        identifier="sweep-all-flag-inverts-its-own-meaning",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor='        "--all",\n        action="store_true",',
+        replacement='        "--all",\n        action="store_false",',
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_all_flag_runs_every_declared_plant_after_a_stop_would_fire"
+        ),
+        claim="--all keeps going, which is the census a phase record quotes",
     ),
 )
