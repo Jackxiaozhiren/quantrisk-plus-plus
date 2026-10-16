@@ -85,15 +85,15 @@ mitigated procedurally and left open on the static half.
 | Gate | Command | Measured result |
 |---|---|---|
 | Lint | `.venv/bin/ruff check .` | All checks passed! |
-| Format | `.venv/bin/ruff format --check .` | 190 files already formatted on this tree; the record commit quotes the `git archive` export (finding 81's rule) |
+| Format | `.venv/bin/ruff format --check .` | 190 files already formatted, measured on the `git archive` export of `dd4bb9d` (finding 81's rule), and the runner reports the same 190 |
 | Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
 | C++ | `ctest --preset dev` | 100% tests passed out of 204 |
 | Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
 | Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | Evidence is intact -- 0 CHANGED, 0 MISSING, 0 unregistered |
 | Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 453 tests collected |
 | Python | `.venv/bin/python -m pytest -q` | 522 passed |
-| Falsification, full sweep | recorded in the next commit, on the sha it ran on | pending |
-| CI on the pushed head | recorded in the next commit, from the runner's own logs | pending |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `dd4bb9d` | 110/110 planted defects were rejected by their guard, tree clean afterwards |
+| CI on the pushed head | run 38885708023, `dd4bb9d`, read from each job's own log | lint `All checks passed!`, `190 files already formatted`, mypy `Success: no issues found in 23 source files`; C++ and Python `100% tests passed out of 204` and `452 passed, 5 skipped in 114.25s`, which is #91's reconciliation against the 453 the probe collects; benchmark `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 324.4s total` |
 
 ## 6. Numerical validation
 
