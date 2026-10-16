@@ -9,6 +9,19 @@
 > Everything in this document is a law with a `check:` predicate, a procedure you must run,
 > or a decision with a stated rationale. If you cannot verify a claim in this document
 > yourself, the Facts Protocol (§4) tells you how to re-measure it; the fresh reading wins.
+>
+> **How to use this document.** Open it from inside a coding agent working in this
+> repository and treat §0–§16 as your operating instructions. Do **not** paste it into a
+> chat window — this file is tens of kilobytes, the tail that gets cut is always the
+> Definition of Done and the rails, and an agent that never received them reports success
+> having bypassed them. The file on disk is the source of truth; read it whole.
+>
+> **One scope unit per session.** The unit is named in the session's opener (a diagnosis
+> pass, or Phase 3's step P3.x for a single task). Continuing "one more lane" past the
+> boundary is what breaks multi-session documents: the next session inherits a ledger whose
+> entries no longer match any one baseline. Cross-session state lives in `REFACTOR_LEDGER.md`
+> at the repository root, never in chat history — every session writes its baseline capture,
+> findings, and liveness table there and commits that file before touching a source file.
 
 ---
 
@@ -369,9 +382,15 @@ Record the declared plant inventory in the snapshot. The full sweep (every plant
 rejected by its guard) is Phase 3.2's proof, and its summary line — read from the sweep
 itself, not from memory — is the only acceptable evidence.
 
-**Step 7 — Declare scope and timebox.** Write into the Phase 5 report: the findings lanes
-you will run (§8), the tasks in scope, and a wall-clock budget. No finding outside the
-declared lanes may be fixed without extending the declaration first.
+**Step 7 — Declare scope and timebox.** Write into the ledger: the findings lanes you will
+run (§8), the tasks in scope, and a wall-clock budget. No finding outside the declared
+lanes may be fixed without extending the declaration first.
+
+**Step 8 — Open the ledger.** Create `REFACTOR_LEDGER.md` at the repository root carrying:
+the Step 4–6 exit codes as captured, the premise readings from Step 3 with the revision and
+environment each was taken on, the declared scope, and an empty findings table. Commit that
+file **before** any instrument or source file is written. Every later session resumes from
+it, re-runs Step 4 first, and marks the stored baseline history — not ground truth.
 
 ---
 
@@ -419,7 +438,8 @@ not reported.
 
 ## 9. Phase 2 — Approval gate
 
-**Nothing touches disk before this gate.** Present to the maintainer, in one document:
+**Nothing touches disk before this gate.** Write into the ledger, then present to the
+maintainer, in one message:
 
 - the findings table, ranked by impact × effort × risk;
 - the proposed Phase 3 commit sequence (one line per commit: finding ID → change →
@@ -513,7 +533,8 @@ Enter only when Phase 3 is fully green. Order matters; do not parallelise with P
 
 ## 12. Phase 5 — Report
 
-Deliver, in one document plus the repository state:
+Deliver, assembled from `REFACTOR_LEDGER.md` plus the repository state, as a final ledger
+entry:
 
 - **Evidence Ledger** — for every finding: ID, verdict (fixed / rejected / deferred), the
   probe, and the commit that closed it.
@@ -532,7 +553,8 @@ Deliver, in one document plus the repository state:
 
 Every law carries a `check:` predicate and the precondition it assumes. A law whose
 precondition no longer holds is VOID and may not be cited to justify or block work. At
-Phase 1's end, produce the table: law | status (ACTIVE/VOID) | the reading that decided it.
+Phase 1's end, produce the table in the ledger: law | status (ACTIVE/VOID) | the reading
+that decided it.
 
 | # | Law | Precondition | check: |
 |---|-----|--------------|--------|

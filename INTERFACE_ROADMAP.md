@@ -14,6 +14,14 @@
 > transcribed into this body.** Every quantity is produced by a named command at run time
 > and compared against a ceiling. If a sentence here disagrees with a fresh reading, the
 > reading wins and this sentence is a defect.
+>
+> **How to use this document.** Open it from inside a coding agent working in this
+> repository and treat §1–§14 as your operating instructions. Do **not** paste it into a
+> chat window — the tail that truncates is the Definition of Done and the rails, and an
+> agent that never received them reports success having bypassed them. The file on disk is
+> the source of truth; read it whole. Cross-session state lives in `INTERFACE_LEDGER.md` at
+> the repository root, never in chat history; one scope unit per session, named in the
+> opener, and the ledger is committed before any file is built.
 
 ---
 
@@ -230,6 +238,11 @@ Same instrument discipline as `REFACTOR_PROMPT.md`; do not hand-write a second p
 ---
 
 ## 9. Phase plan
+
+**Ledger first.** Open `INTERFACE_LEDGER.md` at the repository root, commit it before
+building anything, and record in it: the Phase 0 readings with the revision and environment
+each was taken on, the declared scope unit, and the H1–H4 measurements as they are produced.
+A later session re-runs Phase 0 rather than trusting the stored entry.
 
 **Phase 0 — Prerequisite gate (§3).** Verify the refactor's four conditions on the current
 tree and record the readings. If they do not hold: run only Phase 1 below, report, stop.
