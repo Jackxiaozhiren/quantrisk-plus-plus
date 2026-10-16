@@ -2246,3 +2246,35 @@ mutation, and proves nothing about whether that guard is the *only* or the *inte
 pointed at a reader that objects for a different reason -- a file-level claim it also happens to police --
 would report `caught` while testing a different edge than its `claim` text advertises. The next phase turns
 (b)'s gap into a pre-sweep check.
+
+## Addendum — Phase 47, the citation that named a real row and described another, and the rule that was measured before it shipped (2026-10-16)
+
+**87. `cited` policed a row pointer's existence for eight phases and never once asked what the sentence
+said about it.** #99 recorded the defect the moment it was found (Phase 38: the front page's "Row 14 is the
+other kind of weakness", where row 14 is the third-and-fourth spot sensitivities and the bound is row 15),
+and the instrument shipped then asserted that each cited label appears in the table's numbering and that
+the spelled count above the list equals the list. All three of those stayed green across the mis-citation
+because none of them reads the sentence.
+
+(a) **The plausible instrument was built, run, and refused on its own numbers.** The obvious design is
+token overlap: take each row's bolded name, keep the tokens that belong to exactly one row, and flag a
+citation carrying a token unique to some other row while carrying none unique to its own. Measured over the
+inventoried texts it flagged **6 of the 9 citations that carried any unique token**, and every flag was
+false. Three causes, all ordinary: the matrix's own prose legitimately names a neighbour ("the same column
+truncations as row 19"); the lettered sub-row `9b` has no bolded name at all, so the parser handed it no
+tokens and its citation read as unknown; and the *correct* README citation for row 15 came back vacuous,
+because `bound` and `truncation` belong to several rows and so are unique to none. A gate that cries wolf
+on two thirds of its hits would have been loosened within a phase and then been worth nothing.
+
+(b) **What shipped instead is a registry with both directions checked.** Nine claim-shaped citations --
+apposition, predicate, possessive -- each registered as (document, row, the words the sentence claims), with
+the phrase required to occur inside its own citation and every content word of it required to occur in the
+cited row's cells, plus the reverse: an entry whose phrase no citation carries is stale. That is the #98
+doctrine applied one level up: a hand-written pointer is worth nothing until something structural can make
+it fail in both directions. The comparison folds `ies`/`es`/`s`/`ed` on both sides, which is what lets
+`publishes` agree with a cell that says `published` without pretending to a stemmer.
+
+(c) **The scope boundary is counted, not implied.** Seventeen citations exist in the inventoried texts; nine
+are the claiming shape; the other eight are pointers or comparisons, and a wrong number in one of those still
+passes, because deciding "the same truncations as row 19" needs the comparing row's cells as well. #99's
+amendment states that number rather than closing on the strength of the nine.

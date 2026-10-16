@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 522 pytest tests with
-    the `oracles` extra installed, and the same tree collects 453 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 523 pytest tests with
+    the `oracles` extra installed, and the same tree collects 454 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1212,6 +1212,23 @@ never removed just because a later phase shipped.
     row: that needs the cited row's validation-status cell read and the backticked status the sentence
     quotes required to appear in it, which is buildable from the same table parse and should be built
     against the next real mis-citation rather than speculatively.
+
+    **Amended 2026-10-16 by Phase 47: closed on the shape that matters, with the boundary counted
+    rather than blurred.** The registry guard (`test_every_claim_about_a_validation_matrix_row_describes_
+    that_row`) takes a citation as *claiming* when the descriptor sits in apposition to the number
+    (`Row 6, the Heston comparison,`), predicates on it (`row 16 is validated by`) or possesses it
+    (`row 22's books`), and it requires every content word of that descriptor to appear in the cited row's
+    own cells -- folding `ies`/`es`/`s`/`ed` on both sides so `publishes` agrees with a cell that says
+    `published`. Nine of the seventeen citations in the inventoried texts are that shape and all nine are
+    registered; the other eight are pointers or comparisons and remain unpoliced, because deciding
+    "the same truncations as row 19" needs the *comparing* row's cells too, which is a larger instrument
+    than a registry. The first design was the obvious one and it was measured before it shipped: giving
+    each row the tokens of its own bolded name, keeping those unique to one row, and flagging a citation
+    that carries a token unique to a different row produced **6 flags on the 9 citations that carried any
+    unique token**, every one of them false -- matrix prose legitimately naming a neighbour's concept, plus
+    the un-bolded `9b` label the parser never read -- while the *correct* README citation for row 15 came
+    back vacuous because `bound` and `truncation` belong to several rows. Related: #98, whose structural
+    credit this reuses; finding 87.
 
 100. **The extractor's number may not be preceded by a letter, a digit, `#` or `.`, and a hyphen is none
     of those, so a hyphenated ordinal's number reads as a quantity.** `the order-four radius transfers` is

@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 453 tests collected offline",
+        anchor="# 454 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 522 pytest tests with the validation",
+        anchor="and 523 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 110/110 planted defects rejected",
+        anchor="# 113/113 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 453 collected without them",
+        anchor="oracles installed, 454 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 522 pytest tests with the `oracles` extra here",
+        anchor="# 523 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="forty-seven report files, one per phase",
-        replacement="forty-eight report files, one per phase",
+        anchor="forty-eight report files, one per phase",
+        replacement="forty-nine report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1571,5 +1571,45 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_all_flag_runs_every_declared_plant_after_a_stop_would_fire"
         ),
         claim="--all keeps going, which is the census a phase record quotes",
+    ),
+    # Phase 47 (#99): a claim about a row has to be a claim about *that* row. The first plant is the
+    # defect the entry recorded -- a citation moved to an adjacent row that exists, so every
+    # existence check stays green. The second deletes a registry entry, and the third blinds the
+    # shape regex so the guard is left comparing nothing.
+    Mutation(
+        identifier="row-claim-moved-to-an-adjacent-existing-row",
+        kind="prose",
+        path="README.md",
+        anchor="**Row 15 is the other kind of weakness:**",
+        replacement="**Row 14 is the other kind of weakness:**",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_claim_about_a_validation_matrix_row_describes_that_row"
+        ),
+        claim="a sentence that names a row says words that row's own cells contain",
+    ),
+    Mutation(
+        identifier="row-claim-registry-drops-a-citation",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='    ("README.md", "13", "the real-data arm"),\n',
+        replacement="",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_claim_about_a_validation_matrix_row_describes_that_row"
+        ),
+        claim="every claiming citation is classified, so the registry cannot quietly fall behind",
+    ),
+    Mutation(
+        identifier="row-claim-shape-stops-matching-anything",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor=r"""[Rr]ow\s+(\d+[a-z]?)(?:,\s+the\s+[^,]{2,60},|\s+is\s+|\u2019s\s|'s\s)""",
+        replacement=r"""[Rr]ow\s+(\d+[a-z]?)(?:never-the-shape-of-a-claim)""",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_claim_about_a_validation_matrix_row_describes_that_row"
+        ),
+        claim="the guard's denominator is asserted, so blinding the shape cannot read as agreement",
     ),
 )

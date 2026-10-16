@@ -2340,6 +2340,138 @@ _SPELLED_DOCUMENTS = (
     "docs/validation_matrix.md",
 )
 
+# #99's defect was a citation whose row number existed while its sentence described another row:
+# the front page said "Row 14 is the other kind of weakness: the bound on the stress map's
+# truncation error", and the bound is row 15. Existence was already policed by
+# `test_the_validation_matrix_numbers_its_rows_once_and_in_order`; meaning was not. A citation
+# counts as *claiming* when it puts a descriptor in apposition to the number, predicates on it, or
+# possesses it -- the three shapes the README bullets and the matrix prose take. A comparison whose
+# descriptor sits before the number ("the same truncations as row 19") is not this shape, and
+# deciding it would need the comparing row's cells too; #99 records that as the scope boundary.
+_ROW_CITATION_DOCUMENTS = (*_MARKDOWN_INVENTORY, "paper/technical_report.tex")
+_CLAIMING_ROW = re.compile(r"[Rr]ow\s+(\d+[a-z]?)(?:,\s+the\s+[^,]{2,60},|\s+is\s+|\u2019s\s|'s\s)")
+_CITATION_STOPWORD_TEXT = (
+    "able above about after again all also an and any are as at back be because been"
+    " being below between both but by can did do does done down for from further had"
+    " has have he her here him his how if in into is it its itself just like made"
+    " make many may me might more most much must no not now of on once or other our"
+    " out over own same she should since so some such than that the their them then"
+    " there these they this those through to under until up upon us use used very was"
+    " we were what when where which while who whom why will with without would you"
+    " your"
+)
+_CITATION_STOPWORDS = frozenset(_CITATION_STOPWORD_TEXT.split())
+
+
+def _citation_terms(phrase: str) -> set[str]:
+    """The content words a citation claims, folded to a shared stem on both sides of the comparison.
+
+    Prose and table say the same thing in different inflections -- row 17 publishes what its cell
+    calls a `published` error, and a row whose cells read `identities` is cited as an `identity`.
+    Folding `ies`/`es`/`s`/`ed` on the citation *and* on the row makes those agree; the fold is
+    deliberately short (no general stemmer) because a long one would match words that are not the
+    same claim, and every rule here has to be readable in one pass.
+    """
+    terms: set[str] = set()
+    for word in re.findall(r"[a-z]+", phrase.lower()):
+        if len(word) < 4 or word in _CITATION_STOPWORDS:
+            continue
+        if word.endswith("ies"):
+            word = f"{word[:-3]}y"
+        elif word.endswith("es"):
+            word = word[:-2]
+        elif word.endswith("s"):
+            word = word[:-1]
+        elif word.endswith("ed") and len(word) > 4:
+            word = word[:-2]
+        terms.add(word)
+    return terms
+
+
+def _matrix_row_cells() -> dict[str, str]:
+    """Each validation-matrix row's own cells as one line, keyed by the label the table gives it."""
+    table = (REPO_ROOT / "docs" / "validation_matrix.md").read_text(encoding="utf-8")
+    cells: dict[str, str] = {}
+    for line in table.splitlines():
+        found = re.match(r"^\| (\d+[a-z]?) \|", line)
+        if found:
+            cells[found.group(1)] = " ".join(part.strip() for part in line.split("|")[2:-1])
+    return cells
+
+
+# (document, row, the words the sentence claims that row is about). A phrase has to occur inside
+# its own citation's window and every content word of it has to appear in the cited row's cells, so
+# the list can neither invent a citation nor point one at a row it never describes. The words are
+# the claim's, not the row's whole name: `the real-data arm` claims real data, and "arm" is the
+# sentence's noun, not a fact about the table.
+_ROW_CLAIMS: tuple[tuple[str, str, str], ...] = (
+    ("README.md", "6", "Heston"),
+    ("README.md", "9b", "the bootstrap interval coverage"),
+    ("README.md", "13", "the real-data arm"),
+    ("README.md", "15", "the bound on the stress map's truncation"),
+    ("docs/validation_matrix.md", "16", "identities"),
+    ("docs/validation_matrix.md", "17", "publishes"),
+    ("docs/validation_matrix.md", "17", "joint-shock error is quadratic"),
+    (
+        "docs/validation_matrix.md",
+        "22",
+        "books, grid, tolerance and contiguous paired-magnitude rule",
+    ),
+    ("docs/validation_matrix.md", "22", "radii"),
+)
+
+
+def test_every_claim_about_a_validation_matrix_row_describes_that_row() -> None:
+    """A sentence that says what a row is does so in words the row itself uses.
+
+    The registry is the only hand-written part, and both of its directions are checked: an entry
+    whose phrase no citation carries is stale, and a citation no entry describes is unclassified.
+    That is the shape #98 left as doctrine -- a hand-typed pointer is worth nothing until something
+    structural can make it fail.
+    """
+    cells = _matrix_row_cells()
+    assert cells, "the matrix no longer parses into numbered rows, so nothing here can be compared"
+    citations: list[tuple[str, str, str]] = []
+    for document in _ROW_CITATION_DOCUMENTS:
+        text = _folded_document(document)
+        for match in _CLAIMING_ROW.finditer(text):
+            citations.append(
+                (document, match.group(1), text[max(0, match.start() - 40) : match.end() + 260])
+            )
+    assert citations, (
+        "no claiming row citation exists in the inventoried texts, so this proves nothing"
+    )
+
+    phrases: dict[tuple[str, str], list[str]] = {}
+    for document, row, phrase in _ROW_CLAIMS:
+        phrases.setdefault((document, row), []).append(phrase)
+
+    unclassified = [
+        f"{document} row {row}: {window[:80]!r}"
+        for document, row, window in citations
+        if not any(phrase in window for phrase in phrases.get((document, row), ()))
+    ]
+    assert not unclassified, f"row claims with no registered description: {unclassified}"
+
+    dead = [
+        (document, row, phrase)
+        for (document, row), items in phrases.items()
+        for phrase in items
+        if not any(
+            (cited_document, cited_row) == (document, row) and phrase in window
+            for cited_document, cited_row, window in citations
+        )
+    ]
+    assert not dead, f"registered row claims the documents no longer make: {dead}"
+
+    for document, row, phrase in _ROW_CLAIMS:
+        assert row in cells, f"{document} cites row {row}, which the matrix does not contain"
+        missing = _citation_terms(phrase) - _citation_terms(cells[row])
+        assert not missing, (
+            f"{document} says row {row} is about {sorted(missing)}, which its own cells never "
+            f"mention: {cells[row][:120]!r}"
+        )
+
 
 _MD_BACKTICK = re.compile(r"`([^`\n]+)`")
 
