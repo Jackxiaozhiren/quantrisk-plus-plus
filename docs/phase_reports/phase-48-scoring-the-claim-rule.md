@@ -82,8 +82,8 @@ count), `docs/limitations.md` (#102 and #101 amended with the measurement, and #
 | Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | Evidence is intact -- the report bundle moved, no artifact re-frozen |
 | Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 455 tests collected |
 | Python | `.venv/bin/python -m pytest -q` | 524 passed |
-| Falsification, full sweep | recorded in the next commit, on the sha it ran on | pending |
-| CI on the pushed head | recorded in the next commit, from the runner's own logs | pending |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py` on `aa75231` | 116/116 planted defects were rejected by their guard, tree clean afterwards |
+| CI on the pushed head | run from each job's own log on `aa75231` | lint `All checks passed!`, `192 files already formatted`, mypy `Success: no issues found in 23 source files`; C++ and Python `100% tests passed out of 204` and `454 passed, 5 skipped in 207.09s`, which is #91's reconciliation against the 455 the probe collects; benchmark `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 427.8s total` |
 
 ## 6. Numerical validation
 
