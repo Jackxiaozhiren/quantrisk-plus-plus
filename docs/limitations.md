@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 523 pytest tests with
-    the `oracles` extra installed, and the same tree collects 454 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 524 pytest tests with
+    the `oracles` extra installed, and the same tree collects 455 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1290,6 +1290,14 @@ never removed just because a later phase shipped.
     owners. The exclusion is therefore not written, and the finding stays open as a design question rather
     than a defect: a claim's denominator has to be named by something other than the shape of the words
     around it. Related: #100 recorded the same mechanism on the digit rule, where the fix *was* mechanical.
+
+    **Amended 2026-10-17 by Phase 48: the precision edge got a number, and it is a small one.** The
+    corpus guard (`test_the_claim_rule_is_scored_against_sentences_whose_quantities_are_known`) returns
+    6 claims over its 15 targeted units and all 6 are real quantities, so phantoms measured **0** on that
+    sample -- with two designed negatives in it (a version list, a confidence level), which is why "0 here"
+    is not "precise". What this phase did not touch is the entry's main half: a declaration is still a
+    hand-written reason whose *number* nothing compares to a producer, because the producer it says does
+    not exist is the thing being exempted.
 102. **The tail of the claim rule allows one word between a numeral and its noun, and that choice is
     unmeasured on the recall side: a real claim phrased with two modifiers is invisible to the
     inventory.** `_CLAIM_TAIL` is `\s*%?\s+(?:[A-Za-z]+\.?\s+)?` plus the noun list, so `twelve columns`
@@ -1315,6 +1323,22 @@ never removed just because a later phase shipped.
     recall instrument -- a corpus of sentences with known quantities and their spellings, run against the
     rule to count what it fails to see. Until one exists, #95's "66 remain" bounds only what the rule can
     find. Related: #101, whose precision half this mirrors.
+
+    **Amended 2026-10-17 by Phase 48: the instrument exists, and its first output is a named list rather
+    than an estimate.** `_CLAIM_CORPUS` scores the shipped rule over 15 units taken from the inventoried
+    documents -- each unit is read from the document by a needle, so no sentence in the corpus is
+    invented -- with gold written by reading the unit. Measured: **22 gold quantities, 6 the rule sees,
+    16 named blind spots, 0 phantoms** among what it returned. The 16 are `shocks`, `arm`, `components`,
+    `points`, `families`, `scales`, `maps`, `partials`, `blocks`, `days`, `arms`, `levels`, `benchmark`
+    in the singular the list carries only as plural, `experiments` behind a partitive ("Six of the seven
+    experiments"), and `two Level-1 identities` -- the last one being the reach #100 gave up when `-`
+    left the lookbehind. Both disagreement lists are frozen, so widening the noun list moves the miss
+    ratchet on purpose (a plant proves it) and reinstating the dash moves the precision ratchet (another
+    plant proves that). The corpus is **targeted** -- units were chosen to contain known blind spots --
+    so 6/22 is a list of what the rule cannot see, not a recall estimate for the documents; drawing an
+    unbiased sample is the half that keeps this entry open. One correction while measuring: the example
+    `two methods` above does not occur in these five documents (the corpus says `3 methods`); `five
+    points` and `six partials` do. Related: #101, whose precision half this mirrors.
 103. **A falsification plant's `guard` field is a hand-typed string, and nothing before the sweep can
     tell a plant that points at the wrong reader from a plant that points at nothing.** The harness's
     `check_exists` proves the named test is *defined* in the named file and the registry guard re-asserts

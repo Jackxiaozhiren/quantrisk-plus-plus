@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 454 tests collected offline",
+        anchor="# 455 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 523 pytest tests with the validation",
+        anchor="and 524 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 113/113 planted defects rejected",
+        anchor="# 116/116 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 454 collected without them",
+        anchor="oracles installed, 455 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 523 pytest tests with the `oracles` extra here",
+        anchor="# 524 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="forty-eight report files, one per phase",
-        replacement="forty-nine report files, one per phase",
+        anchor="forty-nine report files, one per phase",
+        replacement="fifty report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1611,5 +1611,44 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_every_claim_about_a_validation_matrix_row_describes_that_row"
         ),
         claim="the guard's denominator is asserted, so blinding the shape cannot read as agreement",
+    ),
+    # Phase 48 (#102): the corpus scores the rule, so each of the three ways that score can lie
+    # has a plant -- a needle that no longer names a real unit, a noun list widened so the miss
+    # ratchet must move, and the hyphen exclusion removed so a phantom reaches precision.
+    Mutation(
+        identifier="corpus-needle-stops-naming-a-sentence-in-its-document",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='("README.md", "618 shocks tested", ("618 shocks",)),',
+        replacement='("README.md", "618 shocks measured", ("618 shocks",)),',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_rule_is_scored_against_sentences_whose_quantities_are_known"
+        ),
+        claim="corpus units come from the document, so an invented needle cannot score",
+    ),
+    Mutation(
+        identifier="claim-rule-widens-its-noun-list-under-the-ratchet",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor=r"|stencils|spreads?|runs|readings?|re-freezings?|paths?)",
+        replacement=r"|stencils|spreads?|runs|readings?|re-freezings?|paths?|shocks?)",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_rule_is_scored_against_sentences_whose_quantities_are_known"
+        ),
+        claim="improving recall has to move the frozen miss list on purpose, not by accident",
+    ),
+    Mutation(
+        identifier="claim-rule-loses-its-hyphen-exclusion",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_CLAIM_EXCLUDE_CHARS = r"A-Za-z\\d#.-"',
+        replacement='_CLAIM_EXCLUDE_CHARS = r"A-Za-z\\d#."',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_rule_is_scored_against_sentences_whose_quantities_are_known"
+        ),
+        claim="a phantom claim is a precision failure, and the frozen list says so",
     ),
 )

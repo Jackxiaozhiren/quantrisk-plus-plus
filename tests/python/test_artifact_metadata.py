@@ -2473,6 +2473,160 @@ def test_every_claim_about_a_validation_matrix_row_describes_that_row() -> None:
         )
 
 
+# #102 asked for the one thing the inventory never had: sentences whose quantities are known
+# independently of the rule, so the rule can be scored against them instead of only reporting what
+# it found. Each entry is (document, a phrase that occurs once in it, the quantities that sentence
+# really counts). The needle is not the claim: the guard takes the enclosing unit from the document,
+# runs the shipped rule over that, and compares. Gold is written by reading the unit, so a rule hit
+# that is not a quantity is a false positive and a quantity the rule cannot see is a miss -- both
+# lists frozen below, so widening the rule has to shrink the miss list on purpose, not by accident.
+_CLAIM_CORPUS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    (
+        "README.md",
+        "runs all nineteen members",
+        (
+            "nineteen members",
+            "four correctness benchmarks",
+            "fourteen statistical experiments",
+            "one performance benchmark",
+        ),
+    ),
+    (
+        "README.md",
+        "twenty-six rows over those twelve components",
+        ("twenty-six rows", "twelve components"),
+    ),
+    ("README.md", "618 shocks tested", ("618 shocks",)),
+    (
+        "README.md",
+        "only one arm is real",
+        ("three entries", "one arm", "six experiments", "seven experiments"),
+    ),
+    ("README.md", "QuantLib 1.43, SciPy 1.18.1", ()),
+    (
+        "docs/validation_matrix.md",
+        "the six partials of total order five",
+        ("six partials",),
+    ),
+    ("docs/validation_matrix.md", "at a 1% shock", ("1% shock",)),
+    (
+        "docs/interview_defense.md",
+        "with three estimator families planned",
+        ("three estimator families",),
+    ),
+    ("docs/interview_defense.md", "far beyond any 95 % or 99 % level", ()),
+    (
+        "docs/interview_defense.md",
+        "Five points cannot buy a replacement mechanism",
+        ("five points",),
+    ),
+    (
+        "docs/interview_defense.md",
+        "between the two narrowest scales",
+        ("two narrowest scales", "four maps"),
+    ),
+    (
+        "paper/technical_report.tex",
+        "Two Level-1 identities guard",
+        ("two Level-1 identities",),
+    ),
+    (
+        "paper/technical_report.tex",
+        "gives the four calibration arms",
+        ("four calibration arms",),
+    ),
+    (
+        "paper/technical_report.tex",
+        "Three validation levels are defined",
+        ("three validation levels",),
+    ),
+    ("paper/technical_report.tex", "20{,}000 days", ("200 blocks", "20{,}000 days")),
+)
+
+# What the rule could not see, and what it saw that is not a quantity, measured
+# on 2026-10-17. A ratchet, not a comment: leaving the rule alone and editing this list reds, and so
+# does a rule change that silently improves or worsens recall.
+# Measured by running the shipped rule over the corpus. Every entry was read in its unit first: each
+# counts a real thing (618 shocks that were run, twelve components the matrix rows cover, three
+# estimator families that were planned), and the rule cannot see it because the noun is not in
+# `_REPORT_NOUNS` -- or, for the last entry, because a hyphenated modifier is not one of the single
+# words the tail allows. The corpus is *targeted*, chosen to include known blind spots, so these 16
+# are named misses and not an estimate of recall over the documents; #102 keeps that distinction.
+_CLAIM_RULE_MISSES = (
+    "README.md :: 618 shocks",
+    "README.md :: one arm",
+    "README.md :: one performance benchmark",
+    "README.md :: six experiments",
+    "README.md :: twelve components",
+    "docs/interview_defense.md :: five points",
+    "docs/interview_defense.md :: four maps",
+    "docs/interview_defense.md :: three estimator families",
+    "docs/interview_defense.md :: two narrowest scales",
+    "docs/validation_matrix.md :: 1% shock",
+    "docs/validation_matrix.md :: six partials",
+    "paper/technical_report.tex :: 20{,}000 days",
+    "paper/technical_report.tex :: 200 blocks",
+    "paper/technical_report.tex :: four calibration arms",
+    "paper/technical_report.tex :: three validation levels",
+    "paper/technical_report.tex :: two level-1 identities",
+)
+_CLAIM_RULE_FALSE_POSITIVES: tuple[str, ...] = ()
+
+
+def _corpus_sentences(document: str, needle: str) -> list[str]:
+    """Every sentence of *document* that contains *needle*, which must be exactly one.
+
+    The unit comes from the document, never from this file, so the corpus cannot assert a
+    sentence the tree does not contain -- the same reason the plant list points at lines
+    rather than copying them.
+    """
+    flat = _folded_document(document)
+    sentences = [part.strip() for part in re.split(r"(?<=[.!?|])\s+", flat) if needle in part]
+    assert sentences, f"{needle!r} appears in no sentence of {document}"
+    assert len(sentences) == 1, f"{needle!r} spans {len(sentences)} sentences of {document}"
+    return sentences
+
+
+def test_the_claim_rule_is_scored_against_sentences_whose_quantities_are_known() -> None:
+    """Recall and precision of the extractor, measured rather than asserted.
+
+    #95 measured what the spelled rule finds, #100 and #101 measured two of its edges, and
+    the missing piece: nothing in the tree could say how many quantities the rule *does not see*,
+    because every count of them came from the rule itself. This scores the shipped rule against gold
+    written by reading the sentences, and freezes the disagreement in both directions.
+    """
+    assert len(_CLAIM_CORPUS) >= 12, "the corpus is too small to score anything"
+    extracted_all: list[str] = []
+    gold_all: list[str] = []
+    misses: list[str] = []
+    false_positives: list[str] = []
+    for document, needle, expected in _CLAIM_CORPUS:
+        (sentence,) = _corpus_sentences(document, needle)
+        extracted = {
+            match.group(0).strip().lower() for match in _extract_claims(sentence, spelled=True)
+        }
+        wanted = {item.lower() for item in expected}
+        extracted_all.extend(sorted(extracted))
+        gold_all.extend(sorted(wanted))
+        misses.extend(f"{document} :: {item}" for item in sorted(wanted - extracted))
+        false_positives.extend(f"{document} :: {item}" for item in sorted(extracted - wanted))
+
+    assert sorted(misses) == sorted(_CLAIM_RULE_MISSES), (
+        f"the rule's blind spots moved: measured {sorted(misses)}, recorded "
+        f"{sorted(_CLAIM_RULE_MISSES)}"
+    )
+    assert sorted(false_positives) == sorted(_CLAIM_RULE_FALSE_POSITIVES), (
+        f"the rule's precision moved: measured {sorted(false_positives)}, recorded "
+        f"{sorted(_CLAIM_RULE_FALSE_POSITIVES)}"
+    )
+    assert gold_all and extracted_all, (
+        "the corpus produced no gold and no hits, so neither rate is a fact"
+    )
+    recall = (len(gold_all) - len(misses)) / len(gold_all)
+    precision = (len(extracted_all) - len(false_positives)) / len(extracted_all)
+    assert 0.0 < recall <= 1.0 and 0.0 < precision <= 1.0, (recall, precision)
+
+
 _MD_BACKTICK = re.compile(r"`([^`\n]+)`")
 
 
