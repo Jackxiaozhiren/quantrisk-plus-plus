@@ -118,7 +118,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 103 numbered entries",
+        anchor="carries 104 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 456 tests collected offline",
+        anchor="# 457 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,8 +342,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 525 pytest tests with the validation",
-        replacement="and 456 pytest tests with the validation",
+        anchor="and 526 pytest tests with the validation",
+        replacement="and 457 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 119/119 planted defects rejected",
+        anchor="# 123/123 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 456 collected without them",
+        anchor="oracles installed, 457 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 525 pytest tests with the `oracles` extra here",
+        anchor="# 526 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -876,7 +876,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-provenance-cell-quotes-a-stale-register-count",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="`docs/limitations.md` (103 entries)",
+        anchor="`docs/limitations.md` (104 entries)",
         replacement="`docs/limitations.md` (84 entries)",
         # The defect this phase actually found: the sheet's prose said 94 while its own
         # claim-provenance table said 84, three phases behind, and the guard that owns the register
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty report files, one per phase",
-        replacement="fifty-one report files, one per phase",
+        anchor="fifty-one report files, one per phase",
+        replacement="fifty-two report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1688,5 +1688,60 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_claim_rules_recall_and_precision_are_estimated_on_a_sample"
         ),
         claim="the sampled indices are pinned, so the sample cannot move under stale gold",
+    ),
+    # Phase 50 (#101's precision denominator): the census and the closed-class block are two halves
+    # of one claim -- the block is why the phantom list is empty, and the census is how anyone would
+    # notice. Each direction gets a plant, including the refactor that looks like tidiness.
+    Mutation(
+        identifier="claim-modifier-slot-reopened-after-the-census",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_CLAIM_TAIL = r"\\s*%?\\s+" + _MODIFIER_BLOCK +',
+        replacement='_CLAIM_TAIL = r"\\s*%?\\s+" +',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="the census's empty phantom list is the block's own evidence: reopen the slot and a "
+        "hit that is not a quantity returns to a document that says it has none",
+    ),
+    Mutation(
+        identifier="closed-class-block-borrowed-a-citation-stopword",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='    "for",\n    "from",\n    "in",',
+        replacement='    "for",\n    "from",\n    "further",\n    "in",',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_extractor_reads_percentages_and_refuses_labels"
+        ),
+        claim="the block is not `_CITATION_STOPWORDS`: `further` classifies a real count in the "
+        "report, so the tidy-looking reuse would delete a claim instead of a phantom",
+    ),
+    Mutation(
+        identifier="census-gold-recasts-a-real-count",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='    "582 rolling windows",',
+        replacement='    "582 static windows",',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="gold is read out of the document, so a count the document never prints reddens the "
+        "census rather than quietly narrowing it",
+    ),
+    Mutation(
+        identifier="precision-queue-drops-a-document",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_PRECISION_PENDING = (\n    "docs/reproducibility.md",',
+        replacement="_PRECISION_PENDING = (",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="every inventoried document is censused or pending, so a document cannot leave the "
+        "queue by being deleted from it",
     ),
 )

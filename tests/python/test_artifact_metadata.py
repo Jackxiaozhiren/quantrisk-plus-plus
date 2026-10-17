@@ -1847,7 +1847,64 @@ _REPORT_NOUNS = (
 # `run` is deliberately absent while `runs` is present: in this corpus the singular fires only on
 # `uv run` inside a command block, which the extractor would then report as paths-per-second
 # claims (measured: `200000 uv run`), while `67 runs` and `160 runs` are real.
-_CLAIM_TAIL = r"\s*%?\s+(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b"
+# The modifier slot takes an open-class word: `582 rolling windows`, `104 numbered entries`,
+# `four further books`. It does not take a closed-class one, because a conjunction or preposition
+# belongs to the clause around the number, not to the noun after it. Two phantoms were that shape,
+# measured on 2026-10-17 over the five inventoried documents (231 hits between them): README.md's
+# "the order-five-to-four piece ratio spans 0.057 to 0.588 and orders the outcome no better", which
+# the slot read as a claim of 0.588 *orders*, and `docs/validation_matrix.md`'s "the ratios move by
+# more than 10% between runs", read as a claim of 10 *runs*. The block is the class rather than
+# those two words, because the next sentence in this register will glue a different conjunction, and
+# property 8 checks every member can fail.
+# The class is drawn at words that cannot modify a noun from in front in this register. `further`,
+# `over`, `under`, `up`, `down`, `past`, `before`, `after` and `since` are left out of the block on
+# purpose: they do double duty here -- "four further books" is a real count in the report, and
+# `moves` and `books` are counted nouns in a risk vocabulary where a direction is an adjective. That
+# list is also why `_CITATION_STOPWORDS` cannot be borrowed: it is a row-citation aid and
+# carries `further`, `used`, `many` and `like`, so reusing it would have deleted a true claim.
+# Property 8 measures the difference instead of trusting the prose.
+_CLOSED_CLASS_MODIFIERS = (
+    "a",
+    "an",
+    "and",
+    "as",
+    "at",
+    "but",
+    "between",
+    "by",
+    "for",
+    "from",
+    "in",
+    "into",
+    "nor",
+    "of",
+    "on",
+    "onto",
+    "or",
+    "per",
+    "so",
+    "than",
+    "the",
+    "that",
+    "these",
+    "those",
+    "to",
+    "upon",
+    "versus",
+    "via",
+    "what",
+    "when",
+    "where",
+    "which",
+    "who",
+    "whom",
+    "whose",
+    "while",
+    "with",
+    "yet",
+)
+_MODIFIER_BLOCK = r"(?!(?:" + "|".join(_CLOSED_CLASS_MODIFIERS) + r")\s)"
+_CLAIM_TAIL = r"\s*%?\s+" + _MODIFIER_BLOCK + r"(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b"
 # One exclusion and one number shape, shared by the digit rule and the spelled rule below. Written
 # twice they would drift, and the drift is invisible: a lookbehind loosened in only one of the two
 # hands one reader a version number as a quantity while the other stays clean.
@@ -2732,6 +2789,123 @@ def test_the_claim_rules_recall_and_precision_are_estimated_on_a_sample() -> Non
     )
 
 
+# The census #101 asked for. Phase 49 scored the rule on a systematic sample and could report recall
+# but not precision, because the 25 sampled units produced exactly one extraction, and a
+# denominator of one is not a rate. A document is small enough to enumerate: every hit the rule
+# prints in it is then either a quantity someone has read and confirmed or a named phantom, and the
+# ratio of the two lists
+# is a precision measurement with a real denominator. README.md is the first document censused;
+# `_PRECISION_PENDING` names the rest, with each one's hit count measured below so the backlog is a
+# quantity rather than a vagueness -- #101's exact complaint about the report's declared exemptions.
+# Gold is the extracted spelling of each real count, lowercased, read from the document in the same
+# view the ownership inventory uses so the two guards always describe the same hits.
+_CENSUS_README_GOLD = (
+    "7 identity checks",
+    "twenty-six rows",
+    "160 runs",
+    "four rows",
+    "nineteen members",
+    "four correctness benchmarks",
+    "fourteen statistical experiments",
+    "fourteen experiments",
+    "582 rolling windows",
+    "three coverage tests",
+    "three questions",
+    "five books",
+    "5 books",
+    "three orders",
+    "two books",
+    "six books",
+    "three files",
+    "three artifacts",
+    "104 numbered entries",
+    "three entries",
+    "seven experiments",
+    "548,368 assertions",
+    "three ci jobs",
+    "six members",
+)
+# Measured empty on 2026-10-17, after the modifier slot stopped accepting a closed-class word. It
+# is not empty by construction: before that fix this document printed `0.588 and orders`, a hit the
+# rule invented by reading the conjunction in "spans 0.057 to 0.588 and orders the outcome" as an
+# adjective ahead of the noun `orders`. A list that can only be empty is a list that cannot be
+# checked, so the load-bearing half lives in
+# `test_the_claim_extractor_reads_percentages_and_refuses_labels`: reopening the slot returns
+# exactly the two phantoms the corpus was measured to hold.
+_CENSUS_README_PHANTOMS: tuple[str, ...] = ()
+_PRECISION_CENSUS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
+    "README.md": (_CENSUS_README_GOLD, _CENSUS_README_PHANTOMS),
+}
+_PRECISION_PENDING = (
+    "docs/reproducibility.md",
+    "docs/interview_defense.md",
+    "docs/validation_matrix.md",
+    "paper/technical_report.tex",
+)
+
+
+def _census_hits(document: str) -> set[str]:
+    """Every claim the shipped rule extracts from *document*, in the view the inventory reads.
+
+    Markdown goes through the masked text the inventory classifies claims in, so a count inside an
+    HTML comment is not a claim here either; the report goes through the same folding its own
+    inventory uses.
+    """
+    if document in _MARKDOWN_INVENTORY:
+        flat = _markdown_inventory_text(document)[1]
+    else:
+        flat = _folded_document(document)
+    return {match.group(0).strip().lower() for match in _extract_claims(flat, spelled=True)}
+
+
+def test_the_claims_a_document_prints_are_a_census_and_not_a_sample() -> None:
+    """Per-document precision: every hit the rule prints is a real count or a named phantom.
+
+    Recall says what the rule cannot see and precision says what it should not have seen. Phase 48
+    measured the first on a targeted corpus and Phase 49 put an unbiased denominator under it; the
+    second has only ever been hand-judged claim by claim (#101), and one document small enough to
+    enumerate in full turns the judgement into a census -- 24 real counts and 1 phantom in README.md
+    on 2026-10-17, which is a 96% precision reading nobody had.
+    """
+    assert set(_PRECISION_CENSUS) | set(_PRECISION_PENDING) == set(_ROW_CITATION_DOCUMENTS), (
+        "an inventoried document is neither censused nor pending: "
+        f"{sorted(set(_ROW_CITATION_DOCUMENTS) - set(_PRECISION_CENSUS) - set(_PRECISION_PENDING))}"
+    )
+    assert not set(_PRECISION_CENSUS) & set(_PRECISION_PENDING), (
+        f"{sorted(set(_PRECISION_CENSUS) & set(_PRECISION_PENDING))} is both censused and pending"
+    )
+
+    for document, (gold, phantoms) in _PRECISION_CENSUS.items():
+        hits = _census_hits(document)
+        assert gold, f"{document} has no gold list, so its census asserts nothing"
+        assert not set(gold) & set(phantoms), (
+            f"{document} calls {sorted(set(gold) & set(phantoms))} both a quantity and a phantom"
+        )
+        assert set(gold) <= hits, (
+            f"{document} no longer prints these real counts, so the census is scoring a document "
+            f"that is not on disk: {sorted(set(gold) - hits)}"
+        )
+        measured_phantoms = sorted(hits - set(gold))
+        assert measured_phantoms == sorted(phantoms), (
+            f"{document}'s precision census moved: the rule prints "
+            f"{sorted(set(hits) - set(gold))} as hits that are not quantities, and the recorded "
+            f"phantom list is {sorted(phantoms)} -- a new phantom names a defect in the rule, "
+            "and a phantom that has stopped firing means the rule changed and this list was not "
+            "told"
+        )
+        precision = len(gold) / len(hits)
+        assert len(hits) >= 15, (
+            f"{document} yields {len(hits)} hits, too few for the ratio to be a measurement"
+        )
+        assert 0.0 < precision <= 1.0, (precision, len(gold), len(hits))
+
+    # The pending side of the queue is a number, not an admission: each document's hit count is what
+    # its census will have to read, so the backlog grows visibly when the rule widens.
+    for document in _PRECISION_PENDING:
+        hits = _census_hits(document)
+        assert hits, f"{document} is pending a census but the rule prints no claims in it at all"
+
+
 _MD_BACKTICK = re.compile(r"`([^`\n]+)`")
 
 
@@ -3276,6 +3450,9 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
     Property 5 reads it two-sided too, and pins that the widening is staged per document rather
     than switched on for the corpus in one diff nobody can review. The hyphen is Phase 40's (#100),
     which property 6 checks by handing the character back and naming the two phantoms that return.
+    The closed-class modifier is Phase 50's, which property 8 checks the same two ways: the census
+    named the first phantom in README.md, the same sweep over all five documents named the second in
+    the matrix, and the class must fail member by member rather than word by word.
     """
     corpus = {
         "paper/technical_report.tex": _tex_inventory_text()[1],
@@ -3465,6 +3642,80 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
     assert _as_int("forty-four") == 44 and _as_int("ninety-nine") == 99, (
         "the table resolves a compound its reader cannot, so the ceiling moved for the rule but "
         "not for the guards"
+    )
+
+    # 8. The modifier slot refuses a closed-class word. A conjunction or preposition belongs to the
+    #    clause around the number, not to the noun after it. The census named the first phantom of
+    #    this shape in README.md and the sweep over the corpus named the second in the matrix, so
+    #    the block is the class rather than those two words -- and every member has to be able to
+    #    fail. Each word goes into the sentence that first showed the defect: the shipped rule must
+    #    read no claim there and the reopened one must read one, which is what separates a class
+    #    member from decoration. Then the corpus is measured. Reopening the slot gains exactly the
+    #    two phantoms pinned below, and the words the corpus really classifies with stay readable --
+    #    the property that makes borrowing `_CITATION_STOPWORDS` wrong rather than tidy, since that
+    #    list carries `further` and "four further books" is a real count in the report.
+    reopened_tail = _CLAIM_TAIL.replace(_MODIFIER_BLOCK, "")
+    assert reopened_tail != _CLAIM_TAIL, "the block is not in the tail, so nothing can reopen it"
+    frame = "the piece ratio spans 0.057 to 0.588 {} orders the outcome no better"
+    reopened_digits = re.compile(_CLAIM_NUMBER + reopened_tail, re.I)
+    for word in _CLOSED_CLASS_MODIFIERS:
+        sentence = frame.format(word)
+        assert not _extract_claims(sentence, spelled=True), (
+            f"the rule still reads a claim through {word!r} in the modifier slot: {sentence!r}"
+        )
+        assert reopened_digits.search(sentence), (
+            f"{word!r} never earned its place in the block: even the reopened rule finds no claim "
+            "for it in this frame, so the member is decoration and the class is a guess"
+        )
+    assert "further" not in _CLOSED_CLASS_MODIFIERS and "over" not in _CLOSED_CLASS_MODIFIERS, (
+        "the block took a word this corpus uses to classify a real count, which is what "
+        "`_CITATION_STOPWORDS` would have done; `four further books` is a claim of four books"
+    )
+
+    reopened_spelled = re.compile(_CLAIM_NUMBER_OR_WORD + reopened_tail, re.I)
+    gained: set[tuple[str, str]] = set()
+    for name, flat in corpus.items():
+        shipped = {match.group(0).strip().lower() for match in _extract_claims(flat, spelled=True)}
+        for match in reopened_spelled.finditer(flat):
+            if _is_labelled(flat, match.start(1)):
+                continue
+            text = match.group(0).strip().lower()
+            if text not in shipped:
+                gained.add((name, text))
+    assert gained == {
+        ("README.md", "0.588 and orders"),
+        ("docs/validation_matrix.md", "10% between runs"),
+    }, (
+        f"reopening the modifier slot across the corpus gains {sorted(gained)}, which is not the "
+        "pair the census measured: either a real claim now sits after a function word, or one of "
+        "the two phantoms has been reworded out of the documents and this pin is stale"
+    )
+
+    modifier_slot = re.compile(
+        _CLAIM_NUMBER_OR_WORD + r"\s*%?\s+([A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b",
+        re.I,
+    )
+    used_modifiers = {
+        match.group(2).strip().rstrip(".").lower()
+        for flat in corpus.values()
+        for match in modifier_slot.finditer(flat)
+        if match.group(2) and not _is_labelled(flat, match.start(1))
+    }
+    for classifier in ("rolling", "numbered", "coverage", "identity", "correctness", "further"):
+        assert classifier in used_modifiers, (
+            f"the corpus no longer classifies a counted noun with {classifier!r}, so the "
+            "no-collateral-damage list above is scoring a corpus that has moved"
+        )
+    # Read the slot with the block left out, which is the only way to see the corpus's whole
+    # modifier vocabulary: a reconstruction that carries the block reports an empty intersection by
+    # definition and certifies nothing. What the intersection does say is the blast radius -- the
+    # closed-class words a real sentence has tried in this slot, which is exactly the pair the
+    # census and the sweep counted.
+    assert used_modifiers & set(_CLOSED_CLASS_MODIFIERS) == {"and", "between"}, (
+        f"the closed-class words this corpus has put in the modifier slot are "
+        f"{sorted(used_modifiers & set(_CLOSED_CLASS_MODIFIERS))}, not the pair measured on "
+        "2026-10-17: a third phantom has appeared, or a real count has started to lean on a "
+        "function word and the block is deleting it"
     )
 
 

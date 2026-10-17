@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 525 pytest tests with
-    the `oracles` extra installed, and the same tree collects 456 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 526 pytest tests with
+    the `oracles` extra installed, and the same tree collects 457 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1298,6 +1298,23 @@ never removed just because a later phase shipped.
     is not "precise". What this phase did not touch is the entry's main half: a declaration is still a
     hand-written reason whose *number* nothing compares to a producer, because the producer it says does
     not exist is the thing being exempted.
+
+    **Amended 2026-10-17 by Phase 50: precision got a denominator, and it is a document.** Enumerating
+    one is cheaper than sampling it: `test_the_claims_a_document_prints_are_a_census_and_not_a_sample`
+    reads every distinct phrase the rule prints in a document and requires each to be gold or a named
+    phantom. Measured on the first censused document, README.md printed **25** distinct phrases, **24**
+    of them counts a reader confirmed and **1** a phantom -- precision **24/25**. Both earlier instruments
+    had returned zero phantoms, so the defect was invisible to a targeted corpus *and* to an unbiased
+    25-unit sample, and it took the enumeration to show it: the phrase was `0.588 and orders`, and #102's
+    modifier slot is where it came from. The queue is a list, not a rumour -- every inventoried document
+    must be censused or pending, and the pending backlog is measured in the same units: **19** phrases in
+    `docs/reproducibility.md`, **40** in the rehearsal sheet, **31** in the matrix, **84** in the report,
+    **198** across the five. (a) The entry's own half is untouched: a declaration is still a hand-written
+    reason whose number nothing compares with a producer, and the census judges hits, not exemptions, so
+    the report's ten declared claims are as untested as Phase 41 left them. (b) Enumerating also exposed a
+    precision failure a phantom list has no word for -- a count attached to the right sentence and the
+    wrong noun, which is #104. Related: #102, whose slot produced the phantom, and #103's sibling lesson
+    that a measurement instrument reports what it was built to see.
 102. **The tail of the claim rule allows one word between a numeral and its noun, and that choice is
     unmeasured on the recall side: a real claim phrased with two modifiers is invisible to the
     inventory.** `_CLAIM_TAIL` is `\s*%?\s+(?:[A-Za-z]+\.?\s+)?` plus the noun list, so `twelve columns`
@@ -1357,6 +1374,25 @@ never removed just because a later phase shipped.
     by how diligently each phase writes owners, so #95's "66 remain" counted only what that list could
     see. Related: #101, whose precision half this sample cannot settle either, and the register's own
     rule that a published figure names its denominator before anyone quotes it.
+
+    **Amended 2026-10-17 by Phase 50: the slot's generosity was priced on the precision side, and the
+    word that showed up is a conjunction.** The entry closed on recall; the census then found the other
+    direction in the same slot. README.md's "the order-five-to-four piece ratio spans 0.057 to 0.588 and
+    orders the outcome no better" was extracted as `0.588 and orders` -- a claim of 0.588 orders, invented
+    because `[A-Za-z]+\.?` cannot tell *and* from *rolling*. The slot now refuses a closed-class word:
+    `_CLOSED_CLASS_MODIFIERS` holds **38** conjunctions, prepositions, determiners and relativizers, and
+    property 8 of the extractor self-test puts each one into the sentence that first showed the defect and
+    requires the shipped rule to read nothing and the reopened rule to read a claim, so no member is
+    decoration. Reopening the slot across the corpus gains **exactly two** phrases -- the README one and
+    `10% between runs` in the matrix, which the census had not reached because that document is still
+    pending -- and nothing else. Two refusals were measured rather than assumed: `further`, `over`, `up`
+    and `down` stay outside the block because they classify counted nouns in this register (the report's
+    "four further books" is a real claim), and `_CITATION_STOPWORDS` cannot be borrowed for the job
+    because that list carries `further`; a plant registers the borrow and the guard reddens on it. What
+    this does *not* change is the entry's headline: a two-modifier phrase is still invisible to the rule,
+    and `_REPORT_NOUNS` still bounds recall at 1/11 on the unbiased sample. Related: #101, which this
+    supplies with a document-sized denominator, and #104, the misattribution the same enumeration found
+    beside it.
 103. **A falsification plant's `guard` field is a hand-typed string, and nothing before the sweep can
     tell a plant that points at the wrong reader from a plant that points at nothing.** The harness's
     `check_exists` proves the named test is *defined* in the named file and the registry guard re-asserts
@@ -1380,3 +1416,23 @@ never removed just because a later phase shipped.
     at every registration. What would settle it is dynamic and costs a suite per plant: run the named
     guard *and* its neighbours under one mutation and require that exactly the named one objects. Related:
     #98, whose fix is this same shape applied to a table rather than a list; findings 85 and 86.
+104. **The claim rule can attach a correct count to the wrong noun, and a phantom list has no shape for
+    it.** `_CLAIM_TAIL` reads the word between a numeral and its noun as a modifier, so where two counted
+    nouns sit side by side it may take the first for the modifier and the second for the thing counted. In
+    `meets it at 60 markets spread over the $(d_1, v)$ plane` (`paper/technical_report.tex`) both
+    `markets` and `spread` are on `_REPORT_NOUNS`, the extraction is `60 markets spread`, and the rule
+    therefore states a claim of sixty *spreads* about a sentence that counts sixty *markets*. The number
+    is right; the object is not.
+    (a) Measured on 2026-10-17, this is **1 phrase of the 198** distinct phrases the rule prints across
+    the five inventoried documents, and it is not the census's blind spot by accident: `60 markets spread`
+    is about a quantity, so the README-style census files it as gold and its phantom list stays honest
+    while this defect survives. Precision and misattribution are different failures, and only the first
+    has an instrument.
+    (b) A fix exists and was left alone. Refusing a modifier that is itself on the noun list would remove
+    this phrase and no other -- `markets` is the only such modifier in the corpus, measured by reading the
+    slot with the block open. It was not taken because the exclusion would be keyed on a list every phase
+    grows: the day `routes`, `moves` or `series` earns a place as a classifier, a true claim vanishes with
+    no guard to notice, which is #102's recall bound authored by the noun list instead of the tail. What
+    would make it safe is the same denominator the census now supplies -- censusing the report, where the
+    phrase lives, before deciding what its hits mean. Related: #101 (precision), #102 (the slot), #100 (the
+    last time the tail's generosity was priced).
