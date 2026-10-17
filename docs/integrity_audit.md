@@ -2303,3 +2303,28 @@ a record that names the wrong revision is corrected by saying so in the record, 
 history. The generalisation is cheap and worth keeping: the commit message has to be written from the
 staged file list, because the file list is the only thing in the transaction that cannot be remembered
 wrongly.
+
+**89. A control written for Phase 51 to prove that one regex placement is destructive could not fail: it
+compared a tuple against a set of strings.** The assertion read
+`assert ("paper/technical_report.tex", "60 markets") not in {text for _, text in hoisted_lost}`, where
+`hoisted_lost` is a set of `(document, phrase)` pairs. Projecting it to phrases leaves a set of `str`,
+and a two-element tuple is never an element of a set of strings, so the membership test is False for
+every input the tree can produce -- and the `not in` turned that into a permanent pass. The companion
+assertion two lines above uses the pair set directly and can fail, which is what made the difference
+visible on re-reading rather than on running.
+
+(a) **Nothing in the repository could have caught it.** The guard's own pass is not evidence: a vacuous
+assertion passes on the tree that contains the defect. What caught it was asking, while writing the
+message for #104's amendment, whether the sentence "the hoisted rule deletes the claim the fix protects"
+was even the measured fact -- it is not, the hoisted rule deletes it *and* 91 others, so the assertion was
+pointing the wrong way as well as unable to fail. Both halves were settled with a five-line probe over the
+two candidate sets before the code was touched.
+
+(b) **The shape of the mistake is worth naming, because it is reusable.** A projection inside a membership
+test changes the type being compared, and Python reports no error for comparing across types -- it just
+answers False forever. So the rule adopted here is: when a set of pairs is the accumulator, assert against
+the pair set, and if a projection is wanted, project the *needle* too. The corrected assertion,
+`("paper/technical_report.tex", "60 markets") in hoisted_lost`, is both true on the measured data (92
+phrases lost, 15 of them in README) and able to fail if the two constructions stop differing. Related:
+finding 82 (a substring test over a corpus containing the tester), finding 86 (a plant whose guard names a
+reader that never reads it), finding 87 (a check that would have measured text overlap instead of meaning).

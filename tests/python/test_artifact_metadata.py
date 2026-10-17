@@ -1816,14 +1816,15 @@ def test_the_identity_checks_the_cli_runs_are_the_ones_the_documents_count() -> 
             )
 
 
-_REPORT_NOUNS = (
-    r"(artifacts?|bytes|tests?|cases|entries|rows|members|experiments|limitations|assertions"
+_REPORT_NOUN_BODY = (
+    r"artifacts?|bytes|tests?|cases|entries|rows|members|experiments|limitations|assertions"
     r"|markets|digits|checks|commands|sections|figures|pages|questions|jobs|assets|files"
     r"|modules|routes|rays|rungs|columns|books|releases|scenarios|fields|identities|steps|series"
     r"|windows|benchmarks|fixtures|oracles|versions|tags|presets|packages|observations|sides"
     r"|claims|models|criteria|radii|radius|moves|factors|orders|edges|candidates|ladders"
-    r"|stencils|spreads?|runs|readings?|re-freezings?|paths?)"
+    r"|stencils|spreads?|runs|readings?|re-freezings?|paths?"
 )
+_REPORT_NOUNS = "(" + _REPORT_NOUN_BODY + ")"
 # A number that is part of a word is not a claim: `(?<![A-Za-z\d])` keeps `Catch2 cases` and
 # `sklearn2011}. Oracle versions` out of the inventory, which a bare lookbehind on digits let in.
 # Four more exclusions, each from reading a real document with this rule (Phase 29 for the first
@@ -1904,7 +1905,24 @@ _CLOSED_CLASS_MODIFIERS = (
     "yet",
 )
 _MODIFIER_BLOCK = r"(?!(?:" + "|".join(_CLOSED_CLASS_MODIFIERS) + r")\s)"
-_CLAIM_TAIL = r"\s*%?\s+" + _MODIFIER_BLOCK + r"(?:[A-Za-z]+\.?\s+)?" + _REPORT_NOUNS + r"\b"
+# A second refusal in the same slot, from #104: a word that is itself on the noun list cannot serve
+# as the modifier either, because in "60 markets spread over the plane" the reading that fits is
+# sixty *markets* with `spread` doing verb work, not sixty *spreads*. The block goes inside the
+# optional group, so the engine falls back to taking that word as the noun and the count survives
+# with its right object; hoisted in front of the group it refuses the noun too, and the corpus loses
+# real counts by the dozen (property 9 measures both placements, because the first reconstruction of
+# this rule made that mistake and nothing else in the tree could see it). Written against
+# `_REPORT_NOUN_BODY` rather than a hand-copied list, so growing the noun list grows the refusal.
+_COLLISION_BLOCK = r"(?!(?:" + _REPORT_NOUN_BODY + r")\s)"
+_CLAIM_TAIL = (
+    r"\s*%?\s+"
+    + _MODIFIER_BLOCK
+    + r"(?:"
+    + _COLLISION_BLOCK
+    + r"[A-Za-z]+\.?\s+)?"
+    + _REPORT_NOUNS
+    + r"\b"
+)
 # One exclusion and one number shape, shared by the digit rule and the spelled rule below. Written
 # twice they would drift, and the drift is invisible: a lookbehind loosened in only one of the two
 # hands one reader a version number as a quantity while the other stays clean.
@@ -3716,6 +3734,87 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
         f"{sorted(used_modifiers & set(_CLOSED_CLASS_MODIFIERS))}, not the pair measured on "
         "2026-10-17: a third phantom has appeared, or a real count has started to lean on a "
         "function word and the block is deleting it"
+    )
+
+    # 9. A counted noun cannot also be the modifier (#104). In "meets it at 60 markets spread over
+    #    the $(d_1, v)$ plane" the rule took `markets` for the adjective and `spread` -- also on the
+    #    noun list -- for the thing counted, so a sentence counting sixty markets was filed as a
+    #    claim of sixty spreads: right number, wrong object, and the census's gold/phantom split has
+    #    no shape for it. The refusal sits *inside* the optional group; that placement is the whole
+    #    mechanism: written in front of the group it refuses the noun as well as the modifier, and
+    #    the corpus loses real counts by the dozen -- the first reconstruction of this rule lost 92
+    #    phrases, `160 runs` among them. So the property is two-sided on both halves of that
+    #    failure: the shipped rule must land on `60 markets`, and the hoisted variant must be shown
+    #    to delete claims the shipped rule keeps.
+    collision_frame = "and meets it at 60 markets spread over the plane"
+    landed = [m.group(0).strip().lower() for m in _extract_claims(collision_frame, spelled=True)]
+    assert landed == ["60 markets"], (
+        f"the collision rule reads {landed} from {collision_frame!r}; the sentence counts markets, "
+        "so the answer must be the markets and not the spreads"
+    )
+    assert [
+        match.group(0).strip().lower()
+        for match in _extract_claims("over 582 rolling windows", spelled=True)
+    ] == ["582 rolling windows"], "a classifier that is not a counted noun stopped classifying"
+
+    # The corpus effect of the refusal is one phrase, named. Measured on 2026-10-17 with the
+    # closed-class block in place in both rules, so what this compares is the collision half alone.
+    def rule_hits(rule: re.Pattern[str], flat: str) -> set[str]:
+        """The distinct phrases *rule* prints in *flat*, label shapes removed -- `_extract_claims`
+        with the pattern handed in, so every comparison below is against the same filter."""
+        return {
+            match.group(0).strip().lower()
+            for match in rule.finditer(flat)
+            if not _is_labelled(flat, match.start(1))
+        }
+
+    unrefused = re.compile(
+        _CLAIM_NUMBER_OR_WORD
+        + r"\s*%?\s+"
+        + _MODIFIER_BLOCK
+        + r"(?:[A-Za-z]+\.?\s+)?"
+        + _REPORT_NOUNS
+        + r"\b",
+        re.I,
+    )
+    # Placement, measured rather than trusted: the same lookahead hoisted in front of the optional
+    # group also refuses the noun, and that is how a fix for one phrase deletes ninety-two.
+    hoisted = re.compile(
+        _CLAIM_NUMBER_OR_WORD
+        + r"\s*%?\s+"
+        + _MODIFIER_BLOCK
+        + r"(?!"
+        + _REPORT_NOUNS
+        + r"\s)(?:[A-Za-z]+\.?\s+)?"
+        + _REPORT_NOUNS
+        + r"\b",
+        re.I,
+    )
+    shifted: set[tuple[str, str]] = set()
+    hoisted_lost: set[tuple[str, str]] = set()
+    for name, flat in corpus.items():
+        shipped = rule_hits(_SPELLED_REPORT_CLAIM, flat)
+        shifted |= {(name, text) for text in rule_hits(unrefused, flat) ^ shipped}
+        hoisted_lost |= {(name, text) for text in shipped - rule_hits(hoisted, flat)}
+    assert shifted == {
+        ("paper/technical_report.tex", "60 markets spread"),
+        ("paper/technical_report.tex", "60 markets"),
+    }, (
+        f"the collision refusal moves {sorted(shifted)}, which is not the pair #104 measured: "
+        "either a second noun-pair has started to collide, or the sentence that earns the rule has "
+        "been reworded out of the report and the rule now refuses nothing real"
+    )
+    assert len(hoisted_lost) >= 10, (
+        f"the hoisted placement loses {len(hoisted_lost)} phrases, not the destructive set "
+        "measured on 2026-10-17, so this control no longer distinguishes the two constructions"
+    )
+    assert ("README.md", "160 runs") in hoisted_lost, (
+        "the hoisted variant keeps `160 runs`, so it is no longer the wrong construction and this "
+        "control proves nothing about placement"
+    )
+    assert ("paper/technical_report.tex", "60 markets") in hoisted_lost, (
+        "the hoisted variant keeps the markets reading, so it differs from the shipped rule only "
+        "on the spreads phrase and this control no longer shows that the placement is the mechanism"
     )
 
 

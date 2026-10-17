@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 123/123 planted defects rejected",
+        anchor="# 126/126 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty-one report files, one per phase",
-        replacement="fifty-two report files, one per phase",
+        anchor="fifty-two report files, one per phase",
+        replacement="fifty-three report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1631,8 +1631,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="claim-rule-widens-its-noun-list-under-the-ratchet",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor=r"|stencils|spreads?|runs|readings?|re-freezings?|paths?)",
-        replacement=r"|stencils|spreads?|runs|readings?|re-freezings?|paths?|shocks?)",
+        anchor=r"|stencils|spreads?|runs|readings?|re-freezings?|paths?",
+        replacement=r"|stencils|spreads?|runs|readings?|re-freezings?|paths?|shocks?",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claim_rule_is_scored_against_sentences_whose_quantities_are_known"
@@ -1696,8 +1696,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="claim-modifier-slot-reopened-after-the-census",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='_CLAIM_TAIL = r"\\s*%?\\s+" + _MODIFIER_BLOCK +',
-        replacement='_CLAIM_TAIL = r"\\s*%?\\s+" +',
+        anchor='    r"\\s*%?\\s+"\n    + _MODIFIER_BLOCK\n',
+        replacement='    r"\\s*%?\\s+"\n',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
@@ -1743,5 +1743,53 @@ MUTATIONS: tuple[Mutation, ...] = (
         ),
         claim="every inventoried document is censused or pending, so a document cannot leave the "
         "queue by being deleted from it",
+    ),
+    # Phase 51 (#104): the collision refusal has two failure directions, and the destructive one
+    # is a placement error this phase actually made. Both are registered so the mistake cannot be
+    # re-made without a red guard.
+    Mutation(
+        identifier="claim-collision-refusal-dropped",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='    + r"(?:"\n    + _COLLISION_BLOCK\n    + r"[A-Za-z]+\\.?\\s+)?"',
+        replacement='    + r"(?:[A-Za-z]+\\.?\\s+)?"',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_extractor_reads_percentages_and_refuses_labels"
+        ),
+        claim="without the collision block the rule reads `60 markets spread` again, so the frame "
+        "property 9 pins stops landing on the markets",
+    ),
+    Mutation(
+        identifier="claim-collision-refusal-hoisted-over-the-noun",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor=(
+            '    r"\\s*%?\\s+"\n    + _MODIFIER_BLOCK\n    + r"(?:"\n'
+            '    + _COLLISION_BLOCK\n    + r"[A-Za-z]+\\.?\\s+)?"'
+        ),
+        replacement=(
+            '    r"\\s*%?\\s+"\n    + _MODIFIER_BLOCK\n    + r"(?!"\n'
+            '    + _REPORT_NOUNS\n    + r"\\s)(?:[A-Za-z]+\\.?\\s+)?"'
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="the same lookahead hoisted in front of the modifier group refuses the noun as well "
+        "as the modifier, and the census is what notices: README's real counts disappear",
+    ),
+    Mutation(
+        identifier="collision-sentence-leaves-the-corpus",
+        kind="prose",
+        path="paper/technical_report.tex",
+        anchor="markets spread over the $(d_1, v)$ plane",
+        replacement="markets laid over the $(d_1, v)$ plane",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_extractor_reads_percentages_and_refuses_labels"
+        ),
+        claim="the one phrase that earns the collision rule is pinned by name, so rewording it out "
+        "of the report reddens the property instead of leaving the refusal unevidenced",
     ),
 )

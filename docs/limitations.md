@@ -1436,3 +1436,24 @@ never removed just because a later phase shipped.
     would make it safe is the same denominator the census now supplies -- censusing the report, where the
     phrase lives, before deciding what its hits mean. Related: #101 (precision), #102 (the slot), #100 (the
     last time the tail's generosity was priced).
+
+    **Amended 2026-10-17 by Phase 51: closed, and the fix is in the rule rather than in the census.** The
+    modifier slot now refuses a word that is itself on the noun list, and the refusal sits *inside* the
+    optional group, which is what makes it a correction instead of a deletion: the engine falls back to
+    taking the word as the noun, so `60 markets spread over the plane` is read as `60 markets` -- right
+    count, right object -- rather than losing the claim. Measured with the closed-class block held
+    constant in both rules, the corpus effect is exactly one phrase moved, in the report, and no other
+    document changes. Re-measured after the fix, noun-pair collisions across the 198 distinct phrases
+    are **0**.
+    (c) The placement is the part worth keeping. Written in front of the optional group the same
+    lookahead refuses the noun as well as the modifier, and that variant -- which this phase built first,
+    and which reads as a one-character difference -- loses **92** phrases across the corpus, `160 runs`
+    and README's other gold counts among them. Property 9 therefore pins both placements by name: the
+    frame must land on `60 markets`, and the hoisted rule must be shown to delete claims the shipped rule
+    keeps. Two plants register the two directions, plus one that rewords the sentence out of the report so
+    the pinned pair cannot go stale unnoticed.
+    (d) What is still not covered: the census has no third bucket, and none was needed once the class was
+    refused -- a misattribution that does not put a counted noun in the modifier slot would still be
+    filed as gold. The 174 phrases in the four pending documents are where the next one would show up,
+    and #101's queue is the instrument that would find it. Related: #101 (precision), #102 (the slot),
+    #100 (the last time the tail's generosity was priced).
