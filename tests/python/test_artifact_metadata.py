@@ -2627,6 +2627,111 @@ def test_the_claim_rule_is_scored_against_sentences_whose_quantities_are_known()
     assert 0.0 < recall <= 1.0 and 0.0 < precision <= 1.0, (recall, precision)
 
 
+# The unbiased half of #102. The frame is every unit in the five inventoried texts that is longer
+# than 25 characters and contains a number token -- measured 1,016 units on 2026-10-17 -- and the
+# sample is every 42nd of them in document order from index 0, which is 25 units. The frame is built
+# from the documents each run, so a reworded sentence moves the sample and this guard says so rather
+# than quietly scoring a stale annotation.
+_CLAIM_SAMPLE_STEP = 42
+_CLAIM_SAMPLE_FRAME_MIN = 26
+_CLAIM_SAMPLE_NUMBER = re.compile(
+    r"(?<![A-Za-z\d])\d[\d{},]*(?:\.\d+)?\b"
+    r"|\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen"
+    r"|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b",
+    re.I,
+)
+# The frame indices the gold below was written against, frozen. Annotating a moving sample twice is
+# how a measurement becomes a rumour.
+_CLAIM_SAMPLE_INDICES = (0, 42, 84, 126, 168, 210, 252, 294, 336, 378, 420, 462, 504, 546, 588)
+_CLAIM_SAMPLE_INDICES += (630, 672, 714, 756, 798, 840, 882, 924, 966, 1008)
+
+# Gold, by frame index: the count phrases each sampled unit really asserts, written as the unit
+# writes them. Thirteen of the 25 units hold no quantity at all -- a version number
+# (`interpreter 3.12`), a tolerance (`1e-12 relative`), a multiplier (`100x the paths`), a file line
+# range (`test_monte_carlo.cpp:142-168`), a limitation reference (`(36)`) and a pronoun ("the one
+# below it")
+# and a LaTeX derivation -- and they are in the sample because the frame took them, not because they
+# were chosen.
+_CLAIM_SAMPLE_GOLD: dict[int, tuple[str, ...]] = {
+    42: ("12/12 confidence intervals",),
+    168: ("one extra digit",),
+    210: ("2 min",),
+    336: ("two lattices",),
+    378: ("116 of 120",),
+    420: ("five books",),
+    588: ("two contributions", "132/132 swept shocks"),
+    714: ("500 days",),
+    756: ("seven and a half orders of magnitude",),
+    1008: ("one cross-language guarantee",),
+}
+
+# Measured 2026-10-17 by running the shipped extractor over the sample. The targeted corpus above
+# names the blind spots; this list is the one that can be quoted as an estimate.
+_CLAIM_SAMPLE_MISSES = (
+    "42 README.md :: 12/12 confidence intervals",
+    "168 docs/interview_defense.md :: one extra digit",
+    "210 docs/interview_defense.md :: 2 min",
+    "336 docs/interview_defense.md :: two lattices",
+    "378 docs/interview_defense.md :: 116 of 120",
+    "588 docs/validation_matrix.md :: two contributions",
+    "588 docs/validation_matrix.md :: 132/132 swept shocks",
+    "714 paper/technical_report.tex :: 500 days",
+    "756 paper/technical_report.tex :: seven and a half orders of magnitude",
+    "1008 paper/technical_report.tex :: one cross-language guarantee",
+)
+_CLAIM_SAMPLE_FALSE_POSITIVES: tuple[str, ...] = ()
+
+
+def _claim_sample() -> list[tuple[int, str, str]]:
+    """The (frame index, document, unit) triples the unbiased sample is drawn from."""
+    units: list[tuple[int, str, str]] = []
+    index = 0
+    for document in _ROW_CITATION_DOCUMENTS:
+        for part in re.split(r"(?<=[.!?|])\s+", _folded_document(document)):
+            part = part.strip()
+            if len(part) < _CLAIM_SAMPLE_FRAME_MIN or not _CLAIM_SAMPLE_NUMBER.search(part):
+                continue
+            units.append((index, document, part))
+            index += 1
+    return units
+
+
+def test_the_claim_rules_recall_and_precision_are_estimated_on_a_sample() -> None:
+    """Recall and precision on a sample the rule did not pick, so the numbers can be extrapolated.
+
+    The targeted corpus says *which* quantities the rule misses; it cannot say how many, because its
+    units were chosen to contain known misses. This draws every 42nd unit of the frame that
+    contains a number, scores the shipped extractor against gold written by reading those units, and
+    freezes the disagreement both ways.
+    """
+    frame = _claim_sample()
+    indices = [index for index, _, _ in frame]
+    assert len(frame) >= 500, f"the frame holds {len(frame)} units, so a 25-unit sample is noisy"
+    assert [i for i in indices if i % _CLAIM_SAMPLE_STEP == 0] == list(_CLAIM_SAMPLE_INDICES), (
+        "the sampled units moved with the documents: re-annotate the gold, do not edit this assert "
+        "to make it pass"
+    )
+    sampled = {i: (doc, part) for i, doc, part in frame if i % _CLAIM_SAMPLE_STEP == 0}
+
+    gold_total = 0
+    misses: list[str] = []
+    false_positives: list[str] = []
+    for index, (document, part) in sorted(sampled.items()):
+        extracted = {m.group(0).strip().lower() for m in _extract_claims(part, spelled=True)}
+        wanted = {item.lower() for item in _CLAIM_SAMPLE_GOLD.get(index, ())}
+        gold_total += len(wanted)
+        misses.extend(f"{index} {document} :: {item}" for item in sorted(wanted - extracted))
+        false_positives.extend(
+            f"{index} {document} :: {item}" for item in sorted(extracted - wanted)
+        )
+
+    assert gold_total >= 8, f"the sample holds {gold_total} gold quantities -- too few to score"
+    assert sorted(misses) == sorted(_CLAIM_SAMPLE_MISSES), f"sampled recall moved: {sorted(misses)}"
+    assert sorted(false_positives) == sorted(_CLAIM_SAMPLE_FALSE_POSITIVES), (
+        f"sampled precision moved: {sorted(false_positives)}"
+    )
+
+
 _MD_BACKTICK = re.compile(r"`([^`\n]+)`")
 
 

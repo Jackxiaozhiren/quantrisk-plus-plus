@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 524 pytest tests with
-    the `oracles` extra installed, and the same tree collects 455 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 525 pytest tests with
+    the `oracles` extra installed, and the same tree collects 456 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1339,6 +1339,24 @@ never removed just because a later phase shipped.
     unbiased sample is the half that keeps this entry open. One correction while measuring: the example
     `two methods` above does not occur in these five documents (the corpus says `3 methods`); `five
     points` and `six partials` do. Related: #101, whose precision half this mirrors.
+
+    **Amended 2026-10-17 by Phase 49: closed, with the estimate the entry asked for and its
+    denominator attached.** `test_the_claim_rules_recall_and_precision_are_estimated_on_a_sample` draws
+    the unbiased sample: the frame is the **1,016** units across the five inventoried texts longer than
+    25 characters that contain a number token, and the sample is **every 42nd of them in document order
+    -- 25 units**, with those frame indices frozen so a reworded sentence moves the sample loudly
+    instead of quietly scoring stale gold. Reading those 25 units yields **11 countable quantities**, of
+    which the shipped rule finds **1**: sampled recall **1/11**, and the 10 misses are named in
+    `_CLAIM_SAMPLE_MISSES` -- confidence intervals, lattices, days, shocks, contributions, an elided-noun
+    partitive ("116 of 120"), a duration ("2 min"), an order-of-magnitude count, a guarantee, and
+    `digit` in the singular the list carries only as plural. **Precision is not estimated by this
+    sample**: it produced exactly one extraction, so its denominator is 1 and an empty phantom list
+    proves nothing -- which is why #101's untested-declaration half stays open. What closes #102 is the
+    instrument plus a number with its n beside it. What follows from the number is the uncomfortable
+    part, and is the reason the entry existed: the inventory's reach is bounded by `_REPORT_NOUNS`, not
+    by how diligently each phase writes owners, so #95's "66 remain" counted only what that list could
+    see. Related: #101, whose precision half this sample cannot settle either, and the register's own
+    rule that a published figure names its denominator before anyone quotes it.
 103. **A falsification plant's `guard` field is a hand-typed string, and nothing before the sweep can
     tell a plant that points at the wrong reader from a plant that points at nothing.** The harness's
     `check_exists` proves the named test is *defined* in the named file and the registry guard re-asserts

@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 455 tests collected offline",
+        anchor="# 456 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 524 pytest tests with the validation",
+        anchor="and 525 pytest tests with the validation",
         replacement="and 456 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 116/116 planted defects rejected",
+        anchor="# 119/119 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 455 collected without them",
+        anchor="oracles installed, 456 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 524 pytest tests with the `oracles` extra here",
+        anchor="# 525 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="forty-nine report files, one per phase",
-        replacement="fifty report files, one per phase",
+        anchor="fifty report files, one per phase",
+        replacement="fifty-one report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1650,5 +1650,43 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_claim_rule_is_scored_against_sentences_whose_quantities_are_known"
         ),
         claim="a phantom claim is a precision failure, and the frozen list says so",
+    ),
+    # Phase 49 (#102's unbiased sample): the frame, the gold and the drawn indices each
+    # have a plant, because a measurement is only as honest as the numbers that define it.
+    Mutation(
+        identifier="claim-sample-frame-stops-covering-the-documents",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor="_CLAIM_SAMPLE_FRAME_MIN = 26",
+        replacement="_CLAIM_SAMPLE_FRAME_MIN = 900",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_rules_recall_and_precision_are_estimated_on_a_sample"
+        ),
+        claim="the frame is asserted to cover the documents before any rate is quoted",
+    ),
+    Mutation(
+        identifier="claim-sample-gold-drops-its-only-hit",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='    420: ("five books",),',
+        replacement="    420: (),",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_rules_recall_and_precision_are_estimated_on_a_sample"
+        ),
+        claim="an extracted phrase gold does not list is a phantom, even the only one",
+    ),
+    Mutation(
+        identifier="claim-sample-redrawn-without-reannotating",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor="_CLAIM_SAMPLE_STEP = 42",
+        replacement="_CLAIM_SAMPLE_STEP = 43",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claim_rules_recall_and_precision_are_estimated_on_a_sample"
+        ),
+        claim="the sampled indices are pinned, so the sample cannot move under stale gold",
     ),
 )
