@@ -1848,7 +1848,7 @@ _REPORT_NOUNS = "(" + _REPORT_NOUN_BODY + ")"
 # `run` is deliberately absent while `runs` is present: in this corpus the singular fires only on
 # `uv run` inside a command block, which the extractor would then report as paths-per-second
 # claims (measured: `200000 uv run`), while `67 runs` and `160 runs` are real.
-# The modifier slot takes an open-class word: `582 rolling windows`, `104 numbered entries`,
+# The modifier slot takes an open-class word: `582 rolling windows`, `105 numbered entries`,
 # `four further books`. It does not take a closed-class one, because a conjunction or preposition
 # belongs to the clause around the number, not to the noun after it. Two phantoms were that shape,
 # measured on 2026-10-17 over the five inventoried documents (231 hits between them): README.md's
@@ -2836,7 +2836,7 @@ _CENSUS_README_GOLD = (
     "six books",
     "three files",
     "three artifacts",
-    "104 numbered entries",
+    "105 numbered entries",
     "three entries",
     "seven experiments",
     "548,368 assertions",
@@ -2851,12 +2851,92 @@ _CENSUS_README_GOLD = (
 # `test_the_claim_extractor_reads_percentages_and_refuses_labels`: reopening the slot returns
 # exactly the two phantoms the corpus was measured to hold.
 _CENSUS_README_PHANTOMS: tuple[str, ...] = ()
+# The next two documents in the queue, censused on 2026-10-17 by reading every hit in its sentence.
+# The criterion a hit has to meet to be gold is stated because the earlier phases implied it: the
+# number must *measure* the noun the phrase names -- either as a count of them (`19 members`,
+# `two radii`) or as their value (`32.6% spread`, `0.15 cubic radius`, `39,040,079 paths/s`, where
+# `/s` is a unit rather than a second thing counted). A hit is a phantom when the noun is not what
+# the number measures at all: the conjunction that glued a clause end to a verb (README's
+# `0.588 and orders`), and now a second shape -- `two radius` here, from "two radius
+# definitions were wrong", where the number counts *definitions* and the rule reached for
+# `radius` because `definitions` is not on the noun list. #104's collision refusal cannot catch
+# that one: there is no modifier to refuse, and choosing the later noun needs to know it is a
+# head noun rather than a verb, which is the part of English the register names as out of reach.
+_CENSUS_REPRO_GOLD = (
+    "12 artifacts",
+    "19 members",
+    "20.8% spread",
+    "204 tests",
+    "32.6% spread",
+    "457 tests",
+    "526 pytest tests",
+    "548,368 assertions",
+    "7 identity checks",
+    "four modules",
+    "nineteen members",
+    "one artifact",
+    "one reading",
+    "six orders",
+    "six releases",
+    "three artifacts",
+    "twenty-two committed files",
+    "twenty-two readings",
+    "two digits",
+)
+_CENSUS_REPRO_PHANTOMS: tuple[str, ...] = ()
+_CENSUS_SHEET_GOLD = (
+    "0.15 cubic radius",
+    "0.46 reading",
+    "1,000 paths",
+    "10,000 paths",
+    "100,000 antithetic paths",
+    "105 entries",
+    "105 numbered entries",
+    "18,816 rows",
+    "20,000,000 terminal paths",
+    "200,000 paths",
+    "203 cases",
+    "21,130,162 paths",
+    "22 questions",
+    "3,787,943 paths",
+    "30 joint moves",
+    "330 python tests",
+    "341 python tests",
+    "39,040,079 paths",
+    "4 scenarios",
+    "45,982,736 paths",
+    "457 tests",
+    "492 rows",
+    "5 books",
+    "526 pytest tests",
+    "526 python tests",
+    "548,368 assertions",
+    "69 cases",
+    "78,860,106 paths",
+    "five books",
+    "four rays",
+    "one test",
+    "twelve columns",
+    "twenty-two re-freezings",
+    "two cases",
+    "two columns",
+    "two equivalent routes",
+    "two radii",
+    "two tests",
+    "two versions",
+)
+# The second precision failure the census has ever named, and the first one the rule cannot refuse.
+# Measured 19 of 19 on `docs/reproducibility.md` and 39 of 40 here. Across the three censused
+# texts the rule prints 83 distinct phrases and 82 are quantities: README's phantom was refused
+# by the class rule in Phase 50 and this one is refused by nothing, which is the difference
+# #105 registers.
+_CENSUS_SHEET_PHANTOMS = ("two radius",)
 _PRECISION_CENSUS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "README.md": (_CENSUS_README_GOLD, _CENSUS_README_PHANTOMS),
+    "docs/reproducibility.md": (_CENSUS_REPRO_GOLD, _CENSUS_REPRO_PHANTOMS),
+    "docs/interview_defense.md": (_CENSUS_SHEET_GOLD, _CENSUS_SHEET_PHANTOMS),
 }
 _PRECISION_PENDING = (
-    "docs/reproducibility.md",
-    "docs/interview_defense.md",
     "docs/validation_matrix.md",
     "paper/technical_report.tex",
 )
@@ -2884,6 +2964,15 @@ def test_the_claims_a_document_prints_are_a_census_and_not_a_sample() -> None:
     second has only ever been hand-judged claim by claim (#101), and one document small enough to
     enumerate in full turns the judgement into a census -- 24 real counts and 1 phantom in README.md
     on 2026-10-17, which is a 96% precision reading nobody had.
+
+    Three of the five inventoried texts are censused now, in the post-fix readings: README.md 24 of
+    24 (it printed 25 with one phantom before Phase 50 refused the conjunction),
+    `docs/reproducibility.md` 19 of 19, and the rehearsal sheet 39 of 40. Across the three, **82 of
+    83** distinct phrases are quantities and the one the rule still prints is a shape nothing
+    refuses: `two radius`, from "two radius definitions were wrong", where the number counts
+    *definitions* -- #105. The denominator is distinct phrases, not occurrences: `526 pytest tests`
+    printed twice in one document is one entry, and a rate written `paths/s` measures the noun it
+    names.
     """
     assert set(_PRECISION_CENSUS) | set(_PRECISION_PENDING) == set(_ROW_CITATION_DOCUMENTS), (
         "an inventoried document is neither censused nor pending: "

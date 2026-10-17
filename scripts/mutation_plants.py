@@ -118,7 +118,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 104 numbered entries",
+        anchor="carries 105 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 126/126 planted defects rejected",
+        anchor="# 129/129 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -876,7 +876,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-provenance-cell-quotes-a-stale-register-count",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="`docs/limitations.md` (104 entries)",
+        anchor="`docs/limitations.md` (105 entries)",
         replacement="`docs/limitations.md` (84 entries)",
         # The defect this phase actually found: the sheet's prose said 94 while its own
         # claim-provenance table said 84, three phases behind, and the guard that owns the register
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty-two report files, one per phase",
-        replacement="fifty-three report files, one per phase",
+        anchor="fifty-three report files, one per phase",
+        replacement="fifty-four report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1735,8 +1735,11 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="precision-queue-drops-a-document",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='_PRECISION_PENDING = (\n    "docs/reproducibility.md",',
-        replacement="_PRECISION_PENDING = (",
+        anchor=(
+            '_PRECISION_PENDING = (\n    "docs/validation_matrix.md",\n'
+            '    "paper/technical_report.tex",\n)'
+        ),
+        replacement='_PRECISION_PENDING = (\n    "docs/validation_matrix.md",\n)',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
@@ -1791,5 +1794,50 @@ MUTATIONS: tuple[Mutation, ...] = (
         ),
         claim="the one phrase that earns the collision rule is pinned by name, so rewording it out "
         "of the report reddens the property instead of leaving the refusal unevidenced",
+    ),
+    # Phase 52 (#101's queue, #105): a census that has found a real phantom must be able to fail
+    # when the phantom is reclassified, when gold quotes a phrase the file never prints, and when a
+    # document is put back into the queue it has already left.
+    Mutation(
+        identifier="census-phantom-reclassified-as-a-quantity",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_CENSUS_SHEET_PHANTOMS = ("two radius",)',
+        replacement="_CENSUS_SHEET_PHANTOMS: tuple[str, ...] = ()",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="the sheet's refused hit is named, so declaring the list empty while the rule still "
+        "prints it reddens the census instead of quietly raising the document's precision",
+    ),
+    Mutation(
+        identifier="census-gold-quotes-a-phrase-the-file-never-prints",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='    "12 artifacts",',
+        replacement='    "12 artifact",',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="gold is a transcription of what the document prints, so a phrase the file never "
+        "produces reddens the census rather than being accepted as a near miss",
+    ),
+    Mutation(
+        identifier="census-document-put-back-in-the-queue-it-left",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_PRECISION_PENDING = (\n    "docs/validation_matrix.md",',
+        replacement=(
+            '_PRECISION_PENDING = (\n    "docs/interview_defense.md",\n'
+            '    "docs/validation_matrix.md",'
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="a document cannot be censused and pending at once, so re-queueing one that has been "
+        "read is caught by the membership check rather than by the gold lists",
     ),
 )

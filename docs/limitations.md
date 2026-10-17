@@ -1315,6 +1315,17 @@ never removed just because a later phase shipped.
     precision failure a phantom list has no word for -- a count attached to the right sentence and the
     wrong noun, which is #104. Related: #102, whose slot produced the phantom, and #103's sibling lesson
     that a measurement instrument reports what it was built to see.
+
+    **Amended 2026-10-17 by Phase 52: three documents censused, and the queue is now measured at 115.**
+    `docs/reproducibility.md` prints **19** distinct phrases and all 19 are quantities; the rehearsal sheet
+    prints **40** and 39 are, the exception being `two radius` -- #105, which found the shape this entry's
+    census was built to expose and which no rule in the tail can refuse without undoing #104. Across the
+    three censused texts, **82 of 83** hits are quantities (README's own phantom having been refused in
+    Phase 50), and the remaining queue is 31 phrases in `docs/validation_matrix.md` and 84 in the report.
+    The entry's headline half is still exactly where it was: a declaration is a hand-written reason whose
+    number nothing compares with a producer, and enumerating hits does not touch exemptions at all -- the
+    report's ten declared claims remain untested, and the census's value so far is that it finds defects
+    in the *rule* rather than auditing the *judgements*.
 102. **The tail of the claim rule allows one word between a numeral and its noun, and that choice is
     unmeasured on the recall side: a real claim phrased with two modifiers is invisible to the
     inventory.** `_CLAIM_TAIL` is `\s*%?\s+(?:[A-Za-z]+\.?\s+)?` plus the noun list, so `twelve columns`
@@ -1457,3 +1468,28 @@ never removed just because a later phase shipped.
     filed as gold. The 174 phrases in the four pending documents are where the next one would show up,
     and #101's queue is the instrument that would find it. Related: #101 (precision), #102 (the slot),
     #100 (the last time the tail's generosity was priced).
+
+    **Amended 2026-10-17 by Phase 52: the prediction came true, one document later.** Enumerating the
+    rehearsal sheet found a hit of exactly that kind -- `two radius`, from "two radius definitions were
+    wrong" -- and the census did not file it as gold only because a reader checked the sentence. It is a
+    different mechanism from this entry's, and the two cannot both be served by the tail: #105.
+105. **The one-word modifier slot cannot tell a compound head from a verb participle, and this corpus
+    contains one of each asking for opposite rules.** `two radius definitions were wrong`
+    (`docs/interview_defense.md`) counts *definitions*: the head noun is not on `_REPORT_NOUNS`, so the
+    rule stops at `radius` and prints a claim of two radii. `meets it at 60 markets spread over the plane`
+    (`paper/technical_report.tex`) counts *markets*: there the second word is a participle, and #104's
+    refusal exists to stop the rule from taking it as the counted noun. The two are the same position in
+    the same pattern, read correctly in opposite directions, and nothing in the pattern distinguishes them.
+    (a) Measured both ways rather than argued. Adding `definitions` to the noun list and dropping
+    `_COLLISION_BLOCK` reads `two radius definitions` correctly; keeping the collision block -- which is
+    what closed #104 -- reads `two radius` again, because the block refuses `radius` as a modifier and the
+    engine falls back to it as the noun. So the fix for this entry deletes the fix for that one: on these
+    two sentences the slot needs a part-of-speech decision, and the rule has a word list.
+    (b) What would settle it is a third list: the words that appear as verbs or participles in this
+    corpus's measurement sentences (`spread`, `spanning`, and whatever the next phase writes). Its cost is
+    that an unregistered verb produces a phantom silently, and only an enumeration notices -- which is why
+    the census names its phantoms per document instead of averaging them, and why this entry carries the
+    number **1 hit in the 83 distinct phrases** censused so far. The alternative reading of the evidence is
+    that `two radius` is a real claim about radii in a document that also says `two radii` four hits
+    earlier; the sentence does not support it, and the phantom list is where that disagreement is settled.
+    Related: #104 (the other half of the slot), #102 (the slot's reach), #101 (whose queue found this).
