@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 129/129 planted defects rejected",
+        anchor="# 132/132 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty-three report files, one per phase",
-        replacement="fifty-four report files, one per phase",
+        anchor="fifty-four report files, one per phase",
+        replacement="fifty-five report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1735,11 +1735,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="precision-queue-drops-a-document",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor=(
-            '_PRECISION_PENDING = (\n    "docs/validation_matrix.md",\n'
-            '    "paper/technical_report.tex",\n)'
-        ),
-        replacement='_PRECISION_PENDING = (\n    "docs/validation_matrix.md",\n)',
+        anchor='    "README.md": (_CENSUS_README_GOLD, _CENSUS_README_PHANTOMS),\n',
+        replacement="",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
@@ -1828,16 +1825,55 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="census-document-put-back-in-the-queue-it-left",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='_PRECISION_PENDING = (\n    "docs/validation_matrix.md",',
-        replacement=(
-            '_PRECISION_PENDING = (\n    "docs/interview_defense.md",\n'
-            '    "docs/validation_matrix.md",'
-        ),
+        anchor="_PRECISION_PENDING: tuple[str, ...] = ()",
+        replacement='_PRECISION_PENDING = (\n    "docs/interview_defense.md",\n)',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
         ),
         claim="a document cannot be censused and pending at once, so re-queueing one that has been "
         "read is caught by the membership check rather than by the gold lists",
+    ),
+    # Phase 53 (#101's queue worked off, #105's second instance): the last two documents get the
+    # same three directions tested -- a phantom forgotten, gold quoting a phrase the file never
+    # prints, and a phrase filed as both a quantity and a phantom.
+    Mutation(
+        identifier="census-report-phantom-forgotten",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_CENSUS_REPORT_PHANTOMS = ("3 path",)',
+        replacement="_CENSUS_REPORT_PHANTOMS: tuple[str, ...] = ()",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="the report's truncation is a measured fact about the rule, so emptying the list "
+        "while the rule still prints `3 path` reddens the census instead of raising its score",
+    ),
+    Mutation(
+        identifier="census-matrix-gold-quotes-a-phrase-the-table-never-prints",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='    "six fields",',
+        replacement='    "six fields of the book",',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="each matrix entry transcribes a phrase the document prints, so an entry the "
+        "table never produces fails the gold-is-a-subset check",
+    ),
+    Mutation(
+        identifier="census-phrase-filed-as-quantity-and-phantom",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_CENSUS_REPORT_PHANTOMS = ("3 path",)',
+        replacement='_CENSUS_REPORT_PHANTOMS = ("3 path", "105 recorded limitations")',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="the two lists are disjoint by construction, and the guard that enforces it is a "
+        "different branch from the one that compares them with the hits",
     ),
 )

@@ -1326,6 +1326,15 @@ never removed just because a later phase shipped.
     number nothing compares with a producer, and enumerating hits does not touch exemptions at all -- the
     report's ten declared claims remain untested, and the census's value so far is that it finds defects
     in the *rule* rather than auditing the *judgements*.
+
+    **Amended 2026-10-17 by Phase 53: the queue is empty, and the entry's headline is what is left.** All
+    five inventoried texts are censused -- **196 of 198** distinct phrases are quantities, and the two that
+    are not are one shape (#105): `two radius` and `3 path`, both compound heads whose true noun is off
+    `_REPORT_NOUNS`. Nothing about the declarations changed. The distinction the finished census draws is
+    the one this entry opened with: enumerating hits found two defects in the *rule* and audited none of the
+    *exemptions*, and the report's ten declared claims still rest on a sentence a guard cannot read. What
+    would test a declaration is a producer for the thing it says has none, which is a different instrument
+    from anything built here. Related: #105 (the shape the census ended on), #102 (reach), #95.
 102. **The tail of the claim rule allows one word between a numeral and its noun, and that choice is
     unmeasured on the recall side: a real claim phrased with two modifiers is invisible to the
     inventory.** `_CLAIM_TAIL` is `\s*%?\s+(?:[A-Za-z]+\.?\s+)?` plus the noun list, so `twelve columns`
@@ -1492,4 +1501,17 @@ never removed just because a later phase shipped.
     number **1 hit in the 83 distinct phrases** censused so far. The alternative reading of the evidence is
     that `two radius` is a real claim about radii in a document that also says `two radii` four hits
     earlier; the sentence does not support it, and the phantom list is where that disagreement is settled.
-    Related: #104 (the other half of the slot), #102 (the slot's reach), #101 (whose queue found this).
+
+    **Amended 2026-10-17 by Phase 53: a second instance, in the last document censused, and the placement
+    question decided on the numbers.** `3 path`, from "40 seeds $\times$ 3 path budgets $\times$ 4 scenarios"
+    (`paper/technical_report.tex`), is the same shape with the head noun `budgets`. Both phantoms the census
+    ever named are therefore this one, and the conjunction class of #101/#102 is not represented in the
+    finished lists at all. The greedy alternative was measured rather than argued: allowing a counted noun
+    to modify, with `definitions` and `budgets` added to the list, repairs both truncations and gains two
+    further real claims (`two definitions`, `one cmake definition`) but re-creates `60 markets spread` --
+    200 phrases against the shipped 198, and one misattribution against two truncations. The block stays,
+    on the ground that a phrase attributing a count to a word the sentence uses as a verb is the failure a
+    reader cannot see from the extraction, while a truncated compound at least names a word the sentence
+    counts something of. That is a judgement, and the number that would overturn it is on the table: a third
+    truncation in a document whose head noun *is* on the list, or a misattribution anywhere else. Related:
+    #104 (the other half of the slot), #102 (the slot's reach), #101 (whose queue found this).

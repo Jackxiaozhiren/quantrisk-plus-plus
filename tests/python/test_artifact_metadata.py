@@ -2931,15 +2931,152 @@ _CENSUS_SHEET_GOLD = (
 # by the class rule in Phase 50 and this one is refused by nothing, which is the difference
 # #105 registers.
 _CENSUS_SHEET_PHANTOMS = ("two radius",)
+# The last two documents in the queue, and the reason #105 stays open rather than being fixed.
+# The matrix's 31 phrases all measure the noun they name -- including `60 markets`, the reading
+# Phase 51's collision refusal produced, which is the first time a fix here has been checked by
+# a later enumeration rather than by the guard that shipped it. The report's 84 include one
+# truncation of the same shape as the sheet's: `3 path`, from "40 seeds $\times$ 3 path budgets
+# $\times$ 4 scenarios", where the head noun `budgets` is not on the list. Both phantoms are
+# named rather than reworded away.
+_CENSUS_MATRIX_GOLD = (
+    "105 numbered limitations",
+    "12 columns",
+    "160 runs",
+    "18,816 grid rows",
+    "18,816 rows",
+    "19 members",
+    "2 books",
+    "30 joint moves",
+    "5 books",
+    "5 curated cases",
+    "50 steps",
+    "60 columns",
+    "60 markets",
+    "five books",
+    "five curated cases",
+    "five prior books",
+    "five prior radii",
+    "five rows",
+    "four joint rays",
+    "four markets",
+    "four rays",
+    "six books",
+    "six fields",
+    "three fred series",
+    "three orders",
+    "three unmoved books",
+    "twenty-six rows",
+    "two factors",
+    "two routes",
+    "two rows",
+    "two vanna routes",
+)
+_CENSUS_MATRIX_PHANTOMS: tuple[str, ...] = ()
+_CENSUS_REPORT_GOLD = (
+    "105 numbered entries",
+    "105 recorded limitations",
+    "10{,}000 observations",
+    "11 failing assertions",
+    "12 cases",
+    "16 later cases",
+    "16 offline fixtures",
+    "190 ctest entries",
+    "1{,}000 steps",
+    "200 steps",
+    "200{,}000 paths",
+    "204 ctest entries",
+    "20{,}000 paths",
+    "25 rows",
+    "250 observations",
+    "250 scenarios",
+    "250 steps",
+    "30 joint moves",
+    "31 ctest entries",
+    "310 pytest tests",
+    "320 steps",
+    "373 solved windows",
+    "3{,}177 aligned observations",
+    "4 scenarios",
+    "400{,}000 paths",
+    "41 pytest tests",
+    "492 rows",
+    "50 steps",
+    "526 pytest tests",
+    "548{,}368 assertions",
+    "582 windows",
+    "6 failing cases",
+    "60 markets",
+    "60 working digits",
+    "600 monthly observations",
+    "67 runs",
+    "7{,}211{,}281 bytes",
+    "8 assets",
+    "8 correctness benchmarks",
+    "800 steps",
+    "95 artifacts",
+    "eight float fields",
+    "fifty-four report files",
+    "five books",
+    "five earlier radii",
+    "four books",
+    "four files",
+    "four further books",
+    "four joint rays",
+    "four reachable cases",
+    "four stress artifacts",
+    "nine release tags",
+    "one credit spread",
+    "one factor moves",
+    "one spread",
+    "seven identities",
+    "seven identity checks",
+    "seven members",
+    "seven named scenarios",
+    "seven orders",
+    "seven scenarios",
+    "six books",
+    "six readings",
+    "sixteen committed fixtures",
+    "three coverage tests",
+    "three fred series",
+    "three persistent series",
+    "three questions",
+    "three rays",
+    "three readings",
+    "three rows",
+    "three scenarios",
+    "three swept columns",
+    "twelve columns",
+    "twelve members",
+    "twenty-two committed re-freezings",
+    "two barrier rows",
+    "two checks",
+    "two factors",
+    "two orders",
+    "two radii",
+    "two sides",
+    "zero spread",
+)
+# #105's second instance, and the corpus decides the placement question rather than this phase:
+# the greedy alternative (the modifier slot allowed to hold a counted noun, plus `definitions`
+# and `budgets` on the list) repairs both truncations but re-creates `60 markets spread` and
+# adds two real claims, so it trades 2 named phantoms for 1 misattribution. The block stays,
+# because a phrase whose noun is a verb attributes the count to something the sentence never
+# counts, which is the failure a reader cannot spot from the extraction alone.
+_CENSUS_REPORT_PHANTOMS = ("3 path",)
 _PRECISION_CENSUS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "README.md": (_CENSUS_README_GOLD, _CENSUS_README_PHANTOMS),
     "docs/reproducibility.md": (_CENSUS_REPRO_GOLD, _CENSUS_REPRO_PHANTOMS),
     "docs/interview_defense.md": (_CENSUS_SHEET_GOLD, _CENSUS_SHEET_PHANTOMS),
+    "docs/validation_matrix.md": (_CENSUS_MATRIX_GOLD, _CENSUS_MATRIX_PHANTOMS),
+    "paper/technical_report.tex": (_CENSUS_REPORT_GOLD, _CENSUS_REPORT_PHANTOMS),
 }
-_PRECISION_PENDING = (
-    "docs/validation_matrix.md",
-    "paper/technical_report.tex",
-)
+# Empty by choice, not by deletion: the partition assert below is what makes a newly inventoried
+# document a decision instead of an omission, and the pending half of it is only ever non-empty
+# while the queue runs. Measured 2026-10-17 with the queue worked off: 198 distinct phrases
+# across the five texts, 196 quantities and 2 named phantoms, both of them #105's compound-head
+# shape.
+_PRECISION_PENDING: tuple[str, ...] = ()
 
 
 def _census_hits(document: str) -> set[str]:
@@ -2965,14 +3102,14 @@ def test_the_claims_a_document_prints_are_a_census_and_not_a_sample() -> None:
     enumerate in full turns the judgement into a census -- 24 real counts and 1 phantom in README.md
     on 2026-10-17, which is a 96% precision reading nobody had.
 
-    Three of the five inventoried texts are censused now, in the post-fix readings: README.md 24 of
-    24 (it printed 25 with one phantom before Phase 50 refused the conjunction),
-    `docs/reproducibility.md` 19 of 19, and the rehearsal sheet 39 of 40. Across the three, **82 of
-    83** distinct phrases are quantities and the one the rule still prints is a shape nothing
-    refuses: `two radius`, from "two radius definitions were wrong", where the number counts
-    *definitions* -- #105. The denominator is distinct phrases, not occurrences: `526 pytest tests`
-    printed twice in one document is one entry, and a rate written `paths/s` measures the noun it
-    names.
+    All five inventoried texts are censused now, in the post-fix readings: README.md 24 of 24
+    (it printed 25 with one phantom before Phase 50 refused the conjunction),
+    `docs/reproducibility.md` 19 of 19, the rehearsal sheet 39 of 40,
+    `docs/validation_matrix.md` 31 of 31, and the report 83 of 84. Across the five, **196 of
+    198** distinct phrases are quantities, and the two that are not -- `two radius` and `3 path`
+    -- are one shape: a compound head off the noun list, which is #105. The denominator is
+    distinct phrases, not occurrences: `526 pytest tests` printed twice in one document is one
+    entry, and a rate written `paths/s` measures the noun it names.
     """
     assert set(_PRECISION_CENSUS) | set(_PRECISION_PENDING) == set(_ROW_CITATION_DOCUMENTS), (
         "an inventoried document is neither censused nor pending: "
