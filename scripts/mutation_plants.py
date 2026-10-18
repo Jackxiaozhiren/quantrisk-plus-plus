@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 144/144 planted defects rejected",
+        anchor="# 150/150 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty-five report files, one per phase",
-        replacement="fifty-six report files, one per phase",
+        anchor="fifty-six report files, one per phase",
+        replacement="fifty-seven report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1894,8 +1894,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="declaration-verdict-cites-a-quote-the-file-dropped",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='"document:docs/phase_reports/phase-09-research-api.md#310 pytest tests"',
-        replacement='"document:docs/phase_reports/phase-09-research-api.md#310 pytest suite"',
+        anchor='"record:docs/phase_reports/phase-09-research-api.md#310 pytest tests"',
+        replacement='"record:docs/phase_reports/phase-09-research-api.md#310 pytest suite"',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_every_declared_number_names_a_producer_or_records_that_none_exists"
@@ -1907,8 +1907,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="declaration-verdict-quotes-a-number-the-quote-omits",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='"document:docs/model_cards/heston.md#250 steps, inside sampling error"',
-        replacement='"document:docs/model_cards/heston.md#steps, inside sampling error"',
+        anchor='"card:docs/model_cards/heston.md#250 steps, inside sampling error"',
+        replacement='"card:docs/model_cards/heston.md#steps, inside sampling error"',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_every_declared_number_names_a_producer_or_records_that_none_exists"
@@ -2056,5 +2056,99 @@ MUTATIONS: tuple[Mutation, ...] = (
         ),
         claim="the published distribution is compared with the rows, so a reading that moves "
         "without being retold is red rather than silently stale",
+    ),
+    # ------------------------------------------------------------------ Phase 55
+    Mutation(
+        identifier="card-verdict-moves-a-measurement-into-the-narrative-tier",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='"card:docs/model_cards/crr_binomial.md#absolute at N = 50"',
+        replacement='"record:docs/model_cards/crr_binomial.md#absolute at N = 50"',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="a tier is read off the cited path, so calling a model card a narrative record is "
+        "refused even though the quote and the number both still check out",
+    ),
+    Mutation(
+        identifier="record-verdict-moves-an-origin-reading-into-the-card-tier",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='"record:docs/phase_reports/phase-09-research-api.md#310 pytest tests"',
+        replacement='"card:docs/phase_reports/phase-09-research-api.md#310 pytest tests"',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the two tiers are disjoint prefixes, so a phase report cannot be promoted to a "
+        "measurement producer by changing the word in front of it",
+    ),
+    Mutation(
+        identifier="measurement-corpus-accretes-a-prefix-no-verdict-cites",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_MEASUREMENT_CORPUS: dict[str, str] = {\n    "docs/model_cards/": (',
+        replacement=(
+            '_MEASUREMENT_CORPUS: dict[str, str] = {\n    "docs/measurement-notes/": "kept for "\n'
+            '        "later",\n    "docs/model_cards/": ('
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="a declared corpus prefix that covers nothing the ledger cites is a guess about a "
+        "future phase rather than a rule about this one, and the guard refuses it",
+    ),
+    Mutation(
+        identifier="none-row-drops-the-corpus-file-it-has-to-name",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor=(
+            '"Three benchmark fields hold 200000, and `docs/model_cards/heston.md` prints '
+            '`200k paths` "'
+        ),
+        replacement=(
+            '"Three benchmark fields hold 200000, and a model card prints the same digits for a "'
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the disclosure is the whole content of a forced `none:` -- name the one file that "
+        "matches and say why it is a different measurement, or the refusal is unevidenced",
+    ),
+    Mutation(
+        identifier="corpus-disclosure-pin-stops-listing-the-forced-row",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor="_MEASUREMENT_DISCLOSURES: dict[tuple[str, str, str], str] = {\n    (",
+        replacement=(
+            "_MEASUREMENT_DISCLOSURES: dict[tuple[str, str, str], str] = {\n"
+            '    ("unused", "unused", "unused"): "docs/model_cards/heston.md",\n    ('
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the firing set is compared with what the search derives, so an empty or padded pin "
+        "reddens rather than quietly disabling the rule it is supposed to record",
+    ),
+    Mutation(
+        identifier="clause-window-widened-until-every-file-matches",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor=(
+            "    stop = break_re.search(text, end)\n"
+            "    return text[lo : stop.start() if stop else len(text)]"
+        ),
+        replacement="    stop = break_re.search(text, end)\n    del stop\n    return text",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the clause window is what makes a corpus match mean anything: widening it to "
+        'the whole file turns the one forced row into "many" and the pinned firing set '
+        "stops agreeing",
     ),
 )

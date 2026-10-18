@@ -3015,7 +3015,7 @@ _CENSUS_REPORT_GOLD = (
     "800 steps",
     "95 artifacts",
     "eight float fields",
-    "fifty-five report files",
+    "fifty-six report files",
     "five books",
     "five earlier radii",
     "four books",
@@ -3682,7 +3682,39 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
 # ---------------------------------------------------------------------------
 
 
-_DECLARATION_KINDS = ("artifact", "document", "granularity", "none", "phantom")
+_DECLARATION_KINDS = ("artifact", "card", "record", "granularity", "none", "phantom")
+
+# The two kinds of witness a cited document can be, and the difference is what Phase 54's own audit
+# paid for. A `card:` cites a measurement table that can disagree today; a `record:` cites the one
+# narrative file where a superseded run's reading was first written, which nothing can re-measure.
+# Filing a copy as a card is how `0.46 reading` and `1{,}000 steps` went wrong, so the tier is
+# read off the path rather than off the author's confidence.
+_MEASUREMENT_CORPUS: dict[str, str] = {
+    "docs/model_cards/": (
+        "each card states a run's configuration beside its measured error, and #86 names these "
+        "as the only record of probes no frozen artifact carries"
+    ),
+}
+_NARRATIVE_RECORDS: dict[str, str] = {
+    "docs/phase_reports/": (
+        "the report of the phase that ran it, where a reading of a discarded tree is written once "
+        "and never re-measured"
+    ),
+    "docs/release_notes_": (
+        "the tag's own note, which is the origin of the suite and register sizes quoted as history"
+    ),
+}
+
+# What the measurement corpus says back when a row is filed as having no producer. The firing set is
+# *derived* and pinned here rather than trusted at the call site: a disclosure rule that quietly
+# stops firing when the search widens is finding 89's empty-falsification failure.
+_MEASUREMENT_DISCLOSURES: dict[tuple[str, str, str], str] = {
+    (
+        "paper/technical_report.tex",
+        "1{,}000 steps is about 1.6 GB",
+        "200{,}000 paths",
+    ): "docs/model_cards/heston.md",
+}
 
 # What a `none:` is a none of. The vocabulary is closed and policed in both directions: an entry
 # outside it is refused, and a category nobody uses is dead weight that the next author would reach
@@ -3745,7 +3777,7 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
         "none:discarded-run, what one `ctest -R` name matched at the run the answer describes"
     ),
     ("docs/interview_defense.md", "moved one mutation's anchor from", "341 python tests"): (
-        "document:docs/release_notes_v1.4.0.md#341 Python tests"
+        "record:docs/release_notes_v1.4.0.md#341 Python tests"
     ),
     ("docs/interview_defense.md", "versions of the radius definition", "two versions"): (
         "none:superseded-design, the rejected definitions finding 46 records"
@@ -3760,7 +3792,7 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
         "number to a measurement this sentence does not make"
     ),
     ("docs/interview_defense.md", "tests at `v1.0.0`", "330 python tests"): (
-        "document:docs/release_notes_v1.0.0.md#330 Python tests"
+        "record:docs/release_notes_v1.0.0.md#330 Python tests"
     ),
     ("docs/interview_defense.md", "corner gaps 1.819909 / 0.456807 /", "0.46 reading"): (
         "none:restatement-of-a-record, limitation 12's `~0.46` restated. `0.456807` beside it in "
@@ -3785,7 +3817,7 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
         "none:derivation-route, the same pair restated where the agreement figure is the claim"
     ),
     ("docs/validation_matrix.md", "A CRR lattice at", "50 steps"): (
-        "document:docs/model_cards/crr_binomial.md#absolute at N = 50"
+        "card:docs/model_cards/crr_binomial.md#absolute at N = 50"
     ),
     ("docs/validation_matrix.md", "and nothing second-order in", "two factors"): (
         "none:external-oracle-absence, what the installed QuantLib does not expose. The one field "
@@ -3797,30 +3829,30 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
     ),
     # ------------------------------------------------------- the report (24)
     ("paper/technical_report.tex", "310 pytest tests with no release tag", "190 ctest entries"): (
-        "document:docs/phase_reports/phase-09-research-api.md#190 CTest entries"
+        "record:docs/phase_reports/phase-09-research-api.md#190 CTest entries"
     ),
     ("paper/technical_report.tex", "310 pytest tests with no release tag", "310 pytest tests"): (
-        "document:docs/phase_reports/phase-09-research-api.md#310 pytest tests"
+        "record:docs/phase_reports/phase-09-research-api.md#310 pytest tests"
     ),
     ("paper/technical_report.tex", "at 200{,}000 paths over 250 steps", "200{,}000 paths"): (
-        "document:docs/model_cards/heston.md#200k paths / 250 steps"
+        "card:docs/model_cards/heston.md#200k paths / 250 steps"
     ),
     ("paper/technical_report.tex", "at 200{,}000 paths over 250 steps", "250 steps"): (
-        "document:docs/model_cards/heston.md#250 steps, inside sampling error"
+        "card:docs/model_cards/heston.md#250 steps, inside sampling error"
     ),
     ("paper/technical_report.tex", "and variance value over", "20{,}000 paths"): (
-        "document:docs/model_cards/heston.md#over 20 000 paths"
+        "card:docs/model_cards/heston.md#over 20 000 paths"
     ),
     (
         "paper/technical_report.tex",
         "combined standard errors for 20, 80 and 320 steps",
         "320 steps",
-    ): ("document:docs/model_cards/heston.md#steps 20/80/320"),
+    ): ("card:docs/model_cards/heston.md#steps 20/80/320"),
     ("paper/technical_report.tex", "Convexity buys", "two orders"): (
         "none:prose-idiom, an order-of-magnitude reading of the table beside it"
     ),
     ("paper/technical_report.tex", "Monte Carlo stress VaR at", "400{,}000 paths"): (
-        "document:docs/model_cards/scenario_stress_testing.md#at 400k paths"
+        "card:docs/model_cards/scenario_stress_testing.md#at 400k paths"
     ),
     ("paper/technical_report.tex", "one volatility,", "one credit spread"): (
         "none:fixture-composition, one asset class of the synthetic ten-factor fixture, defined in "
@@ -3845,21 +3877,23 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
         "none:prose-idiom, an equivalence stated as a count of the sides of one identity"
     ),
     ("paper/technical_report.tex", "comparisons by roughly", "seven orders"): (
-        "document:docs/phase_reports/phase-06-portfolio-optimisation.md#"
+        "record:docs/phase_reports/phase-06-portfolio-optimisation.md#"
         "seven and a half orders of magnitude"
     ),
     ("paper/technical_report.tex", "16 later cases had never", "16 later cases"): (
-        "document:docs/phase_reports/phase-05-market-risk.md#16 later cases had never executed"
+        "record:docs/phase_reports/phase-05-market-risk.md#16 later cases had never executed"
     ),
     ("paper/technical_report.tex", "exposed 6 failing cases", "6 failing cases"): (
-        "document:docs/phase_reports/phase-05-market-risk.md#exposed 6 failing cases and 11"
+        "record:docs/phase_reports/phase-05-market-risk.md#exposed 6 failing cases and 11"
     ),
     ("paper/technical_report.tex", "exposed 6 failing cases", "11 failing assertions"): (
-        "document:docs/phase_reports/phase-05-market-risk.md#11 failing assertions"
+        "record:docs/phase_reports/phase-05-market-risk.md#11 failing assertions"
     ),
     ("paper/technical_report.tex", "1{,}000 steps is about 1.6 GB", "200{,}000 paths"): (
         "none:chosen-configuration, one corner of a memory sizing the report labels an estimate. "
-        "Three benchmark fields hold 200000 and none is this hypothetical"
+        "Three benchmark fields hold 200000, and `docs/model_cards/heston.md` prints `200k paths` "
+        "for the xi=0 collapse run -- the same digits over two different measurements, and this "
+        "sentence is arithmetic about a path matrix nobody priced"
     ),
     ("paper/technical_report.tex", "1{,}000 steps is about 1.6 GB", "1{,}000 steps"): (
         "none:chosen-configuration, the other corner of the same sizing the anchor already calls a "
@@ -3878,10 +3912,10 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
         "none:discarded-run, the field count of one cross-platform re-run that no artifact records"
     ),
     ("paper/technical_report.tex", "31 CTest entries", "31 ctest entries"): (
-        "document:docs/phase_reports/phase-01-clean-clone-run.md#100% tests passed out of 31"
+        "record:docs/phase_reports/phase-01-clean-clone-run.md#100% tests passed out of 31"
     ),
     ("paper/technical_report.tex", "31 CTest entries", "41 pytest tests"): (
-        "document:docs/phase_reports/phase-01-engineering-foundation.md#41 passed in 0.43 s"
+        "record:docs/phase_reports/phase-01-engineering-foundation.md#41 passed in 0.43 s"
     ),
 }
 
@@ -3892,7 +3926,8 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
 # not. `docs/phase_reports/phase-54-*.md` §5 quotes the same five numbers from this dictionary.
 _DECLARATION_READING: dict[str, int] = {
     "artifact": 2,
-    "document": 16,
+    "card": 6,
+    "record": 10,
     "granularity": 1,
     "none": 26,
     "phantom": 1,
@@ -4028,6 +4063,53 @@ def _phrase_noun_words(phrase: str) -> set[str]:
     return {word.lower() for word in re.findall(r"[A-Za-z]{3,}", phrase)}
 
 
+def _declaration_clause_break() -> re.Pattern[str]:
+    return re.compile(r"[.;:|]| -- ")
+
+
+def _clause_of(text: str, start: int, end: int) -> str:
+    """The clause a number sits in, so a producer match is read as a sentence and not as a digit.
+
+    The window is Phase 55's measurement: searching a whole file instead returns 21 to 51 matches
+    for a spelled numeral -- `two lattices differ by a convention term` answering a claim about two
+    columns -- and a search that broad is not evidence of anything.
+    """
+    break_re = _declaration_clause_break()
+    lo = 0
+    for found in break_re.finditer(text[:start]):
+        lo = found.end()
+    stop = break_re.search(text, end)
+    return text[lo : stop.start() if stop else len(text)]
+
+
+def _measurement_files() -> dict[str, str]:
+    texts: dict[str, str] = {}
+    for prefix in _MEASUREMENT_CORPUS:
+        base = REPO_ROOT / prefix.rstrip("/")
+        paths = sorted(base.rglob("*.md")) if base.is_dir() else []
+        for path in paths:
+            relative = str(path.relative_to(REPO_ROOT))
+            texts[relative] = _folded_document(relative)
+    assert texts, (
+        "the declared measurement corpus holds no files, so nothing can be checked against it"
+    )
+    return texts
+
+
+def _measurement_candidates(token: str, phrase: str) -> list[str]:
+    """Corpus files printing this claim's number inside one clause of the noun it counts."""
+    nouns = _phrase_noun_words(phrase)
+    hits: set[str] = set()
+    for relative, text in _measurement_files().items():
+        for spelling in _number_spellings(token):
+            for match in re.finditer(rf"(?<![\d.]){re.escape(spelling)}(?![\d])", text):
+                clause = _clause_of(text, match.start(), match.end())
+                if nouns & {word.lower() for word in re.findall(r"[A-Za-z]{3,}", clause)}:
+                    hits.add(relative)
+                    break
+    return sorted(hits)
+
+
 def _field_candidates(value: float, phrase: str) -> list[tuple[str, str]]:
     """Frozen-artifact numbers that equal this claim and name the noun the claim counts.
 
@@ -4092,8 +4174,27 @@ def test_every_declared_number_names_a_producer_or_records_that_none_exists() ->
                 "ledger is stale"
             )
 
-        elif head == "document":
+        elif head in ("card", "record"):
             source, _, quote = rest.partition("#")
+            tiers = {
+                "card": _MEASUREMENT_CORPUS,
+                "record": _NARRATIVE_RECORDS,
+            }[head]
+            other = _MEASUREMENT_CORPUS if head == "record" else _NARRATIVE_RECORDS
+            assert any(source.startswith(prefix) for prefix in tiers), (
+                f"{document} {phrase!r} is filed `{head}:` against {source}, which that tier does "
+                f"not cover. A cited source has to be classified before it can be believed"
+            )
+            assert not any(source.startswith(prefix) for prefix in other), (
+                f"{document} {phrase!r} cites {source} under two tiers at once"
+            )
+            assert not any(
+                source == inventoried
+                for inventoried in (*_MARKDOWN_INVENTORY, "paper/technical_report.tex")
+            ), (
+                f"{document} {phrase!r} cites {source}, which is one of the documents this "
+                "inventory reads claims out of -- a claim cannot witness itself"
+            )
             assert (REPO_ROOT / source).is_file(), (
                 f"{document} {phrase!r} cites {source}, which is not in the tree"
             )
@@ -4146,6 +4247,21 @@ def test_every_declared_number_names_a_producer_or_records_that_none_exists() ->
                     f"not its producer, naming it ({name!r}); a silent `none:` is the judgement "
                     "this ledger exists to replace"
                 )
+            corpus = _measurement_candidates(token, phrase)
+            if len(corpus) == 1:
+                key = (document, anchor, phrase)
+                assert _MEASUREMENT_DISCLOSURES.get(key) == corpus[0], (
+                    f"{document} {phrase!r} has exactly one measurement-corpus candidate, "
+                    f"{corpus[0]}, and `_MEASUREMENT_DISCLOSURES` says "
+                    f"{_MEASUREMENT_DISCLOSURES.get(key)!r}. The firing set is pinned because a "
+                    "search that quietly stops matching is finding 89's empty falsification"
+                )
+                assert corpus[0] in reason, (
+                    f"{document} {phrase!r} is filed as having no producer while "
+                    f"{corpus[0]} prints the number beside the noun. Name the file and say why "
+                    "that measurement is not this sentence's: compelling the attribution instead "
+                    "would call a memory-sizing hypothetical a Heston run"
+                )
 
     assert kinds == _DECLARATION_READING, (
         f"the ledger's reading moved: {kinds} against the published {_DECLARATION_READING}. A row "
@@ -4156,6 +4272,29 @@ def test_every_declared_number_names_a_producer_or_records_that_none_exists() ->
         f"categories the ledger does not use are dead vocabulary: "
         f"{sorted(set(_DECLARATION_CATEGORIES) - categories)}, "
         f"unrecorded: {sorted(categories - set(_DECLARATION_CATEGORIES))}"
+    )
+    cited = {
+        verdict.partition(":")[2].partition("#")[0]
+        for verdict in _DECLARATION_LEDGER.values()
+        if verdict.startswith(("card:", "record:"))
+    }
+    for prefix in (_MEASUREMENT_CORPUS, _NARRATIVE_RECORDS):
+        unused = sorted(
+            key for key in prefix if not any(source.startswith(key) for source in cited)
+        )
+        assert not unused, (
+            f"a declared witness tier covering nothing the ledger cites is a guess about the next "
+            f"phase rather than a rule about this one: {unused}"
+        )
+    forced = {
+        (document, anchor, phrase): _measurement_candidates(token, phrase)[0]
+        for (document, anchor, phrase), token in pairs.items()
+        if _DECLARATION_LEDGER[(document, anchor, phrase)].startswith("none:")
+        and len(_measurement_candidates(token, phrase)) == 1
+    }
+    assert forced == _MEASUREMENT_DISCLOSURES, (
+        f"the measurement corpus now says something different about the `none:` rows: derived "
+        f"{sorted(forced.items())}, pinned {sorted(_MEASUREMENT_DISCLOSURES.items())}"
     )
 
 

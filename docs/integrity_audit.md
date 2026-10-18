@@ -2328,3 +2328,40 @@ the pair set, and if a projection is wanted, project the *needle* too. The corre
 phrases lost, 15 of them in README) and able to fail if the two constructions stop differing. Related:
 finding 82 (a substring test over a corpus containing the tester), finding 86 (a plant whose guard names a
 reader that never reads it), finding 87 (a check that would have measured text overlap instead of meaning).
+
+**90. A citation and a copy are the same string to a guard that only asks whether the file prints the
+number.** Phase 54's ledger gave each of the 46 declared exemptions a verdict, and 18 of them said
+`document:` -- a sentence in another committed file that prints the claim's number. Two of those 18 were
+wrong in the same way and every check passed them: `0.46 reading` cited
+`docs/limitations.md`, whose `~0.46` is a rounding of a corner gap `test_pricing_vs_quantlib.py` computes
+and asserts only as a normalised bound, never publishing the value; and `1{,}000 steps` cited
+`docs/phase_reports/phase-04-path-dependent-heston.md`, which does the same `200k x 1000 steps ~= 1.6 GB`
+arithmetic the report is paraphrasing. Both files exist, both quotes are verbatim, both print the number.
+The checks verified *presence and spelling*, which is what a copy satisfies just as well as a producer.
+
+(a) **What caught it was reading the sentence, not running the gate.** The tell was inside the repository's
+own text: the anchor `1{,}000 steps is about 1.6 GB` carries the reason "a sizing estimate for a
+hypothetical, labelled as one", and a row whose reason says *hypothetical* cannot also have a producer.
+The obvious general rule -- refuse a citing verdict when the anchor reason contains a no-producer word --
+was measured and rejected here, because the reasons negate their own vocabulary:
+`published in the artifact's control block and re-executed by the run rather than *restated* from prose`
+is the strongest `artifact:` row in the ledger. A keyword gate would have reddened the true row and passed
+nothing.
+
+(b) **The adopted rule is that the tier is a property of the path, not of the sentence.** Phase 55 split
+`document:` into `card:` (a prefix in a declared measurement corpus, which can disagree today) and
+`record:` (a prefix in a declared narrative corpus, which is the one place a discarded run's reading was
+written down), and an uncited path is refused rather than defaulted. The split is honest about its own
+weakest edge: it moves the judgement from *is this a producer* to *which tier does this directory belong
+to*, one decision per directory with a written reason, instead of one decision per claim with none.
+
+(c) **The sibling search was measured before it was written, and the measurement killed the version #106
+proposed.** Restricting the search to the measurement corpus and requiring one clause of adjacency leaves
+exactly one of the 26 `none:` rows with a single candidate -- and that candidate is the Heston card's
+`200k paths`, while the claim is a memory-sizing hypothetical. A rule that *compelled* the attribution
+would have manufactured a false producer at its first firing, which is the same class of defect #104 and
+#105 spent three phases refusing; widening the window to the whole file instead returns 21 to 51 matches for
+a spelled numeral, so the refusal-to-compel is not caution about a hypothetical. What shipped is the
+disclosure: the forced row must name the file and say why it is a different measurement, and the firing set
+is pinned so a search that quietly stops matching reddens. Related: finding 86 (a plant whose guard names a
+reader that never reads it), finding 89 (a control that could not fail), `docs/limitations.md` #106.

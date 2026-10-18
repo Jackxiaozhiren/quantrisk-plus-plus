@@ -1567,3 +1567,23 @@ never removed just because a later phase shipped.
     exclude restatements of the claim's own document family, which is a judgement the ledger would then have
     to record. Related: #101 (what this residue replaced), #86 (the Heston sentences, whose producers are
     model cards the freeze does not hash), #99 (a citation that exists and describes the wrong thing).
+
+    **Amended 2026-10-18 by Phase 55: closed, and closed by the measurement that refuted the fix this entry
+    proposed.** The sibling search was written -- `_measurement_candidates()`, restricted to a declared
+    measurement corpus and requiring one clause of adjacency -- and it found that of the 26 `none:` rows
+    exactly one has a single candidate, and that candidate is the wrong measurement: `200{,}000 paths` is a
+    corner of a memory sizing the report labels hypothetical, and the one file matching is
+    `docs/model_cards/heston.md`'s `200k paths`, the xi=0 collapse run. Compelling the attribution would
+    have manufactured a false producer at its first firing, so the rule ships as a *disclosure*: the forced
+    row names the file and says why it is a different measurement, and `_MEASUREMENT_DISCLOSURES` pins the
+    firing set so a search that quietly stops matching reddens (finding 89's shape). Widening the window to
+    whole files instead returns 21 to 51 clause-less matches for a spelled numeral, which is why "many" is
+    not a refusal either. The residue this entry describes did get a mechanism: `document:` split into
+    `card:` (6 rows, a prefix in the corpus that can disagree today) and `record:` (10 rows, the one
+    narrative file where a discarded reading was written), with an uncited path refused rather than
+    defaulted. What is left is not a queue item: the guard checks that a named refusal *names* the
+    candidate, never that the refusal is *true*, and a check of that truth is the referent the declaration
+    says does not exist. Closing that would need a producer for the meaning of a sentence, which is not an
+    instrument. Finding 90 carries the two mis-cited rows this entry's blind spot produced. Related: #101
+    (what this residue replaced), #86 (the Heston sentences), #99 (a citation that describes the wrong
+    thing), #105 (the same refuse-to-compel judgement on the rule side).
