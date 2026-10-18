@@ -91,13 +91,25 @@ actually fails, and the answer was only obtainable by running the module with th
 reading the whole failing set -- `build/phase56-branch-audit.py`, 4 of 4 plants, tree restored
 byte-for-byte after each. Membership held for all four: each named guard failed, and each failure carried
 the message its claim predicted (`the participle-head rule reads ['60 markets spread']`, `no longer prints
-these real counts: ['two radius definitions']`, `... ['two radius']`, `the ledger and the declarations
-disagree`). The set was *wider* than the name in 3 of 4: dropping `spread` from the participle list reddens
+these real counts: ['two radius definitions']`, `no longer prints these real counts: ['two radius']`, `the
+declared anchor '... because the other' is not in the report: it is stale`). The set was *wider* than the
+name in 3 of 4: dropping `spread` from the participle list reddens
 the census too, un-widening the noun list reddens four guards, and a stale declaration anchor reddens the
 ledger and the ownership check together. The union of extra guards over this sample is four distinct tests.
 So the pairing audit #103 prescribes has to assert membership of the failing set, not equality with a
 singleton -- a plant that trips two guards is not mis-paired, and an assert that demanded one name would
 refuse the honest ones.
+
+_Dated correction, 2026-10-18._ The first version of this paragraph quoted the fourth plant's message as
+`the ledger and the declarations disagree`. That failure is real, but it belongs to the **neighbour**
+guard, not to the plant's named one: the probe sliced the transcript at a fixed-width separator, and pytest
+pads a section header to the terminal width, so a 71-character test name is wrapped in two underscores and
+the slice ran straight through the boundary into the next section. Re-measured with the boundary matched by
+pattern rather than by width -- `build/phase56-capture-check.py` proves the cutter on both the padded and
+the two-underscore header before the suite was spent on it -- the named guard's own message is the
+stale-anchor refusal quoted above. None of the counts moved: 4 of 4 named guards reddened, 3 of 4 sets
+wider, every target restored. What moved is whose evidence was being cited, which is the one thing a branch
+audit exists to establish.
 
 ## 5. Exact test results
 
