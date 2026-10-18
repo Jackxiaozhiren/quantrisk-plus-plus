@@ -2147,8 +2147,9 @@ MUTATIONS: tuple[Mutation, ...] = (
             "tests/python/test_artifact_metadata.py::"
             "test_every_declared_number_names_a_producer_or_records_that_none_exists"
         ),
-        claim="the clause window is what makes a corpus match mean anything: widening it to "
-        'the whole file turns the one forced row into "many" and the pinned firing set '
-        "stops agreeing",
+        claim="widening the window to whole files does not blur the one forced row, it invents a "
+        'second one: `12 artifacts` turns against the card that says `12 functions, 10 bound '
+        "types`, and the in-loop pin comparison reddens because the derived firing set no longer "
+        "agrees with `_MEASUREMENT_DISCLOSURES`",
     ),
 )

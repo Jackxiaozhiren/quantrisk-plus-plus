@@ -8,7 +8,8 @@ sentence: `card:` cites a file inside `_MEASUREMENT_CORPUS` (a measurement table
 down), and a cited path matching neither prefix is refused instead of defaulting into a tier. The 16 rows
 that existed as `document:` were assigned by reading what each cited file is: **6 cards** --
 `docs/model_cards/crr_binomial.md` and `docs/model_cards/heston.md` (four rows) and
-`docs/model_cards/scenario_stress_testing.md` -- and **10 records** (seven in `docs/phase_reports/`, two in
+`docs/model_cards/scenario_stress_testing.md` -- and **10 records** (eight in `docs/phase_reports/` -- three
+from phase-05, two from phase-09, one each from phase-01 twice and phase-06 -- two in
 `docs/release_notes_*`, and none in the register, which lost both of its rows when Phase 54 refiled them).
 The published reading is therefore 2 artifact, 6 card, 10 record, 1 granularity, 1 phantom, 26 none --
 producer-backed still **19 of 46**, with the 19 now stating what kind of witness each one is.
@@ -88,20 +89,32 @@ advice branch simply stops being reached. Pinning the derived firing set against
 means the row set has to be re-agreed when the search moves; `clause-window-widened-until-every-file-matches`
 is the plant that proves it, and it reddens on the pin rather than on the disclosure.
 
+**`caught` proves the guard failed, not that it failed where the plant says.** After the full sweep the
+six new plants were re-run one at a time with the mutation applied by hand and the guard's own traceback
+read, because the harness's `--verbose` echoes only pytest's summary line. Five matched their claimed
+branch. The sixth did not: `clause-window-widened-until-every-file-matches` was written to show that
+widening the window dissolves the forced row into "many", and what it actually does is *invent a second
+forced row* -- `12 artifacts` becomes forced against
+`docs/model_cards/portfolio_covariance_and_optimisation.md`, which says `12 functions, 10 bound types, 81
+members`. The guard's in-loop pin caught it and the plant's claim has been rewritten to name that branch.
+The correction strengthens the phase's central finding rather than weakening it: an unbounded corpus match
+does not merely fail to help a disclosure rule, it manufactures new demands for attributions that are wrong,
+which is what compulsion would have enforced.
+
 ## 5. Exact test results
 
 | Gate | Command | Measured result |
 |---|---|---|
-| Lint | `.venv/bin/ruff check .` | pending |
-| Format | `.venv/bin/ruff format --check .` | pending |
-| Types | `.venv/bin/mypy python/quantrisk` | pending |
-| C++ | `ctest --test-dir build/dev` | pending |
-| Validate | `.venv/bin/quantrisk validate` | pending |
-| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | pending |
-| Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | pending |
-| Python | `.venv/bin/python -m pytest -q` | pending |
-| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` | pending, on the committed tree |
-| CI on the pushed head | read from each job's own log | pending |
+| Lint | `.venv/bin/ruff check .` | All checks passed! |
+| Format | `.venv/bin/ruff format --check .` | 199 files already formatted, measured on the `git archive` export of `e548d0e` (finding 81's rule), and the runner reports the same 199 |
+| Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
+| C++ | `ctest --test-dir build/dev` | 100% tests passed out of 204 |
+| Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
+| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | `Evidence is intact.` -- the report bundle moved to `a0c9510ab961` (PDF `4efd9f2c2225`) when this phase report landed, no artifact re-frozen |
+| Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 458 tests collected |
+| Python | `.venv/bin/python -m pytest -q` | 527 passed in 159.27s (0:02:39) |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` on `e548d0e` | 150/150 planted defects were rejected by their guard, tree clean afterwards, exit 0 |
+| CI on the pushed head | run `39095332946` on `e548d0e`, read from each job's own log | lint `All checks passed!`, `199 files already formatted`, mypy `Success: no issues found in 23 source files`; C++ and Python `100% tests passed out of 204` and `457 passed, 5 skipped in 210.13s`, which is #91's reconciliation against the 458 the probe collects (`457 + 5 = 458 + 4 = 462`); benchmark `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 426.6s total` |
 
 ## 6. Numerical validation
 
