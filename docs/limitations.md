@@ -1533,6 +1533,24 @@ never removed just because a later phase shipped.
     counts something of. That is a judgement, and the number that would overturn it is on the table: a third
     truncation in a document whose head noun *is* on the list, or a misattribution anywhere else. Related:
     #104 (the other half of the slot), #102 (the slot's reach), #101 (whose queue found this).
+
+    **Amended 2026-10-18 by Phase 56: closed, on the condition this entry set for itself.** The refusal no
+    longer looks at the modifier; it looks at the head. `_PARTICIPLE_HEAD_BLOCK` reads two words and lets a
+    counted noun stand in the modifier slot unless the word after it is in `_PARTICIPLE_HEADS` (`spread`,
+    `spanning`), and `definitions` and `budgets` joined the noun list. Measured over the five inventoried
+    texts before the change -- 198 phrases, 196 quantities, 2 phantoms -- the variants were: blanket
+    refusal, as #104 shipped it, 198 with the two truncations; no refusal at all, 200, with `60 markets
+    spread` back; refusal keyed on the head but placed outside the optional group, 197, destroying `one
+    spread` and `zero spread`; a head-keyed lookahead in front of the group, 197, which loses `60 markets`
+    outright because a failing lookahead before an optional group kills the whole tail at that position;
+    and the shipped form, **199 phrases, 199 quantities, 0 phantoms, 0 misattributions**. Both
+    truncations are now read whole and the census gold lists them as quantities, so the reversal condition
+    -- a truncated compound whose head noun is on the list -- is met, and the misattribution #104 refused
+    is still refused. What the entry predicted also holds: the list is vocabulary, not grammar, so a
+    participle absent from it produces a phantom silently, and the per-document census is the instrument
+    that notices -- which is why the repair was gated on the census rather than on these two sentences.
+    Related: #104 (the other half of the slot, still closed), #102 (the slot's reach), #101 (whose queue
+    found this), #106 (the ledger's parallel refusal to compel an attribution from digits).
 106. **A `none:` verdict is policed for its shape, not for the absence it states.** Phase 54 closed #101 by
     giving every declared number a verdict, and 26 of the 46 verdicts say that nothing in this tree can
     disagree with them. The guard checks a lot about those rows -- the category is in a closed vocabulary of

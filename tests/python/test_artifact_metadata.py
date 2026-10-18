@@ -1822,7 +1822,7 @@ _REPORT_NOUN_BODY = (
     r"|modules|routes|rays|rungs|columns|books|releases|scenarios|fields|identities|steps|series"
     r"|windows|benchmarks|fixtures|oracles|versions|tags|presets|packages|observations|sides"
     r"|claims|models|criteria|radii|radius|moves|factors|orders|edges|candidates|ladders"
-    r"|stencils|spreads?|runs|readings?|re-freezings?|paths?"
+    r"|stencils|spreads?|runs|readings?|re-freezings?|paths?|definitions|budgets"
 )
 _REPORT_NOUNS = "(" + _REPORT_NOUN_BODY + ")"
 # A number that is part of a word is not a claim: `(?<![A-Za-z\d])` keeps `Catch2 cases` and
@@ -1905,20 +1905,29 @@ _CLOSED_CLASS_MODIFIERS = (
     "yet",
 )
 _MODIFIER_BLOCK = r"(?!(?:" + "|".join(_CLOSED_CLASS_MODIFIERS) + r")\s)"
-# A second refusal in the same slot, from #104: a word that is itself on the noun list cannot serve
-# as the modifier either, because in "60 markets spread over the plane" the reading that fits is
-# sixty *markets* with `spread` doing verb work, not sixty *spreads*. The block goes inside the
-# optional group, so the engine falls back to taking that word as the noun and the count survives
-# with its right object; hoisted in front of the group it refuses the noun too, and the corpus loses
-# real counts by the dozen (property 9 measures both placements, because the first reconstruction of
-# this rule made that mistake and nothing else in the tree could see it). Written against
-# `_REPORT_NOUN_BODY` rather than a hand-copied list, so growing the noun list grows the refusal.
-_COLLISION_BLOCK = r"(?!(?:" + _REPORT_NOUN_BODY + r")\s)"
+# A refusal in the same slot, and #105 decided where it looks. #104's version refused a word that is
+# itself on the noun list, which is what kept "60 markets spread over the plane" reading as sixty
+# *markets*; but it refused "two radius definitions" and "3 path budgets" too, where the head is
+# really is the head and the first is the thing counted, so the corpus carried two truncations.
+# The slot cannot tell a compound head from a participle -- both are `<noun> <noun-shaped word>` --
+# and the only evidence in the pattern is the head. So the block now reads two words: it refuses a
+# counted noun in the modifier slot only when the word after it is one this corpus uses as a verb.
+# Measured over the five inventoried texts as they stood before this change (198 phrases shipped):
+# blanket refusal 198 with two
+# phantoms, greedy with no refusal 200 with `60 markets spread` back, and this form 199 with neither
+# truncation nor misattribution. Two wrong placements were measured too, because each looked
+# plausible: refusing the head *outside* the optional group costs `one spread` and `zero spread`,
+# two real claims, and a head test placed before the group kills the whole tail at that position and
+# loses `60 markets` as well. Property 9 holds the four shapes apart.
+_PARTICIPLE_HEADS = ("spread", "spanning")
+_PARTICIPLE_HEAD_BLOCK = (
+    r"(?!(?:" + _REPORT_NOUN_BODY + r")\s+(?:" + "|".join(_PARTICIPLE_HEADS) + r")\s)"
+)
 _CLAIM_TAIL = (
     r"\s*%?\s+"
     + _MODIFIER_BLOCK
     + r"(?:"
-    + _COLLISION_BLOCK
+    + _PARTICIPLE_HEAD_BLOCK
     + r"[A-Za-z]+\.?\s+)?"
     + _REPORT_NOUNS
     + r"\b"
@@ -2159,6 +2168,12 @@ _REPORT_DECLARED: dict[str, str] = {
     # extractor reading `1` out of `Level-1` as a count of identities. With a hyphen
     # excluded the claim is never raised, so the exemption would have been keeping
     # nothing -- which is what the decorative check is for, and why this is a comment.
+    "convention bridge rather than derived, because the": (
+        "the two written conventions of the EWMA recursion, centred at zero and centred at the "
+        "target, which `docs/limitations.md` item 39 records as disagreeing whenever the mean is "
+        "material; the shrinkage intensity in the same paragraph is the claim, and no artifact "
+        "enumerates a convention"
+    ),
     "16 later cases had never": (
         "quoted from the incident this report recounts, in that printout's own words"
     ),
@@ -2922,15 +2937,14 @@ _CENSUS_SHEET_GOLD = (
     "two columns",
     "two equivalent routes",
     "two radii",
+    "two radius definitions",
     "two tests",
     "two versions",
 )
-# The second precision failure the census has ever named, and the first one the rule cannot refuse.
-# Measured 19 of 19 on `docs/reproducibility.md` and 39 of 40 here. Across the three censused
-# texts the rule prints 83 distinct phrases and 82 are quantities: README's phantom was refused
-# by the class rule in Phase 50 and this one is refused by nothing, which is the difference
-# #105 registers.
-_CENSUS_SHEET_PHANTOMS = ("two radius",)
+# Empty from Phase 56: the sheet's one phantom, `two radius`, was the truncation #105 named, and the
+# head-conditioned refusal reads it whole as `two radius definitions`, a count of rejected designs
+# the sentence does make. Measured 19 of 19 on `docs/reproducibility.md`, 40 of 40 on this sheet.
+_CENSUS_SHEET_PHANTOMS: tuple[str, ...] = ()
 # The last two documents in the queue, and the reason #105 stays open rather than being fixed.
 # The matrix's 31 phrases all measure the noun they name -- including `60 markets`, the reading
 # Phase 51's collision refusal produced, which is the first time a fix here has been checked by
@@ -2990,6 +3004,7 @@ _CENSUS_REPORT_GOLD = (
     "250 observations",
     "250 scenarios",
     "250 steps",
+    "3 path budgets",
     "30 joint moves",
     "31 ctest entries",
     "310 pytest tests",
@@ -3015,7 +3030,7 @@ _CENSUS_REPORT_GOLD = (
     "800 steps",
     "95 artifacts",
     "eight float fields",
-    "fifty-six report files",
+    "fifty-seven report files",
     "five books",
     "five earlier radii",
     "four books",
@@ -3051,19 +3066,22 @@ _CENSUS_REPORT_GOLD = (
     "twenty-two committed re-freezings",
     "two barrier rows",
     "two checks",
+    "two definitions",
     "two factors",
     "two orders",
     "two radii",
     "two sides",
     "zero spread",
 )
-# #105's second instance, and the corpus decides the placement question rather than this phase:
-# the greedy alternative (the modifier slot allowed to hold a counted noun, plus `definitions`
-# and `budgets` on the list) repairs both truncations but re-creates `60 markets spread` and
-# adds two real claims, so it trades 2 named phantoms for 1 misattribution. The block stays,
-# because a phrase whose noun is a verb attributes the count to something the sentence never
-# counts, which is the failure a reader cannot spot from the extraction alone.
-_CENSUS_REPORT_PHANTOMS = ("3 path",)
+# Empty from Phase 56, and this is the entry's reversal condition met by measurement rather than by
+# argument. #105 recorded that the blanket collision refusal repaired `60 markets` at the cost of
+# two truncations, and that the greedy alternative bought those two back and lost the markets again.
+# The head-conditioned block wins both: `3 path budgets` and `two radius definitions` read whole,
+# `60 markets` still lands on the markets, and `one spread` and `zero spread` survive -- which each
+# wrong placement destroyed. What remains is the cost #105 named and the census now covers: a
+# participle absent from `_PARTICIPLE_HEADS` produces a phantom silently, and only this enumeration
+# notices.
+_CENSUS_REPORT_PHANTOMS: tuple[str, ...] = ()
 _PRECISION_CENSUS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "README.md": (_CENSUS_README_GOLD, _CENSUS_README_PHANTOMS),
     "docs/reproducibility.md": (_CENSUS_REPRO_GOLD, _CENSUS_REPRO_PHANTOMS),
@@ -3073,9 +3091,9 @@ _PRECISION_CENSUS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
 }
 # Empty by choice, not by deletion: the partition assert below is what makes a newly inventoried
 # document a decision instead of an omission, and the pending half of it is only ever non-empty
-# while the queue runs. Measured 2026-10-17 with the queue worked off: 198 distinct phrases
-# across the five texts, 196 quantities and 2 named phantoms, both of them #105's compound-head
-# shape.
+# while the queue runs. Enumerated 2026-10-18, after #105's repair: 199 distinct phrases across
+# the five texts, 199 quantities and no phantom left to name. The queue ran 2026-10-17 at 198
+# phrases, 196 quantities and two phantoms, both of them #105's compound-head shape.
 _PRECISION_PENDING: tuple[str, ...] = ()
 
 
@@ -3102,14 +3120,14 @@ def test_the_claims_a_document_prints_are_a_census_and_not_a_sample() -> None:
     enumerate in full turns the judgement into a census -- 24 real counts and 1 phantom in README.md
     on 2026-10-17, which is a 96% precision reading nobody had.
 
-    All five inventoried texts are censused now, in the post-fix readings: README.md 24 of 24
-    (it printed 25 with one phantom before Phase 50 refused the conjunction),
-    `docs/reproducibility.md` 19 of 19, the rehearsal sheet 39 of 40,
-    `docs/validation_matrix.md` 31 of 31, and the report 83 of 84. Across the five, **196 of
-    198** distinct phrases are quantities, and the two that are not -- `two radius` and `3 path`
-    -- are one shape: a compound head off the noun list, which is #105. The denominator is
-    distinct phrases, not occurrences: `527 pytest tests` printed twice in one document is one
-    entry, and a rate written `paths/s` measures the noun it names.
+    All five inventoried texts are censused, in the readings after #105's repair: README.md 24 of
+    24 (it printed 25 with one phantom before Phase 50 refused the conjunction),
+    `docs/reproducibility.md` 19 of 19, the rehearsal sheet 40 of 40,
+    `docs/validation_matrix.md` 31 of 31, and the report 85 of 85. Across the five, **199 of 199**
+    distinct phrases are quantities and the phantom lists are empty -- the two truncations that
+    were left, `two radius` and `3 path`, are read whole as `two radius definitions` and `3 path
+    budgets` now. The denominator is distinct phrases, not occurrences: `527 pytest tests` printed
+    twice in one document is one entry, and a rate written `paths/s` measures the noun it names.
     """
     assert set(_PRECISION_CENSUS) | set(_PRECISION_PENDING) == set(_ROW_CITATION_DOCUMENTS), (
         "an inventoried document is neither censused nor pending: "
@@ -3682,7 +3700,7 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
 # ---------------------------------------------------------------------------
 
 
-_DECLARATION_KINDS = ("artifact", "card", "record", "granularity", "none", "phantom")
+_DECLARATION_KINDS = ("artifact", "card", "record", "granularity", "none")
 
 # The two kinds of witness a cited document can be, and the difference is what Phase 54's own audit
 # paid for. A `card:` cites a measurement table that can disagree today; a `record:` cites the one
@@ -3721,6 +3739,7 @@ _MEASUREMENT_DISCLOSURES: dict[tuple[str, str, str], str] = {
 # for without reading it.
 _DECLARATION_CATEGORIES = (
     "chosen-configuration",
+    "convention-set",
     "derivation-route",
     "discarded-run",
     "external-oracle-absence",
@@ -3740,8 +3759,10 @@ _DECLARATION_CATEGORIES = (
 # naming what the number is a statement about. Read the kinds as: `artifact:` a frozen field that
 # holds this number, `document:` a sentence in another committed file that prints it, `granularity:`
 # an enumeration whose members the tree declares at a different count than the sentence states,
-# `phantom:` the extractor's own truncation rather than a quantity at all (#105), and `none:` a
-# category of reason why nothing in this tree could disagree. The kind counts are not restated here:
+# `none:` a category of reason why nothing in this tree could disagree. A fifth kind existed in
+# Phase 54 -- `phantom:`, for a phrase that was the extractor's truncation rather than a quantity --
+# and Phase 56's head-conditioned refusal repaired both instances, so the kind was deleted rather
+# than left as a branch that can never be reached. The kind counts are not restated here:
 # `_DECLARATION_READING` below is what publishes them, and it is derived from these rows.
 _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
     # ----------------------------------------------------------------- README.md
@@ -3803,8 +3824,9 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
         "artifact:experiments/second_book_crossing_map/results/"
         "second_book_crossing_map.json#control.control_moves_compared"
     ),
-    ("docs/interview_defense.md", "radius definitions were wrong", "two radius"): (
-        "phantom:two radius definitions were wrong"
+    ("docs/interview_defense.md", "radius definitions were wrong", "two radius definitions"): (
+        "none:superseded-design, the two rejected definitions of the radius finding 46 records "
+        "before the shipped one; nothing publishes a count of discarded designs"
     ),
     # ---------------------------------------------------- validation matrix (6)
     ("docs/validation_matrix.md", "ways gets", "two rows"): (
@@ -3900,6 +3922,15 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
         "hypothetical. `docs/phase_reports/phase-04-path-dependent-heston.md` does the same "
         "arithmetic, which is a restatement of it rather than a measurement of it"
     ),
+    (
+        "paper/technical_report.tex",
+        "convention bridge rather than derived, because the",
+        "two definitions",
+    ): (
+        "none:convention-set, the two written conventions of the EWMA recursion -- centred at zero "
+        "and centred at the target -- whose disagreement item 39 records. No producer enumerates "
+        "a convention, and the shrinkage intensity beside it is the claim the paragraph owns"
+    ),
     ("paper/technical_report.tex", "steepener; credit is", "one spread"): (
         "none:restatement-of-a-record, the register's own wording for limitation 46 paraphrased "
         "into a numeral; the entry there says `a single`, and no producer counts what it names"
@@ -3929,8 +3960,7 @@ _DECLARATION_READING: dict[str, int] = {
     "card": 6,
     "record": 10,
     "granularity": 1,
-    "none": 26,
-    "phantom": 1,
+    "none": 28,
 }
 
 
@@ -4222,15 +4252,6 @@ def test_every_declared_number_names_a_producer_or_records_that_none_exists() ->
                 "kind that checks agreement rather than one that records the disagreement"
             )
 
-        elif head == "phantom":
-            assert rest.lower() in _inventory_flat(document).lower(), (
-                f"{document} declares {phrase!r} as the rule's truncation of {rest!r}, which that "
-                "document no longer prints"
-            )
-            assert phrase in rest, (
-                f"{document}: {phrase!r} is not a prefix of {rest!r}, so it is not a truncation"
-            )
-
         else:
             category, _, reason = rest.partition(", ")
             assert category in _DECLARATION_CATEGORIES, (
@@ -4296,12 +4317,6 @@ def test_every_declared_number_names_a_producer_or_records_that_none_exists() ->
         f"the measurement corpus now says something different about the `none:` rows: derived "
         f"{sorted(forced.items())}, pinned {sorted(_MEASUREMENT_DISCLOSURES.items())}"
     )
-
-
-def _inventory_flat(document: str) -> str:
-    if document in _MARKDOWN_INVENTORY:
-        return _markdown_inventory_text(document)[1]
-    return _tex_inventory_text()[1]
 
 
 def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:

@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 150/150 planted defects rejected",
+        anchor="# 153/153 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty-six report files, one per phase",
-        replacement="fifty-seven report files, one per phase",
+        anchor="fifty-seven report files, one per phase",
+        replacement="fifty-eight report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1748,36 +1748,36 @@ MUTATIONS: tuple[Mutation, ...] = (
     # is a placement error this phase actually made. Both are registered so the mistake cannot be
     # re-made without a red guard.
     Mutation(
-        identifier="claim-collision-refusal-dropped",
+        identifier="claim-participle-head-refusal-dropped",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='    + r"(?:"\n    + _COLLISION_BLOCK\n    + r"[A-Za-z]+\\.?\\s+)?"',
+        anchor='    + r"(?:"\n    + _PARTICIPLE_HEAD_BLOCK\n    + r"[A-Za-z]+\\.?\\s+)?"',
         replacement='    + r"(?:[A-Za-z]+\\.?\\s+)?"',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claim_extractor_reads_percentages_and_refuses_labels"
         ),
-        claim="without the collision block the rule reads `60 markets spread` again, so the frame "
-        "property 9 pins stops landing on the markets",
+        claim="without the participle-head block the rule reads `60 markets spread` again, so the "
+        "frame property 9 pins stops landing on the markets",
     ),
     Mutation(
-        identifier="claim-collision-refusal-hoisted-over-the-noun",
+        identifier="claim-participle-head-refusal-hoisted-over-the-noun",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
         anchor=(
             '    r"\\s*%?\\s+"\n    + _MODIFIER_BLOCK\n    + r"(?:"\n'
-            '    + _COLLISION_BLOCK\n    + r"[A-Za-z]+\\.?\\s+)?"'
+            '    + _PARTICIPLE_HEAD_BLOCK\n    + r"[A-Za-z]+\\.?\\s+)?"'
         ),
         replacement=(
             '    r"\\s*%?\\s+"\n    + _MODIFIER_BLOCK\n    + r"(?!"\n'
-            '    + _REPORT_NOUNS\n    + r"\\s)(?:[A-Za-z]+\\.?\\s+)?"'
+            '    + _REPORT_NOUNS\n    + r"\\s+(?:spread|spanning)\\s)(?:[A-Za-z]+\\.?\\s+)?"'
         ),
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
         ),
         claim="the same lookahead hoisted in front of the modifier group refuses the noun as well "
-        "as the modifier, and the census is what notices: README's real counts disappear",
+        "as the modifier, and the census is what notices: real counts disappear",
     ),
     Mutation(
         identifier="collision-sentence-leaves-the-corpus",
@@ -1796,17 +1796,17 @@ MUTATIONS: tuple[Mutation, ...] = (
     # when the phantom is reclassified, when gold quotes a phrase the file never prints, and when a
     # document is put back into the queue it has already left.
     Mutation(
-        identifier="census-phantom-reclassified-as-a-quantity",
+        identifier="census-gold-phrase-filed-as-a-phantom",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='_CENSUS_SHEET_PHANTOMS = ("two radius",)',
-        replacement="_CENSUS_SHEET_PHANTOMS: tuple[str, ...] = ()",
+        anchor="_CENSUS_SHEET_PHANTOMS: tuple[str, ...] = ()",
+        replacement='_CENSUS_SHEET_PHANTOMS = ("two radii",)',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
         ),
-        claim="the sheet's refused hit is named, so declaring the list empty while the rule still "
-        "prints it reddens the census instead of quietly raising the document's precision",
+        claim="no phantom is left to reclassify since Phase 56, so the disjointness branch is "
+        "tested the other way: filing a gold phrase as a phantom too reddens the census",
     ),
     Mutation(
         identifier="census-gold-quotes-a-phrase-the-file-never-prints",
@@ -1838,17 +1838,17 @@ MUTATIONS: tuple[Mutation, ...] = (
     # same three directions tested -- a phantom forgotten, gold quoting a phrase the file never
     # prints, and a phrase filed as both a quantity and a phantom.
     Mutation(
-        identifier="census-report-phantom-forgotten",
+        identifier="census-phantom-claimed-that-the-rule-no-longer-prints",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='_CENSUS_REPORT_PHANTOMS = ("3 path",)',
-        replacement="_CENSUS_REPORT_PHANTOMS: tuple[str, ...] = ()",
+        anchor="_CENSUS_REPORT_PHANTOMS: tuple[str, ...] = ()",
+        replacement='_CENSUS_REPORT_PHANTOMS = ("3 path",)',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
         ),
-        claim="the report's truncation is a measured fact about the rule, so emptying the list "
-        "while the rule still prints `3 path` reddens the census instead of raising its score",
+        claim="the truncation this list used to name is repaired, so claiming a phantom the rule "
+        "no longer prints reddens the census -- a phantom list is measured against the hits",
     ),
     Mutation(
         identifier="census-matrix-gold-quotes-a-phrase-the-table-never-prints",
@@ -1867,8 +1867,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="census-phrase-filed-as-quantity-and-phantom",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='_CENSUS_REPORT_PHANTOMS = ("3 path",)',
-        replacement='_CENSUS_REPORT_PHANTOMS = ("3 path", "106 recorded limitations")',
+        anchor="_CENSUS_REPORT_PHANTOMS: tuple[str, ...] = ()",
+        replacement='_CENSUS_REPORT_PHANTOMS = ("106 recorded limitations",)',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
@@ -2031,18 +2031,58 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="a row that lists exactly as many members as the sentence claims is not recording a "
         "granularity mismatch, and the guard refuses the kind rather than certifying an accident",
     ),
+    # ------------------------------------------------------------------ Phase 56
     Mutation(
-        identifier="phantom-row-quotes-a-phrase-the-document-does-not-print",
+        identifier="participle-list-loses-the-verb-the-corpus-needs",
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
-        anchor='"phantom:two radius definitions were wrong"',
-        replacement='"phantom:two radius definitions were rejected"',
+        anchor='_PARTICIPLE_HEADS = ("spread", "spanning")',
+        replacement='_PARTICIPLE_HEADS = ("spanning",)',
         guard=(
             "tests/python/test_artifact_metadata.py::"
-            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+            "test_the_claim_extractor_reads_percentages_and_refuses_labels"
         ),
-        claim="a phantom is filed against the sentence the document actually prints, so the longer "
-        "phrase is checked in that document and nowhere else",
+        claim="the refusal is a word list, not a grammatical insight, so dropping the one verb the "
+        "corpus actually uses brings `60 markets spread` back",
+    ),
+    Mutation(
+        identifier="noun-list-not-widened-for-the-compound-heads",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='r"|stencils|spreads?|runs|readings?|re-freezings?|paths?|definitions|budgets"\n)',
+        replacement='r"|stencils|spreads?|runs|readings?|re-freezings?|paths?"\n)',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="the head cannot be taken as a head unless it is on the noun list, so un-widening it "
+        "returns both truncations and the census gold no longer matches what the rule prints",
+    ),
+    Mutation(
+        identifier="census-gold-still-lists-the-repaired-truncation",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='    "two radius definitions",\n    "two tests",',
+        replacement='    "two radius",\n    "two tests",',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
+        ),
+        claim="gold transcribes what the document prints under the shipped rule, so keeping the "
+        "old truncation in the list fails the subset check rather than reading as a near miss",
+    ),
+    Mutation(
+        identifier="convention-pair-loses-its-declared-anchor",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='    "convention bridge rather than derived, because the": (',
+        replacement='    "convention bridge rather than derived, because the other": (',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_countable_claim_in_the_report_is_owned_or_declared"
+        ),
+        claim="a claim the widened rule revealed needs its own exemption, so an anchor that stops "
+        "matching leaves the count unowned instead of silently dropping the row",
     ),
     Mutation(
         identifier="declaration-reading-retires-a-kind",
@@ -2148,7 +2188,7 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_every_declared_number_names_a_producer_or_records_that_none_exists"
         ),
         claim="widening the window to whole files does not blur the one forced row, it invents a "
-        'second one: `12 artifacts` turns against the card that says `12 functions, 10 bound '
+        "second one: `12 artifacts` turns against the card that says `12 functions, 10 bound "
         "types`, and the in-loop pin comparison reddens because the derived firing set no longer "
         "agrees with `_MEASUREMENT_DISCLOSURES`",
     ),
