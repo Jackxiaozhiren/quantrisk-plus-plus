@@ -86,20 +86,34 @@ inventory, so it arrived unowned and the report guard refused the change until i
 widening of a detector owes an answer for each thing it newly sees; the census and the owned-or-declared
 guard together are what make that debt visible at commit time rather than later.
 
+**A plant reddens a set, not a name.** #103 asks whether the guard a plant names is the guard that
+actually fails, and the answer was only obtainable by running the module with the mutation in place and
+reading the whole failing set -- `build/phase56-branch-audit.py`, 4 of 4 plants, tree restored
+byte-for-byte after each. Membership held for all four: each named guard failed, and each failure carried
+the message its claim predicted (`the participle-head rule reads ['60 markets spread']`, `no longer prints
+these real counts: ['two radius definitions']`, `... ['two radius']`, `the ledger and the declarations
+disagree`). The set was *wider* than the name in 3 of 4: dropping `spread` from the participle list reddens
+the census too, un-widening the noun list reddens four guards, and a stale declaration anchor reddens the
+ledger and the ownership check together. The union of extra guards over this sample is four distinct tests.
+So the pairing audit #103 prescribes has to assert membership of the failing set, not equality with a
+singleton -- a plant that trips two guards is not mis-paired, and an assert that demanded one name would
+refuse the honest ones.
+
 ## 5. Exact test results
 
 | Gate | Command | Measured result |
 |---|---|---|
-| Lint | `.venv/bin/ruff check .` | pending |
-| Format | `.venv/bin/ruff format --check .` | pending |
-| Types | `.venv/bin/mypy python/quantrisk` | pending |
-| C++ | `ctest --test-dir build/dev` | pending |
-| Validate | `.venv/bin/quantrisk validate` | pending |
-| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | pending |
-| Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | pending |
-| Python | `.venv/bin/python -m pytest -q` | pending |
-| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` | pending, on the committed tree |
-| CI on the pushed head | read from each job's own log | pending |
+| Lint | `.venv/bin/ruff check .` | All checks passed! |
+| Format | `.venv/bin/ruff format --check .` | 200 files already formatted, measured on the `git archive` export of `d4b37e5` (finding 81's rule), and the runner reports the same 200 |
+| Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
+| C++ | `ctest --test-dir build/dev` | 100% tests passed out of 204 |
+| Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
+| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | `Evidence is intact.` -- 95 OK, 0 CHANGED, 0 MISSING. The report bundle moved to `d6e66063a16c` (PDF `35ff1590e862`) when this phase's cascade landed; no experiment artifact was re-frozen |
+| Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 458 tests collected |
+| Python | `.venv/bin/python -m pytest -q` | 527 passed in 88.96s, re-measured on this record tree; the same 527 passed in 98.36s on `d4b37e5` |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` on `d4b37e5` | 153/153 planted defects were rejected by their guard, tree clean afterwards, exit 0 |
+| Branch audit of this phase's plants | `.venv/bin/python build/phase56-branch-audit.py` on `d4b37e5` | 4 of 4 named guards in the failing set with the predicted message, 3 of 4 sets wider than the name, every target restored byte-for-byte |
+| CI on the pushed head | run `39110753030` on `d4b37e5`, read from each job's own log | lint `All checks passed!`, `200 files already formatted`, mypy `Success: no issues found in 23 source files`; C++ and Python `100% tests passed out of 204` and `457 passed, 5 skipped in 157.51s (0:02:37)`, which is #91's reconciliation against the 458 the probe collects (`457 + 5 = 458 + 4 = 462`); benchmark `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 427.0s total` |
 
 ## 6. Numerical validation
 
@@ -112,6 +126,7 @@ guard together are what make that debt visible at commit time rather than later.
 | Ledger kinds | 2 artifact, 6 card, 10 record, 1 granularity, 28 none | `_DECLARATION_READING` |
 | `none:` categories | 15, all used | the vocabulary assert |
 | Plants | 150 → 153 (4 added, 1 retired) | `scripts/mutation_plants.py` |
+| Branch audit | 4 of 4 named guards reddened, 3 of 4 sets wider, 4 extra guards in the union | `build/phase56-branch-audit.py` |
 
 ## 7. Remaining limitations
 
