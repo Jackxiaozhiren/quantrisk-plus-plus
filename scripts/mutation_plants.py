@@ -118,7 +118,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 105 numbered entries",
+        anchor="carries 106 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 457 tests collected offline",
+        anchor="# 458 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,8 +342,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 526 pytest tests with the validation",
-        replacement="and 457 pytest tests with the validation",
+        anchor="and 527 pytest tests with the validation",
+        replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_documents_that_count_python_tests_count_the_ones_that_exist"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 132/132 planted defects rejected",
+        anchor="# 144/144 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 457 collected without them",
+        anchor="oracles installed, 458 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 526 pytest tests with the `oracles` extra here",
+        anchor="# 527 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -876,7 +876,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-provenance-cell-quotes-a-stale-register-count",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="`docs/limitations.md` (105 entries)",
+        anchor="`docs/limitations.md` (106 entries)",
         replacement="`docs/limitations.md` (84 entries)",
         # The defect this phase actually found: the sheet's prose said 94 while its own
         # claim-provenance table said 84, three phases behind, and the guard that owns the register
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty-four report files, one per phase",
-        replacement="fifty-five report files, one per phase",
+        anchor="fifty-five report files, one per phase",
+        replacement="fifty-six report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -1868,12 +1868,193 @@ MUTATIONS: tuple[Mutation, ...] = (
         kind="prose",
         path="tests/python/test_artifact_metadata.py",
         anchor='_CENSUS_REPORT_PHANTOMS = ("3 path",)',
-        replacement='_CENSUS_REPORT_PHANTOMS = ("3 path", "105 recorded limitations")',
+        replacement='_CENSUS_REPORT_PHANTOMS = ("3 path", "106 recorded limitations")',
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_claims_a_document_prints_are_a_census_and_not_a_sample"
         ),
         claim="the two lists are disjoint by construction, and the guard that enforces it is a "
         "different branch from the one that compares them with the hits",
+    ),
+    # ------------------------------------------------------------------ Phase 54
+    Mutation(
+        identifier="declaration-ledger-key-drags-off-the-declaration",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='("docs/reproducibility.md", "within the last one or", "two digits"): (',
+        replacement='("docs/reproducibility.md", "within the last one or", "two digit"): (',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the partition is a set comparison in both directions, and a key whose phrase drifts "
+        "by one character is a pair the ledger no longer covers",
+    ),
+    Mutation(
+        identifier="declaration-verdict-cites-a-quote-the-file-dropped",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='"document:docs/phase_reports/phase-09-research-api.md#310 pytest tests"',
+        replacement='"document:docs/phase_reports/phase-09-research-api.md#310 pytest suite"',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the quote presence branch and the number-in-quote branch are separate asserts, so a "
+        "producer that stopped printing the cited sentence is caught even when the digits remain",
+    ),
+    Mutation(
+        identifier="declaration-verdict-quotes-a-number-the-quote-omits",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='"document:docs/model_cards/heston.md#250 steps, inside sampling error"',
+        replacement='"document:docs/model_cards/heston.md#steps, inside sampling error"',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="a quote that exists but does not print the number is not a producer of it, and that "
+        "refusal is its own branch after the quote is found",
+    ),
+    Mutation(
+        identifier="artifact-verdict-names-a-field-that-does-not-resolve",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor=(
+            '    ("docs/interview_defense.md", "the equality control is bit-identity over", '
+            '"30 joint moves"): (\n        "artifact:experiments/second_book_crossing_map/'
+            'results/"\n        "second_book_crossing_map.json#control.control_moves_compared"'
+        ),
+        replacement=(
+            '    ("docs/interview_defense.md", "the equality control is bit-identity over", '
+            '"30 joint moves"): (\n        "artifact:experiments/second_book_crossing_map/'
+            'results/"\n        "second_book_crossing_map.json#control.control_moves_compares"'
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="a field that has been renamed is reported as a producer that does not resolve, not "
+        "as a disagreement about its value",
+    ),
+    Mutation(
+        identifier="artifact-verdict-points-at-a-sibling-that-holds-another-number",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor=(
+            '    ("paper/technical_report.tex", "over 30 joint moves", "30 joint moves"): (\n'
+            '        "artifact:experiments/second_book_crossing_map/results/"\n'
+            '        "second_book_crossing_map.json#control.control_moves_compared"'
+        ),
+        replacement=(
+            '    ("paper/technical_report.tex", "over 30 joint moves", "30 joint moves"): (\n'
+            '        "artifact:experiments/second_book_crossing_map/results/"\n'
+            '        "second_book_crossing_map.json#control.v160_radius_quartic"'
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the field resolves, so the only thing that can refuse it is the value comparison -- "
+        "which is the check a digit-matching attribution would have passed",
+    ),
+    Mutation(
+        identifier="declaration-category-outside-the-vocabulary",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='"none:prose-idiom, agreement in the last place',
+        replacement='"none:prose-idioms, agreement in the last place',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the category vocabulary is closed, so a row invented at the keyboard is refused "
+        "rather than counted as a reason",
+    ),
+    Mutation(
+        identifier="declaration-vocabulary-accretes-an-unused-category",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_DECLARATION_CATEGORIES = (\n    "chosen-configuration",',
+        replacement=(
+            '_DECLARATION_CATEGORIES = (\n    "chosen-configuration",\n    "waiting-for-a-row",'
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the vocabulary is policed in both directions, so a category nobody uses cannot be "
+        "added now for the row someone expects to write later",
+    ),
+    Mutation(
+        identifier="declaration-disclosure-drops-the-candidate-field-name",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor=(
+            '        "candidate, `widening_factors`, counts how many factors widen the radius on '
+            'this "'
+        ),
+        replacement=(
+            '        "candidate is a radius-fit count, which says nothing about what the '
+            'installed "'
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="a `none:` is only auditable when it names the one field it is refusing, so dropping "
+        "that name from the reason is a finding rather than a rewording",
+    ),
+    Mutation(
+        identifier="granularity-enumeration-names-an-undeclared-symbol",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='"granularity:family=kupiec_pof_test,christoffersen_independence_test,"',
+        replacement='"granularity:family=kupiec_pof_test,christoffersen_independenc_test,"',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the members of a granularity claim are read off the typed stubs as a syntax tree, "
+        "so a symbol the extension does not declare is refused",
+    ),
+    Mutation(
+        identifier="granularity-lists-the-count-the-sentence-claims",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='"christoffersen_conditional_coverage_test"',
+        replacement='"granularity:family=kupiec_pof_test"',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="a row that lists exactly as many members as the sentence claims is not recording a "
+        "granularity mismatch, and the guard refuses the kind rather than certifying an accident",
+    ),
+    Mutation(
+        identifier="phantom-row-quotes-a-phrase-the-document-does-not-print",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='"phantom:two radius definitions were wrong"',
+        replacement='"phantom:two radius definitions were rejected"',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="a phantom is filed against the sentence the document actually prints, so the longer "
+        "phrase is checked in that document and nowhere else",
+    ),
+    Mutation(
+        identifier="declaration-reading-retires-a-kind",
+        kind="prose",
+        path="tests/python/test_artifact_metadata.py",
+        anchor='_DECLARATION_READING: dict[str, int] = {\n    "artifact": 2,',
+        replacement='_DECLARATION_READING: dict[str, int] = {\n    "artifact": 1,',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+        ),
+        claim="the published distribution is compared with the rows, so a reading that moves "
+        "without being retold is red rather than silently stale",
     ),
 )

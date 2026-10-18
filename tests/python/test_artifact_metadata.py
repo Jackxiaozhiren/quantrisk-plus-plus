@@ -2836,7 +2836,7 @@ _CENSUS_README_GOLD = (
     "six books",
     "three files",
     "three artifacts",
-    "105 numbered entries",
+    "106 numbered entries",
     "three entries",
     "seven experiments",
     "548,368 assertions",
@@ -2868,8 +2868,8 @@ _CENSUS_REPRO_GOLD = (
     "20.8% spread",
     "204 tests",
     "32.6% spread",
-    "457 tests",
-    "526 pytest tests",
+    "458 tests",
+    "527 pytest tests",
     "548,368 assertions",
     "7 identity checks",
     "four modules",
@@ -2890,8 +2890,8 @@ _CENSUS_SHEET_GOLD = (
     "1,000 paths",
     "10,000 paths",
     "100,000 antithetic paths",
-    "105 entries",
-    "105 numbered entries",
+    "106 entries",
+    "106 numbered entries",
     "18,816 rows",
     "20,000,000 terminal paths",
     "200,000 paths",
@@ -2905,11 +2905,11 @@ _CENSUS_SHEET_GOLD = (
     "39,040,079 paths",
     "4 scenarios",
     "45,982,736 paths",
-    "457 tests",
+    "458 tests",
     "492 rows",
     "5 books",
-    "526 pytest tests",
-    "526 python tests",
+    "527 pytest tests",
+    "527 python tests",
     "548,368 assertions",
     "69 cases",
     "78,860,106 paths",
@@ -2939,7 +2939,7 @@ _CENSUS_SHEET_PHANTOMS = ("two radius",)
 # $\times$ 4 scenarios", where the head noun `budgets` is not on the list. Both phantoms are
 # named rather than reworded away.
 _CENSUS_MATRIX_GOLD = (
-    "105 numbered limitations",
+    "106 numbered limitations",
     "12 columns",
     "160 runs",
     "18,816 grid rows",
@@ -2973,8 +2973,8 @@ _CENSUS_MATRIX_GOLD = (
 )
 _CENSUS_MATRIX_PHANTOMS: tuple[str, ...] = ()
 _CENSUS_REPORT_GOLD = (
-    "105 numbered entries",
-    "105 recorded limitations",
+    "106 numbered entries",
+    "106 recorded limitations",
     "10{,}000 observations",
     "11 failing assertions",
     "12 cases",
@@ -3001,7 +3001,7 @@ _CENSUS_REPORT_GOLD = (
     "41 pytest tests",
     "492 rows",
     "50 steps",
-    "526 pytest tests",
+    "527 pytest tests",
     "548{,}368 assertions",
     "582 windows",
     "6 failing cases",
@@ -3015,7 +3015,7 @@ _CENSUS_REPORT_GOLD = (
     "800 steps",
     "95 artifacts",
     "eight float fields",
-    "fifty-four report files",
+    "fifty-five report files",
     "five books",
     "five earlier radii",
     "four books",
@@ -3108,7 +3108,7 @@ def test_the_claims_a_document_prints_are_a_census_and_not_a_sample() -> None:
     `docs/validation_matrix.md` 31 of 31, and the report 83 of 84. Across the five, **196 of
     198** distinct phrases are quantities, and the two that are not -- `two radius` and `3 path`
     -- are one shape: a compound head off the noun list, which is #105. The denominator is
-    distinct phrases, not occurrences: `526 pytest tests` printed twice in one document is one
+    distinct phrases, not occurrences: `527 pytest tests` printed twice in one document is one
     entry, and a rate written `paths/s` measures the noun it names.
     """
     assert set(_PRECISION_CENSUS) | set(_PRECISION_PENDING) == set(_ROW_CITATION_DOCUMENTS), (
@@ -3675,6 +3675,490 @@ def test_every_countable_claim_in_the_readme_and_reproducibility_is_owned_or_dec
         )
     ]
     assert not decorative, f"declared exemptions that exempt nothing: {decorative}"
+
+
+# ---------------------------------------------------------------------------
+# The declaration ledger (#101, Phase 54)
+# ---------------------------------------------------------------------------
+
+
+_DECLARATION_KINDS = ("artifact", "document", "granularity", "none", "phantom")
+
+# What a `none:` is a none of. The vocabulary is closed and policed in both directions: an entry
+# outside it is refused, and a category nobody uses is dead weight that the next author would reach
+# for without reading it.
+_DECLARATION_CATEGORIES = (
+    "chosen-configuration",
+    "derivation-route",
+    "discarded-run",
+    "external-oracle-absence",
+    "fixture-composition",
+    "heading-subject",
+    "historical-gap",
+    "layout-rule",
+    "narrative-roadmap",
+    "prose-idiom",
+    "restatement-of-a-record",
+    "scope-restatement",
+    "sign-pair-quoted",
+    "superseded-design",
+)
+
+# One row per (document, anchor, phrase) the shipped inventory exempts by declaration, and a verdict
+# naming what the number is a statement about. Read the kinds as: `artifact:` a frozen field that
+# holds this number, `document:` a sentence in another committed file that prints it, `granularity:`
+# an enumeration whose members the tree declares at a different count than the sentence states,
+# `phantom:` the extractor's own truncation rather than a quantity at all (#105), and `none:` a
+# category of reason why nothing in this tree could disagree. The kind counts are not restated here:
+# `_DECLARATION_READING` below is what publishes them, and it is derived from these rows.
+_DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
+    # ----------------------------------------------------------------- README.md
+    # No entry: every README claim the shipped inventory reads is owned or cited, so it declares no
+    # anchor of its own. The partition assert below is what would notice if that stopped being true.
+    # ------------------------------------------------------- reproducibility (3)
+    ("docs/reproducibility.md", "restated a freeze", "six releases"): (
+        "none:historical-gap, the release gap finding 55 counted on the revision graph when it was "
+        "written, which no committed file enumerates"
+    ),
+    ("docs/reproducibility.md", "12 artifacts reported VOLATILE", "12 artifacts"): (
+        "none:discarded-run, the tally of a verification whose clone was thrown away. No artifact "
+        "in the freeze carries a volatile flag"
+    ),
+    ("docs/reproducibility.md", "within the last one or", "two digits"): (
+        "none:prose-idiom, agreement in the last place or two of a float reading"
+    ),
+    # ---------------------------------------------------- interview sheet (13)
+    ("docs/interview_defense.md", "tests specified here", "two tests"): (
+        "granularity:family=kupiec_pof_test,christoffersen_independence_test,"
+        "christoffersen_conditional_coverage_test"
+    ),
+    ("docs/interview_defense.md", "on this machine, between the", "21,130,162 paths"): (
+        "none:discarded-run, a rate from a desktop load state the tree does not record"
+    ),
+    ("docs/interview_defense.md", "memory-light; at the", "45,982,736 paths"): (
+        "none:discarded-run, the reading of one commit's run on one machine"
+    ),
+    ("docs/interview_defense.md", "of the same loop", "20,000,000 terminal paths"): (
+        "none:chosen-configuration, a workload sized to make the division legible"
+    ),
+    ("docs/interview_defense.md", "resolves to exactly", "one test"): (
+        "none:discarded-run, what one `ctest -R` name matched at the run the answer describes"
+    ),
+    ("docs/interview_defense.md", "moved one mutation's anchor from", "341 python tests"): (
+        "document:docs/release_notes_v1.4.0.md#341 Python tests"
+    ),
+    ("docs/interview_defense.md", "versions of the radius definition", "two versions"): (
+        "none:superseded-design, the rejected definitions finding 46 records"
+    ),
+    ("docs/interview_defense.md", "`+0.15` are", "two columns"): (
+        "none:sign-pair-quoted, the `-0.15` and `+0.15` the sentence itself names"
+    ),
+    ("docs/interview_defense.md", "let the long-dated book publish a", "0.15 cubic radius"): (
+        "none:superseded-design, what a rejected reading of one column published. The artifact "
+        "fields holding 0.15 belong to other books -- the long-dated book's shipped cubic "
+        "radius is `books[1].radius_cubic` -- so naming any of them would attribute the "
+        "number to a measurement this sentence does not make"
+    ),
+    ("docs/interview_defense.md", "tests at `v1.0.0`", "330 python tests"): (
+        "document:docs/release_notes_v1.0.0.md#330 Python tests"
+    ),
+    ("docs/interview_defense.md", "corner gaps 1.819909 / 0.456807 /", "0.46 reading"): (
+        "document:docs/limitations.md#absolute gap reaches ~0.46"
+    ),
+    ("docs/interview_defense.md", "the equality control is bit-identity over", "30 joint moves"): (
+        "artifact:experiments/second_book_crossing_map/results/"
+        "second_book_crossing_map.json#control.control_moves_compared"
+    ),
+    ("docs/interview_defense.md", "radius definitions were wrong", "two radius"): (
+        "phantom:two radius definitions were wrong"
+    ),
+    # ---------------------------------------------------- validation matrix (6)
+    ("docs/validation_matrix.md", "ways gets", "two rows"): (
+        "none:layout-rule, the table's own convention for a component checked two ways"
+    ),
+    ("docs/validation_matrix.md", "Schwarz makes", "two vanna routes"): (
+        "none:derivation-route, the pair of difference paths the identity is taken along"
+    ),
+    ("docs/validation_matrix.md", "routes agree to", "two vanna routes"): (
+        "none:derivation-route, the same pair restated where the agreement figure is the claim"
+    ),
+    ("docs/validation_matrix.md", "A CRR lattice at", "50 steps"): (
+        "document:docs/model_cards/crr_binomial.md#absolute at N = 50"
+    ),
+    ("docs/validation_matrix.md", "and nothing second-order in", "two factors"): (
+        "none:external-oracle-absence, what the installed QuantLib does not expose. The one field "
+        "candidate, `widening_factors`, counts how many factors widen the radius on this "
+        "repository's own books, so it is not this sentence's producer"
+    ),
+    ("docs/validation_matrix.md", "vanna share no", "two routes"): (
+        "none:derivation-route, the pair of routes a closed form is checked against"
+    ),
+    # ------------------------------------------------------- the report (24)
+    ("paper/technical_report.tex", "310 pytest tests with no release tag", "190 ctest entries"): (
+        "document:docs/phase_reports/phase-09-research-api.md#190 CTest entries"
+    ),
+    ("paper/technical_report.tex", "310 pytest tests with no release tag", "310 pytest tests"): (
+        "document:docs/phase_reports/phase-09-research-api.md#310 pytest tests"
+    ),
+    ("paper/technical_report.tex", "at 200{,}000 paths over 250 steps", "200{,}000 paths"): (
+        "document:docs/model_cards/heston.md#200k paths / 250 steps"
+    ),
+    ("paper/technical_report.tex", "at 200{,}000 paths over 250 steps", "250 steps"): (
+        "document:docs/model_cards/heston.md#250 steps, inside sampling error"
+    ),
+    ("paper/technical_report.tex", "and variance value over", "20{,}000 paths"): (
+        "document:docs/model_cards/heston.md#over 20 000 paths"
+    ),
+    (
+        "paper/technical_report.tex",
+        "combined standard errors for 20, 80 and 320 steps",
+        "320 steps",
+    ): ("document:docs/model_cards/heston.md#steps 20/80/320"),
+    ("paper/technical_report.tex", "Convexity buys", "two orders"): (
+        "none:prose-idiom, an order-of-magnitude reading of the table beside it"
+    ),
+    ("paper/technical_report.tex", "Monte Carlo stress VaR at", "400{,}000 paths"): (
+        "document:docs/model_cards/scenario_stress_testing.md#at 400k paths"
+    ),
+    ("paper/technical_report.tex", "one volatility,", "one credit spread"): (
+        "none:fixture-composition, one asset class of the synthetic ten-factor fixture, defined in "
+        "the optimisation experiment's code and enumerated by nothing"
+    ),
+    ("paper/technical_report.tex", "holds only while", "one factor moves"): (
+        "none:scope-restatement, the bound's assumption stated as a scope"
+    ),
+    ("paper/technical_report.tex", "The same bound when", "two factors"): (
+        "none:heading-subject, the subject a section title names. The one field candidate, "
+        "`widening_factors`, is the count of factors that widen one book's radius, not the "
+        "number of factors the section moves together"
+    ),
+    ("paper/technical_report.tex", "Two checks say the added piece", "two checks"): (
+        "none:narrative-roadmap, the paragraph announcing the two arguments it then makes"
+    ),
+    ("paper/technical_report.tex", "over 30 joint moves", "30 joint moves"): (
+        "artifact:experiments/second_book_crossing_map/results/"
+        "second_book_crossing_map.json#control.control_moves_compared"
+    ),
+    ("paper/technical_report.tex", "agreement at the precision floor means", "two sides"): (
+        "none:prose-idiom, an equivalence stated as a count of the sides of one identity"
+    ),
+    ("paper/technical_report.tex", "comparisons by roughly", "seven orders"): (
+        "document:docs/phase_reports/phase-06-portfolio-optimisation.md#"
+        "seven and a half orders of magnitude"
+    ),
+    ("paper/technical_report.tex", "16 later cases had never", "16 later cases"): (
+        "document:docs/phase_reports/phase-05-market-risk.md#16 later cases had never executed"
+    ),
+    ("paper/technical_report.tex", "exposed 6 failing cases", "6 failing cases"): (
+        "document:docs/phase_reports/phase-05-market-risk.md#exposed 6 failing cases and 11"
+    ),
+    ("paper/technical_report.tex", "exposed 6 failing cases", "11 failing assertions"): (
+        "document:docs/phase_reports/phase-05-market-risk.md#11 failing assertions"
+    ),
+    ("paper/technical_report.tex", "1{,}000 steps is about 1.6 GB", "200{,}000 paths"): (
+        "none:chosen-configuration, one corner of a memory sizing the report labels an estimate. "
+        "Three benchmark fields hold 200000 and none is this hypothetical"
+    ),
+    ("paper/technical_report.tex", "1{,}000 steps is about 1.6 GB", "1{,}000 steps"): (
+        "document:docs/phase_reports/phase-04-path-dependent-heston.md#1000 steps"
+    ),
+    ("paper/technical_report.tex", "steepener; credit is", "one spread"): (
+        "none:restatement-of-a-record, the register's own wording for limitation 46 paraphrased "
+        "into a numeral; the entry there says `a single`, and no producer counts what it names"
+    ),
+    (
+        "paper/technical_report.tex",
+        "macOS-committed artifact in the last digits of",
+        "eight float fields",
+    ): (
+        "none:discarded-run, the field count of one cross-platform re-run that no artifact records"
+    ),
+    ("paper/technical_report.tex", "31 CTest entries", "31 ctest entries"): (
+        "document:docs/phase_reports/phase-01-clean-clone-run.md#100% tests passed out of 31"
+    ),
+    ("paper/technical_report.tex", "31 CTest entries", "41 pytest tests"): (
+        "document:docs/phase_reports/phase-01-engineering-foundation.md#41 passed in 0.43 s"
+    ),
+}
+
+
+# The reading this phase publishes, pinned so that a row changing kind is a decision rather than a
+# quiet edit. It is derived from the rows above and compared against them below: 21 of the 46
+# numbers the inventory exempts now have something in this tree to disagree with them, and 24 do
+# not. `docs/phase_reports/phase-54-*.md` §5 quotes the same five numbers from this dictionary.
+_DECLARATION_READING: dict[str, int] = {
+    "artifact": 2,
+    "document": 18,
+    "granularity": 1,
+    "none": 24,
+    "phantom": 1,
+}
+
+
+def _claim_token_value(token: str) -> float:
+    """`200{,}000`, `1,000`, `0.46` and `seven` as one number."""
+    plain = token.replace("{,}", "").replace(",", "")
+    try:
+        return float(plain)
+    except ValueError:
+        return float(_as_int(token))
+
+
+def _number_spellings(token: str) -> tuple[str, ...]:
+    """Every way this repository's own documents print the number a claim states.
+
+    A model card writes `200k paths`, `docs/limitations.md` writes `20 000 paths` and the report
+    writes `200{,}000 paths` for three different runs those numbers describe. The ledger has to read
+    all three, because a producer that disagrees in spelling is still a producer, and one the guard
+    cannot read is filed as having none.
+    """
+    value = _claim_token_value(token)
+    spellings: list[str] = []
+    plain = token.replace("{,}", "").replace(",", "")
+    if not plain.replace(".", "").isdigit():
+        spellings.append(token.lower())
+    if value.is_integer():
+        number = int(value)
+        spellings += [str(number), f"{number:,}", f"{number:,}".replace(",", " ")]
+        if number % 1_000 == 0:
+            spellings.append(f"{number // 1_000}k")
+        if number % 1_000_000 == 0:
+            spellings.append(f"{number // 1_000_000}M")
+    else:
+        spellings.append(str(value))
+    return tuple(spellings)
+
+
+def _number_is_printed(text: str, token: str) -> bool:
+    for spelling in _number_spellings(token):
+        if re.search(rf"(?<![\d.]){re.escape(spelling)}(?![\d])", text):
+            return True
+    return False
+
+
+def _declared_pairs() -> dict[tuple[str, str, str], str]:
+    """Every claim the inventory exempts by declaration, keyed by (document, anchor, phrase).
+
+    Derived from the shipped classification rather than listed: owned patterns are skipped, then a
+    claim within `_DECLARE_RADIUS` of a declaration anchor is a pair. A sentence reworded so an
+    anchor stops reaching its claim, or a document that starts printing one, changes this set and
+    the ledger has to be told.
+    """
+    tables: dict[str, dict[str, str]] = {
+        **dict.fromkeys(_MARKDOWN_INVENTORY, _MARKDOWN_DECLARED),
+        "paper/technical_report.tex": _REPORT_DECLARED,
+    }
+    owned_tables: dict[str, tuple[str, ...]] = {
+        **{name: tuple(_MARKDOWN_OWNED) for name in _MARKDOWN_INVENTORY},
+        "paper/technical_report.tex": tuple(_REPORT_OWNED),
+    }
+    pairs: dict[tuple[str, str, str], str] = {}
+    for document, declared in tables.items():
+        if document in _MARKDOWN_INVENTORY:
+            flat = _markdown_inventory_text(document)[1]
+        else:
+            flat = _tex_inventory_text()[1]
+        spans: list[tuple[int, int]] = []
+        for pattern in owned_tables[document]:
+            for found in re.finditer(pattern, flat):
+                for group in range(1, (found.lastindex or 0) + 1):
+                    spans.append(found.span(group))
+        for match in _extract_claims(flat, spelled=True):
+            at = match.start(1)
+            if any(lo <= at < hi for lo, hi in spans):
+                continue
+            if not [anchor for anchor in declared if _is_declared(flat, at, [anchor])]:
+                continue
+            for anchor in declared:
+                if not _is_declared(flat, at, [anchor]):
+                    continue
+                pairs.setdefault((document, anchor, match.group(0).strip().lower()), match.group(1))
+    return pairs
+
+
+def _declared_core_surface() -> set[str]:
+    """The names the typed stubs of the extension declare, read as a syntax tree."""
+    names: set[str] = set()
+    for stub in sorted((REPO_ROOT / "python" / "quantrisk").glob("*.pyi")):
+        for node in ast.parse(stub.read_text(encoding="utf-8")).body:
+            if isinstance(node, ast.AnnAssign | ast.FunctionDef | ast.ClassDef):
+                target = getattr(node, "target", node)
+                if isinstance(target, ast.Name):
+                    names.add(target.id)
+    return names
+
+
+def _artifact_numeric_fields(artifact: Path) -> dict[str, float]:
+    """Every number in one frozen artifact, keyed by its dotted path."""
+    found: dict[str, float] = {}
+
+    def walk(node: Any, prefix: str) -> None:
+        if isinstance(node, dict):
+            for key, value in node.items():
+                walk(value, f"{prefix}.{key}" if prefix else str(key))
+        elif isinstance(node, list):
+            for index, value in enumerate(node):
+                walk(value, f"{prefix}[{index}]")
+        elif isinstance(node, int | float) and not isinstance(node, bool):
+            found[prefix] = float(node)
+
+    walk(json.loads(artifact.read_text(encoding="utf-8")), "")
+    return found
+
+
+def _artifact_field(artifact: str, field: str) -> float:
+    data = json.loads((REPO_ROOT / artifact).read_text(encoding="utf-8"))
+    node: Any = data
+    walked: list[str] = []
+    for key in field.split("."):
+        walked.append(key)
+        if not isinstance(node, dict) or key not in node:
+            raise KeyError(f"{'.'.join(walked)}")
+        node = node[key]
+    if isinstance(node, bool) or not isinstance(node, int | float):
+        raise TypeError(f"{'.'.join(walked)} is {type(node).__name__}, not a number")
+    return float(node)
+
+
+def _phrase_noun_words(phrase: str) -> set[str]:
+    return {word.lower() for word in re.findall(r"[A-Za-z]{3,}", phrase)}
+
+
+def _field_candidates(value: float, phrase: str) -> list[tuple[str, str]]:
+    """Frozen-artifact numbers that equal this claim and name the noun the claim counts.
+
+    Deliberately narrow. `2` is the value of hundreds of fields and a ledger that called any of them
+    a producer would be certifying digits, not reading sentences -- which is the failure the whole
+    census line of phases has been chasing. A candidate is a field whose *own path* shares a word
+    with the phrase.
+    """
+    nouns = _phrase_noun_words(phrase)
+    candidates: list[tuple[str, str]] = []
+    for relative in sorted(_frozen_artifact_paths()):
+        path = REPO_ROOT / relative
+        if not relative.endswith(".json") or not path.is_file():
+            continue
+        for field, held in _artifact_numeric_fields(path).items():
+            if held != value:
+                continue
+            if nouns & {word.lower() for word in re.findall(r"[A-Za-z]{3,}", field)}:
+                candidates.append((relative, field))
+    return candidates
+
+
+def test_every_declared_number_names_a_producer_or_records_that_none_exists() -> None:
+    """The exemption list stops being a judgement when each row has something to disagree with.
+
+    #101 asked what a declared number is a statement *about*, and the honest answer for months was
+    "a human read the sentence and judged it" -- the weaker of the inventory's two mechanisms, with
+    the asymmetry registered as #86. This turns the 46 judgement calls into a ledger: each row names
+    either a producer the guard re-reads (an artifact field, a sentence in another committed
+    document, an enumeration of declared symbols) or a closed category of reason why nothing in this
+    tree can disagree.
+    """
+    pairs = _declared_pairs()
+    assert pairs, "no declared pair derives from the shipped inventory, so this guard is inert"
+    assert set(pairs) == set(_DECLARATION_LEDGER), (
+        "the ledger and the declarations disagree: "
+        f"declared with no verdict {sorted(set(pairs) - set(_DECLARATION_LEDGER))}, "
+        f"verdict for nothing declared {sorted(set(_DECLARATION_LEDGER) - set(pairs))}"
+    )
+
+    kinds: dict[str, int] = dict.fromkeys(_DECLARATION_KINDS, 0)
+    categories: set[str] = set()
+    for (document, anchor, phrase), verdict in sorted(_DECLARATION_LEDGER.items()):
+        token = pairs[(document, anchor, phrase)]
+        head, _, rest = verdict.partition(":")
+        assert head in _DECLARATION_KINDS, f"{document} {phrase!r}: unknown kind {verdict!r}"
+        kinds[head] += 1
+
+        if head == "artifact":
+            artifact, _, field = rest.partition("#")
+            held = None
+            try:
+                held = _artifact_field(artifact, field)
+            except (KeyError, TypeError) as error:
+                raise AssertionError(
+                    f"{document} {phrase!r} names {artifact}#{field}, which does not "
+                    f"resolve: {error}"
+                ) from None
+            assert held == _claim_token_value(token), (
+                f"{document} {phrase!r} declares {artifact}#{field}, which now holds {held} "
+                f"rather than {token} -- the producer disagreed, so either the sentence or the "
+                "ledger is stale"
+            )
+
+        elif head == "document":
+            source, _, quote = rest.partition("#")
+            assert (REPO_ROOT / source).is_file(), (
+                f"{document} {phrase!r} cites {source}, which is not in the tree"
+            )
+            flat = _folded_document(source)
+            assert quote.lower() in flat.lower(), (
+                f"{document} {phrase!r} cites {source} for {quote!r}, which that document no "
+                "longer prints: the producer moved and the sentence did not"
+            )
+            assert _number_is_printed(quote, token), (
+                f"{document} {phrase!r} cites {source} for {quote!r}, and that quote does not "
+                f"print {token}. A quote without the number is not a producer of it"
+            )
+
+        elif head == "granularity":
+            grouping, _, listed = rest.partition("=")
+            names = [name for name in listed.split(",") if name]
+            surface = _declared_core_surface()
+            missing = sorted(set(names) - surface)
+            assert not missing, (
+                f"{document} {phrase!r} enumerates {missing}, which the typed stubs do not declare"
+            )
+            assert len(names) != _claim_token_value(token), (
+                f"{document} {phrase!r} lists {len(names)} members under {grouping!r}, which is "
+                "not a granularity mismatch -- it is the count itself, so the row belongs to a "
+                "kind that checks agreement rather than one that records the disagreement"
+            )
+
+        elif head == "phantom":
+            assert rest.lower() in _inventory_flat(document).lower(), (
+                f"{document} declares {phrase!r} as the rule's truncation of {rest!r}, which that "
+                "document no longer prints"
+            )
+            assert phrase in rest, (
+                f"{document}: {phrase!r} is not a prefix of {rest!r}, so it is not a truncation"
+            )
+
+        else:
+            category, _, reason = rest.partition(", ")
+            assert category in _DECLARATION_CATEGORIES, (
+                f"{document} {phrase!r} files {category!r}, which is not in the closed vocabulary"
+            )
+            categories.add(category)
+            candidates = _field_candidates(_claim_token_value(token), phrase)
+            if len(candidates) == 1:
+                artifact, field = candidates[0]
+                name = max((key for key in field.split(".") if key.isidentifier()), key=len)
+                assert name in reason, (
+                    f"{document} {phrase!r} has exactly one field candidate, {artifact}#{field}, "
+                    "and is filed as having none. The verdict has to say why that field is "
+                    f"not its producer, naming it ({name!r}); a silent `none:` is the judgement "
+                    "this ledger exists to replace"
+                )
+
+    assert kinds == _DECLARATION_READING, (
+        f"the ledger's reading moved: {kinds} against the published {_DECLARATION_READING}. A row "
+        "that changes kind changes what this phase measured, so the numbers have to be retold "
+        "together with the row"
+    )
+    assert categories == set(_DECLARATION_CATEGORIES), (
+        f"categories the ledger does not use are dead vocabulary: "
+        f"{sorted(set(_DECLARATION_CATEGORIES) - categories)}, "
+        f"unrecorded: {sorted(categories - set(_DECLARATION_CATEGORIES))}"
+    )
+
+
+def _inventory_flat(document: str) -> str:
+    if document in _MARKDOWN_INVENTORY:
+        return _markdown_inventory_text(document)[1]
+    return _tex_inventory_text()[1]
 
 
 def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:

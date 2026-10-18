@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 526 pytest tests with
-    the `oracles` extra installed, and the same tree collects 457 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 527 pytest tests with
+    the `oracles` extra installed, and the same tree collects 458 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1335,6 +1335,24 @@ never removed just because a later phase shipped.
     *exemptions*, and the report's ten declared claims still rest on a sentence a guard cannot read. What
     would test a declaration is a producer for the thing it says has none, which is a different instrument
     from anything built here. Related: #105 (the shape the census ended on), #102 (reach), #95.
+
+    **Amended 2026-10-18 by Phase 54: closed, and the headline half turned into a ledger.** The exemptions
+    are now enumerated per pair -- 46 `(document, anchor, phrase)` rows derived from the shipped
+    classification, each carrying a verdict in `_DECLARATION_LEDGER` -- and 21 of the 46 name a producer
+    the guard re-reads on every run: 2 frozen artifact fields (both `30 joint moves` readings against
+    `control.control_moves_compared`, which holds 30) and 18 quotes in other committed documents, checked
+    to be both present and to print the number. One row records a granularity mismatch instead of a
+    producer: `two tests` counts families while the stubs declare three functions, so the guard refuses a
+    list that would agree, and a wrong symbol in that list is caught by parsing the `.pyi` as a syntax
+    tree. One row is #105's `two radius`, filed as the rule's own truncation against the longer phrase the
+    document prints. The remaining **24** say nothing in this tree can disagree, in 14 named categories,
+    and that residue is not this entry's silence any more -- it is #106, which states what the ledger
+    cannot check about them. Two things this closure measured rather than assumed: the report's `seven
+    orders of magnitude` cites a phase report that says `seven and a half`, so the rounding is now a quote
+    a guard holds rather than a paraphrase; and `0.15 cubic radius` has eleven artifact fields holding
+    0.15, all of them other books, which is why the forced-candidate rule stops at *disclosing* the
+    candidate instead of compelling an attribution. Related: #106 (what the `none:` rows still owe), #105
+    (the phantom the ledger files), #86 (the Heston numbers, now read off the model cards that state them).
 102. **The tail of the claim rule allows one word between a numeral and its noun, and that choice is
     unmeasured on the recall side: a real claim phrased with two modifiers is invisible to the
     inventory.** `_CLAIM_TAIL` is `\s*%?\s+(?:[A-Za-z]+\.?\s+)?` plus the noun list, so `twelve columns`
@@ -1515,3 +1533,32 @@ never removed just because a later phase shipped.
     counts something of. That is a judgement, and the number that would overturn it is on the table: a third
     truncation in a document whose head noun *is* on the list, or a misattribution anywhere else. Related:
     #104 (the other half of the slot), #102 (the slot's reach), #101 (whose queue found this).
+106. **A `none:` verdict is policed for its shape, not for the absence it states.** Phase 54 closed #101 by
+    giving every declared number a verdict, and 24 of the 46 verdicts say that nothing in this tree can
+    disagree with them. The guard checks a lot about those rows -- the category is in a closed vocabulary of
+    14, the vocabulary has no unused member, the partition with the declarations is exact in both
+    directions, and when the frozen artifacts hold *exactly one* field whose value equals the claim and whose
+    path names the claim's noun, the verdict has to name that field and say why it is not the producer. What
+    it cannot check is the case the rule is about: a row filed as having no producer when a producer exists
+    somewhere the search does not look.
+    (a) The search looks in one place. `_field_candidates` walks the numeric fields of the frozen artifacts
+    and matches on value *and* on a word shared between the field path and the claim's noun; there is no
+    sibling that searches committed *documents*, because the document search measured in this phase returned
+    87 files carrying `2` and 10 carrying `two digits`, so an unforced document match is noise and a forced
+    one is luck. The asymmetry is therefore real but bounded: a declared number whose producer is a sentence
+    in another file can be filed `none:`, and the ledger's `document:` rows are found by whoever fills the
+    row rather than by the guard. Three of the 24 were caught exactly that way during this phase --
+    `200{,}000 paths`, `400{,}000 paths` and `20{,}000 paths` all turned out to have model-card producers
+    written in abbreviated spellings (`200k paths`, `400k paths`, `20 000 paths`), which the number grammar
+    had to learn to read -- so the rule's blind spot is not hypothetical.
+    (b) The second blind spot is the opposite one. `_number_is_printed` accepts the thousand-separator,
+    space-separated and `k`/`M` abbreviations of a number, which is what makes those three cards readable as
+    producers; the same tolerance lets a `document:` quote match a digit that belongs to a different
+    quantity in the same sentence, and only the noun-adjacency the *candidate* search applies is missing
+    there. (c) What would close this entry is the sibling search written and priced: enumerate, for each
+    `none:` row, the documents that print the number within one clause of the claim's noun, and refuse the
+    filing when exactly one exists -- the same forced-disclosure rule the artifacts already have. Its cost is
+    known: `docs/limitations.md` alone would become a candidate corpus for most of the 24, so the rule has to
+    exclude restatements of the claim's own document family, which is a judgement the ledger would then have
+    to record. Related: #101 (what this residue replaced), #86 (the Heston sentences, whose producers are
+    model cards the freeze does not hash), #99 (a citation that exists and describes the wrong thing).
