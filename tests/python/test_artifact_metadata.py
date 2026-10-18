@@ -4604,29 +4604,45 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
         "function word and the block is deleting it"
     )
 
-    # 9. A counted noun cannot also be the modifier (#104). In "meets it at 60 markets spread over
-    #    the $(d_1, v)$ plane" the rule took `markets` for the adjective and `spread` -- also on the
-    #    noun list -- for the thing counted, so a sentence counting sixty markets was filed as a
-    #    claim of sixty spreads: right number, wrong object, and the census's gold/phantom split has
-    #    no shape for it. The refusal sits *inside* the optional group; that placement is the whole
-    #    mechanism: written in front of the group it refuses the noun as well as the modifier, and
-    #    the corpus loses real counts by the dozen -- the first reconstruction of this rule lost 92
-    #    phrases, `160 runs` among them. So the property is two-sided on both halves of that
-    #    failure: the shipped rule must land on `60 markets`, and the hoisted variant must be shown
-    #    to delete claims the shipped rule keeps.
-    collision_frame = "and meets it at 60 markets spread over the plane"
-    landed = [m.group(0).strip().lower() for m in _extract_claims(collision_frame, spelled=True)]
+    # 9. The modifier slot reads two words, because that is where the corpus says what it
+    #    counts (#104 then #105). In "meets it at 60 markets spread over the plane" the rule could
+    #    take `markets` for the adjective and `spread` -- also a noun -- for the thing counted,
+    #    filing a sentence about sixty markets as sixty spreads. #104 refused that by banning any
+    #    counted noun from the slot; #105 showed the same ban eating `two radius definitions` and
+    #    `3 path budgets`, where the second word is the head. The refusal reads two words now, and
+    #    sits *inside* the optional group: a counted noun may modify unless the head is a word the
+    #    corpus uses as a verb. Placement is load-bearing twice -- hoisted in front of the group the
+    #    lookahead refuses the noun too (the first reconstruction lost 92 phrases, `160 runs` among
+    #    them), and a head test before the group kills the whole tail at that position, which is how
+    #    `60 markets` vanishes rather than `60 markets spread`. So the property is two-sided on both
+    #    shapes: the shipped rule lands on the markets *and* on the compound heads, and each wrong
+    #    construction has to be shown to delete or misplace a phrase.
+    head_frame = "and meets it at 60 markets spread over the plane"
+    landed = [m.group(0).strip().lower() for m in _extract_claims(head_frame, spelled=True)]
     assert landed == ["60 markets"], (
-        f"the collision rule reads {landed} from {collision_frame!r}; the sentence counts markets, "
-        "so the answer must be the markets and not the spreads"
+        f"the participle-head rule reads {landed} from {head_frame!r}; the sentence counts "
+        "markets, so the answer must be the markets and not the spreads"
     )
+    compound_frames = {
+        "reading them one at a time gave two radius definitions as wrong": [
+            "two radius definitions"
+        ],
+        "the sweep ran 40 seeds x 3 path budgets x 4 scenarios": ["3 path budgets", "4 scenarios"],
+    }
+    for frame, expected in compound_frames.items():
+        read = [m.group(0).strip().lower() for m in _extract_claims(frame, spelled=True)]
+        assert read == expected, (
+            f"{frame!r} reads {read}, expected {expected}: a counted noun in the modifier slot "
+            "has to be allowed when the head is not a known participle, or the compound head "
+            "truncates again"
+        )
     assert [
         match.group(0).strip().lower()
         for match in _extract_claims("over 582 rolling windows", spelled=True)
     ] == ["582 rolling windows"], "a classifier that is not a counted noun stopped classifying"
 
     # The corpus effect of the refusal is one phrase, named. Measured on 2026-10-17 with the
-    # closed-class block in place in both rules, so what this compares is the collision half alone.
+    # closed-class block in place in both rules, so what this compares is the head refusal alone.
     def rule_hits(rule: re.Pattern[str], flat: str) -> set[str]:
         """The distinct phrases *rule* prints in *flat*, label shapes removed -- `_extract_claims`
         with the pattern handed in, so every comparison below is against the same filter."""
@@ -4668,7 +4684,7 @@ def test_the_claim_extractor_reads_percentages_and_refuses_labels() -> None:
         ("paper/technical_report.tex", "60 markets spread"),
         ("paper/technical_report.tex", "60 markets"),
     }, (
-        f"the collision refusal moves {sorted(shifted)}, which is not the pair #104 measured: "
+        f"the head refusal moves {sorted(shifted)}, which is not the pair #104 and #105 measured: "
         "either a second noun-pair has started to collide, or the sentence that earns the rule has "
         "been reworded out of the report and the rule now refuses nothing real"
     )
