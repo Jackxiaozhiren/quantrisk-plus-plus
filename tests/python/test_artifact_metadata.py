@@ -3763,7 +3763,9 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
         "document:docs/release_notes_v1.0.0.md#330 Python tests"
     ),
     ("docs/interview_defense.md", "corner gaps 1.819909 / 0.456807 /", "0.46 reading"): (
-        "document:docs/limitations.md#absolute gap reaches ~0.46"
+        "none:restatement-of-a-record, limitation 12's `~0.46` restated. `0.456807` beside it in "
+        "the same cell is the corner gap, and the test asserts a normalised bound rather than "
+        "publishing the third value, so nothing in the tree prints 0.46 as a measurement"
     ),
     ("docs/interview_defense.md", "the equality control is bit-identity over", "30 joint moves"): (
         "artifact:experiments/second_book_crossing_map/results/"
@@ -3860,7 +3862,9 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
         "Three benchmark fields hold 200000 and none is this hypothetical"
     ),
     ("paper/technical_report.tex", "1{,}000 steps is about 1.6 GB", "1{,}000 steps"): (
-        "document:docs/phase_reports/phase-04-path-dependent-heston.md#1000 steps"
+        "none:chosen-configuration, the other corner of the same sizing the anchor already calls a "
+        "hypothetical. `docs/phase_reports/phase-04-path-dependent-heston.md` does the same "
+        "arithmetic, which is a restatement of it rather than a measurement of it"
     ),
     ("paper/technical_report.tex", "steepener; credit is", "one spread"): (
         "none:restatement-of-a-record, the register's own wording for limitation 46 paraphrased "
@@ -3888,9 +3892,9 @@ _DECLARATION_LEDGER: dict[tuple[str, str, str], str] = {
 # not. `docs/phase_reports/phase-54-*.md` §5 quotes the same five numbers from this dictionary.
 _DECLARATION_READING: dict[str, int] = {
     "artifact": 2,
-    "document": 18,
+    "document": 16,
     "granularity": 1,
-    "none": 24,
+    "none": 26,
     "phantom": 1,
 }
 

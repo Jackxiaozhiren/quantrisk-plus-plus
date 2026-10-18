@@ -17,12 +17,12 @@ which declares no anchor of its own. Their verdicts:
 | Kind | Rows | What the guard re-reads |
 |---|---|---|
 | `artifact:` | 2 | the named dotted field in the frozen artifact, and that it still holds the claim's number |
-| `document:` | 18 | the named file exists, prints the cited quote, and the quote itself prints the number |
+| `document:` | 16 | the named file exists, prints the cited quote, and the quote itself prints the number |
 | `granularity:` | 1 | every named member resolves in the typed stubs, and their count is *not* the claim's |
 | `phantom:` | 1 | the longer phrase the rule truncated is in the document that carries the claim |
-| `none:` | 24 | a category from a closed vocabulary of 14, plus a forced-candidate disclosure |
+| `none:` | 26 | a category from a closed vocabulary of 14, plus a forced-candidate disclosure |
 
-So **21 of the 46** exempted numbers now have something in this tree that can disagree with them, and
+So **19 of the 46** exempted numbers now have something in this tree that can disagree with them, and
 the distribution is pinned in `_DECLARATION_READING` rather than restated in prose.
 
 Three verdicts found their producer while the rows were being written, and the grammar had to learn to
@@ -111,6 +111,21 @@ been written against the intended text. A cascade that can half-land needs its o
 `grep -c` on the anchor after the format pass is that step; the assertion in the script proved only that
 the *pattern* was absent, not that the file was in the state the plants assumed.
 
+**A restatement is not a producer, and the ledger's first version got two rows wrong.** Auditing the
+completed 46 before recording them found `0.46 reading` cited to `docs/limitations.md` and `1{,}000 steps`
+cited to `docs/phase_reports/phase-04-path-dependent-heston.md`. Both files print the number, both checks
+passed, and neither file *produces* it: the register rounds a corner gap that `test_pricing_vs_quantlib.py`
+asserts only as a normalised bound and never publishes, and the phase report does the same `200k x 1000
+steps ~= 1.6 GB` arithmetic the report is paraphrasing -- whose own anchor reason calls it a hypothetical,
+which is the sentence that gave the row away. Both are `none:` now, and the reading is 19 producer-backed
+rather than 21. The obvious general rule -- refuse a `document:` verdict when the anchor reason contains a
+no-producer word like `estimate` or `restated` -- was measured and refused, because the reasons negate
+their own vocabulary: `published in the artifact's control block and re-executed by the run rather than
+*restated from prose*` is the strongest artifact row in the ledger, and a word list would have reddened it.
+The finding that survives is #106's: the distinction between a record that *originates* a reading and a
+record that *copies* one is not a keyword property, so the sibling search has to carry it as a declared
+producer corpus with a reason per directory, not as a regex.
+
 **An empty ledger is the cheapest way to get the row list right.** Writing the guard with
 `_DECLARATION_LEDGER = {}` and letting the partition assert print all 46 keys took one run and removed
 the entire class of errors where a hand-typed key differs from the derived one by a comma or a lowercase
@@ -138,8 +153,8 @@ the instrument can name its own rows, do not name them for it.
 |---|---|---|
 | Declared pairs | 46 | `_declared_pairs()` |
 | Per document | reproducibility 3, sheet 13, matrix 6, report 24, README 0 | the same |
-| Producer-backed rows | 21 (2 artifact + 18 document + 1 granularity) | `_DECLARATION_READING` |
-| Rows with no producer | 24, in 14 categories | the same, plus the vocabulary assert |
+| Producer-backed rows | 19 (2 artifact + 16 document + 1 granularity) | `_DECLARATION_READING` |
+| Rows with no producer | 26, in 14 categories | the same, plus the vocabulary assert |
 | Artifact field behind `30 joint moves` | `control.control_moves_compared` = 30 | `_artifact_field()` |
 | Functions declared behind `two tests` | 3 | `_declared_core_surface()` over `risk.pyi` |
 | Field candidates for `0.15 cubic radius` | 11, none of them this sentence's book | `_field_candidates()` |
@@ -176,4 +191,4 @@ field, a reworded model card, a stub that stops declaring a symbol, and a catego
 keyboard all redden rather than age quietly. What the gate does *not* yet do is insist that a number has
 a producer; it insists that whoever exempted it says which kind of answer they gave, and that the answer
 survives being re-read. #106 is the residue, and it is the first version of that residue with a measured
-size: 24 of 46.
+size: 26 of 46.

@@ -1338,14 +1338,14 @@ never removed just because a later phase shipped.
 
     **Amended 2026-10-18 by Phase 54: closed, and the headline half turned into a ledger.** The exemptions
     are now enumerated per pair -- 46 `(document, anchor, phrase)` rows derived from the shipped
-    classification, each carrying a verdict in `_DECLARATION_LEDGER` -- and 21 of the 46 name a producer
+    classification, each carrying a verdict in `_DECLARATION_LEDGER` -- and 19 of the 46 name a producer
     the guard re-reads on every run: 2 frozen artifact fields (both `30 joint moves` readings against
-    `control.control_moves_compared`, which holds 30) and 18 quotes in other committed documents, checked
+    `control.control_moves_compared`, which holds 30) and 16 quotes in other committed documents, checked
     to be both present and to print the number. One row records a granularity mismatch instead of a
     producer: `two tests` counts families while the stubs declare three functions, so the guard refuses a
     list that would agree, and a wrong symbol in that list is caught by parsing the `.pyi` as a syntax
     tree. One row is #105's `two radius`, filed as the rule's own truncation against the longer phrase the
-    document prints. The remaining **24** say nothing in this tree can disagree, in 14 named categories,
+    document prints. The remaining **26** say nothing in this tree can disagree, in 14 named categories,
     and that residue is not this entry's silence any more -- it is #106, which states what the ledger
     cannot check about them. Two things this closure measured rather than assumed: the report's `seven
     orders of magnitude` cites a phase report that says `seven and a half`, so the rounding is now a quote
@@ -1534,7 +1534,7 @@ never removed just because a later phase shipped.
     truncation in a document whose head noun *is* on the list, or a misattribution anywhere else. Related:
     #104 (the other half of the slot), #102 (the slot's reach), #101 (whose queue found this).
 106. **A `none:` verdict is policed for its shape, not for the absence it states.** Phase 54 closed #101 by
-    giving every declared number a verdict, and 24 of the 46 verdicts say that nothing in this tree can
+    giving every declared number a verdict, and 26 of the 46 verdicts say that nothing in this tree can
     disagree with them. The guard checks a lot about those rows -- the category is in a closed vocabulary of
     14, the vocabulary has no unused member, the partition with the declarations is exact in both
     directions, and when the frozen artifacts hold *exactly one* field whose value equals the claim and whose
@@ -1547,10 +1547,15 @@ never removed just because a later phase shipped.
     87 files carrying `2` and 10 carrying `two digits`, so an unforced document match is noise and a forced
     one is luck. The asymmetry is therefore real but bounded: a declared number whose producer is a sentence
     in another file can be filed `none:`, and the ledger's `document:` rows are found by whoever fills the
-    row rather than by the guard. Three of the 24 were caught exactly that way during this phase --
-    `200{,}000 paths`, `400{,}000 paths` and `20{,}000 paths` all turned out to have model-card producers
-    written in abbreviated spellings (`200k paths`, `400k paths`, `20 000 paths`), which the number grammar
-    had to learn to read -- so the rule's blind spot is not hypothetical.
+    row rather than by the guard. Three were caught in that direction during this phase -- `200{,}000
+    paths`, `400{,}000 paths` and `20{,}000 paths` all turned out to have model-card producers written in
+    abbreviated spellings (`200k paths`, `400k paths`, `20 000 paths`), which the number grammar had to
+    learn to read. Two were caught in the other direction, and they are the same entry's real cost: the
+    ledger first filed `0.46 reading` against `docs/limitations.md` and `1{,}000 steps` against
+    `docs/phase_reports/phase-04-path-dependent-heston.md`, and both citations were to a document that
+    *restates* the reading rather than one that produces it -- the register rounds a corner gap the test
+    asserts only as a normalised bound, and the phase report does the same sizing arithmetic the report
+    paraphrases, whose own anchor reason calls it a hypothetical. Both are now `none:`.
     (b) The second blind spot is the opposite one. `_number_is_printed` accepts the thousand-separator,
     space-separated and `k`/`M` abbreviations of a number, which is what makes those three cards readable as
     producers; the same tolerance lets a `document:` quote match a digit that belongs to a different
