@@ -1563,7 +1563,7 @@ never removed just because a later phase shipped.
     there. (c) What would close this entry is the sibling search written and priced: enumerate, for each
     `none:` row, the documents that print the number within one clause of the claim's noun, and refuse the
     filing when exactly one exists -- the same forced-disclosure rule the artifacts already have. Its cost is
-    known: `docs/limitations.md` alone would become a candidate corpus for most of the 24, so the rule has to
+    known: `docs/limitations.md` alone would become a candidate corpus for most of the 26, so the rule has to
     exclude restatements of the claim's own document family, which is a judgement the ledger would then have
     to record. Related: #101 (what this residue replaced), #86 (the Heston sentences, whose producers are
     model cards the freeze does not hash), #99 (a citation that exists and describes the wrong thing).

@@ -137,15 +137,15 @@ the instrument can name its own rows, do not name them for it.
 | Gate | Command | Measured result |
 |---|---|---|
 | Lint | `.venv/bin/ruff check .` | All checks passed! |
-| Format | `.venv/bin/ruff format --check .` | pending the record commit's measurement on the `git archive` export (finding 81's rule) |
+| Format | `.venv/bin/ruff format --check .` | 198 files already formatted, measured on the `git archive` export of `a6db867` (finding 81's rule), and the runner reports the same 198 |
 | Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
 | C++ | `ctest --test-dir build/dev` | 100% tests passed out of 204 |
 | Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
-| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | pending the rebuild |
+| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | `Evidence is intact.` -- the report bundle moved to `a16a42883a4e` (PDF `170057abb69d`) when the phase report landed, no artifact re-frozen |
 | Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 458 tests collected |
-| Python | `.venv/bin/python -m pytest -q` | pending the report rebuild |
-| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` | pending, on the committed tree |
-| CI on the pushed head | read from each job's own log | pending |
+| Python | `.venv/bin/python -m pytest -q` | 527 passed in 123.37s (0:02:03) |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` on `a6db867` | 144/144 planted defects were rejected by their guard, tree clean afterwards, exit 0 |
+| CI on the pushed head | run `39093557147` on `a6db867`, read from each job's own log | lint `All checks passed!`, `198 files already formatted`, mypy `Success: no issues found in 23 source files`; C++ and Python `100% tests passed out of 204` and `457 passed, 5 skipped in 155.41s`, which is #91's reconciliation against the 458 the probe collects (`457 + 5 = 458 + 4 = 462`); benchmark `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 428.8s total` |
 
 ## 6. Numerical validation
 
