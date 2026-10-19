@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 532 pytest tests with
-    the `oracles` extra installed, and the same tree collects 463 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 537 pytest tests with
+    the `oracles` extra installed, and the same tree collects 468 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1644,3 +1644,26 @@ never removed just because a later phase shipped.
     both header paddings; its cost is one module run per guard, now 72 of them, plus a reason string per plant that the audit can
     compare against the assertion that actually failed. Related: #103 (what this residue replaced), #94 (why
     a plant's list and its interpreter must stay separate files), finding 91.
+
+    **Amended 2026-10-19 by Phase 58: closed by a text-link rule that costs nothing extra, and closed
+    with its own limit named.** The check ships inside `--pairing-audit`: pytest is now run with
+    `--tb=line`, which prints one entry per failure as `<file>:<lineno>: AssertionError: <whole message>`,
+    so a failing assertion is attributed by its location against the named guard's `ast` span rather than
+    by slicing a transcript at a header -- the trap that produced finding 91. The link rule is derived, not
+    hand-typed: the guard's *reading closure* (its own body, every same-file binding it references, nested
+    definitions included) has to name the edited path or a token taken from the plant's anchor. Measured
+    over the 72 sampled plants: 61 satisfy it in the function alone, 10 more need the closure, and the
+    remaining one -- `release-note-cites-a-digest-its-file-does-not-carry`, whose anchor is a 40-character
+    digest no guard spells out -- is named in `UNATTRIBUTED_PLANTS`, so the residual is a pinned set
+    rather than a silence. The dynamic cost is zero: the audit already ran each module, and only the
+    report flag changed.
+
+    What this does not buy, and what no further instrument in this queue buys, is causality. A text link
+    says the guard could see the thing that changed; the only instrument that separates "saw it" from
+    "rejected because of it" is a differential -- run the guard again against a neutral edit on the same
+    line and require green -- which doubles a 72-run census to 144 runs to interrogate the one plant the
+    closure rule already names. That is the same judgement #105 and #106 reached from the other direction:
+    an instrument is worth building when it changes what a reader can conclude, not when it merely makes a
+    true sentence harder to write. The residual is therefore recorded here, with its cost and the reason it
+    is not taken, rather than opened as a queue item. Related: #103 (membership, which this builds on),
+    #94, findings 86, 89 and 91.

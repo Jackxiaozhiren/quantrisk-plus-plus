@@ -57,6 +57,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import importlib.util
 import os
@@ -235,21 +236,37 @@ class Harness:
     def pytest(self, node: str) -> int:
         return self.uv("pytest", node, "-q", "-p", "no:cacheprovider").returncode
 
-    def module_failures(self, target: str) -> tuple[bool, set[str]]:
-        """``(ran, failing test names)`` for a whole-module run, which the pairing audit reads.
+    def module_failures(self, target: str) -> tuple[bool, set[str], list[tuple[str, int, str]]]:
+        """``(ran, failing test names, per-assertion lines)`` for a whole-module run.
 
         The return code decides whether the module ran at all: 0 is "everything passed" and 1 is
         "some tests failed", while 2, 3, 4 and 5 are collection, internal, usage and
         no-tests-collected errors. Folding those into an empty failing set would report a broken run
         as a plant that escaped every guard, which is the confusion this instrument exists to
         remove.
+
+        `--tb=line` is what makes the third value worth having: one line per failure, carrying the
+        file and line of the assertion that raised, with the message whole. The short summary clips
+        that message to the terminal width, and slicing traceback sections by header width is how
+        finding 91 happened.
         """
         completed = _run(
-            ("uv", "run", "--frozen", "pytest", target, "-q", "--tb=no", "-p", "no:cacheprovider"),
+            (
+                "uv",
+                "run",
+                "--frozen",
+                "pytest",
+                target,
+                "-q",
+                "--tb=line",
+                "-p",
+                "no:cacheprovider",
+            ),
             self.verbose,
             self.next_environment(),
         )
-        return completed.returncode in (0, 1), parse_failures(completed.stdout)
+        ran = completed.returncode in (0, 1)
+        return ran, parse_failures(completed.stdout), parse_line_tracebacks(completed.stdout)
 
     def guard(self, mutation: Mutation) -> tuple[bool, int]:
         """``(ran, returncode)`` for the guard alone; the build is the caller's to time."""
@@ -449,6 +466,132 @@ def audit_verdict(*, ran: bool, failing: Collection[str], named: str) -> str:
     return MIS_PAIRED if failing else ESCAPED
 
 
+ATTRIBUTED = "attributed"
+UNATTRIBUTED = "no text link to the mutation"
+
+#: Words that look like identifiers in a prose anchor and mean nothing as a text link.
+PROSE_TOKENS = frozenset(
+    {
+        "and",
+        "the",
+        "for",
+        "not",
+        "with",
+        "that",
+        "this",
+        "from",
+        "def",
+        "return",
+        "None",
+        "True",
+        "False",
+        "when",
+        "then",
+        "than",
+        "into",
+        "over",
+        "its",
+        "are",
+        "was",
+        "were",
+        "has",
+        "have",
+        "but",
+        "because",
+        "which",
+        "while",
+        "does",
+    }
+)
+TOKEN_PATTERN = re.compile(r"[A-Za-z_][A-Za-z0-9_]{2,}")
+CLOSURE_DEPTH = 8
+#: The plants whose named guard has no text link to what they edit, and why. This is the audit's
+#: residual, named the way `pairing_sample` names the guards it cannot observe. #107 asks whether
+#: the guard rejected *about* the mutated line, and text answers only when the guard spells the
+#: mutated name somewhere in what it reads. A plant that leaves this list without a change here,
+#: or a new plant that belongs on it, reddens the pairing guard.
+UNATTRIBUTED_PLANTS = frozenset({"release-note-cites-a-digest-its-file-does-not-carry"})
+
+
+def anchor_tokens(anchor: str) -> set[str]:
+    """Identifier-shaped tokens of a plant's anchor, prose stopwords removed. Pure."""
+    return {token for token in TOKEN_PATTERN.findall(anchor) if token not in PROSE_TOKENS}
+
+
+def parse_line_tracebacks(output: str) -> list[tuple[str, int, str]]:
+    """Every `(file, line, message)` pytest printed under `--tb=line`. Pure.
+
+    One line per failure, keyed by the location of the assertion that raised -- a boundary the
+    transcript states rather than one the reader assumes. Finding 91 is what the alternative costs:
+    slicing by section header breaks the moment pytest pads a long test name to two underscores, and
+    the neighbour's message then reads as the plant's own.
+    """
+    found = []
+    for match in re.finditer(r"^(.+?):(\d+): ((?:\w+Error|Exception): .*)$", output, flags=re.M):
+        found.append((match.group(1), int(match.group(2)), match.group(3)))
+    return found
+
+
+def guard_span(source: str, name: str) -> tuple[int, int] | None:
+    """The line span of a test function in `source`, or None when it is not defined at top level."""
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.FunctionDef) and node.name == name:
+            return node.lineno, (node.end_lineno or node.lineno)
+    return None
+
+
+def reading_closure(source: str, name: str, depth: int = CLOSURE_DEPTH) -> str:
+    """The guard's own text plus every same-file binding it reaches, transitively.
+
+    Nested definitions count: the closure that mattered in measurement was reached only through a
+    helper defined inside the guard, and a walk that indexes top-level names alone loses the chain
+    at that boundary -- which is the same shape #103's static half blamed reachability for, but here
+    widening only adds coverage rather than crying wolf.
+    """
+    tree = ast.parse(source)
+    members: dict[str, ast.AST] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            members.setdefault(node.name, node)
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    members.setdefault(target.id, node)
+    included: list[str] = []
+    seen: set[str] = set()
+    queue: list[tuple[str, int]] = [(name, 0)]
+    while queue:
+        current, level = queue.pop(0)
+        if current in seen or current not in members:
+            continue
+        seen.add(current)
+        node = members[current]
+        included.append(ast.get_source_segment(source, node) or "")
+        if level >= depth:
+            continue
+        for reference in ast.walk(node):
+            if isinstance(reference, ast.Name) and reference.id in members:
+                queue.append((reference.id, level + 1))
+            elif isinstance(reference, ast.Attribute) and reference.attr in members:
+                queue.append((reference.attr, level + 1))
+    return "\n".join(included)
+
+
+def attribution(*, closure: str, path: str, tokens: set[str]) -> str:
+    """Whether the guard's reading closure names the file or the symbols this plant edited.
+
+    Text, not causality: it says the guard could see the thing that changed. #107's residue is that
+    a guard can also reject for a reason the mutation merely coincides with, and no text rule
+    settles that -- the one plant on this head that has no link is a digest string no guard spells
+    out.
+    """
+    if path in closure or Path(path).name in closure:
+        return ATTRIBUTED
+    if any(token in closure for token in tokens):
+        return ATTRIBUTED
+    return UNATTRIBUTED
+
+
 def _audit_blocker(mutation: Mutation) -> str | None:
     """Why a whole-module pytest cannot observe this plant, or None when it can."""
     if mutation.kind == "core":
@@ -515,6 +658,8 @@ def audit_counts(
         "escaped": sum(1 for r in observed if r["verdict"] == ESCAPED),
         "not-run": len(records) - len(observed),
         "unreachable": len(unreachable),
+        "attributed": sum(1 for r in observed if r["attribution"] == ATTRIBUTED),
+        "unattributed": sum(1 for r in observed if r["attribution"] == UNATTRIBUTED),
     }
 
 
@@ -529,6 +674,7 @@ def run_pairing_audit(mutation: Mutation, harness: Harness) -> dict[str, object]
     verdict = ANCHOR_NOT_UNIQUE if reason else None
     ran = False
     failing: set[str] = set()
+    tracebacks: list[tuple[str, int, str]] = []
     restored = False
     if reason is None:
         try:
@@ -536,13 +682,17 @@ def run_pairing_audit(mutation: Mutation, harness: Harness) -> dict[str, object]
             if path.read_bytes() == before:
                 verdict = NO_OP
             else:
-                ran, failing = harness.module_failures(target)
+                ran, failing, tracebacks = harness.module_failures(target)
                 verdict = audit_verdict(ran=ran, failing=failing, named=named)
         finally:
             path.write_bytes(before)
             restored = hashlib.sha256(path.read_bytes()).hexdigest() == digest
         if not restored:
             verdict = NOT_RESTORED
+    guard_source = (
+        mutated if target == mutation.path else (REPO_ROOT / target).read_text(encoding="utf-8")
+    )
+    site = failing_assertion(tracebacks, module=target, name=named, source=guard_source)
     return {
         "id": mutation.identifier,
         "kind": mutation.kind,
@@ -551,7 +701,32 @@ def run_pairing_audit(mutation: Mutation, harness: Harness) -> dict[str, object]
         "others": sorted(failing - {named}),
         "guard": mutation.guard,
         "claim": mutation.claim,
+        "assert_line": site[0] if site else None,
+        "assert_message": site[1] if site else "",
+        "attribution": attribution(
+            closure=reading_closure(guard_source, named),
+            path=mutation.path,
+            tokens=anchor_tokens(mutation.anchor),
+        ),
     }
+
+
+def failing_assertion(
+    tracebacks: Sequence[tuple[str, int, str]], *, module: str, name: str, source: str
+) -> tuple[int, str] | None:
+    """The assertion the named guard itself raised: `(line, message)`, or None when nothing matched.
+
+    Attributed by location rather than by slicing the transcript at a header, so a long test name
+    cannot move the boundary (finding 91). None is a real answer, not a failure: the guard can
+    reject through an error raised outside any of its assert statements.
+    """
+    span = guard_span(source, name)
+    if span is None:
+        return None
+    for file_, line, message in tracebacks:
+        if Path(file_).name == Path(module).name and span[0] <= line <= span[1]:
+            return line, message
+    return None
 
 
 def audit_census(counts: dict[str, int]) -> str:
@@ -563,6 +738,8 @@ def audit_census(counts: dict[str, int]) -> str:
         f"{counts['singleton']}/{observed} had it alone; "
         f"{counts['mis-paired']} mis-paired, {counts['escaped']} escaped, "
         f"{counts['not-run']} unrunnable, {unreachable} guards unreachable; "
+        f"{counts['attributed']}/{observed} attributed by text to the line they moved, "
+        f"{counts['unattributed']} named as unlinkable; "
         f"{counts['declared']} declared = {counts['sampled']} sampled + {unreachable} named"
     )
 
@@ -602,13 +779,33 @@ def run_pairing_mode(selected: Sequence[Mutation], harness: Harness) -> int:
             joined = ", ".join(str(name) for name in record["others"])
             extra = f"  also reddened: {joined}"
         print(f"{marker} {str(record['verdict']):<22} {str(record['id']):<{width}}{extra}")
+    residual = sorted(
+        str(record["id"])
+        for record in records
+        if record["attribution"] == UNATTRIBUTED and record["verdict"] == PAIRED
+    )
+    if residual:
+        print(
+            f"\n{UNATTRIBUTED}: {', '.join(residual)} -- the reading closure names neither"
+            " the edited path nor a token from the anchor"
+        )
+    unexpected = set(residual) ^ set(UNATTRIBUTED_PLANTS)
+    gained = sorted(set(residual) - set(UNATTRIBUTED_PLANTS))
+    lost = sorted(set(UNATTRIBUTED_PLANTS) - set(residual))
+    if unexpected:
+        print(f"unlinkable set moved: new {gained}, gone {lost}")
+        print(
+            "a plant that loses its text link is a pairing the audit cannot vouch for, and one "
+            "that gains a link should leave this list"
+        )
     print(f"\n{audit_census(counts)}")
     left = [path for path in snapshots if git_status(str(path.relative_to(REPO_ROOT)))]
     if left:
         names = ", ".join(sorted(str(path.relative_to(REPO_ROOT)) for path in left))
         print(f"{NOT_RESTORED}: {len(left)} target(s) still differ from HEAD: {names}")
         return 1
-    return 0 if counts["mis-paired"] + counts["escaped"] + counts["not-run"] == 0 else 1
+    clean = counts["mis-paired"] + counts["escaped"] + counts["not-run"]
+    return 0 if clean == 0 and not unexpected else 1
 
 
 def select(kind: str | None, only: Sequence[str]) -> list[Mutation]:

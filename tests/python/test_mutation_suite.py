@@ -631,27 +631,33 @@ def test_the_pairing_audit_census_divides_by_what_it_observed() -> None:
     records that were observed, an unrunnable module is its own bucket, and the `declared` total is
     the sum of the two lists rather than a count of the registry the run never reached.
     """
+    attributed = harness.ATTRIBUTED
     records: list[dict[str, object]] = [
-        {"verdict": harness.PAIRED, "size": 3},
-        {"verdict": harness.PAIRED, "size": 1},
-        {"verdict": harness.MIS_PAIRED, "size": 2},
-        {"verdict": harness.ESCAPED, "size": 0},
-        {"verdict": harness.MODULE_NOT_RUN, "size": 0},
+        {"verdict": harness.PAIRED, "size": 3, "attribution": attributed},
+        {"verdict": harness.PAIRED, "size": 1, "attribution": attributed},
+        {"verdict": harness.PAIRED, "size": 2, "attribution": harness.UNATTRIBUTED},
+        {"verdict": harness.MIS_PAIRED, "size": 2, "attribution": attributed},
+        {"verdict": harness.ESCAPED, "size": 0, "attribution": attributed},
+        {"verdict": harness.MODULE_NOT_RUN, "size": 0, "attribution": attributed},
     ]
     unreachable = [("tests/python/x.py::test_unreachable", "its guard is a CTest case")]
     counts = harness.audit_counts(records, unreachable)
-    assert counts["sampled"] == 5
-    assert counts["observed"] == 4, "a module that never ran was counted as an observation"
+    assert counts["sampled"] == 6
+    assert counts["attributed"] == 4 and counts["unattributed"] == 1, (
+        f"attributed={counts['attributed']} unattributed={counts['unattributed']}: the residual of "
+        "the derived rule is the number #107 has to be able to name"
+    )
+    assert counts["observed"] == 5, "a module that never ran was counted as an observation"
     assert counts["not-run"] == 1, "the unrunnable bucket stopped naming its own cases"
-    assert counts["paired"] == 2 and counts["singleton"] == 1, (
+    assert counts["paired"] == 3 and counts["singleton"] == 1, (
         f"paired={counts['paired']} singleton={counts['singleton']}: a census that cannot tell "
         "a wide set from a lone one is not the measurement #103 was closed with"
     )
     assert counts["mis-paired"] == 1 and counts["escaped"] == 1
-    assert counts["declared"] == counts["sampled"] + counts["unreachable"] == 6
+    assert counts["declared"] == counts["sampled"] + counts["unreachable"] == 7
 
     line = harness.audit_census(counts)
-    assert "2/4" in line and "1/4" in line, (
+    assert "3/5" in line and "1/5" in line, (
         f"the published census reads {line!r}, so a ratio lost the denominator that makes it a "
         "measurement rather than a count"
     )
@@ -677,8 +683,8 @@ def test_a_module_run_that_never_collected_is_not_read_as_an_escaped_plant(
 
     monkeypatch.setattr(harness.subprocess, "run", fake)
     swept = harness.Harness(build_dir="build/dev")
-    ran, failing = swept.module_failures("tests/python/x.py")
-    assert not ran and failing == set(), "a collection error read as a run"
+    ran, failing, tracebacks = swept.module_failures("tests/python/x.py")
+    assert not ran and failing == set() and tracebacks == [], "a collection error read as a run"
     assert (
         harness.audit_verdict(ran=ran, failing=failing, named="test_a") == harness.MODULE_NOT_RUN
     ), "an unrunnable module reached a pairing verdict"
@@ -687,9 +693,164 @@ def test_a_module_run_that_never_collected_is_not_read_as_an_escaped_plant(
 
     def fake_failures(command: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(
-            list(command or []), 1, "FAILED tests/python/x.py::test_a - AssertionError\n", ""
+            list(command or []),
+            1,
+            "FAILED tests/python/x.py::test_a - AssertionError\n"
+            "/abs/x.py:12: AssertionError: mine\n",
+            "",
         )
 
     monkeypatch.setattr(harness.subprocess, "run", fake_failures)
-    ran, failing = swept.module_failures("tests/python/x.py")
+    ran, failing, tracebacks = swept.module_failures("tests/python/x.py")
     assert ran and failing == {"test_a"}, "a real failure did not read as one"
+    assert tracebacks == [("/abs/x.py", 12, "AssertionError: mine")], (
+        f"the per-assertion lines are what #107 needs, and the run returned {tracebacks}"
+    )
+
+
+def test_the_pairing_audit_attributes_a_failure_to_the_named_guard_s_own_line() -> None:
+    """#107's question is "did this guard reject about this line", and the line is derivable.
+
+    `--tb=line` prints one entry per failure keyed by the location of the assertion that raised, so
+    the audit can say which assert in the named guard spoke -- without slicing a transcript at a
+    header. The attribution is also what makes the neighbour invisible: a message from a different
+    function in the same file cannot be selected, because its line is outside the named span.
+    """
+    source = (
+        "def test_neighbour():\n"
+        "    assert 1 == 2, 'the neighbour objects about something else'\n"
+        "\n"
+        "\n"
+        "def test_named():\n"
+        "    value = 1\n"
+        "    assert value == 2, 'the named guard reads the mutated slot'\n"
+    )
+    span = harness.guard_span(source, "test_named")
+    assert span == (5, 7), f"the span of test_named is {span}, and a wrong span attributes wrongly"
+    lines = [
+        ("t.py", 2, "AssertionError: the neighbour objects about something else"),
+        ("t.py", 7, "AssertionError: the named guard reads the mutated slot"),
+    ]
+    site = harness.failing_assertion(lines, module="t.py", name="test_named", source=source)
+    assert site == (7, "AssertionError: the named guard reads the mutated slot"), (
+        f"the audit attributes the failure to {site}; the named guard's own line is 7"
+    )
+    assert harness.failing_assertion(
+        [lines[0]], module="t.py", name="test_named", source=source
+    ) is None, "a neighbour's line was read as the named guard's own"
+    assert harness.failing_assertion(
+        lines, module="t.py", name="no_such_test", source=source
+    ) is None, "a guard that is not defined reported a failing line anyway"
+
+
+def test_the_pairing_audit_reads_its_evidence_as_lines_and_not_as_a_sliced_transcript() -> None:
+    """Finding 91, made permanent: the cutter may not depend on how wide the terminal is.
+
+    The two shapes that defeated a fixed-width separator are both here -- a short test name padded
+    with many underscores and a 71-character one padded with two -- and the reader has to return
+    each message whole and separate, because a message is the part of a branch audit that is not a
+    number.
+    """
+    long_name = "test_every_declared_number_names_a_producer_or_records_that_none_exists"
+    transcript = (
+        "=========================== short test summary info ============================\n"
+        f"FAILED tests/python/x.py::test_a - AssertionError: mine\n"
+        f"FAILED tests/python/x.py::{long_name} - AssertionError: theirs\n"
+        "tests/python/x.py:41: AssertionError: mine, with the whole message kept\n"
+        "tests/python/x.py:77: AssertionError: theirs and much longer than a terminal "
+        "width -- " + "x" * 120 + "\n"
+        "2 failed in 61.20s\n"
+    )
+    read = harness.parse_failures(transcript)
+    assert read == {"test_a", long_name}, f"the failing set reads {read}"
+    lines = harness.parse_line_tracebacks(transcript)
+    assert [entry[1] for entry in lines] == [41, 77], f"the line reader returned {lines}"
+    assert len(lines) == 2 and len(lines[1][2]) > 150, (
+        f"a message was clipped: {[len(entry[2]) for entry in lines]}"
+    )
+
+
+def test_the_module_run_asks_pytest_for_the_per_assertion_lines_it_needs() -> None:
+    """A report format the audit does not ask for is a check that silently stopped happening.
+
+    `--tb=no` would still yield the failing names, so every other part of the audit keeps passing
+    while the attribution half reads nothing. The flag is the input to #107's instrument, so it is
+    asserted where the command is built rather than trusted from the docstring.
+    """
+    seen: list[list[str]] = []
+
+    def spy(command: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+        seen.append([str(part) for part in list(command or [])])
+        return subprocess.CompletedProcess(list(command or []), 1, "FAILED x.py::test_a\n", "")
+
+    monkeypatch_module = pytest.MonkeyPatch()
+    monkeypatch_module.setattr(harness.subprocess, "run", spy)
+    try:
+        swept = harness.Harness(build_dir="build/dev")
+        ran, failing, _ = swept.module_failures("tests/python/x.py")
+    finally:
+        monkeypatch_module.undo()
+    assert ran and failing == {"test_a"}, "the module run stopped reporting what failed"
+    assert seen and "--tb=line" in seen[0], (
+        f"the audit runs pytest with {seen[0] if seen else 'nothing'}; without the flag there "
+        "are no per-assertion lines to attribute"
+    )
+
+
+def test_the_reading_closure_reaches_the_helpers_and_constants_a_guard_actually_reads() -> None:
+    """A guard rarely names the mutated thing in its own body; the closure has to walk to it.
+
+    The chain here is the one the shipped registry has: the test calls a local helper, the helper
+    reads a module constant, and the constant is built from the symbol the plant edits. A walk that
+    indexes only top-level definitions stops at the nested helper, and a shallow depth cap stops one
+    hop earlier -- both leave a real pairing looking unlinkable, which is how #103's static half
+    failed.
+    """
+    source = (
+        "_TAIL = _MODIFIER_BLOCK + noun\n"
+        "\n"
+        "def test_named():\n"
+        "    def helper():\n"
+        "        return _TAIL\n"
+        "    assert helper() == 1, 'the rule reads the slot it should not'\n"
+    )
+    closure = harness.reading_closure(source, "test_named")
+    assert "_TAIL" in closure, f"the closure did not reach the module constant: {closure!r}"
+    deep = (
+        "_A = _B\n_B = _C\n_C = _D\n_D = _E\n_E = _TARGET\n_TARGET = 1\n"
+        "def test_deep():\n    assert _A == 1\n"
+    )
+    assert "_TARGET" in harness.reading_closure(deep, "test_deep"), (
+        "the closure walk stopped short of a five-hop chain, so a depth cap is doing the "
+        "attributing rather than the text"
+    )
+
+
+def test_the_plants_the_pairing_audit_cannot_attribute_are_named_and_pinned() -> None:
+    """The residual of the derived rule is a list, not an silence.
+
+    Computed without running a suite: every sampled plant's guard module is parsed, its reading
+    closure built, and the plant's own anchor tokens and edited path looked for in it. What does not
+    match has to appear in `UNATTRIBUTED_PLANTS` -- a plant that loses its text link unnoticed is
+    #107's defect arriving through the back door, and a plant that gains a link and stays listed is
+    a pin that has stopped measuring anything.
+    """
+    sample, _unreachable = harness.pairing_sample(harness.MUTATIONS)
+    unattributed = []
+    for plant in sample:
+        module, _, name = plant.guard.partition("::")
+        source = (REPO_ROOT / module).read_text(encoding="utf-8")
+        closure = harness.reading_closure(source, name)
+        verdict = harness.attribution(
+            closure=closure, path=plant.path, tokens=harness.anchor_tokens(plant.anchor)
+        )
+        if verdict == harness.UNATTRIBUTED:
+            unattributed.append(plant.identifier)
+    assert set(unattributed) == set(harness.UNATTRIBUTED_PLANTS), (
+        f"unlinkable plants are {sorted(unattributed)} but the pinned set is "
+        f"{sorted(harness.UNATTRIBUTED_PLANTS)}: the audit's residual moved without a decision"
+    )
+    assert len(unattributed) <= 3, (
+        f"{len(unattributed)} of {len(sample)} sampled plants cannot be attributed, so the "
+        "derived rule is no longer the reason this check is cheap"
+    )

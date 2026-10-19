@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 463 tests collected offline",
+        anchor="# 468 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 532 pytest tests with the validation",
+        anchor="and 537 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 162/162 planted defects rejected",
+        anchor="# 169/169 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 463 collected without them",
+        anchor="oracles installed, 468 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 532 pytest tests with the `oracles` extra here",
+        anchor="# 537 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty-eight report files, one per phase",
-        replacement="fifty-nine report files, one per phase",
+        anchor="fifty-nine report files, one per phase",
+        replacement="sixty report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -2283,8 +2283,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="pairing-module-run-reads-a-collection-error-as-a-run",
         kind="prose",
         path="scripts/run_mutation_suite.py",
-        anchor="        return completed.returncode in (0, 1), parse_failures(completed.stdout)",
-        replacement="        return True, parse_failures(completed.stdout)",
+        anchor="        return ran, parse_failures(completed.stdout), parse_line_tracebacks(",
+        replacement="        return True, parse_failures(completed.stdout), parse_line_tracebacks(",
         guard=(
             "tests/python/test_mutation_suite.py::"
             "test_a_module_run_that_never_collected_is_not_read_as_an_escaped_plant"
@@ -2321,5 +2321,113 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="this is #103's own silence one layer up: an audit that reports 71 of 71 guards "
         "paired while five guards were never observed reads as complete coverage, so the "
         "unreachable list has to be named or the denominator is a fiction",
+    ),
+    # ------------------------------------------------------------------ Phase 58
+    Mutation(
+        identifier="attribution-claims-every-plant-is-linked",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="    if path in closure or Path(path).name in closure:",
+        replacement="    if True:",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_plants_the_pairing_audit_cannot_attribute_are_named_and_pinned"
+        ),
+        claim="the residual is the whole content of #107's honest answer, so a rule that always "
+        "says attributed reports coverage the text does not support",
+    ),
+    Mutation(
+        identifier="attribution-forgets-which-lines-the-named-guard-owns",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="        if Path(file_).name == Path(module).name and span[0] <= line <= span[1]:",
+        replacement="        if Path(file_).name == Path(module).name:",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_attributes_a_failure_to_the_named_guard_s_own_line"
+        ),
+        claim="the span test is what stops a neighbour's assertion being quoted as the plant's, "
+        "which is finding 91 re-opened inside the new instrument",
+    ),
+    Mutation(
+        identifier="line-reader-matches-the-traceback-style-pytest-did-not-print",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor=(
+            '    for match in re.finditer(r"^(.+?):(\\d+): ((?:\\w+Error|Exception): .*)$", '
+            "output, flags=re.M):"
+        ),
+        replacement=(
+            '    for match in re.finditer(r"^E (.+?):(\\d+): (.*)$", output, flags=re.M):'
+        ),
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_reads_its_evidence_as_lines_and_not_as_a_sliced_transcript"
+        ),
+        claim="a reader written for `--tb=short` finds nothing in `--tb=line` output, and an empty "
+        "attribution reads as a clean audit rather than as a broken reader",
+    ),
+    Mutation(
+        identifier="reading-closure-indexes-only-top-level-definitions",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="    for node in ast.walk(tree):",
+        replacement="    for node in tree.body:",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_reading_closure_reaches_the_helpers_and_constants_a_guard_actually_reads"
+        ),
+        claim=(
+            "the chains that matter enter a helper defined inside the test, and a walk that"
+            "stops at the module body calls a real pairing unlinkable"
+        ),
+    ),
+    Mutation(
+        identifier="reading-closure-stops-at-one-hop",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="        if level >= depth:",
+        replacement="        if level >= 1:",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_reading_closure_reaches_the_helpers_and_constants_a_guard_actually_reads"
+        ),
+        claim=(
+            "a depth knob that is smaller than the corpus silently re-creates #103's static"
+            "failure mode, where the reachability walk missed a nested helper"
+        ),
+    ),
+    Mutation(
+        identifier="pinned-residual-list-emptied",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor=(
+            'UNATTRIBUTED_PLANTS = frozenset({"'
+            'release-note-cites-a-digest-its-file-does-not-carry"})'
+        ),
+        replacement="UNATTRIBUTED_PLANTS = frozenset()",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_plants_the_pairing_audit_cannot_attribute_are_named_and_pinned"
+        ),
+        claim=(
+            "an empty exemption list is a pinned set that no longer measures anything, so"
+            "the plant that genuinely has no text link would pass as attributed"
+        ),
+    ),
+    Mutation(
+        identifier="module-run-drops-the-report-flag-the-attribution-needs",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor='                "--tb=line",',
+        replacement='                "--tb=no",',
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_module_run_asks_pytest_for_the_per_assertion_lines_it_needs"
+        ),
+        claim=(
+            "without the flag the audit still names the failing guards and reports every"
+            "attribution as empty, which is the silence #107 exists to close"
+        ),
     ),
 )
