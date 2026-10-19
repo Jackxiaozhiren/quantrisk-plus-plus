@@ -735,12 +735,13 @@ def test_the_pairing_audit_attributes_a_failure_to_the_named_guard_s_own_line() 
     assert site == (7, "AssertionError: the named guard reads the mutated slot"), (
         f"the audit attributes the failure to {site}; the named guard's own line is 7"
     )
-    assert harness.failing_assertion(
-        [lines[0]], module="t.py", name="test_named", source=source
-    ) is None, "a neighbour's line was read as the named guard's own"
-    assert harness.failing_assertion(
-        lines, module="t.py", name="no_such_test", source=source
-    ) is None, "a guard that is not defined reported a failing line anyway"
+    assert (
+        harness.failing_assertion([lines[0]], module="t.py", name="test_named", source=source)
+        is None
+    ), "a neighbour's line was read as the named guard's own"
+    assert (
+        harness.failing_assertion(lines, module="t.py", name="no_such_test", source=source) is None
+    ), "a guard that is not defined reported a failing line anyway"
 
 
 def test_the_pairing_audit_reads_its_evidence_as_lines_and_not_as_a_sliced_transcript() -> None:
