@@ -2368,18 +2368,18 @@ MUTATIONS: tuple[Mutation, ...] = (
         "attribution reads as a clean audit rather than as a broken reader",
     ),
     Mutation(
-        identifier="reading-closure-indexes-only-top-level-definitions",
+        identifier="reading-closure-visits-only-direct-children",
         kind="prose",
         path="scripts/run_mutation_suite.py",
-        anchor="    for node in ast.walk(tree):",
-        replacement="    for node in tree.body:",
+        anchor="        for reference in ast.walk(node):",
+        replacement="        for reference in ast.iter_child_nodes(node):",
         guard=(
             "tests/python/test_mutation_suite.py::"
             "test_the_reading_closure_reaches_the_helpers_and_constants_a_guard_actually_reads"
         ),
         claim=(
-            "the chains that matter enter a helper defined inside the test, and a walk that"
-            "stops at the module body calls a real pairing unlinkable"
+            "a walk over only a node's direct children never reaches a name used inside a "
+            "nested helper, so the closure loses the chain and calls a real pairing unlinkable"
         ),
     ),
     Mutation(
@@ -2426,7 +2426,7 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_module_run_asks_pytest_for_the_per_assertion_lines_it_needs"
         ),
         claim=(
-            "without the flag the audit still names the failing guards and reports every"
+            "without the flag the audit still names the failing guards and reports every "
             "attribution as empty, which is the silence #107 exists to close"
         ),
     ),
