@@ -1460,7 +1460,8 @@ never removed just because a later phase shipped.
     one whole-module run per distinct guard, the failing set read from pytest's own summary, and the cost
     named -- 71 module runs in 57 minutes on this laptop, which is why it is a per-phase instrument and not
     a CI lane. Its first census over `b2df36f` is the datum: **71 of 71** observed plants had the guard they name inside
-    the failing set, and only **28 of 71** had it alone. The remaining 43 are honest plants whose mutation
+    the failing set, and only **28 of 71** had it alone; the shipped registry's own run on `2f9b99e` reads **72 of 72** with
+    28 alone. The remaining 44 are honest plants whose mutation
     edits a module-level structure several guards read, so "exactly the named one objects" would have
     refused 43 of the 71 plants it was meant to certify. The shipped criterion is therefore *membership*:
     it separates finding 86's defect -- a named guard that stays green while a neighbour takes the blame --

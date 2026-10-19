@@ -7,15 +7,15 @@ under one mutation and require that exactly the named one objects". The audit is
 `scripts/run_mutation_suite.py --pairing-audit` -- and the criterion it shipped with is not the one the entry
 wrote, because the registry says that criterion is wrong.
 
-| Quantity | Measured on `b2df36f` | Meaning |
+| Quantity | Measured on `2f9b99e` | Meaning |
 |---|---|---|
-| distinct guards | 76 | the audit's real denominator |
-| observable by a module run | 71 | one plant per guard whose guard is a pytest node |
+| distinct guards | 77 | the audit's real denominator |
+| observable by a module run | 72 | one plant per guard whose guard is a pytest node |
 | unreachable, named | 5 | 3 CTest cases, 2 probe plants that create their own target |
-| plants whose named guard was in the failing set | **71 of 71** | membership separates finding 86's defect with no false alarm |
-| plants whose named guard was the *only* one | **28 of 71** | the prescribed equality test would refuse the other 43 |
+| plants whose named guard was in the failing set | **72 of 72** | membership separates finding 86's defect with no false alarm |
+| plants whose named guard was the *only* one | **28 of 72** | the prescribed equality test would refuse the other 44 |
 
-The failing-set histogram is `1: 28, 2: 20, 3: 14, 4: 7, 6: 1, 7: 1`. Forty-three honest plants edit a
+The failing-set histogram is `1: 28, 2: 20, 3: 14, 4: 8, 6: 1, 7: 1`. Forty-four honest plants edit a
 module-level structure that several guards read, and all of those guards object at once. Requiring a
 singleton would have flagged every one of them, which is the same mistake #103's static half made when it
 cried wolf on 7 of 10 plants -- this time measured before shipping rather than after.
@@ -33,7 +33,7 @@ samples never ran, and the difference between 67 and 72 is the difference betwee
 
 Six guards in `tests/python/test_mutation_suite.py` hold the mechanism, one of them forcing its own premise
 with synthetic plants because the shipped registry happens to order every shared guard favourably. #107
-records what membership does not buy: with 43 of 71 plants reddening several guards, the audit cannot show
+records what membership does not buy: with 44 of 72 plants reddening several guards, the audit cannot show
 that the named guard rejected *for the reason the plant's claim gives*, and that needs the message inside the
 named guard's own traceback section -- which is exactly where finding 91 bit Phase 56.
 
@@ -46,9 +46,10 @@ finding 91 recorded, 9 plants (153 → 162), 6 guards (527 → 532 tests, 458 �
   different module, which is why the sample is one plant per guard and not one per module.
 - The failing set is read from pytest's own `FAILED` summary lines. A summary format change would surface as
   every plant reading `no-guard-objected`, and the census's `observed` denominator would go to zero.
-- Cost is one module run per distinct guard: 71 runs took 57 minutes on this laptop, 42 of them the
-  `tests/python/test_artifact_metadata.py` module. That is why the audit is a per-phase instrument and
-  the CI lane keeps the sweep, which pays one node per plant instead.
+- Cost is one module run per distinct guard, and it is load-dependent: the 72-run census took 170
+  minutes while another session shared this laptop and the 71-run census on `b2df36f` took 57 minutes
+  unattended, 42 of them the `tests/python/test_artifact_metadata.py` module. That is why the audit is
+  a per-phase instrument and the CI lane keeps the sweep, which pays one node per plant instead.
 - Both instruments write to tracked files, so the clean-at-`HEAD` preflight that guards the sweep guards the
   audit too, and the two must never be in flight together.
 
@@ -101,27 +102,27 @@ arrive with its boundary proved against both paddings.
 
 | Gate | Command | Measured result |
 |---|---|---|
-| Lint | `.venv/bin/ruff check .` | pending |
-| Format | `.venv/bin/ruff format --check .` | pending |
-| Types | `.venv/bin/mypy python/quantrisk` | pending |
-| C++ | `ctest --test-dir build/dev` | pending |
-| Validate | `.venv/bin/quantrisk validate` | pending |
-| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | pending |
-| Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | pending |
-| Python | `.venv/bin/python -m pytest -q` | pending |
-| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` | pending, on the committed tree |
-| Pairing audit | `.venv/bin/python scripts/run_mutation_suite.py --pairing-audit` | pending, on the committed tree |
-| CI on the pushed head | read from each job's own log | pending |
+| Lint | `.venv/bin/ruff check .` | All checks passed! |
+| Format | `.venv/bin/ruff format --check .` | 201 files already formatted, measured on the `git archive` export of `2f9b99e` (finding 81's rule), and the runner reports the same 201 |
+| Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
+| C++ | `ctest --test-dir build/dev` | 100% tests passed out of 204 |
+| Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
+| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | `Evidence is intact.` -- 95 OK, 0 CHANGED, 0 MISSING. The report bundle is `3a3619d0e914` (PDF `fefc1ef1b6c0`), rebuilt by the cascade in `b2df36f`; no experiment artifact was re-frozen |
+| Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | 463 tests collected |
+| Python | `.venv/bin/python -m pytest -q` | 532 passed in 102.29s |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` on `2f9b99e` | 162/162 planted defects were rejected by their guard, tree clean afterwards, exit 0 |
+| Pairing audit | `.venv/bin/python scripts/run_mutation_suite.py --pairing-audit` on `2f9b99e` | `72/72 observed had their named guard in the failing set, 28/72 had it alone; 0 mis-paired, 0 escaped, 0 unrunnable, 5 guards unreachable; 77 declared = 72 sampled + 5 named`, exit 0, tree clean; 170 minutes under concurrent load, against 57 for the 71-run census on `b2df36f` |
+| CI on the pushed head | run `39216664378` on `2f9b99e`, read from each job's own log | lint `All checks passed!`, `201 files already formatted`, mypy `Success: no issues found in 23 source files`; C++ and Python `100% tests passed out of 204` and `462 passed, 5 skipped in 119.47s`, which is #91's reconciliation against the 463 the probe collects (`462 + 5 = 467 = 463 + 4`); benchmark `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 323.7s total` |
 
 ## 6. Numerical validation
 
 | Figure | Value | Producer |
 |---|---|---|
 | Distinct guards / observable / unreachable | 77 / 72 / 5 | `pairing_sample()` |
-| Named guard in the failing set | pending, on the committed tree | `--pairing-audit` census |
-| Named guard alone | pending, on the committed tree | the same census |
-| Failing-set histogram | pending, on the committed tree | the same census |
-| Audit wall time | pending, on the committed tree | the same run |
+| Named guard in the failing set | 72 of 72 | `--pairing-audit` census on `2f9b99e` |
+| Named guard alone | 28 of 72 | the same census |
+| Failing-set histogram | 1: 28, 2: 20, 3: 14, 4: 8, 6: 1, 7: 1 | the same census |
+| Audit wall time | 170 min under load, 57 min unattended on `b2df36f` | the two runs |
 | New guards / plants | 6 / 9 | the suite and `--list` |
 | Register entries | 106 → 107 | `docs/limitations.md` |
 | Audit wall time | pending | measured on the committed tree |
@@ -158,7 +159,7 @@ it names its own instrument, so it is debt, and it is Phase 58's work.
 The gate this phase moves is the one that had no instrument at all: #103 said a hand-typed `guard` field
 cannot be distinguished from a hand-typed reader that never reads it, except by paying a suite. The payment
 was made once, and the receipt changed the purchase -- the audit that shipped answers "did the guard you
-name object", and the registry's own answer of 71 of 71 says that is the question finding 86 was
+name object", and the registry's own answer of 72 of 72 says that is the question finding 86 was
 asking. The
 question it does not answer, whether the guard objected *because* of the line the plant moved, is now #107
 with a named instrument and a named trap, which is the same shape every phase in this queue has been closing
