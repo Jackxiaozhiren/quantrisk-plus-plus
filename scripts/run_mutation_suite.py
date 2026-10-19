@@ -670,7 +670,8 @@ def run_pairing_audit(mutation: Mutation, harness: Harness) -> dict[str, object]
     digest = hashlib.sha256(before).hexdigest()
     target = mutation.guard.partition("::")[0]
     named = mutation.guard.partition("::")[-1]
-    mutated, reason = apply_mutation(before.decode("utf-8"), mutation.anchor, mutation.replacement)
+    pristine = before.decode("utf-8")
+    mutated, reason = apply_mutation(pristine, mutation.anchor, mutation.replacement)
     verdict = ANCHOR_NOT_UNIQUE if reason else None
     ran = False
     failing: set[str] = set()
@@ -689,10 +690,17 @@ def run_pairing_audit(mutation: Mutation, harness: Harness) -> dict[str, object]
             restored = hashlib.sha256(path.read_bytes()).hexdigest() == digest
         if not restored:
             verdict = NOT_RESTORED
-    guard_source = (
-        mutated if target == mutation.path else (REPO_ROOT / target).read_text(encoding="utf-8")
-    )
-    site = failing_assertion(tracebacks, module=target, name=named, source=guard_source)
+    # Two texts, on purpose. A traceback's line numbers index the file pytest just compiled, so the
+    # span that picks the named guard's own assertion comes out of the mutated text. The closure
+    # answers a different question -- does this guard read the symbol the plant attacks -- and that
+    # is a property of the program as written: a plant whose edit deletes the very reference the
+    # closure follows would otherwise erase the evidence of its own pairing, which is how
+    # `claim-modifier-slot-reopened-after-the-census` read unlinkable on `6ddc965` while the offline
+    # pin read it as linked.
+    same_module = target == mutation.path
+    closure_source = pristine if same_module else (REPO_ROOT / target).read_text(encoding="utf-8")
+    span_source = mutated if same_module else closure_source
+    site = failing_assertion(tracebacks, module=target, name=named, source=span_source)
     return {
         "id": mutation.identifier,
         "kind": mutation.kind,
@@ -704,7 +712,7 @@ def run_pairing_audit(mutation: Mutation, harness: Harness) -> dict[str, object]
         "assert_line": site[0] if site else None,
         "assert_message": site[1] if site else "",
         "attribution": attribution(
-            closure=reading_closure(guard_source, named),
+            closure=reading_closure(closure_source, named),
             path=mutation.path,
             tokens=anchor_tokens(mutation.anchor),
         ),

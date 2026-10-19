@@ -12,6 +12,7 @@ exercised against every way a cycle can lie.
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import os
 import re
@@ -825,6 +826,63 @@ def test_the_reading_closure_reaches_the_helpers_and_constants_a_guard_actually_
         "the closure walk stopped short of a five-hop chain, so a depth cap is doing the "
         "attributing rather than the text"
     )
+
+
+def test_the_pairing_audit_reads_the_closure_from_the_text_before_the_plant_fires() -> None:
+    """The link question is about the program as written, so the audit may not read the plant's
+    edit.
+
+    `claim-modifier-slot-reopened-after-the-census` deletes the one reference its guard's closure
+    follows. An instrument that walks the mutated text therefore erases the evidence of its own
+    pairing, and that is what happened on `6ddc965`: the shipped audit called the plant unlinkable
+    while the offline pin, which reads the file as committed, called it linked. Two halves of one
+    record disagreed only because they read different texts. The other half genuinely has to follow
+    the edit -- a traceback's line number indexes the file pytest compiled -- so the choice is
+    pinned where it is made, name by name, rather than left to a comment.
+    """
+    tree = ast.parse(HARNESS_PATH.read_text(encoding="utf-8"))
+    audit = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "run_pairing_audit"
+    )
+    origins: dict[str, str] = {}
+    for node in ast.walk(audit):
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+            continue
+        target = node.targets[0]
+        if not isinstance(target, ast.Name) or not isinstance(node.value, ast.IfExp):
+            continue
+        if isinstance(node.value.body, ast.Name):
+            origins[target.id] = node.value.body.id
+    assert origins.get("closure_source") == "pristine", (
+        f"the closure is read from {origins.get('closure_source')!r}; the text before the plant "
+        "fired is the one that says what the guard was written to read"
+    )
+    assert origins.get("span_source") == "mutated", (
+        f"the span is read from {origins.get('span_source')!r}; a traceback indexes the file "
+        "pytest compiled, so this half has to follow the edit"
+    )
+    calls = [
+        node
+        for node in ast.walk(audit)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "attribution"
+    ]
+    assert len(calls) == 1, (
+        f"the audit builds its attribution {len(calls)} times, and this pin is lost"
+    )
+    closure_argument = next(
+        keyword.value for keyword in calls[0].keywords if keyword.arg == "closure"
+    )
+    assert (
+        isinstance(closure_argument, ast.Call)
+        and isinstance(closure_argument.func, ast.Name)
+        and closure_argument.func.id == "reading_closure"
+        and isinstance(closure_argument.args[0], ast.Name)
+        and closure_argument.args[0].id == "closure_source"
+    ), "the attribution call no longer reads the text this pin governs"
 
 
 def test_the_plants_the_pairing_audit_cannot_attribute_are_named_and_pinned() -> None:

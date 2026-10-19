@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 468 tests collected offline",
+        anchor="# 469 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 537 pytest tests with the validation",
+        anchor="and 538 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 169/169 planted defects rejected",
+        anchor="# 170/170 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 468 collected without them",
+        anchor="oracles installed, 469 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 537 pytest tests with the `oracles` extra here",
+        anchor="# 538 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -2393,7 +2393,7 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_reading_closure_reaches_the_helpers_and_constants_a_guard_actually_reads"
         ),
         claim=(
-            "a depth knob that is smaller than the corpus silently re-creates #103's static"
+            "a depth knob that is smaller than the corpus silently re-creates #103's static "
             "failure mode, where the reachability walk missed a nested helper"
         ),
     ),
@@ -2411,7 +2411,7 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_plants_the_pairing_audit_cannot_attribute_are_named_and_pinned"
         ),
         claim=(
-            "an empty exemption list is a pinned set that no longer measures anything, so"
+            "an empty exemption list is a pinned set that no longer measures anything, so "
             "the plant that genuinely has no text link would pass as attributed"
         ),
     ),
@@ -2428,6 +2428,22 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim=(
             "without the flag the audit still names the failing guards and reports every "
             "attribution as empty, which is the silence #107 exists to close"
+        ),
+    ),
+    Mutation(
+        identifier="pairing-closure-reads-the-text-after-the-plant-fired",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="closure_source = pristine if same_module",
+        replacement="closure_source = mutated if same_module",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_reads_the_closure_from_the_text_before_the_plant_fires"
+        ),
+        claim=(
+            "a closure read from the edited text erases the link for the plant whose edit deletes "
+            "the reference the closure follows, so the audit calls a real pairing unlinkable while "
+            "the offline pin calls it linked"
         ),
     ),
 )

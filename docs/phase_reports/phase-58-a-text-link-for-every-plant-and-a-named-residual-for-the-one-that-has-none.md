@@ -34,7 +34,7 @@ closure walk that indexes only top-level definitions loses the chain that runs t
 -- a transcript sliced at a fixed-width separator quoting a neighbour's message -- is what the location
 rule exists to prevent, and it is now the shape of the instrument rather than a caution in a report.
 
-Register: #107 amended closed, no new entry. 7 plants (162 → 169), 5 guards (532 → 537 tests, 463 → 468
+Register: #107 amended closed, no new entry. 8 plants (162 → 170), 6 guards (532 → 538 tests, 463 → 469
 collected offline).
 
 ## 2. Assumptions this rests on
@@ -56,11 +56,14 @@ collected offline).
 - `scripts/run_mutation_suite.py` -- `TRACEBACK_LINE`, `parse_line_tracebacks`, `guard_span`,
   `reading_closure`, `anchor_tokens`, `attribution`, `failing_assertion`, `UNATTRIBUTED_PLANTS`,
   `Harness.module_failures` switched to `--tb=line` and returning the per-assertion entries, the two new
-  census fields, and the residual report in `run_pairing_mode`.
-- `tests/python/test_mutation_suite.py` -- five new guards; the Phase 57 return-code guard updated for the
+  census fields, and the residual report in `run_pairing_mode`. The audit now reads two texts: the
+  assertion's line against the mutated file, because a traceback indexes what pytest compiled, and the
+  reading closure against the file as it was before the plant fired, because a plant that deletes the
+  reference the closure follows must not be able to erase its own pairing.
+- `tests/python/test_mutation_suite.py` -- six new guards; the Phase 57 return-code guard updated for the
   wider return.
-- `scripts/mutation_plants.py` -- seven plants attacking the attribution, one anchor re-pointed at the
-  rebuilt return line, and the plant-count annotations moved.
+- `scripts/mutation_plants.py` -- eight plants attacking the attribution, two anchors re-pointed at the
+  rebuilt return line and the closure-source line, and the plant-count annotations moved.
 - `docs/limitations.md` -- #107 amended closed, its residue recorded with its cost and the reason it is
   not taken.
 - `docs/project_scope.md` -- §9 row.
