@@ -510,8 +510,8 @@ def test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated(
 def test_the_pairing_audit_reads_membership_of_the_failing_set() -> None:
     """#103 prescribes "exactly the named one objects"; the registry says that is wrong.
 
-    The audit run over the plants as shipped found 67 observable of 72 distinct guards, and 40 of
-    those 67 redden more than the one guard they name: a plant that edits a module-level structure
+    The shipped audit over `b2df36f` found 71 observable of 76 distinct guards, and 43 of those
+    71 reddened more than the one guard they name: a plant that edits a module-level structure
     is read by every guard that consumes it, and all of them are honest plants. What the audit is
     for is finding 86's shape -- the guard a plant names stays green while a neighbour takes the
     blame -- so the criterion is membership, a wide set is a pass, and a set without the name is
@@ -545,10 +545,10 @@ def test_the_pairing_audit_reads_membership_of_the_failing_set() -> None:
 def test_the_pairing_audit_samples_one_plant_per_guard_and_names_the_rest() -> None:
     """The sample has to cover the registry, and what it cannot observe has to be named.
 
-    Both halves are load-bearing. One plant per distinct guard is what bounds the cost -- 67 module
-    runs rather than 153 -- and the unreachable list is what stops that bound from becoming a silent
-    exclusion, which is the silence #103 was written about: a CTest guard has no pytest module to
-    read, and a probe plant's target does not exist until the plant writes it.
+    Both halves are load-bearing. One plant per distinct guard is what bounds the cost -- one module
+    run per guard rather than per plant -- and the unreachable list is what stops that bound from
+    becoming a silent exclusion, which is the silence #103 was written about: a CTest guard has no
+    pytest module to read, and a probe plant's target does not exist until the plant writes it.
     """
     sample, unreachable = harness.pairing_sample(harness.MUTATIONS)
     guards = [mutation.guard for mutation in sample]

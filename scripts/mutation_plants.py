@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 160/160 planted defects rejected",
+        anchor="# 162/162 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2205,7 +2205,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         ),
         claim="#103's own criterion, put back: a plant whose guard shares a module structure with "
         "three other guards is honest, and requiring the failing set to be a singleton refuses "
-        "40 of the 67 observable plants",
+        "43 of the 71 observable plants measured on `b2df36f`",
     ),
     Mutation(
         identifier="pairing-verdict-calls-a-quiet-name-paired",
@@ -2291,5 +2291,35 @@ MUTATIONS: tuple[Mutation, ...] = (
         ),
         claim="pytest returns 2, 3, 4 and 5 for runs that never happened, and reading one "
         "of those as a run turns a broken module into a plant that escaped every guard",
+    ),
+    Mutation(
+        identifier="pairing-sample-counts-a-shared-guard-twice",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="        if guard not in order:\n            order.append(guard)",
+        replacement="        order.append(guard)",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_samples_one_plant_per_guard_and_names_the_rest"
+        ),
+        claim="25 guards are named by more than one plant, so appending every occurrence samples "
+        "those guards repeatedly -- the census then counts 72 samples against 77 guards, and the "
+        "membership ratio is divided by a denominator the run never produced",
+    ),
+    Mutation(
+        identifier="pairing-sample-drops-the-unreachable-list",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor=(
+            "    unreachable = [(guard, blocked[guard]) for guard in order if guard not in chosen]"
+        ),
+        replacement="    unreachable = []",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_samples_one_plant_per_guard_and_names_the_rest"
+        ),
+        claim="this is #103's own silence one layer up: an audit that reports 71 of 71 guards "
+        "paired while five guards were never observed reads as complete coverage, so the "
+        "unreachable list has to be named or the denominator is a fiction",
     ),
 )

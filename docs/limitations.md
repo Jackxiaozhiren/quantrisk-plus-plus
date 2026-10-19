@@ -1458,11 +1458,11 @@ never removed just because a later phase shipped.
     **Amended 2026-10-19 by Phase 57: closed, and closed by the measurement that refuted the criterion this
     entry prescribed.** The dynamic audit shipped as `--pairing-audit` in `scripts/run_mutation_suite.py`:
     one whole-module run per distinct guard, the failing set read from pytest's own summary, and the cost
-    named -- 67 module runs, which is why it is a per-phase instrument and not a CI lane. Its first census
-    over the registry as shipped is the datum: **67 of 67** observed plants had the guard they name inside
-    the failing set, and only **27 of 67** had it alone. The remaining 40 are honest plants whose mutation
+    named -- 71 module runs in 57 minutes on this laptop, which is why it is a per-phase instrument and not
+    a CI lane. Its first census over `b2df36f` is the datum: **71 of 71** observed plants had the guard they name inside
+    the failing set, and only **28 of 71** had it alone. The remaining 43 are honest plants whose mutation
     edits a module-level structure several guards read, so "exactly the named one objects" would have
-    refused 40 of the 67 plants it was meant to certify. The shipped criterion is therefore *membership*:
+    refused 43 of the 71 plants it was meant to certify. The shipped criterion is therefore *membership*:
     it separates finding 86's defect -- a named guard that stays green while a neighbour takes the blame --
     with no false alarm on the sample, and it is policed by five guards and seven plants. What the audit
     does *not* buy is #107, which the wide-set half of this measurement opened. Related: #98, #107,
@@ -1622,7 +1622,7 @@ never removed just because a later phase shipped.
     separates finding 86's defect -- a named guard that stays green while a neighbour takes the blame -- and
     the census says every plant in the sample passes it. It cannot separate a plant whose named guard rejects
     the mutation for the reason its `claim` gives from one whose guard rejects because the same edit happened
-    to move a structure the guard also reads. That is not hypothetical: 40 of the 67 observed plants redden
+    to move a structure the guard also reads. That is not hypothetical: 43 of the 71 observed plants on `b2df36f` redden
     more than one guard, so the failing set is the wrong instrument for the question "is this plant about
     this assertion".
     (a) The discriminator exists and was used by hand. Phase 56's branch audit read the *message* inside the
@@ -1635,11 +1635,11 @@ never removed just because a later phase shipped.
     transcript sliced at a fixed-width separator runs through the boundary and quotes the *neighbour's*
     message as the plant's. A shipped message check has to match the boundary by pattern, and prove it on
     both paddings, before its output is worth publishing.
-    (c) Two smaller reaches belong here too. The audit samples one plant per guard, so the 86 plants behind a
+    (c) Two smaller reaches belong here too. The audit samples one plant per guard, so the 90 plants behind a
     shared guard get no dynamic check of their own -- the sweep covers their named guard, not their
     neighbours -- and 5 of the 72 guards cannot be reached at all: three CTest cases with no pytest module,
     two probe plants whose target does not exist until they write it. What would close this entry is a
     message-level pairing check over the named guard's own section, with the section boundary proved against
-    both header paddings; its cost is the same 67 runs, plus a reason string per plant that the audit can
+    both header paddings; its cost is one module run per guard, now 72 of them, plus a reason string per plant that the audit can
     compare against the assertion that actually failed. Related: #103 (what this residue replaced), #94 (why
     a plant's list and its interpreter must stay separate files), finding 91.

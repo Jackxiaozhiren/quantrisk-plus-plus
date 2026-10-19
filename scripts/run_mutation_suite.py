@@ -40,10 +40,10 @@ only reports at the end turns one bad line into a full sweep before anyone reads
 which the sweep already proves, but "is the guard that rejected it the one the plant names". It runs
 the named guard's whole module instead of one node, so it sees every guard that objected, and it
 requires **membership** of the named guard in that set. It does not require the set to be a
-singleton, because the registry as shipped was measured and 40 of the 67 plants this shape can
-observe redden more than the one guard they name -- all of them honest plants, and an equality test
-would refuse them. The cost is one module run per distinct guard, so this is a per-phase instrument,
-not a CI lane, and it must never run while a sweep is in flight: both write to tracked files.
+singleton, because the shipped instrument measured 43 of the 71 plants it could observe on `b2df36f`
+redden more than the one guard they name -- all of them honest plants, and an equality test would
+refuse them. The cost is one module run per distinct guard, so this is a per-phase instrument, not a
+CI lane, and it must never run while a sweep is in flight: both write to tracked files.
 
 Usage::
 
@@ -435,12 +435,12 @@ def audit_verdict(*, ran: bool, failing: Collection[str], named: str) -> str:
 
     Membership, never equality. #103 prescribed "require that exactly the named one objects", and
     the registry as shipped says that criterion is the wrong one: measured over the plants this
-    shape can observe, 40 of 67 redden more than the single guard they name, and each of those is an
-    honest plant reading a structure several guards share. What the audit is for is finding 86's
-    defect -- a hand-typed `guard` field pointing at a reader that stays green while somebody else
-    takes the blame -- and a set without the name reports exactly that, whatever its size. A run
-    that collected nothing is its own verdict, because an empty set then means "nobody looked", not
-    "nothing objected".
+    shape observed on `b2df36f`, 43 of 71 reddened more than the single guard they name, and each
+    was an honest plant reading a structure several guards share. What the audit is for is finding
+    86's defect -- a hand-typed `guard` field pointing at a reader that stays green while somebody
+    else takes the blame -- and a set without the name reports exactly that, whatever its size. A
+    run that collected nothing is its own verdict, because an empty set then means "nobody looked",
+    not "nothing objected".
     """
     if not ran:
         return MODULE_NOT_RUN
