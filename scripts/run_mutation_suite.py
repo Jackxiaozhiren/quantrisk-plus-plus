@@ -36,13 +36,22 @@ the declared plants it never ran. Finding 86 measured what the alternative costs
 only reports at the end turns one bad line into a full sweep before anyone reads it.
 ``--all`` restores the census for the records that quote it.
 
+``--pairing-audit`` answers the question the stop cannot: not "did the named guard reject this",
+which the sweep already proves, but "is the guard that rejected it the one the plant names". It runs
+the named guard's whole module instead of one node, so it sees every guard that objected, and it
+requires **membership** of the named guard in that set. It does not require the set to be a
+singleton, because the registry as shipped was measured and 40 of the 67 plants this shape can
+observe redden more than the one guard they name -- all of them honest plants, and an equality test
+would refuse them. The cost is one module run per distinct guard, so this is a per-phase instrument,
+not a CI lane, and it must never run while a sweep is in flight: both write to tracked files.
+
 Usage::
 
     uv run python scripts/run_mutation_suite.py --list
     uv run python scripts/run_mutation_suite.py --kind prose --verbose
     uv run python scripts/run_mutation_suite.py --only volga-uses-its-own-square
     uv run python scripts/run_mutation_suite.py --all
-
+    uv run python scripts/run_mutation_suite.py --pairing-audit
 """
 
 from __future__ import annotations
@@ -56,7 +65,8 @@ import signal
 import subprocess
 import sys
 import tempfile
-from collections.abc import Sequence
+from collections.abc import Collection, Iterator, Sequence
+from contextlib import contextmanager
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -75,6 +85,11 @@ NOT_GREEN_AGAIN = "tree-did-not-recover"
 DIRTY_TARGET = "target-already-modified"
 PROBE_EXISTS = "probe-file-already-in-the-tree"
 STOPPED = "sweep-stopped-early"
+
+PAIRED = "paired"
+MIS_PAIRED = "named-guard-stayed-green"
+ESCAPED = "no-guard-objected"
+MODULE_NOT_RUN = "module-could-not-be-run"
 
 
 def _load_plants() -> tuple[type, tuple[Mutation, ...]]:
@@ -220,6 +235,22 @@ class Harness:
     def pytest(self, node: str) -> int:
         return self.uv("pytest", node, "-q", "-p", "no:cacheprovider").returncode
 
+    def module_failures(self, target: str) -> tuple[bool, set[str]]:
+        """``(ran, failing test names)`` for a whole-module run, which the pairing audit reads.
+
+        The return code decides whether the module ran at all: 0 is "everything passed" and 1 is
+        "some tests failed", while 2, 3, 4 and 5 are collection, internal, usage and
+        no-tests-collected errors. Folding those into an empty failing set would report a broken run
+        as a plant that escaped every guard, which is the confusion this instrument exists to
+        remove.
+        """
+        completed = _run(
+            ("uv", "run", "--frozen", "pytest", target, "-q", "--tb=no", "-p", "no:cacheprovider"),
+            self.verbose,
+            self.next_environment(),
+        )
+        return completed.returncode in (0, 1), parse_failures(completed.stdout)
+
     def guard(self, mutation: Mutation) -> tuple[bool, int]:
         """``(ran, returncode)`` for the guard alone; the build is the caller's to time."""
         if mutation.kind == "core":
@@ -246,6 +277,45 @@ class Harness:
 
 def git_status(path: str) -> str:
     return _run(("git", "status", "--porcelain", "--", path), False).stdout.strip()
+
+
+@contextmanager
+def restore_on_signal(snapshots: dict[Path, bytes], probes: Sequence[Path]) -> Iterator[None]:
+    """Put every planted byte back if the run is interrupted, then give the handlers back.
+
+    Both instruments write to tracked files, and the second half of finding 25 is a sweep that died
+    part-way and left a mutated source in the tree. The handler has to cover *every* target the run
+    intends to touch, so the caller hands in the whole snapshot map rather than the file in flight.
+    """
+
+    def on_signal(signum: int, _frame: object) -> None:
+        for path, payload in snapshots.items():
+            path.write_bytes(payload)
+        for probe in probes:
+            probe.unlink(missing_ok=True)
+            parent = probe.parent
+            if parent.is_dir() and not any(parent.iterdir()):
+                parent.rmdir()
+        raise SystemExit(128 + signum)
+
+    numbers = (signal.SIGINT, signal.SIGTERM)
+    previous = {number: signal.signal(number, on_signal) for number in numbers}
+    try:
+        yield
+    finally:
+        for number, handler in previous.items():
+            signal.signal(number, handler)
+
+
+def tree_of(selected: Sequence[Mutation]) -> tuple[dict[Path, bytes], list[Path]]:
+    """What each plant overwrites, and what each `tree` plant creates, for the restore handlers."""
+    snapshots = {
+        (REPO_ROOT / mutation.path).resolve(): (REPO_ROOT / mutation.path).read_bytes()
+        for mutation in selected
+        if mutation.kind != "tree"
+    }
+    probes = [REPO_ROOT / mutation.path for mutation in selected if mutation.kind == "tree"]
+    return snapshots, probes
 
 
 def run_one_probe(mutation: Mutation, harness: Harness) -> dict[str, str]:
@@ -352,6 +422,195 @@ def kinds_of(mutations: Sequence[Mutation]) -> set[str]:
     return {mutation.kind for mutation in mutations}
 
 
+def parse_failures(output: str) -> set[str]:
+    """The test names pytest printed as FAILED, stripped of their file prefix. Pure."""
+    return {
+        match.group(1).split("::")[-1]
+        for match in re.finditer(r"^FAILED (\S+)", output, flags=re.M)
+    }
+
+
+def audit_verdict(*, ran: bool, failing: Collection[str], named: str) -> str:
+    """Whether the guard a plant names is among the guards that actually objected.
+
+    Membership, never equality. #103 prescribed "require that exactly the named one objects", and
+    the registry as shipped says that criterion is the wrong one: measured over the plants this
+    shape can observe, 40 of 67 redden more than the single guard they name, and each of those is an
+    honest plant reading a structure several guards share. What the audit is for is finding 86's
+    defect -- a hand-typed `guard` field pointing at a reader that stays green while somebody else
+    takes the blame -- and a set without the name reports exactly that, whatever its size. A run
+    that collected nothing is its own verdict, because an empty set then means "nobody looked", not
+    "nothing objected".
+    """
+    if not ran:
+        return MODULE_NOT_RUN
+    if named in failing:
+        return PAIRED
+    return MIS_PAIRED if failing else ESCAPED
+
+
+def _audit_blocker(mutation: Mutation) -> str | None:
+    """Why a whole-module pytest cannot observe this plant, or None when it can."""
+    if mutation.kind == "core":
+        return "its guard is a CTest case, not a pytest node"
+    if mutation.kind == "tree":
+        return "its target is a probe file the plant creates"
+    if "::" not in mutation.guard:
+        return "its guard names no file::test pair"
+    return None
+
+
+def pairing_sample(
+    mutations: Sequence[Mutation],
+) -> tuple[list[Mutation], list[tuple[str, str]]]:
+    """One plant per distinct guard, plus every guard no plant of this shape can observe and why.
+
+    Two families are out of reach: a ``core`` plant's guard is a CTest case, so there is no pytest
+    module whose failures could be read, and a ``tree`` plant's target does not exist until the
+    plant writes it, so there is nothing to restore and re-read. They are returned as a named list
+    rather than dropped, because an audit whose denominator quietly excludes a family reports a
+    coverage it does not have -- the same silence #103 was written about.
+
+    The choice is by guard, and a guard shared between plants is decided by the plants it has:
+    taking the first plant in registry order would hand an observable guard to the unreachable list
+    on the strength of one probe plant, so the first plant this shape can actually run represents
+    it.
+    """
+    chosen: dict[str, Mutation] = {}
+    blocked: dict[str, str] = {}
+    order: list[str] = []
+    for mutation in mutations:
+        guard = mutation.guard
+        if guard not in order:
+            order.append(guard)
+        reason = _audit_blocker(mutation)
+        if reason is None:
+            chosen.setdefault(guard, mutation)
+        else:
+            blocked.setdefault(guard, reason)
+    sample = [chosen[guard] for guard in order if guard in chosen]
+    unreachable = [(guard, blocked[guard]) for guard in order if guard not in chosen]
+    return sample, unreachable
+
+
+def audit_counts(
+    records: Sequence[dict[str, object]], unreachable: Sequence[tuple[str, str]]
+) -> dict[str, int]:
+    """The audit's numbers, each against the denominator that can honestly carry it.
+
+    The first version of this instrument printed `0 of 72` while five of its 72 samples never ran,
+    and the difference between 67 and 72 is the difference between a measurement and a guess. So
+    every figure here is derived from the records that were observed, and `declared` is checked
+    against the sample plus the unreachable list rather than asserted from a count of the registry.
+    """
+    observed = [r for r in records if r["verdict"] in (PAIRED, MIS_PAIRED, ESCAPED)]
+    paired = [r for r in observed if r["verdict"] == PAIRED]
+    return {
+        "declared": len(records) + len(unreachable),
+        "sampled": len(records),
+        "observed": len(observed),
+        "paired": len(paired),
+        "singleton": sum(1 for record in paired if record["size"] == 1),
+        "mis-paired": sum(1 for r in observed if r["verdict"] == MIS_PAIRED),
+        "escaped": sum(1 for r in observed if r["verdict"] == ESCAPED),
+        "not-run": len(records) - len(observed),
+        "unreachable": len(unreachable),
+    }
+
+
+def run_pairing_audit(mutation: Mutation, harness: Harness) -> dict[str, object]:
+    """Read every guard in the named guard's module while this plant's defect sits in the tree."""
+    path = REPO_ROOT / mutation.path
+    before = path.read_bytes()
+    digest = hashlib.sha256(before).hexdigest()
+    target = mutation.guard.partition("::")[0]
+    named = mutation.guard.partition("::")[-1]
+    mutated, reason = apply_mutation(before.decode("utf-8"), mutation.anchor, mutation.replacement)
+    verdict = ANCHOR_NOT_UNIQUE if reason else None
+    ran = False
+    failing: set[str] = set()
+    restored = False
+    if reason is None:
+        try:
+            path.write_text(mutated, encoding="utf-8")
+            if path.read_bytes() == before:
+                verdict = NO_OP
+            else:
+                ran, failing = harness.module_failures(target)
+                verdict = audit_verdict(ran=ran, failing=failing, named=named)
+        finally:
+            path.write_bytes(before)
+            restored = hashlib.sha256(path.read_bytes()).hexdigest() == digest
+        if not restored:
+            verdict = NOT_RESTORED
+    return {
+        "id": mutation.identifier,
+        "kind": mutation.kind,
+        "verdict": verdict,
+        "size": len(failing),
+        "others": sorted(failing - {named}),
+        "guard": mutation.guard,
+        "claim": mutation.claim,
+    }
+
+
+def audit_census(counts: dict[str, int]) -> str:
+    """One line a phase record can quote, with each ratio naming the denominator it divides."""
+    observed = counts["observed"]
+    unreachable = counts["unreachable"]
+    return (
+        f"{counts['paired']}/{observed} observed had their named guard in the failing set, "
+        f"{counts['singleton']}/{observed} had it alone; "
+        f"{counts['mis-paired']} mis-paired, {counts['escaped']} escaped, "
+        f"{counts['not-run']} unrunnable, {unreachable} guards unreachable; "
+        f"{counts['declared']} declared = {counts['sampled']} sampled + {unreachable} named"
+    )
+
+
+def run_pairing_mode(selected: Sequence[Mutation], harness: Harness) -> int:
+    """The audit loop: one module run per distinct guard, and a census with honest denominators.
+
+    Cost is the reason this is not a CI lane. Every observed plant is a whole-module pytest, so the
+    run is bounded by the number of distinct guards rather than by the number of plants, and it
+    writes to tracked files exactly as the sweep does -- which is why the same clean-at-`HEAD`
+    preflight gates it and why the two must never be in flight together.
+    """
+    sample, unreachable = pairing_sample(selected)
+    print(
+        f"{len(selected)} plants selected, {len(sample) + len(unreachable)} distinct guards behind "
+        f"them: {len(sample)} observable by a module run, {len(unreachable)} not.\n"
+    )
+    for guard, reason in unreachable:
+        print(f"{'unsampled':<22} {guard[:72]:<74} {reason}")
+
+    records: list[dict[str, object]] = []
+    snapshots, probes = tree_of(sample)
+    with restore_on_signal(snapshots, probes):
+        for mutation in sample:
+            print(f"- {mutation.identifier} ({mutation.kind}) ...", flush=True)
+            records.append(run_pairing_audit(mutation, harness))
+            record = records[-1]
+            print(f"    {str(record['verdict']):<22} failing={record['size']}", flush=True)
+
+    counts = audit_counts(records, unreachable)
+    width = max((len(str(record["id"])) for record in records), default=0)
+    print()
+    for record in records:
+        marker = "ok  " if record["verdict"] == PAIRED else "FAIL"
+        extra = ""
+        if record["verdict"] == PAIRED and record["size"] != 1:
+            joined = ", ".join(str(name) for name in record["others"])
+            extra = f"  also reddened: {joined}"
+        print(f"{marker} {str(record['verdict']):<22} {str(record['id']):<{width}}{extra}")
+    print(f"\n{audit_census(counts)}")
+    left = [path for path in snapshots if git_status(str(path.relative_to(REPO_ROOT)))]
+    if left:
+        names = ", ".join(sorted(str(path.relative_to(REPO_ROOT)) for path in left))
+        print(f"{NOT_RESTORED}: {len(left)} target(s) still differ from HEAD: {names}")
+        return 1
+    return 0 if counts["mis-paired"] + counts["escaped"] + counts["not-run"] == 0 else 1
+
+
 def select(kind: str | None, only: Sequence[str]) -> list[Mutation]:
     chosen = [mutation for mutation in MUTATIONS if kind is None or mutation.kind == kind]
     if not only:
@@ -372,6 +631,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--all",
         action="store_true",
         help="keep going after a plant escapes its guard, for the full census",
+    )
+    parser.add_argument(
+        "--pairing-audit",
+        action="store_true",
+        help="#103's dynamic audit: run each guard's whole module under one mutation and require "
+        "that the named guard objects with the others. One module run per distinct guard.",
     )
     parser.add_argument("--verbose", action="store_true", help="echo each guard's own tail")
     arguments = parser.parse_args(argv)
@@ -403,28 +668,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"{GUARD_NOT_RUN:<22} {mutation.identifier}: {reason}", file=sys.stderr)
         return 2
 
+    if arguments.pairing_audit:
+        return run_pairing_mode(selected, harness)
+
     results: list[dict[str, str]] = []
-    snapshots = {
-        (REPO_ROOT / mutation.path).resolve(): (REPO_ROOT / mutation.path).read_bytes()
-        for mutation in selected
-        if mutation.kind != "tree"
-    }
-    probes = [REPO_ROOT / mutation.path for mutation in selected if mutation.kind == "tree"]
-
-    def on_signal(signum: int, _frame: object) -> None:
-        for path, payload in snapshots.items():
-            path.write_bytes(payload)
-        for probe in probes:
-            probe.unlink(missing_ok=True)
-            parent = probe.parent
-            if parent.is_dir() and not any(parent.iterdir()):
-                parent.rmdir()
-        raise SystemExit(128 + signum)
-
-    for number in (signal.SIGINT, signal.SIGTERM):
-        signal.signal(number, on_signal)
+    snapshots, probes = tree_of(selected)
     stopped_at: str | None = None
-    try:
+    with restore_on_signal(snapshots, probes):
         for mutation in selected:
             print(f"- {mutation.identifier} ({mutation.kind}) ...", flush=True)
             results.append(run_one(mutation, harness))
@@ -432,11 +682,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             if not arguments.all and results[-1]["status"] != CAUGHT:
                 stopped_at = mutation.identifier
                 break
-    finally:
-        for number in (signal.SIGINT, signal.SIGTERM):
-            signal.signal(
-                number, signal.default_int_handler if number == signal.SIGINT else signal.SIG_DFL
-            )
 
     width = max((len(result["id"]) for result in results), default=0)
     print()

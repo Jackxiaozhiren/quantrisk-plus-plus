@@ -2365,3 +2365,37 @@ a spelled numeral, so the refusal-to-compel is not caution about a hypothetical.
 disclosure: the forced row must name the file and say why it is a different measurement, and the firing set
 is pinned so a search that quietly stops matching reddens. Related: finding 86 (a plant whose guard names a
 reader that never reads it), finding 89 (a control that could not fail), `docs/limitations.md` #106.
+
+**91. A probe that quotes the message inside a failing test's own traceback section can quote its
+neighbour's instead, because pytest pads the section header to the terminal width.** Phase 56's record
+committed a branch audit of its four new plants: apply the mutation, run the guard's module, read which
+tests failed, and print the assertion that the *named* guard raised. Three of the four quotations were the
+named guard's own. The fourth -- `the ledger and the declarations disagree` -- belongs to
+`test_every_declared_number_names_a_producer_or_records_that_none_exists`, a neighbour in the same module,
+while the plant's named guard actually raised `the declared anchor '...' is not in the report: it is
+stale`. The slicer had split on a fixed-width separator (`_____ name _____`), so for the 71-character
+neighbour name -- padded by pytest to two underscores on each side -- the boundary never matched and the
+capture ran on through it.
+
+(a) **Every number in the published paragraph survived; only the attribution was wrong.** 4 of 4 named
+guards reddened, 3 of 4 failing sets were wider than the name, each target restored byte-for-byte. That is
+what made the defect invisible for a day: the counts were re-read from the same run and agreed, and the
+message is the one part of a branch audit that is not a number. The instrument's whole subject is that a
+transcribed figure needs a producer, and here the transcribed *sentence* needed one too -- the section it
+came from -- and had none.
+
+(b) **The fix is a boundary matched by pattern, and the pattern is proved offline before any suite time is
+spent.** `build/phase56-capture-check.py` feeds the cutter a synthetic two-section transcript in both
+paddings -- the wide one and the two-underscore one a long test name produces -- and refuses unless the
+captured text contains the first guard's messages and not the second's. That check costs milliseconds and
+runs before the four module runs, which is the ordering the defect came from: the first version went
+straight to the suite, and the suite's output looked entirely plausible.
+
+(c) **The generalisation is a rule about evidence, not about pytest.** Any instrument that reports *why*
+something failed is quoting a region of text, and the region has to be delimited by something that cannot
+be shifted by presentation -- a name matched by pattern, an explicit marker, a structured field. A fixed
+width, a line count, or "everything after this header" is a claim about how the tool that produced the text
+happens to format it today. Related: finding 86 (a plant whose guard names a reader that never reads it --
+same family, wrong direction: there the evidence pointed at nothing, here it pointed at something real that
+belonged to someone else), finding 89 (a control that could not fail), `docs/limitations.md` #103 and #107,
+and the Phase 56 report's dated correction.

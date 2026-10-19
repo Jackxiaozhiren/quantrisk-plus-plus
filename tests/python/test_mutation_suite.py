@@ -505,3 +505,191 @@ def test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated(
         f"two guard steps share {prefixes[0]}, which is the window the mutated run and its "
         "restored re-run both sit in"
     )
+
+
+def test_the_pairing_audit_reads_membership_of_the_failing_set() -> None:
+    """#103 prescribes "exactly the named one objects"; the registry says that is wrong.
+
+    The audit run over the plants as shipped found 67 observable of 72 distinct guards, and 40 of
+    those 67 redden more than the one guard they name: a plant that edits a module-level structure
+    is read by every guard that consumes it, and all of them are honest plants. What the audit is
+    for is finding 86's shape -- the guard a plant names stays green while a neighbour takes the
+    blame -- so the criterion is membership, a wide set is a pass, and a set without the name is
+    not.
+    """
+    singleton = harness.audit_verdict(ran=True, failing={"alpha"}, named="alpha")
+    wide = harness.audit_verdict(ran=True, failing={"alpha", "beta", "gamma"}, named="alpha")
+    assert singleton == wide == harness.PAIRED, (
+        f"the audit answers {singleton!r} alone and {wide!r} with neighbours, so it has become the "
+        "equality test #103 proposed and would refuse the plants that share a structure"
+    )
+    assert harness.audit_verdict(ran=True, failing={"beta"}, named="alpha") == harness.MIS_PAIRED, (
+        "a set that never contains the named guard is the defect this instrument exists to find"
+    )
+    assert harness.audit_verdict(ran=True, failing=set(), named="alpha") == harness.ESCAPED
+    assert (
+        harness.audit_verdict(ran=False, failing=set(), named="alpha") == harness.MODULE_NOT_RUN
+    ), "a module that never ran is not evidence about any guard"
+
+    read = harness.parse_failures(
+        "FAILED tests/python/a.py::test_alpha - AssertionError: x\n"
+        "FAILED tests/python/b.py::test_beta\n"
+        "2 failed, 40 passed in 61.20s\n"
+    )
+    assert read == {"test_alpha", "test_beta"}, (
+        f"the reader returns {sorted(read)}; membership is tested against bare names, so a node "
+        "id or a dropped line makes every plant look mis-paired"
+    )
+
+
+def test_the_pairing_audit_samples_one_plant_per_guard_and_names_the_rest() -> None:
+    """The sample has to cover the registry, and what it cannot observe has to be named.
+
+    Both halves are load-bearing. One plant per distinct guard is what bounds the cost -- 67 module
+    runs rather than 153 -- and the unreachable list is what stops that bound from becoming a silent
+    exclusion, which is the silence #103 was written about: a CTest guard has no pytest module to
+    read, and a probe plant's target does not exist until the plant writes it.
+    """
+    sample, unreachable = harness.pairing_sample(harness.MUTATIONS)
+    guards = [mutation.guard for mutation in sample]
+    assert len(guards) == len(set(guards)), "one guard is sampled twice, so it is counted twice"
+
+    declared = {mutation.guard for mutation in harness.MUTATIONS}
+    covered = set(guards) | {guard for guard, _ in unreachable}
+    assert covered == declared, (
+        f"the audit never sees {sorted(declared - covered)}: a guard with no observed plant and "
+        "no named reason"
+    )
+    expected_unreachable = declared - {
+        mutation.guard
+        for mutation in harness.MUTATIONS
+        if mutation.kind not in ("core", "tree") and "::" in mutation.guard
+    }
+    assert {guard for guard, _ in unreachable} == expected_unreachable, (
+        "the unreachable list no longer matches the guards this shape cannot run, so either a "
+        "runnable guard was dropped or an unrunnable one was counted as observed"
+    )
+    assert not (set(guards) & expected_unreachable), (
+        "a guard is both sampled and named as unreachable"
+    )
+
+    for mutation in sample:
+        file_, _, name = mutation.guard.partition("::")
+        source = REPO_ROOT / file_
+        assert source.is_file(), f"{mutation.identifier} samples a guard in a missing file"
+        assert f"def {name}" in source.read_text(encoding="utf-8"), (
+            f"{mutation.identifier} samples {name!r}, which {file_} does not define"
+        )
+
+
+def test_the_pairing_audit_samples_a_shared_guard_from_a_plant_that_can_run() -> None:
+    """A guard named by several plants is decided by what can run, not by who was registered first.
+
+    The shipped registry happens to put a runnable plant first for every shared guard today, so a
+    sampler that decided by registry order would pass a census over the real list for the wrong
+    reason -- and the day a probe plant is added first, an observable guard silently moves to the
+    unreachable list and the audit reports fewer guards than it was given. The premise is forced
+    here rather than inherited from the list, because an absence in the current data is not a
+    mechanism.
+    """
+    guard = "tests/python/x.py::test_shared_between_plants"
+    probe = harness.Mutation(
+        identifier="synthetic-probe-plant",
+        kind="tree",
+        path="experiments/_mutation_probe/run.py",
+        anchor="absent",
+        replacement="x = 1\n",
+        guard=guard,
+        claim="unused by the sampler",
+    )
+    runnable = harness.Mutation(
+        identifier="synthetic-runnable-plant",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="absent",
+        replacement="x = 2\n",
+        guard=guard,
+        claim="unused by the sampler",
+    )
+    for order in ([probe, runnable], [runnable, probe]):
+        sample, unreachable = harness.pairing_sample(order)
+        names = [mutation.identifier for mutation in sample]
+        assert names == ["synthetic-runnable-plant"], (
+            f"{[m.kind for m in order]} samples {names}, so the guard's fate turned on registry "
+            "order rather than on whether a module run can observe it"
+        )
+        assert unreachable == [], (
+            f"{[m.kind for m in order]} left {unreachable} unreachable, reporting a guard as "
+            "unobservable while a plant that could run exists"
+        )
+
+
+def test_the_pairing_audit_census_divides_by_what_it_observed() -> None:
+    """The first version of this instrument printed `0 of 72` while five samples never ran.
+
+    A membership claim is only as good as its denominator, so every figure is derived from the
+    records that were observed, an unrunnable module is its own bucket, and the `declared` total is
+    the sum of the two lists rather than a count of the registry the run never reached.
+    """
+    records: list[dict[str, object]] = [
+        {"verdict": harness.PAIRED, "size": 3},
+        {"verdict": harness.PAIRED, "size": 1},
+        {"verdict": harness.MIS_PAIRED, "size": 2},
+        {"verdict": harness.ESCAPED, "size": 0},
+        {"verdict": harness.MODULE_NOT_RUN, "size": 0},
+    ]
+    unreachable = [("tests/python/x.py::test_unreachable", "its guard is a CTest case")]
+    counts = harness.audit_counts(records, unreachable)
+    assert counts["sampled"] == 5
+    assert counts["observed"] == 4, "a module that never ran was counted as an observation"
+    assert counts["not-run"] == 1, "the unrunnable bucket stopped naming its own cases"
+    assert counts["paired"] == 2 and counts["singleton"] == 1, (
+        f"paired={counts['paired']} singleton={counts['singleton']}: a census that cannot tell "
+        "a wide set from a lone one is not the measurement #103 was closed with"
+    )
+    assert counts["mis-paired"] == 1 and counts["escaped"] == 1
+    assert counts["declared"] == counts["sampled"] + counts["unreachable"] == 6
+
+    line = harness.audit_census(counts)
+    assert "2/4" in line and "1/4" in line, (
+        f"the published census reads {line!r}, so a ratio lost the denominator that makes it a "
+        "measurement rather than a count"
+    )
+
+
+def test_a_module_run_that_never_collected_is_not_read_as_an_escaped_plant(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """`pytest` returns 1 for failures and 2, 3, 4, 5 for runs that never happened.
+
+    Folding those into an empty failing set would report a broken module as a plant that escaped
+    every guard -- the opposite of what the audit is for, and indistinguishable in the census. The
+    return code is what decides, so both sides of the boundary are pinned here, along with the
+    isolation the module run has to carry like every other guard subprocess.
+    """
+    seen: list[dict[str, str] | None] = []
+
+    def fake(command: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+        seen.append(kwargs.get("env"))
+        return subprocess.CompletedProcess(
+            list(command or []), 2, "ERROR tests/python/x.py::test_a\nno tests ran\n", ""
+        )
+
+    monkeypatch.setattr(harness.subprocess, "run", fake)
+    swept = harness.Harness(build_dir="build/dev")
+    ran, failing = swept.module_failures("tests/python/x.py")
+    assert not ran and failing == set(), "a collection error read as a run"
+    assert (
+        harness.audit_verdict(ran=ran, failing=failing, named="test_a") == harness.MODULE_NOT_RUN
+    ), "an unrunnable module reached a pairing verdict"
+    prefix = (seen[-1] or {}).get(harness.BYTECODE_PREFIX)
+    assert prefix, "the module run spawned a guard without a bytecode prefix of its own"
+
+    def fake_failures(command: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(
+            list(command or []), 1, "FAILED tests/python/x.py::test_a - AssertionError\n", ""
+        )
+
+    monkeypatch.setattr(harness.subprocess, "run", fake_failures)
+    ran, failing = swept.module_failures("tests/python/x.py")
+    assert ran and failing == {"test_a"}, "a real failure did not read as one"

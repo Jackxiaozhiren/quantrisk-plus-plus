@@ -309,8 +309,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 527 pytest tests with
-    the `oracles` extra installed, and the same tree collects 458 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 532 pytest tests with
+    the `oracles` extra installed, and the same tree collects 463 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:
@@ -1454,6 +1454,19 @@ never removed just because a later phase shipped.
     at every registration. What would settle it is dynamic and costs a suite per plant: run the named
     guard *and* its neighbours under one mutation and require that exactly the named one objects. Related:
     #98, whose fix is this same shape applied to a table rather than a list; findings 85 and 86.
+
+    **Amended 2026-10-19 by Phase 57: closed, and closed by the measurement that refuted the criterion this
+    entry prescribed.** The dynamic audit shipped as `--pairing-audit` in `scripts/run_mutation_suite.py`:
+    one whole-module run per distinct guard, the failing set read from pytest's own summary, and the cost
+    named -- 67 module runs, which is why it is a per-phase instrument and not a CI lane. Its first census
+    over the registry as shipped is the datum: **67 of 67** observed plants had the guard they name inside
+    the failing set, and only **27 of 67** had it alone. The remaining 40 are honest plants whose mutation
+    edits a module-level structure several guards read, so "exactly the named one objects" would have
+    refused 40 of the 67 plants it was meant to certify. The shipped criterion is therefore *membership*:
+    it separates finding 86's defect -- a named guard that stays green while a neighbour takes the blame --
+    with no false alarm on the sample, and it is policed by five guards and seven plants. What the audit
+    does *not* buy is #107, which the wide-set half of this measurement opened. Related: #98, #107,
+    findings 85, 86 and 91.
 104. **The claim rule can attach a correct count to the wrong noun, and a phantom list has no shape for
     it.** `_CLAIM_TAIL` reads the word between a numeral and its noun as a modifier, so where two counted
     nouns sit side by side it may take the first for the modifier and the second for the thing counted. In
@@ -1605,3 +1618,28 @@ never removed just because a later phase shipped.
     instrument. Finding 90 carries the two mis-cited rows this entry's blind spot produced. Related: #101
     (what this residue replaced), #86 (the Heston sentences), #99 (a citation that describes the wrong
     thing), #105 (the same refuse-to-compel judgement on the rule side).
+107. **The pairing audit proves a guard objected, not that it objected *about the claim*.** Membership
+    separates finding 86's defect -- a named guard that stays green while a neighbour takes the blame -- and
+    the census says every plant in the sample passes it. It cannot separate a plant whose named guard rejects
+    the mutation for the reason its `claim` gives from one whose guard rejects because the same edit happened
+    to move a structure the guard also reads. That is not hypothetical: 40 of the 67 observed plants redden
+    more than one guard, so the failing set is the wrong instrument for the question "is this plant about
+    this assertion".
+    (a) The discriminator exists and was used by hand. Phase 56's branch audit read the *message* inside the
+    named guard's own traceback section -- `the participle-head rule reads ['60 markets spread']`, `the
+    declared anchor ... is not in the report: it is stale` -- and that is what ties a plant to the assertion
+    its claim names. Nothing in the harness does this on a run, so the check exists only in a phase record
+    and in the `claim` text a plant hand-wrote beside the anchor.
+    (b) Reading it automatically has a trap that has already fired once here (finding 91): pytest pads a
+    section header to the terminal width, so a 71-character test name is wrapped in two underscores and a
+    transcript sliced at a fixed-width separator runs through the boundary and quotes the *neighbour's*
+    message as the plant's. A shipped message check has to match the boundary by pattern, and prove it on
+    both paddings, before its output is worth publishing.
+    (c) Two smaller reaches belong here too. The audit samples one plant per guard, so the 86 plants behind a
+    shared guard get no dynamic check of their own -- the sweep covers their named guard, not their
+    neighbours -- and 5 of the 72 guards cannot be reached at all: three CTest cases with no pytest module,
+    two probe plants whose target does not exist until they write it. What would close this entry is a
+    message-level pairing check over the named guard's own section, with the section boundary proved against
+    both header paddings; its cost is the same 67 runs, plus a reason string per plant that the audit can
+    compare against the assertion that actually failed. Related: #103 (what this residue replaced), #94 (why
+    a plant's list and its interpreter must stay separate files), finding 91.

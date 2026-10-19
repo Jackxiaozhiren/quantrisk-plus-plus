@@ -118,7 +118,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-undercounts-the-limitation-register",
         kind="prose",
         path="README.md",
-        anchor="carries 106 numbered entries",
+        anchor="carries 107 numbered entries",
         replacement="carries 78 numbered entries",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 458 tests collected offline",
+        anchor="# 463 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 527 pytest tests with the validation",
+        anchor="and 532 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 153/153 planted defects rejected",
+        anchor="# 160/160 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 458 collected without them",
+        anchor="oracles installed, 463 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 527 pytest tests with the `oracles` extra here",
+        anchor="# 532 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -876,7 +876,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-provenance-cell-quotes-a-stale-register-count",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="`docs/limitations.md` (106 entries)",
+        anchor="`docs/limitations.md` (107 entries)",
         replacement="`docs/limitations.md` (84 entries)",
         # The defect this phase actually found: the sheet's prose said 94 while its own
         # claim-provenance table said 84, three phases behind, and the guard that owns the register
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty-seven report files, one per phase",
-        replacement="fifty-eight report files, one per phase",
+        anchor="fifty-eight report files, one per phase",
+        replacement="fifty-nine report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.
@@ -2191,5 +2191,105 @@ MUTATIONS: tuple[Mutation, ...] = (
         "second one: `12 artifacts` turns against the card that says `12 functions, 10 bound "
         "types`, and the in-loop pin comparison reddens because the derived firing set no longer "
         "agrees with `_MEASUREMENT_DISCLOSURES`",
+    ),
+    # ------------------------------------------------------------------ Phase 57
+    Mutation(
+        identifier="pairing-verdict-demands-the-singleton-103-rejected",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="    if named in failing:",
+        replacement="    if failing == {named}:",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_reads_membership_of_the_failing_set"
+        ),
+        claim="#103's own criterion, put back: a plant whose guard shares a module structure with "
+        "three other guards is honest, and requiring the failing set to be a singleton refuses "
+        "40 of the 67 observable plants",
+    ),
+    Mutation(
+        identifier="pairing-verdict-calls-a-quiet-name-paired",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="    return MIS_PAIRED if failing else ESCAPED",
+        replacement="    return PAIRED",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_reads_membership_of_the_failing_set"
+        ),
+        claim="the audit's only finding is the named guard missing from the set, so a verdict that "
+        "returns `paired` whatever the set holds cannot report one -- finding 86's plant "
+        "would read as a pass",
+    ),
+    Mutation(
+        identifier="pairing-failure-reader-keeps-the-node-id",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor='        match.group(1).split("::")[-1]',
+        replacement="        match.group(1)",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_reads_membership_of_the_failing_set"
+        ),
+        claim="membership is tested against the bare test name, so reading the whole `file::name` "
+        "node id makes every guard look absent from its own failing set",
+    ),
+    Mutation(
+        identifier="pairing-sample-lets-a-later-probe-plant-evict-a-runnable-one",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="            blocked.setdefault(guard, reason)",
+        replacement=(
+            "            blocked.setdefault(guard, reason)\n            chosen.pop(guard, None)"
+        ),
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_samples_a_shared_guard_from_a_plant_that_can_run"
+        ),
+        claim="a guard is observable if any plant naming it can be run, so letting the last plant "
+        "decide hands a guard the audit can read to the unreachable list and shrinks the census",
+    ),
+    Mutation(
+        identifier="pairing-census-counts-an-unrunnable-module-as-observed",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor=(
+            '    observed = [r for r in records if r["verdict"] in (PAIRED, MIS_PAIRED, ESCAPED)]'
+        ),
+        replacement="    observed = list(records)",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_census_divides_by_what_it_observed"
+        ),
+        claim="the denominator of a membership claim is the number of modules that actually "
+        "ran, and counting a collection error as an observation is how the first version of this "
+        "tool printed `0 of 72` over 67 real samples",
+    ),
+    Mutation(
+        identifier="pairing-census-scores-every-paired-plant-as-alone",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor='        "singleton": sum(1 for record in paired if record["size"] == 1),',
+        replacement='        "singleton": len(paired),',
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_pairing_audit_census_divides_by_what_it_observed"
+        ),
+        claim="the wide-versus-lone split is the measurement that closed #103, so a census "
+        "that scores every paired plant as alone reports the rejected equality criterion as the "
+        "observed truth",
+    ),
+    Mutation(
+        identifier="pairing-module-run-reads-a-collection-error-as-a-run",
+        kind="prose",
+        path="scripts/run_mutation_suite.py",
+        anchor="        return completed.returncode in (0, 1), parse_failures(completed.stdout)",
+        replacement="        return True, parse_failures(completed.stdout)",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_a_module_run_that_never_collected_is_not_read_as_an_escaped_plant"
+        ),
+        claim="pytest returns 2, 3, 4 and 5 for runs that never happened, and reading one "
+        "of those as a run turns a broken module into a plant that escaped every guard",
     ),
 )
