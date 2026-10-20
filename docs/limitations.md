@@ -1667,3 +1667,20 @@ never removed just because a later phase shipped.
     true sentence harder to write. The residual is therefore recorded here, with its cost and the reason it
     is not taken, rather than opened as a queue item. Related: #103 (membership, which this builds on),
     #94, findings 86, 89 and 91.
+
+    **Amended 2026-10-20 by Phase 58: the census moved to 78 plants, and the instrument's own
+    source-of-truth bug was the finding.** The first shipped run on `6ddc965` exited 1 because the
+    pinned-residual guard reported a *second* unlinkable plant,
+    `claim-modifier-slot-reopened-after-the-census`. Its edit deletes the one reference its guard's
+    closure follows (`... + _MODIFIER_BLOCK`), and the audit had been building that closure from the
+    file *after* the plant fired, so it erased the evidence of its own pairing; the offline pin computes
+    the same rule over the committed file and called the plant linked. The two readers of one rule
+    disagreed because they read different states, and naming the plant as a second exception would have
+    recorded an instrument bug as a limit on what text can show -- and licensed every future plant that
+    removes the name it is checked against. The audit now reads the assertion's line from the mutated
+    file, because a traceback indexes what pytest compiled, and the closure from the pre-plant file,
+    because "does this guard read that symbol" is a property of the program as written; the split is
+    pinned structurally, with a plant that swaps the two. Measured on `cd0359b`: 83 declared guards =
+    78 sampled + 5 named unreachable, 78/78 observed paired (27 alone), 77/78 attributed by text, 1
+    named. The differential priced above is now 156 runs against those 78, and the refusal stands for
+    the same reason. Related: #103 (membership, which this builds on), #94, findings 86, 89 and 91.

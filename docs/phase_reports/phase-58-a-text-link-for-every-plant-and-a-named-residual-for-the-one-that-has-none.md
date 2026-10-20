@@ -3,7 +3,8 @@
 ## 1. Completed
 
 #107 asked whether the pairing audit can say that a guard rejected *about* the line the plant moved, when
-44 of 72 plants redden several guards at once and membership cannot tell them apart. The answer shipped
+51 of the 78 plants the shipped census observes redden several guards at once and membership cannot tell
+them apart. The answer shipped
 inside the existing `--pairing-audit`, and it cost no extra runs: pytest is now invoked with `--tb=line`,
 which prints one entry per failure as
 
@@ -16,16 +17,29 @@ function's `ast` span, and reads the plant's link from the guard's *reading clos
 every same-file binding it references, and nested definitions included, to depth eight. If the closure names
 the edited path or a token taken from the anchor, the pairing is attributed; otherwise the plant is named.
 
-| Rule | plants of 72 | meaning |
+| Rule | plants | meaning |
 |---|---|---|
-| the guard function's own text names the path or an anchor token | 61 | the narrow rule |
-| plus the reading closure (nested defs indexed, depth 8) | 71 | the shipped rule |
+| the shipped closure rule attributes the failure to the guard's own line | 77 of 78 | the census `--pairing-audit` printed on `cd0359b` |
 | named in `UNATTRIBUTED_PLANTS` | 1 | `release-note-cites-a-digest-its-file-does-not-carry` |
+| the narrow rule (function text alone, no closure) | 61 of 72 | the probe sample, before this phase's plants grew the registry to 78 |
 
 The one exception is instructive rather than embarrassing: its anchor is a 40-character commit digest, the
 guard reads release notes by globbing them, and no amount of closure walking finds a string the guard never
 spells. So the residual is a pinned frozenset, policed both ways -- a plant that loses its link and is not
 added, or one that gains a link and stays listed, reddens the guard.
+
+The census the phase shipped is not the one it designed. On `6ddc965` the audit came back
+`AUDIT_RC=1`: the pinned-residual guard reported a *second* unlinkable plant,
+`claim-modifier-slot-reopened-after-the-census`. That plant's edit deletes the one reference the guard's
+closure follows (`... + _MODIFIER_BLOCK`), and the audit had been building the closure from the file
+*after* the plant fired -- so it erased the evidence of its own pairing. The offline pin computes the same
+rule over the committed file and called the plant linked. The two readers of one rule disagreed because
+they read different states, and the pin was the one asking the right question: "does this guard read the
+symbol the plant attacks" is a property of the program as written. The audit now reads two texts on
+purpose -- the assertion's line against the mutated file, because a traceback indexes what pytest compiled,
+and the closure against the pre-plant file -- with the split pinned structurally so neither half can be
+quietly unified. Exactly one of the six sampled plants whose guard lives in the file it edits changed
+verdict, and it was the one the pin already knew about.
 
 Two traps were measured on the way, both from the same session's probe set. A `-rf` short summary clips the
 message at terminal width (`AssertionError: th...`), so message text cannot come from the summary; and a
@@ -50,6 +64,10 @@ collected offline).
 - Closure depth eight is a bound, not a proof of exhaustion. Deeper chains resolve today; the guard that
   pins it (`reading-closure-stops-at-one-hop` as a plant) fires the moment the bound becomes the reason for
   a miss.
+- The closure is read from the file as it stood before the plant fired, and the assertion's line from the
+  file after. Those are deliberately different states: if they were ever unified in either direction, the
+  attribution would either follow a plant's own deletion or index a line number that no longer exists. The
+  structural guard refuses both, and its plant swaps them.
 
 ## 3. Files changed
 
@@ -90,37 +108,51 @@ module-level definitions and used a depth cap of three: 61 + 8 of 72, with the e
 missing a nested helper -- turned eight misses into hits. The lesson is not "widen until green" but that a
 reachability rule's failure has to be traced to *why* it fails before it is accepted as an exception.
 
+**When a guard and the instrument it pins disagree, the disagreement is the finding.** The residual list
+reddened on a second plant, and the cheap reading was "there are two exceptions now". The rule both halves
+implement is the same one; what differed was the state each read -- committed file versus mutated file. A
+plant that removes the name the closure follows then destroys the evidence of its own pairing, and an
+instrument that reports that as an exception is teaching the next reader that the registry contains a
+limitation it does not contain. Naming the plant would have been the wrong fix, and the pinned set made it
+impossible to make silently: that is what a pin is for.
+
 **Recording a residue without queueing it is a real decision, and it needs its cost written down.** The
 differential run -- neutralise the mutated line, require green -- is the only instrument that separates
-seeing from causing. It doubles a 72-run census to 144 to interrogate one plant that is already named. The
+seeing from causing. It doubles a census to two runs per guard -- 78 sampled becomes 156 -- to interrogate
+one plant that is already named. The
 entry now says that, with the number, so the next reader does not re-propose it as an oversight.
 
 ## 5. Exact test results
 
 | Gate | Command | Measured result |
 |---|---|---|
-| Lint | `.venv/bin/ruff check .` | pending |
-| Format | `.venv/bin/ruff format --check .` | pending |
+| Lint | `.venv/bin/ruff check .` | All checks passed! |
+| Format | `.venv/bin/ruff format --check .` | 202 files already formatted, measured on the `git archive` export of `cd0359b` (finding 81's rule), and the runner's own log reports the same 202 |
 | Types | `.venv/bin/mypy python/quantrisk` | Success: no issues found in 23 source files |
 | C++ | `ctest --test-dir build/dev` | 100% tests passed out of 204 (no C++ change this phase) |
 | Validate | `.venv/bin/quantrisk validate` | 7/7 checks passed |
-| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | pending |
-| Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | pending |
-| Python | `.venv/bin/python -m pytest -q` | pending |
-| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` | pending, on the committed tree |
-| Pairing audit | `.venv/bin/python scripts/run_mutation_suite.py --pairing-audit` | pending, on the committed tree |
-| CI on the pushed head | read from each job's own log | pending |
+| Evidence | `.venv/bin/python scripts/verify_evidence_manifest.py` | `Evidence is intact.` -- 95 OK, 0 CHANGED, 0 VOLATILE, 0 MISSING. The report bundle moved to `cd1f36ecebb2` (PDF `36b36ecea15d`) when this phase's cascade landed; no experiment artifact was re-frozen |
+| Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | `469 tests collected in 0.76s`, exit 0 |
+| Python | `.venv/bin/python -m pytest -q` | 538 passed in 109.35s |
+| Falsification, this phase's plants | `run_mutation_suite.py --all --only <the eight>` | 8/8 planted defects rejected by their guard, 34 s |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` | 170/170 planted defects rejected by their guard, 540 s, measured on the committed tree `cd0359b` |
+| Pairing audit | `.venv/bin/python scripts/run_mutation_suite.py --pairing-audit` | exit 0 on `cd0359b`: 83 declared guards = 78 sampled + 5 named unreachable; 78/78 observed paired, 27 of them alone; 0 mis-paired, 0 escaped, 0 unrunnable; 77/78 attributed by text, 1 named |
+| CI on the pushed head | read from each job's own log | run `39279864968` on `cd0359b`, three jobs from their own logs: `All checks passed!` + `202 files already formatted` + `Success: no issues found in 23 source files`; `100% tests passed out of 204` and `468 passed, 5 skipped in 224.34s`; `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 324.2s total`. The pair reconciles: 468 + 5 = 473 = 469 collected offline + 4 (#91) |
 
 ## 6. Numerical validation
 
 | Figure | Value | Producer |
 |---|---|---|
-| Sampled plants / attributed / named | 72 / 71 / 1 | the static closure rule, run by the guard |
-| Narrow rule (function text only) | 61 of 72 | `build/phase58-probe.py`, `phase58-probe2.py` |
+| Sampled plants / observed paired / attributed / named | 78 / 78 / 77 / 1 | the census line `--pairing-audit` prints, measured on `cd0359b` |
+| Guards declared / sampled / named unreachable | 83 = 78 + 5 | the same line, derived from the records it observed |
+| Plants whose named guard was the only one reddened | 27 of 78 | the same line |
+| Narrow rule (function text only) | 61 of 72 | `build/phase58-probe.py`, `phase58-probe2.py`, on the probe sample this phase grew |
 | Gained by the closure | 10 | the same probes, before and after nested indexing |
-| New guards / plants | 5 / 7 | the suite and `--list` |
+| Plants changed verdict when the closure moved to the pre-plant text | 1 of 6 | `build/phase58-flipscan.py`, over the sampled plants whose guard lives in the file they edit |
+| New guards / plants | 6 / 8 | the suite and `--list` |
 | Register entries | 107, unchanged | `docs/limitations.md` |
-| Audit wall time | pending, on the committed tree | the same run |
+| Sweep wall time | 540 s for 170 plants | `SWEEP_RC=0 WALL_SECONDS=540` from the chain log |
+| Audit wall time | not published | the chain's own difference, 34,108 s, spans a laptop that slept mid-run; per-run cost is visible instead in the sweep's 540 s and Phase 57's 71-run/57-minute census |
 
 ## 7. Remaining limitations
 
