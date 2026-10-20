@@ -116,11 +116,20 @@ instrument that reports that as an exception is teaching the next reader that th
 limitation it does not contain. Naming the plant would have been the wrong fix, and the pinned set made it
 impossible to make silently: that is what a pin is for.
 
+**The document that answers "is the queue empty" was itself behind the register.** Reading `docs/project_scope.md`
+§9 -- the board whose column is literally titled *Current status* -- two rows still asserted `OPEN`: the
+Phase 46 row on #103's static half and the Phase 48 row on #102's unbiased-sample half. Both entries had
+been amended closed four and eight phases earlier, and the register was right. Nothing reads that column,
+so nothing could disagree with it: a status board has no producer, and only its last row is ever touched.
+Both cells now carry the closing phase and the entry, and the header's refresh date moved to today. The
+generalisation is the one this whole project is built on, applied to a document nobody had pointed it at --
+a claim with no instrument that can disagree is not evidence, whether it is a number or the word `OPEN`.
+
 **Recording a residue without queueing it is a real decision, and it needs its cost written down.** The
 differential run -- neutralise the mutated line, require green -- is the only instrument that separates
 seeing from causing. It doubles a census to two runs per guard -- 78 sampled becomes 156 -- to interrogate
-one plant that is already named. The
-entry now says that, with the number, so the next reader does not re-propose it as an oversight.
+one plant that is already named. The entry now says that, with the number, so the next reader does not
+re-propose it as an oversight.
 
 ## 5. Exact test results
 
@@ -163,6 +172,12 @@ entry now says that, with the number, so the next reader does not re-propose it 
 - Basename matching of traceback paths assumes no two modules in one run share a file name.
 - Attribution is computed over the *sampled* plant per guard, so a second plant behind the same guard gets
   no attribution of its own -- the same reach limit #107 states for membership.
+- `docs/project_scope.md` §9's Status column still has no producer. This phase corrected two stale cells by
+  reading the register against them, which is a manual audit, not a gate: a third stale `OPEN` would be
+  caught the same way -- by somebody noticing. No entry was opened for it because no instrument was named
+  that would not simply re-state the register in a second place; the cheapest real owner would be a check
+  that every §9 status agrees with the entry it cites, and that is the shape of the ledger Phase 54 built
+  for numbers, not for words.
 
 ## 8. Technical debt registered here
 
