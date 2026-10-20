@@ -3,6 +3,13 @@
 > A reproducible C++/Python engine for stochastic pricing, Monte Carlo simulation,
 > portfolio risk, optimization and stress testing.
 
+## Navigate this technical repository
+
+- **Understand the models:** [Mathematical specification](docs/mathematical_specification.md) and [Architecture](docs/architecture.md)
+- **Check numerical claims:** [Validation](#validation), [Benchmark](#benchmark), and [Reproducibility](#reproducibility)
+- **Assess boundaries:** [Limitations](docs/limitations.md) · [Contribution guide](CONTRIBUTING.md)
+- Treat any benchmark number as environment- and version-specific; follow the linked evidence rather than interpreting it as a universal performance guarantee.
+
 ## What QuantRisk++ is
 
 A numerical core for quantitative finance, written from scratch in C++20 and exposed to
