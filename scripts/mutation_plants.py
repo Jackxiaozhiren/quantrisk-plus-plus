@@ -768,8 +768,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-release-tags-the-object-store-does-not-carry",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="Nine release tags exist",
-        replacement="Eight release tags exist",
+        anchor="Ten release tags exist",
+        replacement="Nine release tags exist",
         guard=(
             "tests/python/test_artifact_metadata.py::"
             "test_the_report_lists_the_release_tags_the_repository_carries"
@@ -782,7 +782,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         path="CITATION.cff",
         anchor="\nversion: 1.9.0",
         replacement="\nversion: 1.9.9",
-        # The anchor is newline-anchored because `version: 1.8.0` also occurs indented, inside
+        # The anchor is newline-anchored because `version: <version>` also occurs indented, inside
         # the `references` block, and a bare anchor would occur twice -- the class finding 49
         # records for every prose plant. This file is one of the four assets a release attaches,
         # so a citation naming a version the package does not build is downloadable and was,
@@ -1430,8 +1430,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-files-past-the-old-ceiling",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="fifty-nine report files, one per phase",
-        replacement="sixty report files, one per phase",
+        anchor="sixty report files, one per phase",
+        replacement="sixty-one report files, one per phase",
         # Phase 43 wrote this count in digits because forty-three was past the ceiling; the
         # generated table retires that fallback, and the spelled form is owned again. The plant
         # moves the count one up so the disagreement, not a resolution failure, is what reddens.

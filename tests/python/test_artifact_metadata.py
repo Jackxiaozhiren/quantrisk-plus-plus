@@ -3038,7 +3038,6 @@ _CENSUS_REPORT_GOLD = (
     "800 steps",
     "95 artifacts",
     "eight float fields",
-    "fifty-nine report files",
     "five books",
     "five earlier radii",
     "four books",
@@ -3047,7 +3046,6 @@ _CENSUS_REPORT_GOLD = (
     "four joint rays",
     "four reachable cases",
     "four stress artifacts",
-    "nine release tags",
     "one credit spread",
     "one factor moves",
     "one spread",
@@ -3060,6 +3058,8 @@ _CENSUS_REPORT_GOLD = (
     "six books",
     "six readings",
     "sixteen committed fixtures",
+    "sixty report files",
+    "ten release tags",
     "three coverage tests",
     "three fred series",
     "three persistent series",
@@ -5657,6 +5657,10 @@ DATED_BAND_RECORDS: dict[str, str] = {
 # that is no longer today's and they belong in `DATED_BAND_RECORDS`, with a reason naming the
 # revision they record -- which is exactly how the two `v1.7.0` bodies got there.
 TAGGED_BAND_RECORDS: dict[str, str] = {
+    "docs/phase_reports/phase-59-v1.9.0.md": (
+        "the release record quotes the band the committed history carried at the tag it cut, "
+        "which is the reading this project refuses to refresh for tidiness"
+    ),
     "docs/phase_reports/phase-30-v1.8.0.md": (
         "the release report for `v1.8.0`, whose re-freeze produced the band the tree carries now"
     ),
