@@ -368,3 +368,10 @@ the member count, the kind breakdown, the skippable count and the pytest count t
 `tests/python/test_real_data_findings_prose.py` re-derives every figure the README and finding 4
 print from the artifact that produced them — so the class of error this audit contained is now
 checked rather than trusted.
+
+**Amended 2026-10-20, while auditing whether any queue is still open: improvement 3 shipped too, and
+this addendum never said so.** `docs/findings.md` exists and `README.md`'s opening links it, so the
+body's sentence "Improvements 1 and 3 ... are the next phase of work" has been false for many phases.
+The body is left as written -- this file's own policy is that an audit is evidence about a moment -- and
+the correction belongs here, in the append channel the policy provides. Nothing in the ranked list is
+unstarted now: 1 and 3 shipped, and 2 and 4 were applied at the time of writing.
