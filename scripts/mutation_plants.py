@@ -183,7 +183,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 469 tests collected offline",
+        anchor="# 470 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -342,7 +342,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 538 pytest tests with the validation",
+        anchor="and 539 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -354,8 +354,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-a-manifest-the-freeze-does-not-have",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="95 artifacts, 7{,}211{,}281 bytes",
-        replacement="94 artifacts, 7{,}211{,}281 bytes",
+        anchor="95 artifacts, 7{,}210{,}243 bytes",
+        replacement="94 artifacts, 7{,}210{,}243 bytes",
         # The report's §Limitations restatement of the freeze was `v1.1.0`'s totals and shipped in
         # six releases, while its own headline paragraph said 94 two pages earlier; the guard reads
         # `totals` from the manifest, so one digit here is enough to redden it.
@@ -369,7 +369,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="citation-declares-a-release-date-the-tag-does-not-carry",
         kind="prose",
         path="CITATION.cff",
-        anchor="\ndate-released: 2026-10-09",
+        anchor="\ndate-released: 2026-10-20",
         replacement="\ndate-released: 2027-01-01",
         # The last field of the citation asset, and the only one whose producer is an event rather
         # than a file: the annotated tag's tagger date. Newline-anchored because `date-released`
@@ -474,7 +474,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 170/170 planted defects rejected",
+        anchor="# 172/172 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -616,7 +616,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 469 collected without them",
+        anchor="oracles installed, 470 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -741,7 +741,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 538 pytest tests with the `oracles` extra here",
+        anchor="# 539 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -780,7 +780,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="citation-declares-a-version-the-package-does-not",
         kind="prose",
         path="CITATION.cff",
-        anchor="\nversion: 1.8.0",
+        anchor="\nversion: 1.9.0",
         replacement="\nversion: 1.9.9",
         # The anchor is newline-anchored because `version: 1.8.0` also occurs indented, inside
         # the `references` block, and a bare anchor would occur twice -- the class finding 49
@@ -2444,6 +2444,36 @@ MUTATIONS: tuple[Mutation, ...] = (
             "a closure read from the edited text erases the link for the plant whose edit deletes "
             "the reference the closure follows, so the audit calls a real pairing unlinkable while "
             "the offline pin calls it linked"
+        ),
+    ),
+    Mutation(
+        identifier="citation-understates-the-limitation-register",
+        kind="prose",
+        path="CITATION.cff",
+        anchor="and 107 numbered limitations record",
+        replacement="and 55 numbered limitations record",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_documents_that_count_the_limitations_agree_with_the_file"
+        ),
+        claim=(
+            "the citation file is uploaded as a release asset, and its abstract carried 55 for "
+            "four releases while the register passed a hundred because nothing read this file"
+        ),
+    ),
+    Mutation(
+        identifier="sheet-state-line-names-a-superseded-phase",
+        kind="prose",
+        path="docs/interview_defense.md",
+        anchor="Phases 0–58 shipped",
+        replacement="Phases 0–43 shipped",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_state_line_of_the_rehearsal_sheet_names_the_phases_the_repository_carries"
+        ),
+        claim=(
+            "the shipped-phase range is a current claim about the report directory, and it sat at "
+            "43 for fifteen phases with nothing on disk able to disagree with it"
         ),
     ),
 )

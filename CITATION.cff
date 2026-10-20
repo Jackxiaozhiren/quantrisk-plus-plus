@@ -1,10 +1,17 @@
 # CITATION.cff — https://citation-file-format.github.io/
 #
-# `repository-code` and `doi` are deliberately absent. The repository has no remote
-# configured yet, and a citation file that points at a URL nobody has published is worse
-# than one that admits the URL is pending: a reader would follow it, find nothing, and
-# reasonably distrust the rest of the metadata. Add them when the remote exists, and change
-# nothing else here — every other field is true as written.
+# `doi` is deliberately absent: no DOI has been minted for this software, and a citation
+# file that points at an identifier nobody has issued is worse than one that admits it is
+# pending. `repository-code` was written when no remote existed and now names the live
+# repository.
+#
+# The fields that state a fact about the repository are the ones a release can move, and
+# two of them have gone stale before: `version` (seven spellings, one owner since Phase 30)
+# and the abstract's count of numbered limitations, which read `55` for four releases while
+# `docs/limitations.md` grew past a hundred because no guard read this file. Both are
+# policed now -- `test_documents_that_count_the_limitations_agree_with_the_file` and
+# `test_the_version_string_the_project_declares_is_one_number_not_four` -- so a future
+# release that forgets a spelling fails a gate instead of publishing a wrong number.
 
 cff-version: 1.2.0
 message: >-
@@ -21,14 +28,14 @@ abstract: >-
   covariance estimators, six portfolio optimisers, and a scenario and stress layer with
   Euler attribution. Validation is the product: each component is checked against a closed
   form, a live independent oracle, or a statistical property measured over many
-  replications, and 55 numbered limitations record where the claims stop.
+  replications, and 107 numbered limitations record where the claims stop.
 authors:
   - name: Zhiren Xiao
     author-affiliation:
       name: School of Applied Statistics, Guangdong University of Finance
 repository-code: https://github.com/Jackxiaozhiren/quantrisk-plus-plus
-version: 1.8.0
-date-released: 2026-10-09
+version: 1.9.0
+date-released: 2026-10-20
 license: MIT
 type: software
 keywords:
@@ -48,6 +55,6 @@ references:
       - name: Zhiren Xiao
     database: repository
     repository-code: https://github.com/Jackxiaozhiren/quantrisk-plus-plus
-    release-notes: https://github.com/Jackxiaozhiren/quantrisk-plus-plus/releases/tag/v1.8.0
+    release-notes: https://github.com/Jackxiaozhiren/quantrisk-plus-plus/releases/tag/v1.9.0
     path: paper/technical_report.tex
-    version: 1.8.0
+    version: 1.9.0

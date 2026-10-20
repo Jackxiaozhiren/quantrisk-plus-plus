@@ -502,12 +502,18 @@ def test_every_analysis_note_is_guarded_against_the_numbers_it_quotes() -> None:
 
 
 def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
-    """`docs/limitations.md` is cited by count in six other documents.
+    """`docs/limitations.md` is cited by count in seven other documents.
 
     A count repeated by hand in five places is a fact with five chances to go stale, and it
     does: adding Phase 10's entries left every one of them reading "55". This test makes the
     file the single source, so the next entry added without updating the prose fails here
     rather than shipping a wrong number in the README.
+
+    `CITATION.cff` joined for the release, and it is the case this docstring was written
+    about: its abstract carried `55` through four releases while the register passed a
+    hundred, because the file is a *published asset* -- uploaded to the release page -- and
+    nothing read it. A number nobody can disagree with is not a claim, it is a guess that
+    reads well.
 
     `docs/release_notes_v1.0.0.md` and `docs/integrity_audit.md` are deliberately *not* in
     this set. They are records of a revision, and their counts were true of `v1.0.0`; forcing
@@ -518,6 +524,8 @@ def test_documents_that_count_the_limitations_agree_with_the_file() -> None:
     claims = {
         "README.md": r"carries (\d+) numbered entries",
         "docs/validation_matrix.md": r"The (\d+) numbered limitations",
+        # The citation file's abstract, which ships as a release asset.
+        "CITATION.cff": r"and (\d+) numbered limitations record",
         "docs/interview_defense.md": [
             r"has all (\d+)\s*\n?numbered entries",
             # The sheet's own claim-provenance table repeats the register's size as a parenthetical,
@@ -2883,8 +2891,8 @@ _CENSUS_REPRO_GOLD = (
     "20.8% spread",
     "204 tests",
     "32.6% spread",
-    "469 tests",
-    "538 pytest tests",
+    "470 tests",
+    "539 pytest tests",
     "548,368 assertions",
     "7 identity checks",
     "four modules",
@@ -2920,11 +2928,11 @@ _CENSUS_SHEET_GOLD = (
     "39,040,079 paths",
     "4 scenarios",
     "45,982,736 paths",
-    "469 tests",
+    "470 tests",
     "492 rows",
     "5 books",
-    "538 pytest tests",
-    "538 python tests",
+    "539 pytest tests",
+    "539 python tests",
     "548,368 assertions",
     "69 cases",
     "78,860,106 paths",
@@ -3016,7 +3024,7 @@ _CENSUS_REPORT_GOLD = (
     "41 pytest tests",
     "492 rows",
     "50 steps",
-    "538 pytest tests",
+    "539 pytest tests",
     "548{,}368 assertions",
     "582 windows",
     "6 failing cases",
@@ -3024,7 +3032,7 @@ _CENSUS_REPORT_GOLD = (
     "60 working digits",
     "600 monthly observations",
     "67 runs",
-    "7{,}211{,}281 bytes",
+    "7{,}210{,}243 bytes",
     "8 assets",
     "8 correctness benchmarks",
     "800 steps",
@@ -4992,6 +5000,46 @@ def test_the_version_string_the_project_declares_is_one_number_not_four() -> Non
     )
     assert f"`quantrisk` {version}, released as the tag `v{version}`" in defence, (
         f"the state line of docs/interview_defense.md does not name version {version}"
+    )
+
+
+def test_the_state_line_of_the_rehearsal_sheet_names_the_phases_the_repository_carries() -> None:
+    """Phase 30 registered that this line had no owner; the report directory is the owner.
+
+    `docs/interview_defense.md` opens by claiming "Phases 0-N shipped", and for nine phases
+    nothing in the tree could disagree with it. It drifted three times -- `0-30` at the last
+    release, `0-43` today, while fifty-eight phase reports sit on disk -- and each drift was
+    caught by a human reading, which is the act this project has been replacing since Phase 14.
+
+    The producer is the report directory, with one judgement written down: a release phase's
+    report is named for the tag it cuts (`phase-30-v1.8.0.md`), and the sheet's upper bound is
+    the last phase whose *content* shipped, not the release that carried it -- which is why
+    `v1.8.0`'s own line read `0-29`. So release records are excluded by their file names, and
+    the span the sheet prints for the release has to end at the same number.
+    """
+    release_named = re.compile(r"v\d+\.\d+\.\d+|release")
+    shipped: list[int] = []
+    for path in sorted((REPO_ROOT / "docs" / "phase_reports").glob("phase-*.md")):
+        match = re.match(r"phase-(\d+)-(.+)\.md$", path.name)
+        assert match, f"{path.name} is not `phase-<n>-<slug>.md`, so this guard cannot read it"
+        if not release_named.search(match.group(2)):
+            shipped.append(int(match.group(1)))
+    assert shipped, "no phase report on disk is a content phase, so the bound would be vacuous"
+    newest = max(shipped)
+
+    text = _folded_document("docs/interview_defense.md")
+    claim = re.search(r"Phases 0–(\d+) shipped", text)
+    assert claim, "the sheet no longer states a shipped-phase range with this dash"
+    bound = int(claim.group(1))
+    assert bound == newest, (
+        f"docs/interview_defense.md claims Phases 0-{bound} shipped while the newest content "
+        f"phase report is phase-{newest}-*"
+    )
+    span = re.search(r"the release that carries Phases \d+–(\d+)\*\*", text)
+    assert span, "the sheet no longer names the phase span the release carries"
+    assert int(span.group(1)) == newest, (
+        f"the sheet's release span ends at {span.group(1)} while the newest content phase "
+        f"is {newest}"
     )
 
 
