@@ -24,7 +24,7 @@ jobs:
       # `git ls-remote --tags`, which is the only check that matters -- the GitHub *release*
       # is called v10.2.0 either way, so reading the release name is not evidence that a ref
       # resolves. actions/checkout and actions/upload-artifact do publish major tags.
-      - uses: astral-sh/setup-uv@v10.2.0
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
           python-version: "3.12"
           enable-cache: true
@@ -62,7 +62,7 @@ jobs:
           # `432 passed, 5 skipped` where the same tree at depth 1 had read `429 passed, 8 skipped`.
           fetch-depth: 0
           fetch-tags: true
-      - uses: astral-sh/setup-uv@v10.2.0
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
           python-version: "3.12"
           enable-cache: true
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.2.0
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
           python-version: "3.12"
           enable-cache: true
