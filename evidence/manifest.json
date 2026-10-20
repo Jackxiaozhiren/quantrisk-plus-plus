@@ -1,27 +1,25 @@
 {
   "schema": "quantrisk-evidence-manifest/1",
-  "generated_utc": "2026-10-09T05:42:20+00:00",
+  "generated_utc": "2026-10-20T10:43:03+00:00",
   "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
   "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with scripts/verify_evidence_manifest.py.",
   "repository": {
-    "git_commit": "cb5157a19f6402856665fcaa965ce459350f2270",
-    "git_describe": "v1.7.0-28-gcb5157a",
-    "working_tree_dirty": true,
-    "uncommitted_paths": [
-      "vidence/manifest.json"
-    ]
+    "git_commit": "2441c5caf06401ab0fa7d899e17b9dc5b7c78194",
+    "git_describe": "v1.8.0-99-g2441c5c",
+    "working_tree_dirty": false,
+    "uncommitted_paths": []
   },
   "environment": {
-    "quantrisk_version": "1.8.0",
-    "git_commit_at_run": "cb5157a19f64",
-    "binary_git_commit": "49dc0155cfb4",
-    "provenance": "ran from cb5157a19f64 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 49dc0155cfb4",
+    "quantrisk_version": "1.9.0",
+    "git_commit_at_run": "2441c5caf064",
+    "binary_git_commit": "5dff42a31f46",
+    "provenance": "the working tree is clean at 2441c5caf064 but the extension binary was configured at 5dff42a31f46; rebuild (uv pip install -e .) before trusting numbers that depend on C++ sources",
     "python_platform": "macOS-27.0.1-arm64-arm-64bit",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "packages": {
       "python": "3.12.14",
-      "quantrisk": "1.8.0",
+      "quantrisk": "1.9.0",
       "numpy": "2.5.3",
       "scipy": "1.18.1",
       "pandas": "3.0.6",
@@ -499,17 +497,17 @@
       "content_sha256": "f47b89e21a167405bea33d76ab4df4d3ebe89afe8868f1a69a4c29abd29cf870",
       "bytes": 79811,
       "generated_by_command": "uv run python experiments/real_data_risk_study/run.py",
-      "generated_utc": "2026-10-09T04:55:35+00:00",
+      "generated_utc": "2026-10-20T10:26:47+00:00",
       "command_recorded_in": "experiments/real_data_risk_study/results/real_data_risk_study.json"
     },
     {
       "path": "experiments/real_data_risk_study/results/real_data_risk_study.json",
       "category": "statistical_experiment",
-      "sha256": "1bbaba8536501a807084278adb6a47a723250c67a99554ab04dc17b884a7ddfe",
-      "content_sha256": "0779992854e71c396649f66a76670cf4cea4f3b9848a2e591fee250818d8124d",
-      "bytes": 25221,
+      "sha256": "1b76f821ab0ca122ef8ef026e763aad57dcd71a15e995fa54294826f78f1deb6",
+      "content_sha256": "72b640274ce2856b78ce3ab776839ad76ff0247a3672832abe054b8b7ea36100",
+      "bytes": 24740,
       "generated_by_command": "uv run python experiments/real_data_risk_study/run.py",
-      "generated_utc": "2026-10-09T04:55:35+00:00",
+      "generated_utc": "2026-10-20T10:26:47+00:00",
       "command_recorded_in": "experiments/real_data_risk_study/results/real_data_risk_study.json"
     },
     {
@@ -519,7 +517,7 @@
       "content_sha256": null,
       "bytes": 74454,
       "generated_by_command": "uv run python experiments/real_data_risk_study/run.py",
-      "generated_utc": "2026-10-09T04:55:35+00:00",
+      "generated_utc": "2026-10-20T10:26:47+00:00",
       "command_recorded_in": "experiments/real_data_risk_study/results/real_data_risk_study.json"
     },
     {
@@ -529,7 +527,7 @@
       "content_sha256": "228a42e4680a281e5b6f7f544f4c8647bb8561f40621eb254edc64878d8c7c59",
       "bytes": 255605,
       "generated_by_command": "uv run python experiments/real_data_risk_study/run.py",
-      "generated_utc": "2026-10-09T04:55:35+00:00",
+      "generated_utc": "2026-10-20T10:26:47+00:00",
       "command_recorded_in": "experiments/real_data_risk_study/results/real_data_risk_study.json"
     },
     {
@@ -609,7 +607,7 @@
       "content_sha256": "de8ae5e16e8bbc7289c85448edc5b1f7ed8a0b7b1073bfd3c9449c8c4b1597bb",
       "bytes": 2947,
       "generated_by_command": "uv run python experiments/restrike_gamma_map/run.py",
-      "generated_utc": "2026-10-09T04:55:36+00:00",
+      "generated_utc": "2026-10-20T10:26:43+00:00",
       "command_recorded_in": "experiments/restrike_gamma_map/results/restrike_gamma_map.json"
     },
     {
@@ -619,7 +617,7 @@
       "content_sha256": "c7580972742f1de96bc24101b0383a94fd425cb6aa8397e41ebcfc849c6a2674",
       "bytes": 505,
       "generated_by_command": "uv run python experiments/restrike_gamma_map/run.py",
-      "generated_utc": "2026-10-09T04:55:36+00:00",
+      "generated_utc": "2026-10-20T10:26:43+00:00",
       "command_recorded_in": "experiments/restrike_gamma_map/results/restrike_gamma_map.json"
     },
     {
@@ -629,17 +627,17 @@
       "content_sha256": "ec2209cd1ef2fbe6bfb40cbb594f0883284424a1434b09a2925afbdf7d114562",
       "bytes": 39993,
       "generated_by_command": "uv run python experiments/restrike_gamma_map/run.py",
-      "generated_utc": "2026-10-09T04:55:36+00:00",
+      "generated_utc": "2026-10-20T10:26:43+00:00",
       "command_recorded_in": "experiments/restrike_gamma_map/results/restrike_gamma_map.json"
     },
     {
       "path": "experiments/restrike_gamma_map/results/restrike_gamma_map.json",
       "category": "statistical_experiment",
-      "sha256": "d44eeca429e1e812bd50a06db69042130f41322dbc20a505a7c65b851889b316",
+      "sha256": "a9dde82e24f01f30fe662acc34396d6f929d578feddc12889c16395b46d5a65e",
       "content_sha256": "cafbc5e24c48ce92cd2b2af75414e7756f2bd39f9f591e4f1393aa88d2f9cc7a",
-      "bytes": 56859,
+      "bytes": 56302,
       "generated_by_command": "uv run python experiments/restrike_gamma_map/run.py",
-      "generated_utc": "2026-10-09T04:55:36+00:00",
+      "generated_utc": "2026-10-20T10:26:43+00:00",
       "command_recorded_in": "experiments/restrike_gamma_map/results/restrike_gamma_map.json"
     },
     {
@@ -649,17 +647,17 @@
       "content_sha256": "0c6bb20dd705b66b5b2a75634b88addab9426710ce749eccd65107f5938d15b3",
       "bytes": 2067,
       "generated_by_command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_utc": "2026-10-09T04:55:36.778077+00:00",
+      "generated_utc": "2026-10-20T10:26:42.436717+00:00",
       "command_recorded_in": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
     },
     {
       "path": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
       "category": "statistical_experiment",
-      "sha256": "25270b92667fb79265454a15203f8a0dc973253cc8f9361e4f62fca8f33c45c8",
+      "sha256": "cde2c304f029da493b8090fa06a2420f58089fa352526af7f21933332301abb0",
       "content_sha256": "62d85cc5662f0a171e06b341b37f90bd891685fce5e87611b93443b836cb4aeb",
       "bytes": 39226,
       "generated_by_command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_utc": "2026-10-09T04:55:36.778077+00:00",
+      "generated_utc": "2026-10-20T10:26:42.436717+00:00",
       "command_recorded_in": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
     },
     {
@@ -669,7 +667,7 @@
       "content_sha256": "e838970d75b36b7c65df29432eca730bde7672dea3f0feda1f6551ffc0941fe6",
       "bytes": 3495,
       "generated_by_command": "uv run python experiments/fourth_order_crossing_map/run.py",
-      "generated_utc": "2026-10-09T04:55:36.778077+00:00",
+      "generated_utc": "2026-10-20T10:26:42.436717+00:00",
       "command_recorded_in": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
     },
     {
@@ -995,7 +993,7 @@
   ],
   "totals": {
     "artifacts": 95,
-    "bytes": 7211281,
+    "bytes": 7210243,
     "by_category": {
       "correctness_benchmark": 8,
       "performance_benchmark": 1,
