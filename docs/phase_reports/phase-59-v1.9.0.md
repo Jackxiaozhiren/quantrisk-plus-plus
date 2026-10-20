@@ -32,7 +32,8 @@ Date: 2026-10-20. Predecessor: Phase 58 (`docs/phase_reports/phase-58-a-text-lin
   than a preference: four runs on unchanged engine code returned 9.60, 7.32, 8.09 and 7.69 for
   `speedup_vs_pure_python` against a published lower edge of 7.77. One point is not evidence about the
   thing measured, so the band this release publishes is the band it inherited, and the note says so.
-- **172 plants declared, and the sweep's verdict on the tagged tree is section 5's own line.**
+- **172 plants declared, and the sweep run on the committed accounting tree rejected every one of them**;
+  §5 quotes the run's own summary line rather than a restatement of it.
 
 ## 2. Assumptions this rests on
 
@@ -114,7 +115,7 @@ a sha that never reached `main` is a provenance record pointing at nothing.
 | Offline collection | `.venv/bin/python scripts/measure_offline_collection.py` | `470 tests collected`, exit 0 |
 | Python | `.venv/bin/python -m pytest -q` | 538 passed, 1 skipped at the release commit `b2dda33` -- the skip was `test_the_release_date_the_citation_declares_is_the_tags_own`, which cannot check a tag that did not exist yet; on this accounting commit, with `v1.9.0` in the object store, the same command prints `539 passed`, no skips |
 | Falsification, this phase's plants | `run_mutation_suite.py --all --only <the three>` | 3/3 planted defects rejected by their guard |
-| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` | pending at the tagged tree -- this row is filled from the run's own line |
+| Falsification, full sweep | `.venv/bin/python scripts/run_mutation_suite.py --all` | `172/172 planted defects were rejected by their guard.` -- the run's own summary line, on this accounting commit `58b6c22`, exit 0, wall 921 s, and `git status --porcelain` empty after it |
 | CI on the tagged head | read from each job's own log | run `39410055875` on `b2dda33`: `All checks passed!` + `203 files already formatted` + `Success: no issues found in 23 source files`; `100% tests passed out of 204` and `468 passed, 6 skipped in 131.83s`; `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 422.6s total`. Reconciliation under #91: 468 + 6 = 474 = 470 collected offline + 4 |
 
 ## 6. Numerical validation
@@ -128,7 +129,7 @@ a sha that never reached `main` is a provenance record pointing at nothing.
 | Published bands, unchanged | `7.77×–10.31×` (32.6 %), `0.42×–0.51×` (20.8 %) | the committed history of the speed artifact |
 | Freeze | 95 artifacts, 7,210,243 bytes, 66 statistical experiment files | `scripts/build_evidence_manifest.py` at the release commit |
 | Plants / lane | 172 declared, 539 collected and 539 passing at this accounting commit | `--list` and the lane; no skip remains because `v1.9.0` now exists |
-| Register entries | 107, unchanged; no item opened by this phase | `docs/limitations.md` |
+| Register entries | 107, unchanged; one §8 queue item opened, no register entry opened | `docs/limitations.md` and this report's §8 |
 
 ## 7. Remaining limitations
 
@@ -145,13 +146,35 @@ a sha that never reached `main` is a provenance record pointing at nothing.
   not, by reading. The reason no entry is opened for it is the same as #107's: the mechanism would be a
   parse of prose into a queue, and what it would catch is a phase author not finishing a sentence -- which
   the register's own "residue with its cost named" rule is trying to make unnecessary.
+- A red `main` commit inside the release window is not evidence about the code. §8 item 1 records run
+  `39426273608` failing on the tag-enumeration guard for a merge that landed fourteen seconds after the
+  tag and eighteen minutes before the commit allowed to name it; every revision in that window is red by
+  construction, and a reader who finds one should read the window, not the diff.
 
 ## 8. Technical debt registered here
 
-Nothing opened. Two items were *closed* that had never been in the register at all -- Phase 30's §8 item
-3 (the state line's missing owner) by building its guard, and the citation file's unpoliced numbers by
-joining the claim set that already existed. The register holds 107 limitations, no actionable item, and
-this release adds no new claim that a producer cannot disagree with.
+One item opened, and it is a cost this phase measured in CI rather than anticipated. Two items were
+*closed* that had never been in the register at all -- Phase 30's §8 item 3 (the state line's missing
+owner) by building its guard, and the citation file's unpoliced numbers by joining the claim set that
+already existed. The register holds 107 limitations, no actionable item, and this release adds no new
+claim that a producer cannot disagree with.
+
+1. **A release leaves a window on `main` in which every landing commit is red, and Dependabot landed in
+   it.** The tag `v1.9.0` was created at `2026-10-20T20:56:35+08:00`; the accounting commit that lets the
+   report name that tag landed at `21:14:42+08:00`. The PR #6 merge (`404ec82`, `20:56:49`) fell inside
+   those eighteen minutes and its CI run `39426273608` failed on
+   `test_the_report_lists_the_release_tags_the_repository_carries`: its tree enumerates nine tags, the
+   object store by then carried ten. **The guard is right and the commit could never have been green** --
+   the tree cannot name a tag that does not yet exist, and the tag cannot exist before the commit that
+   names it can land. Reversing the order only moves the window (the accounting commit would then name a
+   tag the store lacks), so the only mitigation that shrinks it is making the two refs arrive together:
+   push the tag and the accounting commit in one invocation, and hold dependency merges across the
+   release step. Neither is proven, which is why this is a queue item and not a claim. The measured cost
+   is one red run on `main` at every release that overlaps a dependency bump, and a red main commit is
+   noise that trains a reader to ignore red. It is recorded here rather than as register entry #108
+   because opening an entry re-keys a published count across seven documents and their plants, and the
+   V2 refactor's Phase 0 must measure a baseline that this phase just froze; the cascade belongs in its
+   own commit, against its own red.
 
 ## 9. The gate
 
@@ -161,3 +184,12 @@ commits and one tag carry this release -- the release commit, the freeze rebuilt
 revision the runner verified, and this accounting commit that names the tag the earlier three could not.
 `0.00` was spent: the oracles are local wheels, the runners are the repository's own free hosted minutes,
 and the one network operation with a cost, a FRED fetch, was not used.
+
+Two readings arrived after the sentence above was written, and they are appended rather than folded in
+because each names the revision it was taken on. The full falsification sweep ran on the committed
+accounting tree `58b6c22` and printed `172/172 planted defects were rejected by their guard.` -- exit 0,
+921 s, `git status --porcelain` empty afterwards; the empty `experiments/_mutation_probe/` the two `tree`
+plants leave behind is still there, which is Phase 30 §4(f) unchanged and is a directory `git` cannot see.
+CI run `39428899176` on that same `58b6c22` concluded `success` across all three jobs. The release object
+itself -- the public GitHub Release, its four assets and their hashes -- has **not** been created: the tag
+was authorized, the publication was not, and it waits on the maintainer's word.
