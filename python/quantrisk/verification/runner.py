@@ -47,11 +47,11 @@ CI lane, and it must never run while a sweep is in flight: both write to tracked
 
 Usage::
 
-    uv run python scripts/run_mutation_suite.py --list
-    uv run python scripts/run_mutation_suite.py --kind prose --verbose
-    uv run python scripts/run_mutation_suite.py --only volga-uses-its-own-square
-    uv run python scripts/run_mutation_suite.py --all
-    uv run python scripts/run_mutation_suite.py --pairing-audit
+    uv run python -m quantrisk.verification.runner --list
+    uv run python -m quantrisk.verification.runner --kind prose --verbose
+    uv run python -m quantrisk.verification.runner --only volga-uses-its-own-square
+    uv run python -m quantrisk.verification.runner --all
+    uv run python -m quantrisk.verification.runner --pairing-audit
 """
 
 from __future__ import annotations
@@ -71,7 +71,27 @@ from pathlib import Path
 
 from quantrisk.verification.plants import MUTATIONS, Mutation
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+
+def _declared_repo_root() -> Path:
+    """The repository root, found by marker rather than by `__file__` depth.
+
+    Depth was the defect finding V2-10 names: `parents[1]` is correct in `scripts/` and silently
+    wrong two levels deeper, which would point all 172 plants at paths that do not exist and turn
+    every anchor into a missing file rather than a caught defect. A checkout is recognised by its
+    manifest and its object store together, and their absence is a loud refusal rather than a quiet
+    root.
+    """
+    here = Path(__file__).resolve()
+    for candidate in here.parents:
+        if (candidate / "pyproject.toml").is_file() and (candidate / ".git").exists():
+            return candidate
+    raise RuntimeError(
+        "the falsification harness needs a checkout (a directory holding pyproject.toml and .git); "
+        f"found none above {here}"
+    )
+
+
+REPO_ROOT = _declared_repo_root()
 DEFAULT_BUILD_DIR = "build/dev"
 TEST_BINARY_TARGET = "quantrisk_tests"
 
@@ -772,7 +792,11 @@ def run_pairing_mode(selected: Sequence[Mutation], harness: Harness) -> int:
         marker = "ok  " if record["verdict"] == PAIRED else "FAIL"
         extra = ""
         if record["verdict"] == PAIRED and record["size"] != 1:
-            joined = ", ".join(str(name) for name in record["others"])
+            others = record["others"]
+            assert isinstance(others, Sequence), (
+                f"{record['id']}: the audit's `others` is a {type(others).__name__}, not a sequence"
+            )
+            joined = ", ".join(str(name) for name in others)
             extra = f"  also reddened: {joined}"
         print(f"{marker} {str(record['verdict']):<22} {str(record['id']):<{width}}{extra}")
     residual = sorted(

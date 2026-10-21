@@ -847,7 +847,7 @@ Sources: `docs/analysis/two_factor_error_bound.md`, `docs/limitations.md` #67–
 ### Q24. How do you know your tests would catch a wrong formula?
 
 **30 s.** Coverage percentages measure execution, not detection, so I do not quote them. The claim
-is tested directly: `scripts/run_mutation_suite.py` plants a declared defect and requires the one
+is tested directly: `python/quantrisk/verification/runner.py` plants a declared defect and requires the one
 guard that should reject it to go red. Nineteen were declared at the revision this answer describes —
 fourteen in documents and bindings (counted figures, a phantom path, a renamed pybind registration, a
 shifted analysis-note slope), one in an experiment's own docstring, one that *creates* an unregistered
@@ -888,7 +888,7 @@ by a mutation. It fired within minutes of being written — a document sync move
 from `# 341 Python tests` to 342, and the self-test failed on the now-stale anchor instead of letting a
 sweep report a clean verdict while planting nothing.
 
-Sources: `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`,
+Sources: `python/quantrisk/verification/runner.py`, `tests/python/test_mutation_suite.py`,
 `docs/integrity_audit.md` findings 25, 35, 36, `docs/phase_reports/phase-14-verification-debt.md`
 (second addendum).
 
@@ -990,7 +990,7 @@ name, `stats::quantile_linear`, so a second unbound-and-unmarked function is a r
 silent gap. The other decision is that a guard nobody can make fail is not a guard: the test for the
 original defect shape asserts the differential explicitly -- add a core function with neither a binding
 nor a marker, and the Phase 14 two-way comparison stays silent while the new claim names it. Beyond the
-in-memory plants, `scripts/run_mutation_suite.py` carries a 22nd planted defect that edits the header on
+in-memory plants, `python/quantrisk/verification/runner.py` carries a 22nd planted defect that edits the header on
 disk and expects this guard's node to reject it, so the falsifiability is re-executed by CI rather than
 asserted by me.
 ### Q28. You published a radius for one book. Does it hold for another?
@@ -1033,7 +1033,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 204 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
   .venv/bin/python -m pytest -q                                          # 476 tests collected offline
-uv run python scripts/run_mutation_suite.py                            # 172/172 planted defects rejected
+uv run python -m quantrisk.verification.runner                            # 172/172 planted defects rejected
 uv run python experiments/pricing_validation/run.py
 uv run python experiments/monte_carlo_convergence/run.py
 uv run python experiments/variance_reduction/run.py
@@ -1075,8 +1075,8 @@ uv run python benchmarks/performance/monte_carlo_speed.py
 | ERC condition `wᵢ(Σw)ᵢ = (wᵀΣw)/n` and "validated against independent implementation" | `docs/mathematical_specification.md` §9 |
 | Heston dynamics, Feller condition, full-truncation Euler bias, "validation weaker than Black-Scholes section" | `docs/mathematical_specification.md` §10; `docs/project_scope.md` §4 |
 | Eigen arrives in Phase 6, not before; single-thread and no-QMC limits; path-matrix memory bound | `docs/limitations.md` #8, #16, #18; `docs/model_cards/monte_carlo_gbm.md` |
-| The extension-surface claim and how it was made falsifiable: 110 namespace-scope `[[nodiscard]]` declarations across 29 headers, 102 names, 25 disclaimed by `// python:` markers whose `via` routes the guard verifies; four planted failure modes plus the differential against the Phase 14 guard, and Phase 19 closed the residual it used to inventory | `tests/python/test_extension_surface_parity.py`, `scripts/run_mutation_suite.py` (`core-declares-a-function-nobody-binds`), `docs/limitations.md` #80, `docs/phase_reports/phase-17-surface-coverage.md` |
-| "the tests would catch a wrong formula": nineteen planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green; the sweep's own line on `e5daedc` is `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards | `scripts/run_mutation_suite.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
+| The extension-surface claim and how it was made falsifiable: 110 namespace-scope `[[nodiscard]]` declarations across 29 headers, 102 names, 25 disclaimed by `// python:` markers whose `via` routes the guard verifies; four planted failure modes plus the differential against the Phase 14 guard, and Phase 19 closed the residual it used to inventory | `tests/python/test_extension_surface_parity.py`, `python/quantrisk/verification/runner.py` (`core-declares-a-function-nobody-binds`), `docs/limitations.md` #80, `docs/phase_reports/phase-17-surface-coverage.md` |
+| "the tests would catch a wrong formula": nineteen planted defects, each proven to change bytes and rejected by its guard, then restored and re-run green; the sweep's own line on `e5daedc` is `19/19 planted defects were rejected by their guard.` with `git status` empty afterwards | `python/quantrisk/verification/runner.py`, `tests/python/test_mutation_suite.py`, `docs/phase_reports/phase-14-verification-debt.md` second addendum |
 | A one-book claim tested on five: the order-four radius transfers in direction (5 of 5) and in no magnitude (factors 1.3 to 3.0); the equality control is bit-identity over 30 joint moves, not a band; the order-four-to-three ratio spans 254-fold and does not order the widening; two radius definitions were wrong, and the second is planted in both column orders | `experiments/second_book_crossing_map/run.py`, `tests/python/test_second_book_crossing_map.py`, `docs/analysis/second_book_crossing_map.md`, `docs/limitations.md` #81, `docs/integrity_audit.md` finding 46 |
 
 Anything in this file that is not in that table is an opinion about a method, not a result of

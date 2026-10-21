@@ -1,4 +1,4 @@
-"""`scripts/run_mutation_suite.py` needs a gate of its own, because its failure mode is silence.
+"""The falsification harness needs a gate of its own, because its failure mode is silence.
 
 Finding 25 in `docs/integrity_audit.md` is why this file exists: two of nine mutations in a
 hand-rolled sweep never applied — clang-format had reflowed the expression between the time the
@@ -13,7 +13,7 @@ exercised against every way a cycle can lie.
 from __future__ import annotations
 
 import ast
-import importlib.util
+import importlib
 import os
 import re
 import subprocess
@@ -23,16 +23,12 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-HARNESS_PATH = REPO_ROOT / "scripts" / "run_mutation_suite.py"
 
-# `scripts/` is not a package, so the harness is loaded the way `test_artifact_metadata.py`
-# loads the suite runner: by file location, which keeps the tool a tool rather than turning
-# it into a module the library imports.
-_spec = importlib.util.spec_from_file_location("run_mutation_suite", HARNESS_PATH)
-assert _spec and _spec.loader
-harness = importlib.util.module_from_spec(_spec)
-sys.modules[_spec.name] = harness
-_spec.loader.exec_module(harness)
+# The harness is a package module now, so this reads it the way a consumer does -- by import. The
+# by-file-location load that lived here while it sat in `scripts/` was the same defect the lane is
+# removing, and `HARNESS_PATH` still resolves because the module reports its own file.
+harness = importlib.import_module("quantrisk.verification.runner")
+HARNESS_PATH = Path(harness.__file__)
 
 ALL_CPP_TESTS = "\n".join(
     path.read_text(encoding="utf-8") for path in (REPO_ROOT / "tests" / "cpp").glob("*.cpp")
@@ -42,12 +38,12 @@ ALL_CPP_TESTS = "\n".join(
 def test_the_plant_list_lives_where_a_plant_can_reach_the_harness() -> None:
     """#94's fix is a file boundary, and a boundary is one refactor away from being undone.
 
-    While the list and the interpreter shared `scripts/run_mutation_suite.py`, a plant naming a line
-    of that file found the line twice -- once in the code and once in its own entry -- so the sweep
-    refused the case and the bytecode-isolation guard could only be shown red by hand, which CI
-    never re-runs. The split is what makes that plant legal, so this asserts three things: the list
-    is defined in the data module, no part of it has crept back into the interpreter, and every
-    plant that points at the interpreter has one anchor there and no more.
+    While the list and the interpreter shared `python/quantrisk/verification/runner.py`, a plant
+    naming a line of that file found the line twice -- once in the code and once in its own entry --
+    so the sweep refused the case and the bytecode-isolation guard could only be shown red by hand,
+    which CI never re-runs. The split is what makes that plant legal, so this asserts three things:
+    the list is defined in the data module, no part of it has crept back into the interpreter, and
+    every plant that points at the interpreter has one anchor there and no more.
     """
     plants_path = REPO_ROOT / "python" / "quantrisk" / "verification" / "plants.py"
     assert plants_path.is_file(), "the plant list has no module to live in"
@@ -63,7 +59,8 @@ def test_the_plant_list_lives_where_a_plant_can_reach_the_harness() -> None:
         type(item) is harness.Mutation for item in harness.MUTATIONS
     ), "the harness reads a different Mutation type than the list defines"
 
-    pointed = [item for item in harness.MUTATIONS if item.path == "scripts/run_mutation_suite.py"]
+    runner_path = "python/quantrisk/verification/runner.py"
+    pointed = [item for item in harness.MUTATIONS if item.path == runner_path]
     assert pointed, "no plant can reach the interpreter, so #94's split is unprotected"
     harness_source_occurrences = {
         item.identifier: harness_source.count(item.anchor) for item in pointed
@@ -606,7 +603,7 @@ def test_the_pairing_audit_samples_a_shared_guard_from_a_plant_that_can_run() ->
     runnable = harness.Mutation(
         identifier="synthetic-runnable-plant",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="absent",
         replacement="x = 2\n",
         guard=guard,

@@ -179,7 +179,9 @@ would put a judgement in the ledger that nothing has made yet.
 | V2-15 | documented-claims | Medium | the move's documentation blast radius is ~195 path or command quotations over 8 files (`README.md` 4, `CONTRIBUTING.md` 8, `docs/reproducibility.md` 15, `docs/architecture.md` 6, `docs/validation_matrix.md` 27, `docs/interview_defense.md` 41, `docs/project_scope.md` 16, `paper/technical_report.tex` 80); `CONTRIBUTING.md` is policed by **no** claim inventory, and `docs/architecture.md` is policed only for path existence (`test_artifact_metadata.py:445`) | `grep -cE 'experiments/\|run\.py\|scripts/\|uv run python' <file>` per file; `grep -rn CONTRIBUTING tests/python/*.py` → empty (second pattern: `grep -rln "CONTRIBUTING" tests/` → empty) | P3.3/P3.4 re-derive prose in the same commit as each move, and two of those documents have no guard to tell them they missed one; the architecture document will go red on the first task moved, which is correct but must not be mistaken for a defect | inventories were extended document by document against real reds (the project's own rule), and these two never produced one | each move's commit re-derives the documents it touches and adds any new counted claim to its inventory in the same commit (§13 L10); `docs/architecture.md`'s layout section is re-derived wholesale in P3.4, not patched | the repo's claim-inventory guards green at the final commit, and the architecture document's paths all exist | 0 $ | the 8 documents, `CONTRIBUTING.md`'s first inventory entry, `docs/architecture.md` | high |
 | V2-16 | security-ci | Medium | two CI/guard surfaces can certify their own input's absence, both verified by reading them: `clang-format` is invoked through `find … \| sort \| xargs uv run clang-format --dry-run --Werror` with **no `-r`**, so an empty glob runs the formatter with no files and reads stdin; and the offline lane's reference tool resolves through a `pytest.skip` fallback (`tests/python/conftest.py:82-92`), so a missing binary silently removes a whole comparison rather than failing it | `sed -n '37,40p' .github/workflows/ci.yml`; `sed -n '74,92p' tests/python/conftest.py`; `find cpp bindings tests/cpp \\( -name '*.cpp' -o -name '*.hpp' \\) \| wc -l` → 77 today, which is why the first is latent rather than live | the xargs form is one token from being a dead gate the moment a refactor empties a directory, and the skip is honest only while somebody reads the skip count | add `-r`; keep the reference-tool skip's declared sentence and have the collector's ceilings file record the skip set, so a growing skip list is visible rather than silent | the CI step names paths that exist at the final commit; the lane's skip list is printed by name in §12 | 0 $ | `.github/workflows/ci.yml`, `tests/python/conftest.py` | high |
 | V2-17 | facts-protocol | Medium | D1's class table assigns only `experiments/<task>/run.py` to the package, but 9 of the 95 frozen commands are produced by `benchmarks/*/*.py`, so five producers would sit outside the registry that owns the command string | classify every `generated_by_command` in `evidence/manifest.json` by its target path and read the prefix — 4 `monte_carlo_validation.py`, 2 `benchmarks/pyportfolioopt/optimisation_validation.py`, 1 `path_dependent_validation.py`, 1 bare `benchmarks/quantlib/pricing_validation.py`, 1 `performance monte_carlo_speed.py` | read literally, the packet's P3.3 (14 commits) leaves `commands_not_module_path` at 9 forever and L4 can never pass; the ceiling would be met only by exempting the five, which is the exemption-hides-the-defect-class trap | apply D1's own instruction — members are "by role, not by count, derive the list in Phase 1". The benchmark validators are published studies by role, so the registry declares 19 tasks and P3.3 is 19 commits | the parity test compares the registry against a filesystem walk that recognises both layouts, and `commands_not_module_path` must reach 0 over all 95 entries in P3.5 | 0 $ | registry (5 extra entries), P3.3's commit count, `docs/architecture.md`'s layout section | high |
-| _(Phase 1 lanes 1–2 are the collector's and are already in V2-02/03/06; low-severity hygiene from lane 4 — 24 `spec_from_file_location` sites in `tests/python/` that switch to imports as their targets move — is carried in the commit sequence rather than as its own finding)_ | | | | | | | | | | | |
+| V2-18 | facts-protocol | Medium | §7 step 6 prescribes `uv run --frozen python scripts/run_mutation_suite.py --list`, and §7 step 4's lane list names other pre-refactor paths; after P3.2b those commands exit 2, because the harness is `python/quantrisk/verification/runner.py` | the gate driver ran §7 step 4 verbatim and reported `plant-list rc=2`; re-running the same lane as `uv run python -m quantrisk.verification.runner --list` gives rc 0 and 172 lines | a session resuming from §7 literally will read its own baseline as broken, and the easiest way to "fix" that red is to skip the lane — which is §15's "a gate stopped running while the lane stayed green" | the prompt's command list was written against the tree it was approved on and never scheduled to be re-derived, because editing it needs maintainer approval and §4.4's leak test | the driver's lane list is now the post-move form, and this section's §9 entry records which §7 commands were measured where | 0 $ | `REFACTOR_PROMPT.md` §7 steps 4 and 6, pending approval — not edited in this commit | high |
+
+| _(the low-severity hygiene from lane 4 — 24 `spec_from_file_location` sites in `tests/python/` that switch to imports as their targets move — is carried in the commit sequence rather than as its own finding; V2-19 is deliberately absent because it would restate V2-04)_ | | | | | | | | | | | |
 
 One investigator's claim was **refuted by reading the code** and is not carried: that
 `test_artifact_metadata.py:917`/`:927` compare a glob against the README with no floor. They do have one —
@@ -206,8 +208,11 @@ already settle, and what it cannot:
 
 1. `git fetch && git log --oneline -1` — if `origin/main` moved, re-read this file's §1 against the new
    head before trusting any stored exit code.
-2. Re-run §7 step 4 in a fresh detached export, exactly as §1 describes. If a lane is red that this file
-   recorded green, that is a finding, not noise, and it is entered in §6 before anything is fixed.
+2. Re-run §7 step 4 in a fresh detached export, exactly as §1 describes — **except** that two of its
+   commands name paths this lane has already moved (V2-18): the plant inventory is
+   `uv run python -m quantrisk.verification.runner --list`, and any `scripts/…` invocation in that list
+   is the pre-refactor spelling. If a lane is red that this file recorded green, that is a finding, not
+   noise, and it is entered in §6 before anything is fixed.
 3. Write `tools/inventory_orphan_code.py` (one collector, nothing else), run it, read `§4`'s three
    premises from its snapshot, and append the readings to §9 of this file in the same commit that adds the
    ceilings file `tools/refactor_ceilings.json`.
@@ -388,3 +393,30 @@ compiled extension — the import path is `quantrisk`, and the fix is a named co
 `replace('/', '.')`. And the first version of the canonical-command test used a `task_id` containing a
 hyphen, so it tripped the identifier rule and passed while proving nothing about invocations; the id is
 now `hand_typed` and the assertion exercises the rule its name claims.
+
+### 2026-10-21, P3.2a–b — the verification instruments are inside the package
+
+`scripts/mutation_plants.py` → `python/quantrisk/verification/plants.py` and
+`scripts/run_mutation_suite.py` → `python/quantrisk/verification/runner.py`, invoked as
+`uv run python -m quantrisk.verification.runner`. The harness imports the list as a package module, and
+so does its test, which is what the census reports: by-path load sites **19 → 17** across the two moves,
+files classified `by_path_importlib_load` **12 → 10**, and the harness's own class now
+`installed_import`. The 23 plants that anchored on the harness name its new path; the anchor self-test
+and the 172-line `--list` are green, and the sweep's own summary line remains the proof and is scheduled
+once, at the end of P3.2, per the approved packet.
+
+`REPO_ROOT` is no longer `parents[1]`. It walks up to the first ancestor holding both `pyproject.toml`
+and `.git` and raises, naming the path it gave up on, if none exists — the alternative V2-10 warned about
+is a silent two-levels-deeper root that points all 172 plants at nonexistent files and reports that as a
+sweep of missing targets. mypy's corpus is **27 files** with its two-sided agreement intact, and the new
+coverage found one genuine defect rather than a style complaint: at `runner.py:795` the pairing audit
+iterated `record["others"]`, typed `object`, so the fix narrows with an assertion naming what it found
+instead of letting a `join` over nothing print a clean line.
+
+Nine living command and file quotations moved with the harness (`CONTRIBUTING.md` 3,
+`docs/interview_defense.md` 6); the dated rows that record *where the sweep was promoted to* in Phase 14
+and the register items that describe that phase keep the old path, because they report an event, not an
+instruction. Two things this commit did not do: edit `REFACTOR_PROMPT.md` §7, whose step-6 command is now
+stale and is recorded as **V2-18** pending approval, and run the sweep — the gate driver's
+`plant-list rc=2` after the move was this lane's own instrument lagging one revision, now repointed and
+reading rc=0 with 172 lines.

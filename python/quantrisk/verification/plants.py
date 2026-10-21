@@ -1090,7 +1090,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="harness-spawns-a-guard-subprocess-without-a-bytecode-prefix",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor=(
             'return _run(("uv", "run", "--frozen", *arguments), '
             "self.verbose, self.next_environment())"
@@ -1516,7 +1516,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="sweep-keeps-going-past-an-escaped-defect",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor=r'if not arguments.all and results[-1]["status"] != CAUGHT:',
         replacement=r'if False and not arguments.all and results[-1]["status"] != CAUGHT:',
         guard=(
@@ -1528,7 +1528,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="sweep-stops-at-every-plant-not-just-an-escaped-one",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor=r'if not arguments.all and results[-1]["status"] != CAUGHT:',
         replacement=r"if not arguments.all:",
         guard=(
@@ -1540,7 +1540,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="sweep-stop-counts-what-ran-not-what-was-declared",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor=r"{skipped} of {len(selected)} declared plants",
         replacement=r"{skipped} of {len(results)} declared plants",
         guard=(
@@ -1552,7 +1552,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="sweep-census-counts-what-ran-not-what-was-declared",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="{len(caught)}/{len(selected)} planted defects were rejected by their guard.",
         replacement="{len(caught)}/{len(results)} planted defects were rejected by their guard.",
         guard=(
@@ -1564,7 +1564,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="sweep-all-flag-inverts-its-own-meaning",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor='        "--all",\n        action="store_true",',
         replacement='        "--all",\n        action="store_false",',
         guard=(
@@ -2197,7 +2197,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-verdict-demands-the-singleton-103-rejected",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="    if named in failing:",
         replacement="    if failing == {named}:",
         guard=(
@@ -2211,7 +2211,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-verdict-calls-a-quiet-name-paired",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="    return MIS_PAIRED if failing else ESCAPED",
         replacement="    return PAIRED",
         guard=(
@@ -2225,7 +2225,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-failure-reader-keeps-the-node-id",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor='        match.group(1).split("::")[-1]',
         replacement="        match.group(1)",
         guard=(
@@ -2238,7 +2238,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-sample-lets-a-later-probe-plant-evict-a-runnable-one",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="            blocked.setdefault(guard, reason)",
         replacement=(
             "            blocked.setdefault(guard, reason)\n            chosen.pop(guard, None)"
@@ -2253,7 +2253,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-census-counts-an-unrunnable-module-as-observed",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor=(
             '    observed = [r for r in records if r["verdict"] in (PAIRED, MIS_PAIRED, ESCAPED)]'
         ),
@@ -2269,7 +2269,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-census-scores-every-paired-plant-as-alone",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor='        "singleton": sum(1 for record in paired if record["size"] == 1),',
         replacement='        "singleton": len(paired),',
         guard=(
@@ -2283,7 +2283,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-module-run-reads-a-collection-error-as-a-run",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="        return ran, parse_failures(completed.stdout), parse_line_tracebacks(",
         replacement="        return True, parse_failures(completed.stdout), parse_line_tracebacks(",
         guard=(
@@ -2296,7 +2296,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-sample-counts-a-shared-guard-twice",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="        if guard not in order:\n            order.append(guard)",
         replacement="        order.append(guard)",
         guard=(
@@ -2310,7 +2310,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-sample-drops-the-unreachable-list",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor=(
             "    unreachable = [(guard, blocked[guard]) for guard in order if guard not in chosen]"
         ),
@@ -2327,7 +2327,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="attribution-claims-every-plant-is-linked",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="    if path in closure or Path(path).name in closure:",
         replacement="    if True:",
         guard=(
@@ -2340,7 +2340,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="attribution-forgets-which-lines-the-named-guard-owns",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="        if Path(file_).name == Path(module).name and span[0] <= line <= span[1]:",
         replacement="        if Path(file_).name == Path(module).name:",
         guard=(
@@ -2353,7 +2353,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="line-reader-matches-the-traceback-style-pytest-did-not-print",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor=(
             '    for match in re.finditer(r"^(.+?):(\\d+): ((?:\\w+Error|Exception): .*)$", '
             "output, flags=re.M):"
@@ -2371,7 +2371,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="reading-closure-visits-only-direct-children",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="        for reference in ast.walk(node):",
         replacement="        for reference in ast.iter_child_nodes(node):",
         guard=(
@@ -2386,7 +2386,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="reading-closure-stops-at-one-hop",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="        if level >= depth:",
         replacement="        if level >= 1:",
         guard=(
@@ -2401,7 +2401,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pinned-residual-list-emptied",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor=(
             'UNATTRIBUTED_PLANTS = frozenset({"'
             'release-note-cites-a-digest-its-file-does-not-carry"})'
@@ -2419,7 +2419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="module-run-drops-the-report-flag-the-attribution-needs",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor='                "--tb=line",',
         replacement='                "--tb=no",',
         guard=(
@@ -2434,7 +2434,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="pairing-closure-reads-the-text-after-the-plant-fired",
         kind="prose",
-        path="scripts/run_mutation_suite.py",
+        path="python/quantrisk/verification/runner.py",
         anchor="closure_source = pristine if same_module",
         replacement="closure_source = mutated if same_module",
         guard=(

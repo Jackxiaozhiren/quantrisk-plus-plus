@@ -377,7 +377,7 @@ def plant_liveness() -> dict[str, Any]:
     return {
         "applicable": result.returncode == 0,
         "declared_plants": len(lines),
-        "probe": "python scripts/run_mutation_suite.py --list | wc -l",
+        "probe": "python python/quantrisk/verification/runner.py --list | wc -l",
         "note": "the sweep's own summary line is read in Phase 3.2; this is the declaration only",
     }
 
@@ -442,7 +442,7 @@ def build_snapshot() -> dict[str, Any]:
             },
             {
                 "name": "plant_liveness",
-                "command": "python scripts/run_mutation_suite.py --list",
+                "command": "python python/quantrisk/verification/runner.py --list",
                 "value": plant_liveness(),
             },
         ],

@@ -8,7 +8,7 @@ width from the project's own configuration rather than from a number typed twice
 paired with the case that must pass, because a refusal test with no accepted rewrite next to it
 certifies a tool that refuses everything.
 
-`scripts/run_mutation_suite.py` carries two declared defects against this file:
+`python/quantrisk/verification/runner.py` carries two declared defects against this file:
 `rewrap-tool-writes-anyway-after-losing-words` and `rewrap-tool-hardcodes-a-wider-line`.
 """
 

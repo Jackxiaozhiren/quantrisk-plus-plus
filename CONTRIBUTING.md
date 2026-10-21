@@ -83,7 +83,7 @@ performed out of order in Phase 15, and every one of those produced a red gate r
    `test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it` reads, which is how Phase 31's
    own test-count sync was caught mid-flight.
 3. Refresh the falsification harness's anchors, in the same commit as step 2. Several defects in
-   `scripts/run_mutation_suite.py` key on exactly the figures step 2 moves, and
+   `python/quantrisk/verification/runner.py` key on exactly the figures step 2 moves, and
    `tests/python/test_mutation_suite.py` fails on an anchor that no longer occurs — that failure is
    the mechanism working, not a nuisance to route around.
 4. Commit, then re-run the sweep **on the committed tree**, because it refuses a dirty target and its
@@ -113,10 +113,10 @@ performed out of order in Phase 15, and every one of those produced a red gate r
   in the field name — see limitation #76 for why a correct digit in a wrong sentence is still wrong.
 - **Every test must be shown capable of failing.** New assertions get a negative control: a mutation
   that must be caught and a benign change that must not be. A green test nobody has falsified is
-  decoration (finding 25). The controls are declared in `scripts/run_mutation_suite.py`; adding a
+  decoration (finding 25). The controls are declared in `python/quantrisk/verification/runner.py`; adding a
   guard means adding a mutation to its list, and `tests/python/test_mutation_suite.py` fails if an
   anchor stops resolving, so the sweep cannot rot into a script that reports success while planting
-  nothing. Run it before pushing a change to a guard: `uv run python scripts/run_mutation_suite.py`
+  nothing. Run it before pushing a change to a guard: `uv run python -m quantrisk.verification.runner`
   (it edits tracked files and rebuilds `quantrisk_tests`, which is why it is not a CI step).
 - **Never go green by weakening a check.** No lowering a tolerance, no deleting a failing test, no
   `# noqa`, no adding an exclude to a linter — including in scratch tooling. Fix the thing or record
