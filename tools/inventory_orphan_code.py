@@ -19,6 +19,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_DIR = "python/quantrisk"
+PACKAGE_IMPORT = "quantrisk"
 SNAPSHOT_PATH = REPO_ROOT / "build" / "orphan_inventory.json"
 CEILINGS_PATH = REPO_ROOT / "tools" / "refactor_ceilings.json"
 MANIFEST_PATH = REPO_ROOT / "evidence" / "manifest.json"
@@ -312,7 +313,25 @@ def static_check_coverage(corpus: list[str]) -> dict[str, Any]:
     }
 
 
+def _is_runnable_unit(path: str) -> bool:
+    """A file that can be run, in either the root layout or the package layout."""
+    if path.startswith("experiments/"):
+        return path.endswith("/run.py")
+    if path.startswith("benchmarks/"):
+        return path.count("/") == 2
+    if path.startswith(f"{PACKAGE_DIR}/experiments/"):
+        return path.endswith("/__main__.py")
+    if path.startswith(f"{PACKAGE_DIR}/benchmarks/"):
+        return path.endswith(".py") and not path.endswith(("__init__.py", "registry.py"))
+    return False
+
+
 def registry_parity() -> dict[str, Any]:
+    """§4.1 #5: registry against filesystem, from two sources that never call each other.
+
+    The mismatch is the symmetric difference of the *source paths* each side declares, so an entry
+    pointing at a moved file and an unregistered runnable unit both become a number that can fail.
+    """
     registry = REPO_ROOT / PACKAGE_DIR / "experiments" / "registry.py"
     if not registry.is_file():
         return {
@@ -320,14 +339,28 @@ def registry_parity() -> dict[str, Any]:
             "why": "python/quantrisk/experiments/registry.py does not exist before Phase 3.1",
             "probe": f"test -f {PACKAGE_DIR}/experiments/registry.py",
         }
-    declared = [
-        line for line in git("ls-files", "--", f"{PACKAGE_DIR}/experiments/*").splitlines() if line
-    ]
+    declared = sorted(entry.source for entry in _load_registry().TASKS)
+    tracked = sorted(
+        path for path in git("ls-files", "--", "*.py").splitlines() if _is_runnable_unit(path)
+    )
     return {
         "applicable": True,
-        "filesystem_declared": declared,
-        "probe": f"git ls-files -- {PACKAGE_DIR}/experiments/*",
+        "registry_sources": len(declared),
+        "filesystem_units": len(tracked),
+        "mismatch": sorted(set(declared) ^ set(tracked)),
+        "probe": "uv run python -m tools.inventory_orphan_code (registry_parity)",
     }
+
+
+def _load_registry() -> Any:
+    """Import the registry the way a consumer would.
+
+    Deliberately a package import, not a by-path load: the collector's own census counts by-path
+    sites and must not add one while driving that count to zero.
+    """
+    import importlib
+
+    return importlib.import_module(f"{PACKAGE_IMPORT}.experiments.registry")
 
 
 def plant_liveness() -> dict[str, Any]:
@@ -443,9 +476,9 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
             count for kind, count in commands["classes"].items() if kind in unrunnable
         ),
         "tracked_python_files_in_no_static_check_bucket": coverage["buckets"].get("uncovered", 0),
-        "registry_parity_mismatch": (
-            None if not parity.get("applicable") else len(parity["filesystem_declared"])
-        ),
+        "registry_parity_mismatch": None
+        if not parity.get("applicable")
+        else len(parity["mismatch"]),
         "plants_not_rejected_by_their_guard": None,
         "installed_user_identity_mismatch": None,
         "external_spend_usd": 0,

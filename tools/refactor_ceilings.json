@@ -82,10 +82,13 @@
       "measured_at_baseline": null,
       "max": 0,
       "reach_by_phase": "P3.1",
-      "corpus": "not yet measurable — python/quantrisk/experiments/registry.py does not exist",
-      "can_fail_because": "deliberately absent from any green claim: the collector reports applicable=false with the probe that decided it, and the key is not counted until two independent sources exist",
+      "corpus": "19 registry entries read by importing python/quantrisk/experiments/registry.py, against the tracked runnable units discovered by `git ls-files -- '*.py'` filtered to experiments/*/run.py and benchmarks/*/*.py; neither side calls the other",
+      "can_fail_because": "measured 0 at P3.1 with both enumerations printed; adding a runnable file without a registry entry, or an entry whose source has moved, makes the symmetric difference non-zero",
       "exemptions": [],
-      "may_be_unmeasured": true
+      "measured_at_phase": {
+        "P3.1": 0
+      },
+      "note": "unmeasurable at the Phase 0 baseline because the registry did not exist; the flag that let it be skipped was removed in the commit that made it measurable, which is the rule §9 states for every may_be_unmeasured key"
     },
     {
       "key": "plants_not_rejected_by_their_guard",

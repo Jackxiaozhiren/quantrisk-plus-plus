@@ -178,6 +178,7 @@ would put a judgement in the ledger that nothing has made yet.
 | V2-14 | verification-instruments | Medium | a **shipped** module shells out to git: `python/quantrisk/experiments/metadata.py:93-103` runs `["git", *arguments]` with `cwd=REPO_ROOT` and returns `None` silently when the root is not a repository | `sed -n '90,104p' python/quantrisk/experiments/metadata.py` | artifact fields produced by this function describe the checkout, so an installed run records an environment truthfully only where a `.git` exists; the silent `None` is the difference between a missing field and a missing claim | provenance was written when every producer ran in the checkout | keep the behaviour, make the absence declared: the field names the command that could not answer, and the Phase 4 identity proof (`L8`) prints `module.__file__` beside it | the installed-user proof shows the field either populated or declared absent, never silently empty | 0 $ | `python/quantrisk/experiments/metadata.py`, the Phase 4 proof | high |
 | V2-15 | documented-claims | Medium | the move's documentation blast radius is ~195 path or command quotations over 8 files (`README.md` 4, `CONTRIBUTING.md` 8, `docs/reproducibility.md` 15, `docs/architecture.md` 6, `docs/validation_matrix.md` 27, `docs/interview_defense.md` 41, `docs/project_scope.md` 16, `paper/technical_report.tex` 80); `CONTRIBUTING.md` is policed by **no** claim inventory, and `docs/architecture.md` is policed only for path existence (`test_artifact_metadata.py:445`) | `grep -cE 'experiments/\|run\.py\|scripts/\|uv run python' <file>` per file; `grep -rn CONTRIBUTING tests/python/*.py` → empty (second pattern: `grep -rln "CONTRIBUTING" tests/` → empty) | P3.3/P3.4 re-derive prose in the same commit as each move, and two of those documents have no guard to tell them they missed one; the architecture document will go red on the first task moved, which is correct but must not be mistaken for a defect | inventories were extended document by document against real reds (the project's own rule), and these two never produced one | each move's commit re-derives the documents it touches and adds any new counted claim to its inventory in the same commit (§13 L10); `docs/architecture.md`'s layout section is re-derived wholesale in P3.4, not patched | the repo's claim-inventory guards green at the final commit, and the architecture document's paths all exist | 0 $ | the 8 documents, `CONTRIBUTING.md`'s first inventory entry, `docs/architecture.md` | high |
 | V2-16 | security-ci | Medium | two CI/guard surfaces can certify their own input's absence, both verified by reading them: `clang-format` is invoked through `find … \| sort \| xargs uv run clang-format --dry-run --Werror` with **no `-r`**, so an empty glob runs the formatter with no files and reads stdin; and the offline lane's reference tool resolves through a `pytest.skip` fallback (`tests/python/conftest.py:82-92`), so a missing binary silently removes a whole comparison rather than failing it | `sed -n '37,40p' .github/workflows/ci.yml`; `sed -n '74,92p' tests/python/conftest.py`; `find cpp bindings tests/cpp \\( -name '*.cpp' -o -name '*.hpp' \\) \| wc -l` → 77 today, which is why the first is latent rather than live | the xargs form is one token from being a dead gate the moment a refactor empties a directory, and the skip is honest only while somebody reads the skip count | add `-r`; keep the reference-tool skip's declared sentence and have the collector's ceilings file record the skip set, so a growing skip list is visible rather than silent | the CI step names paths that exist at the final commit; the lane's skip list is printed by name in §12 | 0 $ | `.github/workflows/ci.yml`, `tests/python/conftest.py` | high |
+| V2-17 | facts-protocol | Medium | D1's class table assigns only `experiments/<task>/run.py` to the package, but 9 of the 95 frozen commands are produced by `benchmarks/*/*.py`, so five producers would sit outside the registry that owns the command string | classify every `generated_by_command` in `evidence/manifest.json` by its target path and read the prefix — 4 `monte_carlo_validation.py`, 2 `benchmarks/pyportfolioopt/optimisation_validation.py`, 1 `path_dependent_validation.py`, 1 bare `benchmarks/quantlib/pricing_validation.py`, 1 `performance monte_carlo_speed.py` | read literally, the packet's P3.3 (14 commits) leaves `commands_not_module_path` at 9 forever and L4 can never pass; the ceiling would be met only by exempting the five, which is the exemption-hides-the-defect-class trap | apply D1's own instruction — members are "by role, not by count, derive the list in Phase 1". The benchmark validators are published studies by role, so the registry declares 19 tasks and P3.3 is 19 commits | the parity test compares the registry against a filesystem walk that recognises both layouts, and `commands_not_module_path` must reach 0 over all 95 entries in P3.5 | 0 $ | registry (5 extra entries), P3.3's commit count, `docs/architecture.md`'s layout section | high |
 | _(Phase 1 lanes 1–2 are the collector's and are already in V2-02/03/06; low-severity hygiene from lane 4 — 24 `spec_from_file_location` sites in `tests/python/` that switch to imports as their targets move — is carried in the commit sequence rather than as its own finding)_ | | | | | | | | | | | |
 
 One investigator's claim was **refuted by reading the code** and is not carried: that
@@ -339,3 +340,51 @@ they were written against, because they are records of a run rather than instruc
 `CMakePresets.json` (K1), changing a tolerance or a formula (K5), adding a dependency (L12), or a new
 manifest field. `docs/ecosystem_research.md` §10 records the field gaps the survey found — `seed`,
 `config_hash`, a quarantined state — as V3 candidates, each with the reason it was declined in this lane.
+
+### 2026-10-21, the §9 gate: approval, one scope correction, and where this lane commits
+
+The maintainer approved the packet in full — the ranking, the ceilings dispositions for V2-08 and V2-07,
+the D3′/D4′ amendments, and the flow deviation that runs the 172-plant sweep once after P3.2c rather than
+after each of its three moves. That approval is the reason Phase 3 code exists; nothing in Phase 3 was
+started on the standing authorization alone.
+
+One scope fact the packet undercounted, found while writing the registry rather than assumed: D1's class
+table names only `experiments/<task>/run.py`, but **9 of the 95 frozen commands are produced by
+`benchmarks/*/*.py`** (probe: classify every `generated_by_command` and read its prefix — 4
+`monte_carlo_validation.py`, 2 `benchmarks/pyportfolioopt/…`, 1 `path_dependent_validation.py`, 1 bare
+`benchmarks/quantlib/pricing_validation.py`, 1 `performance monte_carlo_speed.py`). Under the literal
+class table, `commands_not_module_path` could never reach zero, because five producers would sit outside
+the registry that owns the command. D1's own instruction — *"by role, not by count — derive the list in
+Phase 1"* — resolves it: those validators are published studies by role, their outputs are hashed
+evidence, so the registry declares **19 tasks** and P3.3 is 19 commits, not 14. Finding **V2-17**; no §5
+decision changes, because deriving the list is what §5 asks for.
+
+**Branch decision, recorded because the executing skill's default differs.** This lane commits to `main`.
+The repository is trunk-based by practice: 59 phases landed there, CI's three lanes (the oracle-backed
+suite, the tag/history Phase 33 gave the runner) trigger on push to `main`, and §16 requires the gate suite
+green *on CI for the final commit*, proven from the run's own log. A long-lived branch would make P3.5's
+single re-run and L1's digest comparison provable only on a revision that never executed. The maintainer's
+approval of the packet, whose verification column reads "full suite" and "CI", covers this.
+
+### 2026-10-21, P3.1a — the registry lands, and its own guard was written first
+
+Red captured before any registry existed: `tests/python/test_task_registry_parity.py` failed 4/4 with
+`ModuleNotFoundError`, then 6/6 green with `python/quantrisk/experiments/registry.py` present. Both sides
+print their enumeration (`filesystem 19 units`, `registry 19 tasks`), the registry is a literal table and
+not a glob, and the ceiling key `registry_parity_mismatch` went from skipped to **measured 0** with its
+`may_be_unmeasured` flag removed in the same commit — the rule §9 states for every such key.
+
+Six new tests moved the published pytest pair, and the lane's own count guards refused the stale
+quotation, exactly as `REFACTOR_LEDGER.md` §5 predicted: `539/470 → 545/476` across five living documents,
+four plant anchors and three census gold lists. The cascade ran from a script that verifies each pair
+occurs exactly once before writing, and is resumable — it reports the sixteen already-applied pairs rather
+than refusing. The report PDF was rebuilt (`bundle 5fab6f2fb74b`, `pdf 79b30ec30f2c`, 1,005,809 bytes)
+because the tex changed, and the two freshness guards then passed. Full §7 suite on the committed tree:
+ten lanes, every exit code 0, `545 passed`, offline probe `476 tests collected`.
+
+Two of my own defects are part of this record. The collector imported the registry under the name built
+from the **repository** path (`python.quantrisk`), which resolves to a shadowing namespace and dies on the
+compiled extension — the import path is `quantrisk`, and the fix is a named constant rather than a
+`replace('/', '.')`. And the first version of the canonical-command test used a `task_id` containing a
+hyphen, so it tripped the identifier rule and passed while proving nothing about invocations; the id is
+now `hand_typed` and the assertion exercises the rule its name claims.
