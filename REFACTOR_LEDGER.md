@@ -420,3 +420,53 @@ instruction. Two things this commit did not do: edit `REFACTOR_PROMPT.md` §7, w
 stale and is recorded as **V2-18** pending approval, and run the sweep — the gate driver's
 `plant-list rc=2` after the move was this lane's own instrument lagging one revision, now repointed and
 reading rc=0 with 172 lines.
+
+### 2026-10-21, P3.2's proof — the sweep's own line, read from the sweep
+
+`uv run python -m quantrisk.verification.runner --all`, on the committed tree `32b76d5`, printed:
+
+> `172/172 planted defects were rejected by their guard.`
+
+exit 0, wall 708 s, and no line in its output carries any of the non-caught statuses
+(`guard-stayed-green`, `sweep-stopped-early`, `anchor-not-unique`, `mutation-was-a-no-op`,
+`target-already-modified`, `restore-mismatch`, `probe-file-already-in-the-tree`); `git status
+--porcelain` is empty afterwards with one exception the sweep has always left — the empty
+`experiments/_mutation_probe/` directory its two `tree` plants unlink files from but never remove, which
+Phase 30 §4(f) recorded and git cannot see.
+
+That is L7 satisfied for the instruments as they now stand, and it is the only acceptable evidence for it.
+The collector deliberately does **not** grow a sweep-reading key: the sweep's output is gitignored
+scratch that CI never has, and a ceiling satisfiable only on the machine that ran it is §4.3's "never
+ratchet a key that cannot fail where it runs". What the collector measures is the declaration (172, by
+`--list`), and the repository's own guard already fails any document mis-quoting it;
+`plants_not_rejected_by_their_guard` keeps `may_be_unmeasured` with its corpus text naming where the
+proof lives.
+
+Two numbers moved as a consequence rather than as prose: mypy's checked corpus **23 → 28** source files,
+because the instruments are now inside a checked target — and the newly-covered code produced one real
+defect at the pairing audit's print, fixed by narrowing rather than by silencing; and the by-path load
+census **19 → 17**. No plant escaped and none lost its anchor across the two moves, because the 23
+harness anchors were re-keyed in the commit that moved the harness: that is V2-10's discipline observed,
+not a lucky outcome.
+
+## 10. Laws as of the end of Phase 1
+
+§13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
+reading: two laws the prompt recorded as VOID are now ACTIVE, and one it treated as a plan is still
+unimplemented, which is what §12's premises audit will cite.
+
+| Law | Status | The reading that decided it |
+|---|---|---|
+| L1 content-digest invariance | **ACTIVE, with a precondition it cannot yet satisfy** | both manifests exist to compare and the registry is the source of truth for invocations, but 18 of 95 entries have a null content digest (V2-08), so the check would halt the lane on `suite_summary.md` at P3.5 unless the byte-only set is declared first |
+| L2 one finding, one commit | **ACTIVE** | every Phase 3 commit so far names its finding in its subject or body, including the one that exists only to complete a claim its predecessor overreached (3f78b2e → 32b76d5) |
+| L3 no gate weakened | **ACTIVE** | no tolerance, skip or xfail was added; the two lanes that reddened (count guards, `plant-list rc=2`) were answered by re-deriving the corpus, not by loosening a check |
+| L4 canonical invocation | **VOID until its guard exists** | D4 is now D4′ and one command uses the canonical form in a gate (`-m quantrisk.verification.runner` in the derivation's test), but the dry-resolve instrument V2-07 asks for is unwritten, so the check cannot be run and the law cannot be cited as satisfied |
+| L5 registry parity, two-sided | **ACTIVE** | implemented and measured: registry 19 sources, filesystem 19 units, mismatch 0, each side printing its enumeration, neither reading the other |
+| L6 no bootstrap hacks | **ACTIVE, unmet** | 10 `sys.path` sites and 17 by-path loads remain; both are ceilings due P3.4/P3.3, and the census prints its corpus rather than an empty success |
+| L7 plant liveness | **ACTIVE, proven once** | the sweep's own line at `32b76d5`: `172/172 planted defects were rejected by their guard.`, exit 0, no non-caught status — which is also the proof that the two instrument moves did not disarm the 23 anchors they re-keyed |
+| L8 instrument identity | **partly exercised, still VOID as a law** | the Phase 0 probe printed `sys.prefix`, the package file and the extension path and refused a foreign root, but the law's check is the Phase 4 wheel, which does not exist yet |
+| L9 static-check parity | **ACTIVE, incomplete** | the census places all 91 tracked Python files in exactly one bucket — 28 covered by mypy and ruff, 63 by ruff alone, 0 uncovered — and mypy's reported 28 equals an independent enumeration of its target; the target list still omits `tools/`, which is P3.7 |
+| L10 counted claims owned | **ACTIVE** | it fired twice in this lane and each time the corpus moved: `539/470 → 545/476` across five documents, four plant anchors and three census gold lists |
+| L11 facts precedence | **ACTIVE** | five findings are the document losing to a reading (V2-01, V2-04, V2-05, V2-17, V2-18), and §3's own first draft was corrected in public when the measurement contradicted it |
+| L12 zero external spend | **ACTIVE** | no dependency added; the lane's only network use is read-only GitHub transport, which costs nothing and is currently intermittent |
+| L13 baseline purity | **ACTIVE** | the baseline names its revision and its export; two heads (`b8daf28`, and the queued pair behind the current tip) are recorded as never executed rather than as green |

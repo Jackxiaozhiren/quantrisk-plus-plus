@@ -97,10 +97,14 @@
       "measured_at_baseline": null,
       "max": 0,
       "reach_by_phase": "P3.2",
-      "corpus": "172 declared plants read from `run_mutation_suite.py --list`; the verdict is read only from the sweep's own summary line",
+      "corpus": "172 declared plants read from `-m quantrisk.verification.runner --list`. The rejection verdict is the sweep's own summary line and lives in REFACTOR_LEDGER.md §9, because the sweep writes gitignored scratch that CI never has — a key computed from that file could not fail on the runner that evaluates it, so the collector measures only the declaration.",
       "can_fail_because": "the declaration is non-empty (172) and the last full sweep on 58b6c22 printed 172/172, so a plant that stops firing is a visible difference rather than a missing key",
       "exemptions": [],
-      "may_be_unmeasured": true
+      "may_be_unmeasured": true,
+      "measured_at_phase": {
+        "P3.2": 0
+      },
+      "note": "P3.2 ran `-m quantrisk.verification.runner --all` on 32b76d5 and printed `172/172 planted defects were rejected by their guard.` with exit 0 and no non-caught status line; the instruments moved twice before that run, so the verdict also proves 23 re-keyed anchors fire rather than vanish"
     },
     {
       "key": "installed_user_identity_mismatch",
