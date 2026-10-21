@@ -4,7 +4,7 @@
   "source_of_readings": "uv run python -m tools.inventory_orphan_code",
   "baseline": {
     "revision": "7da82b123f0e7cbc8bb19412f4369f8ceae4064b",
-    "vantage": "detached export of 7d4f656 at /Users/jackson/QuantRisk-v2-baseline for the gate suite; the collector's own readings below were taken in the development checkout at this revision, and both are named per reading in the snapshot",
+    "vantage": "a detached worktree created by `git worktree add --detach <sibling-directory> 7d4f656` for the gate suite (the path is a parameter of the machine, not a fact of the lane); the collector's readings named in this file were taken in the development checkout at this revision, and every reading in the snapshot names its own command",
     "tracked_python_files": 86,
     "python_files_outside_the_package": 63,
     "manifest_artifacts": 95,
