@@ -181,6 +181,8 @@ would put a judgement in the ledger that nothing has made yet.
 | V2-17 | facts-protocol | Medium | D1's class table assigns only `experiments/<task>/run.py` to the package, but 9 of the 95 frozen commands are produced by `benchmarks/*/*.py`, so five producers would sit outside the registry that owns the command string | classify every `generated_by_command` in `evidence/manifest.json` by its target path and read the prefix — 4 `monte_carlo_validation.py`, 2 `benchmarks/pyportfolioopt/optimisation_validation.py`, 1 `path_dependent_validation.py`, 1 bare `benchmarks/quantlib/pricing_validation.py`, 1 `performance monte_carlo_speed.py` | read literally, the packet's P3.3 (14 commits) leaves `commands_not_module_path` at 9 forever and L4 can never pass; the ceiling would be met only by exempting the five, which is the exemption-hides-the-defect-class trap | apply D1's own instruction — members are "by role, not by count, derive the list in Phase 1". The benchmark validators are published studies by role, so the registry declares 19 tasks and P3.3 is 19 commits | the parity test compares the registry against a filesystem walk that recognises both layouts, and `commands_not_module_path` must reach 0 over all 95 entries in P3.5 | 0 $ | registry (5 extra entries), P3.3's commit count, `docs/architecture.md`'s layout section | high |
 | V2-18 | facts-protocol | Medium | §7 step 6 prescribes `uv run --frozen python scripts/run_mutation_suite.py --list`, and §7 step 4's lane list names other pre-refactor paths; after P3.2b those commands exit 2, because the harness is `python/quantrisk/verification/runner.py` | the gate driver ran §7 step 4 verbatim and reported `plant-list rc=2`; re-running the same lane as `uv run python -m quantrisk.verification.runner --list` gives rc 0 and 172 lines | a session resuming from §7 literally will read its own baseline as broken, and the easiest way to "fix" that red is to skip the lane — which is §15's "a gate stopped running while the lane stayed green" | the prompt's command list was written against the tree it was approved on and never scheduled to be re-derived, because editing it needs maintainer approval and §4.4's leak test | the driver's lane list is now the post-move form, and this section's §9 entry records which §7 commands were measured where | 0 $ | `REFACTOR_PROMPT.md` §7 steps 4 and 6, pending approval — not edited in this commit | high |
 
+| V2-20 | artifact-reconciliation | **High** | studies write the **code path that produced a figure** into the artifact body: `experiments/restrike_gamma_map/run.py:777` records `"source": "experiments/stress_testing/run.py:run_linearisation"`, `experiments/two_factor_error_bound/run.py:437,743` do the same, and `tests/python/test_second_book_crossing_map.py:371` and `test_fifth_order_crossing_map.py:397` assert those strings | `grep -rn '"source": "experiments/' experiments/*/run.py`; `grep -n "stress_testing/run.py" paper/technical_report.tex` (line 1378 quotes it as the study's prose too) | `source` is **not** in `VOLATILE_KEYS`, so it is hashed into `content_sha256`. The moment the cited file moves, the honest regeneration changes the digest of artifacts in the `statistical_experiment` category — and L1 as written permits movement only in categories declared machine-measurement, so **P3.5's single re-run would halt the lane** on a provenance edit, or the absorb-commits would be forced to leave stale paths that name files which no longer exist | the artifacts conflate "which number" with "which file computed it", and the second half was written when the file was the only name the code had | options and their costs, for adjudication before P3.5: (i) re-express provenance as a registry reference (`stress_testing:run_linearisation`), re-derive once, and declare that named field's movement in the ceilings file with its reason; (ii) add `source` to `VOLATILE_KEYS`, which weakens a gate and needs an explicit yes; (iii) re-run per absorption commit, which breaks D5's one re-run and multiplies volatile-field noise | whatever is chosen, the digest report must enumerate every entry whose content moved and its reason, and the two tests above must assert the new form rather than be deleted | 0 $ | the 2 studies' provenance strings, 2 test files, `evidence/manifest.json` (rebuilt by its builder), `paper/technical_report.tex` line 1378, the ceilings file | high |
+
 | _(the low-severity hygiene from lane 4 — 24 `spec_from_file_location` sites in `tests/python/` that switch to imports as their targets move — is carried in the commit sequence rather than as its own finding; V2-19 is deliberately absent because it would restate V2-04)_ | | | | | | | | | | | |
 
 One investigator's claim was **refuted by reading the code** and is not carried: that
@@ -470,3 +472,55 @@ unimplemented, which is what §12's premises audit will cite.
 | L11 facts precedence | **ACTIVE** | five findings are the document losing to a reading (V2-01, V2-04, V2-05, V2-17, V2-18), and §3's own first draft was corrected in public when the measurement contradicted it |
 | L12 zero external spend | **ACTIVE** | no dependency added; the lane's only network use is read-only GitHub transport, which costs nothing and is currently intermittent |
 | L13 baseline purity | **ACTIVE** | the baseline names its revision and its export; two heads (`b8daf28`, and the queued pair behind the current tip) are recorded as never executed rather than as green |
+
+## 11. How to absorb one task (the P3.3 recipe, derived from the first one's dependencies)
+
+`stress_testing` was read end to end before this recipe was written, and the list below is what its
+dependencies turned out to be — not what §8's lane summaries assumed. Run it per task, in
+`ABSORPTION_ORDER`, one commit per task. Each step names the probe that shows it worked.
+
+1. **Red first.** Add the task's assertion that the module is importable and its artifact is still
+   written to the frozen path, then watch it fail: `uv run python -m quantrisk.experiments.<task>` does
+   not exist yet. Record the failure in the commit message.
+2. **Move the body.** `git mv experiments/<task>/run.py
+   python/quantrisk/experiments/<task>/__init__.py`, keep the module docstring verbatim (it is the
+   study's claim prose), and re-point only its usage line to `-m quantrisk.experiments.<task>`.
+   Probe: `git diff --stat -M` shows a rename, not a rewrite.
+3. **Split the entry point.** `run(argv) -> dict` holds the work and returns the summary payload;
+   `main(argv) -> int` is the CLI shim; `__main__.py` is `raise SystemExit(main())`. No behaviour may
+   be added here: the payload's keys are the artifact's keys, byte-comparable except for volatile
+   fields. Probe: the task's existing test suite, unchanged in assertion, green.
+4. **Output path.** `RESULTS = Path(__file__)...` and `REPO_ROOT = parents[2]` both die. Resolve the
+   directory from `TASKS_BY_ID[<task>].artifact` against a root that is either an explicit `--out` or
+   `checkout_root()`; refuse, naming the path, when there is neither. Never fall back to a temporary
+   directory and never synthesise input data. Probe: `run(["--out", tmp])` writes under `tmp`; `run([])`
+   outside a checkout raises.
+5. **Flip the registry entry** — `absorbed=True`, `source` now the package path. Probe: the parity test's
+   two enumerations still agree, because side A already recognises `*/__main__.py`.
+6. **Re-point the siblings that load it.** A dependent study's `spec_from_file_location(.../run.py)`
+   becomes a package import of the same symbol — the "load the definition, do not copy it" property
+   quoted in `experiments/fourth_order_crossing_map/run.py:101-103` must survive the move, so the import
+   replaces the loader rather than duplicating functions.
+   Probe: `grep -n "spec_from_file_location" experiments/<dependent>/run.py` returns nothing for the
+   moved task, and the dependent's guard test still passes.
+7. **Re-point the tmp-tree replicas.** Six tests build a fake checkout with hard-coded paths
+   (`tests/python/test_second_book_crossing_map.py:368-372` and its neighbours). They are part of this
+   commit, not a later cleanup. Probe: the mutation lane green.
+8. **Re-key the plants that target the moved file.** `grep -c 'path="experiments/<task>/run.py"'
+   python/quantrisk/verification/plants.py` before and after: the count must reach zero with each
+   replacement pointing at `python/quantrisk/experiments/<task>/__init__.py`, and anchors that quote
+   deleted lines are replaced, not relaxed. Probe: the anchor self-test green, and a full sweep at the
+   end of the phase group rather than one per task.
+9. **Re-derive the documents that quote the command.** `paper/technical_report.tex` quotes each study's
+   invocation (its line 2080 is `stress_testing`'s) and its prose quotes the file path (line 1378);
+   `docs/reproducibility.md`, `docs/validation_matrix.md`, `docs/interview_defense.md`,
+   `docs/project_scope.md` and `CONTRIBUTING.md` quote commands too. A tex edit forces the PDF rebuild
+   and both freshness guards. Probe: the docs lane green and the report build pair consistent.
+10. **Gate, then commit.** Full §7 suite, `git status` empty, commit staged by path, the committed
+    object verified (`git show --stat`) before the message is believed, then push. If a Dependabot or
+    other session's commit lands first, rebase — never force.
+
+**Deliberately untouched by these steps:** `experiments/<task>/results/**` (K2 — the directory stays
+where it is and holds only results once `run.py` is gone), `evidence/manifest.json` (K4 — it is rebuilt
+once, at P3.5), and any provenance string inside an artifact (V2-20 is unresolved and that is a decision
+for the maintainer, not a step in this recipe).
