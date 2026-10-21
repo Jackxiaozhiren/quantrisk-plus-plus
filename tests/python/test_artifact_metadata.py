@@ -1245,7 +1245,7 @@ def test_documents_that_count_the_crossing_maps_shape_agree_with_the_frozen_arti
 
 
 TWO_FACTOR_BOUND = REPO_ROOT / "experiments/two_factor_error_bound/results/two_factor_bound.json"
-DERIVATION = REPO_ROOT / "scripts/derive_fifth_order_partials.py"
+DERIVATION = REPO_ROOT / "python/quantrisk/verification/fifth_order_partials.py"
 PARTIALS_TEST = REPO_ROOT / "tests/python/test_fifth_order_partials.py"
 
 

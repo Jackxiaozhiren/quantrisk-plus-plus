@@ -30,7 +30,7 @@ import pytest
 import quantrisk
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DERIVATION = REPO_ROOT / "scripts" / "derive_fifth_order_partials.py"
+DERIVATION = REPO_ROOT / "python" / "quantrisk" / "verification" / "fifth_order_partials.py"
 
 PRICING = quantrisk.pricing
 STEPS = (0.002, 0.005, 0.01)
@@ -220,11 +220,11 @@ def test_an_invalid_instrument_is_refused_before_any_polynomial_is_evaluated() -
 def test_the_derivation_command_agrees_at_the_precision_floor() -> None:
     """The identity behind the `8.7e-58` claim was a command nobody's gate ran.
 
-    `scripts/derive_fifth_order_partials.py` is what makes "the numerators are derived, not typed"
-    a check rather than a sentence: it re-differentiates the price at 60 digits, divides by the
-    prefactor the header claims, and meets the result against the polynomial parsed out of
-    `cpp/src/pricing/black_scholes.cpp`. Until this phase the only way to exercise it was a human
-    typing `uv run --with sympy ...`, so `docs/validation_matrix.md` row 21 and the technical
+    `python/quantrisk/verification/fifth_order_partials.py` is what makes "the numerators are
+    derived, not typed" a check rather than a sentence: it re-differentiates the price at 60 digits,
+    divides by the prefactor the header claims, and meets the result against the polynomial parsed
+    out of `cpp/src/pricing/black_scholes.cpp`. Until this phase the only way to exercise it was a
+    human typing `uv run --with sympy ...`, so `docs/validation_matrix.md` row 21 and the technical
     report's §Stress Testing could quote its worst residual with nothing able to disagree. `sympy`
     is now a dev-group dependency -- the group `uv sync` installs -- so every lane that sets up the
     development environment runs the identity.
@@ -236,7 +236,7 @@ def test_the_derivation_command_agrees_at_the_precision_floor() -> None:
     """
     pytest.importorskip("sympy", reason="the derivation is symbolic and needs sympy")
     completed = subprocess.run(
-        [sys.executable, str(DERIVATION)],
+        [sys.executable, "-m", "quantrisk.verification.fifth_order_partials"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,

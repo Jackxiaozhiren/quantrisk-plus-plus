@@ -14,24 +14,27 @@ the claim "the closed forms were derived rather than typed" is a command, not a 
 
 Neither part takes a closed form as an input. Exits non-zero if any check fails.
 
-    uv run python scripts/derive_fifth_order_partials.py
+    uv run python -m quantrisk.verification.fifth_order_partials
 
 `sympy` is in the `dev` dependency group, which is what `uv sync` installs, so any lane that sets
 up the development environment can run this identity -- that is how it entered the gate. The runtime
-environment the release ships does not carry it. The older form, `uv run --with sympy python
-scripts/derive_fifth_order_partials.py`, still works and is what the pre-2026-10-06 documents quote.
+environment the release ships does not carry it. The older form,
+`uv run --with sympy python scripts/derive_fifth_order_partials.py`, named the module while it lived
+in `scripts/`; documents written then quote it, and those are dated records that this lane does not
+rewrite.
 """
 
 from __future__ import annotations
 
 import argparse
-import pathlib
 import re
 
 import mpmath as mp
 import sympy as sp
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+from quantrisk.verification import repo_root
+
+REPO_ROOT = repo_root(__file__)
 SOURCE = REPO_ROOT / "cpp" / "src" / "pricing" / "black_scholes.cpp"
 
 S, K, r, q, sig, T = sp.symbols("S K r q sigma T", positive=True)

@@ -585,7 +585,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="derivation-prefactor-exponent-off-by-one",
         kind="prose",
-        path="scripts/derive_fifth_order_partials.py",
+        path="python/quantrisk/verification/fifth_order_partials.py",
         anchor="quotient = value * v_value**4 / prefactor",
         replacement="quotient = value * v_value**3 / prefactor",
         # Nothing but the derivation gate can see this: the difference-route tests are banded at
