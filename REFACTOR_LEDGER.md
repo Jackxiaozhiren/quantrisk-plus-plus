@@ -271,3 +271,71 @@ from a CI step without anything noticing — that belongs to P3.7's gate, and it
 says *not a CI lane yet* in as many words. And the plant verdict key reports `None` even though the last
 full sweep printed `172/172` on `58b6c22`: the sweep's line is the only acceptable evidence and it was
 read on a different revision, so the collector refuses to launder it.
+
+### 2026-10-21, Phase 1 complete — the §9 gate packet
+
+The survey §6 requires is written into `docs/ecosystem_research.md` §10: seven candidates read in their own
+repositories at a named ref, each mechanism cited to the file that carries it, every cited URL opened
+rather than constructed, and the negatives kept as evidence — `Riskfolio-Lib`'s `linters` job installs
+requirements and lints nothing, which is the failure mode this lane is one token from. Two §5 decisions
+change on that evidence, and both change because of a finding measured here rather than a fashion. **D4′**:
+the registry owns the canonical *prefix* and the producer appends the argv it actually received, because a
+registry that templates the whole string would erase `--paths 200000`, and a recorded command carries
+exactly such a flag. **D3′**: a registry entry validates itself against a declared key set, and discovery
+that cannot resolve is a build failure rather than a warning. No new dependency — the boundary contract the
+survey admires (kedro's `[tool.importlinter.contracts]`, read at `pyproject.toml:176-222`) is implemented as
+a hand-written guard over the AST walk the collector already performs.
+
+**Findings ranked by impact × effort × risk.** "Blocking" means it must be settled before the first Phase 3
+commit, not merely during it.
+
+| rank | id | severity | why it ranks here | effort | risk |
+|---|---|---|---|---|---|
+| 1 | V2-08 | High | **blocking.** L1 cannot be satisfied as written: 18 of 95 entries have a null content digest, so their only owner is a byte hash, and the mandated single re-run necessarily moves `suite_summary.md`. Decide before the run, or the run halts the lane on an artifact that holds no number | declare a set in the ceilings file | cheap to declare, fatal to discover late |
+| 2 | V2-07 | High | **blocking.** `command` is a `VOLATILE_KEY`, so no existing gate can disagree with a reproduction command that names nothing; L4 needs a guard that does not exist yet, and premise P2 is exactly this | one guard plus one plant | low |
+| 3 | V2-09 | High | **blocking.** If the registry becomes both sides of L5's parity test it passes by construction, and today's guard draws its independence from a glob D1 deletes | shapes P3.1 | high if discovered after the move |
+| 4 | V2-10 | High | 23 of 172 plants anchor on the harness's own source lines and `REPO_ROOT` is `parents[1]`; a deeper destination silently disarms every plant | re-key inside the move commit, prove by sweep | high — silent by nature |
+| 5 | V2-12 | High | 10 studies take their artifact directory from `__file__` and 4 from `parents[2]`, against a K2 that freezes those paths | per task in P3.3 | medium |
+| 6 | V2-02 | High | 7 sibling-study edges over 6 studies, 4 of them at import time; this fixes the absorption order rather than a directory listing choosing it | per task in P3.3 | medium |
+| 7 | V2-03 | High | 43 of 95 recorded commands are unrunnable; D4′ plus P3.5's re-derivation closes it | in P3.5 | medium |
+| 8 | V2-11 | High | fixtures are not in the wheel and `available()` answers `[]` instead of naming the missing path, so the installed-user proof would otherwise be a lie | code change in P4.1 | medium |
+| 9 | V2-13 | Medium | the mission's user-facing claim is false today: three subcommands, no way to run a study | P3.6 | low |
+| 10 | V2-15 | Medium | the documentation blast radius, including two living documents no claim inventory covers | per-commit re-derivation | medium |
+| 11 | V2-06 | Medium | 63 of 86 files are type-checked by nothing | P3.7 | low |
+| 12 | V2-05 | Medium | the formatter census counts prose, and an audit record explains a spread by machine rather than by file set | dated clause plus census | low |
+| 13 | V2-16 | Medium | `xargs` without `-r`; a reference-tool skip that can quietly remove a whole comparison | one-token CI change | low |
+| 14 | V2-14 | Medium | a shipped module shells out to git and returns `None` silently off-repo | P4.1 | low |
+| 15 | V2-04 | Low | §7 step 5's "two files" is three | record | none |
+| 16 | V2-01 | Low | the prompt's own step-3/step-8 ordering | record | none |
+
+**Proposed Phase 3 sequence** — one line per commit: finding → change → verification. Each commit's gate is
+the full §7 suite plus the named check; `S` marks a commit after which a ceiling key must move.
+
+| # | commit | finding → change | verification |
+|---|---|---|---|
+| 1 | P3.1a | V2-09/D3′ → `python/quantrisk/experiments/registry.py` with a declared key set, a canonical-prefix builder, artifact path and category; an unresolvable entry raises | L5's two-sided test lands **in this commit**, one side from the module finder and one from the registry table, neither calling the other, each printing what it enumerated; full suite |
+| 2 | P3.2a | V2-10 → `scripts/mutation_plants.py` to `python/quantrisk/verification/plants.py`; the harness's `PLANTS_PATH` follows; every by-path loader of the plant module updated | anchor self-test green; full suite; the sweep is not yet run |
+| 3 | P3.2b | V2-10 → harness to `python/quantrisk/verification/`, with the root declared rather than inferred from `__file__` depth; re-key its 23 self-anchors in the same commit | `--list` still enumerates 172; full suite |
+| 4 | P3.2c | V2-10 → `scripts/derive_fifth_order_partials.py` to verification; re-point the 11 `experiments/` anchors P3.3 invalidates | **the full sweep, once, at this commit**, its own summary line as the proof; L7 recorded |
+| 5–18 | P3.3 ×14 | V2-02 and V2-12, **one study per commit in the measured order** `stress_testing`, `restrike_gamma_map`, `fourth_order_crossing_map`, `second_book_crossing_map`, `fifth_order_crossing_map`, `sixth_book_crossing_map`, then the 8 independents | each: registry entry added; `run(argv) -> dict` plus a thin `__main__`; the bootstrap line dies; sibling loads become package imports; its tests switch from path-load to import; command-string assertions become the canonical invocation **declared as an intent change in the message**; the artifact still lands on the frozen repo path; full suite |
+| 19 | P3.4a | V2-15 → `tools/` receives the 11 repo scripts; the suite runner consumes the registry; the CI step's path changes in the same commit | the survey's "guard the CI file" test; full suite; `S: bootstrap_sites → 0` |
+| 20 | P3.4b | V2-16 → `xargs -r`, the reference-tool skip's declared sentence, ceilings corpus prints | full suite |
+| 21 | P3.5 | V2-03, V2-07 and V2-08 → declare the byte-only artifact set; **the one** suite re-run; the builder re-hashes from registry-derived commands; the verifier proves nothing else moved; re-derive every document that quotes a moved path | L1's digest report: which categories moved, which could not, matched against the ceilings file; `S: commands_not_module_path → 0`, `commands_unrunnable_from_the_root → 0` |
+| 22 | P3.6 | V2-13 → CLI `run` with `--list`; the three existing subcommands byte-identical | `--list` asserted against the registry by a test sharing no source with its enumeration; old outputs compared byte for byte |
+| 23 | P3.7 | V2-06 and V2-05 → mypy targets extended to the destination modules and `tools/`; the census written into the ceilings file; a dated correction to `docs/integrity_audit.md` 62(d) | full suite including the extended `mypy`; the uncovered bucket prints what it counted and stays structurally able to fail |
+| 24+ | Phase 4 | V2-11 and V2-14 → wheel, clean venv, neutral cwd, identity asserted; a loud refusal naming the missing fixture; documentation coherence; dead-glue deletion; the canonical invocation in the contributor guide | §11's four items, each with its own reading |
+
+**Declared blast radius**, derived from the findings rather than guessed: 14 study modules and their 14
+registry entries; 11 `scripts/*.py` into `tools/`; 3 verification instruments; **21** test files that load
+code by path and **9** that assert a command string; **37** plant anchors naming a path that moves (26 under
+`scripts/`, 11 under `experiments/`); `.github/workflows/ci.yml`; `pyproject.toml` for mypy targets only;
+nine living documents carrying the path or command quotations counted per file in V2-15; the 95 artifact
+`command` fields, regenerated by their producers and excluded from content digests by design (V2-07); and
+`evidence/manifest.json`, rebuilt by its builder and never hand-edited (K4). **Dated records are outside
+this radius deliberately:** `docs/phase_reports/*`, the release notes and the release bodies keep the paths
+they were written against, because they are records of a run rather than instructions for one.
+
+**Not proposed:** moving any artifact path (K2), touching `cpp/`, `bindings/`, `CMakeLists.txt` or
+`CMakePresets.json` (K1), changing a tolerance or a formula (K5), adding a dependency (L12), or a new
+manifest field. `docs/ecosystem_research.md` §10 records the field gaps the survey found — `seed`,
+`config_hash`, a quarantined state — as V3 candidates, each with the reason it was declined in this lane.
