@@ -1,0 +1,143 @@
+{
+  "schema": "quantrisk-refactor-ceilings/1",
+  "purpose": "The policy asset REFACTOR_PROMPT.md §4.3 names. The snapshot at build/orphan_inventory.json is telemetry; this file is what a run is measured against. Each key states the phase that must reach it, the value that proves it can fail, and the corpus it was read from.",
+  "source_of_readings": "uv run python -m tools.inventory_orphan_code",
+  "baseline": {
+    "revision": "7da82b123f0e7cbc8bb19412f4369f8ceae4064b",
+    "vantage": "detached export of 7d4f656 at /Users/jackson/QuantRisk-v2-baseline for the gate suite; the collector's own readings below were taken in the development checkout at this revision, and both are named per reading in the snapshot",
+    "tracked_python_files": 86,
+    "python_files_outside_the_package": 63,
+    "manifest_artifacts": 95,
+    "declared_plants": 172
+  },
+  "ceilings": [
+    {
+      "key": "bootstrap_sites_outside_package",
+      "law": "L6",
+      "metric": "count of sys.path.insert/append sites in tracked Python outside python/quantrisk",
+      "measured_at_baseline": 10,
+      "max": 0,
+      "reach_by_phase": "P3.4",
+      "corpus": "every tracked *.py outside python/quantrisk, ast-parsed; the site's file, line and injected expression are printed in the snapshot",
+      "can_fail_because": "the baseline value is 10, not 0, and each of the ten is listed by file and line",
+      "exemptions": [],
+      "exemption_note": "L6 allows one declared test-bootstrap site. The census found none in tests/python/conftest.py, so the exemption list is empty and a future addition must be justified here by name before it can pass."
+    },
+    {
+      "key": "by_path_load_sites",
+      "law": "L6",
+      "metric": "count of importlib.util.spec_from_file_location / SourceFileLoader call sites outside python/quantrisk",
+      "measured_at_baseline": 19,
+      "max": 0,
+      "reach_by_phase": "P3.3 for tests and studies, P3.2 for the mutation harness",
+      "corpus": "the same corpus; each site printed with the path expression it names",
+      "can_fail_because": "19 sites exist today across 18 files, including five studies that load sibling studies at import time",
+      "exemptions": [],
+      "note": "these are not only test plumbing: experiments/fourth_order_crossing_map/run.py and experiments/sixth_book_crossing_map/run.py load a published sibling study rather than re-implementing it, which is what makes 'the same truncation plus the next order' a claim the file cannot quietly break. The destination is a package import of the same sibling, not a copy."
+    },
+    {
+      "key": "commands_not_module_path",
+      "law": "L4",
+      "metric": "manifest entries whose generated_by_command does not parse as `uv run python -m <module>`",
+      "measured_at_baseline": 95,
+      "max": 0,
+      "reach_by_phase": "P3.5",
+      "corpus": "all 95 evidence/manifest.json artifacts, each classified into one of the seven §4.1 #3 forms",
+      "can_fail_because": "zero entries are in the canonical form today, so the ceiling starts at its maximum distance",
+      "exemptions": [
+        {
+          "pattern": "data/fixtures/*.provenance.json",
+          "count_at_baseline": 16,
+          "reason": "the builder composes these from a fixture's provenance record and appends a human-readable source note inside the command field. P3.5 moves the note into its own field so the command can become executable; until then the entry is declared rather than silently absorbed."
+        }
+      ]
+    },
+    {
+      "key": "commands_unrunnable_from_the_root",
+      "law": "L4",
+      "metric": "manifest entries whose recorded command cannot be pasted into a shell at the repository root",
+      "measured_at_baseline": 43,
+      "max": 0,
+      "reach_by_phase": "P3.5",
+      "corpus": "the same 95 entries; a command counts as runnable only when the file or module it names resolves from this directory",
+      "can_fail_because": "43 fail today: 16 annotated, 15 bare filenames that exist only inside a task directory, 11 two-token mangles, 1 with no interpreter prefix",
+      "exemptions": []
+    },
+    {
+      "key": "tracked_python_files_in_no_static_check_bucket",
+      "law": "L9",
+      "metric": "tracked *.py files admitted by neither mypy's target list nor ruff's own resolver log",
+      "measured_at_baseline": 0,
+      "max": 0,
+      "reach_by_phase": "P3.7",
+      "corpus": "86 tracked *.py, tested against mypy's reported source-file count (23, agreed by independent enumeration of python/quantrisk) and ruff's `check . --verbose` admission log, which names every path it admits",
+      "can_fail_because": "the key is not already at its goal by absence: ruff admitted 86 of 86 Python files and a further 112 non-Python ones, and the snapshot prints `tracked_not_admitted_by_ruff` explicitly so an excluded directory shows up as a named list rather than as a quiet zero",
+      "exemptions": [],
+      "open_at_baseline": "the bucket is satisfied but lopsided: 23 files are covered by mypy and 63 by ruff only. P3.7 extends mypy's targets so every destination module is type-checked, and the census must still print exactly one bucket per file."
+    },
+    {
+      "key": "registry_parity_mismatch",
+      "law": "L5",
+      "metric": "symmetric difference between the registry's enumeration and the filesystem's declared tasks",
+      "measured_at_baseline": null,
+      "max": 0,
+      "reach_by_phase": "P3.1",
+      "corpus": "not yet measurable — python/quantrisk/experiments/registry.py does not exist",
+      "can_fail_because": "deliberately absent from any green claim: the collector reports applicable=false with the probe that decided it, and the key is not counted until two independent sources exist",
+      "exemptions": [],
+      "may_be_unmeasured": true
+    },
+    {
+      "key": "plants_not_rejected_by_their_guard",
+      "law": "L7",
+      "metric": "declared plants whose sweep verdict is not `caught`",
+      "measured_at_baseline": null,
+      "max": 0,
+      "reach_by_phase": "P3.2",
+      "corpus": "172 declared plants read from `run_mutation_suite.py --list`; the verdict is read only from the sweep's own summary line",
+      "can_fail_because": "the declaration is non-empty (172) and the last full sweep on 58b6c22 printed 172/172, so a plant that stops firing is a visible difference rather than a missing key",
+      "exemptions": [],
+      "may_be_unmeasured": true
+    },
+    {
+      "key": "installed_user_identity_mismatch",
+      "law": "L8",
+      "metric": "Phase 4 proof failures where an imported module resolves outside the clean virtual environment",
+      "measured_at_baseline": null,
+      "max": 0,
+      "reach_by_phase": "P4.1",
+      "corpus": "a wheel built at the final commit, installed into a fresh venv, probed from a neutral cwd",
+      "can_fail_because": "the probe prints module.__file__ and sys.prefix and asserts the checkout path is not among them",
+      "exemptions": [],
+      "may_be_unmeasured": true
+    },
+    {
+      "key": "external_spend_usd",
+      "law": "L12",
+      "metric": "total paid external spend attributable to this lane",
+      "measured_at_baseline": 0,
+      "max": 0,
+      "reach_by_phase": "continuously",
+      "corpus": "diff of pyproject.toml dependency sections over the refactor range, plus the count of network calls with a price",
+      "can_fail_because": "a new dependency or a paid API call moves it; the only priced call in the repository, a FRED fetch, is not in scope",
+      "exemptions": []
+    }
+  ],
+  "notes": [
+    {
+      "id": "no-run-trap",
+      "text": "scripts/run_benchmark_suite.py --no-run exits 0 and rewrites tracked aggregates as a side effect. At the baseline it dirtied three paths (benchmarks/suite/results/suite_headline.csv, suite_run.json, suite_summary.md) and the manifest verifier exited 1 on two of them. The rule is to restore exactly the paths `git status --porcelain` names, by name, and re-run the verifier.",
+      "why_it_is_here": "a ceiling that measures the tree after this command without restoring it would certify a dirty tree as green."
+    },
+    {
+      "id": "formatter-corpus-includes-prose",
+      "text": "ruff 0.16.9's formatter traverses Markdown as well as Python: `ruff format --check .` printed 204 at 7d4f656 in a detached export and 203 at b2dda33, and the difference is one committed .md file, not one machine. The tracked corpus behind the number is 86 .py + 8 .pyi + 110 .md.",
+      "why_it_is_here": "the lane re-derives documents constantly, so this count moves without any code changing. Finding V2-05; the collector's ruff admission log is the instrument that names the corpus instead of a terminal line."
+    },
+    {
+      "id": "collector-is-dev-only",
+      "text": "tools/ is not packaged: wheel.packages stays python/quantrisk (D1). Nothing in python/quantrisk may import tools/, and the two-sided registry test of L5 must not read this file's source.",
+      "why_it_is_here": "so that a refactor instrument cannot become part of the shipped surface it is measuring."
+    }
+  ]
+}

@@ -156,7 +156,9 @@ moving any tag requires its own approval and will not be inferred from this file
 ## 6. Findings table
 
 Schema, every field, per §8. `probe` is mandatory: it is what lets a later run re-derive the result
-without trusting this ledger's prose.
+without trusting this ledger's prose. Rows are in **discovery order**, not rank order — §9's gate presents
+the same findings ranked by impact × effort × risk, and re-sorting this table before that ranking exists
+would put a judgement in the ledger that nothing has made yet.
 
 | ID | lane | severity | evidence | probe | impact | root cause | proposed fix | verification | cost | blast radius | confidence |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -164,9 +166,9 @@ without trusting this ledger's prose.
 | V2-04 | facts-protocol | Low | §7 step 5 says "restore exactly the two files it rewrites"; the export's `git status --porcelain` after that command named three, and the verifier rejected two of them | `uv run --frozen python scripts/run_benchmark_suite.py --no-run && git status --porcelain` | an executor who restores "the two" by a remembered list leaves one tracked aggregate dirty, and the next lane's green would then certify a dirty tree | the count of rewritten aggregates is a property of the run, not of the prose: whether a re-aggregated file is byte-identical depends on what changed since the last suite execution | the lane's rule is "restore the paths `git status --porcelain` names, by name" — already §14's rail; step 5's "two" is the defect, and the collector records the set rather than its size | §9's entry records the three named paths and the verifier returning to exit 0 after restoring them | 0 $, no file change | prose only | high |
 | V2-05 | facts-protocol | Medium | 91 quotations of `… files already formatted` sit in 62 files, and none is in a living front-page document — `grep -r "already formatted"` over `README.md`, `docs/architecture.md`, `docs/reproducibility.md`, `docs/interview_defense.md`, `docs/validation_matrix.md` and `CONTRIBUTING.md` finds nothing, so every quotation is a dated record; the count is a census of `.py` + `.pyi` + **`.md`**, so it moves with the documentation, and a file neither tracked nor ignored moves it with no commit | `ruff format --check docs -v \| grep "Included path via" \| grep '\.md$'`; and `git ls-files '*.py' '*.pyi' '*.md' \| wc -l` = 204 = the printed count, with `git status --porcelain --untracked-files=all` empty | a published verification line can be re-derived only by someone who knows the corpus includes prose; Phase 30 §4(e) mis-attributed a real difference to "a different machine", and `docs/integrity_audit.md` 62(d) records that mis-attribution | Ruff's formatter accepts Markdown by default and nothing in this repository names that corpus; every quotation took the number at face value as a Python-formatting signal | the collector (§4.1 #4) prints the three tracked buckets and the exclusions, so the claim's producer names its own corpus; a future quotation is then traceable to a named file set instead of to a terminal, and `docs/integrity_audit.md` 62(d) gains a dated clause rather than a restatement | the census line and the formatter's own count compared in one command, both directions; a plant that adds a scratch `.md` and must be rejected by the census guard | 0 $ | `tools/inventory_orphan_code.py`, `tools/refactor_ceilings.json`, `docs/integrity_audit.md` (one dated clause), one plant | high |
 | V2-03 | reproducibility-contract | **High** | 43 of the 95 frozen artifacts' `generated_by_command` strings cannot be run as written from the repository root, and 27 of those name no file at all: 16 `… (source: …)` prose-in-command, 15 bare filenames (`uv run python run.py`), 11 two-token mangles (`uv run python pricing_validation run.py`), 1 with no interpreter prefix (`benchmarks/quantlib/pricing_validation.py`) | the classifier probe in §4's P2 row, whose input is `evidence/manifest.json` and whose corpus is all 95 entries printed by name; and `grep -rl generated_by_command --include=*.py .` → one file, the writer | the project's central claim is "every published number traces to the command that produced it". For 43 artifacts that command is not runnable, so the trace ends at the ledger rather than at a shell — and the verifier's green proves only that the bytes match, never that the reproduction exists | each study writes its own `command` field into `summary.json`, and `scripts/build_evidence_manifest.py:120` copies it verbatim; no schema constrains the field and no guard parses it | D3/D4: the registry owns the canonical invocation and the builder *derives* `generated_by_command` from it, so the manifest can no longer hold a hand-typed command; the collector's §4.1 #3 census becomes a ceiling that must reach zero, with the fixture-provenance category declared and its annotation moved into a separate field | after P3.5's one re-run, the census prints 95 resolvable commands and a plant that corrupts one is rejected by L4's dry-resolve guard | 0 $ | `python/quantrisk/experiments/registry.py`, `scripts/build_evidence_manifest.py` → `tools/build_evidence_manifest.py`, every `experiments/*/results/summary.json` `command` field (regenerated, not hand-edited), `evidence/manifest.json` (rebuilt by the builder only, K4), one plant | high |
-| _(P1, and every remaining §8 lane finding follow from the collector; none is entered before its probe exists)_ | | | | | | | | | | | |
-
-One placeholder id is reserved so later numbering does not re-use it: **V2-02** (the premise P1 findings).
+| V2-02 | orphan-code | **High** | 10 `sys.path` sites all inject `<root>/python`, which the editable install already provides — but 6 of the 14 studies load *published sibling studies* by repository path — 7 edges, four of them at module import time (`experiments/fourth_order_crossing_map/run.py:104`, `…/second_book_crossing_map/run.py:102` and `:103`, `…/fifth_order_crossing_map/run.py:64`, `…/sixth_book_crossing_map/run.py:72`, `…/restrike_gamma_map/run.py:295`, `…/two_factor_error_bound/run.py:180`), which no installed wheel can satisfy | `cd / && .venv/bin/python -c "import quantrisk; print(quantrisk.__file__)"` (resolves: the bootstrap adds nothing); and import a bootstrap-stripped copy of `experiments/sixth_book_crossing_map/run.py` from `/` → `FileNotFoundError: …/experiments/fifth_order_crossing_map/run.py` | D1's destination is unreachable by moving files alone: an importable `quantrisk.experiments.<task>` must import its siblings as modules, and the dependency order is a constraint on the whole of P3.3 — restrike_gamma_map before second_book/fourth_order, those before fifth_order, that before sixth_book, and stress_testing before all of them | the studies compose by path because the repository path is the only name they have for each other outside a package; nothing declares the edges, so no tool can see the chain | each absorption converts its sibling loads to `from quantrisk.experiments.<task> import …`, keeping the "load the definition, do not copy it" property that the comment insists on; P3.3's per-task order follows the measured dependency graph, and the registry records the edges | after P3.3, `python -c "import quantrisk.experiments.sixth_book_crossing_map"` from a clean venv with a neutral cwd must succeed, and the study's own guard test must still pass unmodified | 0 $ | the 6 coupled study modules and their 7 edges, the 8 independent studies, the tests that load them by path (`test_fifth_order_crossing_map.py`, `test_fourth_order_crossing_map.py`, `test_restrike_gamma_map.py`, `test_second_book_crossing_map.py`, `test_sixth_book_crossing_map.py`, `test_two_factor_bound.py`), the suite runner's member tuple | high |
+| V2-06 | static-check-parity | Medium | the collector's coverage census: 23 files reached by mypy **and** ruff, 63 reached by ruff only, 0 uncovered; mypy's reported 23 equals an independent enumeration of `python/quantrisk`, so the gap is real and measured, not inferred | `uv run python -m tools.inventory_orphan_code` → `static_check_coverage.corpora` (printed with both corpora and `tracked_not_admitted_by_ruff`) | every study, every tool script and the mutation harness is type-checked by nothing, while D7's end state promises exactly one bucket per file | `mypy`'s target list in §7 step 4 and in CI is `python/quantrisk`, written when that was the whole Python surface; the corpus grew around it | D7: extend mypy's targets to the destination modules and `tools/`, and let the collector's per-file bucket table be the artifact the ceiling is read against, printing the corpus in both directions | the census must show each tracked file in exactly one bucket, and `mypy`'s own reported file count must keep agreeing with an independent enumeration — a disagreement is the instrument failing, not the code | 0 $ | `.github/workflows/ci.yml`, the §7 step-4 command in `REFACTOR_PROMPT.md` as quoted by `docs/reproducibility.md`, and whatever type errors the newly-covered 63 files reveal | high |
+| _(every remaining §8 lane finding follows from Phase 1's walk of the snapshot; none is entered before its probe exists)_ | | | | | | | | | | | |
 
 ## 7. Liveness of the laws, as of Phase 0
 
@@ -197,5 +199,59 @@ already settle, and what it cannot:
 
 ## 9. Dated entries
 
-_To be appended by the session that writes the collector: the premise readings, the snapshot path, the
-revision and environment each was taken on, and every finding that closes or voids one._
+### 2026-10-20, the collector and the premise readings (`tools/` + this section)
+
+The instrument is `tools/inventory_orphan_code.py`, invoked as `uv run python -m
+tools.inventory_orphan_code`, writing `build/orphan_inventory.json` (gitignored telemetry). The policy
+file is `tools/refactor_ceilings.json`, and `--check-ceilings` now *compares* rather than prints: at
+this revision it exits **1** with four named violations — bootstrap 10, by-path sites 19,
+commands-not-module-path 95, commands-unrunnable-from-the-root 43 — and two oks
+(`external_spend_usd` 0, `tracked_python_files_in_no_static_check_bucket` 0). Its two-sided key check was
+proven to fire by declaring a key the collector does not compute and reading the failure back:
+`FAIL ceilings file declares 'zzz_not_measured' but the collector computes no such metric`, the file
+then restored byte-identical (`diff -q` → identical). **It is deliberately not a CI lane yet**: §16
+requires the committed suite green at every commit, and a ceiling that measures the debt this lane exists
+to remove is red by construction until P3.4/P3.5 clear it. The key that must not rot is the flip — three
+ceilings carry `may_be_unmeasured: true` today (registry parity, plant verdict, installed identity), and
+each one has to be flipped to measured, in the phase that makes it measurable, or the checker's own
+absence rule reports it.
+
+All three premises are **ACTIVE**, and one of them is active for a reason the prompt did not state.
+
+- **P1 — confirmed, with a different cause.** `git ls-files` outside `python/quantrisk` is 63 files:
+  10 inject a path into `sys.path`, 12 load a file by naming its path, 35 import the package normally,
+  6 reach nothing. Every one of the ten injections adds the same directory, `<root>/python`, and the
+  editable install already puts the package there: from `cwd = /`, `.venv/bin/python -c
+  "import quantrisk; print(quantrisk.__file__)"` resolves inside the checkout, so those ten lines are
+  dead weight — which is what lets L6's ceiling be zero rather than "one declared bootstrap site". The
+  live coupling is elsewhere. Deleting the bootstrap line from a scratch copy of
+  `experiments/sixth_book_crossing_map/run.py` and importing it from `/` does not fail on `quantrisk`;
+  it fails on `FileNotFoundError: …/experiments/fifth_order_crossing_map/run.py`, because that study
+  loads a *published sibling study* at import time — and does so on purpose:
+  `experiments/fourth_order_crossing_map/run.py:104` says the phase-15 module "is the definition of the
+  book… loading it rather than copying four functions out of it is what makes 'the same truncation plus
+  the order-four terms' a statement this file cannot quietly break". The graph, read off the 14 studies
+  that carry a `run.py`: **7 edges over 6 studies** — `stress_testing ← restrike_gamma_map ←
+  fourth_order_crossing_map ← second_book_crossing_map ← fifth_order_crossing_map ←
+  sixth_book_crossing_map`, plus `stress_testing ← two_factor_error_bound` — and the other 8 studies are
+  independent. Four of the seven loads run at module import time, so an installed package would fail on
+  *import*, not on run. The refactor's real problem is therefore not that scripts cannot find the
+  package — it is that **studies find each other by repository path**, and a repository path means
+  nothing inside a wheel. Finding **V2-02**, High.
+- **P2 — confirmed and quantified in §4 and finding V2-03.** The collector's own census is the policy
+  now, and it reads 52 resolvable, 16 annotated, 15 bare-filename-does-not-exist, 11 mangled, 1 with no
+  interpreter prefix, and **zero** in the canonical `python -m` form.
+- **P3 — confirmed, lopsided rather than absent.** The two-sided construction holds: mypy reports 23
+  source files and independent enumeration of `python/quantrisk` finds 23, so the instrument is not
+  lying about its own corpus. Ruff's resolver log admits all 86 tracked Python files (and 112
+  non-Python ones — the markdown that V2-05 is about), and `tracked_not_admitted_by_ruff` prints empty,
+  so the zero in the "uncovered" bucket is a measurement, not an absence. But the split is 23 files with
+  both tools against 63 with ruff only, and those 63 include every study, every tool script and the
+  mutation harness. Finding **V2-06**, Medium.
+
+Two readings this session owes rather than hides. The `--check-ceilings` comparison is enforced only by
+the collector's exit code; no test in `tests/python/` runs it yet, so nothing stops it being deleted
+from a CI step without anything noticing — that belongs to P3.7's gate, and it is the reason this entry
+says *not a CI lane yet* in as many words. And the plant verdict key reports `None` even though the last
+full sweep printed `172/172` on `58b6c22`: the sweep's line is the only acceptable evidence and it was
+read on a different revision, so the collector refuses to launder it.
