@@ -69,31 +69,12 @@ from collections.abc import Collection, Iterator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 
+from quantrisk.verification import repo_root
 from quantrisk.verification.plants import MUTATIONS, Mutation
 
-
-def _declared_repo_root() -> Path:
-    """The repository root, found by marker rather than by `__file__` depth.
-
-    Depth was the defect finding V2-10 names: `parents[1]` is correct in `scripts/` and silently
-    wrong two levels deeper, which would point all 172 plants at paths that do not exist and turn
-    every anchor into a missing file rather than a caught defect. A checkout is recognised by its
-    manifest and its object store together, and their absence is a loud refusal rather than a quiet
-    root.
-    """
-    here = Path(__file__).resolve()
-    for candidate in here.parents:
-        if (candidate / "pyproject.toml").is_file() and (candidate / ".git").exists():
-            return candidate
-    raise RuntimeError(
-        "the falsification harness needs a checkout (a directory holding pyproject.toml and .git); "
-        f"found none above {here}"
-    )
-
-
-REPO_ROOT = _declared_repo_root()
 DEFAULT_BUILD_DIR = "build/dev"
 TEST_BINARY_TARGET = "quantrisk_tests"
+REPO_ROOT = repo_root(__file__)
 
 CAUGHT = "caught"
 ANCHOR_NOT_UNIQUE = "anchor-not-unique"
