@@ -7,8 +7,9 @@ only be shown red by hand. Phase 34 demonstrated `Harness.uv` dropping its isola
 way, and a demonstration is not re-run when the plumbing changes. Here the list is data, the
 interpreter is separate, and a plant can point at the interpreter's own line.
 
-`scripts/` is not a package, so this module is loaded by file path by both readers: the harness, and
-`tests/python/test_mutation_suite.py` through it. Nothing else imports it.
+The harness imports this module as `quantrisk.verification.plants`;
+`tests/python/test_mutation_suite.py` reads its source text to prove the list stayed out of the
+interpreter. Nothing else imports it.
 """
 
 from __future__ import annotations

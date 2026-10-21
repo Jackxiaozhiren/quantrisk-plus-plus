@@ -59,7 +59,6 @@ from __future__ import annotations
 import argparse
 import ast
 import hashlib
-import importlib.util
 import os
 import re
 import signal
@@ -70,10 +69,11 @@ from collections.abc import Collection, Iterator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 
+from quantrisk.verification.plants import MUTATIONS, Mutation
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BUILD_DIR = "build/dev"
 TEST_BINARY_TARGET = "quantrisk_tests"
-PLANTS_PATH = Path(__file__).resolve().with_name("mutation_plants.py")
 
 CAUGHT = "caught"
 ANCHOR_NOT_UNIQUE = "anchor-not-unique"
@@ -93,21 +93,9 @@ ESCAPED = "no-guard-objected"
 MODULE_NOT_RUN = "module-could-not-be-run"
 
 
-def _load_plants() -> tuple[type, tuple[Mutation, ...]]:
-    """Read the list from the module holding it, by path, since `scripts/` is not a package.
-
-    The list cannot live in this file: a plant anchors on a line here, and its own entry is a second
-    copy of that line, so the count is always two and the case is refused before it runs (#94).
-    """
-    spec = importlib.util.spec_from_file_location("mutation_plants", PLANTS_PATH)
-    assert spec and spec.loader, f"the plant list is missing from {PLANTS_PATH}"
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module.Mutation, tuple(module.MUTATIONS)
-
-
-Mutation, MUTATIONS = _load_plants()
+# The plant list arrives by package import from `quantrisk.verification.plants`, which is a separate
+# module from this interpreter on purpose: finding 94 records that a plant anchoring on a line of
+# the file holding the list finds that line twice, so the case is refused before it runs.
 
 
 def apply_mutation(text: str, anchor: str, replacement: str) -> tuple[str, str | None]:

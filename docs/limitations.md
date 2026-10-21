@@ -1022,6 +1022,13 @@ never removed just because a later phase shipped.
     tuple, so the CLI is unchanged, while the file a future phase edits for a plant is now two files and
     the anchor census reads both.
 
+    **Amended 2026-10-21 by V2 Phase 3.1: the list moved again, and the file-path load died with it.**
+    `Mutation` and `MUTATIONS` now live in `python/quantrisk/verification/plants.py`, and the harness
+    imports them as a package module, so `PLANTS_PATH` and its `spec_from_file_location` are gone -- the
+    guard named above proves the same split from the new location. (a) is unchanged: the boundary was
+    always about *which file holds the list*, not which directory that file sits in, and a plant still
+    cannot anchor on a line of its own module.
+
 95. **The claim inventory reads digits, so a count written in words is invisible to it, and its two
     exclusion rules can be used to hide a claim as easily as to excuse one.**
     `_REPORT_CLAIM` matches a numeric token, so the shape is `142 rows` and not `one hundred and

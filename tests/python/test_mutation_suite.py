@@ -49,7 +49,7 @@ def test_the_plant_list_lives_where_a_plant_can_reach_the_harness() -> None:
     is defined in the data module, no part of it has crept back into the interpreter, and every
     plant that points at the interpreter has one anchor there and no more.
     """
-    plants_path = REPO_ROOT / "scripts" / "mutation_plants.py"
+    plants_path = REPO_ROOT / "python" / "quantrisk" / "verification" / "plants.py"
     assert plants_path.is_file(), "the plant list has no module to live in"
     plants_source = plants_path.read_text(encoding="utf-8")
     harness_source = HARNESS_PATH.read_text(encoding="utf-8")
@@ -196,7 +196,7 @@ def _synthetic_plants(count: int = 3) -> tuple[object, ...]:
         harness.Mutation(
             identifier=f"synthetic-{number}",
             kind="prose",
-            path="scripts/mutation_plants.py",
+            path="python/quantrisk/verification/plants.py",
             anchor="MUTATIONS: tuple[Mutation, ...] = (",
             replacement="MUTATIONS: tuple[Mutation, ...] = (  #",
             guard=guard,
