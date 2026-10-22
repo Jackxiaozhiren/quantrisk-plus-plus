@@ -188,6 +188,10 @@ what does compare them is the replay guard `_assert_same_result`, which walks `.
 
 | _(the low-severity hygiene from lane 4 — 24 `spec_from_file_location` sites in `tests/python/` that switch to imports as their targets move — is carried in the commit sequence rather than as its own finding; V2-19 is deliberately absent because it would restate V2-04)_ | | | | | | | | | | | |
 
+| V2-21 | citation-resolution | Medium | `paper/technical_report.tex` carries 315 `\src{}` / `\srcin{}` repository-path citations (a brace pass over the tex that skips only the macro's own definition lines) and **no guard proves any of them resolves**. Six named files that do not exist at this commit's parent: four `experiments/<task>/run.py` for studies the lane had already absorbed (lines 1475, 1510, 1539, 1550), this study's own line 1401, and `scripts/derive\_fifth\_order\_partials.py` at 1530 -- the last created by P3.2's own move five commits back. The first four survived because §11 step 9's probe matched the plain spelling while LaTeX writes `fourth\_order\_crossing\_map` | `git show HEAD:paper/technical_report.tex` through the brace pass: 315 read, 6 unresolved; the same pass over this commit's tex reads 315 and resolves 315 | the report is the artifact a reader opens, and a citation to a file that is not there is the defect class V2-20 just declared for `source` fields inside artifacts -- with the difference that nothing here can see it, because what *is* guarded over the paper is numeric, not structural | the claim inventory keys on numbers and counted nouns; path existence is guarded for `docs/architecture.md` alone (`test_every_path_the_architecture_document_declares_exists`), and nothing extended that loop to the paper | extend that same loop-guard to the paper: parse the tex for `\src{}` / `\srcin{}`, un-escape `\_`, drop any `:line` suffix, resolve each against `checkout_root()`, and keep an explicitly named exemption list for dated records (`docs/phase_reports/**`, `docs/release_notes_v1.*.md`, the numbered findings of `docs/integrity_audit.md`) rather than a pattern that silently absorbs them | the guard reddens when one cited path is renamed -- proven by the falsification probe on a single citation, with the enumerated count and the exemption set printed in the failure. The pass that wrote this row already does the resolution half and is the seed for it | 0 $, one commit | `tests/python/test_artifact_metadata.py` plus the fifteen quotations of the test-count pair (the same cascade any added case pays), `paper/technical_report.tex` read-only | high -- measured at absorption 7, where six stale citations were found this way and all six re-derived |
+
+| V2-22 | guard-denominator | **High** | `test_every_registered_experiment_is_named_in_the_report` asks whether the report names every registered experiment, and built its denominator as `{experiments/<dir>/ for member in suite if member.script.startswith("experiments/")}`. P3.3a made `member.script` a property over the registry, so each absorbed task started reporting `python/quantrisk/...` and **fell out of the filter** -- six commits later the guard checked 7 of the 14 studies under `experiments/`, while passing every run and keeping its own plant green | set difference between the registry's artifact directories and the set the guard constructs: `dropped out of the guard: fifth_order, fourth_order, restrike, second_book, sixth_book, stress_testing, two_factor` | a gate that lost half its coverage is the L3 failure this lane is not allowed to have caused, and it caused it without touching a `skip`. The report can now omit any absorbed experiment and stay green -- and the plant that exists to catch exactly that was anchored on the stale citation, so it proved the *old* denominator only | the guard keyed its population on the shape of the pre-refactor path rather than on the registry, and the refactor changed that shape one task at a time -- which is precisely the case V2-09 registered for the disk-to-member guard, where the same trap was avoided by walking both layouts and printing each pattern's count | fixed in absorption 7: the denominator comes from `Task.artifact` parts, and the token carries no trailing slash so `experiments/<dir>/run.py`, `experiments/<dir>/results/...` and `python/quantrisk/experiments/<dir>` all name the study. The plant was re-keyed to the new citation and proved to fire by applying it in-tree (guard rc 1), restoring under a SHA-256 check (`b70cca9ac01e`) and seeing rc 0 again | the two other prefix classifiers -- `tests/python/test_task_registry_parity.py:35` and `tools/inventory_orphan_code.py:332` -- were read and are layout-safe, which is how `filesystem_units` reaches 19 with 7 units in the package | 0 $, carried by absorption 7's commit | this one guard, one plant anchor, `paper/technical_report.tex` read-only | high -- measured, fixed and negative-controlled at absorption 7 |
+
 One investigator's claim was **refuted by reading the code** and is not carried: that
 `test_artifact_metadata.py:917`/`:927` compare a glob against the README with no floor. They do have one —
 `assert listed, "no rows were read out of the experiments table"` and
@@ -737,6 +741,74 @@ now cite the module. No test added; the pair stays **548 / 479**. The replay's o
 differences are the three declared citation spellings (`controls.control`, two `procedure.reused_from`
 entries), each waiting on P3.5.
 
+### 2026-10-22, P3.3 absorption 7 of 19 — `two_factor_error_bound`, and the report's citations have no owner
+
+Seventh of 19, and the first move that changes nothing in the two counters the lane has been watching:
+bootstrap stays 6, by-path load sites stay 5, because absorption 1 converted this study's sibling loader
+and its `sys.path` insert four commits ago. What did move is the checked corpus -- mypy 41 to 43 source
+files, ruff's tracked-python denominator 98 to 99 -- and the report, for a reason that is its own finding.
+
+Finding first. `paper/technical_report.tex` carries 315 `\src{}` / `\srcin{}` path citations and nothing
+proves any of them resolves. Six named files that do not exist at this commit's parent: four still pointed
+at `run.py` for the studies absorbed in commits 3 to 6, this study's own line 1401 pointed here, and line
+1530 cited `scripts/derive\_fifth\_order\_partials.py` -- moved into `python/quantrisk/verification/` by
+P3.2 five commits back, which means the lane that widened step 9 today had itself made the hole earlier.
+The escaped spelling is a second axis of blindness in a probe that had just been widened for a first one:
+the tex writes `fourth\_order\_crossing\_map`, so a pattern containing an underscore does not match it.
+Step 9 now says to run the probe twice, and the missing owner is registered as **V2-21** with its fix and
+its cost named (one loop-guard over the tex, and the fifteen-quotation cascade any added pytest case pays).
+All six are re-derived in this commit and the same pass resolves 315 of 315 afterwards. The PDF is rebuilt
+after the last of them, not before: the first build of this commit recorded bundle `74d9ca04aa4c` / pdf
+`bcc58f914e82` and is superseded; the pair the tree ships is bundle `913dd5752889`, pdf `0e93bd19a0ab`.
+
+The re-derivation is what a guard was for, and the second one it exposed is worse than the citations. The
+plant `report-drops-an-experiment-from-its-own-account` anchors the tex citation, so its anchor going stale
+was the lane's own signal that `test_every_registered_experiment_is_named_in_the_report` had stopped
+covering what its name says: its denominator was built from `member.script` filtered by
+`startswith("experiments/")`, and P3.3a had made `member.script` the registry's path -- so every absorbed
+task moved
+out of the filter, and by this commit the guard checked **7 of the 14** studies under `experiments/` while
+passing every run and keeping its plant green. Registered as **V2-22**, because a gate that loses half its
+population without a `skip` in sight is the L3 failure this lane is not allowed to have caused; the
+denominator now comes from `Task.artifact` parts with no trailing slash, so all three spellings the report
+uses name the study. The re-keyed plant was proved to fire rather than assumed: citation removed in-tree,
+guard rc 1; file restored, SHA-256 `b70cca9ac01e` equal to the snapshot, guard rc 0. The sweep's own
+`--only` for that plant refused to run against a staged tree (`target-already-modified`, rc 2), which is
+the harness's precondition working as designed, not a defect -- and the full sweep at the end of P3.3 is
+where the re-keyed anchor gets its verdict. The two other prefix classifiers,
+`tests/python/test_task_registry_parity.py:35` and `tools/inventory_orphan_code.py:332`, were read and are
+layout-safe; that is how `filesystem_units` reaches 19 with 7 units already inside the package.
+
+`figure_status` is new to the lane. This is the first absorbed study that draws a PNG and records where it
+landed *inside* the payload, so a replay under `--out` moves a field that `VOLATILE_KEYS` does not name --
+which is why the digests differ and why the reproduction guard waives the key by name, a waiver that
+predates the move because the tmp-tree copy hit the same thing for the same reason. It is deliberately not
+promoted into `VOLATILE_KEYS`: that set decides what `content_digest` certifies for all 95 artifacts, and
+widening it is a policy change with a declared reason, belonging to P3.5's ceilings entry, not to a commit
+whose only mandate is to move a file.
+
+Two defects surfaced in the newly-covered code, both in `published_scenario()`, and both of the same shape
+the lane has now seen four times: `found = {"equity": None, "volatility": None}` infers `dict[str, None]`,
+so the assignments at the loop body are rejected, and the guard that proves both legs were found narrows
+nothing when it reads through the dict subscript. The fix types the dict and reads the two values into
+locals before the check, which is what makes the `return` well-typed; the behaviour is the same bytes, and
+the replay plus the study's own 20 guards say so.
+
+The three prose citations this study owned inside `restrike_gamma_map` became registry references --
+`two_factor_error_bound:terms_at_base` and `:engine_map`, both confirmed to exist as module-level functions
+at lines 253 and 201 -- except the book comment, which now names the `linearisation_error_bound` and
+`two_factor_error_bound` studies *without* a symbol, because that one has no `run` function to cite and a
+reference that does not resolve is the thing this whole lane is trying to remove.
+
+Absent at HEAD, proved by running it: `python -m quantrisk.experiments.two_factor_error_bound --out build/probe`
+exits 1 with `No module named quantrisk.experiments.two_factor_error_bound`. After the move the same
+invocation exits 0, and its artifact differs from the committed one in exactly three classes: the two
+provenance citations absorption 1 re-expressed (`book.source`, `published_scenario_bound.source`), the
+`command` field every absorption rewrites, and `figure_status` naming the temporary root. The analysis
+note's reproduction command and the `reproducibility.md` sentence about the conditioning band are
+re-derived; no plant targets this file's source (`grep -c` of the path in `plants.py` is 0 before and
+after); no test added, so the pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
@@ -819,7 +891,11 @@ identical in every member field before it moved anything.
    CONTRIBUTING.md`. What may remain is a dated record -- `docs/phase_reports/**`,
    `docs/release_notes_v1.*.md`, the numbered findings of `docs/integrity_audit.md`, this ledger's own
    finding text -- because those state what was true when written. Living prose (the validation matrix's
-   rows, a limitation entry) states current behaviour and follows the file.
+   rows, a limitation entry) states current behaviour and follows the file. Absorption 7 found the same
+   probe narrow on a second axis: inside `paper/technical_report.tex` every underscore is written `\_`, so
+   a citation to `fourth_order_crossing_map` does not match a pattern containing `fourth_order_crossing_map`
+   -- four report citations had sat through four commits that way, and the miss is registered as V2-21.
+   Run the probe twice, the second with `\_` substituted, before believing a document tree is clean.
 10. **Gate, then commit.** Full §7 suite, `git status` empty, commit staged by path, the committed
     object verified (`git show --stat`) before the message is believed, then push. If a Dependabot or
     other session's commit lands first, rebase — never force.

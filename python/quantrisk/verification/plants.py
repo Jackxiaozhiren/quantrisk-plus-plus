@@ -451,7 +451,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-drops-an-experiment-from-its-own-account",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="experiments/fifth\\_order\\_crossing\\_map/run.py",
+        anchor="python/quantrisk/experiments/fifth_order_crossing_map",
         replacement="docs/analysis/fifth\\_order\\_crossing\\_map.md",
         guard=(
             "tests/python/test_artifact_metadata.py::"

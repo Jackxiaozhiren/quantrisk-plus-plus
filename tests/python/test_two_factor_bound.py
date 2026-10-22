@@ -54,8 +54,7 @@ def _word_to_int(word: str) -> int:
         return int(word)
 
 
-EXPERIMENT = REPO_ROOT / "experiments" / "two_factor_error_bound"
-RESULTS = EXPERIMENT / "results"
+RESULTS = REPO_ROOT / "experiments" / "two_factor_error_bound" / "results"
 ARTIFACT = RESULTS / "two_factor_bound.json"
 CSV_PATH = RESULTS / "two_factor_bound.csv"
 
@@ -544,28 +543,31 @@ def test_the_swept_grid_and_the_published_rows_agree_cell_by_cell() -> None:
 def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_numbers(
     tmp_path: Path,
 ) -> None:
-    """Determinism, without letting the test write into frozen evidence.
+    """Determinism, without letting a test write into frozen evidence.
 
-    The copy has to sit at the same depth as the original because the experiment writes its results
-    beside itself. It no longer has to carry a copy of the stress experiment: that sibling arrives
-    now as a package import, which is the whole point of moving it inside `quantrisk`.
+    Nothing travels: the study is absorbed, so the replay is its canonical invocation with `--out`
+    naming a temporary repository root, and the stress study it reads the scenario from arrives as a
+    package import. The artifact it writes lands at the registry's path beneath that root, and the
+    committed evidence stays byte-for-byte untouched.
     """
-    destination = tmp_path / "experiments" / "two_factor_error_bound" / "run.py"
-    destination.parent.mkdir(parents=True)
-    destination.write_text((EXPERIMENT / "run.py").read_text(encoding="utf-8"), encoding="utf-8")
-
     before = ARTIFACT.read_bytes()
     completed = subprocess.run(  # noqa: S603
-        [sys.executable, str(destination)],
+        [
+            sys.executable,
+            "-m",
+            "quantrisk.experiments.two_factor_error_bound",
+            "--out",
+            str(tmp_path),
+        ],
         capture_output=True,
         text=True,
         check=False,
-        cwd=tmp_path,
+        cwd=REPO_ROOT,
     )
     assert completed.returncode == 0, completed.stderr[-2000:]
     assert ARTIFACT.read_bytes() == before, "the test run modified a committed artifact"
 
-    produced = destination.parent / "results" / "two_factor_bound.json"
+    produced = tmp_path / "experiments/two_factor_error_bound/results/two_factor_bound.json"
     assert produced.exists(), f"the copy wrote no artifact; stdout: {completed.stdout[-400:]}"
     mine = _payload()
     theirs = json.loads(produced.read_text(encoding="utf-8"))

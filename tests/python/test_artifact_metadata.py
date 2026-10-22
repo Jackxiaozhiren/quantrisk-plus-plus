@@ -5510,13 +5510,20 @@ def test_every_registered_experiment_is_named_in_the_report() -> None:
 
     Keyed on the directory rather than the script path, because the report cites most members by
     their results file (`experiments/real_data_risk_study/results/...`), which the path form would
-    miss while the directory form matches.
+    miss while the directory form matches. Absorption 7 found the other half of that: the set was
+    built from the suite members' `script` with a `startswith("experiments/")` filter, and once a
+    task moves inside the package its script is `python/quantrisk/...` -- so each absorbed member
+    had quietly left the denominator, and by the sixth one the guard checked 7 of 14 studies and
+    could no longer see a report that dropped the other seven. The key is the registry's own
+    artifact path now, and the token has no trailing slash, so all three spellings the report uses
+    -- `experiments/<dir>/run.py`, `experiments/<dir>/results/...`, and the package's
+    `python/quantrisk/experiments/<dir>` -- name the study to a guard that is looking for it.
     """
     prose = _report_prose()
     directories = {
-        f"experiments/{Path(member.script).parent.name}/"
-        for member in _load_suite_members()
-        if member.script.startswith("experiments/")
+        f"experiments/{Path(task.artifact).parts[1]}"
+        for task in TASKS_BY_ID.values()
+        if task.artifact.startswith("experiments/")
     }
     absent = sorted(directory for directory in directories if directory not in prose)
     assert not absent, f"the report never names these registered experiments: {absent}"

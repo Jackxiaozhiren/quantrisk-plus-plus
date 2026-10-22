@@ -226,8 +226,8 @@ relative, and by 39% in one regression's standard error — the last figure not 
 a statistic with no cross-platform value to reproduce. The mechanism is the same 1.7 ULP above,
 amplified: a fit distributes the difference across every one of its samples, and a standard error
 measures how much scatter it saw. Such a quantity is reproducible only as a *member of a band*, and the
-band is the experiment's own: `experiments/two_factor_error_bound/run.py` raises rather than writing an
-artifact whose slope leaves its declared range, and it publishes
+band is the experiment's own: `quantrisk.experiments.two_factor_error_bound` raises rather than
+writing an artifact whose slope leaves its declared range, and it publishes
 `reproduction_policy.conditioning_limited` naming the families this applies to. The reproduction test
 reads that list from the artifact and, inside those families, compares key sets, list lengths and types
 rather than values — integers, booleans, strings and verdicts stay exact even there, unless the

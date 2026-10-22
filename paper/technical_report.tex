@@ -1398,7 +1398,7 @@ excludes zero, so the \emph{sign} of the published error is proved rather than e
 leading term} is the one that disappoints: at the size the scenario actually uses, the order-2 term
 is $+787.96$ against an error of $-5320.79$. A cubic term dominates it by $10.7\times$ --- or
 $7.4\times$ measured against the quadratic's two contributions summed in absolute value, which is
-the reading \src{experiments/two_factor_error_bound/run.py} publishes beside it --- and it is the
+the reading \src{python/quantrisk/experiments/two_factor_error_bound} publishes beside it --- and it is the
 $\tfrac12 V_{SS\sigma}h^2k$ piece --- base gamma applied across a move that has already changed the
 volatility on which gamma depends. Counted over the whole grid the largest omitted piece is that
 mixed cubic in 64 cells, the pure spot cubic in 36 and volga in 32, while $vanna \cdot hk$, the term
@@ -1472,7 +1472,7 @@ The prediction above is gated only inside $|\delta| \le 0.05$, which is an argum
 third-order truncation owns rather than about the mechanism. \src{cpp/include/quantrisk/pricing/black\_scholes.hpp}
 now carries the four mixed fourth partials, each in the shape
 $V = P \cdot S^{1-n_{\text{spot}}} \cdot T^{n_{\sigma}/2} \cdot R(d_1, v) / v^3$, and
-\src{experiments/fourth\_order\_crossing\_map/run.py} adds them to the same column truncation, on the
+\src{python/quantrisk/experiments/fourth_order_crossing_map} adds them to the same column truncation, on the
 same book, with the cubic imported from the phase-15 experiment rather than re-typed.
 
 Two checks say the added piece is what it claims. Along four joint-shock rays scaled from published
@@ -1507,7 +1507,7 @@ keeps; \src{docs/limitations.md}, item 79 and
 \src{docs/analysis/fourth\_order\_crossing\_map.md} §5 carry the rest.
 
 \paragraph{Does the radius belong to the model or to the book?}
-\src{experiments/second\_book\_crossing\_map/run.py} re-measures it on four further books --- a
+\src{python/quantrisk/experiments/second_book_crossing_map} re-measures it on four further books --- a
 long-dated wide ladder, a short-dated tight one, a deep out-of-the-money ladder and an in-the-money
 mirror --- after proving the re-implementation is the shipped machinery wherever both are defined: ten
 book coefficients, both truncations and the engine P\&L over 30 joint moves agree bit-for-bit on the
@@ -1527,7 +1527,7 @@ before the measurement was right.
 fifth-order one, so \src{cpp/include/quantrisk/pricing/black\_scholes.hpp} now carries the six mixed
 partials of total order five in the same shape with one further power of $v$,
 $V = P \cdot S^{1-n_{\text{spot}}} \cdot T^{n_{\sigma}/2} \cdot R(d_1, v) / v^4$. The numerators are
-not typed: \src{scripts/derive\_fifth\_order\_partials.py} parses them out of the source, forms the
+not typed: \src{python/quantrisk/verification/fifth\_order\_partials.py} parses them out of the source, forms the
 quotient of the symbolic derivative of the price by the prefactor the header claims, and meets it at 60
 markets spread over the $(d_1, v)$ plane to $8.7 \times 10^{-58}$ relative worst at 60 working digits.
 Nothing there is fitted, so agreement at the precision floor means the two sides are one function rather
@@ -1536,7 +1536,7 @@ at total degree five cannot represent this family: the first attempt at that che
 noise where it should have reported a bad model.
 
 That paragraph stood alone for one phase, because the capability and the claim that consumes it were
-delivered separately. \src{experiments/fifth\_order\_crossing\_map/run.py}, the eighteenth suite member,
+delivered separately. \src{python/quantrisk/experiments/fifth_order_crossing_map}, the eighteenth suite member,
 adds $(1/120)$ of the fifth directional derivative to the column truncation and re-runs the same
 paired-magnitude contiguous rule on the same five books. Order five widens the radius on 2 of the 5: the
 published ladder from $0.15$ to $0.20$ and the deep out-of-the-money ladder from $0.20$ to $0.30$. It
@@ -1547,7 +1547,7 @@ order-five spot piece to the order-four one at the measure column spans 0.057 to
 and the book with the \emph{smallest} of those ratios took the larger widening.
 
 \paragraph{A sixth book, and what a rule can reach.} The ratio axis is extended by rule rather than by
-choice: \src{experiments/sixth\_book\_crossing\_map/run.py} fixes a 23-candidate grid, ranks it by the
+choice: \src{python/quantrisk/experiments/sixth_book_crossing_map} fixes a 23-candidate grid, ranks it by the
 order-five-to-four piece ratio at the same measure column, and takes the first candidate whose radius is
 \emph{defined} --- at least three swept columns carrying a priced crossing --- reading no radius until the
 choice is made. The winner sits 24-fold below the previous minimum, at ratio $0.0024$, and its quartic

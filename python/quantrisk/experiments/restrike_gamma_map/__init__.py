@@ -95,9 +95,9 @@ from quantrisk.experiments.registry import (
 
 TASK = TASKS_BY_ID["restrike_gamma_map"]
 
-# The published book, unchanged from `stress_testing:run_linearisation`,
-# `experiments/linearisation_error_bound/run.py` and `experiments/two_factor_error_bound/run.py`:
-# spot 100, three calls at 90/100/110, 5000 each, r = 3 %, no dividend, sigma = 20 %, T = 0.5.
+# The published book, unchanged from `stress_testing:run_linearisation` and from the
+# `linearisation_error_bound` and `two_factor_error_bound` studies: spot 100, three calls at
+# 90/100/110, 5000 each, r = 3 %, no dividend, sigma = 20 %, T = 0.5.
 SPOT = 100.0
 RATE = 0.03
 DIVIDEND_YIELD = 0.0
@@ -212,7 +212,7 @@ def book_expansion_coefficients() -> dict[str, float]:
 
     Raw partials rather than exposures: the gamma exposure already folds in the `\frac12 S^2`, while
     claim 5 asks where the *terms* of the expansion cancel, and a term is a coefficient times the
-    powers of the move. Named as in `experiments/two_factor_error_bound/run.py:terms_at_base`, the
+    powers of the move. Named as in `two_factor_error_bound:terms_at_base`, the
     expansion these coefficients belong to.
     """
     m = market(SPOT, VOLATILITY)
@@ -260,7 +260,7 @@ def engine_pnl(delta: float, vol_move: float, exposure: dict[str, float]) -> flo
         STRESS.RiskFactor("VOL", STRESS.FactorClass.volatility, VOLATILITY, "annualised vol"),
     ]
     vector = STRESS.ExposureVector()
-    # Blocks are indexed by factor position, as `two_factor_error_bound/run.py:engine_map` records:
+    # Blocks are indexed by factor position, as `two_factor_error_bound:engine_map` records:
     # a vega parked on the equity factor is multiplied by zero and disappears silently.
     vector.delta = [exposure["delta"], 0.0]
     vector.gamma = [exposure["gamma"], 0.0]

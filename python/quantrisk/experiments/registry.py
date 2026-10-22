@@ -238,7 +238,12 @@ TASKS: tuple[Task, ...] = (
         "linearisation_error_bound",
         "linearisation_error_bound.json",
     ),
-    _study("two_factor_error_bound", "two_factor_error_bound", "two_factor_bound.json"),
+    _study(
+        "two_factor_error_bound",
+        "two_factor_error_bound",
+        "two_factor_bound.json",
+        absorbed=True,
+    ),
     _study("stress_testing", "stress_testing", "stress_testing_study.json", absorbed=True),
     _study("real_data_risk_study", "real_data_risk_study", "real_data_risk_study.json"),
     _study(

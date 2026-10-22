@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 13 experiment: what a joint spot-and-volatility shock costs the delta-gamma-vega map.
 
-    uv run python experiments/two_factor_error_bound/run.py
+    uv run python -m quantrisk.experiments.two_factor_error_bound [--out DIRECTORY]
     uv run python scripts/run_benchmark_suite.py --only two_factor_error_bound
 
 Phase 12 bounded the error of the stress map when *only* the equity factor moves, and refused
@@ -60,6 +60,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -72,8 +73,14 @@ from quantrisk.experiments.metadata import (
     repo_relative,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["two_factor_error_bound"]
 
 # The same book as `stress_testing:run_linearisation` and
 # `experiments/linearisation_error_bound/run.py`: spot 100, three calls at 90/100/110, 5000 each,
@@ -179,15 +186,16 @@ def published_scenario(name: str = "risk_off") -> dict[str, float]:
     for handle in scenarios():
         if handle.name != name:
             continue
-        found = {"equity": None, "volatility": None}
+        found: dict[str, float | None] = {"equity": None, "volatility": None}
         for shock in handle.shocks:
             if shock.factor_id == "EQ0":
                 found["equity"] = float(shock.relative)
             elif shock.factor_id == "VOL":
                 found["volatility"] = float(shock.absolute)
-        if found["equity"] is None or found["volatility"] is None:  # pragma: no cover
+        equity, volatility = found["equity"], found["volatility"]
+        if equity is None or volatility is None:  # pragma: no cover
             raise RuntimeError(f"scenario {name} does not move both EQ0 and VOL: {found}")
-        return {key: float(value) for key, value in found.items()}
+        return {"equity": equity, "volatility": volatility}
     raise RuntimeError(f"no scenario named {name!r} in the published stress set")
 
 
@@ -507,8 +515,12 @@ def fit_conditioning() -> dict[str, Any]:
     return out
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Bound the map's joint-shock error, sweep the grid, write, return the payload."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
+
     ridge = ridge_probe()
     located = [
         value["root_over_predicted"]
@@ -718,7 +730,7 @@ def main() -> int:
     payload = {
         "schema": "quantrisk.two_factor_error_bound.v1",
         "generated_at_utc": utc_timestamp(),
-        "command": "uv run python experiments/two_factor_error_bound/run.py",
+        "command": TASK.invocation,
         "claim": (
             "the delta-gamma-vega stress map loses a quadratic term under a joint spot and "
             "volatility shock, that term is closed-form, and the residual left by subtracting it "
@@ -823,7 +835,7 @@ def main() -> int:
         },
     }
 
-    csv_path = RESULTS / "two_factor_bound.csv"
+    csv_path = results / "two_factor_bound.csv"
     write_csv(
         csv_path,
         [
@@ -832,7 +844,7 @@ def main() -> int:
             for row in rows
         ],
     )
-    published_csv_path = RESULTS / "published_scenario_bound.csv"
+    published_csv_path = results / "published_scenario_bound.csv"
     write_csv(
         published_csv_path,
         [
@@ -853,14 +865,20 @@ def main() -> int:
             for row in (published,)
         ],
     )
-    figure_path = RESULTS / "two_factor_bound.png"
+    figure_path = results / "two_factor_bound.png"
     payload["figure_status"] = make_figure(asymptotics, rows, published, figure_path)
     payload["artifacts"] = artifact_manifest([csv_path, published_csv_path, figure_path])
 
-    json_path = RESULTS / "two_factor_bound.json"
+    json_path = artifact_path(TASK, out)
     json_path.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+    return payload
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the headline as JSON, then the line the suite's log reports."""
+    payload = run(argv)
     print(json.dumps(payload["headline"], indent=2))
-    print(f"wrote {repo_relative(json_path)}")
+    print(f"wrote {repo_relative(artifact_path(TASK, parse_out(argv, description=__doc__)))}")
     return 0
 
 
@@ -943,7 +961,3 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer = csv.DictWriter(handle, fieldnames=field_names)
         writer.writeheader()
         writer.writerows(rows)
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
