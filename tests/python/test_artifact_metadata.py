@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import ast
 import csv
+import dataclasses
 import hashlib
 import importlib.util
 import json
@@ -37,6 +38,7 @@ from quantrisk.experiments.metadata import (
     sha256_file,
     working_tree_state,
 )
+from quantrisk.experiments.registry import CATEGORIES, TASKS_BY_ID
 
 
 def test_parse_porcelain_status_reports_paths_not_status_prefixes() -> None:
@@ -164,6 +166,15 @@ def test_package_versions_records_the_running_interpreter() -> None:
 
 SUITE = REPO_ROOT / "scripts" / "run_benchmark_suite.py"
 
+#: Every layout a runnable unit can live at: the two the repository uses today and the two
+#: Phase 3.3 absorbs into. Kept beside the loader so both sides of the parity guards read alike.
+RUNNABLE_UNIT_PATTERNS = (
+    "experiments/*/run.py",
+    "benchmarks/*/*.py",
+    "python/quantrisk/experiments/*/__main__.py",
+    "python/quantrisk/benchmarks/*/*.py",
+)
+
 
 def _aggregate(tmp_path: Path) -> subprocess.CompletedProcess[str]:
     """Run the suite in aggregate-only mode, writing outside the tracked tree.
@@ -205,6 +216,58 @@ def test_suite_run_json_records_a_member_for_each_registered_script(tmp_path: Pa
         assert Path(REPO_ROOT / member["artifact"]).exists()
         assert member["metrics"], f"{member['key']} publishes nothing"
         assert member["artifact_sha256"] == sha256_file(REPO_ROOT / member["artifact"])
+
+
+def test_the_suite_member_list_carries_no_path_of_its_own(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """D3 makes the registry the only place a task's path is written, so the suite may hold none.
+
+    Finding V2-03's mechanism is one path typed into two files: the member list and every study
+    both named `experiments/<task>/run.py`, and the copy is what a move forgets. Comparing the two
+    lists for equality would pass forever for a hand-copied pair, so the guard is structural
+    instead -- a member stores no source, artifact or category of its own -- and it is shown able
+    to fail by making the registry disagree and watching the member follow it.
+    """
+    module = _load_suite_module()
+    stored = {field.name for field in dataclasses.fields(module.Member)}
+    copied = sorted(stored & {"script", "artifact", "kind"})
+    assert not copied, f"the member list still stores its own {copied}"
+    member = next(each for each in module.MEMBERS if each.key == "stress_testing")
+    probe = dataclasses.replace(
+        TASKS_BY_ID["stress_testing"],
+        source="probe/moved.py",
+        artifact="probe/moved.json",
+        category="performance_benchmark",
+    )
+    monkeypatch.setitem(module.TASKS_BY_ID, "stress_testing", probe)
+    assert member.script == "probe/moved.py"
+    assert member.artifact == "probe/moved.json"
+    assert member.kind == "performance_benchmark"
+
+
+def test_every_registry_task_is_aggregated_by_exactly_one_member() -> None:
+    """A task the suite does not read publishes no headline number, and silence used to hide it.
+
+    The member list and the registry now describe the same work by construction, so what this
+    guards is not a stale string but a missing row: a study absorbed into the package with no
+    member entry keeps its artifact on disk and appears nowhere in `suite_summary.md`. Both
+    directions are compared, and the sides are computed independently -- the keys are read off the
+    runner's objects, the ids off the installed package.
+    """
+    members = _load_suite_members()
+    keys = [member.key for member in members]
+    duplicates = sorted({key for key in keys if keys.count(key) > 1})
+    assert not duplicates, f"a member key appears more than once: {duplicates}"
+    registry_ids = sorted(TASKS_BY_ID)
+    assert sorted(keys) == registry_ids, (
+        f"members with no registry entry: {sorted(set(keys) - set(registry_ids))}; "
+        f"registry tasks with no member: {sorted(set(registry_ids) - set(keys))}"
+    )
+    assert {member.kind for member in members} == set(CATEGORIES), (
+        "the suite groups a category the registry does not declare, so a row would land in no "
+        "section of the summary"
+    )
 
 
 def test_suite_headline_csv_is_machine_readable_and_points_at_its_source(
@@ -671,14 +734,11 @@ def _collect_in_this_environment() -> int:
     return int(collected.group(1))
 
 
-def _load_suite_members() -> list[Any]:
-    """The suite's own registry, so a document can be checked against it rather than a guess.
+def _load_suite_module() -> Any:
+    """The suite's own module, so a guard can read its objects rather than grep its text.
 
-    Loaded by path because `scripts/` is not an importable package, and loaded rather than
-    grepped because the thing being asserted is the count of Python objects the runner holds.
+    Loaded by path because `scripts/` is not an importable package.
     """
-    import importlib.util
-
     spec = importlib.util.spec_from_file_location(
         "run_benchmark_suite", REPO_ROOT / "scripts" / "run_benchmark_suite.py"
     )
@@ -692,31 +752,44 @@ def _load_suite_members() -> list[Any]:
         spec.loader.exec_module(module)
     finally:
         del sys.modules[spec.name]
-    return list(module.MEMBERS)
+    return module
+
+
+def _load_suite_members() -> list[Any]:
+    """The runner's member tuple, read from the live objects.
+
+    Loaded by path because `scripts/` is not an importable package, and loaded rather than
+    grepped because the thing being asserted is the count of Python objects the runner holds.
+    """
+    return list(_load_suite_module().MEMBERS)
 
 
 def test_every_experiment_and_benchmark_script_on_disk_is_a_suite_member() -> None:
     """A script nobody registers is invisible, so absence itself has to be an assertion.
 
-    `docs/integrity_audit.md` keeps this on its open list for one reason: the registry in
-    `scripts/run_benchmark_suite.py` is hand-maintained, so an `experiments/*/run.py` that arrives
-    without a member entry produces no output anywhere. Nothing disagrees with anything: the
-    fourteen published numbers stay as true as they were before the fifteenth experiment existed.
-    The other direction is already policed, by
+    `docs/integrity_audit.md` keeps this on its open list for one reason: a runnable unit that
+    arrives with no member entry produces no output anywhere, and nothing disagrees with anything
+    -- the fourteen published numbers stay as true as they were before the fifteenth experiment
+    existed. The other direction is policed by
     `test_suite_run_json_records_a_member_for_each_registered_script`, which fails on a member whose
     file is gone; the unprovable half was this one, disk to registry.
 
-    The floor is part of the check, not decoration. Discovery is by the layout the repository
-    actually uses, and a glob that silently narrowed would compare two shortlists and pass.
+    Every layout the repository uses or is moving to is walked, because Phase 3.3 relocates one
+    study at a time and a guard that knew only the old location would go red on the first move and
+    invite deletion. The floor is part of the check, not decoration, and each pattern reports its
+    own count: a glob that silently narrowed would otherwise compare two shortlists and pass
+    (finding V2-09).
     """
-    on_disk = {
-        str(path.relative_to(REPO_ROOT))
-        for pattern in ("experiments/*/run.py", "benchmarks/*/*.py")
-        for path in REPO_ROOT.glob(pattern)
-        if path.is_file()
+    found = {
+        pattern: sorted(
+            str(path.relative_to(REPO_ROOT)) for path in REPO_ROOT.glob(pattern) if path.is_file()
+        )
+        for pattern in RUNNABLE_UNIT_PATTERNS
     }
+    on_disk = {path for paths in found.values() for path in paths}
     registered = {member.script for member in _load_suite_members()}
-    assert len(on_disk) >= 15, f"discovery found only {len(on_disk)}: {sorted(on_disk)}"
+    print("discovered per pattern: " + ", ".join(f"{k}={len(v)}" for k, v in found.items()))
+    assert len(on_disk) >= 15, f"discovery found only {len(on_disk)}: {sorted(found)}"
     assert on_disk == registered, (
         f"on disk but not registered: {sorted(on_disk - registered)}; "
         f"registered but not on disk: {sorted(registered - on_disk)}"
@@ -2891,8 +2964,8 @@ _CENSUS_REPRO_GOLD = (
     "20.8% spread",
     "204 tests",
     "32.6% spread",
-    "476 tests",
-    "545 pytest tests",
+    "478 tests",
+    "547 pytest tests",
     "548,368 assertions",
     "7 identity checks",
     "four modules",
@@ -2928,11 +3001,11 @@ _CENSUS_SHEET_GOLD = (
     "39,040,079 paths",
     "4 scenarios",
     "45,982,736 paths",
-    "476 tests",
+    "478 tests",
     "492 rows",
     "5 books",
-    "545 pytest tests",
-    "545 python tests",
+    "547 pytest tests",
+    "547 python tests",
     "548,368 assertions",
     "69 cases",
     "78,860,106 paths",
@@ -3024,7 +3097,7 @@ _CENSUS_REPORT_GOLD = (
     "41 pytest tests",
     "492 rows",
     "50 steps",
-    "545 pytest tests",
+    "547 pytest tests",
     "548{,}368 assertions",
     "582 windows",
     "6 failing cases",

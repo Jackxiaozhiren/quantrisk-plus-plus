@@ -12,9 +12,12 @@ artifacts must come from a script, not from a person copying numbers into a tabl
 
 What this runner does and does not do:
 
-  * It executes each member's own script as a subprocess. It never computes a financial
-    or statistical result itself, so there is no second implementation here to drift from
-    the first.
+  * Each member names a task in `quantrisk.experiments.registry`, and that entry supplies the
+    source path, the artifact path and the category. Nothing in this file is a second copy of
+    where a study lives.
+  * It executes each member's own work as a subprocess — the module once the task is absorbed into
+    the package, the script while it is not. It never computes a financial or statistical result
+    itself, so there is no second implementation here to drift from the first.
   * It reads the headline numbers *out of* the JSON each script already writes, by key
     path. A key that has moved or been renamed raises and fails the run, which is the
     point: an aggregation that silently dropped a metric would look exactly like an
@@ -50,6 +53,10 @@ from quantrisk.experiments.metadata import (  # noqa: E402
     repo_relative,
     sha256_file,
 )
+from quantrisk.experiments.registry import (  # noqa: E402
+    TASKS_BY_ID,
+    Task,
+)
 
 RESULTS_DIR = ROOT / "benchmarks" / "suite" / "results"
 
@@ -60,22 +67,43 @@ class SuiteError(RuntimeError):
 
 @dataclass(frozen=True)
 class Member:
-    """One benchmark or experiment, and where its headline numbers live.
+    """One benchmark or experiment, and the claims this runner makes *about* it.
 
-    `headline` entries are (label, key path) pairs rather than dotted strings: several
-    artifacts key their results by name and those names contain dots and pluses
-    (`ranking["correlation_+0.2"]`), which a string path would split in the wrong place.
+    Nothing here names a file: the source path, the artifact path and the category belong to
+    `quantrisk.experiments.registry`, which §5 D3 makes the single owner of runnable work. A
+    second copy of those strings is what finding V2-03 is about — a path typed into the registry
+    and into this list, of which a move updates one. `headline` entries are (label, key path)
+    pairs rather than dotted strings: several artifacts key their results by name and those names
+    contain dots and pluses (`ranking["correlation_+0.2"]`), which a string path would split in
+    the wrong place.
     """
 
     key: str
     title: str
-    kind: str
-    script: str
-    artifact: str
     headline: tuple[tuple[str, tuple[str, ...]], ...]
     requires: tuple[str, ...] = ()
     summary: tuple[str, ...] = ()
     plot: tuple[str, ...] = ()
+
+    @property
+    def task(self) -> Task:
+        """The registry entry this member aggregates."""
+        try:
+            return TASKS_BY_ID[self.key]
+        except KeyError as error:  # unreachable: checked when the members are built
+            raise SuiteError(f"{self.key}: no registry entry to aggregate") from error
+
+    @property
+    def kind(self) -> str:
+        return self.task.category
+
+    @property
+    def script(self) -> str:
+        return self.task.source
+
+    @property
+    def artifact(self) -> str:
+        return self.task.artifact
 
 
 CORRECTNESS = "correctness_benchmark"
@@ -86,9 +114,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="pricing_vs_quantlib",
         title="Black-Scholes, Greeks and CRR lattice vs QuantLib (18,816 rows)",
-        kind=CORRECTNESS,
-        script="benchmarks/quantlib/pricing_validation.py",
-        artifact="benchmarks/quantlib/results/pricing_vs_quantlib.json",
         requires=("QuantLib",),
         headline=(
             (
@@ -122,9 +147,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="monte_carlo_vs_analytic",
         title="Monte Carlo, antithetic and control variate vs the analytic oracle",
-        kind=CORRECTNESS,
-        script="benchmarks/quantlib/monte_carlo_validation.py",
-        artifact="benchmarks/quantlib/results/monte_carlo_validation.json",
         requires=("QuantLib",),
         headline=(
             ("plain MC z mean", ("z_score_vs_quantlib_analytic", "plain", "mean")),
@@ -152,9 +174,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="path_dependent_vs_quantlib",
         title="Asian and barrier options, and Heston against closed forms and QuantLib",
-        kind=CORRECTNESS,
-        script="benchmarks/quantlib/path_dependent_validation.py",
-        artifact="benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
         requires=("QuantLib",),
         headline=(
             (
@@ -188,9 +207,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="optimisation_vs_oracles",
         title="Mean-variance, max-Sharpe, risk parity and CVaR vs PyPortfolioOpt and cvxpy",
-        kind=CORRECTNESS,
-        script="benchmarks/pyportfolioopt/optimisation_validation.py",
-        artifact="benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
         requires=("pypfopt", "cvxpy"),
         headline=(
             ("problems solved", ("agreement", "problems_solved")),
@@ -214,9 +230,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="mc_speed",
         title="C++ Monte Carlo throughput against NumPy and pure Python on one machine",
-        kind=PERFORMANCE,
-        script="benchmarks/performance/monte_carlo_speed.py",
-        artifact="benchmarks/performance/results/monte_carlo_speed.json",
         headline=(
             ("speedup vs pure Python (mean)", ("speedup_vs_pure_python",)),
             ("speedup vs NumPy (mean)", ("speedup_vs_numpy",)),
@@ -226,9 +239,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="pricing_grid",
         title="Pricing surface, put-call parity and lattice convergence order",
-        kind=EXPERIMENT,
-        script="experiments/pricing_validation/run.py",
-        artifact="experiments/pricing_validation/results/summary.json",
         headline=(
             ("worst put-call parity residual", ("worst_put_call_parity_residual",)),
             (
@@ -242,9 +252,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="mc_convergence",
         title="1/sqrt(N) convergence and confidence-interval coverage of the MC engine",
-        kind=EXPERIMENT,
-        script="experiments/monte_carlo_convergence/run.py",
-        artifact="experiments/monte_carlo_convergence/results/summary.json",
         headline=(
             (
                 "coverage intervals inside the binomial band",
@@ -258,9 +265,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="variance_reduction",
         title="Antithetic and control-variate gains on out-of-sample mean squared error",
-        kind=EXPERIMENT,
-        script="experiments/variance_reduction/run.py",
-        artifact="experiments/variance_reduction/results/summary.json",
         headline=(
             (
                 "worst MSE reduction among the variance-reduced cells",
@@ -272,9 +276,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="var_backtesting",
         title="VaR/ES estimator bias, Kupiec and Christoffersen size and power, bootstrap coverage",
-        kind=EXPERIMENT,
-        script="experiments/var_backtesting/run.py",
-        artifact="experiments/var_backtesting/results/var_backtesting_validation.json",
         requires=("statsmodels",),
         headline=(
             ("Kupiec reject rate, calibrated, 95%", ("headline", "calibrated_kupiec_reject_rate")),
@@ -292,9 +293,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="portfolio_estimation_cost",
         title="Rolling-origin forward variance each covariance estimator costs an optimiser",
-        kind=EXPERIMENT,
-        script="experiments/portfolio_optimization/run.py",
-        artifact="experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
         headline=(
             ("portfolios evaluated", ("data", "portfolios_evaluated")),
             ("windows solved", ("data", "windows_solved")),
@@ -305,9 +303,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="linearisation_error_bound",
         title="Taylor remainder bound for the delta-gamma stress map, and its sign change",
-        kind=EXPERIMENT,
-        script="experiments/linearisation_error_bound/run.py",
-        artifact="experiments/linearisation_error_bound/results/linearisation_error_bound.json",
         # No `plot` labels. This member publishes no error against an oracle, and panel A
         # of the envelope figure is labelled |our value - oracle| / |oracle|. A remainder
         # bound is not such a quantity; adding it would relabel the figure into a lie.
@@ -357,9 +352,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="two_factor_error_bound",
         title="What a joint spot-and-volatility shock costs the delta-gamma-vega stress map",
-        kind=EXPERIMENT,
-        script="experiments/two_factor_error_bound/run.py",
-        artifact="experiments/two_factor_error_bound/results/two_factor_bound.json",
         # No `plot` labels, for the same reason as the member above: this publishes a bound,
         # not a value against an oracle, and panel A of the envelope figure is labelled
         # |our value - oracle| / |oracle|.
@@ -395,9 +387,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="stress_testing",
         title="Stress reversals, attribution closure and delta-gamma linearisation error",
-        kind=EXPERIMENT,
-        script="experiments/stress_testing/run.py",
-        artifact="experiments/stress_testing/results/stress_testing_study.json",
         headline=(
             ("worst factor attribution residual", ("attribution_closure", "worst_factor_residual")),
             (
@@ -414,9 +403,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="real_data_risk_study",
         title="Phase 5/6 estimator conclusions re-run on real daily market observations",
-        kind=EXPERIMENT,
-        script="experiments/real_data_risk_study/run.py",
-        artifact="experiments/real_data_risk_study/results/real_data_risk_study.json",
         requires=("scipy",),
         # Aggregated through the artifact's own `headline` block, which the experiment writes
         # as references to the per-estimator rows rather than as paths into a list ordered by
@@ -460,9 +446,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="restrike_gamma_map",
         title="What re-striking gamma at the shocked volatility actually buys the stress map",
-        kind=EXPERIMENT,
-        script="experiments/restrike_gamma_map/run.py",
-        artifact="experiments/restrike_gamma_map/results/restrike_gamma_map.json",
         # No `plot`, for the reason the two members above give: this compares approximations against
         # a revaluation rather than against an oracle, and panel A of the envelope figure is
         # labelled |our value - oracle| / |oracle|.
@@ -504,9 +487,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="fourth_order_crossing_map",
         title="How far a fourth-order truncation predicts the stress map's crossing",
-        kind=EXPERIMENT,
-        script="experiments/fourth_order_crossing_map/run.py",
-        artifact="experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
         # No `plot`, for the reason the members above give: it compares a truncation against a
         # revaluation rather than against an oracle.
         headline=(
@@ -556,9 +536,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="second_book_crossing_map",
         title="Does the fourth-order crossing radius hold on books other than the published one",
-        kind=EXPERIMENT,
-        script="experiments/second_book_crossing_map/run.py",
-        artifact="experiments/second_book_crossing_map/results/second_book_crossing_map.json",
         # No `plot`, for the reason the members above give: a truncation is compared with a
         # revaluation of the same book, not with an oracle.
         headline=(
@@ -594,9 +571,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="fifth_order_crossing_map",
         title="Does the crossing radius widen again at order five, on five books",
-        kind=EXPERIMENT,
-        script="experiments/fifth_order_crossing_map/run.py",
-        artifact="experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json",
         # No `plot`: a truncation is compared with a revaluation of the same book, not an
         # oracle.
         headline=(
@@ -628,9 +602,6 @@ MEMBERS: tuple[Member, ...] = (
     Member(
         key="sixth_book_crossing_map",
         title=("What a sixth book, chosen by the published ratio rule, says of the radius"),
-        kind=EXPERIMENT,
-        script="experiments/sixth_book_crossing_map/run.py",
-        artifact="experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
         # No `plot`: the artifact's table is the result, and the sixth book's radius is bounded by
         # the swept grid -- a figure would draw that as if it measured the expansion.
         headline=(
@@ -661,6 +632,17 @@ MEMBERS: tuple[Member, ...] = (
     ),
 )
 
+# Every member has to name a task, or its paths would resolve to nothing at first use — inside a
+# subprocess loop, one member per line, which is the worst place to discover a typo. The other
+# direction (a registry task with no member) is guarded by a test, because a study that publishes
+# an artifact nobody aggregates is a silent omission rather than a broken reference.
+_unregistered = sorted(member.key for member in MEMBERS if member.key not in TASKS_BY_ID)
+if _unregistered:
+    raise SuiteError(
+        f"member(s) with no registry entry: {', '.join(_unregistered)}; "
+        "the registry at quantrisk/experiments/registry.py owns that table"
+    )
+
 
 def dig(payload: dict[str, Any], keys: tuple[str, ...], *, source: str) -> Any:
     """Follow a key path, and fail loudly if the artifact does not have it."""
@@ -681,7 +663,7 @@ def importable(module: str) -> bool:
 
 
 def execute(member: Member, *, timeout: float) -> dict[str, Any]:
-    """Run one member's own script, capturing everything a reviewer would ask for."""
+    """Run one member's own work, capturing everything a reviewer would ask for."""
     missing = [name for name in member.requires if not importable(name)]
     if missing:
         return {
@@ -691,12 +673,16 @@ def execute(member: Member, *, timeout: float) -> dict[str, Any]:
         }
     if not (ROOT / member.script).exists():
         raise SuiteError(f"{member.key}: script {member.script} is missing")
-    # The member's own artifact records `sys.argv[0]` as its generating command. Passing an
-    # absolute path here would write this machine's directory into frozen evidence, so the
-    # script is named relative to the cwd the subprocess actually runs in.
+    # An absorbed task is a package module and runs as one, so the interpreter resolves it the way
+    # `quantrisk run` will. A task still at the root is a script, and it is named relative to the
+    # cwd the subprocess runs in: an absolute path would land this machine's directory in frozen
+    # evidence. Phase 3.3 empties the second branch one task at a time, and its last commit
+    # deletes it.
+    task = member.task
+    program = ["-m", task.module] if task.absorbed else [task.source]
     started = time.monotonic()
     completed = subprocess.run(  # noqa: S603 - fixed argv, no shell, no interpolation
-        [sys.executable, member.script],
+        [sys.executable, *program],
         cwd=ROOT,
         capture_output=True,
         text=True,

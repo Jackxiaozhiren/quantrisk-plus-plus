@@ -451,6 +451,42 @@ census **19 → 17**. No plant escaped and none lost its anchor across the two m
 harness anchors were re-keyed in the commit that moved the harness: that is V2-10's discipline observed,
 not a lucky outcome.
 
+### 2026-10-22, P3.3a — the suite stops storing paths the registry owns
+
+Reading `stress_testing`'s dependents for absorption #1 turned up a step §8's lane summaries had not:
+`scripts/run_benchmark_suite.py`'s `Member` tuple carried its own `script`, `artifact` and `kind` for all
+19 tasks. Those three fields are exactly what D3 gives to the registry, so every absorption commit would
+have retyped a path in a second file — V2-03's mechanism, reproduced 19 times — and
+`test_every_experiment_and_benchmark_script_on_disk_is_a_suite_member` would have needed rewriting once
+per move. It also decides, before the first move, how an absorbed task is *executed*: `[sys.executable,
+member.script]` would run a package `__main__.py` as a file, which puts a repository directory on the
+subprocess's `sys.path` and is the thing L6 counts.
+
+The member now stores its key and its own claims (title, headline key paths, requires, summary, plot) and
+reads the three registry-owned fields through `Member.task`; a key with no entry raises at import rather
+than inside a subprocess loop. `execute()` runs `-m <module>` for an absorbed task and the script path for
+one not yet absorbed, and that second branch is scheduled to die with the lane's last commit.
+
+**The verification, both directions.** The equivalence claim is that this changes no published number, so
+it was measured rather than argued: `--no-run --out build/p33a-before` at `75d6e81` and
+`--no-run --out build/p33a-after` at this commit produce `members` arrays that compare equal field for
+field, all 19, and a byte-identical `suite_headline.csv`; `suite_summary.md` differs only in its header
+block, which names the run's own `--out` path, its timestamp and the dirty-tree banner. The two guards
+were shown able to fail before they were believed: hard-coding `Member.script` to a literal reddens the
+structural guard *and* the disk-to-registry guard (with its per-pattern print reading
+`experiments/*/run.py=14, benchmarks/*/*.py=5, …__main__.py=0, …*.py=0`), and adding a phantom task to the
+registry reddens the missing-member guard. Both probes were undone by copying a snapshot taken before
+them and verifying the restored file's SHA-256 equals the snapshot's, and the only files the commit
+touches are the ones its own `git status` named.
+
+Two counts moved as the cost of adding guards, not as prose: the pytest pair **545 → 547** with the
+oracles and **476 → 478** collected without, cascaded through 17 named quotations in five files
+(`docs/interview_defense.md`, `docs/limitations.md`, `docs/reproducibility.md`,
+`paper/technical_report.tex` and four *plant anchors* that quote those documents, which is V2-10's
+re-keying rule applied to a documentation edit), then the report rebuilt and both freshness guards re-run.
+Red first was observed: the structural guard failed with `the member list still stores its own ['artifact',
+'kind', 'script']` before the runner changed.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
@@ -479,6 +515,12 @@ unimplemented, which is what §12's premises audit will cite.
 dependencies turned out to be — not what §8's lane summaries assumed. Run it per task, in
 `ABSORPTION_ORDER`, one commit per task. Each step names the probe that shows it worked.
 
+One prerequisite came out of reading the dependents rather than out of §8: `scripts/run_benchmark_suite.py`
+stored its own copy of every task's source path, artifact path and category, so step 5 would otherwise
+leave the suite naming a file that no longer exists and force a rewrite of the disk-to-registry guard once
+per task. P3.3a made the member read those three from the registry, and proved the regenerated aggregate
+identical in every member field before it moved anything.
+
 1. **Red first.** Add the task's assertion that the module is importable and its artifact is still
    written to the frozen path, then watch it fail: `uv run python -m quantrisk.experiments.<task>` does
    not exist yet. Record the failure in the commit message.
@@ -496,7 +538,9 @@ dependencies turned out to be — not what §8's lane summaries assumed. Run it 
    directory and never synthesise input data. Probe: `run(["--out", tmp])` writes under `tmp`; `run([])`
    outside a checkout raises.
 5. **Flip the registry entry** — `absorbed=True`, `source` now the package path. Probe: the parity test's
-   two enumerations still agree, because side A already recognises `*/__main__.py`.
+   two enumerations still agree, because side A already recognises `*/__main__.py`. The suite runner needs
+   nothing here: it stopped storing its own copy of those paths in the prerequisite commit, so a member
+   follows the entry it names.
 6. **Re-point the siblings that load it.** A dependent study's `spec_from_file_location(.../run.py)`
    becomes a package import of the same symbol — the "load the definition, do not copy it" property
    quoted in `experiments/fourth_order_crossing_map/run.py:101-103` must survive the move, so the import
@@ -522,5 +566,9 @@ dependencies turned out to be — not what §8's lane summaries assumed. Run it 
 
 **Deliberately untouched by these steps:** `experiments/<task>/results/**` (K2 — the directory stays
 where it is and holds only results once `run.py` is gone), `evidence/manifest.json` (K4 — it is rebuilt
-once, at P3.5), and any provenance string inside an artifact (V2-20 is unresolved and that is a decision
-for the maintainer, not a step in this recipe).
+once, at P3.5), and every provenance string already frozen inside an artifact. V2-20 was adjudicated by
+the maintainer on 2026-10-22 as option (i): a study cites a published sibling as a registry reference
+(`<task>:<symbol>`), the artifacts re-derive once at P3.5, and that field's movement is declared in
+`tools/refactor_ceilings.json` with its reason. The *code* of the citing study changes in the commit that
+moves the cited file — a path that no longer resolves is not evidence — while the frozen artifact keeps
+the string it was written with until the single re-run replaces it.
