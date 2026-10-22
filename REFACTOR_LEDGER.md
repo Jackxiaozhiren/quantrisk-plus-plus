@@ -704,6 +704,39 @@ instead of pinning a string that the lane has already decided must move.
 Documents re-derived: the analysis note's prose citation and its reproduction command. No test added; the
 pair stays **548 / 479**.
 
+### 2026-10-22, P3.3 absorption 6 of 19 — `sixth_book_crossing_map`
+
+Sixth move and the chain's tail: nothing imports it, so this one is a move plus an entry-point split,
+with **bootstrap 7 → 6** (its own `sys.path` insert died with it) and **by-path 6 → 5** (its test's
+`_load`, deleted rather than left unused). mypy added it to its corpus clean -- 41 source files, nothing
+new to fix -- which is the first absorption where the newly-covered module produced no defect.
+
+Two things this file does that the previous five did not, and both needed stating rather than working
+around. Its control reads a *published input*: the five prior books' radii come back from
+`experiments/fifth_order_crossing_map/results/...json` bit for bit. That read is now
+`checkout_root() / CONTROL_TASK.artifact` -- `--out` moves outputs, never the evidence a control is
+compared against -- and the `published_artifact` field the payload records is the registry's own
+relative string, so it stayed byte-identical while the path constant that produced it disappeared. Its
+other quirk is that `main` printed a banner *before* computing and a "wrote" line after, so the split put
+the banner and the five narrative lines in the shim with `run(argv)` doing the work -- the order of the
+printed lines is unchanged, which is what the frozen `suite_summary.md` and the rehearsal sheet quote.
+
+The replay found a defect I had written into the split: the closing print used
+`landed.relative_to(checkout_root())`, which raises when `--out` is a *relative* path -- exactly what I
+passed. `repo_relative` is the helper that already handles both spellings, and §11 step 4 now says so,
+because the remaining thirteen will each print a line and each may be handed a relative root. The failure
+was a nonzero exit on the replay, caught before the gate suite ran, not a red lane afterwards.
+
+Documents re-derived: the analysis note's reproduction command and the citation inside limitation #88,
+which names this study as the thing that cannot tell in advance whether its verdict is grid-bounded -- a
+register entry states current behaviour, so it follows the file it points at, and the register's count is
+unchanged. The same grep turned up two rows of `docs/validation_matrix.md` that still named a `run.py`,
+one for this study and one for `restrike_gamma_map` -- the latter is absorption 2's miss, and it sat for
+four commits because step 9 looked for command lines while the matrix names the study in prose. Both rows
+now cite the module. No test added; the pair stays **548 / 479**. The replay's only non-volatile
+differences are the three declared citation spellings (`controls.control`, two `procedure.reused_from`
+entries), each waiting on P3.5.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
@@ -752,8 +785,12 @@ identical in every member field before it moved anything.
 4. **Output path.** `RESULTS = Path(__file__)...` and `REPO_ROOT = parents[2]` both die. Resolve the
    directory from `TASKS_BY_ID[<task>].artifact` against a root that is either an explicit `--out` or
    `checkout_root()`; refuse, naming the path, when there is neither. Never fall back to a temporary
-   directory and never synthesise input data. Probe: `run(["--out", tmp])` writes under `tmp`; `run([])`
-   outside a checkout raises.
+   directory and never synthesise input data. A published *input* a study reads (a sibling's frozen
+   artifact) comes from `checkout_root()` whatever `--out` says -- `--out` moves outputs, not the
+   evidence a control is checked against. Probe: `run(["--out", tmp])` writes under `tmp`; `run([])`
+   outside a checkout raises. Absorption 5 adds one line the first four did not need to learn: the
+   closing print must go through `repo_relative`, because `--out` may be a relative path and
+   `Path.relative_to(checkout_root())` raises on one -- the replay caught it before the gate did.
 5. **Flip the registry entry** — `absorbed=True`, `source` now the package path. Probe: the parity test's
    two enumerations still agree, because side A already recognises `*/__main__.py`. The suite runner needs
    nothing here: it stopped storing its own copy of those paths in the prerequisite commit, so a member
@@ -777,6 +814,12 @@ identical in every member field before it moved anything.
    `docs/reproducibility.md`, `docs/validation_matrix.md`, `docs/interview_defense.md`,
    `docs/project_scope.md` and `CONTRIBUTING.md` quote commands too. A tex edit forces the PDF rebuild
    and both freshness guards. Probe: the docs lane green and the report build pair consistent.
+   Absorption 6 found that probe too narrow, because a document can name a study in prose rather than as
+   a command line, so it now ends with `grep -rn "experiments/<task>/run\.py" docs/ paper/ README.md
+   CONTRIBUTING.md`. What may remain is a dated record -- `docs/phase_reports/**`,
+   `docs/release_notes_v1.*.md`, the numbered findings of `docs/integrity_audit.md`, this ledger's own
+   finding text -- because those state what was true when written. Living prose (the validation matrix's
+   rows, a limitation entry) states current behaviour and follows the file.
 10. **Gate, then commit.** Full §7 suite, `git status` empty, commit staged by path, the committed
     object verified (`git show --stat`) before the message is believed, then push. If a Dependabot or
     other session's commit lands first, rebase — never force.

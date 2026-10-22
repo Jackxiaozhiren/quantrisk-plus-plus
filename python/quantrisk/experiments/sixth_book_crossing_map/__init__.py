@@ -51,13 +51,18 @@ from __future__ import annotations
 import datetime as dt
 import importlib
 import json
-import pathlib
 import sys
+from collections.abc import Sequence
 from typing import Any
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "python"))
-
+from quantrisk.checkout import checkout_root
+from quantrisk.experiments.metadata import repo_relative
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 
 # Phase 20 owns the books, the measure column, the piece arithmetic, the sweep and the radius rule.
 P20 = importlib.import_module("quantrisk.experiments.fifth_order_crossing_map")
@@ -68,14 +73,10 @@ MIN_COLUMNS = P18.MIN_COLUMNS_WITH_A_CROSSING
 TOLERANCE = P18.TOLERANCE
 ORDERS = P20.ORDERS
 MEASURE_COLUMN = P20.MEASURE_COLUMN
-RESULTS = REPO_ROOT / "experiments" / "sixth_book_crossing_map" / "results"
-FIFTH_ORDER_ARTIFACT = (
-    REPO_ROOT
-    / "experiments"
-    / "fifth_order_crossing_map"
-    / "results"
-    / "fifth_order_crossing_map.json"
-)
+TASK = TASKS_BY_ID["sixth_book_crossing_map"]
+# The study this one is checked against, named by its registry entry rather than by a file: a
+# published input is read from the checkout, whatever `--out` says about where results go.
+CONTROL_TASK = TASKS_BY_ID["fifth_order_crossing_map"]
 
 CANDIDATE_MATURITIES = (0.25, 0.5, 1.0, 3.0)
 CANDIDATE_VOLATILITIES = (0.15, 0.25, 0.45)
@@ -179,7 +180,8 @@ def scan() -> tuple[Any, list[dict[str, Any]], list[dict[str, Any]]]:
 
 def control_against_published(sixth: Any, measured: dict[str, dict[str, Any]]) -> dict[str, Any]:
     """The five published books must return their published radii, bit for bit."""
-    artifact = json.loads(FIFTH_ORDER_ARTIFACT.read_text(encoding="utf-8"))
+    published_path = checkout_root() / CONTROL_TASK.artifact
+    artifact = json.loads(published_path.read_text(encoding="utf-8"))
     published = {row["label"]: row for row in artifact["books"]}
     mismatches = []
     for label, row in published.items():
@@ -193,7 +195,7 @@ def control_against_published(sixth: Any, measured: dict[str, dict[str, Any]]) -
         "control": "fifth_order_crossing_map::P18.verify_control",
         "control_ran_on": PUBLISHED_BOOKS[0].label,
         "published_books_reproduced_bit_for_bit": len(published),
-        "published_artifact": str(FIFTH_ORDER_ARTIFACT.relative_to(REPO_ROOT)),
+        "published_artifact": CONTROL_TASK.artifact,
         "radii_from_that_artifact": {
             label: {order: row[f"radius_{order}"] for order in ORDERS}
             for label, row in published.items()
@@ -243,7 +245,7 @@ def build_payload() -> dict[str, Any]:
             "column-error truncations on six books, the sixth chosen by the published "
             "order-five-to-four ratio rule before its radius was read"
         ),
-        "command": "uv run python experiments/sixth_book_crossing_map/run.py",
+        "command": TASK.invocation,
         "generated_at_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
         "environment": {
             "python": sys.version.split()[0],
@@ -343,9 +345,20 @@ def build_payload() -> dict[str, Any]:
     }
 
 
-def main() -> int:
-    print("sixth book at the order-five-to-four radius")
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Choose the sixth book by the published ratio rule, control it, write, return the payload."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
     payload = build_payload()
+    results.mkdir(parents=True, exist_ok=True)
+    artifact_path(TASK, out).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return payload
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the banner, the study, then the five lines it reports."""
+    print("sixth book at the order-five-to-four radius")
+    payload = run(argv)
     head = payload["headline"]
     span = head["published_ratio_span_of_the_five_prior_books"]
     print(
@@ -368,12 +381,6 @@ def main() -> int:
         f"thinned {head['books_thinning_at_order_five']}, "
         f"grid edge {head['books_at_grid_edge']}"
     )
-    RESULTS.mkdir(parents=True, exist_ok=True)
-    path = RESULTS / "sixth_book_crossing_map.json"
-    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    print(f"wrote {path.relative_to(REPO_ROOT)}")
+    landed = artifact_path(TASK, parse_out(argv, description=__doc__))
+    print(f"wrote {repo_relative(landed)}")
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

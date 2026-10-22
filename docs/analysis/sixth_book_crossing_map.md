@@ -8,7 +8,7 @@ quintic truncation is closer to the revalued book than the quartic inside that r
 label could not move.
 
 Artifact: `experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json`. Run:
-`uv run python experiments/sixth_book_crossing_map/run.py`. Owned by
+`uv run python -m quantrisk.experiments.sixth_book_crossing_map`. Owned by
 `tests/python/test_sixth_book_crossing_map.py`.
 
 ## 1. Why a sixth book is allowed, and how it was picked

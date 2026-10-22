@@ -22,10 +22,9 @@ from the artifact rather than read by nobody.
 
 from __future__ import annotations
 
-import importlib.util
+import importlib
 import json
 import pathlib
-import sys
 from typing import Any
 
 import pytest
@@ -49,15 +48,6 @@ NOTE = REPO_ROOT / "docs" / "analysis" / "sixth_book_crossing_map.md"
 ORDERS = ("cubic", "quartic", "quintic")
 
 
-def _load(relative: str, name: str) -> Any:
-    spec = importlib.util.spec_from_file_location(name, REPO_ROOT / relative)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 @pytest.fixture(scope="module")
 def payload() -> dict[str, Any]:
     return json.loads(ARTIFACT.read_text(encoding="utf-8"))
@@ -70,7 +60,8 @@ def prior() -> dict[str, Any]:
 
 @pytest.fixture(scope="module")
 def experiment() -> Any:
-    return _load("experiments/sixth_book_crossing_map/run.py", "sixth_book_experiment_under_test")
+    """The study under test, imported through the name the registry gives it."""
+    return importlib.import_module("quantrisk.experiments.sixth_book_crossing_map")
 
 
 def test_the_five_prior_books_return_the_radii_phase_20_published(

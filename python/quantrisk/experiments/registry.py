@@ -269,6 +269,7 @@ TASKS: tuple[Task, ...] = (
         "sixth_book_crossing_map",
         "sixth_book_crossing_map",
         "sixth_book_crossing_map.json",
+        absorbed=True,
     ),
 )
 

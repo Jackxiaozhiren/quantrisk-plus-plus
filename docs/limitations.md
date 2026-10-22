@@ -825,7 +825,7 @@ never removed just because a later phase shipped.
     revision -- and no such decision is made here.
 
 88. **The sixth book's radius verdict is bounded by the swept grid, and the selection rule that found
-    it cannot tell that in advance.** `experiments/sixth_book_crossing_map/run.py` picks its book by
+    it cannot tell that in advance.** `quantrisk.experiments.sixth_book_crossing_map` picks its book by
     the lowest order-five-to-four piece ratio over a pre-registered candidate grid, measured before any
     radius is read. The candidate it reached -- 3-year maturity, 45 % volatility, 5 % dividend -- has
     its *quartic* radius already at 0.3, the widest move the ladder sweeps, so the quintic radius
