@@ -1421,7 +1421,8 @@ checked (\src{docs/analysis/two_factor_error_bound.md}; \src{docs/limitations.md
 \subsection{Re-striking gamma: the recommendation, measured}
 \label{sec:restrike}
 The paragraph above ends in a priority rather than a result, and a priority is the kind of claim a
-later revision quietly gets wrong. \src{experiments/restrike_gamma_map/run.py} rebuilds the map four
+later revision quietly gets wrong. \src{python/quantrisk/experiments/restrike_gamma_map} rebuilds the
+map four
 ways --- every exposure at the base market (what ships), gamma alone at $(S, \sigma{+}k)$, gamma at
 $(S{+}h, \sigma{+}k)$, and all three at the shocked market --- and prices each through the shipped
 \code{run\_scenario} against a revaluation of the same book, so the comparison is between four maps and

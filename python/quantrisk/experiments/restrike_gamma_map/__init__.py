@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 r"""Phase 15 experiment: what re-striking gamma at the shocked volatility actually buys the map.
 
-    uv run python experiments/restrike_gamma_map/run.py
+    uv run python -m quantrisk.experiments.restrike_gamma_map [--out DIRECTORY]
     uv run python scripts/run_benchmark_suite.py --only restrike_gamma_map
 
 `v1.3.0` derived the two-factor error of the published delta-gamma-vega map and ended with a
@@ -74,8 +74,7 @@ from __future__ import annotations
 import csv
 import json
 import math
-import sys
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -87,8 +86,14 @@ from quantrisk.experiments.metadata import (
     repo_relative,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["restrike_gamma_map"]
 
 # The published book, unchanged from `stress_testing:run_linearisation`,
 # `experiments/linearisation_error_bound/run.py` and `experiments/two_factor_error_bound/run.py`:
@@ -298,15 +303,16 @@ def published_scenario(name: str = "risk_off") -> dict[str, float]:
     for handle in scenarios():
         if handle.name != name:
             continue
-        found = {"equity": None, "volatility": None}
+        found: dict[str, float | None] = {"equity": None, "volatility": None}
         for shock in handle.shocks:
             if shock.factor_id == "EQ0":
                 found["equity"] = float(shock.relative)
             elif shock.factor_id == "VOL":
                 found["volatility"] = float(shock.absolute)
-        if found["equity"] is None or found["volatility"] is None:  # pragma: no cover
+        equity, volatility = found["equity"], found["volatility"]
+        if equity is None or volatility is None:  # pragma: no cover
             raise RuntimeError(f"scenario {name} does not move both EQ0 and VOL: {found}")
-        return {key: float(value) for key, value in found.items()}
+        return {"equity": float(equity), "volatility": float(volatility)}
     raise RuntimeError(f"no scenario named {name!r} in the published stress set")
 
 
@@ -439,7 +445,9 @@ def cancellation_row(delta: float, column: list[dict[str, Any]]) -> dict[str, An
         "nearest_zeros_both_absent": not predicted and not measured,
         "nearest_zero_distance": zero_distance,
         "nearest_zero_signed_bias": (
-            None if zero_distance is None else nearest_measured - nearest_predicted
+            None
+            if nearest_predicted is None or nearest_measured is None
+            else nearest_measured - nearest_predicted
         ),
         "base_abs_error_at_nearest_measured_zero": (
             None if at_nearest is None else abs(at_nearest["base"])
@@ -600,8 +608,11 @@ def sweep_rows() -> list[dict[str, Any]]:
     return rows
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Do the study: rebuild the four maps, measure the five claims, write, return the payload."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
     published = published_scenario("risk_off")
     h_published = SPOT * published["equity"]
     exact_published = (
@@ -729,9 +740,9 @@ def main() -> int:
         r for r in doubled if not r["base_error_was_smaller_than_removed_term"]
     ]
 
-    grid_csv = RESULTS / "restrike_gamma_map.csv"
+    grid_csv = results / "restrike_gamma_map.csv"
     write_csv(grid_csv, rows)
-    published_csv = RESULTS / "published_scenario_maps.csv"
+    published_csv = results / "published_scenario_maps.csv"
     write_csv(
         published_csv,
         [
@@ -749,13 +760,13 @@ def main() -> int:
         ],
     )
 
-    cancellation_csv = RESULTS / "cancellation_columns.csv"
+    cancellation_csv = results / "cancellation_columns.csv"
     write_csv(cancellation_csv, cancellations)
 
     payload = {
         "schema": "quantrisk.restrike_gamma_map.v1",
         "generated_at_utc": utc_timestamp(),
-        "command": "uv run python experiments/restrike_gamma_map/run.py",
+        "command": TASK.invocation,
         "claim": (
             "re-striking gamma at the shocked volatility does remove the term v1.3.0 named as "
             "dominant -- 86% of it at published size, taking the risk_off error to 0.364x -- but "
@@ -935,12 +946,19 @@ def main() -> int:
         "artifacts": artifact_manifest([grid_csv, published_csv, cancellation_csv]),
         "csv_rows": len(rows),
     }
-    json_path = RESULTS / "restrike_gamma_map.json"
+    json_path = artifact_path(TASK, out)
     json_path.write_text(
         json.dumps(payload, indent=2, sort_keys=False, allow_nan=False) + "\n", encoding="utf-8"
     )
+    return payload
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: run the study, then print the headline and where the artifact landed."""
+    payload = run(argv)
     print(json.dumps(payload["headline"], indent=2, sort_keys=False))
-    print(f"wrote {repo_relative(json_path)}")
+    landed = artifact_path(TASK, parse_out(argv, description=__doc__))
+    print(f"wrote {repo_relative(landed)}")
     return 0
 
 
@@ -960,7 +978,3 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerow(columns)
         for row in rows:
             writer.writerow([_cell(row[column]) for column in columns])
-
-
-if __name__ == "__main__":
-    sys.exit(main())

@@ -99,7 +99,7 @@ def _load(relative: str, name: str) -> Any:
 # v1.5.0 owns the grid, the tolerance and the root finder; v1.6.0 owns the order-four terms of
 # the published book and its truncation. Both are loaded rather than re-typed, so "the same
 # truncation, on another book" cannot quietly become "a truncation this file invented".
-P15 = _load("experiments/restrike_gamma_map/run.py", "quantrisk_restrike_map_for_second_book")
+P15 = importlib.import_module("quantrisk.experiments.restrike_gamma_map")
 P16 = _load(
     "experiments/fourth_order_crossing_map/run.py", "quantrisk_fourth_order_for_second_book"
 )
@@ -671,9 +671,8 @@ def build_payload() -> dict[str, Any]:
             ),
             "shared_with": (
                 "the grid, the tolerance and _sign_change_roots are imported from "
-                "restrike_gamma_map/run.py, and v1.6.0's truncation is imported as the control, "
-                "so a "
-                "radius here and a radius there mean one thing"
+                "restrike_gamma_map, and v1.6.0's truncation is imported as the control, "
+                "so a radius here and a radius there mean one thing"
             ),
         },
         "headline": {

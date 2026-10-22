@@ -27,7 +27,7 @@ the same column truncation gives
 
 with every coefficient summed over the published book at the base market and none of it fitted to
 anything measured here. The book, the grid, the engine call and the cubic truncation are imported
-from `experiments/restrike_gamma_map/run.py` rather than re-typed: this is a claim about *that*
+from the registry task `restrike_gamma_map` rather than re-typed: this is a claim about *that*
 truncation plus four terms, and sharing the code is what makes "plus four terms" checkable.
 
 Four claims, each falsifiable, and two of them came out other than expected:
@@ -83,7 +83,6 @@ ships.
 from __future__ import annotations
 
 import csv
-import importlib.util
 import json
 import math
 import sys
@@ -99,17 +98,9 @@ if str(REPO_ROOT / "python") not in sys.path:
 import quantrisk  # noqa: E402
 
 # The phase-15 module is the definition of the book, the grid, the engine call and the cubic
-# truncation. Loading it (rather than copying four functions out of it) is what makes "the same
+# truncation. Importing it (rather than copying four functions out of it) is what makes "the same
 # truncation plus the order-four terms" a statement this file cannot quietly break.
-_SPEC = importlib.util.spec_from_file_location(
-    "quantrisk_restrike_gamma_map_for_fourth_order",
-    REPO_ROOT / "experiments" / "restrike_gamma_map" / "run.py",
-)
-if _SPEC is None or _SPEC.loader is None:  # pragma: no cover
-    raise RuntimeError("cannot load experiments/restrike_gamma_map/run.py")
-P15 = importlib.util.module_from_spec(_SPEC)
-sys.modules[_SPEC.name] = P15
-_SPEC.loader.exec_module(P15)
+import quantrisk.experiments.restrike_gamma_map as P15  # noqa: E402
 
 SPOT = P15.SPOT
 VOLATILITY = P15.VOLATILITY
@@ -777,7 +768,7 @@ def main() -> int:
             "strikes": list(P15.STRIKES),
             "quantity": P15.QUANTITY,
             "base_value": P15.BASE_VALUE,
-            "source": "imported from experiments/restrike_gamma_map/run.py",
+            "source": "imported from restrike_gamma_map",
         },
         "coefficients": {
             "cubic": dict(P15.COEFFS),

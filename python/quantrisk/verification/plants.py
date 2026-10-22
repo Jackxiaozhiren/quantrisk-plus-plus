@@ -255,7 +255,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="producer-docstring-quotes-a-stale-restdike-share",
         kind="prose",
-        path="experiments/restrike_gamma_map/run.py",
+        path="python/quantrisk/experiments/restrike_gamma_map/__init__.py",
         anchor="86 % of the local",
         replacement="92 % of the local",
         guard=(

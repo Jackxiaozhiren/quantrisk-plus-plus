@@ -44,11 +44,7 @@ MAP_KEYS = ("base", "gamma_restrike", "gamma_restrike_at_move", "all_restrike")
 
 # The producer's own gates, read from the module rather than restated, so a test that keeps its own
 # copy of a tolerance is free to disagree with the run it is checking.
-_spec = importlib.util.spec_from_file_location("restrike_gamma_map_run", EXPERIMENT / "run.py")
-assert _spec and _spec.loader
-harness = importlib.util.module_from_spec(_spec)
-sys.modules[_spec.name] = harness
-_spec.loader.exec_module(harness)
+harness = importlib.import_module("quantrisk.experiments.restrike_gamma_map")
 
 
 def _payload() -> dict:
@@ -282,7 +278,7 @@ def test_the_docstring_figures_and_counts_are_the_ones_the_artifact_holds() -> N
     """Every number the producer's own docstring quotes, re-derived from the artifact."""
     headline = _payload()["headline"]
     asymptotics = _payload()["asymptotics"]
-    doc = (EXPERIMENT / "run.py").read_text(encoding="utf-8")
+    doc = Path(harness.__file__).read_text(encoding="utf-8")
     phase_13 = json.loads(
         (REPO_ROOT / "experiments/two_factor_error_bound/results/two_factor_bound.json").read_text(
             encoding="utf-8"
@@ -391,26 +387,29 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
 ) -> None:
     """Determinism, without letting the test write into frozen evidence.
 
-    The copy sits at the same depth as the original because the experiment writes its results
-    beside itself. The stress experiment is no longer part of the tree it needs: it arrives as a
-    package import now, which is what Phase 3.3 moved it for.
+    The study is absorbed, so the replay is its canonical invocation with a temporary root rather
+    than a copied file: `--out` makes the temporary directory stand in for the repository, the
+    artifact lands at `tmp_path/experiments/restrike_gamma_map/results/…`, and nothing about the run
+    depends on a fake tree sitting at the same depth any more.
     """
-    destination = tmp_path / "experiments" / "restrike_gamma_map" / "run.py"
-    destination.parent.mkdir(parents=True)
-    destination.write_text((EXPERIMENT / "run.py").read_text(encoding="utf-8"), encoding="utf-8")
-
     before = ARTIFACT.read_bytes()
     completed = subprocess.run(  # noqa: S603
-        [sys.executable, str(destination)],
+        [
+            sys.executable,
+            "-m",
+            "quantrisk.experiments.restrike_gamma_map",
+            "--out",
+            str(tmp_path),
+        ],
         capture_output=True,
         text=True,
         check=False,
-        cwd=tmp_path,
+        cwd=REPO_ROOT,
     )
     assert completed.returncode == 0, completed.stderr[-2000:]
     assert ARTIFACT.read_bytes() == before, "the test run modified a committed artifact"
 
-    produced = destination.parent / "results" / "restrike_gamma_map.json"
+    produced = tmp_path / "experiments/restrike_gamma_map/results/restrike_gamma_map.json"
     assert produced.exists(), f"the copy wrote no artifact; stdout: {completed.stdout[-400:]}"
     mine, theirs = _payload(), json.loads(produced.read_text(encoding="utf-8"))
     for key in ("generated_at_utc", "environment", "artifacts"):

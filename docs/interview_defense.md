@@ -921,7 +921,7 @@ and the drift outside it is published rather than hidden. The order never change
 the two narrowest scales for all four maps — because re-striking deletes a cubic and leaves the
 quadratic terms where they were.
 
-Sources: `experiments/restrike_gamma_map/run.py`,
+Sources: `python/quantrisk/experiments/restrike_gamma_map`,
 `experiments/restrike_gamma_map/results/restrike_gamma_map.json` (`headline`, `asymptotics`,
 `mechanism`, `cancellation`, `refusals`), `docs/analysis/restrike_gamma_map.md`, `docs/findings.md` §7,
 `docs/limitations.md` #78, and row 18 of `docs/validation_matrix.md`.

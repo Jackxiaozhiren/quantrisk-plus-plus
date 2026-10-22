@@ -16,6 +16,7 @@ nothing.
 
 from __future__ import annotations
 
+import argparse
 import importlib.util
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -52,6 +53,17 @@ def module_resolves(module: str) -> bool:
         return False
 
 
+def artifact_path(task: Task, out: Path | None = None) -> Path:
+    """The published artifact of one task, under the root it is given.
+
+    A study writes *here* rather than to a filename of its own, so the path the registry declares
+    and the path the code produces cannot disagree -- which is the half of D3 that a directory
+    alone leaves open.
+    """
+    root = checkout_root() if out is None else Path(out)
+    return root / task.artifact
+
+
 def results_directory(task: Task, out: Path | None = None) -> Path:
     """Where one task's artifacts land: its published path, under the root it is given.
 
@@ -60,8 +72,24 @@ def results_directory(task: Task, out: Path | None = None) -> Path:
     published one. With no `--out` the root is the checkout the working tree is in; there is no
     third answer, and none is guessed.
     """
-    root = checkout_root() if out is None else Path(out)
-    return (root / task.artifact).parent
+    return artifact_path(task, out).parent
+
+
+def parse_out(argv: Sequence[str], *, description: str = "") -> Path | None:
+    """Read the one flag every published study accepts.
+
+    Kept here rather than in each study because 14 copies of an argparse block is 14 chances for
+    the flag to mean something slightly different in one of them, and `--out` is the flag the
+    installed-user and the temporary-tree proofs both turn on.
+    """
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="treat this directory as the repository root; required outside a checkout",
+    )
+    return parser.parse_args(argv).out
 
 
 @dataclass(frozen=True)
@@ -213,7 +241,12 @@ TASKS: tuple[Task, ...] = (
     _study("two_factor_error_bound", "two_factor_error_bound", "two_factor_bound.json"),
     _study("stress_testing", "stress_testing", "stress_testing_study.json", absorbed=True),
     _study("real_data_risk_study", "real_data_risk_study", "real_data_risk_study.json"),
-    _study("restrike_gamma_map", "restrike_gamma_map", "restrike_gamma_map.json"),
+    _study(
+        "restrike_gamma_map",
+        "restrike_gamma_map",
+        "restrike_gamma_map.json",
+        absorbed=True,
+    ),
     _study(
         "fourth_order_crossing_map",
         "fourth_order_crossing_map",

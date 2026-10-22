@@ -546,6 +546,61 @@ lists re-keyed beside them and the report rebuilt; mypy's checked corpus **28 �
 two-sided agreement intact, and ruff still admitting every tracked Python file. The ceilings gate
 stays exit 1 by design, with `by_path_load_sites` now named at 14 rather than 17.
 
+### 2026-10-22, P3.3 absorption 2 of 19 — `restrike_gamma_map`
+
+Moved, split, and re-imported, with three discoveries that were not in the recipe.
+
+The move itself followed §11: `git mv` into `python/quantrisk/experiments/restrike_gamma_map/__init__.py`
+plus a three-line `__main__.py`, `run(argv) -> dict` and `main(argv) -> int`, the recorded command now
+`TASK.invocation`, and the replay compared by content digest. The two sibling edges it owns --
+`fourth_order_crossing_map` and `second_book_crossing_map` both load it at module scope -- became
+package imports, while restrike's own import of `stress_testing` stayed inside `published_scenario()`
+because that study needs matplotlib for its figure and this one must not need it to be read. The test
+that had been loading restrike by path at module scope now imports it, and its replay runs the canonical
+`-m … --out tmp_path` instead of copying the file into a fake tree -- the temporary root turned out to
+make the whole fake-checkout apparatus unnecessary, which is worth knowing before the remaining twelve.
+
+**Discovery 1: the registry now owns the artifact's filename, not only its directory.** A study writing
+`results / "restrike_gamma_map.json"` next to a registry entry naming that file is two declarations that
+nothing compares. `artifact_path(task, out)` returns the registry's path and the study writes there, so
+the disagreement is impossible rather than policed; `parse_out(argv)` became the shared reader of the
+one flag every study accepts, and `stress_testing` was back-ported to both in the same commit so no
+second spelling of either survives.
+
+**Discovery 2: V2-20's citations are prose as often as they are fields.** The finding names the
+`"source"` strings; `second_book_crossing_map` carries the same citation inside
+`procedure.shared_with`, a sentence. A normalisation keyed on the field name `source` would have covered
+one artifact and missed the other -- the partial-re-derivation trap, where an exemption list licenses
+everything outside it. So `_assert_same_result` now maps a *runnable unit's file path* to its registry id
+on every string leaf, in either layout and with or without the `experiments/` prefix, and the same helper
+waives the values of `VOLATILE_KEYS` (whose presence it still asserts) because D4-prime makes every
+absorbed study re-record its command. The hatch was shown narrow twice over on the committed tree, each
+probe undone from a snapshot and the restore verified by SHA-256: citing the wrong task still fails the
+replay (`as registry references 'stress_testing:run_linearisation' != 'fourth_order_crossing_map:…'`),
+and so does changing two words in an unrelated sentence -- the normalizer touches path forms and nothing
+else.
+
+**Discovery 3: the collector mis-read a red type check, and the newly-covered module had two real
+defects in it.** mypy's corpus is `python/quantrisk`, so a study only becomes type-checked when it moves
+in; this one arrived carrying `found = {"equity": None, …}` inferred as `dict[str, None]` and a
+signed-bias field guarded on `zero_distance is None` while subtracting two values that are `float | None`.
+Both are annotation/narrowing fixes with no numerical change -- the replay proves it -- and they are the
+same class as the pairing-audit defect P3.2's move surfaced. Reading them out of mypy exposed the
+instrument's own bug: `mypy_reported_count` scanned for the first `in <n>`, so a failing run printing
+`Found 5 errors in 1 file (checked 33 source files)` reported a *one-file* corpus and set
+`mypy_two_sided_agreement` false for the wrong reason. It now reads the `(checked N source files)` tail or
+the success line's `found in N source files`, carries `mypy_exit_code` beside the count, and requires
+exit 0 for agreement. Both branches were exercised: green reads 33 against an enumerated 33 with
+agreement true, and a planted type error reads 33 with `mypy_exit_code: 1` and agreement false -- the
+failure is now named as a failure rather than as a suspicious number.
+
+Readings and re-derivations: the by-path load census **14 → 12** (two loaders), mypy's checked corpus
+**31 → 33**, `registry_parity` 19 against 19, one plant re-keyed with the file it mutates
+(`producer-docstring-quotes-a-stale-restdike-share`, whose anchor text moved verbatim with the docstring).
+The pytest pair stays **548 / 479** -- this commit added no test, it re-pointed six. Documents re-derived:
+the report's `\src{}` for the study, its reproduction line in `docs/analysis/restrike_gamma_map.md`, and
+the rehearsal sheet's source list; the PDF rebuilt and both freshness guards re-run.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring

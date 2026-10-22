@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import re
 import subprocess
 import sys
 from collections import Counter
@@ -265,19 +266,29 @@ def ruff_admitted() -> tuple[set[str], int]:
     return admitted, non_python
 
 
-def mypy_reported_count(target: str) -> int | None:
+def mypy_reported_count(target: str) -> tuple[int | None, int]:
+    """The file count mypy names, and the exit code it printed it with.
+
+    The count comes from the "(checked N source files)" tail, not from the first "in <n>" in the
+    line: a failing run prints "Found 5 errors in 1 file (checked 33 source files)", and reading the
+    first number after "in" reports the files that broke as if it were the corpus size. The exit
+    code travels with the reading so a red type check shows up as a named failure rather than as a
+    suspicious count -- §4.3's rule that a measurement which cannot report its own failing branch is
+    not a measurement.
+    """
     binary = REPO_ROOT / ".venv" / "bin" / "mypy"
     result = subprocess.run([str(binary), target], cwd=REPO_ROOT, capture_output=True, text=True)
-    words = (result.stdout or result.stderr).strip().split()
-    for index, word in enumerate(words):
-        if word == "in" and index + 1 < len(words) and words[index + 1].isdigit():
-            return int(words[index + 1])
-    return None
+    output = result.stdout + result.stderr
+    for pattern in (r"\(checked (\d+) source files\)", r"found in (\d+) source files"):
+        checked = re.search(pattern, output)
+        if checked:
+            return int(checked.group(1)), result.returncode
+    return None, result.returncode
 
 
 def static_check_coverage(corpus: list[str]) -> dict[str, Any]:
     admitted, ruff_non_python = ruff_admitted()
-    mypy_count = mypy_reported_count(PACKAGE_DIR)
+    mypy_count, mypy_exit_code = mypy_reported_count(PACKAGE_DIR)
     mypy_enumerated = sorted(path for path in corpus if path.startswith(PACKAGE_DIR + "/"))
     per_file = [
         {
@@ -304,8 +315,11 @@ def static_check_coverage(corpus: list[str]) -> dict[str, Any]:
             "tracked_python_files": len(corpus),
             "mypy_target": PACKAGE_DIR,
             "mypy_reported_source_files": mypy_count,
+            "mypy_exit_code": mypy_exit_code,
             "mypy_enumerated": len(mypy_enumerated),
-            "mypy_two_sided_agreement": mypy_count == len(mypy_enumerated),
+            "mypy_two_sided_agreement": (
+                mypy_count == len(mypy_enumerated) and mypy_exit_code == 0
+            ),
             "ruff_admitted_python": len(admitted & set(corpus)),
             "ruff_admitted_non_python": ruff_non_python,
             "tracked_not_admitted_by_ruff": sorted(set(corpus) - admitted),

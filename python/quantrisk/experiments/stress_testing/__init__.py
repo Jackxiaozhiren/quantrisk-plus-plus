@@ -40,7 +40,6 @@ SciPy and NumPy are reference arithmetic only. The library imports neither
 
 from __future__ import annotations
 
-import argparse
 import csv
 import json
 import math
@@ -57,7 +56,12 @@ from quantrisk.experiments.metadata import (
     repo_relative,
     utc_timestamp,
 )
-from quantrisk.experiments.registry import TASKS_BY_ID, results_directory
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 from quantrisk.plotting import line_plot
 
 TASK = TASKS_BY_ID["stress_testing"]
@@ -466,21 +470,10 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
-def output_root(argv: Sequence[str]) -> Path | None:
-    """The `--out` directory, if the caller named one: a root to write under, not the checkout."""
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument(
-        "--out",
-        type=Path,
-        default=None,
-        help="treat this directory as the repository root; required outside a checkout",
-    )
-    return parser.parse_args(argv).out
-
-
 def run(argv: Sequence[str]) -> dict[str, Any]:
     """Do the study: build the books, solve, measure, write the artifacts, return the summary."""
-    results = results_directory(TASK, output_root(argv))
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
     results.mkdir(parents=True, exist_ok=True)
     covariance, means = factor_structure()
     # Each book carries the equity leg from a Phase 6 optimiser plus a small macro
@@ -611,9 +604,7 @@ def run(argv: Sequence[str]) -> dict[str, Any]:
             ]
         ),
     }
-    (results / "stress_testing_study.json").write_text(
-        json.dumps(summary, indent=2) + "\n", encoding="utf-8"
-    )
+    artifact_path(TASK, out).write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return summary
 
 
@@ -635,6 +626,6 @@ def main(argv: Sequence[str]) -> int:
             indent=2,
         )
     )
-    results = results_directory(TASK, output_root(argv))
+    results = results_directory(TASK, parse_out(argv, description=__doc__))
     print(f"wrote {len(summary['artifacts'])} artifacts to {repo_relative(results)}")
     return 0

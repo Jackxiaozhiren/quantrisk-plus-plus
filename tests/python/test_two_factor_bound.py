@@ -19,6 +19,7 @@ from pathlib import Path
 import pytest
 import quantrisk
 from quantrisk import stress as STRESS
+from quantrisk.experiments.evidence import VOLATILE_KEYS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -642,7 +643,10 @@ def _assert_same_result(
     families are still compared for keys, lengths and types.
 
     Mismatches are collected and reported together rather than raised on the first, because one
-    field per round-trip is how six runs went by one at a time.
+    field per round-trip is how six runs went by one at a time. Keys in `VOLATILE_KEYS` -- the set
+    `content_digest` already declares as run metadata -- have their presence asserted and their
+    values waived: a recorded command is the producer's claim about how it was invoked, and Phase
+    3.3 changes it for every study it absorbs.
     """
     found = problems if problems is not None else []
     if isinstance(mine, bool) or isinstance(theirs, bool):
@@ -665,6 +669,12 @@ def _assert_same_result(
         if mine.keys() != theirs.keys():
             found.append(f"{path}: keys differ, in one only: {sorted(set(mine) ^ set(theirs))}")
         for key in mine.keys() & theirs.keys():
+            if key in VOLATILE_KEYS:
+                # Presence is asserted above; the value is run metadata by the producer's own
+                # declaration, and `content_digest` exempts exactly this set. A reproduction that
+                # compared them would be comparing the machine, and a study that moved its recorded
+                # command -- which is what D4-prime makes every study do -- would read as a result.
+                continue
             _assert_same_result(
                 mine[key],
                 theirs[key],
@@ -686,12 +696,15 @@ def _assert_same_result(
                     advisory=advisory,
                     problems=found,
                 )
-    elif isinstance(mine, str) and isinstance(theirs, str) and path.split(".")[-1] == "source":
+    elif isinstance(mine, str) and isinstance(theirs, str):
         left, right = _sibling_reference(mine), _sibling_reference(theirs)
         if left != right:
-            found.append(
-                f"{path}: {mine!r} != {theirs!r}; as registry references {left!r} != {right!r}"
+            cited = (
+                f"; as registry references {left!r} != {right!r}"
+                if (left, right) != (mine, theirs)
+                else ""
             )
+            found.append(f"{path}: {mine!r} != {theirs!r}{cited}")
     elif mine != theirs:
         if _is_limited(path, advisory):
             return found
@@ -700,22 +713,27 @@ def _assert_same_result(
 
 
 def _sibling_reference(value: str) -> str:
-    """A published-sibling citation, in the form the registry uses to name that sibling.
+    """A citation of a published sibling, in the form the registry uses to name it.
 
     Before Phase 3.3 a study had no other name for a sibling than the file it sat in, so the frozen
-    artifacts cite `experiments/<task>/run.py:<symbol>`. Finding V2-20 settled what they cite from
-    here on: `<task>:<symbol>`, which a move cannot stale. The single re-run that replaces the old
-    spelling is P3.5's, so between now and then a reproduction sees both forms of the same
-    citation. This normalises the *prefix* only: a different task, or a different symbol, or any
-    other string at that path, still compares unequal and still fails the replay.
+    artifacts cite `experiments/<task>/run.py` or `<path>:<symbol>`. Finding V2-20 settled what they
+    cite from here on: the registry's task id, `<task>` or `<task>:<symbol>`, which no move can
+    stale. The single re-run that replaces the old spelling is P3.5's, so between now and then a
+    reproduction sees both spellings of one citation. This maps a *runnable unit's file path* -- in
+    the root-level layout or the package layout, with or without the `experiments/` prefix, because
+    the published prose has used both -- to its task id, and to nothing else. It is applied to every
+    string leaf rather than to a named field, because the citation is prose in one artifact and a
+    `source` field in another, and an exemption list keyed on field names is how half a corpus gets
+    missed. A different symbol, a different task, or a string that is not a path to a study still
+    compares verbatim, so the hatch is one path form wide and no wider.
     """
-    head, separator, symbol = value.partition(":")
-    if not separator or not head.startswith(("experiments/", "benchmarks/")):
-        return value
-    parts = [segment for segment in head.split("/") if segment]
-    if len(parts) < 2:
-        return value
-    return f"{parts[-2]}:{symbol}"
+    replaced = re.sub(
+        r"(?:(?:python/quantrisk/)?experiments/)?([a-z0-9_]+)"
+        r"/(?:run|__init__|__main__)\.py",
+        lambda match: match.group(1),
+        value,
+    )
+    return replaced
 
 
 def test_the_refusals_say_what_the_experiment_did_not_estimate() -> None:
