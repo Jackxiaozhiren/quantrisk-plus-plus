@@ -16,7 +16,7 @@ such fits belongs to the artifacts that carry them.
 What is reused rather than re-typed, and why that is the point:
 
 * the books, the grid, the tolerance, the root finder, the radius rule and the worst-distance helper
-  all come from `experiments/second_book_crossing_map/run.py`, which itself loads v1.5.0's and
+  all come from the `second_book_crossing_map` study, which itself loads v1.5.0's and
   v1.6.0's files;
 * that file's own equality gate is run, not imitated: `verify_control` requires this machinery's
   cubic and quartic coefficients, truncations and engine P&L to be *bit-identical* to v1.5.0's and
@@ -35,7 +35,7 @@ been measured at all -- such books are flagged rather than counted as wins or lo
 from __future__ import annotations
 
 import csv
-import importlib.util
+import importlib
 import json
 import pathlib
 import sys
@@ -46,22 +46,11 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "python"))
 
 
-def _load(relative: str, name: str) -> Any:
-    path = REPO_ROOT / relative
-    spec = importlib.util.spec_from_file_location(name, path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 # Phase 18 owns the books, the grid and the radius rule; it owns v1.5.0's and v1.6.0's truncations
 # transitively. Loading it is what makes "the same radius, one order higher" a statement about the
 # same
 # quantity rather than about a new one.
-P18 = _load("experiments/second_book_crossing_map/run.py", "quantrisk_second_book_for_fifth_order")
+P18 = importlib.import_module("quantrisk.experiments.second_book_crossing_map")
 
 quantrisk = P18.quantrisk
 BOOKS = P18.BOOKS
@@ -351,7 +340,7 @@ def build_payload() -> dict[str, Any]:
         "procedure": {
             "books": "the five books, the delta grid, the 0.005 tolerance and the contiguous "
             "paired-magnitude radius rule are imported from "
-            "experiments/second_book_crossing_map/run.py, which itself loads v1.5.0's and v1.6.0's "
+            "second_book_crossing_map, which itself loads v1.5.0's and v1.6.0's "
             "files, so this run adds one order and changes nothing else",
             "radius_definition": "a |delta| magnitude passes only when every signed column at "
             "it that has a priced crossing has this truncation's nearest zero inside 0.005; "
@@ -387,7 +376,7 @@ def build_payload() -> dict[str, Any]:
         "fits": fits,
         "controls": {
             "machinery_equality_with_v150_and_v160": "verify_control from "
-            "experiments/second_book_crossing_map/run.py ran on the published book before this "
+            "second_book_crossing_map ran on the published book before this "
             "artifact was written: the ten third- and fourth-order coefficients, both"
             "truncations and"
             "the engine P&L over 30 joint moves are exactly equal, and the run refuses to publish "

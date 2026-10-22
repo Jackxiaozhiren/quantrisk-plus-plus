@@ -30,7 +30,7 @@ The rule was written before any radius on a new book was read, and it is mechani
   quantity available, because a rule that can see the outcome would be selecting on the outcome;
 - candidates are examined in ascending ratio order, ties by iteration order, and the first whose radius
   is *defined* — at least three of its swept columns carry a priced crossing, the precondition
-  `experiments/second_book_crossing_map/run.py` enforces — becomes the sixth book.
+  the `second_book_crossing_map` study enforces — becomes the sixth book.
 
 The first candidate examined won: `candidate T=3y sig=0.45 q=0.05`, ratio 0.0024, with 12 of 12 columns
 carrying a priced crossing. Two lists are published so that sentence can be checked rather than taken:

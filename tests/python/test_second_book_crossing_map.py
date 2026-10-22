@@ -19,7 +19,7 @@ the note's figures are re-derived here rather than read by nobody.
 
 from __future__ import annotations
 
-import importlib.util
+import importlib
 import json
 import subprocess
 import sys
@@ -30,7 +30,6 @@ import pytest
 from test_two_factor_bound import _assert_same_result, _noise_decided_verdicts
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = REPO_ROOT / "experiments" / "second_book_crossing_map" / "run.py"
 ARTIFACT = (
     REPO_ROOT
     / "experiments"
@@ -42,20 +41,10 @@ NOTE = REPO_ROOT / "docs" / "analysis" / "second_book_crossing_map.md"
 PUBLISHED = "published ladder"
 
 
-def _load(relative: str, name: str) -> Any:
-    path = REPO_ROOT / relative
-    spec = importlib.util.spec_from_file_location(name, path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 @pytest.fixture(scope="module")
 def experiment() -> Any:
-    return _load("experiments/second_book_crossing_map/run.py", "second_book_experiment")
+    """The study under test, imported through the name the registry gives it."""
+    return importlib.import_module("quantrisk.experiments.second_book_crossing_map")
 
 
 @pytest.fixture(scope="module")
@@ -360,28 +349,30 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
 ) -> None:
     """Determinism, without letting the test write into frozen evidence.
 
-    One file travels: this experiment. The order-four study it imports, the phase-15 study that owns
-    the grid and tolerance, and the stress experiment that names the scenario all arrive as package
-    imports now, so the copy only has to sit at the depth it has in the repository because it writes
-    its results beside itself.
+    Nothing is copied and no tree is laid out to a depth: the study is absorbed, so the replay is
+    its canonical invocation with `--out` naming a temporary repository root. The artifact it
+    writes lands at the registry's path beneath it, and the committed evidence stays untouched.
     """
-    tree = {
-        "experiments/second_book_crossing_map/run.py",
-    }
-    for relative in tree:
-        destination = tmp_path / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_text((REPO_ROOT / relative).read_text(encoding="utf-8"), encoding="utf-8")
-
-    copy = tmp_path / "experiments" / "second_book_crossing_map" / "run.py"
     before = ARTIFACT.read_bytes()
     completed = subprocess.run(  # noqa: S603
-        [sys.executable, str(copy)], capture_output=True, text=True, check=False, cwd=tmp_path
+        [
+            sys.executable,
+            "-m",
+            "quantrisk.experiments.second_book_crossing_map",
+            "--out",
+            str(tmp_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        cwd=REPO_ROOT,
     )
     assert completed.returncode == 0, completed.stderr[-2000:]
     assert ARTIFACT.read_bytes() == before, "the test run modified a committed artifact"
 
-    produced = copy.parent / "results" / "second_book_crossing_map.json"
+    produced = (
+        tmp_path / "experiments/second_book_crossing_map/results/second_book_crossing_map.json"
+    )
     assert produced.exists(), f"the copy wrote no artifact; stdout: {completed.stdout[-400:]}"
     mine, theirs = (
         json.loads(ARTIFACT.read_text(encoding="utf-8")),

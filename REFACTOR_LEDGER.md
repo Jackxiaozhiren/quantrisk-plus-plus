@@ -635,6 +635,44 @@ one entry from their travelling sets -- 2 files, then 1 -- which is the chain di
 Documents re-derived: the analysis note's reproduction command, the rehearsal sheet's source line, and
 one plant re-keyed with the file it mutates. No test was added; the published pair stays **548 / 479**.
 
+### 2026-10-22, P3.3 absorption 4 of 19 — `second_book_crossing_map`
+
+Fourth move. This was the study the chain hangs on: it owns the books, the grid, the tolerance and the
+radius rule that v1.9.0's two later studies import, so taking it into the package removes a by-path load
+from *each* of them rather than one. Census after this commit: **bootstrap 8** (its `sys.path` insert died
+with the move) and **by-path 10 → 8** -- its own loader helper and `fifth_order`'s `_load`, both deleted
+rather than left unused, because a dead by-path loader in a published study gets copied forward.
+
+The entry point split like the others, and its console report was already payload-derived, so the shim
+took the five per-book lines and the summary line unchanged. One non-volatile difference in the replay,
+`.procedure.shared_with`, is the V2-20 citation the P3.5 re-run replaces; the CSV is content-identical.
+The print line at the end moved from `json_path.relative_to(REPO_ROOT)` to `repo_relative`, which is the
+same claim made by the helper that already knows how to say it.
+
+Two of the six plants in this lane's cross-study set sit on this file
+(`radius-reads-one-signed-column-at-a-time`, `sixth-book-grid-bound-claim-reads-a-narrower-grid`) and
+were re-keyed with it; both anchors were confirmed present in the moved file before the sweep is re-run
+against them.
+
+`fifth_order` and `sixth_book` cite it in artifact prose, not only in `source` fields -- `books`,
+`machinery_equality_with_v150_and_v160`, `reused_from` -- which is the second confirmation that a
+citation normaliser keyed on a field name would have covered one artifact and silently missed three.
+`test_fifth_order_crossing_map:331` asserts the sentence *inside the committed artifact*, so it was
+re-pointed through the same `_sibling_reference` the replay uses rather than at a literal spelling: it
+must be true against the artifact on disk today and against the one P3.5 writes, without being edited
+twice.
+
+Newly type-checked code produced the same defect as its neighbour's: a `lambda o, field=name: …` default
+argument carrying a comprehension variable, which mypy cannot infer. Replaced by a `_mixed_field` static
+method on the book class that binds the name by parameter -- the comment in the module says plainly why
+the trick was dropped. `mypy_two_sided_agreement` held at 37 reported against 37 enumerated.
+
+Documents re-derived: the analysis note's reproduction command, its sixth-book neighbour's prose citation,
+two `docs/validation_matrix.md` rows, and the rehearsal sheet's source cell; dated records
+(`docs/phase_reports/*`, `docs/integrity_audit.md`) keep the path they were written against, per §11's
+rule that a record states the revision it describes. No test added, so the published pair stays
+**548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring

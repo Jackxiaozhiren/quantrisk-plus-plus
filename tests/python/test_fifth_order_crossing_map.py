@@ -30,7 +30,11 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from test_two_factor_bound import _assert_same_result, _noise_decided_verdicts
+from test_two_factor_bound import (
+    _assert_same_result,
+    _noise_decided_verdicts,
+    _sibling_reference,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ARTIFACT = (
@@ -328,7 +332,10 @@ def test_the_prose_of_the_artifact_says_what_it_means(payload: dict[str, Any]) -
     )
     assert "Phase 18's five books had already refuted the mechanism" in procedure["not_measured"]
     assert "10 V_SSsigmasigmasigma h^2 k^3" in procedure["quintic_term"]
-    assert "imported from experiments/second_book_crossing_map/run.py" in procedure["books"]
+    # The citation is the registry reference now; the committed artifact still spells it as the
+    # file that existed when it was written, and P3.5 re-runs it. Reading the sentence through the
+    # same normaliser the replay uses keeps this true on both sides of that re-run.
+    assert "imported from second_book_crossing_map" in _sibling_reference(procedure["books"])
     for key, value in list(procedure.items()) + [
         ("why", payload["reproduction_policy"]["why"]),
         ("everything_else", payload["reproduction_policy"]["everything_else"]),
@@ -386,14 +393,13 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
 ) -> None:
     """Determinism, without letting a test write into frozen evidence.
 
-    Two files travel: this experiment and the second-book study it imports. The order-four study,
-    the phase-15 study and the stress experiment behind that chain arrive as package imports now,
-    and each copy still has to sit at the depth it has in the repository, because each writes its
-    results beside itself.
+    One file travels: this experiment. Everything beneath it in the chain -- the second-book study,
+    the order-four study, the phase-15 study and the stress experiment -- arrives as a package
+    import now, and the copy still has to sit at the depth it has in the repository because it
+    writes its results beside itself.
     """
     tree = {
         "experiments/fifth_order_crossing_map/run.py",
-        "experiments/second_book_crossing_map/run.py",
     }
     for relative in tree:
         destination = tmp_path / relative

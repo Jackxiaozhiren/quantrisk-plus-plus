@@ -133,7 +133,7 @@ largest differences as `control`, and all four are exactly 0.
 ## 6. Reproducing
 
 ```bash
-uv run python experiments/second_book_crossing_map/run.py
+uv run python -m quantrisk.experiments.second_book_crossing_map
 uv run pytest tests/python/test_second_book_crossing_map.py
 ```
 

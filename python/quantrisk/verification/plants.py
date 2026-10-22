@@ -486,7 +486,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="radius-reads-one-signed-column-at-a-time",
         kind="prose",
-        path="experiments/second_book_crossing_map/run.py",
+        path="python/quantrisk/experiments/second_book_crossing_map/__init__.py",
         anchor='if not all(row[f"{order}_within_tolerance"] for row in crossing):',
         replacement='if not any(row[f"{order}_within_tolerance"] for row in crossing):',
         guard=(
@@ -698,7 +698,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="sixth-book-grid-bound-claim-reads-a-narrower-grid",
         kind="prose",
-        path="experiments/second_book_crossing_map/run.py",
+        path="python/quantrisk/experiments/second_book_crossing_map/__init__.py",
         anchor="GRID_EDGE = max(abs(delta) for delta in DELTAS)",
         replacement="GRID_EDGE = 0.2",
         # The sixth book's whole message is that its radius could not rise on the ladder that was

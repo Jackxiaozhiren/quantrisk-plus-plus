@@ -71,18 +71,23 @@ import importlib
 import json
 import math
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT / "python") not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT / "python"))
+import quantrisk
+from quantrisk import stress as STRESS
+from quantrisk.experiments.metadata import repo_relative
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 
-import quantrisk  # noqa: E402
-from quantrisk import stress as STRESS  # noqa: E402
+TASK = TASKS_BY_ID["second_book_crossing_map"]
 
 # v1.5.0 owns the grid, the tolerance and the root finder; v1.6.0 owns the order-four terms of
 # the published book and its truncation. Both are imported rather than re-typed, so "the same
@@ -96,7 +101,6 @@ TOLERANCE = P15.CROSSING_MATCH_TOLERANCE
 PREDICTION_SCAN = P15.PREDICTION_SCAN_POINTS
 MEASURED_SCAN = P15.MEASURED_SCAN_POINTS
 
-RESULTS = REPO_ROOT / "experiments" / "second_book_crossing_map" / "results"
 
 # The move at which each book's higher-order ratio is quoted: v1.6.0's widening, so this is the
 # displacement at which its claim has to survive on a different book.
@@ -201,10 +205,20 @@ class Book:
             for name, read in readings.items()
         }
 
+    @staticmethod
+    def _mixed_field(field: str, market: Any) -> Callable[[Any], float]:
+        """One reading of one named mixed fourth partial, bound to its field by argument.
+
+        `lambda o, field=name: ...` — a default argument carrying the loop variable through a
+        comprehension — says the same thing, but mypy cannot infer a type for it and a reader has to
+        decode the trick to see that it does.
+        """
+        mixed = quantrisk.pricing.black_scholes_mixed_fourth_derivatives
+        return lambda option: mixed(option, market).__getattribute__(field)
+
     def fourth_order(self) -> dict[str, float]:
         """The order-four book sums, in v1.6.0's own field names."""
         market = self.market()
-        mixed = quantrisk.pricing.black_scholes_mixed_fourth_derivatives
         spot_partials = quantrisk.pricing.black_scholes_spot_derivatives
         mixed_fields = (
             "spot_spot_spot_sigma",
@@ -214,10 +228,7 @@ class Book:
         )
         readings: dict[str, Callable[[Any], float]] = {
             "spot_x4": lambda o: spot_partials(o, market).fourth,
-            **{
-                name: (lambda o, field=name: mixed(o, market).__getattribute__(field))
-                for name in mixed_fields
-            },
+            **{name: self._mixed_field(name, market) for name in mixed_fields},
         }
         return {
             name: sum(read(o) for o in self.options()) * self.quantity
@@ -634,7 +645,7 @@ def build_payload() -> dict[str, Any]:
 
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
-        "command": "uv run python experiments/second_book_crossing_map/run.py",
+        "command": TASK.invocation,
         "claim": (
             "the order-four widening is a property of the expansion and not of v1.6.0's ladder: on "
             f"{len(widened)} of {len(books)} books the quartic's contiguous crossing radius is at "
@@ -806,11 +817,15 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             )
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Measure the five books and write the artifacts; the payload is the published result."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
     payload = build_payload()
-    json_path = RESULTS / "second_book_crossing_map.json"
-    json_path.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+    artifact_path(TASK, out).write_text(
+        json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8"
+    )
 
     profile_rows = [
         {
@@ -827,8 +842,13 @@ def main() -> int:
             strict=True,
         )
     ]
-    write_csv(RESULTS / "second_book_columns.csv", profile_rows)
+    write_csv(results / "second_book_columns.csv", profile_rows)
+    return payload
 
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: run the study, then print the five rows and the summary line."""
+    payload = run(argv)
     for book in payload["books"]:
         factor = book["widening_factor"]
         own = payload["fits"][book["label"]]
@@ -848,9 +868,6 @@ def main() -> int:
         f"{payload['control']['book_coefficients_largest_absolute_difference']:.0e} / "
         f"{payload['control']['engine_pnl_largest_absolute_difference']:.0e}"
     )
-    print(f"wrote {json_path.relative_to(REPO_ROOT)}")
+    landed = artifact_path(TASK, parse_out(argv, description=__doc__))
+    print(f"wrote {repo_relative(landed)}")
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

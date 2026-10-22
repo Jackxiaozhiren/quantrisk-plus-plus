@@ -31,7 +31,7 @@ What is reused rather than re-typed, and why that is the point:
 
 * the books, the grid, the tolerance, the root finder, the radius rule, the piece arithmetic, the
   quintic error and the column sweep all come from `experiments/fifth_order_crossing_map/run.py`,
-  which itself loads `experiments/second_book_crossing_map/run.py`, which loads v1.5.0's and
+  which itself loads the `second_book_crossing_map` study, which loads v1.5.0's and
   v1.6.0's files. Calling `measure` on six books is what makes "the same radius, one more book" a
   statement about the same quantity;
 * the five published books' radii must come back bit-identical to the values
@@ -311,7 +311,7 @@ def build_payload() -> dict[str, Any]:
             "orders": list(ORDERS),
             "reused_from": [
                 "experiments/fifth_order_crossing_map/run.py",
-                "experiments/second_book_crossing_map/run.py",
+                "second_book_crossing_map",
             ],
         },
         "headline": {
