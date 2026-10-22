@@ -30,7 +30,7 @@ coefficients, not of the crossing map's outcome.
 What is reused rather than re-typed, and why that is the point:
 
 * the books, the grid, the tolerance, the root finder, the radius rule, the piece arithmetic, the
-  quintic error and the column sweep all come from `experiments/fifth_order_crossing_map/run.py`,
+  quintic error and the column sweep all come from the `fifth_order_crossing_map` study,
   which itself loads the `second_book_crossing_map` study, which loads v1.5.0's and
   v1.6.0's files. Calling `measure` on six books is what makes "the same radius, one more book" a
   statement about the same quantity;
@@ -49,7 +49,7 @@ that axis is where Phase 20's two contradictory outcomes sat).
 from __future__ import annotations
 
 import datetime as dt
-import importlib.util
+import importlib
 import json
 import pathlib
 import sys
@@ -59,17 +59,8 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "python"))
 
 
-def _load(relative: str, name: str) -> Any:
-    spec = importlib.util.spec_from_file_location(name, REPO_ROOT / relative)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 # Phase 20 owns the books, the measure column, the piece arithmetic, the sweep and the radius rule.
-P20 = _load("experiments/fifth_order_crossing_map/run.py", "quantrisk_fifth_order_for_sixth_book")
+P20 = importlib.import_module("quantrisk.experiments.fifth_order_crossing_map")
 P18 = P20.P18
 
 PUBLISHED_BOOKS = P20.BOOKS
@@ -199,7 +190,7 @@ def control_against_published(sixth: Any, measured: dict[str, dict[str, Any]]) -
                 mismatches.append(f"{label} {key}: {mine[key]} versus published {row[key]}")
     assert not mismatches, "adding a sixth book moved a published radius: " + "; ".join(mismatches)
     return {
-        "control": "experiments/fifth_order_crossing_map/run.py::P18.verify_control",
+        "control": "fifth_order_crossing_map::P18.verify_control",
         "control_ran_on": PUBLISHED_BOOKS[0].label,
         "published_books_reproduced_bit_for_bit": len(published),
         "published_artifact": str(FIFTH_ORDER_ARTIFACT.relative_to(REPO_ROOT)),
@@ -310,7 +301,7 @@ def build_payload() -> dict[str, Any]:
             "radius_rule": "contiguous paired-magnitude rule, Phase 18's implementation",
             "orders": list(ORDERS),
             "reused_from": [
-                "experiments/fifth_order_crossing_map/run.py",
+                "fifth_order_crossing_map",
                 "second_book_crossing_map",
             ],
         },

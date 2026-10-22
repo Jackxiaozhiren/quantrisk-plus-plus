@@ -39,12 +39,16 @@ import importlib
 import json
 import pathlib
 import sys
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Any
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "python"))
-
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 
 # Phase 18 owns the books, the grid and the radius rule; it owns v1.5.0's and v1.6.0's truncations
 # transitively. Loading it is what makes "the same radius, one order higher" a statement about the
@@ -60,7 +64,7 @@ GRID_EDGE = P18.GRID_EDGE
 MIN_COLUMNS = P18.MIN_COLUMNS_WITH_A_CROSSING
 PUBLISHED_LABEL = "published ladder"
 
-RESULTS = REPO_ROOT / "experiments" / "fifth_order_crossing_map" / "results"
+TASK = TASKS_BY_ID["fifth_order_crossing_map"]
 
 FIFTH_FIELDS = (
     "spot_spot_spot_spot_spot",
@@ -326,7 +330,7 @@ def build_payload() -> dict[str, Any]:
 
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
-        "command": "uv run python experiments/fifth_order_crossing_map/run.py",
+        "command": TASK.invocation,
         "claim": (
             f"order five widens the contiguous paired-magnitude crossing radius on "
             f"{len(widened)} of {len(books)} books and leaves it unchanged on {len(unchanged)}: "
@@ -438,16 +442,19 @@ def write_csv(path: pathlib.Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow({name: row[name] for name in fields})
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Measure the five books at order five, write the artifacts, return the payload."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
     payload = build_payload()
-    (RESULTS / "fifth_order_crossing_map.json").write_text(
+    artifact_path(TASK, out).write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    write_csv(RESULTS / "fifth_order_radii.csv", payload["books"])
+    write_csv(results / "fifth_order_radii.csv", payload["books"])
     for result in payload["books"]:
         distances = payload["fits"][result["label"]]["columns"]
-        with (RESULTS / f"fifth_order_columns_{slug(result['label'])}.csv").open(
+        with (results / f"fifth_order_columns_{slug(result['label'])}.csv").open(
             "w", newline="", encoding="utf-8"
         ) as handle:
             names = list(result["columns"][0]) + list(distances[0])
@@ -455,14 +462,15 @@ def main() -> int:
             writer.writeheader()
             for verdict, distance in zip(result["columns"], distances, strict=True):
                 writer.writerow({**verdict, **distance})
-    print(payload["claim"])
+    return payload
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: run the study, then print the one line it has always printed."""
+    print(run(argv)["claim"])
     return 0
 
 
 def slug(label: str) -> str:
     """A filename-safe form of a book's label, so hyphens count as separators too."""
     return "_".join(label.lower().replace("-", " ").split())
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

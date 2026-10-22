@@ -531,7 +531,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="fifth-order-radius-judged-by-another-orders-range",
         kind="prose",
-        path="experiments/fifth_order_crossing_map/run.py",
+        path="python/quantrisk/experiments/fifth_order_crossing_map/__init__.py",
         anchor='widest = own_fits["worst_distance_inside_own_radius"][order]',
         replacement='widest = own_fits["worst_distance_inside_quartic_radius"][order]',
         guard=(
@@ -543,7 +543,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="fifth-order-sums-drop-the-book-quantity",
         kind="prose",
-        path="experiments/fifth_order_crossing_map/run.py",
+        path="python/quantrisk/experiments/fifth_order_crossing_map/__init__.py",
         anchor="for o in book.options()) * book.quantity",
         replacement="for o in book.options()) * 1.0",
         # Not the sums test: that one recomputes the sums from the bindings itself, so a producer

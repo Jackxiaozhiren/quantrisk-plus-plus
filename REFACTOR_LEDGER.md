@@ -673,6 +673,37 @@ two `docs/validation_matrix.md` rows, and the rehearsal sheet's source cell; dat
 rule that a record states the revision it describes. No test added, so the published pair stays
 **548 / 479**.
 
+### 2026-10-22, P3.3 absorption 5 of 19 — `fifth_order_crossing_map`
+
+Fifth move, and the last one inside the radius chain: `sixth_book_crossing_map` imports it, so its
+`_load` helper went too, which is why the census drops further than one move would suggest --
+**bootstrap 8 → 7, by-path 8 → 6**. `fifth_order` also borrows its library namespace from its sibling
+(`quantrisk = P18.quantrisk`), a shape that survives this commit untouched: it is not a path problem, and
+retyping it here would mix a stylistic change into a move.
+
+The replay's console line -- the claim sentence -- matches what row 22 of the validation matrix publishes
+("2 of 5 books, published ladder 0.15 → 0.20, a factor of 1.33, 2 books at the swept grid edge"), and
+the six CSVs it writes are content-identical to the committed ones. The JSON carries exactly the two
+declared differences from absorption #4's citations (`procedure.books`,
+`controls.machinery_equality_with_v150_and_v160`), both waiting on P3.5's re-run, and nothing else.
+
+The entry point split took the one print statement with it rather than leaving it in the computation:
+`run(argv)` now returns the payload and `main(argv)` prints the claim, so importing the module for its
+numbers stays silent -- which matters because `sixth_book` imports it. mypy found nothing new this time
+(39 source files, two-sided agreement holding), and the two plants on this file
+(`fifth-order-radius-judged-by-another-orders-range`, `fifth-order-sums-drop-the-book-quantity`) were
+re-keyed with anchors confirmed present in the moved file.
+
+One test changed in kind rather than in spelling: `test_fifth_order_crossing_map` asserted the artifact's
+recorded command against a literal path. `command` is volatile by declaration, and Phase 3.3 changes it
+for every study it absorbs, so the assertion is now an explicit set of the two spellings that both name
+this task -- the one the frozen artifact carries today and the registry invocation the code writes --
+with the legacy alternative commented for deletion at P3.5. That keeps the guard honest across the re-run
+instead of pinning a string that the lane has already decided must move.
+
+Documents re-derived: the analysis note's prose citation and its reproduction command. No test added; the
+pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring

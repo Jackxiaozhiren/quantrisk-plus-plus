@@ -22,7 +22,7 @@ rather than read by nobody.
 
 from __future__ import annotations
 
-import importlib.util
+import importlib
 import json
 import subprocess
 import sys
@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from quantrisk.experiments.registry import TASKS_BY_ID
 from test_two_factor_bound import (
     _assert_same_result,
     _noise_decided_verdicts,
@@ -57,20 +58,10 @@ SUM_FIELDS = (
 )
 
 
-def _load(relative: str, name: str) -> Any:
-    path = REPO_ROOT / relative
-    spec = importlib.util.spec_from_file_location(name, path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 @pytest.fixture(scope="module")
 def experiment() -> Any:
-    return _load("experiments/fifth_order_crossing_map/run.py", "fifth_order_experiment")
+    """The study under test, imported through the name the registry gives it."""
+    return importlib.import_module("quantrisk.experiments.fifth_order_crossing_map")
 
 
 @pytest.fixture(scope="module")
@@ -342,7 +333,14 @@ def test_the_prose_of_the_artifact_says_what_it_means(payload: dict[str, Any]) -
     ]:
         assert "  " not in value, key
         assert " [" not in value and "] " not in value, key
-    assert payload["command"] == "uv run python experiments/fifth_order_crossing_map/run.py"
+    # The recorded command is volatile by declaration, and Phase 3.3 changes it for every study it
+    # absorbs: the artifact on disk carries the spelling of the revision that wrote it, the code now
+    # writes the registry's. Both are the command that produced this task; anything else is not.
+    # Drop the legacy spelling at P3.5, when the single re-run rewrites the artifact.
+    assert payload["command"] in {
+        "uv run python experiments/fifth_order_crossing_map/run.py",
+        TASKS_BY_ID["fifth_order_crossing_map"].invocation,
+    }, payload["command"]
 
 
 def test_the_declared_families_exist_in_the_payload(payload: dict[str, Any]) -> None:
@@ -393,28 +391,31 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
 ) -> None:
     """Determinism, without letting a test write into frozen evidence.
 
-    One file travels: this experiment. Everything beneath it in the chain -- the second-book study,
-    the order-four study, the phase-15 study and the stress experiment -- arrives as a package
-    import now, and the copy still has to sit at the depth it has in the repository because it
-    writes its results beside itself.
+    Nothing travels: the study is absorbed, so the replay is its canonical invocation with `--out`
+    naming a temporary repository root. The whole chain beneath it -- the second-book study, the
+    order-four study, the phase-15 study and the stress experiment -- arrives as package imports, so
+    there is no file left to copy and no depth to lay out.
     """
-    tree = {
-        "experiments/fifth_order_crossing_map/run.py",
-    }
-    for relative in tree:
-        destination = tmp_path / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_text((REPO_ROOT / relative).read_text(encoding="utf-8"), encoding="utf-8")
-
-    copy = tmp_path / "experiments" / "fifth_order_crossing_map" / "run.py"
     before = ARTIFACT.read_bytes()
     completed = subprocess.run(  # noqa: S603
-        [sys.executable, str(copy)], capture_output=True, text=True, check=False, cwd=tmp_path
+        [
+            sys.executable,
+            "-m",
+            "quantrisk.experiments.fifth_order_crossing_map",
+            "--out",
+            str(tmp_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        cwd=REPO_ROOT,
     )
     assert completed.returncode == 0, completed.stderr[-2000:]
     assert ARTIFACT.read_bytes() == before, "the test run modified a committed artifact"
 
-    produced = copy.parent / "results" / "fifth_order_crossing_map.json"
+    produced = (
+        tmp_path / "experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json"
+    )
     assert produced.exists(), f"the copy wrote no artifact; stdout: {completed.stdout[-400:]}"
     mine, theirs = (
         json.loads(ARTIFACT.read_text(encoding="utf-8")),

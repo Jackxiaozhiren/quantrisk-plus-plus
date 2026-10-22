@@ -9,12 +9,12 @@ widen *again* when the order-five terms are added, or had the truncation already
 anything the map's own error can see?
 
 Phase 20 shipped `pricing.black_scholes_mixed_fifth_derivatives`, and
-`experiments/fifth_order_crossing_map/run.py` asks the question with it.
+`quantrisk.experiments.fifth_order_crossing_map` asks the question with it.
 
 Reproduce:
 
 ```bash
-uv run python experiments/fifth_order_crossing_map/run.py
+uv run python -m quantrisk.experiments.fifth_order_crossing_map
 ```
 
 ## 1. The same rule, the same books, one more order
