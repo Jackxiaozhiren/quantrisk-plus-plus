@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 r"""Phase 16 experiment: how far a fourth-order truncation predicts the map's crossing.
 
-    uv run python experiments/fourth_order_crossing_map/run.py
+    uv run python -m quantrisk.experiments.fourth_order_crossing_map [--out DIRECTORY]
     uv run python scripts/run_benchmark_suite.py --only fourth_order_crossing_map
 
 `v1.5.0` measured the recommendation v1.3.0 had left unmeasured, and closed with the reason it
@@ -86,21 +86,26 @@ import csv
 import json
 import math
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT / "python") not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT / "python"))
-
-import quantrisk  # noqa: E402
+import quantrisk
 
 # The phase-15 module is the definition of the book, the grid, the engine call and the cubic
 # truncation. Importing it (rather than copying four functions out of it) is what makes "the same
 # truncation plus the order-four terms" a statement this file cannot quietly break.
-import quantrisk.experiments.restrike_gamma_map as P15  # noqa: E402
+import quantrisk.experiments.restrike_gamma_map as P15
+from quantrisk.experiments.metadata import repo_relative
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
+
+TASK = TASKS_BY_ID["fourth_order_crossing_map"]
 
 SPOT = P15.SPOT
 VOLATILITY = P15.VOLATILITY
@@ -110,8 +115,6 @@ SCALES = P15.SCALES
 TOLERANCE = P15.CROSSING_MATCH_TOLERANCE
 SCAN = P15.PREDICTION_SCAN_POINTS
 MEASURED_SCAN = P15.MEASURED_SCAN_POINTS
-
-RESULTS = REPO_ROOT / "experiments" / "fourth_order_crossing_map" / "results"
 
 # Claim 2's widened limit. The cubic is gated at 0.05 by v1.5.0; the quartic is asked to hold to
 # 0.15, which is three times the move and the widest column where its worst measured distance
@@ -187,12 +190,14 @@ def book_fourth_coefficients() -> dict[str, float]:
     market = P15.market(SPOT, VOLATILITY)
     mixed = quantrisk.pricing.black_scholes_mixed_fourth_derivatives
     spot = quantrisk.pricing.black_scholes_spot_derivatives
+
+    def mixed_field(field: str) -> Callable[[Any], float]:
+        """One reading of one named mixed fourth derivative, bound to its field by argument."""
+        return lambda option: mixed(option, market).__getattribute__(field)
+
     readings: dict[str, Callable[[Any], float]] = {
         "spot_x4": lambda o: spot(o, market).fourth,
-        **{
-            name: (lambda o, field=name: mixed(o, market).__getattribute__(field))
-            for name in FOURTH_FIELDS
-        },
+        **{name: mixed_field(name) for name in FOURTH_FIELDS},
     }
     return {
         name: sum(read(P15.option(strike)) for strike in P15.STRIKES) * P15.QUANTITY
@@ -457,8 +462,11 @@ def published_scenario_block() -> dict[str, Any]:
     }
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Extend the truncation to order four, sweep the grid, write, return the payload."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
 
     # Gate 0: the order-four piece must be the closed form it says it is. At k = 0 the quartic
     # reduces to the pure-spot quartic, and the cubic must be untouched -- otherwise "the same
@@ -749,7 +757,7 @@ def main() -> int:
 
     payload = {
         "generated_at_utc": utc_timestamp(),
-        "command": "uv run python experiments/fourth_order_crossing_map/run.py",
+        "command": TASK.invocation,
         "claim": (
             "adding the four mixed fourth partials to the column truncation triples the radius over"
             "which it predicts the shipped map's crossing -- |delta| <= 0.15 against the cubic's "
@@ -864,22 +872,36 @@ def main() -> int:
         },
     }
 
-    json_path = RESULTS / "fourth_order_crossing_map.json"
+    json_path = artifact_path(TASK, out)
     json_path.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
-    write_csv(RESULTS / "fourth_order_crossing_columns.csv", columns)
+    write_csv(results / "fourth_order_crossing_columns.csv", columns)
     write_csv(
-        RESULTS / "fourth_order_residual_rays.csv", [r for rows in rays.values() for r in rows]
+        results / "fourth_order_residual_rays.csv", [r for rows in rays.values() for r in rows]
     )
 
+    return payload
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: run the study, then print the lines it has always printed on the way out.
+
+    Everything here is read back out of the payload the study returns, in the same formats, so the
+    console report and the artifact cannot end up describing two different runs.
+    """
+    payload = run(argv)
+    headline = payload["headline"]
+    fits = headline["fits"]
+    published = payload["published_scenario"]
     cubic_span = fits["residual_slope_cubic_span"]
     quartic_span = fits["residual_slope_quartic_span"]
     print(
-        f"quartic radius |delta| <= {WIDENED_LIMIT}: worst distance "
+        f"quartic radius |delta| <= {headline['widened_limit']}: worst distance "
         f"{fits['quartic_distance_max_within_the_widened_limit']:.4f} "
         f"(cubic {fits['cubic_distance_max_within_the_widened_limit']:.4f}); "
         f"zeros measured {headline['measured_zeros_total']}, cubic "
         f"{headline['cubic_zeros_total']}, quartic {headline['quartic_zeros_total']}; "
-        f"count disagreements {len(count_disagree_cubic)} -> {len(count_disagree_quartic)}"
+        f"count disagreements {headline['columns_where_the_cubic_zero_count_disagrees']} -> "
+        f"{headline['columns_where_the_quartic_zero_count_disagrees']}"
     )
     print(
         f"residual ratio quartic/cubic: {fits['residual_ratio_at_grid_size_span'][0]:.3f}"
@@ -896,7 +918,7 @@ def main() -> int:
         f"{published['gamma_restrike_map']['cubic_relative_error']:+.2%}, quartic "
         f"{published['gamma_restrike_map']['quartic_relative_error']:+.2%}"
     )
-    print(f"wrote {json_path.relative_to(REPO_ROOT)}")
+    print(f"wrote {repo_relative(artifact_path(TASK, parse_out(argv, description=__doc__)))}")
     return 0
 
 
@@ -923,7 +945,3 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writeheader()
         for row in rows:
             writer.writerow({key: _cell(row.get(key)) for key in fields})
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

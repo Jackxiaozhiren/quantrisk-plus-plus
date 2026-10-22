@@ -40,7 +40,7 @@ import quantrisk
 from test_two_factor_bound import _assert_same_result, _noise_decided_verdicts
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = REPO_ROOT / "experiments" / "fourth_order_crossing_map" / "run.py"
+SCRIPT = REPO_ROOT / "python/quantrisk/experiments/fourth_order_crossing_map/__init__.py"
 ARTIFACT = (
     REPO_ROOT
     / "experiments"
@@ -53,19 +53,10 @@ STRIKES = (90.0, 100.0, 110.0)
 QUANTITY = 5000.0
 
 
-def _load(path: Path, name: str):
-    spec = importlib.util.spec_from_file_location(name, path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 @pytest.fixture(scope="module")
 def experiment():
-    return _load(SCRIPT, "quantrisk_fourth_order_crossing_map_under_test")
+    """The study under test, imported the way the registry says to run it."""
+    return importlib.import_module("quantrisk.experiments.fourth_order_crossing_map")
 
 
 @pytest.fixture(scope="module")
@@ -527,33 +518,31 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
 ) -> None:
     """Determinism, without letting the test write into frozen evidence.
 
-    The copy has to sit at the same depth because the experiment writes its results beside itself.
-    One file travels: this one. The phase-15 module whose truncation it reuses and the stress
-    experiment that names `risk_off` both arrive as package imports now, so this fixture is also the
-    check that the chain no longer needs a repository layout -- only the file being replayed is a
-    script, until its own absorption commit lands.
+    The study is absorbed, so the replay is its canonical invocation with a temporary root: no file
+    is copied, nothing is laid out to a depth, and the artifact lands at the registry's path under
+    `tmp_path` while the committed evidence stays untouched -- `--out` is what makes that the same
+    run rather than a different one.
     """
-    tree = {
-        "experiments/fourth_order_crossing_map/run.py",
-    }
-    for relative in tree:
-        destination = tmp_path / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_text((REPO_ROOT / relative).read_text(encoding="utf-8"), encoding="utf-8")
-
-    copy = tmp_path / "experiments" / "fourth_order_crossing_map" / "run.py"
     before = ARTIFACT.read_bytes()
     completed = subprocess.run(  # noqa: S603
-        [sys.executable, str(copy)],
+        [
+            sys.executable,
+            "-m",
+            "quantrisk.experiments.fourth_order_crossing_map",
+            "--out",
+            str(tmp_path),
+        ],
         capture_output=True,
         text=True,
         check=False,
-        cwd=tmp_path,
+        cwd=REPO_ROOT,
     )
     assert completed.returncode == 0, completed.stderr[-2000:]
     assert ARTIFACT.read_bytes() == before, "the test run modified a committed artifact"
 
-    produced = copy.parent / "results" / "fourth_order_crossing_map.json"
+    produced = (
+        tmp_path / "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json"
+    )
     assert produced.exists(), f"the copy wrote no artifact; stdout: {completed.stdout[-400:]}"
     mine, theirs = (
         json.loads(ARTIFACT.read_text(encoding="utf-8")),

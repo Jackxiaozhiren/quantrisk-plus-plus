@@ -149,7 +149,7 @@ used anyway.
 ## 8. Reproducing
 
 ```bash
-uv run python experiments/fourth_order_crossing_map/run.py
+uv run python -m quantrisk.experiments.fourth_order_crossing_map
 uv run python scripts/run_benchmark_suite.py --only fourth_order_crossing_map
 uv run pytest -q tests/python/test_fourth_order_crossing_map.py
 ```

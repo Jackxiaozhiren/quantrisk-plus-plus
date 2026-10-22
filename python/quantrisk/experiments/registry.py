@@ -251,6 +251,7 @@ TASKS: tuple[Task, ...] = (
         "fourth_order_crossing_map",
         "fourth_order_crossing_map",
         "fourth_order_crossing_map.json",
+        absorbed=True,
     ),
     _study(
         "second_book_crossing_map",

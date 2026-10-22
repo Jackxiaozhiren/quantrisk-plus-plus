@@ -58,7 +58,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="fourth-order-docstring-quotes-a-stale-crossing-radius",
         kind="prose",
-        path="experiments/fourth_order_crossing_map/run.py",
+        path="python/quantrisk/experiments/fourth_order_crossing_map/__init__.py",
         anchor="worst 0.00162",
         replacement="worst 0.00152",
         guard=(

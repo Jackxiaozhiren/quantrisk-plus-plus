@@ -953,7 +953,7 @@ repairs the cubic's three column-level mistakes and invents a different one, at 
 `delta = +0.10` column. Counts are reported rather than gated, because a tolerance on distance alone
 would have hidden a false zero completely.
 
-Sources: `experiments/fourth_order_crossing_map/run.py`,
+Sources: `python/quantrisk/experiments/fourth_order_crossing_map`,
 `experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json` (`headline`, `columns`,
 `rays`, `published_scenario`), `cpp/include/quantrisk/pricing/black_scholes.hpp`
 (`MixedFourthDerivatives`), `tests/cpp/test_black_scholes.cpp`,

@@ -67,7 +67,7 @@ change of a scanned function, not an analytic root.
 from __future__ import annotations
 
 import csv
-import importlib.util
+import importlib
 import json
 import math
 import sys
@@ -84,25 +84,11 @@ if str(REPO_ROOT / "python") not in sys.path:
 import quantrisk  # noqa: E402
 from quantrisk import stress as STRESS  # noqa: E402
 
-
-def _load(relative: str, name: str) -> Any:
-    path = REPO_ROOT / relative
-    spec = importlib.util.spec_from_file_location(name, path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
 # v1.5.0 owns the grid, the tolerance and the root finder; v1.6.0 owns the order-four terms of
-# the published book and its truncation. Both are loaded rather than re-typed, so "the same
+# the published book and its truncation. Both are imported rather than re-typed, so "the same
 # truncation, on another book" cannot quietly become "a truncation this file invented".
 P15 = importlib.import_module("quantrisk.experiments.restrike_gamma_map")
-P16 = _load(
-    "experiments/fourth_order_crossing_map/run.py", "quantrisk_fourth_order_for_second_book"
-)
+P16 = importlib.import_module("quantrisk.experiments.fourth_order_crossing_map")
 
 DELTAS = P15.DELTAS
 VOL_MOVES = P15.VOL_MOVES

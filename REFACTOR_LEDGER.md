@@ -601,6 +601,40 @@ The pytest pair stays **548 / 479** -- this commit added no test, it re-pointed 
 the report's `\src{}` for the study, its reproduction line in `docs/analysis/restrike_gamma_map.md`, and
 the rehearsal sheet's source list; the PDF rebuilt and both freshness guards re-run.
 
+### 2026-10-22, P3.3 absorption 3 of 19 — `fourth_order_crossing_map`
+
+Third move, and the first that took a `sys.path` bootstrap with it: `fourth_order_crossing_map` was one
+of the four studies that pinned their root at `parents[2]` and inserted `<root>/python` so they could
+import the package. Inside the package both are dead -- the census drops to **bootstrap 9, by-path 10**
+-- and `REPO_ROOT` went with them, its last uses being the results directory and a `relative_to` print
+that `repo_relative` already does honestly.
+
+The entry point split like the others, with one wrinkle worth recording: this study's console report is
+three narrative lines built from locals (`fits`, `headline`, `published`, the disagreement lists), so
+moving them to `main()` meant reading them back out of the payload instead of out of scope. The values
+are the same objects the artifact carries -- `headline["fits"]`,
+`headline["columns_where_the_cubic_zero_count_disagrees"]`, `payload["published_scenario"]` -- and the
+replayed console text matches the published one, so the print moved without inventing a second source.
+The digest check then found exactly one non-volatile difference: `.book.source`, the V2-20 citation this
+lane re-expresses. Nothing else moved.
+
+`second_book_crossing_map` imports it now, which was that study's last by-path sibling load: its `_load`
+helper is deleted rather than left unused, because a dead loader in a published study is the kind of
+code that gets copied forward. Its own absorption is next-but-three, and it keeps its own root pinning
+until then.
+
+Newly type-checked code produced one more real defect, fixed by annotation rather than by exemption: a
+`lambda o, field=name: …` inside a dict comprehension that mypy cannot infer, replaced by a small
+`mixed_field(field)` factory that binds the name by argument -- same closure semantics, one less trick.
+`mypy_two_sided_agreement` stayed true across it: 35 reported against 35 enumerated.
+
+`test_fourth_order_crossing_map` was the last test in the chain loading its study by path at module
+scope; it imports now, and its replay runs `-m … --out tmp_path` like restrike's, so no file is copied
+and the fake-tree list for this study is gone. The `second_book` and `fifth_order` fixtures each dropped
+one entry from their travelling sets -- 2 files, then 1 -- which is the chain dissolving as intended.
+Documents re-derived: the analysis note's reproduction command, the rehearsal sheet's source line, and
+one plant re-keyed with the file it mutates. No test was added; the published pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
