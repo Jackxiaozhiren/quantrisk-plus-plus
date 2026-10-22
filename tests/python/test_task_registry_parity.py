@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import importlib
 import subprocess
+from pathlib import Path
 from typing import Any
 
 REGISTRY_MODULE = "quantrisk.experiments.registry"
@@ -89,7 +90,6 @@ def test_the_registry_and_the_filesystem_enumerate_the_same_runnable_units() -> 
 
 def test_every_registry_task_names_an_artifact_that_exists() -> None:
     """A task whose artifact path is wrong cannot be re-run, so the path is part of the claim."""
-    from pathlib import Path
 
     import quantrisk.experiments.registry as registry
 
@@ -181,6 +181,51 @@ STUDY_IDS: tuple[str, ...] = (
     "sixth_book_crossing_map",
     "two_factor_error_bound",
 )
+
+
+def test_an_absorbed_task_is_invocable_and_writes_where_it_is_told(tmp_path: Path) -> None:
+    """D1's destination, asserted per absorbed task rather than assumed from the file being there.
+
+    Two things make a moved study usable: it resolves as a module, because that is the form
+    `quantrisk run` and the suite's `execute()` will invoke; and it derives its published artifact
+    path from a root that is either an explicit `--out` or the checkout it is standing in, refusing
+    with the path it searched when it is neither. A module that fell back to its own directory would
+    write published numbers into site-packages, and a file that sits in the package without being
+    importable is a registry entry that lies.
+    """
+    import importlib
+    import inspect
+
+    import pytest
+    from quantrisk.experiments.registry import TASKS, checkout_root, results_directory
+
+    root = Path(__file__).resolve().parents[2]
+    absorbed = [task for task in TASKS if task.absorbed]
+    assert absorbed, "no task is absorbed yet, so this guard asserts nothing"
+    problems: list[str] = []
+    for task in absorbed:
+        module = importlib.import_module(task.module)
+        for name in ("run", "main"):
+            entry_point = getattr(module, name, None)
+            if not callable(entry_point):
+                problems.append(f"{task.task_id}: {task.module} has no callable {name}()")
+            elif name == "main" and not inspect.signature(entry_point).parameters:
+                problems.append(f"{task.task_id}: main() takes no argv, so it cannot be reused")
+        published = results_directory(task)
+        if published != root / Path(task.artifact).parent:
+            problems.append(
+                f"{task.task_id}: resolved {published} instead of the published {task.artifact}"
+            )
+        replay = results_directory(task, out=tmp_path)
+        if not replay.is_relative_to(tmp_path) or replay == tmp_path:
+            problems.append(f"{task.task_id}: --out did not keep the artifact under {tmp_path}")
+        print(f"  {task.task_id}: {published.relative_to(root)}")
+    assert not problems, "absorbed task contract broken:\n" + "\n".join(problems)
+
+    outside = tmp_path / "not-a-checkout"
+    outside.mkdir()
+    with pytest.raises(RuntimeError, match="not inside a QuantRisk\\+\\+ checkout"):
+        checkout_root(start=outside)
 
 
 def test_the_absorption_sequence_never_moves_a_study_before_its_dependencies() -> None:

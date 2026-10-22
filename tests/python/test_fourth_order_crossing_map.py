@@ -527,15 +527,14 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
 ) -> None:
     """Determinism, without letting the test write into frozen evidence.
 
-    The copy has to sit at the same depth: this experiment walks up to the repository root both to
-    load the phase-15 module it extends and to read the published scenario, and a bare copy in
-    `tmp_path` would resolve that root to a temp dir. Three files travel: this one, the phase-15
-    module whose truncation it reuses, and the stress experiment that names `risk_off`.
+    The copy has to sit at the same depth because each experiment writes its results beside itself.
+    Two files travel: this one and the phase-15 module whose truncation it reuses. The stress
+    experiment that names `risk_off` is no longer part of the tree -- it arrives as a package import
+    now -- so this fixture is also the check that the chain does not need a repository layout.
     """
     tree = {
         "experiments/fourth_order_crossing_map/run.py",
         "experiments/restrike_gamma_map/run.py",
-        "experiments/stress_testing/run.py",
     }
     for relative in tree:
         destination = tmp_path / relative

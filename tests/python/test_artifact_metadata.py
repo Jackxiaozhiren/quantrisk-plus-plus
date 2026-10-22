@@ -978,8 +978,10 @@ def test_the_readme_experiment_count_agrees_with_the_experiments_on_disk() -> No
 
     It had fallen three rows behind: the prose said eight experiments while the table under it
     listed nine, and twelve scripts existed. Two documents restating one fact and neither owning it
-    is the failure this file exists to close, so both the sentence and the rows are derived from
-    `experiments/*/run.py`.
+    is the failure this file exists to close, so both the sentence and the rows are derived from the
+    study directories on disk -- in whichever layout each study currently sits, because Phase 3.3
+    relocates them one at a time and a guard that knew only the old location would read the first
+    move as a lost experiment.
     """
     readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     section = re.search(r"^## Experiments$(.*?)^## ", readme, flags=re.M | re.S)
@@ -987,7 +989,10 @@ def test_the_readme_experiment_count_agrees_with_the_experiments_on_disk() -> No
     listed = re.findall(r"^\| `([a-z0-9_]+)` \|", section.group(1), flags=re.M)
     assert listed, "no rows were read out of the experiments table"
     assert len(set(listed)) == len(listed), f"a row is listed twice: {listed}"
-    on_disk = sorted(path.parent.name for path in (REPO_ROOT / "experiments").glob("*/run.py"))
+    root_level = (REPO_ROOT / "experiments").glob("*/run.py")
+    in_package = (REPO_ROOT / "python/quantrisk/experiments").glob("*/__main__.py")
+    named = {path.parent.name for path in root_level} | {path.parent.name for path in in_package}
+    on_disk = sorted(named)
     assert sorted(listed) == on_disk, (
         f"README lists {len(listed)} experiments and the tree has {len(on_disk)}; "
         f"only one side names {sorted(set(listed) ^ set(on_disk))}"
@@ -2964,8 +2969,8 @@ _CENSUS_REPRO_GOLD = (
     "20.8% spread",
     "204 tests",
     "32.6% spread",
-    "478 tests",
-    "547 pytest tests",
+    "479 tests",
+    "548 pytest tests",
     "548,368 assertions",
     "7 identity checks",
     "four modules",
@@ -3001,11 +3006,11 @@ _CENSUS_SHEET_GOLD = (
     "39,040,079 paths",
     "4 scenarios",
     "45,982,736 paths",
-    "478 tests",
+    "479 tests",
     "492 rows",
     "5 books",
-    "547 pytest tests",
-    "547 python tests",
+    "548 pytest tests",
+    "548 python tests",
     "548,368 assertions",
     "69 cases",
     "78,860,106 paths",
@@ -3097,7 +3102,7 @@ _CENSUS_REPORT_GOLD = (
     "41 pytest tests",
     "492 rows",
     "50 steps",
-    "547 pytest tests",
+    "548 pytest tests",
     "548{,}368 assertions",
     "582 windows",
     "6 failing cases",

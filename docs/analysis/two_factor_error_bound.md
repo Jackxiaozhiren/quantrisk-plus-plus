@@ -180,7 +180,7 @@ also holds on the published-size shocks where P1's ratio is `-6.75`: the inclusi
 work that the asymptotics cannot.
 
 **P3.** On `risk_off` (`delta = -0.15`, `k = +0.06`, the shocks imported from
-`experiments/stress_testing/run.py` rather than re-typed here):
+`quantrisk.experiments.stress_testing` rather than re-typed here):
 
 | quantity | value |
 |---|---|

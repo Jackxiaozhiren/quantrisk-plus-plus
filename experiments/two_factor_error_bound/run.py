@@ -58,10 +58,8 @@ and the scenario are the published ones.
 from __future__ import annotations
 
 import csv
-import importlib.util
 import json
 import math
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -76,9 +74,8 @@ from quantrisk.experiments.metadata import (
 )
 
 RESULTS = Path(__file__).resolve().parent / "results"
-REPO_ROOT = Path(__file__).resolve().parents[2]
 
-# The same book as `experiments/stress_testing/run.py:run_linearisation` and
+# The same book as `stress_testing:run_linearisation` and
 # `experiments/linearisation_error_bound/run.py`: spot 100, three calls at 90/100/110, 5000 each,
 # r = 3%, no dividend, sigma = 20%, T = 0.5. Reusing it is the point -- the error bounded here is
 # the error of the published map on the published book, not a fresh example chosen to look good.
@@ -174,16 +171,12 @@ def published_scenario(name: str = "risk_off") -> dict[str, float]:
 
     Imported rather than re-typed: the bound in claim D is a statement about the scenario the
     repository actually publishes, and a copy of its numbers here could go stale against it
-    silently.
+    silently. It is imported inside the function because the stress study needs matplotlib for its
+    figure and this experiment does not need it to be run.
     """
-    path = REPO_ROOT / "experiments" / "stress_testing" / "run.py"
-    spec = importlib.util.spec_from_file_location("quantrisk_stress_experiment_for_bound", path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    for handle in module.scenarios():
+    from quantrisk.experiments.stress_testing import scenarios
+
+    for handle in scenarios():
         if handle.name != name:
             continue
         found = {"equity": None, "volatility": None}
@@ -434,7 +427,7 @@ def risk_off_row() -> dict[str, Any]:
     published = published_scenario("risk_off")
     row = bound(published["equity"], published["volatility"])
     row["scenario"] = "risk_off"
-    row["source"] = "experiments/stress_testing/run.py:scenarios()"
+    row["source"] = "stress_testing:scenarios()"
     return row
 
 
@@ -740,7 +733,7 @@ def main() -> int:
             "strikes": list(STRIKES),
             "quantity": QUANTITY,
             "base_value": book_value(SPOT, VOLATILITY),
-            "source": "experiments/stress_testing/run.py:run_linearisation",
+            "source": "stress_testing:run_linearisation",
         },
         "base_exposures": {
             **BASE,

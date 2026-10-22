@@ -69,12 +69,12 @@ from collections.abc import Collection, Iterator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 
-from quantrisk.verification import repo_root
+from quantrisk.checkout import checkout_root
 from quantrisk.verification.plants import MUTATIONS, Mutation
 
 DEFAULT_BUILD_DIR = "build/dev"
 TEST_BINARY_TARGET = "quantrisk_tests"
-REPO_ROOT = repo_root(__file__)
+REPO_ROOT = checkout_root(Path(__file__).resolve().parent)
 
 CAUGHT = "caught"
 ANCHOR_NOT_UNIQUE = "anchor-not-unique"

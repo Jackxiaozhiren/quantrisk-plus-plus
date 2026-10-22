@@ -9,7 +9,6 @@ artifact so the prose cannot drift from the evidence.
 from __future__ import annotations
 
 import csv
-import importlib.util
 import json
 import math
 import re
@@ -490,14 +489,15 @@ def test_the_published_scenario_bounds_the_error_with_a_sign_that_is_proved() ->
 
 
 def test_the_scenario_being_bounded_is_the_one_the_stress_experiment_publishes() -> None:
-    """The bound is about `risk_off`, so `risk_off`'s numbers cannot move unnoticed."""
-    path = REPO_ROOT / "experiments" / "stress_testing" / "run.py"
-    spec = importlib.util.spec_from_file_location("stress_experiment_for_bound_check", path)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    scenario = next(handle for handle in module.scenarios() if handle.name == "risk_off")
+    """The bound is about `risk_off`, so `risk_off`'s numbers cannot move unnoticed.
+
+    The scenario is read from the stress study's own definition, imported the way the experiment
+    imports it: a copy of two floats here would keep agreeing with the artifact while the published
+    scenario moved away from both.
+    """
+    from quantrisk.experiments.stress_testing import scenarios
+
+    scenario = next(handle for handle in scenarios() if handle.name == "risk_off")
     equity = next(shock for shock in scenario.shocks if shock.factor_id == "EQ0")
     volatility = next(shock for shock in scenario.shocks if shock.factor_id == "VOL")
 
@@ -545,19 +545,13 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
 ) -> None:
     """Determinism, without letting the test write into frozen evidence.
 
-    The copy has to sit at the same depth as the original: the experiment locates the published
-    scenario by walking up to the repository root, and a bare copy in `tmp_path` would resolve
-    that root to a temporary directory.
+    The copy has to sit at the same depth as the original because the experiment writes its results
+    beside itself. It no longer has to carry a copy of the stress experiment: that sibling arrives
+    now as a package import, which is the whole point of moving it inside `quantrisk`.
     """
     destination = tmp_path / "experiments" / "two_factor_error_bound" / "run.py"
     destination.parent.mkdir(parents=True)
     destination.write_text((EXPERIMENT / "run.py").read_text(encoding="utf-8"), encoding="utf-8")
-    upstream = tmp_path / "experiments" / "stress_testing"
-    upstream.mkdir(parents=True)
-    (upstream / "run.py").write_text(
-        (REPO_ROOT / "experiments" / "stress_testing" / "run.py").read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
 
     before = ARTIFACT.read_bytes()
     completed = subprocess.run(  # noqa: S603
@@ -692,11 +686,36 @@ def _assert_same_result(
                     advisory=advisory,
                     problems=found,
                 )
+    elif isinstance(mine, str) and isinstance(theirs, str) and path.split(".")[-1] == "source":
+        left, right = _sibling_reference(mine), _sibling_reference(theirs)
+        if left != right:
+            found.append(
+                f"{path}: {mine!r} != {theirs!r}; as registry references {left!r} != {right!r}"
+            )
     elif mine != theirs:
         if _is_limited(path, advisory):
             return found
         found.append(f"{path}: {mine!r} != {theirs!r}")
     return found
+
+
+def _sibling_reference(value: str) -> str:
+    """A published-sibling citation, in the form the registry uses to name that sibling.
+
+    Before Phase 3.3 a study had no other name for a sibling than the file it sat in, so the frozen
+    artifacts cite `experiments/<task>/run.py:<symbol>`. Finding V2-20 settled what they cite from
+    here on: `<task>:<symbol>`, which a move cannot stale. The single re-run that replaces the old
+    spelling is P3.5's, so between now and then a reproduction sees both forms of the same
+    citation. This normalises the *prefix* only: a different task, or a different symbol, or any
+    other string at that path, still compares unequal and still fails the replay.
+    """
+    head, separator, symbol = value.partition(":")
+    if not separator or not head.startswith(("experiments/", "benchmarks/")):
+        return value
+    parts = [segment for segment in head.split("/") if segment]
+    if len(parts) < 2:
+        return value
+    return f"{parts[-2]}:{symbol}"
 
 
 def test_the_refusals_say_what_the_experiment_did_not_estimate() -> None:

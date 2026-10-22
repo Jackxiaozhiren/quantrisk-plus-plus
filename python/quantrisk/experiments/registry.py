@@ -19,7 +19,10 @@ from __future__ import annotations
 import importlib.util
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
+
+from quantrisk.checkout import checkout_root
 
 REGISTRY_VERSION = "1"
 COMMAND_PREFIX = "uv run python -m "
@@ -34,6 +37,7 @@ CATEGORIES = frozenset(
 
 EXPERIMENTS = "experiments"
 BENCHMARKS = "benchmarks"
+PACKAGE_DIR = "python/quantrisk"
 
 
 def canonical_command(module: str) -> str:
@@ -46,6 +50,18 @@ def module_resolves(module: str) -> bool:
         return importlib.util.find_spec(module) is not None
     except (ImportError, ValueError):
         return False
+
+
+def results_directory(task: Task, out: Path | None = None) -> Path:
+    """Where one task's artifacts land: its published path, under the root it is given.
+
+    `--out` names a directory to treat as the repository root, so a replay in a temporary tree
+    writes `tmp/experiments/<task>/results/…` and the layout a reviewer diffs against is the
+    published one. With no `--out` the root is the checkout the working tree is in; there is no
+    third answer, and none is guessed.
+    """
+    root = checkout_root() if out is None else Path(out)
+    return (root / task.artifact).parent
 
 
 @dataclass(frozen=True)
@@ -117,23 +133,30 @@ def _task(**kwargs: Any) -> Task:
     return Task(**kwargs)
 
 
-def _study(task_id: str, directory: str, artifact: str) -> Task:
+def _study(task_id: str, directory: str, artifact: str, *, absorbed: bool = False) -> Task:
+    """A published study, named by its directory in both layouts the lane moves between."""
+    package = f"{PACKAGE_DIR}/{EXPERIMENTS}/{directory}"
     return _task(
         task_id=task_id,
-        source=f"experiments/{directory}/run.py",
+        source=(f"{package}/__main__.py" if absorbed else f"{EXPERIMENTS}/{directory}/run.py"),
         module=f"quantrisk.{EXPERIMENTS}.{directory}",
-        artifact=f"experiments/{directory}/results/{artifact}",
+        artifact=f"{EXPERIMENTS}/{directory}/results/{artifact}",
         category="statistical_experiment",
+        absorbed=absorbed,
     )
 
 
-def _benchmark(task_id: str, suite: str, script: str, artifact: str) -> Task:
+def _benchmark(
+    task_id: str, suite: str, script: str, artifact: str, *, absorbed: bool = False
+) -> Task:
+    package = f"{PACKAGE_DIR}/{BENCHMARKS}/{suite}/{script}.py"
     return _task(
         task_id=task_id,
-        source=f"benchmarks/{suite}/{script}.py",
+        source=package if absorbed else f"{BENCHMARKS}/{suite}/{script}.py",
         module=f"quantrisk.{BENCHMARKS}.{suite}.{script}",
-        artifact=f"benchmarks/{suite}/results/{artifact}",
+        artifact=f"{BENCHMARKS}/{suite}/results/{artifact}",
         category="correctness_benchmark",
+        absorbed=absorbed,
     )
 
 
@@ -188,7 +211,7 @@ TASKS: tuple[Task, ...] = (
         "linearisation_error_bound.json",
     ),
     _study("two_factor_error_bound", "two_factor_error_bound", "two_factor_bound.json"),
-    _study("stress_testing", "stress_testing", "stress_testing_study.json"),
+    _study("stress_testing", "stress_testing", "stress_testing_study.json", absorbed=True),
     _study("real_data_risk_study", "real_data_risk_study", "real_data_risk_study.json"),
     _study("restrike_gamma_map", "restrike_gamma_map", "restrike_gamma_map.json"),
     _study(

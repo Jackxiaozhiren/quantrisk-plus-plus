@@ -72,7 +72,6 @@ the value-weighted version next to the count.
 from __future__ import annotations
 
 import csv
-import importlib.util
 import json
 import math
 import sys
@@ -90,9 +89,8 @@ from quantrisk.experiments.metadata import (
 )
 
 RESULTS = Path(__file__).resolve().parent / "results"
-REPO_ROOT = Path(__file__).resolve().parents[2]
 
-# The published book, unchanged from `experiments/stress_testing/run.py:run_linearisation`,
+# The published book, unchanged from `stress_testing:run_linearisation`,
 # `experiments/linearisation_error_bound/run.py` and `experiments/two_factor_error_bound/run.py`:
 # spot 100, three calls at 90/100/110, 5000 each, r = 3 %, no dividend, sigma = 20 %, T = 0.5.
 SPOT = 100.0
@@ -290,15 +288,14 @@ def errors_for(delta: float, vol_move: float, exact: float) -> dict[str, float]:
 
 
 def published_scenario(name: str = "risk_off") -> dict[str, float]:
-    """The named scenario's moves, read from the stress experiment rather than re-typed here."""
-    path = REPO_ROOT / "experiments" / "stress_testing" / "run.py"
-    spec = importlib.util.spec_from_file_location("quantrisk_stress_experiment_for_restrike", path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise RuntimeError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    for handle in module.scenarios():
+    """The named scenario's moves, read from the stress experiment rather than re-typed here.
+
+    The sibling is imported, not copied, and imported here rather than at module scope because the
+    stress study needs matplotlib to draw its figure and this experiment does not need it to be run.
+    """
+    from quantrisk.experiments.stress_testing import scenarios
+
+    for handle in scenarios():
         if handle.name != name:
             continue
         found = {"equity": None, "volatility": None}
@@ -774,7 +771,7 @@ def main() -> int:
             "strikes": list(STRIKES),
             "quantity": QUANTITY,
             "base_value": BASE_VALUE,
-            "source": "experiments/stress_testing/run.py:run_linearisation",
+            "source": "stress_testing:run_linearisation",
         },
         "maps": {
             name: {

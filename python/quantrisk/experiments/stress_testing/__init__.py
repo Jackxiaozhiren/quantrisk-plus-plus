@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 7 experiment: does a stress change which portfolio is the risky one?
 
-    uv run python experiments/stress_testing/run.py
+    uv run python -m quantrisk.experiments.stress_testing [--out DIRECTORY]
 
 Phase 6 ended with a measured claim: the estimator, not the solver, decides what a
 portfolio is optimal for. Phase 7 asks the follow-up that stress testing exists to
@@ -40,14 +40,16 @@ SciPy and NumPy are reference arithmetic only. The library imports neither
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import math
-import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+
 import quantrisk
 from quantrisk.experiments.metadata import (
     artifact_manifest,
@@ -55,9 +57,10 @@ from quantrisk.experiments.metadata import (
     repo_relative,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import TASKS_BY_ID, results_directory
 from quantrisk.plotting import line_plot
 
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["stress_testing"]
 
 PORTFOLIO = quantrisk.portfolio
 STRESS = quantrisk.stress
@@ -463,8 +466,22 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def output_root(argv: Sequence[str]) -> Path | None:
+    """The `--out` directory, if the caller named one: a root to write under, not the checkout."""
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="treat this directory as the repository root; required outside a checkout",
+    )
+    return parser.parse_args(argv).out
+
+
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Do the study: build the books, solve, measure, write the artifacts, return the summary."""
+    results = results_directory(TASK, output_root(argv))
+    results.mkdir(parents=True, exist_ok=True)
     covariance, means = factor_structure()
     # Each book carries the equity leg from a Phase 6 optimiser plus a small macro
     # overlay, so the multi-factor attribution has more than one factor to talk about.
@@ -482,9 +499,9 @@ def main() -> int:
     linearisation_rows = run_linearisation(covariance)
     decomposition_rows = run_decomposition(books, covariance)
 
-    write_csv(RESULTS / "scenario_ranking.csv", ranking_rows)
-    write_csv(RESULTS / "linearisation_error.csv", linearisation_rows)
-    write_csv(RESULTS / "var_decomposition.csv", decomposition_rows)
+    write_csv(results / "scenario_ranking.csv", ranking_rows)
+    write_csv(results / "linearisation_error.csv", linearisation_rows)
+    write_csv(results / "var_decomposition.csv", decomposition_rows)
 
     reversals = {}
     for scenario_name in {row["scenario"] for row in ranking_rows}:
@@ -519,7 +536,7 @@ def main() -> int:
         title="Exposure-map error against full revaluation, as the move grows",
         xlabel="equity fall (fraction of level)",
         ylabel="relative error in P&L vs re-pricing the book",
-        path=RESULTS / "linearisation_error.png",
+        path=results / "linearisation_error.png",
         log_x=True,
         annotations={"both curves rise: the map is a local approximation": (0.35, 0.72)},
     )
@@ -527,7 +544,7 @@ def main() -> int:
     summary = {
         "phase": "7 - Stress testing",
         "generated_utc": utc_timestamp(),
-        "command": "uv run python experiments/stress_testing/run.py",
+        "command": TASK.invocation,
         "question": (
             "A portfolio chosen to be least risky under normal dispersion is optimal for "
             "that dispersion. Does a stress change which portfolio is the risky one, and "
@@ -587,17 +604,23 @@ def main() -> int:
         "environment": environment(),
         "artifacts": artifact_manifest(
             [
-                RESULTS / "scenario_ranking.csv",
-                RESULTS / "linearisation_error.csv",
-                RESULTS / "var_decomposition.csv",
-                RESULTS / "linearisation_error.png",
+                results / "scenario_ranking.csv",
+                results / "linearisation_error.csv",
+                results / "var_decomposition.csv",
+                results / "linearisation_error.png",
             ]
         ),
     }
-    (RESULTS / "stress_testing_study.json").write_text(
+    (results / "stress_testing_study.json").write_text(
         json.dumps(summary, indent=2) + "\n", encoding="utf-8"
     )
-    print(json.dumps({"ranking": reversals}, indent=2))
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: run the study, then print what a reviewer asks for on the way out."""
+    summary = run(argv)
+    print(json.dumps({"ranking": summary["ranking"]}, indent=2))
     print(
         json.dumps(
             {
@@ -612,9 +635,6 @@ def main() -> int:
             indent=2,
         )
     )
-    print(f"wrote {len(summary['artifacts'])} artifacts to {repo_relative(RESULTS)}")
+    results = results_directory(TASK, output_root(argv))
+    print(f"wrote {len(summary['artifacts'])} artifacts to {repo_relative(results)}")
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

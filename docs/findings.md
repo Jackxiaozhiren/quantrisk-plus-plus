@@ -205,7 +205,7 @@ error stops being cubic in the shock size and becomes **quadratic**.
 
 `experiments/two_factor_error_bound/` checks that rather than asserting it, against
 `stress.run_scenario`'s own output on the published book with the published scenario imported from
-`experiments/stress_testing/run.py`. Fitted over four successively narrower windows, the log-log
+`quantrisk.experiments.stress_testing`. Fitted over four successively narrower windows, the log-log
 slope of the error against shock size runs **1.9098 → 1.9762 → 1.9929 → 1.9975** on a crash ray and
 settles at 2 on all four joint directions, while a pure-spot ray on the same book holds at
 **3.0009** — which is Phase 12's answer, reconciled rather than replaced. The sharp Lagrange form,

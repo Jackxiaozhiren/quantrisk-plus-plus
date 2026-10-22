@@ -105,7 +105,7 @@ as a risk measure.
 
 ```bash
 uv run pytest -m oracle tests/python/test_stress_vs_oracles.py
-uv run python experiments/stress_testing/run.py
+uv run python -m quantrisk.experiments.stress_testing
 ./build/dev/quantrisk_tests            # test_stress_engine.cpp, test_stress_simulation.cpp
 ```
 

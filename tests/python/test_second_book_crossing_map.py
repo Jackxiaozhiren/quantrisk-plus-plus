@@ -360,15 +360,15 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
 ) -> None:
     """Determinism, without letting the test write into frozen evidence.
 
-    Four files travel: this experiment and the two shipped experiments it imports, plus the stress
-    experiment that owns the published scenario those two read. The copy has to sit at the same
-    depth, because each of them resolves the repository root by walking up.
+    Three files travel: this experiment and the two shipped experiments it imports. The stress
+    experiment that owns the published scenario is not one of them any more -- it arrives as a
+    package import now -- but each copy still has to sit at the depth it has in the repository,
+    because each one writes its results beside itself.
     """
     tree = {
         "experiments/second_book_crossing_map/run.py",
         "experiments/fourth_order_crossing_map/run.py",
         "experiments/restrike_gamma_map/run.py",
-        "experiments/stress_testing/run.py",
     }
     for relative in tree:
         destination = tmp_path / relative

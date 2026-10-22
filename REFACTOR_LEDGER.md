@@ -181,7 +181,10 @@ would put a judgement in the ledger that nothing has made yet.
 | V2-17 | facts-protocol | Medium | D1's class table assigns only `experiments/<task>/run.py` to the package, but 9 of the 95 frozen commands are produced by `benchmarks/*/*.py`, so five producers would sit outside the registry that owns the command string | classify every `generated_by_command` in `evidence/manifest.json` by its target path and read the prefix — 4 `monte_carlo_validation.py`, 2 `benchmarks/pyportfolioopt/optimisation_validation.py`, 1 `path_dependent_validation.py`, 1 bare `benchmarks/quantlib/pricing_validation.py`, 1 `performance monte_carlo_speed.py` | read literally, the packet's P3.3 (14 commits) leaves `commands_not_module_path` at 9 forever and L4 can never pass; the ceiling would be met only by exempting the five, which is the exemption-hides-the-defect-class trap | apply D1's own instruction — members are "by role, not by count, derive the list in Phase 1". The benchmark validators are published studies by role, so the registry declares 19 tasks and P3.3 is 19 commits | the parity test compares the registry against a filesystem walk that recognises both layouts, and `commands_not_module_path` must reach 0 over all 95 entries in P3.5 | 0 $ | registry (5 extra entries), P3.3's commit count, `docs/architecture.md`'s layout section | high |
 | V2-18 | facts-protocol | Medium | §7 step 6 prescribes `uv run --frozen python scripts/run_mutation_suite.py --list`, and §7 step 4's lane list names other pre-refactor paths; after P3.2b those commands exit 2, because the harness is `python/quantrisk/verification/runner.py` | the gate driver ran §7 step 4 verbatim and reported `plant-list rc=2`; re-running the same lane as `uv run python -m quantrisk.verification.runner --list` gives rc 0 and 172 lines | a session resuming from §7 literally will read its own baseline as broken, and the easiest way to "fix" that red is to skip the lane — which is §15's "a gate stopped running while the lane stayed green" | the prompt's command list was written against the tree it was approved on and never scheduled to be re-derived, because editing it needs maintainer approval and §4.4's leak test | the driver's lane list is now the post-move form, and this section's §9 entry records which §7 commands were measured where | 0 $ | `REFACTOR_PROMPT.md` §7 steps 4 and 6, pending approval — not edited in this commit | high |
 
-| V2-20 | artifact-reconciliation | **High** | studies write the **code path that produced a figure** into the artifact body: `experiments/restrike_gamma_map/run.py:777` records `"source": "experiments/stress_testing/run.py:run_linearisation"`, `experiments/two_factor_error_bound/run.py:437,743` do the same, and `tests/python/test_second_book_crossing_map.py:371` and `test_fifth_order_crossing_map.py:397` assert those strings | `grep -rn '"source": "experiments/' experiments/*/run.py`; `grep -n "stress_testing/run.py" paper/technical_report.tex` (line 1378 quotes it as the study's prose too) | `source` is **not** in `VOLATILE_KEYS`, so it is hashed into `content_sha256`. The moment the cited file moves, the honest regeneration changes the digest of artifacts in the `statistical_experiment` category — and L1 as written permits movement only in categories declared machine-measurement, so **P3.5's single re-run would halt the lane** on a provenance edit, or the absorb-commits would be forced to leave stale paths that name files which no longer exist | the artifacts conflate "which number" with "which file computed it", and the second half was written when the file was the only name the code had | options and their costs, for adjudication before P3.5: (i) re-express provenance as a registry reference (`stress_testing:run_linearisation`), re-derive once, and declare that named field's movement in the ceilings file with its reason; (ii) add `source` to `VOLATILE_KEYS`, which weakens a gate and needs an explicit yes; (iii) re-run per absorption commit, which breaks D5's one re-run and multiplies volatile-field noise | whatever is chosen, the digest report must enumerate every entry whose content moved and its reason, and the two tests above must assert the new form rather than be deleted | 0 $ | the 2 studies' provenance strings, 2 test files, `evidence/manifest.json` (rebuilt by its builder), `paper/technical_report.tex` line 1378, the ceilings file | high |
+| V2-20 | artifact-reconciliation | **High** | studies write the **code path that produced a figure** into the artifact body: `experiments/restrike_gamma_map/run.py:777` records `"source": "experiments/stress_testing/run.py:run_linearisation"`, `experiments/two_factor_error_bound/run.py:437,743` do the same, and nothing asserts them — the two
+lines first read as assertions are the fake-checkout file sets in
+`tests/python/test_second_book_crossing_map.py:371` and `test_fifth_order_crossing_map.py:397`, while
+what does compare them is the replay guard `_assert_same_result`, which walks `.source` leaf by leaf | `grep -rn '"source": "experiments/' experiments/*/run.py`; `grep -n "stress_testing/run.py" paper/technical_report.tex` (line 1378 quotes it as the study's prose too) | `source` is **not** in `VOLATILE_KEYS`, so it is hashed into `content_sha256`. The moment the cited file moves, the honest regeneration changes the digest of artifacts in the `statistical_experiment` category — and L1 as written permits movement only in categories declared machine-measurement, so **P3.5's single re-run would halt the lane** on a provenance edit, or the absorb-commits would be forced to leave stale paths that name files which no longer exist | the artifacts conflate "which number" with "which file computed it", and the second half was written when the file was the only name the code had | options and their costs, for adjudication before P3.5: (i) re-express provenance as a registry reference (`stress_testing:run_linearisation`), re-derive once, and declare that named field's movement in the ceilings file with its reason; (ii) add `source` to `VOLATILE_KEYS`, which weakens a gate and needs an explicit yes; (iii) re-run per absorption commit, which breaks D5's one re-run and multiplies volatile-field noise | whatever is chosen, the digest report must enumerate every entry whose content moved and its reason, and the replay guard must normalise the citation to the registry reference — narrowing a comparison, not deleting one | 0 $ | the 2 studies' 3 provenance strings, the shared replay guard in `tests/python/test_two_factor_bound.py`, 3 frozen artifact fields, `evidence/manifest.json` (rebuilt by its builder), `paper/technical_report.tex` line 1378, the ceilings file | high |
 
 | _(the low-severity hygiene from lane 4 — 24 `spec_from_file_location` sites in `tests/python/` that switch to imports as their targets move — is carried in the commit sequence rather than as its own finding; V2-19 is deliberately absent because it would restate V2-04)_ | | | | | | | | | | | |
 
@@ -486,6 +489,62 @@ oracles and **476 → 478** collected without, cascaded through 17 named quotati
 re-keying rule applied to a documentation edit), then the report rebuilt and both freshness guards re-run.
 Red first was observed: the structural guard failed with `the member list still stores its own ['artifact',
 'kind', 'script']` before the runner changed.
+
+### 2026-10-22, P3.3 absorption 1 of 19 — `stress_testing`
+
+`git mv` of the 620-line study into `python/quantrisk/experiments/stress_testing/__init__.py`, with a
+`__main__.py` of three lines. Red first was observed twice: the new absorbed-task guard failed with
+`cannot import name 'checkout_root'`, and the parity walk could not see the moved file until it was
+staged. `git diff --stat -M` reports a rename, not a rewrite, which is the only form of that claim
+worth having.
+
+The entry point split into `run(argv) -> dict` and `main(argv) -> int` with no behaviour added between
+them: the payload's keys are the artifact's keys, and the print statements moved to the shim. Output
+resolution went from `Path(__file__).parent / "results"` to `results_directory(TASK, --out or the
+checkout)`, and the refusal was exercised: from `/tmp`, `python -m quantrisk.experiments.stress_testing`
+exits with `RuntimeError: /private/tmp is not inside a QuantRisk++ checkout: no ancestor holds
+pyproject.toml and .git; refusing to guess at a root`. The replay into a temporary root wrote
+`build/stress-replay/experiments/stress_testing/results/` — the published layout under whatever root it
+is handed — and every artifact's **content digest matched the committed one**: the three CSVs and the
+JSON agree on content (the JSON's bytes differ only in the volatile timestamp/command fields), and the
+PNG is byte-identical. That is the move proved as behaviour, not as a file operation; the frozen
+artifacts stay frozen until P3.5's single re-run, as D5 requires.
+
+Three things the recipe had listed arrived as larger than they sounded:
+
+* **The two sibling edges.** `restrike_gamma_map` and `two_factor_error_bound` loaded the study by
+  repository path; both now import it, and the import stays *inside* `published_scenario()` because
+  the stress module needs matplotlib for its figure and the two bound studies must not need it to be
+  read. The "load the definition, do not copy it" property survives, and the depth-derived
+  `REPO_ROOT = parents[2]` in both files died with the loader that was its only user. The by-path load
+  census moved **17 → 14** in one commit: the two study loaders plus the guard in
+  `test_two_factor_bound.py:494`, which now imports the package the way the experiment does.
+* **V2-20's citation.** The three `"<path>:<symbol>"` provenance strings became
+  `stress_testing:<symbol>`. Reading the finding again at the collision, its evidence was wrong about
+  half the blast radius: the two test lines it cited are fake-checkout file sets, not assertions, and
+  what the change actually lands on is `_assert_same_result` — the shared replay guard compares
+  `.source` leaf by leaf, so two of the six replica tests went red on the first move. §6 is corrected
+  in place and disclosed here rather than papered over. The guard now normalises a citation to its
+  registry reference *prefix only*; that narrowing was shown to be narrow by misspelling the symbol in
+  the study, which still fails the replay with
+  `as registry references 'stress_testing:run_linearisation' != 'stress_testing:run_linearisatn'`, and
+  the probe was undone from a snapshot with the SHA-256 compared afterwards.
+* **Two guards that knew only the old layout.** `test_the_readme_experiment_count_agrees_with_the_experiments_on_disk`
+  counted `experiments/*/run.py` and read the move as a lost experiment (14 rows against 13 files);
+  it now counts study directories in whichever layout each sits, as the disk-to-member guard already
+  does after P3.3a. Both are permanent fixes — without them, each of the 18 remaining moves would have
+  needed the same rescue.
+
+`checkout_root()` went to a new leaf module, `python/quantrisk/checkout.py`, rather than becoming a
+second marker walk beside the harness's: the instruments start from their own file, a study starts from
+the working tree, and one list of markers now answers both. `quantrisk.verification.repo_root` is gone,
+its two callers repointed; no plant anchored on it and no test imported it.
+
+Numbers the culture demands: the pytest pair **547 → 548** with the oracles and **478 → 479** offline,
+cascaded through 17 named quotations in five files including four plant anchors, with the census gold
+lists re-keyed beside them and the report rebuilt; mypy's checked corpus **28 → 31** files with its
+two-sided agreement intact, and ruff still admitting every tracked Python file. The ceilings gate
+stays exit 1 by design, with `by_path_load_sites` now named at 14 rather than 17.
 
 ## 10. Laws as of the end of Phase 1
 

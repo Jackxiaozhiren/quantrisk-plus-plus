@@ -391,18 +391,13 @@ def test_rerunning_the_experiment_in_a_temporary_tree_reproduces_the_committed_n
 ) -> None:
     """Determinism, without letting the test write into frozen evidence.
 
-    The copy has to sit at the same depth: the experiment reads the published scenario by walking up
-    to the repository root, and a bare copy in `tmp_path` would resolve that root to a temp dir.
+    The copy sits at the same depth as the original because the experiment writes its results
+    beside itself. The stress experiment is no longer part of the tree it needs: it arrives as a
+    package import now, which is what Phase 3.3 moved it for.
     """
     destination = tmp_path / "experiments" / "restrike_gamma_map" / "run.py"
     destination.parent.mkdir(parents=True)
     destination.write_text((EXPERIMENT / "run.py").read_text(encoding="utf-8"), encoding="utf-8")
-    upstream = tmp_path / "experiments" / "stress_testing"
-    upstream.mkdir(parents=True)
-    (upstream / "run.py").write_text(
-        (REPO_ROOT / "experiments" / "stress_testing" / "run.py").read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
 
     before = ARTIFACT.read_bytes()
     completed = subprocess.run(  # noqa: S603

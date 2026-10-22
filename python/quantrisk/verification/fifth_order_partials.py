@@ -28,13 +28,14 @@ from __future__ import annotations
 
 import argparse
 import re
+from pathlib import Path
 
 import mpmath as mp
 import sympy as sp
 
-from quantrisk.verification import repo_root
+from quantrisk.checkout import checkout_root
 
-REPO_ROOT = repo_root(__file__)
+REPO_ROOT = checkout_root(Path(__file__).resolve().parent)
 SOURCE = REPO_ROOT / "cpp" / "src" / "pricing" / "black_scholes.cpp"
 
 S, K, r, q, sig, T = sp.symbols("S K r q sigma T", positive=True)
