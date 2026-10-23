@@ -62,7 +62,7 @@ either derived from a closed form or produced by a live oracle call.
 
 Level 1 (definition and closed form), Level 2 (live SciPy oracle), Level 3 (statistical
 behaviour over replications). Regenerate with
-`uv run python experiments/var_backtesting/run.py` (~25 s, all streams seeded).
+`uv run python -m quantrisk.experiments.var_backtesting` (~25 s, all streams seeded).
 
 | Question | Measured | Source |
 | --- | --- | --- |

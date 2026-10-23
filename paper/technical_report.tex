@@ -165,7 +165,7 @@ QuantLib \citep{quantlib}, PyPortfolioOpt \citep{pyportfolioopt}, cvxpy \citep{c
 \texttt{[project.optional-dependencies]}, in the group named \code{oracles}. A search of
 the shipped package (\srcin{python/quantrisk/}), the C++ sources (\srcin{cpp/}) and the
 bindings at this revision finds no import or link of any of them; the imports live in
-\srcin{benchmarks/}, \srcin{experiments/var_backtesting/run.py} and \srcin{tests/python/},
+\srcin{benchmarks/}, \srcin{python/quantrisk/experiments/var_backtesting} and \srcin{tests/python/},
 where the oracle modules are pulled in through \code{pytest.importorskip} so that an
 environment without them skips those tests instead of failing
 (\src{pyproject.toml}; \src{docs/validation_protocol.md}~\S6). The reason this matters is
@@ -2076,7 +2076,7 @@ uv run python benchmarks/quantlib/monte_carlo_validation.py
 uv run python -m quantrisk.experiments.monte_carlo_convergence
 uv run python -m quantrisk.experiments.variance_reduction
 uv run python benchmarks/quantlib/path_dependent_validation.py
-uv run python experiments/var_backtesting/run.py
+uv run python -m quantrisk.experiments.var_backtesting
 uv run python benchmarks/pyportfolioopt/optimisation_validation.py
 uv run python experiments/portfolio_optimization/run.py
 uv run python -m quantrisk.experiments.stress_testing

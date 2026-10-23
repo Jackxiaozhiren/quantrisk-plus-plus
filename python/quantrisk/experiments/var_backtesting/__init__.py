@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 5 experiment: are the risk estimators and the coverage tests valid?
 
-    uv run python experiments/var_backtesting/run.py
+    uv run python -m quantrisk.experiments.var_backtesting [--out DIRECTORY]
 
 Three questions, each answered with a measured number rather than a claim.
 
@@ -36,13 +36,14 @@ from __future__ import annotations
 import csv
 import json
 import math
-import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-import quantrisk
 import scipy.stats
+
+import quantrisk
 from quantrisk.experiments.metadata import (
     artifact_manifest,
     environment,
@@ -50,9 +51,15 @@ from quantrisk.experiments.metadata import (
     repo_relative,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 from quantrisk.plotting import line_plot
 
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["var_backtesting"]
 
 SIGMA = 0.02
 T_DF = 3.0
@@ -257,7 +264,7 @@ def calibration_summary(p_values: np.ndarray) -> dict[str, Any]:
     return summary
 
 
-ARMS = {
+ARMS: dict[str, dict[str, Any]] = {
     "calibrated_iid": {"kind": "iid", "rate": NOMINAL_RATE},
     "over_calibrated_iid": {"kind": "iid", "rate": 0.02},
     "under_set_vaR": {"kind": "iid", "rate": 0.12},
@@ -407,7 +414,7 @@ def bootstrap_rows() -> list[dict[str, Any]]:
 # --- figures --------------------------------------------------------------
 
 
-def convergence_figure(rows: list[dict[str, Any]]) -> Path | None:
+def convergence_figure(rows: list[dict[str, Any]], results: Path) -> Path | None:
     selected = [
         row
         for row in rows
@@ -431,13 +438,13 @@ def convergence_figure(rows: list[dict[str, Any]]) -> Path | None:
         title="t(3) returns, 99 % VaR: estimator mean against sample size",
         xlabel="sample size n",
         ylabel="VaR estimate",
-        path=str(RESULTS / "estimator_convergence.png"),
+        path=str(results / "estimator_convergence.png"),
         log_x=True,
         annotations={"the normal fit converges to the wrong number": (0.45, 0.18)},
     )
 
 
-def ecdf_figure(ecdf: dict[str, np.ndarray]) -> Path | None:
+def ecdf_figure(ecdf: dict[str, np.ndarray], results: Path) -> Path | None:
     if not ecdf:
         return None
     grid = np.linspace(0.0, 1.0, 101)
@@ -452,26 +459,34 @@ def ecdf_figure(ecdf: dict[str, np.ndarray]) -> Path | None:
         title="Coverage-test p-values under a correctly calibrated VaR",
         xlabel="p-value",
         ylabel="empirical CDF",
-        path=str(RESULTS / "pvalue_uniformity.png"),
+        path=str(results / "pvalue_uniformity.png"),
     )
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Measure the estimators, backtest the coverage tests, write, return the summary."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
+
     estimators = estimator_rows()
     backtests, ecdf = backtest_rows()
     bootstraps = bootstrap_rows()
 
     outputs = [
-        RESULTS / "estimator_convergence.csv",
-        RESULTS / "coverage_test_size_power.csv",
-        RESULTS / "bootstrap_coverage.csv",
+        results / "estimator_convergence.csv",
+        results / "coverage_test_size_power.csv",
+        results / "bootstrap_coverage.csv",
     ]
     write_csv(outputs[0], estimators)
     write_csv(outputs[1], backtests)
     write_csv(outputs[2], bootstraps)
 
-    figures = [path for path in (convergence_figure(estimators), ecdf_figure(ecdf)) if path]
+    figures = [
+        path
+        for path in (convergence_figure(estimators, results), ecdf_figure(ecdf, results))
+        if path
+    ]
     artifacts = outputs + figures
 
     def cell(block: str, **keys: Any) -> Any:
@@ -483,7 +498,7 @@ def main() -> int:
     summary = {
         "phase": "5 - Market risk: VaR/ES estimators, bootstrap intervals, coverage backtests",
         "generated_utc": utc_timestamp(),
-        "command": "uv run python experiments/var_backtesting/run.py",
+        "command": TASK.invocation,
         "purpose": (
             "Level 1/3 statistical validation of the risk layer: estimator bias and "
             "realised violation rates, size and power of the Kupiec and Christoffersen "
@@ -624,14 +639,15 @@ def main() -> int:
         },
         "artifacts": artifact_manifest(artifacts),
     }
-    (RESULTS / "var_backtesting_validation.json").write_text(
-        json.dumps(summary, indent=2) + "\n", encoding="utf-8"
-    )
+    artifact_path(TASK, out).write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
 
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the headline block, then where the artifacts landed."""
+    summary = run(argv)
     print(json.dumps(summary["headline"], indent=2))
-    print(f"wrote {len(artifacts)} artifacts to {repo_relative(RESULTS)}")
+    results = results_directory(TASK, parse_out(argv, description=__doc__))
+    print(f"wrote {len(summary['artifacts'])} artifacts to {repo_relative(results)}")
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

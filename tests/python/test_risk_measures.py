@@ -13,7 +13,7 @@ Three kinds of check, kept deliberately separate:
 
 Statistical *quality* claims (p-value uniformity, bootstrap coverage under
 clustering) are measured over many replications in
-`experiments/var_backtesting/run.py` and land in artifacts, not here.
+`quantrisk.experiments.var_backtesting` and land in artifacts, not here.
 """
 
 from __future__ import annotations

@@ -232,6 +232,7 @@ TASKS: tuple[Task, ...] = (
         "var_backtesting",
         "var_backtesting",
         "var_backtesting_validation.json",
+        absorbed=True,
     ),
     _study(
         "portfolio_estimation_cost",

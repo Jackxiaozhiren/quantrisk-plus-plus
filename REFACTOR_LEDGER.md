@@ -192,6 +192,8 @@ what does compare them is the replay guard `_assert_same_result`, which walks `.
 
 | V2-22 | guard-denominator | **High** | `test_every_registered_experiment_is_named_in_the_report` asks whether the report names every registered experiment, and built its denominator as `{experiments/<dir>/ for member in suite if member.script.startswith("experiments/")}`. P3.3a made `member.script` a property over the registry, so each absorbed task started reporting `python/quantrisk/...` and **fell out of the filter** -- six commits later the guard checked 7 of the 14 studies under `experiments/`, while passing every run and keeping its own plant green | set difference between the registry's artifact directories and the set the guard constructs: `dropped out of the guard: fifth_order, fourth_order, restrike, second_book, sixth_book, stress_testing, two_factor` | a gate that lost half its coverage is the L3 failure this lane is not allowed to have caused, and it caused it without touching a `skip`. The report can now omit any absorbed experiment and stay green -- and the plant that exists to catch exactly that was anchored on the stale citation, so it proved the *old* denominator only | the guard keyed its population on the shape of the pre-refactor path rather than on the registry, and the refactor changed that shape one task at a time -- which is precisely the case V2-09 registered for the disk-to-member guard, where the same trap was avoided by walking both layouts and printing each pattern's count | fixed in absorption 7: the denominator comes from `Task.artifact` parts, and the token carries no trailing slash so `experiments/<dir>/run.py`, `experiments/<dir>/results/...` and `python/quantrisk/experiments/<dir>` all name the study. The plant was re-keyed to the new citation and proved to fire by applying it in-tree (guard rc 1), restoring under a SHA-256 check (`b70cca9ac01e`) and seeing rc 0 again | the two other prefix classifiers -- `tests/python/test_task_registry_parity.py:35` and `tools/inventory_orphan_code.py:332` -- were read and are layout-safe, which is how `filesystem_units` reaches 19 with 7 units in the package | 0 $, carried by absorption 7's commit | this one guard, one plant anchor, `paper/technical_report.tex` read-only | high -- measured, fixed and negative-controlled at absorption 7 |
 
+| V2-23 | artifact-reconciliation | Medium | `content_digest` waives the keys in `VOLATILE_KEYS`, which covers `environment` -- but four committed artifacts record the **package version outside** that block, under `oracles.versions.quantrisk` or `oracle.versions.quantrisk`, and neither container is in the set. The replay guards already know this: `tests/python/test_two_factor_bound.py` waives `oracles` by name in its own comparison list. So an artifact's *content* hash moves when the version moves, with no number in the study changing, and P3.5's L1 digest report would have to explain a difference that is pure release metadata | walk every committed artifact through `strip(VOLATILE_KEYS)` and keep paths ending in `quantrisk`: four hits -- `linearisation_error_bound.json`, `two_factor_bound.json`, `var_backtesting_validation.json` all at 1.8.0, `real_data_risk_study.json` at 1.9.0, each under a `.or…cle.versions.quantrisk` path that survives the waiver | `quantrisk_version` is volatile *information* under an ad-hoc key name, and the two instruments that compare artifacts -- the digest and the replay guard -- disagree about it. That disagreement is the finding, not a residual to caveat: one of the two is wrong about what an artifact's content is | the version block was named study by study in Phases 2 to 13, before `VOLATILE_KEYS` existed, and the set grew by listing what each phase happened to notice rather than by a rule about environment | decide at P3.5 with the other declared movements: either add the two container spellings to `VOLATILE_KEYS` with the reason recorded in `tools/refactor_ceilings.json`, or move the field inside `environment`, where it is already waived. The second is a producer change to four studies and re-derives their artifacts; the first is one line and a declaration. Neither is this lane's call to make silently | whichever is chosen, the digest report must not enumerate these four as "numbers moved", and the waiver must live in one place -- the replay guard's local list is deleted or replaced by the shared set, not duplicated | 0 $ | `python/quantrisk/experiments/evidence.py`'s set, four artifacts, the replay guard's local waiver list, `evidence/manifest.json` digests | medium -- population measured, instrument disagreement read, the fix is a P3.5 decision |
+
 One investigator's claim was **refuted by reading the code** and is not carried: that
 `test_artifact_metadata.py:917`/`:927` compare a glob against the README with no floor. They do have one —
 `assert listed, "no rows were read out of the experiments table"` and
@@ -930,6 +932,63 @@ moved too; the PDF was rebuilt after both, bundle `4d5b082be827`, pdf `1382159ce
 study at all (`grep -c variance_reduction` in `plants.py` is 0), so step 8 had nothing to re-key here, and
 the falsification coverage of this study is the artifact's own guards rather than a planted edit. No test
 added, so the pair stays **548 / 479**.
+
+### 2026-10-22, P3.3 absorption 11 of 19 — `var_backtesting`, and an instrument disagreement about what "content" is
+
+Eleventh of 19. Id and directory agree, the probe ran first (`-m quantrisk.experiments.var_backtesting`
+exits 1 with `No module named`), and the counters stay at bootstrap 6 / by-path 5: this study takes no
+sibling path. It is, though, one of the three places the report says optional-oracle imports actually live --
+and that sentence, `\srcin{experiments/var_backtesting/run.py}` in the limitations paragraph, was itself a
+stale citation of exactly the kind V2-21 registered. Re-derived with the reproduction command two thousand
+lines later, along with the VaR/ES model card and the docstring of `tests/python/test_risk_measures.py`,
+which names this study as where its quality claims are measured. The PDF was rebuilt after all four: bundle
+`8aad76b3d940`, pdf `ccaf730f69ce`.
+
+mypy found 4 defects of a new shape for the lane. `ARMS = {...}` at line 266 mixes a string (`"kind"`) with
+floats, so it infers `dict[str, dict[str, object]]` -- and that `object` does not merely sit in a dict: it
+flows into `rng.random(BACKTEST_LENGTH) < spec["rate"]`, where numpy has no `__lt__` overload for `object`,
+and into two positional `float` parameters of `markov_flags`. The fix is one annotation at the declaration
+rather than four casts at the uses, and it is the honest one: the values *are* floats, the inference was the
+accident. Two helpers gained a `results` parameter for the same reason `build_figures` did in absorption 8 --
+their output paths were derived from `__file__`.
+
+One print needed thought rather than a mechanical split. The old banner read `wrote {len(artifacts)}
+artifacts to {repo_relative(RESULTS)}`, and `artifacts` is a local the returned payload does not carry under
+that name. Dropping the count would have changed what a reader sees, so the shim reads
+`len(summary["artifacts"])` -- the manifest the run just wrote -- and the replay's stdout confirms the line
+still says "wrote 5 artifacts to …".
+
+The replay is the lane's cleanest: all three CSVs are **byte-identical** to the committed evidence, and the
+JSON has one volatile-free difference, which this commit did not cause. `oracle.versions.quantrisk` says
+1.8.0 in the frozen artifact and 1.9.0 in the replay, because this study records the package version
+*outside* `environment`, under a container `VOLATILE_KEYS` does not name. `content_digest` therefore treats
+release metadata as content while the replay guards waive `oracles` by name in their own comparison lists --
+two instruments in this repository disagreeing about what an artifact's content is, and the disagreement is
+the finding. Registered as **V2-23** with the population measured (four artifacts, two container spellings,
+three still reading 1.8.0) and the decision -- widen the set, or move the field inside `environment` --
+deferred to P3.5 with the other declared movements, because neither is a call a move-only commit should make.
+
+mypy's corpus went 49 to 51 source files with the two-sided agreement holding; ruff admits every tracked
+file; no plant mentions this study at all (`grep -c var_backtesting` in `plants.py` is 0), so step 8 had
+nothing to re-key and the coverage here is the artifact's own guards. No test added, so the pair stays
+**548 / 479**.
+
+One ceiling counter moved the wrong way, and the reason is measured rather than assumed:
+`commands_unrunnable_from_the_root` went 71 to 77. The census reads one recorded command per **manifest
+artifact**, not per study -- the corpus is 95 entries because `evidence/manifest.json` lists 95 files -- so a
+move re-classifies one entry per artifact that study publishes. `var_backtesting` publishes six (three CSVs,
+two PNGs, the JSON), all carrying the same string, which is why six flipped at once where earlier moves
+flipped one to nine each: `fifth_order` 9, `stress_testing` 5, `restrike` 4, `two_factor` 4, `fourth_order`
+3, `second_book` 2, `sixth_book` 1, all now `bare-filename-does-not-exist-from-root`. Same declared
+staleness as `commands_not_module_path` (flat at 95, because none of these were ever module paths), and it
+clears with the single re-run at P3.5.
+
+The three Phase-2/3 studies absorbed at 8, 9 and 10 flip nothing in this counter, and the reason is its own
+defect: their recorded commands were *synthesised* at write time as `uv run python run.py` -- the bare
+`Path(sys.argv[0]).name`, never a path that resolved from the root -- so they sat in the does-not-exist
+bucket before this lane touched them and stayed there. D4' replaces all three with `TASK.invocation`, which
+P3.5's re-run will turn into runnable strings; until then the artifacts say a command that no reader could
+have typed, and that is a fact about the frozen evidence rather than about the move.
 
 ## 10. Laws as of the end of Phase 1
 
