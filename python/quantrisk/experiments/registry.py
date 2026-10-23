@@ -219,10 +219,11 @@ TASKS: tuple[Task, ...] = (
     ),
     _task(
         task_id="mc_speed",
-        source="benchmarks/performance/monte_carlo_speed.py",
+        source="python/quantrisk/benchmarks/performance/monte_carlo_speed.py",
         module=f"quantrisk.{BENCHMARKS}.performance.monte_carlo_speed",
         artifact="benchmarks/performance/results/monte_carlo_speed.json",
         category="performance_benchmark",
+        absorbed=True,
     ),
     _study("pricing_grid", "pricing_validation", "summary.json", absorbed=True),
     _study(

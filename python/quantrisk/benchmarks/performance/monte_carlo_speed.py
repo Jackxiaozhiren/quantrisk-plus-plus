@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 3 performance benchmark: C++ core vs Python baselines, measured.
 
-    uv run python benchmarks/performance/monte_carlo_speed.py [--paths 200000]
+    uv run python -m quantrisk.benchmarks.performance.monte_carlo_speed [--paths 200000]
 
 Every speedup number in the README must come from this script's output on the
 machine quoted next to it (PROJECT_SPEC.md §4, docs/validation_protocol.md §4).
@@ -28,14 +28,16 @@ import random
 import statistics
 import sys
 import time
+from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import quantrisk
-from quantrisk.experiments.metadata import environment, utc_timestamp
+from quantrisk.experiments.metadata import environment, repo_relative, utc_timestamp
+from quantrisk.experiments.registry import TASKS_BY_ID, artifact_path, results_directory
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-RESULTS = REPO_ROOT / "benchmarks" / "performance" / "results"
+TASK = TASKS_BY_ID["mc_speed"]
 
 MATURITY = 1.0
 SPOT = 100.0
@@ -46,6 +48,8 @@ VOLATILITY = 0.25
 DEFAULT_PATHS = 200_000
 REPETITIONS = 7
 WARMUP = 2
+
+ESTIMATOR = Callable[[int, int], tuple[float, float]]
 
 
 def cpp_price(paths: int, seed: int) -> tuple[float, float]:
@@ -99,19 +103,27 @@ def numpy_price(paths: int, seed: int) -> tuple[float, float]:
     )
 
 
-def timed(function, paths: int, seed: int) -> tuple[float, tuple[float, float]]:
+def timed(function: ESTIMATOR, paths: int, seed: int) -> tuple[float, tuple[float, float]]:
     started = time.perf_counter()
     estimate = function(paths, seed)
     return time.perf_counter() - started, estimate
 
 
-def main() -> int:
+def _parse(argv: Sequence[str]) -> argparse.Namespace:
+    """The three knobs, parsed by the study and by the entry point from one place."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--paths", type=int, default=DEFAULT_PATHS)
     parser.add_argument("--repetitions", type=int, default=REPETITIONS)
-    arguments = parser.parse_args()
+    parser.add_argument(
+        "--out", type=Path, default=None, help="treat this directory as the repository root"
+    )
+    return parser.parse_args(argv)
 
-    implementations = {
+
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Time the three implementations on one call, write, return the payload."""
+    arguments = _parse(argv)
+    implementations: dict[str, ESTIMATOR] = {
         "cpp": cpp_price,
         "python": pure_python_price,
         "numpy": numpy_price,
@@ -148,8 +160,8 @@ def main() -> int:
     ).price
 
     payload = {
-        "artifact": "benchmarks/performance/monte_carlo_speed.py",
-        "command": f"uv run python {' '.join(Path(sys.argv[0]).parts[-2:])}",
+        "artifact": TASK.source,
+        "command": TASK.invocation,
         "paths_per_run": arguments.paths,
         "option": {
             "type": "european_call",
@@ -199,9 +211,15 @@ def main() -> int:
             "would inflate every column equally.",
         ],
     }
-    RESULTS.mkdir(parents=True, exist_ok=True)
-    json_path = RESULTS / "monte_carlo_speed.json"
+    results_directory(TASK, arguments.out).mkdir(parents=True, exist_ok=True)
+    json_path = artifact_path(TASK, arguments.out)
     json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return payload
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the three timings and two ratios, then where the artifact landed."""
+    payload = run(argv)
     print(
         json.dumps(
             {
@@ -209,15 +227,15 @@ def main() -> int:
                 "speedup_vs_pure_python": payload["speedup_vs_pure_python"],
                 "speedup_vs_numpy": payload["speedup_vs_numpy"],
                 "measured_prices": payload["measured_prices"],
-                "analytic_reference_price": analytic,
+                "analytic_reference_price": payload["analytic_reference_price"],
             },
             indent=2,
             sort_keys=True,
         )
     )
-    print(f"wrote {json_path}")
+    print(f"wrote {repo_relative(artifact_path(TASK, _parse(argv).out))}")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv[1:]))

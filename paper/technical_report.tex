@@ -2080,7 +2080,7 @@ uv run python -m quantrisk.experiments.var_backtesting
 uv run python -m quantrisk.benchmarks.pyportfolioopt.optimisation_validation
 uv run python -m quantrisk.experiments.portfolio_optimization
 uv run python -m quantrisk.experiments.stress_testing
-uv run python benchmarks/performance/monte_carlo_speed.py
+uv run python -m quantrisk.benchmarks.performance.monte_carlo_speed
 uv run pytest -m oracle
 uv run quantrisk validate
 uv run python scripts/run_benchmark_suite.py       # re-runs the members, re-reads their output

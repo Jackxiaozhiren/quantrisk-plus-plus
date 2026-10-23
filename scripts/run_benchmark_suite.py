@@ -15,9 +15,9 @@ What this runner does and does not do:
   * Each member names a task in `quantrisk.experiments.registry`, and that entry supplies the
     source path, the artifact path and the category. Nothing in this file is a second copy of
     where a study lives.
-  * It executes each member's own work as a subprocess — the module once the task is absorbed into
-    the package, the script while it is not. It never computes a financial or statistical result
-    itself, so there is no second implementation here to drift from the first.
+  * It executes each member's own work as a subprocess — the package module the registry names. It
+    never computes a financial or statistical result itself, so there is no second implementation
+    here to drift from the first.
   * It reads the headline numbers *out of* the JSON each script already writes, by key
     path. A key that has moved or been renamed raises and fails the run, which is the
     point: an aggregation that silently dropped a metric would look exactly like an
@@ -673,13 +673,11 @@ def execute(member: Member, *, timeout: float) -> dict[str, Any]:
         }
     if not (ROOT / member.script).exists():
         raise SuiteError(f"{member.key}: script {member.script} is missing")
-    # An absorbed task is a package module and runs as one, so the interpreter resolves it the way
-    # `quantrisk run` will. A task still at the root is a script, and it is named relative to the
-    # cwd the subprocess runs in: an absolute path would land this machine's directory in frozen
-    # evidence. Phase 3.3 empties the second branch one task at a time, and its last commit
-    # deletes it.
-    task = member.task
-    program = ["-m", task.module] if task.absorbed else [task.source]
+    # Every task is a package module now, so the interpreter resolves it the way `quantrisk run`
+    # will. Phase 3.3 emptied the alternative branch -- run a task still at the root as a script
+    # named relative to the subprocess's cwd, because an absolute path there would land this
+    # machine's directory in frozen evidence -- one task at a time, and absorption 19 deletes it.
+    program = ["-m", member.task.module]
     started = time.monotonic()
     completed = subprocess.run(  # noqa: S603 - fixed argv, no shell, no interpolation
         [sys.executable, *program],

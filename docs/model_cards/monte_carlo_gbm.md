@@ -59,7 +59,7 @@ error, which is what makes this section's statistics interpretable.
 * `experiments/variance_reduction/`: measured mean-squared-error reduction vs
   plain Monte Carlo, antithetic 1.1-1.9x, control variate 1.9-2.3x depending on
   scenario and path budget.
-* `benchmarks/performance/monte_carlo_speed.py`: terminal-only European pricing
+* `python/quantrisk/benchmarks/performance/monte_carlo_speed.py`: terminal-only European pricing
   at ~45.6M paths/s in C++ vs ~5.0M paths/s in a pure-Python loop (≈8.1x on this
   machine) and ~86M paths/s for vectorised NumPy - i.e. the honest finding that
   for one-normal-per-path work NumPy's vectorised generator is faster, and the

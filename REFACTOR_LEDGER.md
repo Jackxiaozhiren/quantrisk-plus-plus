@@ -1301,6 +1301,47 @@ working as designed. Fixed forward as its own commit rather than by rewriting th
 re-derived first and the staging command comes after, so there is no window in which the measured tree and
 the committed object disagree.
 
+### 2026-10-23, P3.3 absorption 19 of 19 — the last benchmark moves, and the suite loses its second branch
+
+Nineteenth of 19. `benchmarks/performance/monte_carlo_speed.py` becomes
+`python/quantrisk/benchmarks/performance/monte_carlo_speed.py`, and with it the root-level task corpus is
+empty: 19 tasks, 19 package modules, `registry_parity` still 19 filesystem units to 19 sources, and
+`execute()`'s `[…, task.source]` alternative deleted because nothing can reach it any more. Step 5's promise
+that the suite "needs nothing here" held all the way through -- the member follows the registry entry it
+names -- but the branch it dispatches through is gone: the module docstring said "the module once the task is
+absorbed, the script while it is not", and now says only the first thing.
+
+This move is the one where step 4 was not housekeeping. The file computed its own root as
+`REPO_ROOT = Path(__file__).resolve().parents[2]`, which is right at the repository root and **wrong at the
+destination**: inside the package that expression is `python/quantrisk`, so a move that kept it would have
+had the benchmark write `python/quantrisk/benchmarks/performance/results/monte_carlo_speed.json` while the
+registry, the evidence manifest and every guard went on reading the frozen artifact at the published path.
+The study would simply have stopped publishing, quietly. Replaced, as every other task was, with
+`results_directory` / `artifact_path` over `--out` or `checkout_root()`.
+
+The command field is also where the mangled token came from: `f"uv run python {' '.join(Path(sys.argv[0]).parts[-2:])}"`
+produced the `uv run python performance monte_carlo_speed.py` the ledger has been quoting since Phase 10 -- two
+trailing path components of `argv[0]`, not a command anyone could paste. D4′ makes it `TASK.invocation`, and
+because the old spelling was already in the `mangled-token` bucket, `commands_unrunnable_from_the_root` does
+**not** move this time: 91 stays 91, the counterpart of absorption 18's +2. `bootstrap_sites_outside_package`
+6, by-path load sites 5, `commands_not_module_path` 95, mypy 61 to 62 source files with the two-sided
+agreement true, `ruff only` 45 to 44 as the last file joins the both-checked set, 106 tracked Python files,
+plants 172 with no anchor on a moved path, and no test added, so the pair stays **548 / 479**.
+
+The replay took 0.5 s and is the lane's most interesting diff, because this artifact measures a wall clock.
+Of 83 leaf keys, 53 are identical -- including every price: `measured_prices`,
+`reported_standard_errors`, `z_score_vs_analytic` and the Black-Scholes reference all reproduce exactly,
+which is the claim the file makes. The other 30 are 13 in the declared classes (`artifact`, `command`,
+`generated_at_utc`, the `host_environment` block, the version fields) plus 17 timings: the five
+`results_seconds` columns per implementation and the three speedup ratios. Those move on every run on every
+machine -- that is what the artifact *is* -- so P3.5's digest report has to present them as measurement
+noise rather than refactor movement, in the same neighbourhood as V2-23's version fields.
+
+Living documents re-derived: the reproduction block in `paper/technical_report.tex`, the same line in the
+rehearsal sheet, and `docs/model_cards/monte_carlo_gbm.md`, which named the script path in prose. The
+phase-3 report keeps its spelling as a dated record. The report build pair is bundle `b78cb24adda9`, pdf
+`34cb90361ee2`.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
@@ -1366,10 +1407,17 @@ identical in every member field before it moved anything.
    outside a checkout raises. Absorption 5 adds one line the first four did not need to learn: the
    closing print must go through `repo_relative`, because `--out` may be a relative path and
    `Path.relative_to(checkout_root())` raises on one -- the replay caught it before the gate did.
+   Absorption 19 is the case that shows the rule is not cosmetic: its `REPO_ROOT = parents[2]` resolves to
+   `python/quantrisk` once the file is inside the package, so a move that left it in place would have had the
+   benchmark write `python/quantrisk/benchmarks/performance/results/` while the registry, the manifest and
+   every guard kept reading the frozen artifact at the published path -- a study that stops publishing and
+   stays green.
 5. **Flip the registry entry** — `absorbed=True`, `source` now the package path. Probe: the parity test's
    two enumerations still agree, because side A already recognises `*/__main__.py`. The suite runner needs
    nothing here: it stopped storing its own copy of those paths in the prerequisite commit, so a member
-   follows the entry it names.
+   follows the entry it names. Absorption 19 removes the one thing that *was* per-task in the runner --
+   `execute()`'s script branch, the last place the two layouts still diverged -- because with 19 of 19
+   absorbed no task can reach it.
 6. **Re-point the siblings that load it.** A dependent study's `spec_from_file_location(.../run.py)`
    becomes a package import of the same symbol — the "load the definition, do not copy it" property
    quoted in `experiments/fourth_order_crossing_map/run.py:101-103` must survive the move, so the import

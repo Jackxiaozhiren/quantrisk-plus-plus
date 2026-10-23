@@ -1040,7 +1040,7 @@ uv run python -m quantrisk.experiments.monte_carlo_convergence
 uv run python -m quantrisk.experiments.variance_reduction
 uv run python -m quantrisk.benchmarks.quantlib.pricing_validation
 uv run python -m quantrisk.benchmarks.quantlib.monte_carlo_validation --paths 200000
-uv run python benchmarks/performance/monte_carlo_speed.py
+uv run python -m quantrisk.benchmarks.performance.monte_carlo_speed
 ```
 
 | Claim in this file | Source to check |
