@@ -1342,6 +1342,49 @@ rehearsal sheet, and `docs/model_cards/monte_carlo_gbm.md`, which named the scri
 phase-3 report keeps its spelling as a dated record. The report build pair is bundle `b78cb24adda9`, pdf
 `34cb90361ee2`.
 
+### 2026-10-23, P3.3 closes — 19 of 19 absorbed, one sweep for the whole phase group, CI green on the head
+
+Phase 3.3 is done at `50309b0`: 19 tasks, 19 package modules, no runnable unit left at the repository root,
+`execute()` down to one dispatch, `registry_parity` 19 filesystem units to 19 sources with the mismatch
+ceiling still 0, mypy 41 source files at the phase's start and 62 now, `ruff only` down to 44 files, and the
+test pair unchanged at **548 / 479** because the phase added no test -- every move was proved by replaying
+the task, not by pinning it.
+
+**The deferred sweep, paid.** The §9 packet approved one falsification sweep at the end of the phase group
+rather than one per task, so the verdict is the whole group's: `uv run python -m
+quantrisk.verification.runner --all` at `50309b0` reports **172/172 planted defects rejected**, rc=0, with the
+tree restored (`git status --porcelain` empty after the run, which is the run's own teardown claim and it
+held). One sweep over a tree that moved 19 times underneath it is the trade, and the price is only real if
+the sweep can still see a stale anchor -- it can: a plant whose anchor text or target has gone missing
+escapes or stops at the plant, which is #103 and Phase 46's finding, so 172 caught is also the evidence that
+every anchor still resolves against the post-refactor layout. The per-commit proof this substitutes for was
+the in-tree negative control run in each absorption's own commit, hash-verified before and after.
+
+**CI, read from the runner rather than from expectation.** `39928290973` on `50309b0`: success, all three
+jobs (build + C++ + Python, format and static, benchmark suite against live oracles). `39927130806` on the
+absorption-18 follow-up: **cancelled** -- the next push superseded it under `cancel-in-progress`, and it is
+recorded as cancelled rather than as passing, since its own pytest job had not finished. `39921178271` on
+`ee9bde2`: failure, on `test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it`, which is the
+story in absorption 17's second correction arriving from the environment rather than from me.
+
+**Carried into P3.4 and P3.5.** The ceilings at the close: `bootstrap_sites_outside_package` 6 (due P3.4),
+`by_path_load_sites` 5 -- and this one is a disclosed miss, not a rounding: `tools/refactor_ceilings.json`
+assigns it "P3.3 for tests and studies", but P3.3 moved studies and all five survivors load a *tool*
+(`test_artifact_metadata.py:742`, `:4861`, `:5354` over `scripts/run_benchmark_suite.py`,
+`scripts/build_report.py`, `scripts/measure_offline_collection.py`; `test_rewrap_docstrings.py:35` and
+`test_shim_stubs.py:24` over their own two tools). They become package imports when P3.4 moves `scripts/`
+helpers into a `tools/` package, and until then the ceiling stays red and says so. Then
+`commands_not_module_path` 95 and `commands_unrunnable_from_the_root` 91 -- both due P3.5, where the single
+suite re-run (D5) and the manifest rebuild (K4) are the only legitimate producers of movement in them. The declared-movement list P3.5's L1
+digest report has to enumerate is now: `command`, `artifact` / `source` self-references, `figure_status`, the
+`csv` landing path, the `oracles` / `oracle` version spellings V2-23 measured in four artifacts, and -- new
+this phase, because the last task turned out to be the one that measures a wall clock -- the 17 timing
+columns of `monte_carlo_speed.json`, which move on every run on every machine and must be labelled
+measurement noise rather than refactor movement. What P3.3 deliberately did **not** do: no suite re-run, no
+manifest rebuild, no artifact regenerated, and the two legacy command spellings still in
+`tests/python/test_fifth_order_crossing_map.py:341` and `tests/python/test_linearisation_bound.py:349` as
+two-sided assertions that P3.5's re-run retires.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
