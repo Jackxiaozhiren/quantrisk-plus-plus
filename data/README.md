@@ -98,7 +98,7 @@ fails loudly instead of quietly becoming the source of truth.
 
 ```bash
 export QUANTRISK_DATA_USER_AGENT='Your Name (research; contact: you@example.com)'
-uv run python scripts/record_data_fixtures.py
+uv run python -m tools.record_data_fixtures
 ```
 
 Re-running rewrites every snapshot and re-records every digest, so a fixture's provenance

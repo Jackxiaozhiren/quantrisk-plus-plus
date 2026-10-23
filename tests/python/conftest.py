@@ -6,7 +6,7 @@ every ``build/<preset>/`` directory, so both the CMake developer path and the
 ``pip install -e .`` path work.
 
 The session-scoped autouse fixture at the bottom protects something else: the frozen
-evidence. ``scripts/build_evidence_manifest.py`` hashes every artifact under
+evidence. ``tools/build_evidence_manifest.py`` hashes every artifact under
 ``benchmarks/``, ``experiments/`` and ``data/``, and ``verify_evidence_manifest.py`` answers
 "did anything move since", but neither mechanism can
 see a test that moves one *during* the run — and one did, when the real-data study's offline

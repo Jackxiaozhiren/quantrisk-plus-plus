@@ -2,7 +2,7 @@
 
 Every number below is read from a committed artifact or from the assertion in the named
 test. None of them was typed from memory, and `uv run python
-scripts/run_benchmark_suite.py --no-run` re-checks the artifact-backed ones against the
+tools/run_benchmark_suite.py --no-run` re-checks the artifact-backed ones against the
 key path they came from.
 
 This is the table PROJECT_SPEC.md §Phase 10 asks for: **Component · Method · Oracle ·
@@ -137,10 +137,10 @@ order without the size would read as "expect ~800 of error" where the defensible
 ## Regenerating
 
 ```bash
-uv run python scripts/run_benchmark_suite.py            # all 19 members
-uv run python scripts/run_benchmark_suite.py --no-run   # re-check the artifact bindings only
-uv run python scripts/build_evidence_manifest.py        # re-hash into evidence/manifest.json
-uv run python scripts/verify_evidence_manifest.py       # prove nothing changed since
+uv run python -m tools.run_benchmark_suite            # all 19 members
+uv run python -m tools.run_benchmark_suite --no-run   # re-check the artifact bindings only
+uv run python -m tools.build_evidence_manifest        # re-hash into evidence/manifest.json
+uv run python -m tools.verify_evidence_manifest       # prove nothing changed since
 ```
 
 The suite runner holds no copy of any number in this file: it reads each one from the JSON

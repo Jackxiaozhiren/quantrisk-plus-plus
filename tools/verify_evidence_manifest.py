@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check the frozen evidence against `evidence/manifest.json`.
 
-    uv run python scripts/verify_evidence_manifest.py
+    uv run python -m tools.verify_evidence_manifest
 
 The manifest is only useful if something reads it back. This re-hashes every listed
 artifact and reports three distinct outcomes rather than a single pass/fail, because they
@@ -31,11 +31,10 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "python"))
+from quantrisk.data.provenance import sha256_of
+from quantrisk.experiments.evidence import content_digest
 
-from quantrisk.data.provenance import sha256_of  # noqa: E402
-from quantrisk.experiments.evidence import content_digest  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
 
 MANIFEST = ROOT / "evidence" / "manifest.json"
 
@@ -44,7 +43,7 @@ def main() -> int:
     if not MANIFEST.exists():
         print(
             f"no manifest at {MANIFEST.relative_to(ROOT)}; run "
-            "scripts/build_evidence_manifest.py first",
+            "tools/build_evidence_manifest.py first",
             file=sys.stderr,
         )
         return 2

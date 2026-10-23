@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for `scripts/rewrap_docstrings.py`, the tool four phases ran from a gitignored directory.
+"""Tests for `tools/rewrap_docstrings.py`, the tool four phases ran from a gitignored directory.
 
 A tool that only ever prints "proof: whitespace-only" has not shown anything: the proof is a
 function that could return the empty list and the string it prints would not change. So these read
@@ -14,14 +14,16 @@ certifies a tool that refuses everything.
 
 from __future__ import annotations
 
-import importlib.util
+import importlib
 import subprocess
 import tomllib
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TOOL = REPO_ROOT / "scripts" / "rewrap_docstrings.py"
+TOOL = REPO_ROOT / "tools" / "rewrap_docstrings.py"
 
 LONG = (
     "Re-wraps a paragraph that cannot fit the project line length because the sentence is long, "
@@ -31,12 +33,8 @@ LONG = (
 
 
 def load_tool() -> Any:
-    """The script as a module, by path, without touching `sys.path`."""
-    spec = importlib.util.spec_from_file_location("rewrap_docstrings_under_test", TOOL)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    """The tool as the package module it is, imported rather than loaded by path."""
+    return importlib.import_module("tools.rewrap_docstrings")
 
 
 def sample_module() -> str:
@@ -58,7 +56,9 @@ def sample_module() -> str:
     )
 
 
-def test_a_rewrite_that_loses_a_word_is_refused_and_nothing_is_written(tmp_path: Path) -> None:
+def test_a_rewrite_that_loses_a_word_is_refused_and_nothing_is_written(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """The whole reason the tool exists is this refusal, so it is tested before its success."""
     tool = load_tool()
     path = tmp_path / "sample.py"
@@ -70,7 +70,11 @@ def test_a_rewrite_that_loses_a_word_is_refused_and_nothing_is_written(tmp_path:
         del width
         return source.replace("the vocabulary is technical", "the vocabulary", 1), 1
 
-    tool.rewrap_source = lossy  # type: ignore[method-assign]
+    # Restored by the fixture, not by the loader. Loaded by path, every test here got its own module
+    # object and an assignment like this died with it; imported as a package module the name is
+    # cached, so the stub would leak into every later test and make the tool's *success* cases fail
+    # on a rewrite the refusal case left behind.
+    monkeypatch.setattr(tool, "rewrap_source", lossy)
     assert tool.process(path, apply_changes=True) == 1, (
         "the proof accepted a rewrite that deleted words from a docstring"
     )
@@ -137,7 +141,7 @@ def test_the_tool_takes_its_width_from_the_configuration_not_from_itself() -> No
 def test_the_tool_is_the_only_copy_and_it_is_tracked() -> None:
     """The debt being closed was a tool that lived in a directory git does not see."""
     listed = subprocess.run(
-        ["git", "ls-files", "--error-unmatch", "scripts/rewrap_docstrings.py"],
+        ["git", "ls-files", "--error-unmatch", "tools/rewrap_docstrings.py"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,

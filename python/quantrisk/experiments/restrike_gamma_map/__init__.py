@@ -2,7 +2,7 @@
 r"""Phase 15 experiment: what re-striking gamma at the shocked volatility actually buys the map.
 
     uv run python -m quantrisk.experiments.restrike_gamma_map [--out DIRECTORY]
-    uv run python scripts/run_benchmark_suite.py --only restrike_gamma_map
+    uv run python -m tools.run_benchmark_suite --only restrike_gamma_map
 
 `v1.3.0` derived the two-factor error of the published delta-gamma-vega map and ended with a
 prioritisation rather than a result: on the repository's own `risk_off` scenario the largest single

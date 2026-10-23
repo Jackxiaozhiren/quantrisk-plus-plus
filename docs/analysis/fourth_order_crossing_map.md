@@ -150,7 +150,7 @@ used anyway.
 
 ```bash
 uv run python -m quantrisk.experiments.fourth_order_crossing_map
-uv run python scripts/run_benchmark_suite.py --only fourth_order_crossing_map
+uv run python -m tools.run_benchmark_suite --only fourth_order_crossing_map
 uv run pytest -q tests/python/test_fourth_order_crossing_map.py
 ```
 

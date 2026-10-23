@@ -16,7 +16,7 @@ Two things it has to get right, both asserted by the guard that calls it rather 
   `sys.modules[name] = None` makes an import fail as an absent distribution fails, which is what
   `pytest.importorskip` catches.
 
-Usage: uv run --frozen python scripts/measure_offline_collection.py
+Usage: uv run --frozen python -m tools.measure_offline_collection
 """
 
 from __future__ import annotations

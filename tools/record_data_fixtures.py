@@ -2,7 +2,7 @@
 """Record the offline data fixtures from the live public sources.
 
     QUANTRISK_DATA_USER_AGENT="Name (contact: you@example.com)" \\
-        uv run python scripts/record_data_fixtures.py
+        uv run python -m tools.record_data_fixtures
 
 Fixtures are real responses, committed small, each with a provenance sidecar carrying the
 URL, the retrieval timestamp and the SHA-256 of the bytes as served. That is what lets the
@@ -23,11 +23,10 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "python"))
+from quantrisk.data import cftc, edgar, fixtures, fred, http
+from quantrisk.data.provenance import Provenance, write_pair
 
-from quantrisk.data import cftc, edgar, fixtures, fred, http  # noqa: E402
-from quantrisk.data.provenance import Provenance, write_pair  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
 
 FIXTURES = fixtures.FIXTURE_ROOT
 MAX_COMMITTED_BYTES = 200_000

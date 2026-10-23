@@ -378,20 +378,17 @@ def _load_registry() -> Any:
 
 
 def plant_liveness() -> dict[str, Any]:
-    runner = REPO_ROOT / "scripts" / "run_mutation_suite.py"
-    if not runner.is_file():
-        return {
-            "applicable": False,
-            "why": "the harness has moved; see python/quantrisk/verification/",
-        }
     result = subprocess.run(
-        [sys.executable, str(runner), "--list"], cwd=REPO_ROOT, capture_output=True, text=True
+        [sys.executable, "-m", "quantrisk.verification.runner", "--list"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
     )
     lines = [line for line in result.stdout.splitlines() if line.strip()]
     return {
         "applicable": result.returncode == 0,
         "declared_plants": len(lines),
-        "probe": "python python/quantrisk/verification/runner.py --list | wc -l",
+        "probe": "uv run python -m quantrisk.verification.runner --list",
         "note": "the sweep's own summary line is read in Phase 3.2; this is the declaration only",
     }
 

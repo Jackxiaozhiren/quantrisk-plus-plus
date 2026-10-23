@@ -2,7 +2,7 @@
 r"""Phase 16 experiment: how far a fourth-order truncation predicts the map's crossing.
 
     uv run python -m quantrisk.experiments.fourth_order_crossing_map [--out DIRECTORY]
-    uv run python scripts/run_benchmark_suite.py --only fourth_order_crossing_map
+    uv run python -m tools.run_benchmark_suite --only fourth_order_crossing_map
 
 `v1.5.0` measured the recommendation v1.3.0 had left unmeasured, and closed with the reason it
 cannot be extrapolated: the shipped delta-gamma-vega map's error is predicted, term by term, by a

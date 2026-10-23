@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Freeze the evidence: hash every artifact and write `evidence/manifest.json`.
 
-    uv run python scripts/build_evidence_manifest.py
+    uv run python -m tools.build_evidence_manifest
 
 PROJECT_SPEC.md §Phase 10 asks for `evidence/manifest.json` with SHA-256 over the key
 outputs, so that a number in the README can be traced to a file and that file can be shown
@@ -30,12 +30,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "python"))
+from quantrisk.data.provenance import sha256_of
+from quantrisk.experiments.evidence import content_digest
+from quantrisk.experiments.metadata import environment
 
-from quantrisk.data.provenance import sha256_of  # noqa: E402
-from quantrisk.experiments.evidence import content_digest  # noqa: E402
-from quantrisk.experiments.metadata import environment  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
 
 OUTPUT = ROOT / "evidence" / "manifest.json"
 
@@ -137,7 +136,7 @@ def fixture_provenance(path: Path) -> tuple[str, str, str]:
         return "", "", ""
     payload = json.loads(sidecar.read_text(encoding="utf-8"))
     return (
-        f"uv run python scripts/record_data_fixtures.py (source: {payload.get('source', '?')})",
+        f"uv run python -m tools.record_data_fixtures (source: {payload.get('source', '?')})",
         str(payload.get("retrieved_at_utc", "")),
         str(sidecar.relative_to(ROOT)),
     )
@@ -190,11 +189,11 @@ def main() -> int:
     payload = {
         "schema": "quantrisk-evidence-manifest/1",
         "generated_utc": datetime.now(UTC).isoformat(timespec="seconds"),
-        "generated_by_command": "uv run python scripts/build_evidence_manifest.py",
+        "generated_by_command": "uv run python -m tools.build_evidence_manifest",
         "purpose": (
             "Frozen SHA-256 over every artifact a README or paper number traces to, with "
             "the command that produced it. Regenerate with the command above; verify with "
-            "scripts/verify_evidence_manifest.py."
+            "tools/verify_evidence_manifest.py."
         ),
         "repository": state,
         "environment": {

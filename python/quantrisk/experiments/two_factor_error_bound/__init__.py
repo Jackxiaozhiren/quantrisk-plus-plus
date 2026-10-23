@@ -2,7 +2,7 @@
 """Phase 13 experiment: what a joint spot-and-volatility shock costs the delta-gamma-vega map.
 
     uv run python -m quantrisk.experiments.two_factor_error_bound [--out DIRECTORY]
-    uv run python scripts/run_benchmark_suite.py --only two_factor_error_bound
+    uv run python -m tools.run_benchmark_suite --only two_factor_error_bound
 
 Phase 12 bounded the error of the stress map when *only* the equity factor moves, and refused
 the multi-factor case on the ground that the map is linear in the volatility move. This

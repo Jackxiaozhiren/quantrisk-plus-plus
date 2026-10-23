@@ -133,7 +133,7 @@
   "notes": [
     {
       "id": "no-run-trap",
-      "text": "scripts/run_benchmark_suite.py --no-run exits 0 and rewrites tracked aggregates as a side effect. At the baseline it dirtied three paths (benchmarks/suite/results/suite_headline.csv, suite_run.json, suite_summary.md) and the manifest verifier exited 1 on two of them. The rule is to restore exactly the paths `git status --porcelain` names, by name, and re-run the verifier.",
+      "text": "uv run python -m tools.run_benchmark_suite --no-run exits 0 and rewrites tracked aggregates as a side effect. At the baseline it dirtied three paths (benchmarks/suite/results/suite_headline.csv, suite_run.json, suite_summary.md) and the manifest verifier exited 1 on two of them. The rule is to restore exactly the paths `git status --porcelain` names, by name, and re-run the verifier.",
       "why_it_is_here": "a ceiling that measures the tree after this command without restoring it would certify a dirty tree as green."
     },
     {

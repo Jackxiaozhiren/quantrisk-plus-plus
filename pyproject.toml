@@ -59,6 +59,10 @@ build-dir = "build/wheel"
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
+# The repository root on `sys.path`, so a guard can import the repo tools as the package they are
+# (`from tools import ...`) instead of loading a file by path and registering it in `sys.modules`
+# by hand. Declared in config rather than in code: no test inserts into `sys.path` any more.
+pythonpath = ["."]
 addopts = "-ra --strict-markers"
 markers = [
   "oracle: requires an external validation oracle (skipped when absent)",

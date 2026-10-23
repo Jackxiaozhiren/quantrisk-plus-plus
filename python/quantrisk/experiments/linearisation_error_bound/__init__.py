@@ -2,7 +2,7 @@
 """Phase 12 experiment: a Taylor remainder bound that predicts a sign change in published data.
 
     uv run python -m quantrisk.experiments.linearisation_error_bound [--out DIRECTORY]
-    uv run python scripts/run_benchmark_suite.py --only linearisation_error_bound
+    uv run python -m tools.run_benchmark_suite --only linearisation_error_bound
 
 `experiments/stress_testing/results/linearisation_error.csv` freezes the measured error of the
 delta-gamma P&L map against a full Black-Scholes re-pricing, and the prose shipped with it said the

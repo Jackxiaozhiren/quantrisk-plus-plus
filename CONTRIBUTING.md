@@ -34,9 +34,9 @@ uv run mypy python/quantrisk             # types (the scope CI enforces)
 uv run cmake --build --preset dev
 uv run ctest --preset dev                # C++ suite
 uv run pytest tests/python -q            # Python suite
-uv run python scripts/run_benchmark_suite.py --require-all
+uv run python -m tools.run_benchmark_suite --require-all
 uv run quantrisk validate                # seven identities against the build you just made
-uv run python scripts/verify_evidence_manifest.py
+uv run python -m tools.verify_evidence_manifest
 ```
 
 `--require-all` on the suite is what makes the run mean something: without the `oracles` extra some
@@ -52,7 +52,7 @@ here and fails there is the normal case on a project whose numerics depend on `l
 
 1. Change the script, then re-run it — never hand-edit a result file, a CSV row or a figure.
 2. Re-run the suite so the aggregates match the members.
-3. Re-freeze the manifest last: `uv run python scripts/build_evidence_manifest.py`.
+3. Re-freeze the manifest last: `uv run python -m tools.build_evidence_manifest`.
 
 Each artifact records the commit and the uncommitted paths it was produced from, so a frozen tree that
 lies about its own provenance is visible. `verify_evidence_manifest.py` distinguishes
@@ -78,7 +78,7 @@ performed out of order in Phase 15, and every one of those produced a red gate r
    Snapshot the spellings the documents currently carry before re-running anything: once a session has
    re-run twice, `git show HEAD:<artifact>` is no longer what the prose says, and replacing from it
    silently no-ops. The report is the last thing rebuilt, not the first: the sync edits
-   `paper/technical_report.tex`, so `uv run python scripts/build_report.py` runs *after* the prose is
+   `paper/technical_report.tex`, so `uv run python -m tools.build_report` runs *after* the prose is
    settled and before the commit. Its record is what
    `test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it` reads, which is how Phase 31's
    own test-count sync was caught mid-flight.

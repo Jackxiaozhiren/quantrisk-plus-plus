@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 11 experiment: do the Phase 5 and Phase 6 conclusions survive real data?
 
-    uv run python scripts/run_benchmark_suite.py --only real_data_risk_study
+    uv run python -m tools.run_benchmark_suite --only real_data_risk_study
     uv run python -m quantrisk.experiments.real_data_risk_study [--out DIRECTORY]
 
 Everything else in `experiments/` runs on synthetic data whose truth is known, which is what

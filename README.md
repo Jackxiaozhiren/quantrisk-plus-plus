@@ -165,7 +165,7 @@ would have stopped. Each is named by the row it interrogates.
 
 ## Benchmark
 
-`uv run python scripts/run_benchmark_suite.py` runs all nineteen members — four correctness
+`uv run python -m tools.run_benchmark_suite` runs all nineteen members — four correctness
 benchmarks, fourteen statistical experiments, one performance benchmark, and writes JSON, CSV, Markdown and a figure under
 `benchmarks/suite/results/`. No wall-clock is quoted here on purpose: `wall_seconds` is in
 the artifact, from the run that produced it.
@@ -238,9 +238,9 @@ writes its own JSON, CSV and figures, and each reports its own caveats in the ar
 ## Reproducibility
 
 ```bash
-uv run python scripts/run_benchmark_suite.py         # regenerate every artifact
-uv run python scripts/build_evidence_manifest.py     # SHA-256 everything into evidence/manifest.json
-uv run python scripts/verify_evidence_manifest.py    # prove nothing changed since
+uv run python -m tools.run_benchmark_suite         # regenerate every artifact
+uv run python -m tools.build_evidence_manifest     # SHA-256 everything into evidence/manifest.json
+uv run python -m tools.verify_evidence_manifest    # prove nothing changed since
 ```
 
 `evidence/manifest.json` records, for each artifact, its SHA-256, the command that generated

@@ -164,7 +164,7 @@ def test_package_versions_records_the_running_interpreter() -> None:
     assert versions["quantrisk"] == quantrisk.version()
 
 
-SUITE = REPO_ROOT / "scripts" / "run_benchmark_suite.py"
+SUITE = REPO_ROOT / "tools" / "run_benchmark_suite.py"
 
 #: Every layout a runnable unit can live at: the two the repository uses today and the two
 #: Phase 3.3 absorbs into. Kept beside the loader so both sides of the parity guards read alike.
@@ -695,7 +695,7 @@ def _collect_in_this_environment() -> int:
     The guard compares a document's figure for *this* environment with a collection run, and the
     collection happens in a subprocess because the parent must not execute the suite. A bare
     subprocess sees site-packages rather than the parent's import state, so under
-    `scripts/measure_offline_collection.py`'s simulation the parent correctly concluded the oracles
+    `tools/measure_offline_collection.py`'s simulation the parent correctly concluded the oracles
     were missing while the child collected the with-oracles figure -- measured on 2026-10-07 as
     `1 failed, 415 passed, 4 skipped` in a blocked child, where the CI lane prints no failure. The
     block is therefore handed down: absent modules are absent in the child too, which is what the
@@ -737,29 +737,18 @@ def _collect_in_this_environment() -> int:
 def _load_suite_module() -> Any:
     """The suite's own module, so a guard can read its objects rather than grep its text.
 
-    Loaded by path because `scripts/` is not an importable package.
+    Imported, not loaded by path: `tools` is a package and the test run has the repository root on
+    `sys.path`, so the guard reads the very objects the runner uses -- the `sys.modules` dance a
+    path load needed for the module's `@dataclass` classes is gone with the path.
     """
-    spec = importlib.util.spec_from_file_location(
-        "run_benchmark_suite", REPO_ROOT / "scripts" / "run_benchmark_suite.py"
-    )
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    # `@dataclass` resolves the module of a class through `sys.modules`, and a module created
-    # by `module_from_spec` is not in there until it is put there. Without this the load dies
-    # inside dataclasses, on the Member definition, with an AttributeError about None.
-    sys.modules[spec.name] = module
-    try:
-        spec.loader.exec_module(module)
-    finally:
-        del sys.modules[spec.name]
-    return module
+    return importlib.import_module("tools.run_benchmark_suite")
 
 
 def _load_suite_members() -> list[Any]:
     """The runner's member tuple, read from the live objects.
 
-    Loaded by path because `scripts/` is not an importable package, and loaded rather than
-    grepped because the thing being asserted is the count of Python objects the runner holds.
+    Read rather than grepped because the thing being asserted is the count of Python objects the
+    runner holds.
     """
     return list(_load_suite_module().MEMBERS)
 
@@ -819,7 +808,7 @@ def test_the_suite_records_a_pasteable_command_with_no_machine_path(tmp_path: Pa
     assert first.returncode == 0, first.stderr[-4000:]
     command = json.loads((in_repo / "suite_run.json").read_text(encoding="utf-8"))["command"]
 
-    assert command.startswith("uv run python scripts/run_benchmark_suite.py")
+    assert command.startswith("uv run python -m tools.run_benchmark_suite")
     assert "--no-run" in command and "--require-all" in command
     assert f"--out {repo_relative(in_repo)}" in command, (
         f"--out was not made repo-relative: {command}"
@@ -841,7 +830,7 @@ def test_the_suite_records_a_pasteable_command_with_no_machine_path(tmp_path: Pa
 def test_the_manifest_hashes_every_experiment_results_directory() -> None:
     """A new experiment escapes the evidence freeze silently, because the list is kept by hand.
 
-    `scripts/build_evidence_manifest.py` walks the directories it names, and Phase 18 added
+    `tools/build_evidence_manifest.py` walks the directories it names, and Phase 18 added
     `experiments/second_book_crossing_map/` without naming it there. The verifier then read back
     `83 OK / 0 MISSING / 0 on disk but not in the manifest` -- three true statements about the list
     it walks, and blind to the directory that is not in it. Every README, matrix and paper number
@@ -884,7 +873,7 @@ def test_the_frozen_suite_roll_up_records_the_command_that_made_it() -> None:
 def test_documents_that_count_the_suite_members_agree_with_the_registry() -> None:
     """The suite's member count is quoted in six documents, and the registry owns it.
 
-    `scripts/run_benchmark_suite.py` registers members by hand (limitation #58), so the only
+    `tools/run_benchmark_suite.py` registers members by hand (limitation #58), so the only
     thing that turns "we run everything" into a checkable claim is a reader counting the
     registry. Six documents count it for that reader, and a count repeated by hand is a fact
     with six chances to go stale — which is how `docs/reproducibility.md` came to say that
@@ -1571,7 +1560,7 @@ def test_the_report_counts_what_the_studies_and_the_gates_have() -> None:
     )
     suite_members = len(
         _literal_list(
-            (REPO_ROOT / "scripts/run_benchmark_suite.py").read_text(encoding="utf-8"), "MEMBERS"
+            (REPO_ROOT / "tools/run_benchmark_suite.py").read_text(encoding="utf-8"), "MEMBERS"
         )
     )
     report = _tex_inventory_text()[1].replace("{,}", ",")
@@ -4851,19 +4840,13 @@ def test_the_report_lists_the_release_tags_the_repository_carries() -> None:
 
 
 def _report_builder() -> Any:
-    """The build script as a module, so the guard reads the same parser the producer uses.
+    """The build tool as a module, so the guard reads the same parser the producer uses.
 
-    `spec_from_file_location` alone is not enough: a `@dataclass` in the loaded module raises
-    `AttributeError: 'NoneType' object has no attribute '__dict__'` from inside
-    `dataclasses._is_type` unless the module is registered in `sys.modules` before `exec_module`.
+    Imported as the package module it is. The path load this replaces needed the module registered
+    in `sys.modules` before `exec_module` or its `@dataclass` died inside `dataclasses._is_type`;
+    an import does that work itself, which is why the hack disappears with the path.
     """
-    path = REPO_ROOT / "scripts" / "build_report.py"
-    spec = importlib.util.spec_from_file_location("build_report", path)
-    assert spec and spec.loader, f"{path} is not importable"
-    module = importlib.util.module_from_spec(spec)
-    sys.modules["build_report"] = module
-    spec.loader.exec_module(module)
-    return module
+    return importlib.import_module("tools.build_report")
 
 
 def test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it() -> None:
@@ -4878,7 +4861,7 @@ def test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it() -> 
     already corrected (Phase 24 §8). Both were found by a human running `pdftotext`.
 
     The binding is `paper/technical_report.build.json`, written by
-    `scripts/build_report.py`. It records the digest of every source the render consumes,
+    `tools/build_report.py`. It records the digest of every source the render consumes,
     plus the digest of the bytes now in the tree. A reproduction is impossible and is not
     claimed: pdfTeX stamps the creation date, so two builds of an unchanged source differ
     (`e72fcfc5…` then `ac7736aa…`, measured 2026-10-09) while the text they typeset is
@@ -4896,11 +4879,11 @@ def test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it() -> 
     builder = _report_builder()
     sidecar = REPO_ROOT / "paper" / "technical_report.build.json"
     assert sidecar.is_file(), (
-        f"{sidecar.relative_to(REPO_ROOT)} is missing; run `uv run python scripts/build_report.py`"
+        f"{sidecar.relative_to(REPO_ROOT)} is missing; run `uv run python -m tools.build_report`"
     )
     record = json.loads(sidecar.read_text(encoding="utf-8"))
 
-    assert record["command"] == "uv run python scripts/build_report.py", (
+    assert record["command"] == "uv run python -m tools.build_report", (
         f"the record names {record['command']!r}, which is not this script's own command"
     )
     derived = builder.source_bundle()
@@ -5009,7 +4992,7 @@ def test_rebuilding_the_report_from_the_committed_source_typesets_the_same_text(
     assert rendered == shipped, (
         "re-typesetting the committed source yields text the PDF in the tree does not "
         "shipped render is not what this source says: rebuild with "
-        "`uv run python scripts/build_report.py`"
+        "`uv run python -m tools.build_report`"
     )
     # Two truncated extractions would compare equal too, so the control is that the render says
     # something a reader of this document expects to find in it.
@@ -5331,8 +5314,6 @@ def test_every_digest_a_release_note_cites_is_its_files_own() -> None:
             )
 
 
-OFFLINE_PROBE_SCRIPT = REPO_ROOT / "scripts" / "measure_offline_collection.py"
-
 # Every phrasing in which a living document states the oracle-free count. The older guard
 # `test_the_documents_that_count_python_tests_count_the_ones_that_exist` compares each document's
 # two figures with each other and with the environment it runs in, and the oracle-free half of
@@ -5350,19 +5331,8 @@ _OFFLINE_CLAIMS = {
 
 
 def _offline_probe() -> dict[str, Any]:
-    """The measurement, taken by calling the script's own function rather than parsing stdout."""
-    spec = importlib.util.spec_from_file_location(
-        "measure_offline_collection", OFFLINE_PROBE_SCRIPT
-    )
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    try:
-        spec.loader.exec_module(module)
-        result = module.measure()
-    finally:
-        del sys.modules[spec.name]
-    return result
+    """The measurement, taken by calling the tool's own function rather than parsing stdout."""
+    return importlib.import_module("tools.measure_offline_collection").measure()
 
 
 def test_the_offline_test_count_is_measurable_before_the_runner() -> None:
@@ -5372,7 +5342,7 @@ def test_the_offline_test_count_is_measurable_before_the_runner() -> None:
     with-oracles half on any development machine, the oracle-free half on the CI lane that installs
     without the extra. That asymmetry produced findings 54(b) and 55(d) -- a phase adds tests, syncs
     the figure it can see, and learns the other from a red runner one push later.
-    `scripts/measure_offline_collection.py` is the second producer, so a document can be compared
+    `tools/measure_offline_collection.py` is the second producer, so a document can be compared
     with an oracle-free measurement in the same command that reads the other one.
 
     Three assertions make `collected` mean the runner's number rather than this machine's: nothing
@@ -6139,6 +6109,29 @@ def test_the_performance_guards_are_not_vacuous() -> None:
 
 CI_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
 
+_CI_PATH = re.compile(r"[a-z0-9_.][a-z0-9_.-]*(?:/[a-z0-9_.-][a-z0-9_.-]*)+")
+
+
+def _ci_run_paths(run: str) -> list[str]:
+    """The repository paths a step names in an argument position.
+
+    Deliberately narrow. A `${{ … }}` expression belongs to the runner, an operand of `-name` is a
+    glob rather than a claim about one file, and a token beginning with `-` is a flag -- none of
+    those says "this path exists in the checkout", and reading them as if they did is how a guard
+    gets exemptions it never asked for. A dotted module path (`tools.run_benchmark_suite`) has no
+    slash and is not a file either.
+    """
+    paths: list[str] = []
+    for line in run.splitlines():
+        line = re.sub(r"\$\{[^}]*\}", " ", line)
+        for token in re.split(r"[\s|&;()]+", line):
+            token = token.strip("'\"")
+            if not token or token.startswith("-") or "*" in token or "$" in token:
+                continue
+            if _CI_PATH.fullmatch(token) and "/" in token:
+                paths.append(token)
+    return paths
+
 
 def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
     """A guard that reads commits is a claim about the checkout, and nothing checked the checkout.
@@ -6156,6 +6149,12 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
     comments and block sequences are exactly where a grep loses a step, and a check that silently
     examines fewer jobs than the file contains would report this guard green while the lane it cares
     about went unconfigured.
+
+    Added at P3.4, the same reading now carries the other half of the same divorce: every path a
+    step names in an argument position has to exist in the repository. Phase 3.3 moved nineteen
+    tasks and P3.4 moves the eight repo tools out of `scripts/`, and a workflow left quoting the old
+    location does not fail -- `cat` of a missing file and a `-m` of a missing module both report the
+    step's own exit code, and the job that never ran the thing it names is green.
     """
     workflow = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
     lanes = []
@@ -6194,3 +6193,21 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
             f"the {name} job does not fetch tags, so the release-date and release-tag guards skip "
             "there and the lane still passes"
         )
+
+    named: list[str] = []
+    for name, job in sorted((workflow.get("jobs") or {}).items()):
+        for step in job.get("steps") or []:
+            run = step.get("run")
+            if isinstance(run, str):
+                named.extend(f"{name} :: {path}" for path in _ci_run_paths(run))
+    assert named, (
+        f"{CI_WORKFLOW} has no step naming a repository path, so this half of the guard would "
+        "certify an empty set"
+    )
+    missing = sorted(
+        {entry for entry in named if not (REPO_ROOT / entry.split(" :: ", 1)[1]).exists()}
+    )
+    assert not missing, (
+        "a CI step runs against a path the repository does not have, which is how a job turns "
+        f"green by executing nothing: {missing}"
+    )

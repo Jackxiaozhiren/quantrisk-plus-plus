@@ -133,7 +133,7 @@ tests/{cpp,python}/ · benchmarks/{quantlib,pyportfolioopt,performance}/
 experiments/{pricing_validation,monte_carlo_convergence,variance_reduction,linearisation_error_bound,
   two_factor_error_bound,var_backtesting,portfolio_optimization,stress_testing,real_data_risk_study}/
 data/fixtures/ · docs/ (this file set + model_cards/, analysis/, phase_reports/) · paper/ ·
-evidence/ · scripts/ · .github/workflows/
+evidence/ · tools/ · .github/workflows/
 ```
 
 **Departures from the §6 target, and why.** `data/sample/` became `data/fixtures/` (committed real

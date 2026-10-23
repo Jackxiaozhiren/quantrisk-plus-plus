@@ -8,32 +8,24 @@ text, which makes "added a binding, forgot the stub" a CI failure.
 
 from __future__ import annotations
 
-import importlib.util
-import sys
+import importlib
 from pathlib import Path
 
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "python"))
-
-GENERATOR = REPO_ROOT / "scripts" / "generate_shim_stubs.py"
 
 
 def _generator():
-    spec = importlib.util.spec_from_file_location("generate_shim_stubs", GENERATOR)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+    """The generator as the package module it is, imported rather than loaded by path."""
+    return importlib.import_module("tools.generate_shim_stubs")
 
 
 def test_every_shim_has_a_committed_stub() -> None:
     generator = _generator()
     for name in generator.SHIM_MODULES:
         assert (REPO_ROOT / "python" / "quantrisk" / f"{name}.pyi").exists(), (
-            f"quantrisk/{name}.pyi is missing; run scripts/generate_shim_stubs.py"
+            f"quantrisk/{name}.pyi is missing; run uv run python -m tools.generate_shim_stubs"
         )
 
 
@@ -45,7 +37,7 @@ def test_stub_matches_the_live_module(module_name: str) -> None:
     )
     assert committed == generator.stub_text(module_name), (
         f"quantrisk/{module_name}.pyi is stale; regenerate with "
-        f"uv run python scripts/generate_shim_stubs.py"
+        f"uv run python -m tools.generate_shim_stubs"
     )
 
 

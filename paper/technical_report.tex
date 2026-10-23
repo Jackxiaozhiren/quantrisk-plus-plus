@@ -2083,9 +2083,9 @@ uv run python -m quantrisk.experiments.stress_testing
 uv run python -m quantrisk.benchmarks.performance.monte_carlo_speed
 uv run pytest -m oracle
 uv run quantrisk validate
-uv run python scripts/run_benchmark_suite.py       # re-runs the members, re-reads their output
-uv run python scripts/build_evidence_manifest.py   # re-hashes into evidence/manifest.json
-uv run python scripts/verify_evidence_manifest.py  # proves nothing changed since
+uv run python -m tools.run_benchmark_suite       # re-runs the members, re-reads their output
+uv run python -m tools.build_evidence_manifest   # re-hashes into evidence/manifest.json
+uv run python -m tools.verify_evidence_manifest  # proves nothing changed since
 \end{verbatim}
 }
 The oracle-dependent steps need the optional \code{oracles} extra

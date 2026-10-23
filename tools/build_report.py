@@ -21,7 +21,7 @@ file: ``\graphicspath{{../}}`` plus ``\includegraphics{experiments/â€¦/results/â
 suite re-run that redraws a figure makes the committed PDF stale, and a hand-maintained
 input list would go stale in exactly the way the phase set out to prevent.
 
-Usage: ``uv run python scripts/build_report.py`` from the repository root.
+Usage: ``uv run python -m tools.build_report`` from the repository root.
 """
 
 from __future__ import annotations
@@ -166,7 +166,7 @@ def build(force: bool) -> dict[str, Any]:
         )
     return {
         "schema": SCHEMA,
-        "command": "uv run python scripts/build_report.py",
+        "command": "uv run python -m tools.build_report",
         "generated_at_utc": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S+00:00"),
         "engine": engine,
         "source_bundle": entries,

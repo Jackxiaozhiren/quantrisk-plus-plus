@@ -5,7 +5,7 @@ repository files — the C++ source it differentiates, the artifacts it plants i
 from its own file. A published study writes repository files, so it starts from the working tree
 and lets the caller name a different root with `--out`. Both questions are the same walk, and the
 answer is either a directory that holds the markers or a refusal: a root derived from `__file__`
-depth is correct in `scripts/` and silently wrong two levels deeper, which points every plant and
+depth is correct in `tools/` and silently wrong two levels deeper, which points every plant and
 every study at a path that does not exist and prints that as a clean result.
 
 An installed wheel is the other case worth naming. No ancestor of site-packages is a checkout, so

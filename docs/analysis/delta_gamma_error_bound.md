@@ -225,7 +225,7 @@ the directions separately over hundreds of points is what produced the numbers i
 ```bash
 uv run python -m quantrisk.experiments.linearisation_error_bound       # sweep, fits, and the guards
 uv run pytest tests/python/test_linearisation_bound.py -q       # the predictions, as falsified tests
-uv run python scripts/run_benchmark_suite.py --only linearisation_error_bound
+uv run python -m tools.run_benchmark_suite --only linearisation_error_bound
 ```
 
 The experiment is offline, deterministic, calls no oracle, and **raises rather than publishing**

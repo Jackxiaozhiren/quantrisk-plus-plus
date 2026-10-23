@@ -256,7 +256,7 @@ not manufacture one ([validation_matrix.md row 12](../validation_matrix.md)).
 
 ```
 uv run python -m quantrisk.experiments.two_factor_error_bound
-uv run python scripts/run_benchmark_suite.py --only two_factor_error_bound
+uv run python -m tools.run_benchmark_suite --only two_factor_error_bound
 uv run pytest tests/python/test_two_factor_bound.py
 ```
 

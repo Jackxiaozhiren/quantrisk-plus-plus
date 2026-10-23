@@ -305,7 +305,7 @@ never removed just because a later phase shipped.
     unused by the study). The artifact states this in `look_ahead.residual_exposure`.
 63. **The test count is a property of the environment, and a document quoting one number
     without saying which is now wrong. Both are measured now: `uv run pytest -q` gives the first, and
-    `scripts/measure_offline_collection.py` gives the second by making the `oracles`-only packages
+    `tools/measure_offline_collection.py` gives the second by making the `oracles`-only packages
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
@@ -886,7 +886,7 @@ never removed just because a later phase shipped.
     machine is a guard whose red must be scheduled, not assumed.
 
     **Closed 2026-10-09 by Phase 31, and the closure is a binding rather than a reproduction.**
-    `scripts/build_report.py` typesets the report and writes `paper/technical_report.build.json`, which
+    `tools/build_report.py` typesets the report and writes `paper/technical_report.build.json`, which
     records the digest of every file the render consumes -- the tex, the bibliography, and each figure
     `\includegraphics` names, parsed from the document rather than listed -- plus the digest of the bytes
     it produced. `test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it` re-derives that
@@ -904,7 +904,7 @@ never removed just because a later phase shipped.
     binding green and this guard red.
 
 91. **The oracle-free pytest figure is a *collection* count, and the runner prints a different
-    denominator for the same tree.** `scripts/measure_offline_collection.py` publishes what an
+    denominator for the same tree.** `tools/measure_offline_collection.py` publishes what an
     oracle-free interpreter collects -- at `cbaeffd` it reported `collected: 431`, `module_skips: 4`,
     `collection_errors: 0` -- and every document quoting 431 is quoting that producer. The same commit's
     CI lane (run `38110131841`) printed `428 passed, 7 skipped in 116.75s`. A reader who expects one

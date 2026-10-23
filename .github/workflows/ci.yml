@@ -106,7 +106,7 @@ jobs:
       - name: Install the Python package from the same tree
         run: uv pip install -e .
       - name: Run every benchmark and experiment
-        run: uv run python scripts/run_benchmark_suite.py --require-all
+        run: uv run python -m tools.run_benchmark_suite --require-all
       - name: Show the generated summary
         run: cat benchmarks/suite/results/suite_summary.md
       - name: Upload the suite artifacts

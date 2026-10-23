@@ -13,7 +13,7 @@ It lived in `build/` for four phases, which is gitignored. That made it invisibl
 session: a tool that survives by being re-typed from conversation is a tool that will be re-typed
 wrong, and its proof is the kind of thing worth having once rather than re-deriving.
 
-Usage: `uv run python scripts/rewrap_docstrings.py <path.py> [--apply]`
+Usage: `uv run python -m tools.rewrap_docstrings <path.py> [--apply]`
 
 `tests/python/test_rewrap_docstrings.py` holds the proof to the tool: a lossy rewrite is refused,
 the output respects the project's own line-length, code outside docstrings is untouched, and a

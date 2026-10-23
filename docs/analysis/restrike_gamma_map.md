@@ -120,7 +120,7 @@ the truncation finds 14 zeros and the priced error 13.
 
 ```bash
 uv run python -m quantrisk.experiments.restrike_gamma_map
-uv run python scripts/run_benchmark_suite.py --only restrike_gamma_map
+uv run python -m tools.run_benchmark_suite --only restrike_gamma_map
 uv run pytest -q tests/python/test_restrike_gamma_map.py
 ```
 

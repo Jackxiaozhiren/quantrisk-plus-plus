@@ -991,7 +991,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="rewrap-tool-accepts-the-rewrite-it-exists-to-refuse",
         kind="prose",
-        path="scripts/rewrap_docstrings.py",
+        path="tools/rewrap_docstrings.py",
         anchor="    if signature(after) != signature(source):",
         replacement="    if signature(after) == signature(source):",
         # The promoted tool's whole claim is its proof, and a proof that appends a problem when
@@ -1005,7 +1005,7 @@ MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         identifier="rewrap-tool-hardcodes-a-wider-line",
         kind="prose",
-        path="scripts/rewrap_docstrings.py",
+        path="tools/rewrap_docstrings.py",
         anchor='            return int(line.split("=", 1)[1].strip())',
         replacement='            return int(line.split("=", 1)[1].strip()) + 20',
         # The tool reads the project's line length rather than carrying its own, so that a
