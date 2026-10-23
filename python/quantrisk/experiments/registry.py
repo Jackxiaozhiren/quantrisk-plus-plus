@@ -238,6 +238,7 @@ TASKS: tuple[Task, ...] = (
         "portfolio_estimation_cost",
         "portfolio_optimization",
         "portfolio_optimisation_study.json",
+        absorbed=True,
     ),
     _study(
         "linearisation_error_bound",

@@ -990,6 +990,41 @@ bucket before this lane touched them and stayed there. D4' replaces all three wi
 P3.5's re-run will turn into runnable strings; until then the artifacts say a command that no reader could
 have typed, and that is a fact about the frozen evidence rather than about the move.
 
+### 2026-10-22, P3.3 absorption 12 of 19 — `portfolio_estimation_cost`, and a replay with nothing to declare
+
+Twelfth of 19. Task id `portfolio_estimation_cost`, directory `portfolio_optimization`, so the module is
+`quantrisk.experiments.portfolio_optimization` and the registry's `validate_task` is what makes an
+id-named package unshippable: the probe confirmed the absence first (`-m
+quantrisk.experiments.portfolio_optimization` exits 1), and after the move it exits 0.
+
+This is the lane's cleanest reproduction -- **zero volatile-free differences** in the JSON, and every artifact
+the study publishes, three CSVs and the PNG, byte-identical to the committed evidence. It records no
+self-path in its payload, so unlike 8, 9, 10 and 11 there is no `.artifact` movement to declare, while
+`commands_unrunnable_from_the_root` moves 77 to 82: five more manifest entries name the file that just moved,
+which is this study's artifact count rather than a coincidence, and `commands_not_module_path` stays at 95
+because none of them were ever module paths.
+
+mypy found 1 defect, in a loop the type checker had never read. `row` names the dict being built in the first
+pass and is then reused for `index.get(...)`, which is `dict | None`, so mypy rejects the assignment because
+the variable was already bound to a bare dict. The None *was* guarded -- `if row is None: continue` sits on
+the next line -- so nothing was wrong at run time, but the shadowing made a correct guard read like a bug,
+and the fix is the rename: the looked-up row is `target`, and the two roles no longer share a name.
+
+The shim needed the container hunt absorption 9 only hinted at. The old `main` printed two blocks from
+locals, `by_cell` and `objective_summary`; both are in the payload, but under parents that are not their own
+names -- `estimation_cost.by_window_and_estimator` and `objective_comparison.by_objective`. Those paths were
+found by walking the committed artifact rather than guessed from the code, and the replay's stdout carries
+the same two blocks, so the banner is unchanged.
+
+One mechanical fix worth saying rather than hiding: this file's import block lists `quantrisk` alongside the
+third parties, so inserting `from quantrisk.experiments.registry import ...` produced a third block and
+`ruff check --fix` folded it back. The insertion was mine, so the disclosure is too.
+
+Documents re-derived: the portfolio model card's reproduction command, its comment column kept aligned, and
+the report's; the PDF rebuilt after both, bundle `b1f55b9a149b`, pdf `bd266889182f`. No plant mentions this
+study (`grep -c` of either name in `plants.py` is 0), so nothing was re-keyed. mypy's corpus is 51 to 53
+source files with the two-sided agreement holding, and no test was added, so the pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring

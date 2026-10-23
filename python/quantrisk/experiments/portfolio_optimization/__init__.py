@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 6 experiment: what does the covariance estimator choice actually cost?
 
-    uv run python experiments/portfolio_optimization/run.py
+    uv run python -m quantrisk.experiments.portfolio_optimization [--out DIRECTORY]
 
 The optimisers were shown to agree with PyPortfolioOpt and cvxpy in
 benchmarks/pyportfolioopt/optimisation_validation.py. Agreement is not the interesting
@@ -44,11 +44,12 @@ from __future__ import annotations
 import csv
 import json
 import math
-import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+
 import quantrisk
 from quantrisk.experiments.metadata import (
     artifact_manifest,
@@ -56,9 +57,15 @@ from quantrisk.experiments.metadata import (
     repo_relative,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 from quantrisk.plotting import line_plot
 
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["portfolio_estimation_cost"]
 
 ASSETS = 8
 OBSERVATIONS = 600
@@ -230,11 +237,11 @@ def run_estimation_cost(returns: np.ndarray) -> list[dict[str, Any]]:
         for kind in ESTIMATORS:
             previous = None
             for start in range(0, OBSERVATIONS - window_length - HORIZON + 1, STEP):
-                row = index.get((window_length, kind, start))
-                if row is None:
+                target = index.get((window_length, kind, start))
+                if target is None:
                     continue
                 weights = solved[(window_length, kind, start)]
-                row["turnover"] = (
+                target["turnover"] = (
                     0.0 if previous is None else float(np.abs(weights - previous).sum())
                 )
                 previous = weights
@@ -396,16 +403,20 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Simulate, estimate, optimise, write, return the study."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
+
     returns = simulate_returns()
     cost_rows = run_estimation_cost(returns)
     robust_rows = run_robustness()
     objective_rows = run_objective_comparison(returns)
 
-    write_csv(RESULTS / "estimator_out_of_sample.csv", cost_rows)
-    write_csv(RESULTS / "solver_robustness.csv", robust_rows)
-    write_csv(RESULTS / "objective_comparison.csv", objective_rows)
+    write_csv(results / "estimator_out_of_sample.csv", cost_rows)
+    write_csv(results / "solver_robustness.csv", robust_rows)
+    write_csv(results / "objective_comparison.csv", objective_rows)
 
     keys = (
         "variance_ratio_vs_informed",
@@ -461,7 +472,7 @@ def main() -> int:
         title="Out-of-sample variance cost by estimator and window length",
         xlabel="estimation window (monthly observations)",
         ylabel="forward variance / informed-optimum variance",
-        path=RESULTS / "estimator_cost_by_window.png",
+        path=results / "estimator_cost_by_window.png",
         log_x=True,
         annotations={"1.0 = what a perfectly informed solver would have held": (0.05, 0.08)},
     )
@@ -593,7 +604,7 @@ def main() -> int:
     summary = {
         "phase": "6 - Portfolio optimisation",
         "generated_utc": utc_timestamp(),
-        "command": "uv run python experiments/portfolio_optimization/run.py",
+        "command": TASK.invocation,
         "question": (
             "Every covariance matrix the optimisers consume is an estimate. How much "
             "forward variance does each estimator cost a long-only minimum-variance "
@@ -655,29 +666,30 @@ def main() -> int:
         "environment": environment(),
         "artifacts": artifact_manifest(
             [
-                RESULTS / "estimator_out_of_sample.csv",
-                RESULTS / "solver_robustness.csv",
-                RESULTS / "objective_comparison.csv",
-                RESULTS / "estimator_cost_by_window.png",
+                results / "estimator_out_of_sample.csv",
+                results / "solver_robustness.csv",
+                results / "objective_comparison.csv",
+                results / "estimator_cost_by_window.png",
             ]
         ),
     }
-    (RESULTS / "portfolio_optimisation_study.json").write_text(
-        json.dumps(summary, indent=2) + "\n", encoding="utf-8"
-    )
+    artifact_path(TASK, out).write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the cost grid and the objective table, then where they landed."""
+    summary = run(argv)
     print(
         json.dumps(
             {
                 cell: round(values["variance_ratio_vs_informed"], 4)
-                for cell, values in by_cell.items()
+                for cell, values in summary["estimation_cost"]["by_window_and_estimator"].items()
             },
             indent=2,
         )
     )
-    print(json.dumps({"objectives": objective_summary}, indent=2))
-    print(f"wrote {len(summary['artifacts'])} artifacts to {repo_relative(RESULTS)}")
+    print(json.dumps({"objectives": summary["objective_comparison"]["by_objective"]}, indent=2))
+    results = results_directory(TASK, parse_out(argv, description=__doc__))
+    print(f"wrote {len(summary['artifacts'])} artifacts to {repo_relative(results)}")
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

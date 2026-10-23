@@ -120,7 +120,7 @@ measured value beside the asserted bound.
 
 ```bash
 uv run python benchmarks/pyportfolioopt/optimisation_validation.py   # L2 agreement
-uv run python experiments/portfolio_optimization/run.py             # L1/L3 study
+uv run python -m quantrisk.experiments.portfolio_optimization       # L1/L3 study
 uv run pytest -m oracle                                             # the test-level checks
 ```
 
