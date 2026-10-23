@@ -809,6 +809,52 @@ note's reproduction command and the `reproducibility.md` sentence about the cond
 re-derived; no plant targets this file's source (`grep -c` of the path in `plants.py` is 0 before and
 after); no test added, so the pair stays **548 / 479**.
 
+### 2026-10-22, P3.3 absorption 8 of 19 — `pricing_grid`, whose module is not named `pricing_grid`
+
+Eighth of 19 and the first from the Phase-2 generation, and it taught the lane something the radius chain
+could not: a task id and a directory are different names. `pricing_grid` lives in
+`experiments/pricing_validation/`, and `_study` composes the module from the *directory* -- "named by its
+directory in both layouts the lane moves between", its own docstring says -- so the destination is
+`quantrisk.experiments.pricing_validation`. A package directory named after the task id instead was refused
+by the registry itself, on the replay's first run: `ValueError: pricing_grid claims to be absorbed but
+quantrisk.experiments.pricing_validation does not resolve`. That is L5's parity check acting as a
+precondition rather than a post-hoc test, and it is why the three documents re-derived here say
+`-m quantrisk.experiments.pricing_validation` while the suite still calls the member `pricing_grid`. The
+same trap is live for `mc_convergence` (monte_carlo_convergence) and `portfolio_estimation_cost`
+(portfolio_optimization).
+
+Neither ceiling counter moved: bootstrap stays 6 and by-path load sites stay 5, because this study loads no
+sibling and inserts no path. What died instead was an orphan of the V2-01 class -- `REPO_ROOT = parents[2]`,
+declared and never read -- and an `import sys` whose only consumer was the command string,
+`f"uv run python {' '.join(Path(sys.argv[0]).parts[-2:])}"`. Under `-m` that interpolation yields
+`pricing_validation/__main__.py`, which is a file, not an invocation, and was never a command a reader could
+type; D4' replaces it with `TASK.invocation`, and the study's self-reference `"artifact"` with `TASK.module`.
+That self-reference is a new kind of declared movement: `artifact` is not in `VOLATILE_KEYS`, so P3.5's single
+re-run changes this artifact's *content* digest for a reason that must be enumerated -- the first artifact
+whose pointer to its own producer moves, not merely its timestamp.
+
+mypy found 14 defects in the newly-covered file, 13 of one shape and 1 of another. The thirteen are
+`float(row["steps"])` and its neighbours read out of rows typed `dict[str, object]`; the convention elsewhere
+in the package is `dict[str, Any]`, so the row annotations were widened -- annotations only, with identical
+CSV and PNG digests on both sides of the replay as the proof. The fourteenth is the one worth reading:
+`slopes: dict[str, dict[str, float]]` while its field `deviations_in_standard_errors` is
+`abs(...) / fit[1] if ... else None`. The annotation was false rather than merely loose, and false in the
+direction that hides a null from every later reader; the slope map is now `dict[str, float | None]`.
+
+Two smaller things this file needed that the previous seven did not. `build_figures` derived its output
+directory from the module's own location, so it takes `results` as a parameter now -- the one signature
+change, and the only way the destination stops being a function of `__file__`. And its closing print was
+`print(f"wrote {json_path}")`: an absolute machine path on stdout where every other study prints
+`repo_relative`. §11 step 4's lesson from absorption 6 was applied before the replay this time rather than
+caught by it.
+
+Documents re-derived: the interview-defense command block, the CRR model card's Level-3 citation, and the
+report's reproduction command -- with the PDF rebuilt after all three, bundle `557da79a185e`, pdf
+`f3d11c3cef61`. No plant targets this file (`grep -c pricing_validation` in `plants.py` is 0 before and
+after), and no test was added, so the pair stays **548 / 479**. The replay's only volatile-free difference is
+the `.artifact` self-reference above; everything else it reports lives under `artifacts`, `environment` or
+`command`, each volatile by declaration.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
@@ -849,7 +895,11 @@ identical in every member field before it moved anything.
 2. **Move the body.** `git mv experiments/<task>/run.py
    python/quantrisk/experiments/<task>/__init__.py`, keep the module docstring verbatim (it is the
    study's claim prose), and re-point only its usage line to `-m quantrisk.experiments.<task>`.
-   Probe: `git diff --stat -M` shows a rename, not a rewrite.
+   The `<task>` in the destination is the *directory*, not the task id: `_study` composes `module` from the
+   directory, so `pricing_grid` lands in `experiments/pricing_validation/` and `mc_convergence` in
+   `experiments/monte_carlo_convergence/`. Guessing from the id is caught, not silent -- `validate_task`
+   refuses an absorbed task whose module does not resolve, and the replay exits 1 before anything is
+   written. Probe: `git diff --stat -M` shows a rename, not a rewrite.
 3. **Split the entry point.** `run(argv) -> dict` holds the work and returns the summary payload;
    `main(argv) -> int` is the CLI shim; `__main__.py` is `raise SystemExit(main())`. No behaviour may
    be added here: the payload's keys are the artifact's keys, byte-comparable except for volatile

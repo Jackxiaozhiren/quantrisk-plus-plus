@@ -220,7 +220,7 @@ TASKS: tuple[Task, ...] = (
         artifact="benchmarks/performance/results/monte_carlo_speed.json",
         category="performance_benchmark",
     ),
-    _study("pricing_grid", "pricing_validation", "summary.json"),
+    _study("pricing_grid", "pricing_validation", "summary.json", absorbed=True),
     _study("mc_convergence", "monte_carlo_convergence", "summary.json"),
     _study("variance_reduction", "variance_reduction", "summary.json"),
     _study(

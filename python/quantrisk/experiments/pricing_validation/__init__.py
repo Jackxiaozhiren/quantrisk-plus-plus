@@ -2,9 +2,10 @@
 """Phase 2 experiment: how does the deterministic pricer behave across the
 four parameter dimensions that matter (strike, maturity, volatility, rate)?
 
-    uv run python experiments/pricing_validation/run.py
+    uv run python -m quantrisk.experiments.pricing_validation [--out DIRECTORY]
 
-Writes reproducible artifacts under ``results/``:
+Writes reproducible artifacts at the registry's frozen path for this task,
+``experiments/pricing_validation/results/``:
 
 * ``pricing_grid.csv``      every evaluated point, both models, all errors
 * ``lattice_convergence.csv`` one row per (setting, N) with the error vs analytic
@@ -22,8 +23,9 @@ from __future__ import annotations
 import csv
 import json
 import math
-import sys
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import quantrisk
 from quantrisk.experiments.metadata import (
@@ -32,10 +34,15 @@ from quantrisk.experiments.metadata import (
     sha256_file,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 from quantrisk.plotting import line_plot, log_log_convergence_plot
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["pricing_grid"]
 
 BASE_MARKET = {
     "spot": 100.0,
@@ -79,7 +86,7 @@ def relative(actual: float, reference: float) -> float:
     return abs(actual - reference) / max(abs(reference), 1.0e-12)
 
 
-def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
     field_names = sorted({key for row in rows for key in row})
@@ -115,8 +122,8 @@ def fit_log_log_slope(xs: list[float], ys: list[float]) -> tuple[float, float] |
     return slope, standard_error
 
 
-def price_scan() -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def price_scan() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
 
     def emit(dimension: str, variable: float, params: dict[str, float]) -> None:
         strike = params.pop("strike", BASE_MARKET["spot"])
@@ -156,8 +163,8 @@ def price_scan() -> list[dict[str, object]]:
     return rows
 
 
-def lattice_study() -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def lattice_study() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     for name, option_type, strike, parameters in CONVERGENCE_SETTINGS:
         mkt = market(**parameters)
         contract = option(option_type, strike)
@@ -188,8 +195,8 @@ def lattice_study() -> list[dict[str, object]]:
     return rows
 
 
-def greek_study() -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def greek_study() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     for strike in [70.0, 85.0, 95.0, 100.0, 105.0, 115.0, 130.0]:
         mkt = market()
         for option_type, label in (
@@ -200,7 +207,7 @@ def greek_study() -> list[dict[str, object]]:
             analytic = quantrisk.pricing.black_scholes_greeks(contract, mkt)
             numeric = quantrisk.pricing.finite_difference_greeks(contract, mkt)
             parity = quantrisk.pricing.put_call_parity_residual(mkt, strike)
-            row: dict[str, object] = {
+            row: dict[str, Any] = {
                 "strike": strike,
                 "option": label,
                 "moneyness": f"{mkt.spot / strike:.6g}",
@@ -217,14 +224,15 @@ def greek_study() -> list[dict[str, object]]:
 
 
 def build_figures(
-    grid_rows: list[dict[str, object]],
-    lattice_rows: list[dict[str, object]],
-    greek_rows: list[dict[str, object]],
+    grid_rows: list[dict[str, Any]],
+    lattice_rows: list[dict[str, Any]],
+    greek_rows: list[dict[str, Any]],
+    results: Path,
 ) -> list[Path]:
     figures: list[Path] = []
 
     def pairs(
-        rows: list[dict[str, object]], option_label: str, key: str
+        rows: list[dict[str, Any]], option_label: str, key: str
     ) -> tuple[list[float], list[float]]:
         """x and y always come from the same filtered subset."""
         subset = [row for row in rows if row["option"] == option_label]
@@ -233,7 +241,7 @@ def build_figures(
         return xs, ys
 
     def price_figure(
-        rows: list[dict[str, object]], *, title: str, xlabel: str, name: str, log_x: bool = False
+        rows: list[dict[str, Any]], *, title: str, xlabel: str, name: str, log_x: bool = False
     ) -> Path:
         xs, call_prices = pairs(rows, "call", "price")
         _, put_prices = pairs(rows, "put", "price")
@@ -243,7 +251,7 @@ def build_figures(
             title=title,
             xlabel=xlabel,
             ylabel="price",
-            path=RESULTS / name,
+            path=results / name,
             log_x=log_x,
         )
 
@@ -298,7 +306,7 @@ def build_figures(
             xlabel="lattice steps N",
             ylabel="absolute price error",
             reference_slope=-1.0,
-            path=RESULTS / "lattice_convergence.png",
+            path=results / "lattice_convergence.png",
         )
     )
 
@@ -313,28 +321,31 @@ def build_figures(
             title="Analytic Greeks vs moneyness (call)",
             xlabel="S / K",
             ylabel="Greek",
-            path=RESULTS / "greeks_vs_moneyness.png",
+            path=results / "greeks_vs_moneyness.png",
         )
     )
     return figures
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Scan the grid, fit the lattice slopes, write, return the summary."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
 
     grid_rows = price_scan()
     lattice_rows = lattice_study()
     greek_rows = greek_study()
 
-    grid_path = RESULTS / "pricing_grid.csv"
-    lattice_path = RESULTS / "lattice_convergence.csv"
-    greeks_path = RESULTS / "greeks_by_moneyness.csv"
+    grid_path = results / "pricing_grid.csv"
+    lattice_path = results / "lattice_convergence.csv"
+    greeks_path = results / "greeks_by_moneyness.csv"
     write_csv(grid_path, grid_rows)
     write_csv(lattice_path, lattice_rows)
     write_csv(greeks_path, greek_rows)
-    figures = build_figures(grid_rows, lattice_rows, greek_rows)
+    figures = build_figures(grid_rows, lattice_rows, greek_rows, results)
 
-    slopes: dict[str, dict[str, float]] = {}
+    slopes: dict[str, dict[str, float | None]] = {}
     for setting_name, *_ in CONVERGENCE_SETTINGS:
         subset = [row for row in lattice_rows if row["setting"] == setting_name]
         steps = [float(row["steps"]) for row in subset]
@@ -360,8 +371,8 @@ def main() -> int:
     }
 
     summary = {
-        "artifact": "experiments/pricing_validation/run.py",
-        "command": f"uv run python {' '.join(Path(sys.argv[0]).parts[-2:])}",
+        "artifact": TASK.module,
+        "command": TASK.invocation,
         "generated_at_utc": utc_timestamp(),
         "environment": environment(),
         "grid_rows": len(grid_rows),
@@ -389,7 +400,7 @@ def main() -> int:
             "is reported rather than smoothed over."
         ),
     }
-    json_path = RESULTS / "summary.json"
+    json_path = artifact_path(TASK, out)
     json_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(
         json.dumps(
@@ -409,9 +420,29 @@ def main() -> int:
             sort_keys=True,
         )
     )
-    print(f"wrote {json_path}")
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the summary block the suite reports, then where it landed."""
+    summary = run(argv)
+    print(
+        json.dumps(
+            {
+                k: summary[k]
+                for k in (
+                    "grid_rows",
+                    "lattice_rows",
+                    "greek_rows",
+                    "crr_convergence_slope",
+                    "final_lattice_relative_error",
+                    "worst_put_call_parity_residual",
+                    "worst_analytic_vs_finite_difference_delta",
+                )
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    print(f"wrote {repo_relative(artifact_path(TASK, parse_out(argv, description=__doc__)))}")
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

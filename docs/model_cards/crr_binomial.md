@@ -45,7 +45,7 @@ tree widens.
 * Level 1 — put-call structure, `u*d == 1`, `p` recovered from its definition,
   no-early-exercise theorem for an American call with `q = 0`
   (`tests/cpp/test_binomial.cpp`, `tests/python/test_pricing.py`).
-* Level 3 — convergence study in `experiments/pricing_validation/run.py`:
+* Level 3 — convergence study in `quantrisk.experiments.pricing_validation`:
   an OLS fit of `log|error|` on `log N` over N = 25…3200 for four regimes,
   reported with standard errors in
   `experiments/pricing_validation/results/summary.json` under

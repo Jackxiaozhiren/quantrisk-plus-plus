@@ -1034,7 +1034,7 @@ cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 204 C
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
   .venv/bin/python -m pytest -q                                          # 479 tests collected offline
 uv run python -m quantrisk.verification.runner                            # 172/172 planted defects rejected
-uv run python experiments/pricing_validation/run.py
+uv run python -m quantrisk.experiments.pricing_validation
 uv run python experiments/monte_carlo_convergence/run.py
 uv run python experiments/variance_reduction/run.py
 uv run python benchmarks/quantlib/pricing_validation.py
