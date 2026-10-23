@@ -215,6 +215,7 @@ TASKS: tuple[Task, ...] = (
         "pyportfolioopt",
         "optimisation_validation",
         "optimisation_vs_oracles.json",
+        absorbed=True,
     ),
     _task(
         task_id="mc_speed",

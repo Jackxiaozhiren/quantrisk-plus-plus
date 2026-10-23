@@ -82,8 +82,8 @@ from quantrisk.experiments.registry import (
 
 TASK = TASKS_BY_ID["two_factor_error_bound"]
 
-# The same book as `stress_testing:run_linearisation` and
-# `experiments/linearisation_error_bound/run.py`: spot 100, three calls at 90/100/110, 5000 each,
+# The same book as `stress_testing:run_linearisation` and the `linearisation_error_bound` study:
+# spot 100, three calls at 90/100/110, 5000 each,
 # r = 3%, no dividend, sigma = 20%, T = 0.5. Reusing it is the point -- the error bounded here is
 # the error of the published map on the published book, not a fresh example chosen to look good.
 SPOT = 100.0

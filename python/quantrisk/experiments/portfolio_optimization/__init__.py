@@ -3,8 +3,8 @@
 
     uv run python -m quantrisk.experiments.portfolio_optimization [--out DIRECTORY]
 
-The optimisers were shown to agree with PyPortfolioOpt and cvxpy in
-benchmarks/pyportfolioopt/optimisation_validation.py. Agreement is not the interesting
+The optimisers were shown to agree with PyPortfolioOpt and cvxpy in the
+`optimisation_vs_oracles` benchmark. Agreement is not the interesting
 question. The interesting question is the one a benchmark cannot ask, because a
 benchmark has no future: **a minimum-variance portfolio is optimal for the covariance
 matrix it was given, and every matrix in Phase 6 is an estimate.** So the estimator,

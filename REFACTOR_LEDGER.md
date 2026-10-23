@@ -1219,6 +1219,79 @@ changes follow, because a lane's own mechanics need gates too: the report is reb
 command, and the check after a commit is `git status --porcelain` empty against the file list the commit
 needed, not a `--stat` that merely looks plausible.
 
+Correction two, added later the same day, and this one is about the evidence in the paragraph above
+rather than about the commit. The claim that the fix-forward commit re-ran "the same pair against a git
+archive export of this commit" was measured wrong. `pytest` inside an export imports `quantrisk` from the
+editable install, so `REPO_ROOT` -- `python/quantrisk/experiments/metadata.py:23`, `parents[3]` of the
+*installed* module -- resolved to the live checkout, both guards read the live tree, and that is why they
+printed `2 passed` about a broken commit. Re-measured with identity asserted before the verdict:
+`scripts/build_report.py` loaded from each export (its own `REPO_ROOT` is `parents[1]` of that file, and the
+replication refuses anything that resolves outside the tree under test) and every assertion of the guard
+replayed against that export's bytes. `ee9bde2` fails two: `paper/technical_report.tex` hashes to
+`a1f235f75a43…` where its record says `617bb08c3628…`, and the bundle to `92cc6ad1fc15…` against
+`b184d7ff272f…`. `27b0edf` passes the whole set. CI then said the same thing about the same pair on its own
+runner -- run `39921178271`, job "Configure, build, C++ tests, Python tests", `FAILED
+tests/python/test_artifact_metadata.py::test_the_committed_report_pdf_is_bound_to_the_sources_that_rendered_it`
+at `tests/python/test_artifact_metadata.py:4915` with exactly those two digests, while the benchmark-suite
+and format/static jobs stayed green. So the guard can fail on a stale render, proven in the measuring
+environment rather than only in a local replication, which is the claim #90's closure rests on; and a
+run-from-copy probe that does not print the paths it resolved is not a probe of the copy.
+
+
+### 2026-10-23, P3.3 absorption 18 of 19 — the last PyPortfolioOpt benchmark, and a census that reads earlier absorptions
+
+Eighteenth of 19, fourth benchmark. `benchmarks/pyportfolioopt/optimisation_validation.py` becomes
+`python/quantrisk/benchmarks/pyportfolioopt/optimisation_validation.py` in the same flat shape the other
+three took -- one file, no package marker, so the parity glob counts a unit and not a directory. This one
+took **no** flags at all before the move, so `--out` is new surface and the whole parser is the registry's
+`parse_out`; the command field was a hand-typed literal rather than `sys.argv`, and D4′ replaces it with
+`TASK.invocation`. mypy needed two annotations on import (`per_problem`, and the inner `worst`'s parameter,
+which had been shadowing the `rows` it summarised) and found nothing else in 547 lines newly inside the
+covered corpus.
+
+The replay is the lane's fastest yet -- 5 s for 75 problems against three solvers -- and the proof is the
+same shape: CSV byte-identical, and 117 leaf keys in the JSON of which 11 differ, every one inside a declared
+class (`command`, the `artifacts` landing path under the temporary root, `generated_utc`, and the
+`environment` block including `packages`, `provenance`, `uncommitted_paths` and both commit fields; plus
+`our_side.version`). Every agreement number -- worst objective gap `4.484e-09`, worst weight gap `4.663e-07`,
+worst budget residual `1.450e-12`, bound violation `0`, 75 problems -- is identical, which is the whole point
+of a benchmark whose claim is "these solvers agree".
+
+The step-9 probe, now a whole-tree census rather than a grep for the one path being moved, found two
+documents the lane had already walked past. `docs/interview_defense.md`'s evidence table still cited
+`experiments/monte_carlo_convergence/run.py:60-78,93-95` and `run.py:184-188`, four absorptions after
+absorption 9 moved that study and converted its prose citations -- the table rows were prose of a kind the
+per-task probe did not ask about. And a comment in `two_factor_error_bound` still named
+`experiments/linearisation_error_bound/run.py`, the file absorption 13 itself deleted. Both re-derived here:
+the rows now carry the new module path with line ranges opened and checked (`67-85,100-102` for
+`fit_log_log_slope` and the nesting comment, `191-195` for `_binomial_band`), and the book comment names the
+`linearisation_error_bound` study rather than a file that is gone. This is V2-21's class in a third corpus --
+the paper's `\src{}` set, the artifact `source` fields, and now living prose and source comments -- and it is
+the reason the census is the recipe's probe from here: a lag is only invisible while the question is asked
+one task at a time.
+
+The first attempt at the interview-defense fix was itself caught, by the instrument rather than by reading.
+Converting those two rows to the `<task>:<symbol>` shape deleted the *digits* from two table cells, and the
+claim-sampling frame is built by keeping only the units that contain a number -- so every index after them
+shifted, and `test_the_claim_rules_recall_and_precision_are_estimated_on_a_sample` reported two new "false
+positives" (`672 … two barrier rows`, `924 … twenty-two committed re-freezings`). Nothing had gone wrong with
+the claim rule; the frozen gold had simply come to sit over different sentences. Re-doing the citation with
+its digits intact made the frame and the test agree again, which is the lesson §11 step 9 now carries: a
+living-doc edit in this corpus has to preserve the *number-bearing shape* of what it rewrites, or re-annotate
+the gold rather than leave the estimator measuring a moved target.
+
+`bootstrap_sites_outside_package` stays 6 (due P3.4), by-path load sites 5, `commands_not_module_path` 95.
+`commands_unrunnable_from_the_root` moves **89 to 91**, and the reason corrects a generalisation this entry's
+predecessor made: a move is neutral for a command that was already a bare non-existent name, but this
+benchmark's manifest commands were `uv run python benchmarks/pyportfolioopt/optimisation_validation.py` --
+runnable from the root until the file moved -- so its two manifest entries (`.csv` and `.json`) fell into the
+does-not-exist bucket. The rule is one unit per frozen manifest entry whose recorded command named the moved
+path, which is the same arithmetic that took the counter from 82 to 89 across the study absorptions. All of it
+is P3.5's single re-run, already declared due. mypy 60 to 61 source files with the two-sided agreement still
+true and 106 tracked Python files, ruff-format 225 files (one out, one in), registry parity 19 filesystem
+units to 19 sources, ctest 204, `validate` 7/7, the evidence manifest intact, plants 172 with no anchor on a
+moved path, and no test added, so the pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
@@ -1317,6 +1390,18 @@ identical in every member field before it moved anything.
    a citation to `fourth_order_crossing_map` does not match a pattern containing `fourth_order_crossing_map`
    -- four report citations had sat through four commits that way, and the miss is registered as V2-21.
    Run the probe twice, the second with `\_` substituted, before believing a document tree is clean.
+   Absorption 18 widened it on the third axis: instead of grepping the one path this task moved, enumerate
+   every `experiments/*/run.py` and `benchmarks/*/*.py` shape in the tracked corpus, keep the hits whose
+   path no longer exists, and classify each survivor as a dated record, a frozen artifact or a defect. That
+   is a whole-tree question and it found two lags this recipe's per-task probe structurally could not: the
+   evidence table of `docs/interview_defense.md` still cited `monte_carlo_convergence/run.py` with line
+   ranges (absorption 9 converted its prose citations and missed the rows), and a comment in
+   `two_factor_error_bound` still named `linearisation_error_bound/run.py` (absorption 13's own move). Both
+   are fixed in absorption 18's commit, and the census is the recipe's probe from here -- a lag is only
+   invisible if nobody asks the question across the whole tree. One cost to keep in mind: the claim-sample
+   frame keeps only units that contain a digit, so a citation rewrite that drops a line range for a symbol
+   name shifts every later index and makes the frozen gold score a different sentence. Preserve the
+   number-bearing shape, or re-annotate the gold in the same commit.
 10. **Gate, then commit.** Full §7 suite, `git status` empty, commit staged by path, the committed
     object verified (`git show --stat`) before the message is believed, then push. If a Dependabot or
     other session's commit lands first, rebase — never force.

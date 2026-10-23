@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 6 benchmark: our portfolio optimisers against PyPortfolioOpt and cvxpy.
 
-    uv run python benchmarks/pyportfolioopt/optimisation_validation.py
+    uv run python -m quantrisk.benchmarks.pyportfolioopt.optimisation_validation
 
 Every problem is solved three ways - our C++ core, PyPortfolioOpt (SciPy SLSQP),
 and cvxpy (OSQP / SCS) - and the outputs the Phase 6 gate names are recorded for
@@ -30,6 +30,8 @@ import csv
 import json
 import math
 import sys
+import warnings
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -42,8 +44,14 @@ from quantrisk.experiments.metadata import (
     repo_relative,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["optimisation_vs_oracles"]
 
 PORTFOLIO = quantrisk.portfolio
 ASSET_COUNTS = (2, 3, 5, 8, 12)
@@ -145,15 +153,16 @@ def metrics(
     }
 
 
-def main() -> int:
-    import warnings
-
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Solve every problem three ways, write the agreement, return the summary."""
     import cvxpy
     import pandas as pd
     from pypfopt import EfficientCVaR, EfficientFrontier
 
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
     warnings.filterwarnings("ignore")
-    RESULTS.mkdir(parents=True, exist_ok=True)
+    results.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
 
     for assets in ASSET_COUNTS:
@@ -355,13 +364,13 @@ def main() -> int:
     def value_of(row: dict[str, Any], key: str) -> float:
         return float(row[key])
 
-    def worst(rows: list[dict[str, Any]], key: str) -> dict[str, Any]:
+    def worst(all_rows: list[dict[str, Any]], key: str) -> dict[str, Any]:
         """The maximum of `key` together with the row that produced it.
 
         A bare maximum would let one loose LP row masquerade as a general property of
         the solvers, so the offending problem, size and seed travel with the number.
         """
-        record = max(rows, key=lambda row: value_of(row, key))
+        record = max(all_rows, key=lambda row: value_of(row, key))
         return {
             "value": value_of(record, key),
             "problem": record["problem"],
@@ -369,8 +378,9 @@ def main() -> int:
             "seed": record["seed"],
         }
 
-    write_csv(RESULTS / "optimisation_vs_oracles.csv", rows)
-    per_problem = {}
+    csv_path = results / "optimisation_vs_oracles.csv"
+    write_csv(csv_path, rows)
+    per_problem: dict[str, dict[str, Any]] = {}
     for problem in sorted({row["problem"] for row in rows}):
         subset = [row for row in rows if row["problem"] == problem]
         per_problem[problem] = {
@@ -412,7 +422,7 @@ def main() -> int:
     summary = {
         "phase": "6 - Portfolio optimisation",
         "generated_utc": utc_timestamp(),
-        "command": "uv run python benchmarks/pyportfolioopt/optimisation_validation.py",
+        "command": TASK.invocation,
         "purpose": (
             "Level 2 validation of the covariance estimators' consumers: do the mean-"
             "variance, max-Sharpe, frontier, risk-parity and CVaR solvers in the C++ "
@@ -457,13 +467,21 @@ def main() -> int:
         },
         "agreement": agreement,
         "environment": environment(),
-        "artifacts": artifact_manifest([RESULTS / "optimisation_vs_oracles.csv"]),
+        "artifacts": artifact_manifest([csv_path]),
     }
-    (RESULTS / "optimisation_vs_oracles.json").write_text(
-        json.dumps(summary, indent=2) + "\n", encoding="utf-8"
+    json_path = artifact_path(TASK, out)
+    json_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the agreement table, then where the two files landed."""
+    summary = run(argv)
+    print(json.dumps(summary["agreement"], indent=2))
+    print(
+        f"wrote {len(summary['artifacts'])} artifacts to "
+        f"{repo_relative(results_directory(TASK, parse_out(argv)))}"
     )
-    print(json.dumps(agreement, indent=2))
-    print(f"wrote {len(summary['artifacts'])} artifacts to {repo_relative(RESULTS)}")
     return 0
 
 
@@ -543,4 +561,4 @@ def _relative_gap(left: dict[str, Any], right: dict[str, Any], key: str) -> floa
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main(sys.argv[1:]))
