@@ -221,7 +221,12 @@ TASKS: tuple[Task, ...] = (
         category="performance_benchmark",
     ),
     _study("pricing_grid", "pricing_validation", "summary.json", absorbed=True),
-    _study("mc_convergence", "monte_carlo_convergence", "summary.json"),
+    _study(
+        "mc_convergence",
+        "monte_carlo_convergence",
+        "summary.json",
+        absorbed=True,
+    ),
     _study("variance_reduction", "variance_reduction", "summary.json"),
     _study(
         "var_backtesting",

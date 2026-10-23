@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 3 experiment: does Monte Carlo error really decay like 1/sqrt(N)?
 
-    uv run python experiments/monte_carlo_convergence/run.py
+    uv run python -m quantrisk.experiments.monte_carlo_convergence [--out DIRECTORY]
 
 Not a picture of a downward line - three quantitative claims, each with an
 artifact:
@@ -21,16 +21,23 @@ from __future__ import annotations
 import csv
 import json
 import math
-import sys
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import numpy as np
+
 import quantrisk
 from quantrisk.experiments.metadata import environment, repo_relative, sha256_file, utc_timestamp
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 from quantrisk.plotting import line_plot, log_log_convergence_plot
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["mc_convergence"]
 
 PATH_COUNTS = [1_000, 3_000, 10_000, 30_000, 100_000, 300_000, 1_000_000, 3_000_000]
 BASE_SEED = 42
@@ -84,8 +91,8 @@ def option_for(scenario: str):  # noqa: ANN201
     return quantrisk.pricing.EuropeanOption(option_type, strike), market
 
 
-def convergence_rows() -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def convergence_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     for scenario in SCENARIOS:
         option, market = option_for(scenario)
         reference = quantrisk.pricing.black_scholes(option, market).price
@@ -116,9 +123,9 @@ def convergence_rows() -> list[dict[str, object]]:
     return rows
 
 
-def z_score_rows() -> list[dict[str, object]]:
+def z_score_rows() -> list[dict[str, Any]]:
     """Distribution of error / SE over independent seeds (should be ~N(0,1))."""
-    rows: list[dict[str, object]] = []
+    rows: list[dict[str, Any]] = []
     for scenario in SCENARIOS:
         option, market = option_for(scenario)
         reference = quantrisk.pricing.black_scholes(option, market).price
@@ -146,8 +153,8 @@ def z_score_rows() -> list[dict[str, object]]:
     return rows
 
 
-def coverage_rows() -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def coverage_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     for scenario in SCENARIOS:
         option, market = option_for(scenario)
         reference = quantrisk.pricing.black_scholes(option, market).price
@@ -188,7 +195,7 @@ def _binomial_band(trials: int, level: float) -> tuple[int, int]:
     return low, high
 
 
-def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     field_names = sorted({key for row in rows for key in row})
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=field_names, extrasaction="ignore")
@@ -196,15 +203,19 @@ def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         writer.writerows(rows)
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Fit the decay, measure the z-scores and the coverage, write, return the summary."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
+
     convergence = convergence_rows()
     z_scores = z_score_rows()
     coverage = coverage_rows()
 
-    convergence_path = RESULTS / "convergence.csv"
-    z_path = RESULTS / "z_scores.csv"
-    coverage_path = RESULTS / "coverage.csv"
+    convergence_path = results / "convergence.csv"
+    z_path = results / "z_scores.csv"
+    coverage_path = results / "coverage.csv"
     write_csv(convergence_path, convergence)
     write_csv(z_path, z_scores)
     write_csv(coverage_path, coverage)
@@ -240,7 +251,7 @@ def main() -> int:
             xlabel="paths N",
             ylabel="|MC price - analytic|",
             reference_slope=-0.5,
-            path=RESULTS / "convergence_slope.png",
+            path=results / "convergence_slope.png",
         ),
         line_plot(
             [float(row["paths"]) for row in convergence if row["scenario"] == "atm_call"],
@@ -259,16 +270,16 @@ def main() -> int:
             title="Reported SE tracks the realised error",
             xlabel="paths N",
             ylabel="currency units",
-            path=RESULTS / "se_versus_error.png",
+            path=results / "se_versus_error.png",
             log_x=True,
         ),
     ]
 
     inside = sum(1 for row in coverage if row["inside_band"])
     summary = {
-        "artifact": "experiments/monte_carlo_convergence/run.py",
+        "artifact": TASK.module,
         "generated_at_utc": utc_timestamp(),
-        "command": f"uv run python {Path(sys.argv[0]).name}",
+        "command": TASK.invocation,
         "environment": environment(),
         "base_seed": BASE_SEED,
         "path_counts": PATH_COUNTS,
@@ -295,7 +306,7 @@ def main() -> int:
             },
         },
     }
-    json_path = RESULTS / "summary.json"
+    json_path = artifact_path(TASK, out)
     json_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(
         json.dumps(
@@ -307,9 +318,21 @@ def main() -> int:
             sort_keys=True,
         )
     )
-    print(f"wrote {json_path}")
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the fit and the coverage line, then where the artifact landed."""
+    summary = run(argv)
+    print(
+        json.dumps(
+            {
+                "slopes": summary["convergence_slope_fit"],
+                "coverage_inside_band": summary["coverage_intervals_inside_binomial_band"],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    print(f"wrote {repo_relative(artifact_path(TASK, parse_out(argv, description=__doc__)))}")
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

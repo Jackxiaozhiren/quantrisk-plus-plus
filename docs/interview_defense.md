@@ -150,10 +150,11 @@ convincing.
 `cpp/src/monte_carlo/engine.cpp:49` — `sample_stddev / sqrt(units.size())`, where `units` are
 single paths for plain and control-variate estimators and pair means for the antithetic one.
 The fit is an OLS of `log|error|` on `log N` with
-`SE(slope) = sqrt(SSE/(n−2)/Sxx)` (`experiments/monte_carlo_convergence/run.py:60-78`), over
+`SE(slope) = sqrt(SSE/(n−2)/Sxx)` (`monte_carlo_convergence:fit_log_log_slope`), over
 path counts 1,000 → 3,000,000 at `base_seed = 42`. One design detail I would be asked about and
 would defend: each path count uses a *fresh* engine with the same seed, so the smaller runs are
-initial segments of the larger ones (nesting, documented at `run.py:93-95`), which is what makes
+initial segments of the larger ones (nesting, documented at
+`monte_carlo_convergence:convergence_rows`), which is what makes
 the fitted slope clean rather than noisy. Deviations from theory in standard errors: 1.28, 0.89,
 0.06. The companion check is that the yardstick itself is right: `error/SE` over 200 seeds per
 scenario has standard deviation 0.875–0.999 in the same artifact.
@@ -1035,7 +1036,7 @@ uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_referen
   .venv/bin/python -m pytest -q                                          # 479 tests collected offline
 uv run python -m quantrisk.verification.runner                            # 172/172 planted defects rejected
 uv run python -m quantrisk.experiments.pricing_validation
-uv run python experiments/monte_carlo_convergence/run.py
+uv run python -m quantrisk.experiments.monte_carlo_convergence
 uv run python experiments/variance_reduction/run.py
 uv run python benchmarks/quantlib/pricing_validation.py
 uv run python benchmarks/quantlib/monte_carlo_validation.py --paths 200000

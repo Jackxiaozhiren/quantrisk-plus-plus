@@ -855,6 +855,46 @@ after), and no test was added, so the pair stays **548 / 479**. The replay's onl
 the `.artifact` self-reference above; everything else it reports lives under `artifacts`, `environment` or
 `command`, each volatile by declaration.
 
+### 2026-10-22, P3.3 absorption 9 of 19 — `mc_convergence`, and the citation shape that cannot survive a move
+
+Ninth of 19. Last commit's rule was applied before the move this time, so the package directory was created
+as `monte_carlo_convergence` -- the name the registry composes the module from -- and the absent-at-HEAD
+probe ran first as written: `-m quantrisk.experiments.monte_carlo_convergence` exits 1 with `No module
+named`, then exits 0 after the move. Bootstrap stays 6 and by-path load sites stay 5 again: this study takes
+no sibling path and inserts none. Its dead `REPO_ROOT = parents[2]` is the second one deleted, and its
+`import sys` existed only to build `"command": f"uv run python {Path(sys.argv[0]).name}"` -- under `-m` that
+interpolation yields `__main__.py`, so the recorded command would have become one that names no file at all.
+D4' replaces it with `TASK.invocation`.
+
+mypy found 5 defects, all the class the lane now recognises at once: `float(row["paths"])` read out of rows
+annotated `dict[str, object]`. Eight annotations widened to `dict[str, Any]`, no behaviour touched. Unlike
+absorption 8 there was no lying annotation here -- this file's slope map really does hold only floats, and
+mypy's silence on it is the evidence, not an assumption.
+
+The one thing worth recording is a defect the split introduced and review caught before any run. The old
+`main` printed `{"slopes": slopes, ...}` from a *local*, while the payload stores that same dict under
+`convergence_slope_fit`; a first cut of the shim printed `summary["slopes"]`, which is a KeyError waiting on
+the CLI path the study's guards never exercise -- no test loads this file, and no plant targets it (`grep`
+of the path in `tests/` and `plants.py` both return 0), because the Monte Carlo claims are all checked
+against the artifact. The shim now reads `summary["convergence_slope_fit"]` and prints it under the key the
+banner always used, so stdout is unchanged. A split that moves a print across a function boundary has to
+re-find every value that print read from a local, and this is the case where the local was never in the
+returned payload under the name the print wanted.
+
+Two documents carried the most fragile citation shape in the repository:
+`experiments/monte_carlo_convergence/run.py:60-78` and `run.py:93-95` in the interview defense. A line range
+names a file *and* an offset, and a move changes both, with nothing to guard it -- confirmed by grepping the
+plant list and the census for those ranges, which is V2-21's hole in a second form. Both are now registry
+references to the symbols the ranges enclosed, `monte_carlo_convergence:fit_log_log_slope` and
+`monte_carlo_convergence:convergence_rows`, each read in the moved file before being cited. Commands
+re-derived in the interview defense and the report; the PDF rebuilt after them, bundle `6bfad07e6505`, pdf
+`0b6802d8aced`.
+
+The replay is the lane's strongest determinism evidence so far: this study is seeded at 42, and every fitted
+slope, z-score and coverage cell is bit-identical to the committed artifact -- a single volatile-free
+difference, the `.artifact` self-reference P3.5 will re-derive. mypy's corpus is 47 source files with the
+two-sided agreement holding; no test added, so the pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
