@@ -1144,6 +1144,37 @@ dated records. `commands_unrunnable_from_the_root` holds at 89 -- a benchmark's 
 a bare path in the manifest, so it was in the does-not-exist bucket before the move. No test added, so the
 pair stays **548 / 479**.
 
+### 2026-10-23, P3.3 absorption 16 of 19 — `monte_carlo_vs_analytic`, and a test that had the old `--out` meaning
+
+Sixteenth of 19, the second benchmark, and it went through §11 step 3's benchmark shape without surprise:
+one file at `python/quantrisk/benchmarks/quantlib/monte_carlo_validation.py`, no `__init__.py`, one shared
+`_parse(argv)`, `run(argv)` returning the summary and `main(argv)` printing it, mypy 58 to 59 source files.
+
+What was new is that a *test* carried the old `--out` meaning.
+`test_published_monte_carlo_benchmark_script_runs_and_reports` spawned the script with `--out <tmp>` and read
+`<tmp>/monte_carlo_validation.json` -- the pre-refactor semantics were "this is the results directory". The
+registry's `--out` names a repository root, so the first gate run went red exactly there, and the fix was to
+re-point the test at `tmp/benchmarks/quantlib/results/...` rather than fork the convention for one caller.
+Two absorbed units now share a rule instead of one rule and one exception.
+
+Its recorded command was `f"uv run python {Path(sys.argv[0]).name} --paths {arguments.paths}"` -- the bare
+filename with the path count glued on, which under `-m` would have named `__main__.py`. D4' makes it
+`TASK.invocation`, and nothing is lost by dropping the parameter from the string because the payload already
+records it twice over as `paths_per_run: 200000` and `seeds: 40`; that was checked in the committed artifact
+before the change, not assumed from the field names.
+
+The replay's CSV is byte-identical and the JSON differs in the same two declared places as absorption 15 --
+the `artifact` self-reference and the `csv` landing path. Everything the third yardstick decided is
+unchanged: `quantlib_mc_engine_used` matches, so the run reproduced the same "QuantLib's own MC engine is
+unavailable in this build" verdict the published artifact states, including the two `unknown MC traits: sobol`
+lines on stderr.
+
+Documents re-derived: the Monte Carlo model card's Level-2 citation, the interview-defense command (which
+keeps its `--paths 200000`), and the report's; the PDF rebuilt after them, bundle `b184d7ff272f`, pdf
+`9cd5762eaf19`. `bootstrap_sites_outside_package` stays 6, by-path load sites 5,
+`commands_unrunnable_from_the_root` 89 and `commands_not_module_path` 95; offline collection is still 479 and
+no test was added, so the pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring

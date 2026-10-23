@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Level 2/3 validation of the Monte Carlo engine against live oracles.
 
-    uv run python benchmarks/quantlib/monte_carlo_validation.py [--paths 200000]
+    uv run python -m quantrisk.benchmarks.quantlib.monte_carlo_validation [--paths 200000]
 
 Three independent yardsticks, in order of strength:
 
@@ -28,14 +28,15 @@ import csv
 import json
 import math
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
 import quantrisk
 from quantrisk.experiments.metadata import environment, repo_relative, sha256_file, utc_timestamp
+from quantrisk.experiments.registry import TASKS_BY_ID, artifact_path, results_directory
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-RESULTS = REPO_ROOT / "benchmarks" / "quantlib" / "results"
+TASK = TASKS_BY_ID["monte_carlo_vs_analytic"]
 
 SEEDS = 40
 DEFAULT_PATHS = 200_000
@@ -159,12 +160,20 @@ def numpy_reference(
     )
 
 
-def main() -> int:
+def _parse(argv: Sequence[str]) -> argparse.Namespace:
+    """The three knobs this benchmark takes, parsed by the study and by the shim."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--paths", type=int, default=DEFAULT_PATHS)
     parser.add_argument("--seeds", type=int, default=SEEDS)
-    parser.add_argument("--out", type=Path, default=None)
-    arguments = parser.parse_args()
+    parser.add_argument(
+        "--out", type=Path, default=None, help="treat this directory as the repository root"
+    )
+    return parser.parse_args(argv)
+
+
+def run(argv: Sequence[str]) -> dict[str, object]:
+    """Sweep the three yardsticks, write where the registry says, return the summary."""
+    arguments = _parse(argv)
 
     ql = import_quantlib()
     rows: list[dict[str, object]] = []
@@ -256,7 +265,7 @@ def main() -> int:
                 }
             )
 
-    output_dir = arguments.out or RESULTS
+    output_dir = results_directory(TASK, arguments.out)
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "monte_carlo_validation.csv"
     field_names = sorted({key for row in rows for key in row})
@@ -277,9 +286,9 @@ def main() -> int:
         for label, values in z_scores.items()
     }
     summary = {
-        "artifact": "benchmarks/quantlib/monte_carlo_validation.py",
+        "artifact": TASK.source,
         "generated_at_utc": utc_timestamp(),
-        "command": f"uv run python {Path(sys.argv[0]).name} --paths {arguments.paths}",
+        "command": TASK.invocation,
         "environment": environment(),
         "quantlib_version": ql.__version__,
         "paths_per_run": arguments.paths,
@@ -306,6 +315,12 @@ def main() -> int:
     }
     json_path = output_dir / "monte_carlo_validation.json"
     json_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the engine and z-score block, then where the two files landed."""
+    summary = run(argv)
     print(
         json.dumps(
             {
@@ -316,9 +331,9 @@ def main() -> int:
             sort_keys=True,
         )
     )
-    print(f"wrote {csv_path} and {json_path}")
+    print(f"wrote {summary['csv']} and {repo_relative(artifact_path(TASK, _parse(argv).out))}")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv[1:]))

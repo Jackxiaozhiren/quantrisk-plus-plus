@@ -44,7 +44,7 @@ error, which is what makes this section's statistics interpretable.
   price to ~1e-12 relative with a standard error below 1e-10 and `beta` of 1.
   A constant payoff returns the discount factor exactly. Antithetic pairs satisfy
   `S+ * S- = S^2 exp(2(r-q-sigma^2/2)T)` exactly.
-* Level 2 - `benchmarks/quantlib/monte_carlo_validation.py`: 492 rows, our
+* Level 2 - `quantrisk.benchmarks.quantlib.monte_carlo_validation`: 492 rows, our
   estimate against QuantLib's analytic engine over 4 scenarios x 3 methods x 40
   seeds, reported as z-scores (pooled mean ~0, std ~0.92-1.01, ~96 % inside ±2).
   An independent NumPy/PCG64 simulation is a third yardstick. QuantLib's own MC

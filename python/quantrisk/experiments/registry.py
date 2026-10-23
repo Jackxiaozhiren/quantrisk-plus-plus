@@ -201,6 +201,7 @@ TASKS: tuple[Task, ...] = (
         "quantlib",
         "monte_carlo_validation",
         "monte_carlo_validation.json",
+        absorbed=True,
     ),
     _benchmark(
         "path_dependent_vs_quantlib",

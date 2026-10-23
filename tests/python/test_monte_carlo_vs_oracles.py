@@ -21,7 +21,7 @@ ql = pytest.importorskip("QuantLib")
 pytest.importorskip("scipy")
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-BENCHMARK = REPO_ROOT / "benchmarks" / "quantlib" / "monte_carlo_validation.py"
+MODULE = "quantrisk.benchmarks.quantlib.monte_carlo_validation"
 mc = quantrisk.monte_carlo
 pricing = quantrisk.pricing
 VR = mc.VarianceReduction
@@ -113,17 +113,8 @@ def test_control_variate_beats_plain_monte_carlo_on_realised_error() -> None:
 
 @pytest.mark.oracle
 def test_published_monte_carlo_benchmark_script_runs_and_reports(tmp_path: Path) -> None:
-    completed = subprocess.run(  # noqa: S603, S607
-        [
-            sys.executable,
-            str(BENCHMARK),
-            "--paths",
-            "20000",
-            "--seeds",
-            "10",
-            "--out",
-            str(tmp_path),
-        ],
+    completed = subprocess.run(  # noqa: S603
+        [sys.executable, "-m", MODULE, "--paths", "20000", "--seeds", "10", "--out", str(tmp_path)],
         capture_output=True,
         text=True,
         check=False,
@@ -131,7 +122,8 @@ def test_published_monte_carlo_benchmark_script_runs_and_reports(tmp_path: Path)
         timeout=600,
     )
     assert completed.returncode == 0, completed.stderr[-2000:]
-    summary = json.loads((tmp_path / "monte_carlo_validation.json").read_text())
+    results = tmp_path / "benchmarks/quantlib/results"
+    summary = json.loads((results / "monte_carlo_validation.json").read_text())
     assert summary["rows"] > 100
     pooled = summary["z_score_vs_quantlib_analytic"]
     for method, stats in pooled.items():
@@ -140,5 +132,5 @@ def test_published_monte_carlo_benchmark_script_runs_and_reports(tmp_path: Path)
         assert stats["fraction_within_2"] >= 0.85, (method, stats)
     # The artifact must state honestly whether the third yardstick was available.
     assert isinstance(summary["quantlib_mc_engine_used"], bool)
-    text = (tmp_path / "monte_carlo_validation.csv").read_text()
+    text = (results / "monte_carlo_validation.csv").read_text()
     assert "z_vs_quantlib_analytic" in text
