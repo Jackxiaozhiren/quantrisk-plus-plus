@@ -1204,6 +1204,21 @@ path, the two declared classes of this stretch of the lane.
 does-not-exist bucket, so a move cannot make that counter worse. mypy 59 to 60 source files, offline
 collection 479, and no test added, so the pair stays **548 / 479**.
 
+Correction, added later the same day to this same-day entry rather than as a new one. The commit described
+above (`ee9bde2`) was pushed **without the rebuilt render**: it carries this absorption's
+`paper/technical_report.tex` and the previous absorption's PDF and build record -- bundle `b184d7ff272f` /
+pdf `9cd5762eaf19` in the commit against `92cc6ad1fc15` / `8400d3de3c56` in the worktree, and the older PDF's
+own digest in the committed blob proves which render landed there. The cause is a command order I wrote:
+`git add … && build_report.py`, which re-dirtied the two generated files after the last staging; and the
+`git status` I read in the same block as the commit showed both as ` M` and I did not act on it. The gate
+suite stayed green because it measures the worktree, which was right -- so only the committed object was
+wrong, and that is the exact failure #90's freshness pair exists to catch, one commit after it was used to
+catch somebody else's. The fix is forward: the render is committed on its own, the pushed commit is not
+rewritten, and CI's verdict on `ee9bde2` is recorded as it turns out rather than as I expect it. Two practice
+changes follow, because a lane's own mechanics need gates too: the report is rebuilt *before* the staging
+command, and the check after a commit is `git status --porcelain` empty against the file list the commit
+needed, not a `--stat` that merely looks plausible.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
