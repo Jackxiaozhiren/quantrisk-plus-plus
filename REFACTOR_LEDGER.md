@@ -1292,6 +1292,15 @@ true and 106 tracked Python files, ruff-format 225 files (one out, one in), regi
 units to 19 sources, ctest 204, `validate` 7/7, the evidence manifest intact, plants 172 with no anchor on a
 moved path, and no test added, so the pair stays **548 / 479**.
 
+Correction, same day, and it is the third instance of this lane's own staging defect. The gate run measured
+the worktree, which already held the corrected citation rows; the commit captured what had been staged
+*before* those rows were re-derived, so `1a231bc` carries the symbol-form rows this very entry describes as
+wrong, and it would fail the claim-sample test on the runner. Step 10's check caught it -- `git status
+--porcelain` was not empty after the commit, which is the check absorption 17's correction added and it
+working as designed. Fixed forward as its own commit rather than by rewriting the candidate: documents are
+re-derived first and the staging command comes after, so there is no window in which the measured tree and
+the committed object disagree.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
