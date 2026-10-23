@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 3 experiment: measured variance reduction, on identical seeds.
 
-    uv run python experiments/variance_reduction/run.py
+    uv run python -m quantrisk.experiments.variance_reduction [--out DIRECTORY]
 
 Plain Monte Carlo, antithetic variates and a control variate are run on the same
 market and the same seed family, and three things are reported per method:
@@ -20,16 +20,23 @@ from __future__ import annotations
 import csv
 import json
 import math
-import sys
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import numpy as np
+
 import quantrisk
 from quantrisk.experiments.metadata import environment, repo_relative, sha256_file, utc_timestamp
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 from quantrisk.plotting import line_plot
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["variance_reduction"]
 
 VR = quantrisk.monte_carlo.VarianceReduction
 METHODS = {
@@ -47,7 +54,7 @@ SCENARIOS = {
 }
 
 
-def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     field_names = sorted({key for row in rows for key in row})
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=field_names)
@@ -55,10 +62,13 @@ def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         writer.writerows(rows)
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
-    rows: list[dict[str, object]] = []
-    realised: list[dict[str, object]] = []
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Run the three methods on identical seeds, write, return the summary."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
+    rows: list[dict[str, Any]] = []
+    realised: list[dict[str, Any]] = []
 
     for name, (option_type, strike, volatility, maturity, dividend) in SCENARIOS.items():
         market = quantrisk.pricing.MarketParams(
@@ -122,8 +132,8 @@ def main() -> int:
                     }
                 )
 
-    variance_path = RESULTS / "variance_by_method.csv"
-    realised_path = RESULTS / "realised_error.csv"
+    variance_path = results / "variance_by_method.csv"
+    realised_path = results / "realised_error.csv"
     write_csv(variance_path, rows)
     write_csv(realised_path, realised)
 
@@ -138,7 +148,7 @@ def main() -> int:
         title="ATM call: reported standard error by variance-reduction method",
         xlabel="paths N",
         ylabel="standard error",
-        path=RESULTS / "standard_error_by_method.png",
+        path=results / "standard_error_by_method.png",
         log_x=True,
     )
 
@@ -149,13 +159,12 @@ def main() -> int:
         for row in realised
     }
     worst_reduction = min(reductions.values())
-    worst_reduction = min(reductions.values())
     reduced = {key: value for key, value in reductions.items() if not key.endswith("|plain")}
     worst_reduced_reduction = min(reduced.values())
     summary = {
-        "artifact": "experiments/variance_reduction/run.py",
+        "artifact": TASK.module,
         "generated_at_utc": utc_timestamp(),
-        "command": f"uv run python {Path(sys.argv[0]).name}",
+        "command": TASK.invocation,
         "environment": environment(),
         "seeds": SEEDS,
         "path_counts": PATH_COUNTS,
@@ -188,7 +197,7 @@ def main() -> int:
             },
         },
     }
-    json_path = RESULTS / "summary.json"
+    json_path = artifact_path(TASK, out)
     json_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(
         json.dumps(
@@ -197,9 +206,21 @@ def main() -> int:
             sort_keys=True,
         )
     )
-    print(f"wrote {json_path}")
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the reductions the suite reports, then where the artifact landed."""
+    summary = run(argv)
+    print(
+        json.dumps(
+            {
+                "mse_reduction_vs_plain": summary["mse_reduction_vs_plain"],
+                "worst": summary["worst_mse_reduction_all_rows"],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+    print(f"wrote {repo_relative(artifact_path(TASK, parse_out(argv, description=__doc__)))}")
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

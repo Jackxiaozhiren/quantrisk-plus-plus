@@ -895,6 +895,42 @@ slope, z-score and coverage cell is bit-identical to the committed artifact -- a
 difference, the `.artifact` self-reference P3.5 will re-derive. mypy's corpus is 47 source files with the
 two-sided agreement holding; no test added, so the pair stays **548 / 479**.
 
+### 2026-10-22, P3.3 absorption 10 of 19 — `variance_reduction`, and a statement written twice
+
+Tenth of 19. Id and directory agree here, so the move is the plain shape, and the ceilings counters stay
+where they were (bootstrap 6, by-path 5) -- this study takes no sibling. mypy added it to its corpus, 47 to
+49 source files, and found the four familiar `float(row[...])` / `int(row[...])` defects against
+`dict[str, object]` rows.
+
+Whether an annotation change is load-bearing was measured rather than assumed: the widening was reverted and
+mypy re-run, which produced 4 errors, then restored, which produced none. So four annotations moved because
+a check demanded them, not because the file looked inconsistent next to its neighbours -- and the diff says
+so.
+
+The finding this file carries is older than the lane. Two adjacent lines read
+`worst_reduction = min(reductions.values())` twice. Nothing notices that: ruff has no duplicate-statement
+rule, mypy never saw the file until this commit put it in its corpus, and the 548 tests all read the
+artifact, where the second assignment produces exactly what the first did. It survived eight phases and six
+releases. Removed as part of the split, and the proof it changed nothing is the byte-identical
+`realised_error.csv` on both sides.
+
+The replay is the lane's clearest illustration of what "volatile" means in this repository. The JSON differs
+from the committed artifact in one volatile-free field -- the `.artifact` self-reference, third of its kind.
+The `variance_by_method.csv` differs in bytes, but cell by cell it is only `mean_runtime_seconds` and
+`seconds_per_path`, 36 rows of each, while every statistical column matches exactly: variance
+11.1237619281, standard error 3.412623e+02, and the rest, identical to the published run. Those two columns
+are the wall-clock family `content_digest` already treats as volatile, and the guard
+`test_content_digest_treats_wall_clock_csv_columns_as_volatile` is what licenses reading a timing table that
+disagrees as the same evidence. `realised_error.csv`, which carries no clock, is byte-identical.
+
+Documents re-derived: the interview-defense reproduction command and, in the same document, the citation
+`experiments/variance_reduction/run.py:108-123` -- the second line-range citation, absorbed into
+`variance_reduction:run`, the function that now encloses the block it pointed at. The report's command line
+moved too; the PDF was rebuilt after both, bundle `4d5b082be827`, pdf `1382159ce6dc`. No plant mentions this
+study at all (`grep -c variance_reduction` in `plants.py` is 0), so step 8 had nothing to re-key here, and
+the falsification coverage of this study is the artifact's own guards rather than a planted edit. No test
+added, so the pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring

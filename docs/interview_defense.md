@@ -538,9 +538,9 @@ the benchmark side of the line. Nothing is implemented, so there is no `δ` to r
 methodological precedent this project already has for the "never score an estimator on the data
 that produced it" rule is the control variate: `beta` is fitted on the same sample, so the
 engine's own reported variance is mildly optimistic, and the experiment compensates by reporting
-*out-of-sample* MSE across a 40-seed ensemble (`docs/limitations.md` #19,
-`experiments/variance_reduction/run.py:108-123`, worst realised reduction 1.0 = the plain
-baseline by construction, best 40.468×). Same logic, same remedy, one phase earlier.
+*out-of-sample* MSE across a 40-seed ensemble (`docs/limitations.md` #19, `variance_reduction:run`,
+worst realised reduction 1.0 = the plain baseline by construction, best 40.468×). Same logic, same remedy,
+one phase earlier.
 
 ### Q15. What causes an optimizer to produce unstable weights?
 
@@ -1037,7 +1037,7 @@ uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_referen
 uv run python -m quantrisk.verification.runner                            # 172/172 planted defects rejected
 uv run python -m quantrisk.experiments.pricing_validation
 uv run python -m quantrisk.experiments.monte_carlo_convergence
-uv run python experiments/variance_reduction/run.py
+uv run python -m quantrisk.experiments.variance_reduction
 uv run python benchmarks/quantlib/pricing_validation.py
 uv run python benchmarks/quantlib/monte_carlo_validation.py --paths 200000
 uv run python benchmarks/performance/monte_carlo_speed.py

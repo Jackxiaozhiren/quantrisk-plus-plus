@@ -227,7 +227,7 @@ TASKS: tuple[Task, ...] = (
         "summary.json",
         absorbed=True,
     ),
-    _study("variance_reduction", "variance_reduction", "summary.json"),
+    _study("variance_reduction", "variance_reduction", "summary.json", absorbed=True),
     _study(
         "var_backtesting",
         "var_backtesting",
