@@ -2,7 +2,7 @@
 """Phase 11 experiment: do the Phase 5 and Phase 6 conclusions survive real data?
 
     uv run python scripts/run_benchmark_suite.py --only real_data_risk_study
-    uv run python experiments/real_data_risk_study/run.py
+    uv run python -m quantrisk.experiments.real_data_risk_study [--out DIRECTORY]
 
 Everything else in `experiments/` runs on synthetic data whose truth is known, which is what
 makes a bias measurable but also what keeps every conclusion one step away from an empirical
@@ -57,13 +57,14 @@ import csv
 import io
 import json
 import math
-import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-import quantrisk
 import scipy.stats
+
+import quantrisk
 from quantrisk.data import fixtures
 from quantrisk.experiments.metadata import (
     artifact_manifest,
@@ -73,8 +74,14 @@ from quantrisk.experiments.metadata import (
     sha256_file,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["real_data_risk_study"]
 
 # (fixture series id, human name, how a level becomes a factor move, factor class)
 FACTORS = (
@@ -522,8 +529,12 @@ def _score_row(
     return next(row for row in rows if row["confidence"] == confidence)
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Re-run the Phase 5 and 6 questions on committed fixtures, write, return the payload."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
+
     moves = factor_moves()
     aligned_dates = moves["DGS10"]
     print(
@@ -575,7 +586,7 @@ def main() -> int:
     payload: dict[str, Any] = {
         "phase": "11 - real-data risk study",
         "generated_utc": utc_timestamp(),
-        "command": "uv run python experiments/real_data_risk_study/run.py",
+        "command": TASK.invocation,
         "question": (
             "The Phase 5 and Phase 6 conclusions were measured on synthetic data whose truth "
             "is known. Which of them survive on real daily market observations?"
@@ -695,7 +706,7 @@ def main() -> int:
         },
     }
 
-    csv_path = RESULTS / "real_data_violations.csv"
+    csv_path = results / "real_data_violations.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
         writer.writerow(["date", "factor", "move"])
@@ -703,14 +714,14 @@ def main() -> int:
             for date, value in zip(dates, by_factor[factor], strict=True):
                 writer.writerow([date, factor, f"{value:.10g}"])
 
-    book_path = RESULTS / "real_data_book_pnl.csv"
+    book_path = results / "real_data_book_pnl.csv"
     with book_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
         writer.writerow(["date", "pnl"])
         for date, value in zip(dates, book, strict=True):
             writer.writerow([date, f"{value:.6f}"])
 
-    figure_path = RESULTS / "real_data_violation_coverage.png"
+    figure_path = results / "real_data_violation_coverage.png"
     single_factor_rows = {
         name: [
             {**row, "factor": arm.replace("_only", "")}
@@ -723,16 +734,29 @@ def main() -> int:
     figure_status = make_figure(estimator_scores["per_estimator"], single_factor_rows, figure_path)
     payload["figure_status"] = figure_status
     payload["artifacts"] = artifact_manifest([csv_path, book_path, figure_path])
-    json_path = RESULTS / "real_data_risk_study.json"
+    json_path = artifact_path(TASK, out)
     json_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
-    print(json.dumps({"A": estimator_scores["per_estimator"], "B": coverage}, indent=2)[:2000])
+    return payload
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the three summary blocks the study reports, then where it landed."""
+    payload = run(argv)
     print(
-        json.dumps({"D_ranking": covariance["ranked_best_to_worst_by_realised_variance"]}, indent=2)
+        json.dumps(
+            {
+                "A": payload["A_estimator_validity"]["per_estimator"],
+                "B": payload["B_coverage_tests"],
+            },
+            indent=2,
+        )[:2000]
     )
-    print(f"wrote {repo_relative(json_path)}")
+    print(
+        json.dumps(
+            {"D_ranking": payload["D_covariance"]["ranked_best_to_worst_by_realised_variance"]},
+            indent=2,
+        )
+    )
+    print(f"wrote {repo_relative(artifact_path(TASK, parse_out(argv, description=__doc__)))}")
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

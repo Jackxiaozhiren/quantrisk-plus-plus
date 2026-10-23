@@ -12,37 +12,45 @@ asserted directly.
 from __future__ import annotations
 
 import json
-import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 import quantrisk
 from quantrisk.data import fixtures
+from quantrisk.experiments.evidence import VOLATILE_KEYS
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = REPO_ROOT / "experiments" / "real_data_risk_study" / "run.py"
+MODULE = "quantrisk.experiments.real_data_risk_study"
 ARTIFACT = (
     REPO_ROOT / "experiments" / "real_data_risk_study" / "results" / "real_data_risk_study.json"
 )
 
 
-def _script_copy(destination: Path) -> Path:
-    """The experiment, relocated so running it cannot overwrite frozen evidence.
+def _replay(directory: Path, env: dict[str, str] | None = None) -> subprocess.CompletedProcess:
+    """Run the study where it cannot overwrite frozen evidence.
 
-    `run.py` writes to `Path(__file__).parent / "results"`, so a copy placed in a temporary
-    directory writes there instead. This matters: the first version of these tests executed the
-    script in the repository, and a normal `pytest` run therefore rewrote a committed artifact
-    on every invocation — new timestamp, new provenance block, tree left dirty, and the evidence
-    manifest reporting VOLATILE for a file nothing had deliberately regenerated. A test that
-    mutates the evidence it is meant to verify is not a test of reproducibility, it is a source
+    The study writes to the root it is given: `--out` names a temporary repository root and the
+    artifact lands at the registry's path beneath it. Before Phase 3.3 absorbed this study there was
+    no way to say that, so the tests copied `run.py` into a temporary directory and executed the
+    copy -- which was a workaround for the same defect the move removes, because the script resolved
+    its own output beside itself. It matters what this avoids: the first version of these tests
+    executed the script in the repository, and a normal `pytest` run therefore rewrote a committed
+    artifact on every invocation -- new timestamp, new provenance block, tree left dirty, and the
+    evidence manifest reporting VOLATILE for a file nothing had deliberately regenerated. A test
+    that mutates the evidence it is meant to verify is not a test of reproducibility, it is a source
     of variation.
     """
-    directory = destination / "real_data_risk_study"
-    directory.mkdir(parents=True, exist_ok=True)
-    copy = directory / "run.py"
-    shutil.copyfile(SCRIPT, copy)
-    return copy
+    command = [sys.executable, "-m", MODULE, "--out", str(directory)]
+    return subprocess.run(
+        command,
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=900,
+        check=False,
+        env=env,
+    )
 
 
 HISTORY_SERIES = ("DGS10", "T10YIE", "VIXCLS")
@@ -82,8 +90,10 @@ def test_the_experiment_runs_with_sockets_disabled(tmp_path: Path) -> None:
     # fresh interpreter. `getaddrinfo` is where a name becomes an address and nothing
     # inherits from it, so refusing it closes every outbound path without collateral.
     #
-    # It is installed as `sitecustomize` rather than exec'd around the script, because the
-    # script resolves its own path through `__file__`, which `exec` does not define.
+    # It is installed as `sitecustomize` rather than exec'd around the module, because the block has
+    # to be in place before the interpreter imports `quantrisk` at all -- `-m` gives the module a
+    # real `__file__`, so the reason that made a copy necessary is gone, and the reason this one is
+    # not.
     startup = tmp_path / "sitecustomize.py"
     startup.write_text(
         "import socket, urllib.request\n"
@@ -97,15 +107,7 @@ def test_the_experiment_runs_with_sockets_disabled(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     environment = {"PYTHONPATH": str(tmp_path), "PATH": "/usr/bin:/bin", "HOME": str(tmp_path)}
-    completed = subprocess.run(
-        [sys.executable, str(_script_copy(tmp_path))],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        timeout=900,
-        check=False,
-        env=environment,
-    )
+    completed = _replay(tmp_path, env=environment)
     assert "a socket was opened" not in completed.stderr, completed.stderr[-2000:]
     assert completed.returncode == 0, completed.stderr[-3000:]
 
@@ -126,17 +128,24 @@ def test_the_experiment_runs_with_sockets_disabled(tmp_path: Path) -> None:
 CROSS_PLATFORM_RELATIVE_SLACK = 1e-12
 
 
+#: The fields a re-run is allowed to disagree on, read from the digest's own set rather than
+#: restated here: the docstring below has always claimed "the same rule as the evidence
+#: manifest's content digest", and the list it kept was a shorter one -- which is how
+#: `test_a_fresh_run_reproduces_the_committed_artifact_exactly` went red on absorption 14 for the
+#: single reason that `command` is volatile by declaration and Phase 3.3 rewrites it. `oracles` is
+#: the one key this test waives that `VOLATILE_KEYS` does not: finding V2-23 names that gap, and
+#: P3.5 settles which side moves. Until then the waiver lives here, where it is said out loud.
+RUNTIME_FIELDS = VOLATILE_KEYS | {"oracles"}
+
+
 def _results_only(payload: dict) -> dict:
     """Strip the fields that legitimately differ between runs.
 
-    Same rule as the evidence manifest's content digest: a re-run changes when it ran, from
-    which revision, on which machine, and how long the clock said it took.
+    Same rule as the evidence manifest's content digest -- read from it, so the two cannot drift:
+    a re-run changes when it ran, from which revision, on which machine, how long the clock said
+    it took, and which command the registry says produces it.
     """
-    stripped = {
-        key: value
-        for key, value in payload.items()
-        if key not in {"generated_utc", "environment", "oracles", "artifacts"}
-    }
+    stripped = {key: value for key, value in payload.items() if key not in RUNTIME_FIELDS}
     return json.loads(json.dumps(stripped))
 
 
@@ -192,17 +201,13 @@ def test_a_fresh_run_reproduces_the_committed_artifact_exactly(tmp_path: Path) -
     """
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
     before = ARTIFACT.read_bytes()
-    script = _script_copy(tmp_path)
-    completed = subprocess.run(
-        [sys.executable, str(script)],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        timeout=900,
-        check=False,
-    )
+    completed = _replay(tmp_path)
     assert completed.returncode == 0, completed.stderr[-3000:]
-    fresh = json.loads((script.parent / "results" / "real_data_risk_study.json").read_text())
+    fresh = json.loads(
+        (
+            tmp_path / "experiments/real_data_risk_study/results/real_data_risk_study.json"
+        ).read_text()
+    )
     _assert_results_agree(_results_only(fresh), _results_only(committed))
     # The committed artifact is the evidence; a test that regenerated it would make the next
     # assertion below about the test rather than about the experiment.

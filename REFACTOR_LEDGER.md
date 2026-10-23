@@ -1064,6 +1064,38 @@ read 17995s while pytest's own summary on the same tree reads 228.82s. The machi
 launch and completion, so the wrapper's elapsed includes sleep. The per-lane exit codes are taken from the
 commands and stand; the wall column in that log is not a measurement of anything about this commit.
 
+### 2026-10-23, P3.3 absorption 14 of 19 — `real_data_risk_study`, and a test that broke its own stated rule
+
+Fourteenth of 19. No living document had to change: the only three citations of
+`experiments/real_data_risk_study/run.py` are dated records -- the phase-11 report twice and the numbered
+integrity-audit finding at 190 -- and a dated record says what was true when it was written. Step 9's probe
+found nothing else, escaped spelling included.
+
+mypy was clean on the file's first entry into its corpus (55 to 57 source files), the second absorption
+where the newly-covered arithmetic held up. `run()` became silent and the shim took all three summary
+blocks, whose payload paths were measured by walking the committed artifact --
+`A_estimator_validity.per_estimator`, `B_coverage_tests` and the `D_covariance` ranking key -- because the
+banner's keys are not the locals' names. The replay's stdout is 2201 bytes with the same 2000-character
+truncation the old `main` applied, and all three artifacts -- two CSVs and the PNG -- are byte-identical,
+with **zero** differences anywhere in the JSON: this is the one artifact V2-23 listed that already carried
+1.9.0, so even the version field agrees.
+
+The finding is the test. `test_a_fresh_run_reproduces_the_committed_artifact_exactly` went red, and the
+single field it disagreed on was `command`. Its own docstring has always said it strips "the same rule as
+the evidence manifest's content digest", and the list it actually kept was four hand-written keys --
+`generated_utc`, `environment`, `oracles`, `artifacts` -- which is not that rule: the digest waives
+`command`, this test did not. So the guard was failing on a field the lane had already declared free to
+move, and the interesting part is that the divergence pre-dated Phase 3.3 entirely; nothing could see it
+until a commit moved the field for real. The waiver list now reads `VOLATILE_KEYS` from the digest's own
+module, unioned with `oracles` -- the one key this test waives that the shared set does not, which is
+exactly the gap V2-23 registered -- and the comment says so rather than letting a second list drift
+silently again. The guard's falsifiability is not an assumption here: it failed minutes earlier for a
+reason, and it still compares every number, verdict and ranking of the study.
+
+`commands_unrunnable_from_the_root` moves 85 to 89 for this study's four manifest artifacts; bootstrap
+stays 6 and by-path load sites stay 5. No plant targets the study's source. No test added, so the pair
+stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring

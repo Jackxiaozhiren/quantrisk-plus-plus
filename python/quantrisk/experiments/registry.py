@@ -253,7 +253,12 @@ TASKS: tuple[Task, ...] = (
         absorbed=True,
     ),
     _study("stress_testing", "stress_testing", "stress_testing_study.json", absorbed=True),
-    _study("real_data_risk_study", "real_data_risk_study", "real_data_risk_study.json"),
+    _study(
+        "real_data_risk_study",
+        "real_data_risk_study",
+        "real_data_risk_study.json",
+        absorbed=True,
+    ),
     _study(
         "restrike_gamma_map",
         "restrike_gamma_map",
