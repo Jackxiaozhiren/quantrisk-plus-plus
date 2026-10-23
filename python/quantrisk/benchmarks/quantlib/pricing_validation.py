@@ -5,7 +5,7 @@ QuantLib is an oracle only (PROJECT_SPEC.md §2.2). Every reference number in th
 output is computed by this run; nothing is pasted from documentation or from an
 earlier execution, and the QuantLib version is recorded in the artifact.
 
-    uv run python benchmarks/quantlib/pricing_validation.py [--quick]
+    uv run python -m quantrisk.benchmarks.quantlib.pricing_validation [--quick]
 
 Two conventions were established by *measurement* rather than assumption, and
 both are recorded in the JSON summary:
@@ -31,6 +31,7 @@ import csv
 import json
 import math
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 import quantrisk
@@ -40,9 +41,9 @@ from quantrisk.experiments.metadata import (
     sha256_file,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import TASKS_BY_ID, artifact_path, results_directory
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_DIR = REPO_ROOT / "benchmarks" / "quantlib" / "results"
+TASK = TASKS_BY_ID["pricing_vs_quantlib"]
 
 #: Maturities are given in days so both engines see the same year fraction.
 MATURITY_DAYS = (7, 30, 91, 182, 365, 730, 1825)
@@ -206,11 +207,19 @@ class Worst:
             )
 
 
-def main() -> int:
+def _parse(argv: Sequence[str]) -> argparse.Namespace:
+    """The benchmark's two flags, parsed by the entry point and by the study alike."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--quick", action="store_true", help="small grid, used by the smoke test")
-    parser.add_argument("--out", type=Path, default=None)
-    arguments = parser.parse_args()
+    parser.add_argument(
+        "--out", type=Path, default=None, help="treat this directory as the repository root"
+    )
+    return parser.parse_args(argv)
+
+
+def run(argv: Sequence[str]) -> dict[str, object]:
+    """Run the oracle grid, write where the registry says, return the summary."""
+    arguments = _parse(argv)
 
     oracle = QuantLibReference(import_quantlib())
 
@@ -387,7 +396,7 @@ def main() -> int:
                                         }
                                     )
 
-    output_dir = arguments.out or OUTPUT_DIR
+    output_dir = results_directory(TASK, arguments.out)
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "pricing_vs_quantlib.csv"
     field_names = sorted({key for row in rows for key in row})
@@ -397,8 +406,8 @@ def main() -> int:
         writer.writerows(rows)
 
     summary = {
-        "artifact": "benchmarks/quantlib/pricing_validation.py",
-        "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+        "artifact": TASK.source,
+        "command": TASK.invocation,
         "generated_at_utc": utc_timestamp(),
         "environment": environment(),
         "quantlib_version": oracle.ql.__version__,
@@ -424,6 +433,12 @@ def main() -> int:
     json_path = output_dir / "pricing_vs_quantlib.json"
     json_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the two worst-case blocks, then the row count and where they landed."""
+    summary = run(argv)
     print(
         json.dumps(
             {
@@ -434,9 +449,13 @@ def main() -> int:
             sort_keys=True,
         )
     )
-    print(f"wrote {csv_path} ({len(rows)} rows) and {json_path}")
+    csv_landing = str(summary["csv"])
+    print(
+        f"wrote {csv_landing} ({summary['rows']} rows) and"
+        f" {repo_relative(artifact_path(TASK, _parse(argv).out))}"
+    )
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv[1:]))

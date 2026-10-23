@@ -55,7 +55,7 @@ Put-call parity `C - P = S e^{-qT} - K e^{-rT}` is asserted on every grid point.
   strikes, bounds, monotonicity, degenerate limits, `d1/d2` identity),
   `tests/python/test_pricing.py` (independent recomputation from the spec with
   SciPy, 5 markets × 8 strikes × 2 types).
-* Level 2 — `benchmarks/quantlib/pricing_validation.py`, 18 816 rows over
+* Level 2 — `quantrisk.benchmarks.quantlib.pricing_validation`, 18 816 rows over
   7 maturities × 11 strikes × 4 volatilities × 2 rates × 2 dividend yields,
   both option types, plus all five Greeks. Worst case in
   `benchmarks/quantlib/results/pricing_vs_quantlib.json`.

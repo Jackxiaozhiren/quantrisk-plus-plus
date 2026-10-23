@@ -2070,7 +2070,7 @@ are recorded verbatim inside the artifacts themselves (\code{command} fields), f
 uv sync && uv pip install -e .
 uv run cmake --preset dev && uv run cmake --build --preset dev && uv run ctest --preset dev
 uv run pytest
-uv run python benchmarks/quantlib/pricing_validation.py
+uv run python -m quantrisk.benchmarks.quantlib.pricing_validation
 uv run python -m quantrisk.experiments.pricing_validation
 uv run python benchmarks/quantlib/monte_carlo_validation.py
 uv run python -m quantrisk.experiments.monte_carlo_convergence

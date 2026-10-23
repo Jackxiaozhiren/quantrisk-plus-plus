@@ -5,7 +5,7 @@ Two things are checked here:
 1. The core's prices and Greeks against QuantLib's ``AnalyticEuropeanEngine``
    on the same inputs, computed at run time. Nothing from a previous run or from
    documentation is embedded as an expected value (PROJECT_SPEC.md §4).
-2. That ``benchmarks/quantlib/pricing_validation.py`` still executes and still
+2. That ``quantrisk.benchmarks.quantlib.pricing_validation`` still executes and still
    reports a negligible worst-case error, so the published artifact cannot rot
    into something the test suite no longer covers.
 """
@@ -25,7 +25,7 @@ ql = pytest.importorskip("QuantLib")
 pytest.importorskip("scipy")
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-BENCHMARK = REPO_ROOT / "benchmarks" / "quantlib" / "pricing_validation.py"
+MODULE = "quantrisk.benchmarks.quantlib.pricing_validation"
 EVALUATION_DATE = ql.Date(1, 1, 2024)
 PRICE_TOLERANCE = 1.0e-10
 GREEK_TOLERANCE = 1.0e-8
@@ -137,7 +137,7 @@ def test_greeks_match_quantlib(
     )
     # Units were verified by measurement, not assumed: this build reports vega
     # and rho per unit of vol / rate, exactly as docs/mathematical_specification.md
-    # §0 freezes them. See benchmarks/quantlib/pricing_validation.py docstring.
+    # §0 freezes them. See the benchmark module's own docstring.
     for greek in ("delta", "gamma", "vega", "theta", "rho"):
         oracle_value = float(getattr(reference, greek)())
         our_value = float(getattr(analytic, greek))
@@ -193,9 +193,11 @@ def test_crr_lattice_is_within_its_own_discretisation_error_of_quantlib(
 
 @pytest.mark.oracle
 def test_published_benchmark_script_still_runs_and_still_passes(tmp_path: Path) -> None:
-    output = tmp_path / "results"
-    completed = subprocess.run(  # noqa: S603, S607
-        [sys.executable, str(BENCHMARK), "--quick", "--out", str(output)],
+    # One line on purpose: the claim inventory counts the tests that re-execute a published
+    # benchmark by finding the interpreter and the `--quick` flag in the same line, so a wrapped
+    # argument list silently drops the count the sheet states.
+    completed = subprocess.run(  # noqa: S603
+        [sys.executable, "-m", MODULE, "--quick", "--out", str(tmp_path)],
         capture_output=True,
         text=True,
         check=False,
@@ -203,7 +205,8 @@ def test_published_benchmark_script_still_runs_and_still_passes(tmp_path: Path) 
         timeout=600,
     )
     assert completed.returncode == 0, completed.stderr[-2000:]
-    summary = json.loads((output / "pricing_vs_quantlib.json").read_text())
+    results = tmp_path / "benchmarks/quantlib/results"
+    summary = json.loads((results / "pricing_vs_quantlib.json").read_text())
     # quick grid: 3 strikes x 2 types x (1 price + 5 greeks) + 12 lattice rows
     assert summary["rows"] == 48
     absolute = summary["worst_absolute_error"]
@@ -215,5 +218,5 @@ def test_published_benchmark_script_still_runs_and_still_passes(tmp_path: Path) 
     assert absolute["lattice[sigma*sqrt(dt)<=0.25]"] < 1.0e-2
     assert summary["quantlib_version"]
     assert math.isfinite(summary["price_floor"])
-    csv_text = (output / "pricing_vs_quantlib.csv").read_text()
+    csv_text = (results / "pricing_vs_quantlib.csv").read_text()
     assert "our_price" in csv_text and "quantlib_price" in csv_text

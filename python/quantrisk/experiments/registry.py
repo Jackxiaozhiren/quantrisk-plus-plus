@@ -194,6 +194,7 @@ TASKS: tuple[Task, ...] = (
         "quantlib",
         "pricing_validation",
         "pricing_vs_quantlib.json",
+        absorbed=True,
     ),
     _benchmark(
         "monte_carlo_vs_analytic",

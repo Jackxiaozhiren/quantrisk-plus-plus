@@ -1096,6 +1096,54 @@ reason, and it still compares every number, verdict and ranking of the study.
 stays 6 and by-path load sites stay 5. No plant targets the study's source. No test added, so the pair
 stays **548 / 479**.
 
+### 2026-10-23, P3.3 absorption 15 of 19 — the first benchmark moves, and the layout question answers itself
+
+Fifteenth of 19 and the first of the five benchmarks, which is where D1's "one package" meets a second
+layout: a benchmark is a single file in a suite directory, not a task directory with an entry-point pair, so
+the destination is `python/quantrisk/benchmarks/quantlib/pricing_validation.py`. The open question was
+whether that needs `__init__.py` files, and it was settled by measuring rather than by arguing:
+
+- **import**: `python -m quantrisk.benchmarks.quantlib.pricing_validation` resolves and runs with no
+  `__init__.py` anywhere under `benchmarks/` -- PEP 420 makes a directory inside a regular package a
+  namespace portion, so `-m`, `importlib.import_module` and the suite runner all work.
+- **typing**: mypy checked the file anyway -- 57 to 58 source files -- so no `__init__.py` is needed to keep
+  it inside the static-check bucket, which is the ceiling
+  `tracked_python_files_in_no_static_check_bucket` guards and which stays ok at 0.
+- **parity**: the guard's side A walks `python/quantrisk/benchmarks/*/*.py`. Adding
+  `benchmarks/quantlib/__init__.py` would make that glob report a runnable unit the registry does not
+  carry, so the parity guard would go red on a *package marker*. No `__init__.py` keeps the glob meaning
+  "one file, one unit", which is what the benchmark layout actually is.
+
+Two contracts had to be met rather than bent. `test_an_absorbed_task_is_invocable_and_writes_where_it_is_told`
+requires `run(argv) -> dict` of every absorbed task, and the benchmark arrived as a `main()` that computed,
+wrote and printed. It is now `run(argv)` returning the summary and `main(argv)` printing it -- the same shape
+as the studies -- with `--quick`/`--out` parsed by one `_parse(argv)` helper shared by both, because the
+original printed banner names the CSV, the row count and the JSON, and reproducing it from the payload
+(`summary["csv"]`, `summary["rows"]`) is what keeps the shim honest without a second parser.
+
+The other one is the interesting failure. `test_the_documents_that_count_python_tests_count_the_ones_that_exist`
+went red reading `no test re-executes the published benchmark script` -- not because the test stopped
+executing it, but because the claim inventory's own detector looks for the interpreter and the `--quick` flag
+*on the same source line*, and wrapping the argument list across eight lines made its count zero. The guard
+caught a real thing (it is a spawn, and the sheet counts spawns) and was defeated by formatting. The call
+list is one line again, with a comment saying why, so the next person does not reformat it back into
+silence.
+
+Behaviour: `command` was `" ".join([sys.argv[0], *sys.argv[1:]])`, which recorded
+`benchmarks/quantlib/pricing_validation.py` -- a fragment, no interpreter, and under `-m` it would have
+become a full machine path with whatever flags the caller passed. Now `TASK.invocation`. The replay is
+byte-identical on the 18 816-row CSV, and the JSON differs in exactly the two declared places: the
+`artifact` self-reference, and `csv`, which records where the companion file landed and so moves under
+`--out` for the same reason `figure_status` does -- a third in-payload output-path field for P3.5 to weigh
+with V2-23.
+
+Documents re-derived: the model card's Level-2 citation, the interview-defense command block, and the
+report's; the PDF rebuilt after them, bundle `66c75781bc64`, pdf `ec5d58229bb4`. Both spellings of the
+probe were run; the remaining citations of the old path are the phase-02 and phase-10 reports, which are
+dated records. `commands_unrunnable_from_the_root` holds at 89 -- a benchmark's recorded command was already
+a bare path in the manifest, so it was in the does-not-exist bucket before the move. No test added, so the
+pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
@@ -1145,6 +1193,13 @@ identical in every member field before it moved anything.
    `main(argv) -> int` is the CLI shim; `__main__.py` is `raise SystemExit(main())`. No behaviour may
    be added here: the payload's keys are the artifact's keys, byte-comparable except for volatile
    fields. Probe: the task's existing test suite, unchanged in assertion, green.
+   Benchmarks take the same split but not the same shape: their destination is one file,
+   `python/quantrisk/benchmarks/<suite>/<script>.py`, and `if __name__ == "__main__"` stays in it because
+   `-m` executes the module itself -- no `__main__.py`, and no `__init__.py` under `benchmarks/`: the
+   namespace import resolves, mypy checks the file regardless, and a package marker would make the parity
+   guard's `benchmarks/*/*.py` glob count a unit the registry does not carry. Where a benchmark already
+   parses its own flags, keep one parser and share it (`_parse(argv)`), because a shim that re-parses with
+   the registry's `parse_out` rejects the study's own arguments.
 4. **Output path.** `RESULTS = Path(__file__)...` and `REPO_ROOT = parents[2]` both die. Resolve the
    directory from `TASKS_BY_ID[<task>].artifact` against a root that is either an explicit `--out` or
    `checkout_root()`; refuse, naming the path, when there is neither. Never fall back to a temporary
