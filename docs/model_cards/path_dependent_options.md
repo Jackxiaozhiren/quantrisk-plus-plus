@@ -40,7 +40,7 @@ must be moved **toward the spot**.
 That direction was initially implemented backwards in this repository, and a test
 asserted the wrong inequality (`corrected > discrete`) which passed because the
 implementation shared the misconception. The oracle comparison
-`benchmarks/quantlib/path_dependent_validation.py` is what caught it; the tests
+`quantrisk.benchmarks.quantlib.path_dependent_validation` is what caught it; the tests
 now assert the tightened barrier, the cheaper price, and the reduced error
 against the analytic continuous value.
 

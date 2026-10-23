@@ -198,7 +198,7 @@ TEST_CASE("the continuity correction widens the barrier in the right direction")
     // A tighter barrier must knock out more often, so the corrected estimate is
     // strictly cheaper than the raw discrete one and closer to continuous
     // monitoring (checked quantitatively against AnalyticBarrierEngine in
-    // benchmarks/quantlib/path_dependent_validation.py).
+    // quantrisk.benchmarks.quantlib.path_dependent_validation).
     MonteCarloEngine plain(5);
     const auto discrete =
         quantrisk::path_dependent::price_barrier(plain, up, market, 60000, 50, false, false);

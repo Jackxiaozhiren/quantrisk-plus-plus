@@ -208,6 +208,7 @@ TASKS: tuple[Task, ...] = (
         "quantlib",
         "path_dependent_validation",
         "path_dependent_vs_quantlib.json",
+        absorbed=True,
     ),
     _benchmark(
         "optimisation_vs_oracles",

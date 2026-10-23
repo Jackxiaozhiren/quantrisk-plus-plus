@@ -2,7 +2,7 @@
 """Level 2 validation for Phase 4: path-dependent and stochastic-volatility
 pricing against live QuantLib models.
 
-    uv run python benchmarks/quantlib/path_dependent_validation.py [--quick]
+    uv run python -m quantrisk.benchmarks.quantlib.path_dependent_validation [--quick]
 
 Each family is attempted independently and its availability is recorded in the
 artifact, so a missing or renamed QuantLib class shows up as
@@ -36,13 +36,15 @@ import csv
 import json
 import math
 import sys
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import quantrisk
 from quantrisk.experiments.metadata import environment, repo_relative, sha256_file, utc_timestamp
+from quantrisk.experiments.registry import TASKS_BY_ID, artifact_path, results_directory
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-RESULTS = REPO_ROOT / "benchmarks" / "quantlib" / "results"
+TASK = TASKS_BY_ID["path_dependent_vs_quantlib"]
 
 EVALUATION_DATE_DAY, EVALUATION_DATE_MONTH, EVALUATION_DATE_YEAR = 1, 1, 2024
 DEFAULT_PATHS = 200_000
@@ -115,12 +117,20 @@ def bs_process(
     )
 
 
-def main() -> int:  # noqa: C901, PLR0915 - one readable pass per oracle family
+def _parse(argv: Sequence[str]) -> argparse.Namespace:
+    """The three knobs, parsed by the study and by the entry point from one place."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--quick", action="store_true")
     parser.add_argument("--paths", type=int, default=DEFAULT_PATHS)
-    parser.add_argument("--out", type=Path, default=None)
-    arguments = parser.parse_args()
+    parser.add_argument(
+        "--out", type=Path, default=None, help="treat this directory as the repository root"
+    )
+    return parser.parse_args(argv)
+
+
+def run(argv: Sequence[str]) -> dict[str, Any]:  # noqa: C901, PLR0915 - one pass per family
+    """Price the path-dependent books against the oracles, write, return the summary."""
+    arguments = _parse(argv)
 
     ql = import_quantlib()
     day_counter = ql.Actual365Fixed()
@@ -131,7 +141,7 @@ def main() -> int:  # noqa: C901, PLR0915 - one readable pass per oracle family
     barrier_cases = BARRIER_CASES[:1] if arguments.quick else BARRIER_CASES
     asian_cases = ASIAN_CASES[:1] if arguments.quick else ASIAN_CASES
 
-    rows: list[dict[str, object]] = []
+    rows: list[dict[str, Any]] = []
     availability: dict[str, dict[str, str | bool]] = {}
 
     # --- heston against the semi-analytic engine -------------------------
@@ -451,7 +461,7 @@ def main() -> int:  # noqa: C901, PLR0915 - one readable pass per oracle family
                 }
             )
 
-    output_dir = arguments.out or RESULTS
+    output_dir = results_directory(TASK, arguments.out)
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "path_dependent_vs_quantlib.csv"
     field_names = sorted({key for row in rows for key in row})
@@ -470,9 +480,9 @@ def main() -> int:  # noqa: C901, PLR0915 - one readable pass per oracle family
         return max(values) if values else float("nan")
 
     summary = {
-        "artifact": "benchmarks/quantlib/path_dependent_validation.py",
+        "artifact": TASK.source,
         "generated_at_utc": utc_timestamp(),
-        "command": f"uv run python {Path(sys.argv[0]).name}",
+        "command": TASK.invocation,
         "environment": environment(),
         "quantlib_version": ql.__version__,
         "paths": paths,
@@ -498,6 +508,12 @@ def main() -> int:  # noqa: C901, PLR0915 - one readable pass per oracle family
     }
     json_path = output_dir / "path_dependent_vs_quantlib.json"
     json_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return summary
+
+
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: what was available and how far apart, then where the files landed."""
+    summary = run(argv)
     print(
         json.dumps(
             {k: summary[k] for k in ("oracle_availability", "worst_relative_error", "rows")},
@@ -506,9 +522,9 @@ def main() -> int:  # noqa: C901, PLR0915 - one readable pass per oracle family
             default=str,
         )
     )
-    print(f"wrote {csv_path} and {json_path}")
+    print(f"wrote {summary['csv']} and {repo_relative(artifact_path(TASK, _parse(argv).out))}")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv[1:]))

@@ -1175,6 +1175,35 @@ keeps its `--paths 200000`), and the report's; the PDF rebuilt after them, bundl
 `commands_unrunnable_from_the_root` 89 and `commands_not_module_path` 95; offline collection is still 479 and
 no test was added, so the pair stays **548 / 479**.
 
+### 2026-10-23, P3.3 absorption 17 of 19 — `path_dependent_vs_quantlib`, and a splice the formatter caught
+
+Seventeenth of 19, third benchmark, and the first of the three with **no test that spawns it**: the path
+dependent oracle comparison is exercised by the suite and checked through its artifact, so the only test-tree
+edit this commit makes is a C++ comment -- `tests/cpp/test_path_dependent.cpp:201` says the barrier
+convergence is "checked quantitatively against AnalyticBarrierEngine in" that file, and the file has a new
+name. mypy found 1 defect (the familiar `float(row["relative_error"])` against `dict[str, object]` rows; two
+annotations widened), and the report, the model card and that comment are re-derived with it, PDF bundle
+`92cc6ad1fc15`, pdf `8400d3de3c56`.
+
+The lane's own mistake, recorded because it is the second instance of the same shape. The registry flip was
+done by string surgery -- `old[:-5] + "        absorbed=True,\n    ),"` -- which left the new line indented by
+nine spaces instead of eight. The first full gate run caught it as `ruff format --check` rc=1, and that was
+the only red on the tree; nothing else would have noticed, because the file parses, imports and type-checks
+either way. Absorption 16 got away with the identical splice by luck. So: registry flips go through the Edit
+tool from here, and `ruff format --check` is what makes the splice safe to attempt at all -- it is a gate on
+this lane's own mechanics, not a stylistic one.
+
+The command field read `f"uv run python {Path(sys.argv[0]).name}"`, which under `-m` names `__main__.py`;
+D4' makes it `TASK.invocation`, and the run's `--paths` value is not lost because the payload already records
+`paths`. The replay was run **again after** the annotation change rather than argued to be unaffected by it:
+same result -- the 25-row CSV byte-identical, the JSON differing only in `artifact` and in the `csv` landing
+path, the two declared classes of this stretch of the lane.
+
+`bootstrap_sites_outside_package` stays 6, by-path load sites 5, `commands_not_module_path` 95 and
+`commands_unrunnable_from_the_root` 89 -- a benchmark recording a bare filename was already in the
+does-not-exist bucket, so a move cannot make that counter worse. mypy 59 to 60 source files, offline
+collection 479, and no test added, so the pair stays **548 / 479**.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
