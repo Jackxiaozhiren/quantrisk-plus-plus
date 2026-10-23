@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 12 experiment: a Taylor remainder bound that predicts a sign change in published data.
 
-    uv run python experiments/linearisation_error_bound/run.py
+    uv run python -m quantrisk.experiments.linearisation_error_bound [--out DIRECTORY]
     uv run python scripts/run_benchmark_suite.py --only linearisation_error_bound
 
 `experiments/stress_testing/results/linearisation_error.csv` freezes the measured error of the
@@ -37,11 +37,12 @@ from __future__ import annotations
 import csv
 import json
 import math
-import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+
 import quantrisk
 from quantrisk.experiments.metadata import (
     artifact_manifest,
@@ -50,8 +51,14 @@ from quantrisk.experiments.metadata import (
     repo_relative,
     utc_timestamp,
 )
+from quantrisk.experiments.registry import (
+    TASKS_BY_ID,
+    artifact_path,
+    parse_out,
+    results_directory,
+)
 
-RESULTS = Path(__file__).resolve().parent / "results"
+TASK = TASKS_BY_ID["linearisation_error_bound"]
 
 SPOT = 100.0
 RATE = 0.03
@@ -232,7 +239,7 @@ def fit_slope(moves: list[float], floor: float, ceiling: float) -> dict[str, flo
     standard_error = math.sqrt(
         float((residual**2).sum()) / (n - 2) / float(((x - x.mean()) ** 2).sum())
     )
-    return {
+    fit: dict[str, Any] = {
         "slope": float(slope),
         "standard_error": standard_error,
         "theory": 3.0,
@@ -240,6 +247,7 @@ def fit_slope(moves: list[float], floor: float, ceiling: float) -> dict[str, flo
         "observations": n,
         "window": [floor, ceiling],
     }
+    return fit
 
 
 # Windows whose upper end shrinks toward the base point. The fitted slope must approach 3 along
@@ -257,7 +265,7 @@ GRID_POINTS = 900
 
 
 def dense_grid() -> tuple[list[float], list[float]]:
-    sizes = list(np.geomspace(GRID_FLOOR, GRID_CEILING, GRID_POINTS))
+    sizes = [float(size) for size in np.geomspace(GRID_FLOOR, GRID_CEILING, GRID_POINTS)]
     return [-size for size in sizes], sizes
 
 
@@ -312,8 +320,11 @@ def sweep_row(direction: str, magnitude: float) -> dict[str, Any]:
     }
 
 
-def main() -> int:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def run(argv: Sequence[str]) -> dict[str, Any]:
+    """Sweep the ladder, fit the remainder bounds, write, return the payload."""
+    out = parse_out(argv, description=__doc__)
+    results = results_directory(TASK, out)
+    results.mkdir(parents=True, exist_ok=True)
 
     rows = [sweep_row("down", move) for move in SWEEP] + [sweep_row("up", move) for move in SWEEP]
 
@@ -359,9 +370,9 @@ def main() -> int:
         direction: [measured_quartic_correction(sign * delta) for delta in correction_deltas]
         for direction, sign in (("down", -1.0), ("up", 1.0))
     }
-    for direction, values in measured_correction.items():
+    for direction, corrections in measured_correction.items():
         closest = min(
-            abs(value - predicted_correction) / abs(predicted_correction) for value in values
+            abs(value - predicted_correction) / abs(predicted_correction) for value in corrections
         )
         if closest > 0.02:
             raise RuntimeError(
@@ -376,17 +387,17 @@ def main() -> int:
 
     # B. the sharp inclusion, on the sweep and on a dense grid in both directions
     violations = [row for row in rows if not row["coefficient_inside_segment_range"]]
-    dense_violations: list[dict[str, float]] = []
-    for direction in (-1.0, 1.0):
+    dense_violations: list[dict[str, Any]] = []
+    for polarity in (-1.0, 1.0):
         for magnitude in np.linspace(1e-3, DENSE_CEILING, DENSE_SHOCKS):
-            delta = direction * float(magnitude)
+            delta = polarity * float(magnitude)
             coefficient = lagrange_coefficient(delta)
             low, high = segment_extremes(delta)
             if not low - 1e-8 <= coefficient <= high + 1e-8:
                 dense_violations.append(
                     {
                         "move": float(magnitude),
-                        "direction": "up" if direction > 0 else "down",
+                        "direction": "up" if polarity > 0 else "down",
                         "coefficient": coefficient,
                         "segment_min": low,
                         "segment_max": high,
@@ -479,10 +490,10 @@ def main() -> int:
             "the up-move |R| is not monotone in the shock, contradicting prediction D"
         )
 
-    figure_path = RESULTS / "linearisation_bound.png"
+    figure_path = results / "linearisation_bound.png"
     figure_status = make_figure(rows, speed_crossing, figure_path)
 
-    csv_path = RESULTS / "linearisation_bound.csv"
+    csv_path = results / "linearisation_bound.csv"
     fields = sorted({key for row in rows for key in row})
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
@@ -492,7 +503,7 @@ def main() -> int:
     payload: dict[str, Any] = {
         "phase": "12 - linearisation error bound",
         "generated_utc": utc_timestamp(),
-        "command": "uv run python experiments/linearisation_error_bound/run.py",
+        "command": TASK.invocation,
         "question": (
             "The stress layer's delta-gamma map has a published error curve, and the prose shipped "
             "with it said the error grows with the shock. Is there a Lagrange remainder "
@@ -637,11 +648,9 @@ def main() -> int:
     payload["figure_status"] = figure_status
     payload["artifacts"] = artifact_manifest([csv_path, figure_path])
 
-    json_path = RESULTS / "linearisation_error_bound.json"
+    json_path = artifact_path(TASK, out)
     json_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(payload["headline"], indent=2))
-    print(f"wrote {repo_relative(json_path)}")
-    return 0
+    return payload
 
 
 def make_figure(rows: list[dict[str, Any]], crossing: dict[str, Any], path: Path) -> str:
@@ -739,5 +748,9 @@ def make_figure(rows: list[dict[str, Any]], crossing: dict[str, Any], path: Path
     return "generated"
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+def main(argv: Sequence[str]) -> int:
+    """The CLI shim: the headline block, then the line the suite reports."""
+    payload = run(argv)
+    print(json.dumps(payload["headline"], indent=2))
+    print(f"wrote {repo_relative(artifact_path(TASK, parse_out(argv, description=__doc__)))}")
+    return 0

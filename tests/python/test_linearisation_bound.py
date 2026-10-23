@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 quantrisk = pytest.importorskip("quantrisk")
+registry = pytest.importorskip("quantrisk.experiments.registry")
 
 if TYPE_CHECKING:
     # mypy cannot see attributes through a name bound by `pytest.importorskip`, so the two types
@@ -340,7 +341,14 @@ def test_the_bound_degenerates_honestly_at_zero_volatility() -> None:
 
 def test_the_experiment_artifact_carries_the_provenance_the_chain_requires() -> None:
     payload = _payload()
-    assert payload["command"] == "uv run python experiments/linearisation_error_bound/run.py"
+    # The recorded command is volatile by declaration, and Phase 3.3 changes it for every study
+    # it absorbs: the artifact on disk carries the spelling of the revision that wrote it, the code
+    # now writes the registry's. Both are the command that produced this task; anything else is not.
+    # Drop the legacy spelling at P3.5, when the single re-run rewrites the artifact.
+    assert payload["command"] in {
+        "uv run python experiments/linearisation_error_bound/run.py",
+        registry.TASKS_BY_ID["linearisation_error_bound"].invocation,
+    }, payload["command"]
     assert len(payload["refusals"]) == 3
     questions = " ".join(entry["question"] for entry in payload["refusals"])
     for phrase in ("plausible", "multi-factor", "zero-volatility"):

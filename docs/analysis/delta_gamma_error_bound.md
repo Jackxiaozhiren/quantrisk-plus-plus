@@ -16,7 +16,7 @@ the reason this note exists: the absolute error is 649.5 at a 10 % down move and
 follows explains why, and then says where the explanation stops.
 
 Everything below is reproduced by
-`uv run python experiments/linearisation_error_bound/run.py`; `docs/analysis/` is new in this phase
+`uv run python -m quantrisk.experiments.linearisation_error_bound`; `docs/analysis/` is new in this phase
 and holds the derivations that the model cards deliberately do not.
 
 ---
@@ -223,7 +223,7 @@ the directions separately over hundreds of points is what produced the numbers i
 ## 7. Reproducing
 
 ```bash
-uv run python experiments/linearisation_error_bound/run.py       # sweep, fits, and the guards
+uv run python -m quantrisk.experiments.linearisation_error_bound       # sweep, fits, and the guards
 uv run pytest tests/python/test_linearisation_bound.py -q       # the predictions, as falsified tests
 uv run python scripts/run_benchmark_suite.py --only linearisation_error_bound
 ```

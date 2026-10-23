@@ -1025,6 +1025,45 @@ the report's; the PDF rebuilt after both, bundle `b1f55b9a149b`, pdf `bd26688918
 study (`grep -c` of either name in `plants.py` is 0), so nothing was re-keyed. mypy's corpus is 51 to 53
 source files with the two-sided agreement holding, and no test was added, so the pair stays **548 / 479**.
 
+### 2026-10-22, P3.3 absorption 13 of 19 — `linearisation_error_bound`, and a frozen assertion that had to learn both spellings
+
+Thirteenth of 19, and the first absorption whose *test* had to change in kind rather than spelling.
+`tests/python/test_linearisation_bound.py:343` asserted the artifact's recorded command with `==` against
+the literal pre-refactor string -- the one command assertion in the suite written as an equality rather than
+a membership, and it had been invisible to absorptions 1 to 12 because no study it guards had moved since
+Phase 12. Pinning the old string would have failed the moment the artifact was honestly regenerated; pinning
+only the new one fails today, because K2 keeps the frozen bytes until P3.5's single re-run. The assertion now
+names both spellings and says why, the same shape `test_fifth_order_crossing_map.py:340` has carried since
+absorption 5, and it reads the new one from the registry rather than retyping it.
+
+Eight mypy defects, and they are the lane's first lesson in *type* rather than annotation arithmetic. Six of
+them were one variable name carrying two roles: `direction` is a str in four dict comprehensions (the sweep's
+`"down"`/`"up"`) and then a float in the dense-grid loop at line 392, so mypy reported `str * float`, `str >
+int` and an assignment of float to str from one collision; `values` was a dict in the fit loop and a list in
+the correction loop. Both were correct at run time -- each loop rebound the name before using it -- and both
+were unreadable, so the fixes are renames (`polarity`, `corrections`) rather than casts. The seventh is
+`dense_grid` returning `list[float]` while `np.geomspace` yields `np.float64`: the elements are now
+explicitly `float(size)`, and the replay's PNG is byte-identical (`78c28e042a52` on both sides), which is the
+proof that converting the container changed no number. The eighth is the fit dict that mixes a `list`
+(`window`) with floats, annotated at the declaration.
+
+The replay's single volatile-free difference is `.oracles.versions.quantrisk`, 1.8.0 against 1.9.0 -- the
+V2-23 finding arriving exactly as registered, in one of the four artifacts it named, and not caused by
+anything this commit changed in the study's arithmetic. `linearisation_bound.csv` and the figure are
+byte-identical.
+`commands_unrunnable_from_the_root` moves 82 to 85 for the three manifest files this study publishes;
+bootstrap stays 6 and by-path load sites stay 5.
+
+No LaTeX citation names this study's source: the report cites its results path, which K2 freezes, and the
+model-card and analysis-note prose was already on `results/...`. The analysis note's two reproduction
+commands are re-derived. No plant targets the moved file (`grep -c` of the path form in `plants.py` is 0).
+mypy is 53 to 55 source files; no test added, so the pair stays **548 / 479**.
+
+One measurement to record honestly rather than quietly: the gate wrapper's wall clock for the pytest lane
+read 17995s while pytest's own summary on the same tree reads 228.82s. The machine was suspended between
+launch and completion, so the wrapper's elapsed includes sleep. The per-lane exit codes are taken from the
+commands and stand; the wall column in that log is not a measurement of anything about this commit.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring

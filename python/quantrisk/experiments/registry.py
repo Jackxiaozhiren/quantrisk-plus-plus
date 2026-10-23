@@ -244,6 +244,7 @@ TASKS: tuple[Task, ...] = (
         "linearisation_error_bound",
         "linearisation_error_bound",
         "linearisation_error_bound.json",
+        absorbed=True,
     ),
     _study(
         "two_factor_error_bound",
