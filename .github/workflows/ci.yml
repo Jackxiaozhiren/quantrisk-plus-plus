@@ -93,27 +93,29 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           python-version: "3.12"
           enable-cache: true
       - name: Install the pinned environment with independent pricing oracles
-        run: uv sync --python 3.12 --extra oracles --frozen
+        run: uv sync --python 3.12 --extra oracles --frozen --no-build --no-install-project
       - name: Configure native C++20 core and bindings
-        run: uv run --frozen cmake --preset ci
+        run: .venv/bin/cmake --preset ci
       - name: Build core, C++ tests, and Python extension
-        run: uv run --frozen cmake --build --preset ci --parallel 2
+        run: .venv/bin/cmake --build --preset ci --parallel 2
       - name: Run all native C++ tests
-        run: uv run --frozen ctest --preset ci
-      - name: Install the extension as the actual Python package
-        run: uv pip install -e .
+        run: .venv/bin/ctest --preset ci
+      - name: Build a local wheel from this reviewed checkout
+        run: uv build --wheel --out-dir dist
+      - name: Install only the built wheel (no registry or build scripts)
+        run: uv pip install --no-index --no-deps --no-build dist/quantrisk-*.whl
       - name: Test native pricing, independent oracle, and C++/Python parity
         env:
           QUANTRISK_REFERENCE_TOOL: ${{ github.workspace }}/build/ci/quantrisk_reference_tool
         run: |
-          uv run --frozen python -c "import scipy, QuantLib; print('Independent oracles loaded')"
-          uv run --frozen pytest -q \
+          .venv/bin/python -c "import scipy, QuantLib; print('Independent oracles loaded')"
+          .venv/bin/python -m pytest -q \
             tests/python/test_smoke.py \
             tests/python/test_pricing.py \
             tests/python/test_cpp_python_consistency.py \
