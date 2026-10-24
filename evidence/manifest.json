@@ -1,34 +1,19 @@
 {
   "schema": "quantrisk-evidence-manifest/1",
-  "generated_utc": "2026-10-24T04:01:35+00:00",
+  "generated_utc": "2026-10-24T04:11:51+00:00",
   "generated_by_command": "uv run python -m tools.build_evidence_manifest",
   "purpose": "Frozen SHA-256 over every artifact a README or paper number traces to, with the command that produced it. Regenerate with the command above; verify with tools/verify_evidence_manifest.py.",
   "repository": {
-    "git_commit": "5be00b3a47128478cb46eccb9ca9e298636ec0ea",
-    "git_describe": "v1.9.0-42-g5be00b3",
-    "working_tree_dirty": true,
-    "uncommitted_paths": [
-      "docs/limitations.md",
-      "docs/reproducibility.md",
-      "evidence/manifest.json",
-      "ocs/interview_defense.md",
-      "paper/technical_report.build.json",
-      "paper/technical_report.pdf",
-      "paper/technical_report.tex",
-      "python/quantrisk/verification/plants.py",
-      "tests/python/test_artifact_metadata.py",
-      "tests/python/test_fifth_order_crossing_map.py",
-      "tests/python/test_linearisation_bound.py",
-      "tools/build_evidence_manifest.py",
-      "tools/inventory_orphan_code.py",
-      "tools/refactor_ceilings.json"
-    ]
+    "git_commit": "26aef06ba28821b9d9b8ddfe6d416b251121bccc",
+    "git_describe": "v1.9.0-43-g26aef06",
+    "working_tree_dirty": false,
+    "uncommitted_paths": []
   },
   "environment": {
     "quantrisk_version": "1.9.0",
-    "git_commit_at_run": "5be00b3a4712",
+    "git_commit_at_run": "26aef06ba288",
     "binary_git_commit": "af7595749188",
-    "provenance": "ran from 5be00b3a4712 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at af7595749188",
+    "provenance": "the working tree is clean at 26aef06ba288 but the extension binary was configured at af7595749188; rebuild (uv pip install -e .) before trusting numbers that depend on C++ sources",
     "python_platform": "macOS-27.0.1-arm64-arm-64bit",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
