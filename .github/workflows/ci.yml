@@ -81,6 +81,45 @@ jobs:
           QUANTRISK_REFERENCE_TOOL: ${{ github.workspace }}/build/ci/quantrisk_reference_tool
         run: uv run pytest -q
 
+  macos-native:
+    # QuantLib tests its C++ core on Linux, Windows, and macOS. QuantRisk++'s
+    # existing Ubuntu jobs check the numerical oracles and frozen benchmark
+    # evidence; this separate native job prevents an Ubuntu-only green build
+    # from masking Apple-Clang, extension-linker, or wheel ABI regressions.
+    #
+    # Keep performance benchmarks on their original runner. Timings from a
+    # different OS/CPU must never be compared as if they share a baseline.
+    name: macOS native C++ and Python parity
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install the pinned environment with independent pricing oracles
+        run: uv sync --python 3.12 --extra oracles --frozen
+      - name: Configure native C++20 core and bindings
+        run: uv run --frozen cmake --preset ci
+      - name: Build core, C++ tests, and Python extension
+        run: uv run --frozen cmake --build --preset ci --parallel 2
+      - name: Run all native C++ tests
+        run: uv run --frozen ctest --preset ci
+      - name: Install the extension as the actual Python package
+        run: uv pip install -e .
+      - name: Test native pricing, independent oracle, and C++/Python parity
+        env:
+          QUANTRISK_REFERENCE_TOOL: ${{ github.workspace }}/build/ci/quantrisk_reference_tool
+        run: |
+          uv run --frozen python -c "import scipy, QuantLib; print('Independent oracles loaded')"
+          uv run --frozen pytest -q \
+            tests/python/test_smoke.py \
+            tests/python/test_pricing.py \
+            tests/python/test_cpp_python_consistency.py \
+            tests/python/test_pricing_vs_quantlib.py \
+            tests/python/test_validation_errors.py
+
   benchmark-suite:
     # The published artifacts in benchmarks/ and experiments/ are the evidence the README
     # and docs/validation_matrix.md quote. This job re-executes all nineteen members against
