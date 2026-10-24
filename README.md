@@ -302,10 +302,11 @@ uv run cmake --build --preset dev   # build core + tests
 uv run ctest --preset dev           # 204 C++ tests, 548,368 assertions
 ```
 
-Three CI jobs run on every push: lint and format, the full build with both test suites, and
-the benchmark suite against live oracles with `--require-all` so a missing oracle fails the
-job rather than quietly skipping six members. The third job is new and has not yet completed
-on a GitHub-hosted runner; see `docs/reproducibility.md`.
+Four CI jobs run on every push: lint and format, the Ubuntu full C++/Python test build,
+native macOS C++/Python parity with a local SHA-256-verified wheel, and the benchmark suite
+against live oracles with --require-all so a missing oracle fails the job rather than
+quietly skipping six members. Performance benchmarks stay on the original Ubuntu runner,
+rather than treating heterogeneous systems as equivalent; see docs/reproducibility.md.
 
 ---
 

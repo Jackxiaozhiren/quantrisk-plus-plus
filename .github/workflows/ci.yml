@@ -96,8 +96,12 @@ jobs:
       # Pin native CMake binding discovery to the Python interpreter that uv
       # installed, rather than whichever Python happens to be on PATH.
       VIRTUAL_ENV: ${{ github.workspace }}/.venv
+      WHEEL_REQUIREMENTS: dist/locked-wheel.txt
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           python-version: "3.12"
@@ -105,35 +109,35 @@ jobs:
       - name: Install the pinned environment with independent pricing oracles
         run: uv sync --python 3.12 --extra oracles --frozen --no-build --no-install-project
       - name: Configure native C++20 core and bindings
-        run: .venv/bin/cmake --preset ci
+        run: uv run --no-build --no-sync cmake --preset ci
       - name: Build core, C++ tests, and Python extension
-        run: .venv/bin/cmake --build --preset ci --parallel 2
+        run: uv run --no-build --no-sync cmake --build --preset ci --parallel 2
       - name: Run all native C++ tests
-        run: .venv/bin/ctest --preset ci
+        run: uv run --no-build --no-sync ctest --preset ci
       - name: Build a local wheel from this reviewed checkout
         run: uv build --wheel --out-dir dist
       - name: SHA-256 pin the exact locally built wheel
         run: |
-          .venv/bin/python - <<'PY'
+          uv run --no-build --no-sync python - <<'PY'
           from hashlib import sha256
           from pathlib import Path
           wheels = list(Path("dist").glob("quantrisk-*.whl"))
           if len(wheels) != 1:
               raise SystemExit(f"Expected exactly one wheel, found {len(wheels)}")
           wheel = wheels[0].resolve()
-          Path("dist/locked-wheel.txt").write_text(
+          (Path("dist") / "locked-wheel.txt").write_text(
               f"{wheel} --hash=sha256:{sha256(wheel.read_bytes()).hexdigest()}\n",
               encoding="utf-8",
           )
           PY
       - name: Install only the verified wheel, offline and without setup scripts
-        run: uv pip install --no-index --no-deps --no-build --require-hashes -r dist/locked-wheel.txt
+        run: uv pip install --no-index --no-deps --no-build --require-hashes -r "$WHEEL_REQUIREMENTS"
       - name: Test native pricing, independent oracle, and C++/Python parity
         env:
           QUANTRISK_REFERENCE_TOOL: ${{ github.workspace }}/build/ci/quantrisk_reference_tool
         run: |
-          .venv/bin/python -c "import scipy, QuantLib; print('Independent oracles loaded')"
-          .venv/bin/python -m pytest -q \
+          uv run --no-build --no-sync python -c "import scipy, QuantLib; print('Independent oracles loaded')"
+          uv run --no-build --no-sync python -m pytest -q \
             tests/python/test_smoke.py \
             tests/python/test_pricing.py \
             tests/python/test_cpp_python_consistency.py \
