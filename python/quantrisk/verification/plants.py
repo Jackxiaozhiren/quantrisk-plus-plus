@@ -71,7 +71,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="readme-quotes-a-stale-speedup",
         kind="prose",
         path="README.md",
-        anchor="`10.31×` in the artifact now in the tree",
+        anchor="`7.89×` in the artifact now in the tree",
         replacement="`8.70×` in the artifact now in the tree",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -83,7 +83,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-cites-a-run-date-the-artifact-does-not-carry",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="2026-10-09T04:54:37+00:00",
+        anchor="2026-10-24T03:08:57+00:00",
         replacement="2026-09-29T08:58:31+00:00",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -355,8 +355,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-a-manifest-the-freeze-does-not-have",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="95 artifacts, 7{,}210{,}243 bytes",
-        replacement="94 artifacts, 7{,}210{,}243 bytes",
+        anchor="95 artifacts, 7{,}210{,}363 bytes",
+        replacement="94 artifacts, 7{,}210{,}363 bytes",
         # The report's §Limitations restatement of the freeze was `v1.1.0`'s totals and shipped in
         # six releases, while its own headline paragraph said 94 two pages earlier; the guard reads
         # `totals` from the manifest, so one digit here is enough to redden it.
@@ -892,7 +892,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-quotes-a-path-rate-the-artifact-does-not-measure",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="versus 3,787,943 paths/s in an equivalent pure-Python loop",
+        anchor="versus 4,453,163 paths/s in an equivalent pure-Python loop",
         replacement="versus 3,787,944 paths/s in an equivalent pure-Python loop",
         # The sheet states three rates in running prose beside the current band, and a superseded
         # fourth beside the words that say it is history. Proving the phrase patterns distinguish

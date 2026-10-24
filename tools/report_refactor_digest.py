@@ -106,17 +106,33 @@ def compare(revision: str) -> tuple[int, list[str]]:
             before = content_digest(snapshot)
             after = content_digest(live)
             if before is None or after is None:
-                if old_bytes != live.read_bytes():
-                    byte_moved += 1
-                    lines.append(f"byte-only {category:24s} {path}")
+                if old_bytes == live.read_bytes():
+                    continue
+                cover = _declared(declarations, "<bytes>", category)
+                byte_moved += 1
+                if cover is None:
+                    # No canonical form and the bytes differ: for a figure that is data movement,
+                    # and it is adjudicated rather than absorbed.
+                    undeclared.append(f"{path} :: bytes differ, no canonical form")
+                    lines.append(f"UNDECLARED {category:24s} {path} :: <bytes>")
+                else:
+                    lines.append(f"declared   {category:24s} {path} :: <bytes> [{cover['id']}]")
                 continue
             if before == after:
                 identical += 1
                 continue
             moved += 1
             if Path(path).suffix != ".json":
-                undeclared.append(f"{path} :: whole-file content moved ({category})")
-                lines.append(f"UNDECLARED {category:24s} {path} :: <file>")
+                # A CSV has columns, not leaves, and a Markdown aggregate has neither. The whole
+                # file is one leaf named `<file>`, so a category-level declaration can cover it --
+                # which is only safe because the numbers an aggregate quotes are compared leaf by
+                # leaf in the member artifacts above it.
+                cover = _declared(declarations, "<file>", category)
+                if cover is None:
+                    undeclared.append(f"{path} :: whole-file content moved")
+                    lines.append(f"UNDECLARED {category:24s} {path} :: <file>")
+                else:
+                    lines.append(f"declared   {category:24s} {path} :: <file> [{cover['id']}]")
                 continue
             old_leaves = _leaves(_strip(json.loads(old_bytes.decode("utf-8"))))
             new_leaves = _leaves(_strip(json.loads(live.read_text(encoding="utf-8"))))
@@ -138,8 +154,8 @@ def compare(revision: str) -> tuple[int, list[str]]:
             temporary.unlink(missing_ok=True)
     header = (
         f"L1 report {revision} -> working tree: {len(old_manifest['artifacts'])} manifest entries, "
-        f"{identical} unchanged, {moved} with content movement, "
-        f"{byte_moved} byte-only files redrawn, {len(undeclared)} undeclared"
+        f"{identical} unchanged, {moved} with content movement, {byte_moved} files with no "
+        f"canonical form whose bytes differ, {len(undeclared)} undeclared"
     )
     return (1 if undeclared else 0), [header, *lines]
 

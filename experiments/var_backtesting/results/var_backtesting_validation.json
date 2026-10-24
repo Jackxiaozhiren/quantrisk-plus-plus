@@ -1,7 +1,7 @@
 {
   "phase": "5 - Market risk: VaR/ES estimators, bootstrap intervals, coverage backtests",
-  "generated_utc": "2026-10-09T04:55:11+00:00",
-  "command": "uv run python experiments/var_backtesting/run.py",
+  "generated_utc": "2026-10-24T03:09:34+00:00",
+  "command": "uv run python -m quantrisk.experiments.var_backtesting",
   "purpose": "Level 1/3 statistical validation of the risk layer: estimator bias and realised violation rates, size and power of the Kupiec and Christoffersen tests, and measured bootstrap coverage under dependence.",
   "parameters": {
     "sigma": 0.02,
@@ -45,7 +45,7 @@
     "role": "reference only; the library never imports SciPy",
     "versions": {
       "python": "3.12.14",
-      "quantrisk": "1.8.0",
+      "quantrisk": "1.9.0",
       "numpy": "2.5.3",
       "scipy": "1.18.1",
       "pandas": "3.0.6",
@@ -59,14 +59,12 @@
     }
   },
   "environment": {
-    "generated_at_utc": "2026-10-09T04:55:11+00:00",
-    "quantrisk_version": "1.8.0",
-    "git_commit": "49dc0155cfb4",
-    "binary_git_commit": "49dc0155cfb4",
+    "generated_at_utc": "2026-10-24T03:09:34+00:00",
+    "quantrisk_version": "1.9.0",
+    "git_commit": "17df062040b8",
+    "binary_git_commit": "af7595749188",
     "working_tree_dirty": true,
     "uncommitted_paths": [
-      "CITATION.cff",
-      "CMakeLists.txt",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
@@ -76,12 +74,9 @@
       "experiments/monte_carlo_convergence/results/summary.json",
       "experiments/pricing_validation/results/summary.json",
       "experiments/variance_reduction/results/summary.json",
-      "experiments/variance_reduction/results/variance_by_method.csv",
-      "pyproject.toml",
-      "tests/python/test_artifact_metadata.py",
-      "uv.lock"
+      "experiments/variance_reduction/results/variance_by_method.csv"
     ],
-    "provenance": "ran from 49dc0155cfb4 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 49dc0155cfb4",
+    "provenance": "ran from 17df062040b8 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at af7595749188",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",
@@ -92,7 +87,7 @@
     "python_machine": "arm64",
     "packages": {
       "python": "3.12.14",
-      "quantrisk": "1.8.0",
+      "quantrisk": "1.9.0",
       "numpy": "2.5.3",
       "scipy": "1.18.1",
       "pandas": "3.0.6",

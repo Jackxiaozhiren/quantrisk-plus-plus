@@ -2944,7 +2944,7 @@ _CENSUS_README_PHANTOMS: tuple[str, ...] = ()
 # The next two documents in the queue, censused on 2026-10-17 by reading every hit in its sentence.
 # The criterion a hit has to meet to be gold is stated because the earlier phases implied it: the
 # number must *measure* the noun the phrase names -- either as a count of them (`19 members`,
-# `two radii`) or as their value (`32.6% spread`, `0.15 cubic radius`, `39,040,079 paths/s`, where
+# `two radii`) or as their value (`32.6% spread`, `0.15 cubic radius`, `35,143,688 paths/s`, where
 # `/s` is a unit rather than a second thing counted). A hit is a phantom when the noun is not what
 # the number measures at all: the conjunction that glued a clause end to a verb (README's
 # `0.588 and orders`), and now a second shape -- `two radius` here, from "two radius
@@ -2988,12 +2988,12 @@ _CENSUS_SHEET_GOLD = (
     "203 cases",
     "21,130,162 paths",
     "22 questions",
-    "3,787,943 paths",
     "30 joint moves",
     "330 python tests",
     "341 python tests",
-    "39,040,079 paths",
+    "35,143,688 paths",
     "4 scenarios",
+    "4,453,163 paths",
     "45,982,736 paths",
     "479 tests",
     "492 rows",
@@ -3002,7 +3002,7 @@ _CENSUS_SHEET_GOLD = (
     "548 python tests",
     "548,368 assertions",
     "69 cases",
-    "78,860,106 paths",
+    "80,258,165 paths",
     "five books",
     "four rays",
     "one test",
@@ -3015,6 +3015,7 @@ _CENSUS_SHEET_GOLD = (
     "two radius definitions",
     "two tests",
     "two versions",
+
 )
 # Empty from Phase 56: the sheet's one phantom, `two radius`, was the truncation #105 named, and the
 # head-conditioned refusal reads it whole as `two radius definitions`, a count of rejected designs
@@ -3099,7 +3100,7 @@ _CENSUS_REPORT_GOLD = (
     "60 working digits",
     "600 monthly observations",
     "67 runs",
-    "7{,}210{,}243 bytes",
+    "7{,}210{,}363 bytes",
     "8 assets",
     "8 correctness benchmarks",
     "800 steps",

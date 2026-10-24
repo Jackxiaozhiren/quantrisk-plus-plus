@@ -1800,7 +1800,7 @@ thread, on the recorded arm64 platform. The price column is the estimate each im
 returned, so the timing comparison cannot be made by implementations that price something else.
 Source: the run in
 \src{benchmarks/performance/results/monte_carlo_speed.json} dated
-2026-10-09T04:54:37+00:00; the manifest binds that file to the revision and toolchain it was
+2026-10-24T03:08:57+00:00; the manifest binds that file to the revision and toolchain it was
 produced with. Earlier dated runs of the same script are in
 \src{docs/phase_reports/phase-03-monte-carlo.md} and
 \src{benchmarks/suite/results/suite_headline.csv}.}
@@ -1810,18 +1810,18 @@ produced with. Earlier dated runs of the same script are in
 \toprule
 Implementation & mean s.\ & std.\ s. & paths/s & estimate & $z$ vs analytic \\
 \midrule
-C++ core & 0.005123 & 0.000151 & 39{,}040{,}079 & 11.14596 & $+0.537$ \\
-pure Python loop & 0.052799 & 0.012910 & 3{,}787{,}943 & 11.11229 & $-0.292$ \\
-vectorised NumPy & 0.002536 & 0.000286 & 78{,}860{,}106 & 11.11430 & $-0.242$ \\
+C++ core & 0.005691 & 0.000090 & 35{,}143{,}688 & 11.14596 & $+0.537$ \\
+pure Python loop & 0.044912 & 0.000086 & 4{,}453{,}163 & 11.11229 & $-0.292$ \\
+vectorised NumPy & 0.002492 & 0.000300 & 80{,}258{,}165 & 11.11430 & $-0.242$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The measured ratio of C++ to a pure Python loop is $10.31\times$ in the run tabulated
+The measured ratio of C++ to a pure Python loop is $7.89\times$ in the run tabulated
 here, whose absolute throughputs run from the $21{,}130{,}162$ paths/s a loaded desktop has
 produced to the $46{,}382{,}828$ the quietest committed run gives, and this one sits between them at
 $39{,}040{,}079$, which is why the claim is the ratio and not the rate; against vectorised NumPy it
-is $0.495\times$, that is, NumPy is faster in this regime, and the artifact says
+is $0.438\times$, that is, NumPy is faster in this regime, and the artifact says
 so (\src{benchmarks/performance/results/monte_carlo_speed.json};
 \src{docs/phase_reports/phase-03-monte-carlo.md}). The claim is scoped by four recorded caveats in
 the same artifact. The work measured is a terminal-only draw, one normal per path, which is exactly
@@ -1979,7 +1979,7 @@ microstructure --- is deferred, and adding any of it requires extending the spec
 (\src{docs/mathematical_specification.md}~\S11; \src{docs/project_scope.md}).
 
 Where the release engineering is incomplete, this report says so rather than anticipating it.
-The manifest is committed and verified: 95 artifacts, 7{,}210{,}243 bytes, of which 8 correctness
+The manifest is committed and verified: 95 artifacts, 7{,}210{,}363 bytes, of which 8 correctness
 benchmarks, 1 performance benchmark, 66 statistical experiment files, 4 suite-aggregate files and 16
 offline fixtures, generated from a clean tree with no warnings
 (\src{evidence/manifest.json}). What remains incomplete is distribution rather than evidence: the

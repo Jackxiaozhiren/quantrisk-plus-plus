@@ -1,7 +1,7 @@
 {
   "schema": "quantrisk.two_factor_error_bound.v1",
-  "generated_at_utc": "2026-10-09T04:55:29+00:00",
-  "command": "uv run python experiments/two_factor_error_bound/run.py",
+  "generated_at_utc": "2026-10-24T03:09:51+00:00",
+  "command": "uv run python -m quantrisk.experiments.two_factor_error_bound",
   "claim": "the delta-gamma-vega stress map loses a quadratic term under a joint spot and volatility shock, that term is closed-form, and the residual left by subtracting it is trapped by the third directional derivative along the shock ray",
   "book": {
     "spot": 100.0,
@@ -16,7 +16,7 @@
     ],
     "quantity": 5000.0,
     "base_value": 108911.1270234195,
-    "source": "experiments/stress_testing/run.py:run_linearisation"
+    "source": "stress_testing:run_linearisation"
   },
   "base_exposures": {
     "delta": 850686.9028678279,
@@ -510,7 +510,7 @@
     "dominant_omitted_term": "cubic_gamma_sigma",
     "volatility_attribution": 21344.22586441339,
     "scenario": "risk_off",
-    "source": "experiments/stress_testing/run.py:scenarios()"
+    "source": "stress_testing:scenarios()"
   },
   "ridge_probe": {
     "predicted_k_over_h": -0.0007204375742640882,
@@ -4683,14 +4683,12 @@
     }
   ],
   "environment": {
-    "generated_at_utc": "2026-10-09T04:55:29+00:00",
-    "quantrisk_version": "1.8.0",
-    "git_commit": "49dc0155cfb4",
-    "binary_git_commit": "49dc0155cfb4",
+    "generated_at_utc": "2026-10-24T03:09:51+00:00",
+    "quantrisk_version": "1.9.0",
+    "git_commit": "17df062040b8",
+    "binary_git_commit": "af7595749188",
     "working_tree_dirty": true,
     "uncommitted_paths": [
-      "CITATION.cff",
-      "CMakeLists.txt",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
@@ -4703,12 +4701,9 @@
       "experiments/pricing_validation/results/summary.json",
       "experiments/var_backtesting/results/var_backtesting_validation.json",
       "experiments/variance_reduction/results/summary.json",
-      "experiments/variance_reduction/results/variance_by_method.csv",
-      "pyproject.toml",
-      "tests/python/test_artifact_metadata.py",
-      "uv.lock"
+      "experiments/variance_reduction/results/variance_by_method.csv"
     ],
-    "provenance": "ran from 49dc0155cfb4 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 49dc0155cfb4",
+    "provenance": "ran from 17df062040b8 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at af7595749188",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",
@@ -4719,7 +4714,7 @@
     "python_machine": "arm64",
     "packages": {
       "python": "3.12.14",
-      "quantrisk": "1.8.0",
+      "quantrisk": "1.9.0",
       "numpy": "2.5.3",
       "scipy": "1.18.1",
       "pandas": "3.0.6",
@@ -4736,7 +4731,7 @@
     "tool": "none used; a bound is not a second implementation of a price",
     "versions": {
       "python": "3.12.14",
-      "quantrisk": "1.8.0",
+      "quantrisk": "1.9.0",
       "numpy": "2.5.3",
       "scipy": "1.18.1",
       "pandas": "3.0.6",

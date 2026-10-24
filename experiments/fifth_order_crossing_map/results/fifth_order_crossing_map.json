@@ -747,7 +747,7 @@
     }
   ],
   "claim": "order five widens the contiguous paired-magnitude crossing radius on 2 of 5 books and leaves it unchanged on 3: the published ladder goes 0.15 -> 0.20, a factor of 1.33 against the cubic-to-quartic 3.00; 2 books sit at the swept grid edge where a radius cannot be read as a measurement of anything",
-  "command": "uv run python experiments/fifth_order_crossing_map/run.py",
+  "command": "uv run python -m quantrisk.experiments.fifth_order_crossing_map",
   "controls": {
     "fifth_order_book_sums_published_book": {
       "sigma_sigma_sigma_sigma_sigma": -1623990538.352941,
@@ -757,7 +757,7 @@
       "spot_spot_spot_spot_sigma": 11.024332241945928,
       "spot_spot_spot_spot_spot": 0.0969119927093902
     },
-    "machinery_equality_with_v150_and_v160": "verify_control from experiments/second_book_crossing_map/run.py ran on the published book before this artifact was written: the ten third- and fourth-order coefficients, bothtruncations andthe engine P&L over 30 joint moves are exactly equal, and the run refuses to publish otherwise",
+    "machinery_equality_with_v150_and_v160": "verify_control from second_book_crossing_map ran on the published book before this artifact was written: the ten third- and fourth-order coefficients, bothtruncations andthe engine P&L over 30 joint moves are exactly equal, and the run refuses to publish otherwise",
     "multinomial_contraction_of_the_quintic_piece": {
       "band": 0.05,
       "rays": [
@@ -833,7 +833,7 @@
   },
   "environment": {
     "packages": {
-      "quantrisk": "1.8.0"
+      "quantrisk": "1.9.0"
     },
     "platform": "darwin",
     "python": "3.12.14"
@@ -1250,7 +1250,7 @@
       }
     }
   },
-  "generated_at_utc": "2026-10-09T04:56:54.161456+00:00",
+  "generated_at_utc": "2026-10-24T03:10:52.499465+00:00",
   "headline": {
     "books_at_grid_edge": 2,
     "books_measured": 5,
@@ -1286,7 +1286,7 @@
     }
   },
   "procedure": {
-    "books": "the five books, the delta grid, the 0.005 tolerance and the contiguous paired-magnitude radius rule are imported from experiments/second_book_crossing_map/run.py, which itself loads v1.5.0's and v1.6.0's files, so this run adds one order and changes nothing else",
+    "books": "the five books, the delta grid, the 0.005 tolerance and the contiguous paired-magnitude radius rule are imported from second_book_crossing_map, which itself loads v1.5.0's and v1.6.0's files, so this run adds one order and changes nothing else",
     "not_measured": "residual slopes against shock size: Phase 18's five books had already refuted the mechanism a slope would illustrate, and the arithmetic-floor windowing that governs such fits is this chain's published caveat, not a new one",
     "quintic_term": "(1/120) times V_SSSSS h^5 + 5 V_SSSSsigma h^4 k + 10 V_SSSsigmasigma h^3 k^2 + 10 V_SSsigmasigmasigma h^2 k^3 + 5 V_Ssigmasigmasigmasigma h k^4 + V_sigmasigmasigmasigmasigma k^5, with the six book sums read from pricing.black_scholes_mixed_fifth_derivatives and h the absolute spot move",
     "radius_definition": "a |delta| magnitude passes only when every signed column at it that has a priced crossing has this truncation's nearest zero inside 0.005; the radius is the widest magnitude such that all smaller magnitudes pass"

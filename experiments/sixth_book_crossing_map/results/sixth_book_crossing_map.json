@@ -1,13 +1,13 @@
 {
   "schema": "quantrisk.sixth_book_crossing_map.v1",
   "claim": "the contiguous paired-magnitude crossing radius of the cubic, quartic and quintic column-error truncations on six books, the sixth chosen by the published order-five-to-four ratio rule before its radius was read",
-  "command": "uv run python experiments/sixth_book_crossing_map/run.py",
-  "generated_at_utc": "2026-10-09T04:57:50+00:00",
+  "command": "uv run python -m quantrisk.experiments.sixth_book_crossing_map",
+  "generated_at_utc": "2026-10-24T03:11:42+00:00",
   "environment": {
     "python": "3.12.14",
     "platform": "darwin",
     "packages": {
-      "quantrisk": "1.8.0"
+      "quantrisk": "1.9.0"
     }
   },
   "reproduction_policy": {
@@ -61,8 +61,8 @@
       "quintic"
     ],
     "reused_from": [
-      "experiments/fifth_order_crossing_map/run.py",
-      "experiments/second_book_crossing_map/run.py"
+      "fifth_order_crossing_map",
+      "second_book_crossing_map"
     ]
   },
   "headline": {
@@ -94,7 +94,7 @@
     "columns_with_a_priced_crossing_total": 60
   },
   "controls": {
-    "control": "experiments/fifth_order_crossing_map/run.py::P18.verify_control",
+    "control": "fifth_order_crossing_map::P18.verify_control",
     "control_ran_on": "published ladder",
     "published_books_reproduced_bit_for_bit": 5,
     "published_artifact": "experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json",

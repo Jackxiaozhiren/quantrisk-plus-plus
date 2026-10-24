@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-10-09T04:56:04.041853+00:00",
-  "command": "uv run python experiments/second_book_crossing_map/run.py",
+  "generated_at_utc": "2026-10-24T03:10:21.067950+00:00",
+  "command": "uv run python -m quantrisk.experiments.second_book_crossing_map",
   "claim": "the order-four widening is a property of the expansion and not of v1.6.0's ladder: on 5 of 5 books the quartic's contiguous crossing radius is at least the cubic's, and on every book its worst distance inside the cubic's own radius is the smaller -- but the magnitude does not transfer: the published 3.0x is the widest factor in the set, matched by one other book, the four spanning 1.3x to 3.0x",
   "procedure": {
     "tolerance": 0.005,
@@ -26,7 +26,7 @@
     "measured_scan_points": 401,
     "bisection_steps": 40,
     "radius_definition": "the widest |delta| whose every column with a priced crossing has its nearest predicted zero inside the tolerance, contiguous from the smallest magnitude outward, a magnitude passing only when both of its signed columns do",
-    "shared_with": "the grid, the tolerance and _sign_change_roots are imported from restrike_gamma_map/run.py, and v1.6.0's truncation is imported as the control, so a radius here and a radius there mean one thing"
+    "shared_with": "the grid, the tolerance and _sign_change_roots are imported from restrike_gamma_map, and v1.6.0's truncation is imported as the control, so a radius here and a radius there mean one thing"
   },
   "headline": {
     "books_measured": 5,
@@ -1126,7 +1126,7 @@
     "python": "3.12.14",
     "platform": "darwin",
     "packages": {
-      "quantrisk": "1.8.0"
+      "quantrisk": "1.9.0"
     }
   }
 }

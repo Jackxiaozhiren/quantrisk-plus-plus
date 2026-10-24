@@ -1,7 +1,7 @@
 {
   "schema": "quantrisk.restrike_gamma_map.v1",
-  "generated_at_utc": "2026-10-20T10:26:43+00:00",
-  "command": "uv run python experiments/restrike_gamma_map/run.py",
+  "generated_at_utc": "2026-10-24T03:09:58+00:00",
+  "command": "uv run python -m quantrisk.experiments.restrike_gamma_map",
   "claim": "re-striking gamma at the shocked volatility does remove the term v1.3.0 named as dominant -- 86% of it at published size, taking the risk_off error to 0.364x -- but it worsens 45 of the 120 cells swept, and the cells it worsens are exactly those where the shipped map was accurate because two third-order terms cancelled",
   "book": {
     "spot": 100.0,
@@ -16,7 +16,7 @@
     ],
     "quantity": 5000.0,
     "base_value": 108911.1270234195,
-    "source": "experiments/stress_testing/run.py:run_linearisation"
+    "source": "stress_testing:run_linearisation"
   },
   "maps": {
     "base": {
@@ -1328,32 +1328,30 @@
     "everything_else": "exact for counts and verdicts, 1e-5 relative for other floats"
   },
   "environment": {
-    "generated_at_utc": "2026-10-20T10:26:43+00:00",
+    "generated_at_utc": "2026-10-24T03:09:58+00:00",
     "quantrisk_version": "1.9.0",
-    "git_commit": "5dff42a31f46",
-    "binary_git_commit": "5dff42a31f46",
+    "git_commit": "17df062040b8",
+    "binary_git_commit": "af7595749188",
     "working_tree_dirty": true,
     "uncommitted_paths": [
-      "CITATION.cff",
-      "CMakeLists.txt",
-      "README.md",
-      "docs/interview_defense.md",
-      "docs/limitations.md",
-      "docs/release_notes_v1.9.0.md",
-      "docs/reproducibility.md",
-      "evidence/manifest.json",
-      "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
+      "benchmarks/performance/results/monte_carlo_speed.json",
+      "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
+      "benchmarks/quantlib/results/monte_carlo_validation.json",
+      "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
+      "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
+      "experiments/monte_carlo_convergence/results/convergence.csv",
+      "experiments/monte_carlo_convergence/results/summary.json",
+      "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
+      "experiments/pricing_validation/results/summary.json",
       "experiments/real_data_risk_study/results/real_data_risk_study.json",
-      "experiments/restrike_gamma_map/results/restrike_gamma_map.json",
-      "paper/technical_report.build.json",
-      "paper/technical_report.pdf",
-      "paper/technical_report.tex",
-      "pyproject.toml",
-      "scripts/mutation_plants.py",
-      "tests/python/test_artifact_metadata.py",
-      "uv.lock"
+      "experiments/stress_testing/results/stress_testing_study.json",
+      "experiments/two_factor_error_bound/results/two_factor_bound.json",
+      "experiments/var_backtesting/results/var_backtesting_validation.json",
+      "experiments/variance_reduction/results/summary.json",
+      "experiments/variance_reduction/results/variance_by_method.csv"
     ],
-    "provenance": "ran from 5dff42a31f46 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 5dff42a31f46",
+    "provenance": "ran from 17df062040b8 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at af7595749188",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_arch": "arm64",
     "cpp_os": "Darwin 27.0.0",

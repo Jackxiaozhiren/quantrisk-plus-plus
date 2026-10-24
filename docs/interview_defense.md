@@ -442,11 +442,11 @@ in `/tmp` with the commit and the full command list recorded.
 ### Q12. Why use C++ instead of pure Python?
 
 **30 s.** For the hot loops and the memory layout, with a measured number rather than a belief:
-39,040,079 paths/s in the C++ core versus 3,787,943 paths/s in an equivalent pure-Python loop —
-10.31× on this machine, between the 21,130,162 paths/s a loaded desktop has shown and the
+35,143,688 paths/s in the C++ core versus 4,453,163 paths/s in an equivalent pure-Python loop —
+7.89× on this machine, between the 21,130,162 paths/s a loaded desktop has shown and the
 46,382,828 the quietest committed run gives, so the claim is the ratio and not the rate. The same measurement gives
-vectorised NumPy 78,860,106 paths/s, i.e.
-C++ is 0.495× of NumPy for one-normal-per-path work, so the honest claim is narrower than "C++ is
+vectorised NumPy 80,258,165 paths/s, i.e.
+C++ is 0.438× of NumPy for one-normal-per-path work, so the honest claim is narrower than "C++ is
 faster than Python".
 
 **2 min.** Three reasons the boundary is where it is. (1) The regime where C++ genuinely wins is
@@ -465,8 +465,8 @@ binding plus tests in both suites.
 `benchmarks/performance/results/monte_carlo_speed.json`: terminal-only European call
 (`S = K = 100`, `r = 5 %`, `q = 2 %`, `σ = 25 %`, `T = 1`), 200,000 paths per run, 7
 repetitions, single-threaded, `CMAKE_BUILD_TYPE=Release`, AppleClang 21.0.0.21000334, arm64.
-Means: C++ 0.005123 s (std 1.51e-4), pure Python 0.052799 s (std 1.29e-2), NumPy 0.002536 s
-(std 2.86e-4); speedups 10.31× versus pure Python, 0.495× versus NumPy. Those are the digits in the
+Means: C++ 0.005691 s (std 8.96e-5), pure Python 0.044912 s (std 8.64e-5), NumPy 0.002492 s
+(std 3.00e-4); speedups 7.89× versus pure Python, 0.438× versus NumPy. Those are the digits in the
 frozen artifact, and they are not constants: across the twenty-two re-freezings in this repository's
 history the C++/Python ratio spans 7.77×–10.31× and the NumPy ratio 0.42×–0.51×, so the answer above
 quotes a run and the claim is the ordering. Three caveats shipped in
@@ -1056,7 +1056,7 @@ uv run python -m quantrisk.benchmarks.performance.monte_carlo_speed
 | Coverage 12/12 inside the exact `Binomial(200, level)` band; example cell 191/200 in [181, 197] | `experiments/monte_carlo_convergence/results/summary.json` (`coverage`, `coverage_intervals_inside_binomial_band`); band construction `python/quantrisk/experiments/monte_carlo_convergence/__init__.py:191-195` |
 | Pooled z-scores vs QuantLib analytic (492 rows, 4 scenarios × 3 methods × 40 seeds, 200,000 paths): means −0.0228 / +0.0503 / +0.0310, stds 1.0139 / 0.9232 / 0.9304, 96.25 %–98.75 % inside ±2; `quantlib_mc_engine_used: false` | `benchmarks/quantlib/results/monte_carlo_validation.json` |
 | Out-of-sample MSE reductions: antithetic 1.1155×–2.7741×, control variate 1.9313×–40.468×; 40 seeds; in-sample-`beta` caveat | `experiments/variance_reduction/results/summary.json` (+ `realised_error.csv`); `docs/limitations.md` #19 |
-| Speed: C++ 0.005123 s / 39,040,079 paths/s, pure Python 0.052799 s / 3,787,943, NumPy 0.002536 s / 78,860,106; 10.31× and 0.495×, with the 7.77×–10.31× / 0.42×–0.51× history range; 7 repetitions; three estimates and z-scores; caveats list | `benchmarks/performance/results/monte_carlo_speed.json` |
+| Speed: C++ 0.005691 s / 35,143,688 paths/s, pure Python 0.044912 s / 4,453,163, NumPy 0.002492 s / 80,258,165; 7.89× and 0.438×, with the 7.77×–10.31× / 0.42×–0.51× history range; 7 repetitions; three estimates and z-scores; caveats list | `benchmarks/performance/results/monte_carlo_speed.json` |
 | Antithetic `iid_units = paths / 2`; odd path count throws; pair product identity to 1e-12; drift not negated | `cpp/src/monte_carlo/engine.cpp:87-97,142-154`; `cpp/src/stochastic/gbm.cpp:74-88,104-109`; `tests/cpp/test_monte_carlo.cpp:96-110`; `tests/cpp/test_gbm.cpp:128-167` |
 | Control-variate exactness identity (price to 1e-12, SE < 1e-12, `beta ≈ 1`) and constant-payoff discount factor to 1e-15 | `tests/cpp/test_monte_carlo.cpp:142-168`; `cpp/src/monte_carlo/engine.cpp:57-85` |
 | Physical measure is a separate code path, and `mu = r` reproduces the risk-neutral stream bit-for-bit | `cpp/src/stochastic/gbm.cpp:113-127`; `tests/cpp/test_gbm.cpp:170-186`; convention in `docs/project_scope.md` §10 |

@@ -1,5 +1,5 @@
 {
-  "artifact": "experiments/variance_reduction/run.py",
+  "artifact": "quantrisk.experiments.variance_reduction",
   "artifacts": {
     "csv": [
       "experiments/variance_reduction/results/variance_by_method.csv",
@@ -11,21 +11,21 @@
     "sha256": {
       "experiments/variance_reduction/results/realised_error.csv": "56edcc2a682dbf5b376567159317e36c3e017fd843c633e57ab7c234918bcacc",
       "experiments/variance_reduction/results/standard_error_by_method.png": "be1e346ba57154a040bea2db6b37e6dcee72964edd698233a12636441e7cc6ee",
-      "experiments/variance_reduction/results/variance_by_method.csv": "a26b9cb9a67ddd009f0799fa569a14424906d02ab9f9462742e009fa3ab8289e"
+      "experiments/variance_reduction/results/variance_by_method.csv": "e51ca0c610758b0e3c87d82bcb8d02d75400d86379461c7bdbe855b06dd0b5e4"
     }
   },
   "caveat": "Antithetic reporting divides by pair count, so its standard error is per pair; the comparison here is on realised MSE at equal path budget.",
-  "command": "uv run python run.py",
+  "command": "uv run python -m quantrisk.experiments.variance_reduction",
   "environment": {
-    "binary_git_commit": "49dc0155cfb4",
+    "binary_git_commit": "af7595749188",
     "cpp_arch": "arm64",
     "cpp_build_type": "Release",
     "cpp_compiler": "AppleClang 21.0.0.21000334",
     "cpp_flags": "(none)",
     "cpp_os": "Darwin 27.0.0",
     "cpp_standard": "C++20",
-    "generated_at_utc": "2026-10-09T04:54:43+00:00",
-    "git_commit": "49dc0155cfb4",
+    "generated_at_utc": "2026-10-24T03:09:05+00:00",
+    "git_commit": "17df062040b8",
     "packages": {
       "PyPortfolioOpt": "1.6.0",
       "QuantLib": "1.43",
@@ -35,18 +35,16 @@
       "osqp": "1.1.3",
       "pandas": "3.0.6",
       "python": "3.12.14",
-      "quantrisk": "1.8.0",
+      "quantrisk": "1.9.0",
       "scikit-learn": "1.9.1",
       "scipy": "1.18.1",
       "statsmodels": "0.15.0"
     },
-    "provenance": "ran from 49dc0155cfb4 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at 49dc0155cfb4",
+    "provenance": "ran from 17df062040b8 plus the uncommitted changes listed in uncommitted_paths; the extension binary was configured at af7595749188",
     "python_machine": "arm64",
     "python_platform": "macOS-27.0.1-arm64-arm-64bit",
-    "quantrisk_version": "1.8.0",
+    "quantrisk_version": "1.9.0",
     "uncommitted_paths": [
-      "CITATION.cff",
-      "CMakeLists.txt",
       "benchmarks/performance/results/monte_carlo_speed.json",
       "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
       "benchmarks/quantlib/results/monte_carlo_validation.json",
@@ -55,13 +53,11 @@
       "experiments/monte_carlo_convergence/results/convergence.csv",
       "experiments/monte_carlo_convergence/results/summary.json",
       "experiments/pricing_validation/results/summary.json",
-      "experiments/variance_reduction/results/variance_by_method.csv",
-      "pyproject.toml",
-      "uv.lock"
+      "experiments/variance_reduction/results/variance_by_method.csv"
     ],
     "working_tree_dirty": true
   },
-  "generated_at_utc": "2026-10-09T04:54:43+00:00",
+  "generated_at_utc": "2026-10-24T03:09:05+00:00",
   "mse_reduction_vs_plain": {
     "atm_call|100000|antithetic": 2.2415,
     "atm_call|100000|control_variate": 7.1043,
