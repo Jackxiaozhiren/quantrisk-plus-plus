@@ -1,11 +1,21 @@
-"""The `quantrisk` command line: three commands, no more.
+"""The `quantrisk` command line: four commands, and each one earns its place.
 
 PROJECT_SPEC.md §Phase 9 asks for `validate`, `benchmark` and `demo` and explicitly says
-not to build a web app, because the project's value is not UI. What each one does:
+not to build a web app, because the project's value is not UI. V2's D6 added `run`, whose
+task list and execution targets are the registry's own entries resolved by module path --
+so "what can this repository execute" has one answer instead of a second list to keep true.
+What each one does:
 
   validate   run the identities the library claims, and exit non-zero if any fail
   benchmark  time a few core operations on this machine, right now
   demo       execute the documented API examples end to end
+  run        list the registered tasks (`--list`), or execute one by id
+
+`run` is the reason the registry exists as data rather than as a list in a runner script:
+this command reads the same entries the suite and the evidence manifest do, so "what can
+this repository execute" has one answer. It resolves each task through the interpreter
+(`-m` semantics via runpy), never through a file beside itself, because an installed wheel
+has no source tree to walk.
 
 `validate` is the one worth having, and the reason it is not just "run pytest" is that
 pytest needs the source tree while `validate` needs only an installed wheel. It re-checks
@@ -24,8 +34,10 @@ from __future__ import annotations
 import argparse
 import json
 import platform
+import runpy
 import sys
 import time
+from pathlib import Path
 from typing import Any
 
 import quantrisk
@@ -396,6 +408,77 @@ def _vector(values: list[float]) -> str:
     return "[" + ", ".join(f"{value:.4f}" for value in values) + "]"
 
 
+# --- run -------------------------------------------------------------------
+
+
+def _registered_tasks() -> list[Any]:
+    """The registry's tasks, sorted, read through the package -- not through a file path.
+
+    Importing inside the function is what keeps `quantrisk validate` on a wheel from paying
+    for the experiment machinery: the registry pulls in the checkout-resolution helper, and a
+    user asking for an identity check should not need either.
+    """
+    from quantrisk.experiments.registry import TASKS  # noqa: PLC0415 - lazy by design, see above
+
+    return sorted(TASKS, key=lambda task: task.task_id)
+
+
+def command_run(arguments: argparse.Namespace) -> int:
+    """List what can be run, or run one of it. Non-zero means the task said so.
+
+    Two exit codes are deliberately distinct: `2` is "no such task", which is a rejected
+    argument, and `1` is "the task ran and failed", which is a result. Collapsing them would
+    make a typo look like a broken study and a broken study look like a typo.
+    """
+    tasks = _registered_tasks()
+    if arguments.list_tasks:
+        for task in tasks:
+            print(f"  {task.task_id:32s} {task.module:58s} {task.artifact}")
+        print(f"{len(tasks)} registered tasks; run one with `quantrisk run <id> [--out DIR]`")
+        return 0
+    if arguments.task is None:
+        print(
+            _paint("name a task, or pass --list to see them", _YELLOW),
+            file=sys.stderr,
+        )
+        return 2
+    wanted = next((task for task in tasks if task.task_id == arguments.task), None)
+    if wanted is None:
+        print(
+            _paint(
+                f"no registered task {arguments.task!r}; `quantrisk run --list` names {len(tasks)}",
+                _RED,
+            ),
+            file=sys.stderr,
+        )
+        return 2
+    argv = [wanted.module]
+    if arguments.out is not None:
+        argv += ["--out", str(arguments.out)]
+    saved = sys.argv
+    sys.argv = argv
+    try:
+        runpy.run_module(wanted.module, run_name="__main__", alter_sys=True)
+    except SystemExit as exit_request:  # the study's own return code, if it calls sys.exit
+        code = exit_request.code
+        sys.argv = saved
+        if code in (None, 0):
+            print(_paint(f"  PASS  {wanted.task_id:38s} {wanted.artifact}", _GREEN))
+            return 0
+        print(_paint(f"  FAIL  {wanted.task_id:38s} exit {code}", _RED), file=sys.stderr)
+        return 1
+    except Exception as error:  # noqa: BLE001 - a crash is a result: named on stderr, exit 1
+        sys.argv = saved
+        print(
+            _paint(f"  FAIL  {wanted.task_id:38s} {type(error).__name__}: {error}", _RED),
+            file=sys.stderr,
+        )
+        return 1
+    sys.argv = saved
+    print(_paint(f"  PASS  {wanted.task_id:38s} {wanted.artifact}", _GREEN))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="quantrisk",
@@ -415,6 +498,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     demo = sub.add_parser("demo", help="run the documented examples")
     demo.set_defaults(handler=command_demo)
+
+    run = sub.add_parser("run", help="list or execute a registered study, over the task registry")
+    run.add_argument("task", nargs="?", help="task id, as printed by --list")
+    run.add_argument("--list", dest="list_tasks", action="store_true", help="list every task")
+    run.add_argument(
+        "--out", type=Path, default=None, help="write the study's artifacts under this root"
+    )
+    run.set_defaults(handler=command_run)
     return parser
 
 

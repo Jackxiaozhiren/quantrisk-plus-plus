@@ -11,7 +11,7 @@ flowchart TB
     subgraph PY["Python research layer"]
         API["quantrisk API<br/>(pricing / risk / portfolio / stress)"]
         EXP["experiments/<topic>/<br/>reproducible scripts"]
-        PLT["plotting + CLI<br/>(validate / benchmark / demo)"]
+        PLT["plotting + CLI<br/>(validate / benchmark / demo / run)"]
     end
     subgraph BI["Binding layer"]
         PB["pybind11 (thin)<br/>no numerics reimplemented"]

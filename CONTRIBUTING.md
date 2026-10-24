@@ -148,6 +148,6 @@ for the same reason.
 `docs/limitations.md` is the complete list of what is *not* claimed — read it before adding a feature,
 because several entries exist precisely to stop a future contributor from "finishing" something that was
 deliberately left open. `docs/validation_matrix.md` says what each component is validated against and
-at which level. Frozen public surfaces (`Greeks`, the pybind11 module's shape, the CLI's three
+at which level. Frozen public surfaces (`Greeks`, the pybind11 module's shape, the CLI's four
 subcommands) are listed in `docs/project_scope.md`; extending them means a new type or a new function,
 not a new field.

@@ -1722,3 +1722,85 @@ Ceilings now: `bootstrap_sites_outside_package` 0, `by_path_load_sites` 0, `comm
 precondition, the first resolved by the end-of-Phase-3 sweep and the second by Phase 4's clean-venv wheel.
 V2-21 is closed by its guard; V2-23 is closed by the declaration in `tools/refactor_ceilings.json`;
 L1 holds with zero undeclared movement.
+
+### 2026-10-24, P3.6 — the CLI gains `run` over the registry, and four commands get pinned
+
+D6's one new subcommand is a projection of the task registry, not a second catalogue: `quantrisk run
+--list` prints the registry's own `(id, module, artifact)` triples and the count of them, and
+`quantrisk run <id> [--out DIR]` executes that entry through the interpreter (`runpy.run_module` with
+`run_name="__main__"`, the `-m` semantics) rather than through a file beside the CLI, which is the only
+thing that can work against a wheel with no checkout. `2` is a rejected request (unknown id, or no id)
+and `1` is a study that ran and said so; collapsing them would make a typo look like a regression.
+
+Four guards, four cases (550/481 → **554 with the oracles, 485 collected offline**), and every one of
+them was shown to be able to fail before this was written:
+
+* `test_cli_run_lists_every_registered_task_and_the_package_agrees` is the L5 parity question asked
+  through the installed surface, two-sided as P3.1 established: the listing comes from the registry,
+  the expected modules from a filesystem walk of the two shapes a runnable unit has
+  (`experiments/*/__main__.py`, `benchmarks/*/*.py`), and neither enumeration reads the other. The walk
+  is what caught a bug in its own first draft -- deriving a study's module from its filename gave
+  `quantrisk.experiments.pricing_validation.__main__` for every study, because what `-m` executes is the
+  *package*, so the module has to come from the path's parts with `__main__` dropped.
+* `test_cli_run_executes_a_task_into_the_root_it_is_given` runs a real study into a `tmp_path` and then
+  reads the artifact it wrote, asserting its recorded `command` is the registry's invocation. A `run`
+  that executed some other program would still exit 0, so the exit code alone is not the evidence.
+* `test_cli_run_distinguishes_a_typo_from_a_bare_run` pins the two rejection messages apart, because a
+  reader who has already seen `--list` should not be told to consult `--list`.
+* `test_cli_pre_existing_command_outputs_kept_their_contracts_when_run_landed` fingerprints the three
+  earlier commands' printed shapes (11 lines for `validate`, 63 for its `--json`, 32 for `demo`, 8 for
+  `benchmark`) and pins the parser's own usage set to the four names, so a fifth command cannot arrive
+  quietly. The digit fold alone was not enough: `benchmark` right-aligns its timings, so the same
+  unchanged build fingerprinted **twice** across four runs (`9db3461feed27779` / `87ebf00e4a8d43aa`)
+  when a timing gained an integer digit and shifted a pad space. Collapsing runs of spaces as well as
+  digit runs makes the fingerprint stable (`64fbd3b57b61a6ab`) and still pins wording, order and line
+  count -- the contract -- while the measured arithmetic stays out of it. A pinned flaky guard would
+  have been worse than none.
+
+Falsification was done as a harness rather than as declared plants, and the difference is worth keeping:
+`build/v2-p36-falsify.py` snapshots `python/quantrisk/cli.py`, applies one of five defects, runs the CLI
+tests, and writes the snapshot back, asserting the file is byte-identical after every plant. Each defect
+reddenes exactly one test and names it -- drop the last listed task → the parity guard; make a bare `run`
+repeat the unknown-id message → the exit-code guard; skip the `runpy` call but print PASS → the execution
+guard; reword `validate`'s summary line, or add a fifth subcommand to the parser → the contract guard. A
+plant that cannot fire is the failure mode this repo has been bitten by (`#103`), so the harness prints
+`rc=` alongside the red count: a collection error exits 2 and prints no `FAILED` lines, which is not a
+clean run.
+
+The cascade was paid in the same commit as the guard, as P3.5 established: **23 changed lines across six
+files** carry the new pair -- four phrases in `docs/reproducibility.md`, five in `docs/interview_defense.md`
+(including its provenance row), two in `docs/limitations.md` #63, the report's headline sentence and its
+growth sentence in `paper/technical_report.tex`, four plant anchors in
+`python/quantrisk/verification/plants.py`, and six census-gold entries in the guard file -- and the report
+was then re-typeset from the corrected tex (bundle `d2d7be3ba44c`, PDF `daf891282ae2`, 6 sources).
+
+Five documents describe the command surface, and each says something different about it, so each was
+edited for its own reason rather than by pattern: `README.md`'s front-page block and
+`docs/reproducibility.md`'s fresh-clone sequence gained a `run --list` line (the front page is where a
+reader decides what this is, the reproduce block is where they execute a study); `docs/architecture.md`'s
+mermaid node now lists four; `CONTRIBUTING.md` now says the CLI's *four* subcommands are frozen;
+`INTERFACE_ROADMAP.md:167` keeps its audit-time wording ("three subcommands already ship") and carries a
+dated amendment beside it, because that row is the evidence for adopting the CLI at all.
+`docs/project_scope.md` §10 gained the Phase 9 block it never had: `CONTRIBUTING.md` has pointed at it for
+nine phases as the list of frozen surfaces, and the CLI was not in it -- so the sentence that tells a
+contributor "extending a frozen surface means a new type, not a new field" was describing a document that
+did not carry the surface. The new block states the contract the test enforces: the output shapes are
+pinned, and `run` is a projection of the registry.
+
+Two things this phase did **not** claim, both owned by Phase 4. The docstring originally said an installed
+wheel can enumerate *and execute* the published studies; execution was proven in a checkout, and a
+docstring is not a wheel test, so the sentence now states what is proven (the list and the targets are the
+registry's own entries, resolved by module path) and Phase 4's clean-venv wheel proof owns the rest. And
+the four-command count is prose the claim inventory cannot see -- `the four-command CLI` in the rehearsal
+sheet is hyphenated with a singular noun, outside `_REPORT_NOUNS`' reach, which is #102's blind-spot class
+measured rather than assumed: the guard pins the set, the document does not have to agree with it.
+
+Ceilings unchanged and still zero where they were zero; no artifact content moved, because P3.6 ran no
+study into a committed path -- the one study it executed wrote to a `tmp_path`, and the manifest verified
+`0 on disk but not in the manifest` afterwards.
+
+Gate lane after all of it, on this tree: ruff, ruff format (226 files), mypy over 62 source files,
+clang-format, ctest 204/204, `quantrisk validate` 7/7, `pytest -q` **554 passed**, manifest "Evidence is
+intact", offline probe **485 tests collected**, plant inventory lists with rc=0.
+
+

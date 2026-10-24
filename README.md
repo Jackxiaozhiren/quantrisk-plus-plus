@@ -102,6 +102,7 @@ the documentation cannot silently pin itself to one vendor's math library.
 quantrisk validate    # 7 identity checks against the installed build
 quantrisk benchmark   # timings measured on this machine, now
 quantrisk demo        # the examples above, run end to end
+quantrisk run --list  # every registered study, with the command that reproduces it
 ```
 
 ## Mathematical scope

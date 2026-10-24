@@ -309,6 +309,16 @@ Rule: one phase at a time; each phase ends with a Phase Report and stops.
 - The dependency direction is frozen: `quantrisk.data` may use `quantrisk`; no pricing,
   risk, portfolio or stress code may import `quantrisk.data`.
 
+### Phase 9
+
+- `quantrisk` CLI: `validate`, `benchmark`, `demo`, `run`. Each command's output contract is
+  frozen — the shapes are pinned by a guard that fingerprints each command's printed text with
+  its measured numbers normalised, so a wording change is a deliberate act, not a side effect.
+- `run` is a projection of the task registry, not a second catalogue: what it lists, it can
+  execute, and the command it prints for a task is the registry's own invocation. A task it does
+  not know exits `2` (the request was invalid); a task that runs and fails exits `1` (a claim
+  about the library did not hold).
+
 ### Phase 10
 
 - `tools/run_benchmark_suite.py` is an **orchestrator, not an implementation**. It holds no

@@ -8,6 +8,7 @@ recomputed a price in Python could still match to 1e-12; matching exactly is the
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import re
@@ -246,6 +247,130 @@ def test_cli_benchmark_reports_measured_numbers(capsys) -> None:
     assert "us/call" in printed
     # A benchmark that printed a cached or hard-coded figure would not say where it ran.
     assert "measured timings" in printed
+
+
+_RUN_ROW = re.compile(r"^  (\S+)\s+(\S+)\s+(\S+)$")
+
+
+def _cli(argv: list[str], capsys) -> tuple[int, str, str]:
+    """Run the CLI and hand back its exit code, stdout and stderr as one call.
+
+    Reading both streams here rather than at the call site matters: a test that asked for stdout
+    first would leave nothing for the stderr assertion afterwards.
+    """
+    code = cli.main(argv)
+    captured = capsys.readouterr()
+    return code, captured.out, captured.err
+
+
+def test_cli_run_lists_every_registered_task_and_the_package_agrees(capsys) -> None:
+    """`run --list` and the filesystem are two independent enumerations of one set.
+
+    The listing comes from the registry; the expected modules come from globbing the package for the
+    two shapes a runnable unit has -- `experiments/<dir>/__main__.py` and
+    `benchmarks/<suite>/<name>.py`. Neither side reads the other, so a registry entry whose module
+    was never shipped and a shipped unit the registry forgot both fail here. That is the L5 parity
+    question asked through the installed surface, where a missing entry would actually be felt.
+    """
+    code, printed, _err = _cli(["run", "--list"], capsys)
+    assert code == 0
+    listed = [
+        (match.group(1), match.group(2), match.group(3))
+        for line in printed.splitlines()
+        if (match := _RUN_ROW.match(line))
+    ]
+    assert len(listed) >= 19, f"only {len(listed)} rows parsed out of `run --list`"
+    assert len(listed) == len({row[0] for row in listed}), "a task id is listed twice"
+
+    root = Path(cli.__file__).resolve().parents[2]
+    package = root / "python" / "quantrisk"
+    on_disk = sorted(
+        {
+            # A study is a package whose `__main__.py` is what `-m` executes, so the module is its
+            # directory; a benchmark is a single module file.
+            f"quantrisk.{'.'.join(path.relative_to(package).parts[:-1])}"
+            if path.name == "__main__.py"
+            else f"quantrisk.{'.'.join(path.relative_to(package).parts).removesuffix('.py')}"
+            for pattern in ("experiments/*/__main__.py", "benchmarks/*/*.py")
+            for path in package.glob(pattern)
+            if "__pycache__" not in path.parts
+        }
+    )
+    assert on_disk, "the filesystem walk found no runnable unit, so this comparison proves nothing"
+    listed_modules = sorted(row[1] for row in listed)
+    assert listed_modules == on_disk, (
+        f"the registry lists {len(listed_modules)} modules, the package holds {len(on_disk)}; "
+        f"they disagree on {sorted(set(listed_modules) ^ set(on_disk))}"
+    )
+    assert f"{len(listed)} registered tasks" in printed, (
+        "the summary line does not count its own rows"
+    )
+
+
+def test_cli_run_executes_a_task_into_the_root_it_is_given(capsys, tmp_path) -> None:
+    """D6's other half: a study runs from the installed surface and writes where it is told.
+
+    The module is resolved through the interpreter (`runpy`), not through a file beside the CLI,
+    which is the only thing that works against a wheel with no checkout. The artifact's recorded
+    command is asserted too: a `run` that executed some other program would still exit 0.
+    """
+    code, printed, err = _cli(["run", "pricing_grid", "--out", str(tmp_path)], capsys)
+    assert code == 0, (printed[-800:], err[-800:])
+    assert "PASS  pricing_grid" in printed, printed[-400:]
+    landing = tmp_path / "experiments" / "pricing_validation" / "results" / "summary.json"
+    assert landing.is_file(), f"the study reported PASS but wrote no {landing}"
+    payload = json.loads(landing.read_text(encoding="utf-8"))
+    assert payload["command"] == "uv run python -m quantrisk.experiments.pricing_validation", (
+        payload["command"]
+    )
+
+
+def test_cli_run_distinguishes_a_typo_from_a_bare_run(capsys) -> None:
+    """Both are rejected arguments (exit 2), but they are different facts and say different things.
+
+    Neither may look like a study that failed -- that would be exit 1 -- and a single shared message
+    would tell a reader who already passed `--list` to consult `--list`.
+    """
+    code, _out, err = _cli(["run", "no_such_task_anywhere"], capsys)
+    assert code == 2
+    assert "no registered task" in err, err
+
+    code, _out, err = _cli(["run"], capsys)
+    assert code == 2
+    assert "name a task" in err, err
+
+
+def test_cli_pre_existing_command_outputs_kept_their_contracts_when_run_landed(capsys) -> None:
+    """D6 requires the earlier commands to be unchanged; this pins that rather than trusting it.
+
+    Each fingerprint is taken over the printed text with the measured part folded away -- every
+    digit run becomes `#`, and runs of spaces become one -- so what is pinned is the contract (every
+    line, its wording, its order) and not this machine's arithmetic. The space fold is load-bearing:
+    `benchmark` right-aligns its timings, so a number gaining an integer digit shifts a pad space,
+    and without the fold the same unchanged build fingerprints twice. The digests were measured when
+    `run` was added.
+
+    The command *set* is read out of the parser's own usage line rather than from a list written
+    here, so a fifth subcommand can only land by changing the surface the documents describe.
+    """
+    usage = cli.build_parser().format_usage()
+    named = re.search(r"\{([a-z,]+)\}", usage)
+    assert named, f"the usage line names no subcommand set: {usage!r}"
+    assert set(named.group(1).split(",")) == {"validate", "benchmark", "demo", "run"}, usage
+    expected = {
+        ("validate",): "82047dafac7aa0a5",
+        ("validate", "--json"): "69068e3ccf816cda",
+        ("demo",): "2a7bb172d846b2c3",
+        ("benchmark", "--iterations", "2"): "64fbd3b57b61a6ab",
+    }
+    for argv, digest in expected.items():
+        code, printed, _err = _cli(list(argv), capsys)
+        assert code == 0, f"`quantrisk {' '.join(argv)}` exited {code}"
+        folded = re.sub(r"[ \t]+", " ", re.sub(r"\d+(?:\.\d+)?(?:e-?\d+)?", "#", printed))
+        assert hashlib.sha256(folded.encode("utf-8")).hexdigest()[:16] == digest, (
+            f"`quantrisk {' '.join(argv)}` changed shape; D6 says the pre-existing subcommands "
+            "keep their output contracts byte-for-byte, so this needs a stated reason"
+        )
 
 
 def test_cli_requires_a_subcommand() -> None:
