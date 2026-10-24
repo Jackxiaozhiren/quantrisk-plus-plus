@@ -1,6 +1,6 @@
 {
   "schema": "quantrisk-refactor-ceilings/1",
-  "purpose": "The policy asset REFACTOR_PROMPT.md §4.3 names. The snapshot at build/orphan_inventory.json is telemetry; this file is what a run is measured against. Each key states the phase that must reach it, the value that proves it can fail, and the corpus it was read from.",
+  "purpose": "The policy asset REFACTOR_PROMPT.md \u00a74.3 names. The snapshot at build/orphan_inventory.json is telemetry; this file is what a run is measured against. Each key states the phase that must reach it, the value that proves it can fail, and the corpus it was read from.",
   "source_of_readings": "uv run python -m tools.inventory_orphan_code",
   "baseline": {
     "revision": "7da82b123f0e7cbc8bb19412f4369f8ceae4064b",
@@ -42,7 +42,7 @@
       "measured_at_baseline": 95,
       "max": 0,
       "reach_by_phase": "P3.5",
-      "corpus": "all 95 evidence/manifest.json artifacts, each classified into one of the seven §4.1 #3 forms",
+      "corpus": "all 95 evidence/manifest.json artifacts, each classified into one of the seven \u00a74.1 #3 forms",
       "can_fail_because": "zero entries are in the canonical form today, so the ceiling starts at its maximum distance",
       "exemptions": [
         {
@@ -88,7 +88,7 @@
       "measured_at_phase": {
         "P3.1": 0
       },
-      "note": "unmeasurable at the Phase 0 baseline because the registry did not exist; the flag that let it be skipped was removed in the commit that made it measurable, which is the rule §9 states for every may_be_unmeasured key"
+      "note": "unmeasurable at the Phase 0 baseline because the registry did not exist; the flag that let it be skipped was removed in the commit that made it measurable, which is the rule \u00a79 states for every may_be_unmeasured key"
     },
     {
       "key": "plants_not_rejected_by_their_guard",
@@ -97,7 +97,7 @@
       "measured_at_baseline": null,
       "max": 0,
       "reach_by_phase": "P3.2",
-      "corpus": "172 declared plants read from `-m quantrisk.verification.runner --list`. The rejection verdict is the sweep's own summary line and lives in REFACTOR_LEDGER.md §9, because the sweep writes gitignored scratch that CI never has — a key computed from that file could not fail on the runner that evaluates it, so the collector measures only the declaration.",
+      "corpus": "172 declared plants read from `-m quantrisk.verification.runner --list`. The rejection verdict is the sweep's own summary line and lives in REFACTOR_LEDGER.md \u00a79, because the sweep writes gitignored scratch that CI never has \u2014 a key computed from that file could not fail on the runner that evaluates it, so the collector measures only the declaration.",
       "can_fail_because": "the declaration is non-empty (172) and the last full sweep on 58b6c22 printed 172/172, so a plant that stops firing is a visible difference rather than a missing key",
       "exemptions": [],
       "may_be_unmeasured": true,
@@ -145,6 +145,59 @@
       "id": "collector-is-dev-only",
       "text": "tools/ is not packaged: wheel.packages stays python/quantrisk (D1). Nothing in python/quantrisk may import tools/, and the two-sided registry test of L5 must not read this file's source.",
       "why_it_is_here": "so that a refactor instrument cannot become part of the shipped surface it is measuring."
+    }
+  ],
+  "declared_movements": [
+    {
+      "id": "artifact-self-reference",
+      "leaf_pattern": "^artifact$",
+      "law": "D3-prime / L5",
+      "reason": "an artifact names the file that produced it, and Phase 3.3 and P3.4 moved those files into the package. The field is provenance, not a measurement: the numbers in the same document are compared individually."
+    },
+    {
+      "id": "provenance-source-field",
+      "leaf_pattern": "^(book|published_scenario_bound)\\.source$",
+      "law": "V2-20 adjudicated option (i)",
+      "reason": "the `<path>:<symbol>` strings that name where a shared book or scenario comes from are re-expressed as `<task>:<symbol>` registry references, which is what lets them be re-derived once instead of going stale one move at a time."
+    },
+    {
+      "id": "provenance-procedure-citation",
+      "leaf_pattern": "^procedure\\.(shared_with|books|reused_from\\[\\d+\\])$",
+      "law": "V2-20 adjudicated option (i)",
+      "reason": "a study's account of whose machinery it reuses cites sibling studies by path; the citation follows the registry spelling."
+    },
+    {
+      "id": "provenance-control-citation",
+      "leaf_pattern": "^controls\\.(control|machinery_equality_with_v150_and_v160)$",
+      "law": "V2-20 adjudicated option (i)",
+      "reason": "the control row names the module whose verifier was re-run, and that module moved."
+    },
+    {
+      "id": "figure-status-landing-path",
+      "leaf_pattern": "^figure_status$",
+      "law": "K2",
+      "reason": "a derived string quoting where a figure landed; it moves only when the run was given an `--out` root, and an in-place re-run leaves it where the committed artifact says it is."
+    },
+    {
+      "id": "csv-landing-path",
+      "leaf_pattern": "^csv$",
+      "law": "K2",
+      "reason": "the companion of figure_status: the published CSV path as the run saw it. Under `--out` it names the temporary root; in place it is unchanged."
+    },
+    {
+      "id": "release-metadata-version-fields",
+      "leaf_pattern": "^(oracles|oracle)\\.versions\\.quantrisk$|^our_side\\.version$",
+      "law": "V2-23 closed by declaration",
+      "reason": "four artifacts record the package version outside the `environment` block, so their content digest moves on a version bump with no number in the study changing. Adjudicated here rather than by restructuring four producers: the waiver lives in this file, and `tools/inventory_orphan_code.py` keeps printing the same content view for every other field."
+    },
+    {
+      "id": "suite-aggregate-is-a-record-of-the-run",
+      "leaf_pattern": ".*",
+      "categories": [
+        "suite_aggregate"
+      ],
+      "law": "K4 / D5",
+      "reason": "the three aggregates under benchmarks/suite/results/ are a record of one execution: each member line carries the command and artifact path that produced it. Their measured values are read out of the member artifacts, which are compared leaf by leaf above; nothing in this category is a result."
     }
   ]
 }
