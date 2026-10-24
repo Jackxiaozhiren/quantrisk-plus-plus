@@ -1657,3 +1657,35 @@ handoff, then the release) each require a measured gate cycle, and the session h
 to run one and read its verdict honestly. Starting them would have produced exactly the state this lane
 refuses -- an unverified wide change described as done. Resume from §11's recipe with the authorization
 above in hand.
+
+### 2026-10-24, P3.5 remainder — the two guards were built, measured, and set down again
+
+Both of the guards P3.5 still owed were written and run. V2-21's citation resolver reads the report
+through the lane's own comment-blanking pass and, with the macro-definition lines dropped, counts **302
+citations over 78 distinct targets, all of which resolve**; the floors that make a blind parser visible
+(≥290 citations, ≥70 targets) came from that measurement rather than from a guess, and the negative
+control injects `\src{python/quantrisk/experiments/no_such_unit_anymore.py}` into the same text and
+requires the pass to return exactly one more citation, so the guard cannot pass by seeing nothing. L4's
+dry-resolve guard asks every manifest entry a question the census does not ask — `find_spec`, import
+without executing — and all 95 answer yes; its control asserts that the legacy
+`uv run python tools/inventory_orphan_code.py` spelling still fails the prefix test, so the guard can
+fail on a command that does not import.
+
+Landing them then costs the test-count cascade, and the cost is now measured instead of estimated: two
+cases move the pair 548 → 550 and 479 → 481, and a grep of the tracked corpus for those two numbers
+returns **seven files** — `README.md`, `docs/interview_defense.md`, `docs/limitations.md`,
+`docs/reproducibility.md`, `paper/technical_report.tex`, six plant anchors in
+`python/quantrisk/verification/plants.py`, and the gold lists inside the guard file itself — which is
+the project's recorded reason for not adding per-case tests casually, and why this session stopped
+rather than carrying a half-cascaded tree: the guards pass in isolation while every counting document
+in the repository disagrees with them, so committing them now would have shipped a red lane with a green
+commit message. The work is not lost — `build/p35-two-guards.patch` holds the 112 added lines, and the
+resume step is to apply it and re-derive the seven files in one commit, letting each guard name its own
+stale quotations rather than transcribing digits.
+
+Two hazards surfaced on the way and are worth carrying forward. The masked-text pass sees fewer
+citations than the raw brace pass V2-21 used (318 → 302) because the report's commented preamble
+*documents* the `\src{path}` macro; a floor copied from the earlier figure would have reddened the new
+guard on its own first run. And `\\src{path}` with an unescaped `path` token appears in that preamble,
+which is why the resolver splits citation arguments and drops units that are not path-shaped — a naive
+splitter reports the macro's own documentation as a dead citation.
