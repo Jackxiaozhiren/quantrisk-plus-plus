@@ -112,8 +112,22 @@ jobs:
         run: .venv/bin/ctest --preset ci
       - name: Build a local wheel from this reviewed checkout
         run: uv build --wheel --out-dir dist
-      - name: Install only the built wheel (no registry or build scripts)
-        run: uv pip install --no-index --no-deps --no-build dist/quantrisk-*.whl
+      - name: SHA-256 pin the exact locally built wheel
+        run: |
+          .venv/bin/python - <<'PY'
+          from hashlib import sha256
+          from pathlib import Path
+          wheels = list(Path("dist").glob("quantrisk-*.whl"))
+          if len(wheels) != 1:
+              raise SystemExit(f"Expected exactly one wheel, found {len(wheels)}")
+          wheel = wheels[0].resolve()
+          Path("dist/locked-wheel.txt").write_text(
+              f"{wheel} --hash=sha256:{sha256(wheel.read_bytes()).hexdigest()}\n",
+              encoding="utf-8",
+          )
+          PY
+      - name: Install only the verified wheel, offline and without setup scripts
+        run: uv pip install --no-index --no-deps --no-build --require-hashes -r dist/locked-wheel.txt
       - name: Test native pricing, independent oracle, and C++/Python parity
         env:
           QUANTRISK_REFERENCE_TOOL: ${{ github.workspace }}/build/ci/quantrisk_reference_tool
