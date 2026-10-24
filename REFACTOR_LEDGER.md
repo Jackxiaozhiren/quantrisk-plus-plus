@@ -1689,3 +1689,36 @@ citations than the raw brace pass V2-21 used (318 → 302) because the report's 
 guard on its own first run. And `\\src{path}` with an unescaped `path` token appears in that preamble,
 which is why the resolver splits citation arguments and drops units that are not path-shaped — a naive
 splitter reports the macro's own documentation as a dead citation.
+
+### 2026-10-24, P3.5 closes — the two guards landed and the counting pair moved to 550 / 481
+
+The 112-line patch was applied and the cascade paid in the same commit, which is the only order that
+leaves a green lane. Both guards pass and the counting documents agree with them: **550 pytest tests with
+the oracles, 481 collected offline**, and the full §7 suite is green at those numbers (pytest 550 passed,
+offline probe `collected: 481`, ruff/format/mypy/clang/ctest/validate/manifest/plant-list all rc=0).
+
+Nine sites in seven files carried the old pair and each was re-derived to it rather than caveated: the
+report's headline sentence (plus the PDF rebuild), four phrases in `docs/reproducibility.md`, three in
+`docs/interview_defense.md` including its provenance row, two in `docs/limitations.md` #63, four plant
+anchors in `python/quantrisk/verification/plants.py`, and six census-gold entries in the guard file.
+
+Two ways that cascade nearly lied about being finished, both worth keeping:
+
+* A `grep 548 | grep -v 368` census of the corpus -- written to exclude the unrelated C++ assertion total
+  `548,368` -- hid the one line that carried both figures, because the line containing the stale test count
+  *also* contained the assertion count. The filter built to reduce noise deleted the target. The figure
+  survived until a guard named it, and the reason it was hard to see is that the prose wraps between the
+  number and its noun, so the claim exists only in the folded view.
+* The citation guard's floor had to be re-measured rather than inherited: the comment-blanked pass reads
+  302 citations where V2-21's raw brace pass read 318, because the report's commented preamble documents
+  `\src{path}` and `\newcommand` lines. A floor copied from the earlier number would have reddened the new
+  guard on its own first run, which is the same mistake as a denominator that silently shrinks -- it just
+  fails loudly instead of quietly.
+
+Ceilings now: `bootstrap_sites_outside_package` 0, `by_path_load_sites` 0, `commands_not_module_path` 0,
+`commands_unrunnable_from_the_root` 0, `registry_parity_mismatch` 0,
+`tracked_python_files_in_no_static_check_bucket` 0, `external_spend_usd` 0; the two remaining rows
+(`plants_not_rejected_by_their_guard`, `installed_user_identity_mismatch`) still skip for want of their
+precondition, the first resolved by the end-of-Phase-3 sweep and the second by Phase 4's clean-venv wheel.
+V2-21 is closed by its guard; V2-23 is closed by the declaration in `tools/refactor_ceilings.json`;
+L1 holds with zero undeclared movement.

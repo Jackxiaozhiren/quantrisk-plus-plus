@@ -2958,8 +2958,8 @@ _CENSUS_REPRO_GOLD = (
     "20.8% spread",
     "204 tests",
     "32.6% spread",
-    "479 tests",
-    "548 pytest tests",
+    "481 tests",
+    "550 pytest tests",
     "548,368 assertions",
     "7 identity checks",
     "four modules",
@@ -2995,11 +2995,11 @@ _CENSUS_SHEET_GOLD = (
     "4 scenarios",
     "4,453,163 paths",
     "45,982,736 paths",
-    "479 tests",
+    "481 tests",
     "492 rows",
     "5 books",
-    "548 pytest tests",
-    "548 python tests",
+    "550 pytest tests",
+    "550 python tests",
     "548,368 assertions",
     "69 cases",
     "80,258,165 paths",
@@ -3091,7 +3091,7 @@ _CENSUS_REPORT_GOLD = (
     "41 pytest tests",
     "492 rows",
     "50 steps",
-    "548 pytest tests",
+    "550 pytest tests",
     "548{,}368 assertions",
     "582 windows",
     "6 failing cases",
@@ -6210,4 +6210,117 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
     assert not missing, (
         "a CI step runs against a path the repository does not have, which is how a job turns "
         f"green by executing nothing: {missing}"
+    )
+
+
+_CITATION = re.compile(r"\\src(?:in)?\{([^{}]*)\}")
+_CITATION_DEFINITION = re.compile(r"\\newcommand\{\\src")
+_PATH_SHAPED = re.compile(r"[A-Za-z0-9_.\-/]+(?:\.[A-Za-z0-9]+)?")
+
+
+def _report_citations(text: str) -> list[str]:
+    r"""Every repository path the report cites, LaTeX spelling resolved.
+
+    The macro's own definition lines and the commented preamble that documents it name `\src{path}`
+    as an example rather than claiming a file exists, so they are dropped first; and inside an
+    argument, a comma or a soft space separates several paths, one of which may be prose.
+    """
+    body = "\n".join(line for line in text.splitlines() if not _CITATION_DEFINITION.search(line))
+    found: list[str] = []
+    for argument in _CITATION.findall(body):
+        for unit in re.split(r"[,;]\s*|\s+", argument):
+            unit = unit.strip().rstrip(".;)")
+            if not unit or not _PATH_SHAPED.fullmatch(unit):
+                continue
+            found.append(unit.split(":")[0].replace("\\_", "_").replace("\\$", "$"))
+    return found
+
+
+def test_every_repository_path_the_report_cites_resolves() -> None:
+    r"""`docs/limitations.md` finding V2-21, closed: the report's citations are counted now.
+
+    The paper carries several hundred `\src{}` / `\srcin{}` path citations and, until now, nothing
+    proved any of them named a file. Phase 3.3 moved 19 studies and P3.4 moved 8 tools underneath
+    them, and six citations had already rotted -- four because a per-task grep matched the plain
+    spelling while LaTeX writes `fourth\_order\_crossing\_map`, so the probe itself was blind to the
+    shape it claimed to cover. A document a reader trusts to point at evidence is exactly the place
+    where a pointer that goes nowhere is a defect, not a typographical detail.
+
+    The population is enumerated rather than spot-checked, with a floor on the count: a parser that
+    quietly stopped seeing citations would otherwise report a smaller set and stay green, which is
+    the V2-22 failure mode repeating through a new instrument.
+    """
+    _masked, aligned = _tex_inventory_text()
+    citations = _report_citations(_masked)
+    assert len(citations) >= 290, (
+        f"the pass read {len(citations)} citations; V2-21 measured 318 in the raw text, and a "
+        "comments-blanked pass reading far fewer means the parser went blind, not that the report "
+        "got quieter"
+    )
+    targets = sorted(set(citations))
+    assert len(targets) >= 70, (
+        f"only {len(targets)} distinct targets from {len(citations)} citations"
+    )
+    missing = sorted({target for target in targets if not (REPO_ROOT / target).exists()})
+    assert not missing, (
+        f"{len(missing)} of {len(targets)} cited paths do not exist; the report points a reader at "
+        f"evidence not in the tree: {missing[:8]}"
+    )
+
+    # And the pass can see a break. Injected into the same text the guard reads, a dead path has to
+    # come back as one more citation and as an unresolvable one -- a splitter that quietly
+    # dropped the macro form would keep the assertions above green while seeing nothing.
+    injected = "python/quantrisk/experiments/no_such_unit_anymore.py"
+    assert not (REPO_ROOT / injected).exists(), "the control path exists, so it proves nothing"
+    tampered = f"{_masked}\n\\src{{{injected}}}"
+    assert tampered != _masked, "the injection did not land, so it proved nothing"
+    after = _report_citations(tampered)
+    assert len(after) == len(citations) + 1, (
+        f"the pass read {len(after)} citations after an injection that adds one, so it is not "
+        "seeing every citation the document holds"
+    )
+    assert injected in set(after), "the injected citation was not extracted"
+    assert not (REPO_ROOT / injected).exists()
+
+
+MANIFEST_PATH = REPO_ROOT / "evidence" / "manifest.json"
+_COMMAND_PREFIX = "uv run python -m "
+
+
+def test_every_manifest_command_resolves_as_a_module_without_being_run() -> None:
+    r"""L4 on the pytest side: a recorded command must name a module the interpreter can find.
+
+    `tools/inventory_orphan_code.py` counts commands that do not parse as `uv run python -m
+    <module>`, and P3.5 drove that ceiling to 0 -- then found the counter had been reading its own
+    parsing bug for the whole time, because the branch that recognised `-m` was unreachable and the
+    one beneath it resolved modules against the wrong root. The lesson is that a metric measured one
+    way can be wrong while the corpus is fine, so this asks a different question of the same
+    entries: does the module name import? `importlib.util.find_spec` answers without executing
+    anything, and it is not the path arithmetic the census uses, so the two can disagree -- which is
+    the only reason having both means something.
+    """
+    entries = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))["artifacts"]
+    assert entries, "the manifest lists no artifacts, so this guard would certify an empty set"
+    unresolvable: list[str] = []
+    for entry in entries:
+        command = entry.get("generated_by_command", "")
+        if not command.startswith(_COMMAND_PREFIX):
+            unresolvable.append(f"{entry['path']}: not a module invocation ({command!r})")
+            continue
+        module = command[len(_COMMAND_PREFIX) :].split(" ")[0]
+        try:
+            resolved = importlib.util.find_spec(module) is not None
+        except (ImportError, ValueError) as error:
+            resolved = False
+            unresolvable.append(f"{entry['path']}: {module} raised {error}")
+            continue
+        if not resolved:
+            unresolvable.append(f"{entry['path']}: module {module!r} does not resolve")
+    assert not unresolvable, (
+        f"{len(unresolvable)} of {len(entries)} commands cannot be run: {unresolvable[:6]}"
+    )
+
+    needle = "uv run python tools/inventory_orphan_code.py"
+    assert not needle.startswith(_COMMAND_PREFIX), (
+        "the legacy spelling started with the module prefix, so the check above would accept it"
     )
