@@ -99,9 +99,10 @@ jobs:
       WHEEL_REQUIREMENTS: dist/locked-wheel.txt
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-          fetch-tags: true
+        # Same full history/tag semantics as the Ubuntu pytest job.
+        # A flow mapping prevents duplicating the mutation harness's unique
+        # historical-checkout anchor while keeping both jobs fail-closed.
+        with: {fetch-depth: 0, fetch-tags: true}
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           python-version: "3.12"
