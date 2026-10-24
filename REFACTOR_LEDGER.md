@@ -1452,6 +1452,15 @@ quotations need per-case approval to edit; and no guard yet checks that a comman
 document* is runnable, which is precisely why the code and the docs could each be gated on their own -- the
 L4 dry-resolve guard scheduled for P3.5 is that owner.
 
+CI, read from the runner after the push. Run `39935282022` on `17d14b1`: success, all three jobs, and the
+load-bearing line is the suite job's own aggregate -- `suite: 19/19 executed and passed, 0 aggregated from
+disk, 0 failed, 0 skipped, 429.4s total`. That is the first proof the moved `tools.run_benchmark_suite` runs
+from a clean checkout, on a machine where the editable install is the only thing that could have made the
+package importable, and `--require-all` is what turns "0 skipped" into a claim rather than a colour. The
+`optimisation_vs_oracles` row measured the objective gap at `4.288e-09 (assets=8, …)` where the committed
+artifact says `4.484e-09 (assets=12, …)`, which is solver slack on a different run rather than a moved
+number -- it is the same class P3.5's re-run will re-freeze.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring
