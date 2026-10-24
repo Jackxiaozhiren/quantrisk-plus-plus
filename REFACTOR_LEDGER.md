@@ -1639,3 +1639,21 @@ the maintainer on 2026-10-22 as option (i): a study cites a published sibling as
 `tools/refactor_ceilings.json` with its reason. The *code* of the citing study changes in the commit that
 moves the cited file — a path that no longer resolves is not evidence — while the frozen artifact keeps
 the string it was written with until the single re-run replaces it.
+
+### 2026-10-24, authorization record — the maintainer granted the remaining V2 work in one go
+
+CI on `cc8430e`: run `40061392783`, success, all three jobs, read from the runner.
+
+The maintainer then authorized everything still outstanding in a single instruction -- "全部一起都授权，
+直接一口气完成剩下所有任务". Recorded here because the two edits that previously needed per-case
+approval are now granted in advance: `PROJECT_SPEC.md` §6's target-layout diagram (which still names
+`scripts/`) and `REFACTOR_PROMPT.md`'s three `scripts/` quotations; and because the v1.9.0 public
+Release object with its four assets, held back pending explicit go-ahead, is now within scope.
+
+The work was **not** executed under that authorization in this session: the remaining steps (P3.5's two
+new guards and the single test-count cascade they cost, P3.6's `quantrisk run --list`, P3.7's mypy parity
+including `tools/`, Phase 4's clean-venv wheel proof and loud fixture refusal, Phase 5's report and V3
+handoff, then the release) each require a measured gate cycle, and the session had too little budget left
+to run one and read its verdict honestly. Starting them would have produced exactly the state this lane
+refuses -- an unverified wide change described as done. Resume from §11's recipe with the authorization
+above in hand.
