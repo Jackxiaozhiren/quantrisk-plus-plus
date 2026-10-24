@@ -587,7 +587,7 @@ never removed just because a later phase shipped.
     with no owner inside a sentence that looks checked. Both spellings are policed by that guard now,
     which is the rule restated: policing a number means policing every spelling of it.
     2026-10-08 and the v1.8.0 re-freeze on 2026-10-09 moved the *pure-Python* edge twice more:
-    twenty-two committed measurements now span `7.77×`–`10.31×` (32.6%) and `0.42×`–`0.51×` (20.8%).
+    twenty-three committed measurements now span `7.77×`–`10.31×` (32.6%) and `0.42×`–`0.51×` (20.8%).
     Three clean idle runs of the same script wrote `8.378×` / `0.5656×`, `8.877×` / `0.4597×` and
     `10.306×` / `0.4950×` — a 16% swing between the last two, with no contention recorded in either,
     and only the reading that was committed can be what the documents quote, because the tree holds

@@ -467,7 +467,7 @@ binding plus tests in both suites.
 repetitions, single-threaded, `CMAKE_BUILD_TYPE=Release`, AppleClang 21.0.0.21000334, arm64.
 Means: C++ 0.005691 s (std 8.96e-5), pure Python 0.044912 s (std 8.64e-5), NumPy 0.002492 s
 (std 3.00e-4); speedups 7.89× versus pure Python, 0.438× versus NumPy. Those are the digits in the
-frozen artifact, and they are not constants: across the twenty-two re-freezings in this repository's
+frozen artifact, and they are not constants: across the twenty-three re-freezings in this repository's
 history the C++/Python ratio spans 7.77×–10.31× and the NumPy ratio 0.42×–0.51×, so the answer above
 quotes a run and the claim is the ordering. Three caveats shipped in
 the same artifact: the pure-Python baseline uses `random.Random(seed).gauss`, so its stream

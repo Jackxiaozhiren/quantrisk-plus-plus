@@ -333,14 +333,11 @@ def test_the_prose_of_the_artifact_says_what_it_means(payload: dict[str, Any]) -
     ]:
         assert "  " not in value, key
         assert " [" not in value and "] " not in value, key
-    # The recorded command is volatile by declaration, and Phase 3.3 changes it for every study it
-    # absorbs: the artifact on disk carries the spelling of the revision that wrote it, the code now
-    # writes the registry's. Both are the command that produced this task; anything else is not.
-    # Drop the legacy spelling at P3.5, when the single re-run rewrites the artifact.
-    assert payload["command"] in {
-        "uv run python experiments/fifth_order_crossing_map/run.py",
-        TASKS_BY_ID["fifth_order_crossing_map"].invocation,
-    }, payload["command"]
+    # P3.5's single re-run rewrote this artifact, so the pre-refactor spelling is history now: the
+    # assertion that carried both spellings during the moves collapses to the registry's one form.
+    assert payload["command"] == TASKS_BY_ID["fifth_order_crossing_map"].invocation, payload[
+        "command"
+    ]
 
 
 def test_the_declared_families_exist_in_the_payload(payload: dict[str, Any]) -> None:

@@ -184,7 +184,10 @@ def by_path_load_sites(corpus: list[str]) -> list[dict[str, Any]]:
 
 def split_command(command: str) -> tuple[str, str] | None:
     for prefix in PREFIXES:
-        for verb in ("", "-m "):
+        # `-m ` first: the bare prefix is a prefix of it, so trying "" first would hand the module
+        # form back as a script path beginning with "-m" and every canonical command would be
+        # classified as mangled.
+        for verb in ("-m ", ""):
             head = prefix + verb
             if command.startswith(head):
                 return verb.strip("- "), command[len(head) :]
@@ -202,9 +205,15 @@ def classify_command(command: str) -> tuple[str, str]:
         return "no-command-recorded", body
     if verb == "m":
         token = body.split(" ")[0]
-        as_module = REPO_ROOT / PACKAGE_DIR.split("/")[0]
-        candidate = as_module.parent / Path(*token.split("."))
-        if candidate.with_suffix(".py").is_file() or candidate.is_dir():
+        relative = Path(*token.split("."))
+        package_root = REPO_ROOT / PACKAGE_DIR.split("/")[0]
+        # A module is either a repo tool (`tools.*`, at the checkout root) or shipped code
+        # (`quantrisk.*`, under the package directory). Reading only one of the two is the bug this
+        # branch carried unseen: nothing reached it while the `-m ` prefix lost to the bare one.
+        candidates = [REPO_ROOT / relative, package_root / relative]
+        if any(
+            candidate.with_suffix(".py").is_file() or candidate.is_dir() for candidate in candidates
+        ):
             return "module-path-resolves", token
         return "module-path-does-not-resolve", token
     if "(" in body and ")" in body:

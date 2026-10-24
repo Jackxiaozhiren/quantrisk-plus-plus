@@ -1216,8 +1216,8 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="sheet-reads-the-refreeze-count-as-a-longer-history",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="across the twenty-two re-freezings",
-        replacement="across the twenty-three re-freezings",
+        anchor="across the twenty-three re-freezings",
+        replacement="across the twenty-four re-freezings",
         # The same committed history the note in `docs/reproducibility.md` counts three times
         # over; the sheet is its fourth spelling, and a re-freeze moves all four together or the
         # guard says which one lagged.

@@ -157,11 +157,11 @@ every run: `benchmarks/performance/results/monte_carlo_speed.json` entirely, and
 `mean_runtime_seconds` / `seconds_per_path` columns of
 `experiments/variance_reduction/results/variance_by_method.csv` and
 `experiments/monte_carlo_convergence/results/convergence.csv`. The speed benchmark has been
-re-frozen twenty-two times, and the ratios of those twenty-two committed files are the honest measure of
+re-frozen twenty-three times, and the ratios of those twenty-three committed files are the honest measure of
 how much these digits mean: `7.77×`–`10.31×` against a pure Python loop (32.6% spread) and
 `0.42×`–`0.51×` against vectorised NumPy (20.8% spread), because the NumPy baseline itself ranged
 from 110M to 46M paths/s. Each percentage is `(max − min) / min` over those readings, to one decimal
-place — over the pure-Python band the same twenty-two readings give 24.6 % against `max` and 30.3 %
+place — over the pure-Python band the same twenty-three readings give 24.6 % against `max` and 30.3 %
 against their mean, and a document that prints a spread without saying how it is formed cannot be
 checked against them. The
 guard recomputes the percentages from the committed history and compares the whole band-plus-percentage

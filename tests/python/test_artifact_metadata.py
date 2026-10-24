@@ -2969,8 +2969,8 @@ _CENSUS_REPRO_GOLD = (
     "six orders",
     "six releases",
     "three artifacts",
-    "twenty-two committed files",
-    "twenty-two readings",
+    "twenty-three committed files",
+    "twenty-three readings",
     "two digits",
 )
 _CENSUS_REPRO_PHANTOMS: tuple[str, ...] = ()
@@ -3007,7 +3007,7 @@ _CENSUS_SHEET_GOLD = (
     "four rays",
     "one test",
     "twelve columns",
-    "twenty-two re-freezings",
+    "twenty-three re-freezings",
     "two cases",
     "two columns",
     "two equivalent routes",
@@ -3015,7 +3015,6 @@ _CENSUS_SHEET_GOLD = (
     "two radius definitions",
     "two tests",
     "two versions",
-
 )
 # Empty from Phase 56: the sheet's one phantom, `two radius`, was the truncation #105 named, and the
 # head-conditioned refusal reads it whole as `two radius definitions`, a count of rejected designs
@@ -3139,7 +3138,7 @@ _CENSUS_REPORT_GOLD = (
     "three swept columns",
     "twelve columns",
     "twelve members",
-    "twenty-two committed re-freezings",
+    "twenty-three committed re-freezings",
     "two barrier rows",
     "two checks",
     "two definitions",

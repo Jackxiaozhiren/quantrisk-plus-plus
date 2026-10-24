@@ -1461,6 +1461,55 @@ package importable, and `--require-all` is what turns "0 skipped" into a claim r
 artifact says `4.484e-09 (assets=12, …)`, which is solver slack on a different run rather than a moved
 number -- it is the same class P3.5's re-run will re-freeze.
 
+### 2026-10-24, P3.5 — the one re-run, the two L4 ceilings, and the instruments that were lying
+
+D5 ran once: `python -m tools.run_benchmark_suite --require-all` reported 19/19 executed and passed,
+0 failed, 0 skipped in 199.8 s, the builder re-hashed, the verifier says the evidence is intact, and
+`tools/report_refactor_digest --from 17df062` answers L1 -- **95 entries, 59 unchanged, 18 with content
+movement, 0 undeclared, rc=0**. No correctness number moved. The 18 are the artifact self-reference, the
+three V2-20 provenance-citation shapes, the `--out`-dependent landing strings, and the four
+release-metadata version fields V2-23 named; the only measurement that moved is `mc_speed`'s two
+wall-clock ratios, inside the committed band.
+
+Then the instruments themselves turned out to be the finding, twice over.
+
+* **L4's classifier had a dead branch with a live bug.** `split_command` tried the bare interpreter
+  prefix before `-m `, so no canonical command ever reached the module branch -- and that branch, once
+  reachable, resolved `quantrisk.*` against `REPO_ROOT.parent`, which cannot exist. Both fixed, and the
+  two L4 ceilings move **95 → 0**: every one of the 95 manifest commands is now
+  `module-path-resolves`. The classifier was proved on seven shapes (module under the package, module at
+  the root as `tools.*`, a module that does not exist, a bare path that does not exist, a mangled token,
+  an annotated prose command, and the `--frozen` prefix), so the ceiling is measuring commands again
+  rather than its own parsing bug.
+* **A note inside a command field made sixteen entries unparsable.** The fixture entries carried
+  `(source: …)` inside `generated_by_command`, which the exemption list in `tools/refactor_ceilings.json`
+  had been absorbing since P3.1. The note now lives where it was always authoritative -- the sidecar
+  `command_recorded_in` points at -- and the exemption is retired in that file rather than left to rot.
+* **An unreachable branch stays unmeasured.** Neither defect was caught by a test, because nothing ever
+  called them; what caught them was the ceiling they govern going the wrong way after a change that
+  should have improved it. That is the argument for a metric being read from a real corpus rather than
+  from a fixture.
+
+The re-run's own consequences were re-derived, not caveated, and every figure came out of the artifact or
+the git history through its owner rather than being typed: the rehearsal sheet's three rate phrases, the
+report's manifest totals (`7{,}210{,}363` bytes) and its re-freezing sentence, four census gold entries,
+five plant anchors that named a superseded reading, a bytes count, and the run date. Two hazards showed up
+on the way. The first re-derivation replaced the bare `10.31×` everywhere, which silently rewrote the
+*band's upper edge* in three documents -- the old point reading happens to be the band maximum, so one
+token was doing two jobs; restored from HEAD and redone with the band spans excluded. And the plant whose
+lie was "the history is longer" became a no-op once the history grew, anchor equal to replacement; its
+lie moved to `twenty-four`. The census also surfaced a gap that predates this commit -- `two versions` in
+the rehearsal sheet was never in the gold list, and nothing noticed because an earlier assertion in the
+same guard had always failed first, which is the shape of a masked finding rather than an absent one.
+
+`bootstrap_sites_outside_package` 0, `by_path_load_sites` 0, `commands_not_module_path` 0,
+`commands_unrunnable_from_the_root` 0, `registry_parity_mismatch` 0,
+`tracked_python_files_in_no_static_check_bucket` 0, `external_spend_usd` 0 -- seven of nine ceilings at
+zero, the remaining two skipped for want of their precondition (a built wheel, a sweep verdict living in
+this file). mypy 62 files with the two-sided agreement true, ctest 204, `validate` 7/7, offline
+collection 479, plants 172, and the pair stays **548 / 479**: no case was added, because V2-21's citation
+guard and the pytest-side L4 dry-resolve are deliberately held for one cascade rather than paid twice.
+
 ## 10. Laws as of the end of Phase 1
 
 §13 requires this table when Phase 1 closes. It is the lane's reading, not the prompt's authoring

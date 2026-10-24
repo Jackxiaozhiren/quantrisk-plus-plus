@@ -129,14 +129,19 @@ def fixture_provenance(path: Path) -> tuple[str, str, str]:
     A downloaded response has different provenance from a computed one: what you want to
     know is where it came from and when it was fetched, and the script that re-fetches the
     whole set is the same for all of them. Reporting "no command" for these would be a
-    warning that is technically true and informationally useless.
+    warning that is technically true and informationally useless. The command field stays
+    executable and the source stays in the sidecar, which `command_recorded_in` already points
+    at: an annotation inside a command makes the command unparsable, and the L4 census counted
+    all sixteen of these as not-module-path because of it.
     """
     sidecar = path.with_suffix(path.suffix + ".provenance.json")
     if not sidecar.exists():
         return "", "", ""
     payload = json.loads(sidecar.read_text(encoding="utf-8"))
     return (
-        f"uv run python -m tools.record_data_fixtures (source: {payload.get('source', '?')})",
+        # The command is what a reviewer pastes, so it carries no prose: the source the
+        # parenthetical used to name is in the sidecar this entry points at already.
+        "uv run python -m tools.record_data_fixtures",
         str(payload.get("retrieved_at_utc", "")),
         str(sidecar.relative_to(ROOT)),
     )
