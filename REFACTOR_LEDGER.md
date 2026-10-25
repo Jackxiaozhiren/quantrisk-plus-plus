@@ -2012,3 +2012,18 @@ tools` (73 source files), clang-format over the C++ corpus, `ctest` 204/204, `qu
 `pytest -q` **555 passed in 206.82 s**, the manifest verifier ("Evidence is intact", `0 on disk but not in
 the manifest`), the offline probe (**486 tests collected**), `-m quantrisk.verification.runner --list` (174
 plants), and `--check-ceilings` with all ten keys at or under their ceiling. **All eleven rc=0.**
+
+**Same-day amendment: the second plant, fired where it can be fired.** With `3f5245b` committed,
+`--only ci-lane-drops-a-declared-type-checked-directory` returns `1/1 planted defects were rejected by
+their guard.` with exit code 0 and `git status --porcelain` empty afterwards -- the workflow restored
+byte-identically, so the lane edit survives its own falsification. Both of P3.7's plants are therefore
+proven, one on the working tree (`formatter-census-sees-a-page-no-commit-declares`, before the commit
+because its target is a file the sweep creates rather than edits) and one after it. The five plant anchors
+the counting cascade re-keyed -- `# 486 tests collected offline`, `and 555 pytest tests with the
+validation`, `# 174/174 planted defects rejected`, `oracles installed, 486 collected without them`, and
+`# 555 pytest tests with the `oracles` extra here` -- are covered by the harness's own one-pass
+enumeration rather than by firing each one: `tests/python/test_mutation_suite.py` is 23 green, and the
+staleness that enumeration is designed to catch is exactly what fired once in the lane (the 172/172
+annotation). The full 174-plant sweep stays scheduled for the end-of-phase falsification run, with the
+`plants_not_rejected_by_their_guard` ceiling reading the declaration on the runner and the verdict from
+this file, which is the split P3.2 recorded and this phase did not change.
