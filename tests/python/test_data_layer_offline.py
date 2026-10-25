@@ -152,6 +152,33 @@ def test_a_missing_fixture_names_what_is_available() -> None:
         fixtures.load("no_such_fixture")
 
 
+def test_an_install_without_the_corpus_refuses_instead_of_listing_nothing(
+    tmp_path, monkeypatch
+) -> None:
+    """V2-11: an empty list told an installed reader that the project has no snapshots.
+
+    `data/fixtures/` is committed to the repository and deliberately not packaged into the wheel, so
+    from an install the corpus path does not exist -- and `available()` answered `[]`, which is the
+    same answer a checkout with no fixtures would give. `tools/verify_installed_surface.py` measured
+    the consequence: a study that needs a market series reads that silence as permission to proceed.
+    The refusal now names what it looked for and why it is absent, and it never generates a series
+    in place of one (V1 §4), which is the rule this pins from both sides -- the real corpus still
+    lists when the path is the repository's.
+    """
+    real = fixtures.FIXTURE_ROOT
+    absent = tmp_path / "site-packages" / "data" / "fixtures"
+    monkeypatch.setattr(fixtures, "FIXTURE_ROOT", absent)
+
+    with pytest.raises(fixtures.FixturesNotShipped, match="no fixture corpus at"):
+        fixtures.available()
+    with pytest.raises(fixtures.FixturesNotShipped, match="does not package"):
+        fixtures.load("fred_any_series")
+
+    # A root the caller names is a listing question, not a shipping question: empty stays empty.
+    assert fixtures.available(root=absent) == []
+    assert len(fixtures.available(real)) >= 10, "the refusal broke the checkout's own view"
+
+
 def test_no_fixture_is_large_enough_to_bloat_the_repository() -> None:
     # §Phase 8: "do not commit large datasets directly". The cap is on the payload total,
     # not on any single file, because the failure mode is a slow clone.

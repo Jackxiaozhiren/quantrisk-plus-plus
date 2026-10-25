@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import platform
+import shutil
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -106,11 +107,45 @@ def _git(*arguments: str) -> str | None:
     return completed.stdout
 
 
+def git_availability() -> str:
+    """Why Git cannot answer, phrased so a reader can act on it instead of inferring it.
+
+    V2-14: an installed wheel has no repository above site-packages, and every caller of `_git`
+    answered that with `None`. `None` is the right value for the *fields* -- nobody should read a
+    blank commit as a zero -- but it is the wrong answer to the question the artifact is asking,
+    because "git is not available here" and "git reported a clean tree" arrive at the reader as the
+    same silence. This names which condition holds, and it is what the record prints beside the
+    absence rather than a second guess at the cause.
+    """
+    if shutil.which("git") is None:
+        return "no `git` binary on PATH"
+    try:
+        completed = subprocess.run(  # noqa: S603, S607
+            ["git", "rev-parse", "--is-inside-work-tree"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as error:
+        return f"`git` could not be run here: {error.__class__.__name__}"
+    if completed.returncode != 0:
+        return (
+            f"`{REPO_ROOT}` is not a Git work tree "
+            f"(git exit {completed.returncode}: {completed.stderr.strip().splitlines()[:1]})"
+        )
+    return "git answers"
+
+
 def working_tree_state() -> dict[str, Any]:
     """Uncommitted changes present at run time, as far as Git will tell us."""
     status = _git("status", "--porcelain")
     if status is None:
-        return {"working_tree_dirty": None, "uncommitted_paths": []}
+        return {
+            "working_tree_dirty": None,
+            "uncommitted_paths": [],
+            "git_unavailable_because": git_availability(),
+        }
     paths = parse_porcelain_status(status)
     return {"working_tree_dirty": bool(paths), "uncommitted_paths": paths}
 

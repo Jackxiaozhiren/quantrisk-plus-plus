@@ -180,7 +180,18 @@ def scan() -> tuple[Any, list[dict[str, Any]], list[dict[str, Any]]]:
 
 def control_against_published(sixth: Any, measured: dict[str, dict[str, Any]]) -> dict[str, Any]:
     """The five published books must return their published radii, bit for bit."""
-    published_path = checkout_root() / CONTROL_TASK.artifact
+    try:
+        root = checkout_root()
+    except RuntimeError as error:
+        # V2-11's shape, one layer down: the refusal has to name the thing it needed, not the walk
+        # that failed to find it. This study is a *control* on committed evidence, so an installed
+        # wheel cannot run it at all -- and "no pyproject.toml above your cwd" does not say that.
+        raise RuntimeError(
+            f"{CONTROL_TASK.task_id} validates against the committed artifact at "
+            f"{CONTROL_TASK.artifact}, which only exists in a QuantRisk++ checkout; this study is "
+            f"not runnable from an installed wheel. The root walk reported: {error}"
+        ) from error
+    published_path = root / CONTROL_TASK.artifact
     artifact = json.loads(published_path.read_text(encoding="utf-8"))
     published = {row["label"]: row for row in artifact["books"]}
     mismatches = []

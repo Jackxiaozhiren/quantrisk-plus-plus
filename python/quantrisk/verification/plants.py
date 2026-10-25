@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 486 tests collected offline",
+        anchor="# 488 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -289,6 +289,30 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="an undeclared results directory is evidence the frozen manifest never hashed",
     ),
     Mutation(
+        identifier="installed-corpus-refusal-falls-back-to-silence",
+        kind="prose",
+        path="python/quantrisk/data/fixtures.py",
+        anchor="        if root is None:\n            _refuse_unshipped(directory)",
+        replacement="        if False:\n            _refuse_unshipped(directory)",
+        guard=(
+            "tests/python/test_data_layer_offline.py::"
+            "test_an_install_without_the_corpus_refuses_instead_of_listing_nothing"
+        ),
+        claim="an install with no corpus refuses by naming it, not by answering with an empty list",
+    ),
+    Mutation(
+        identifier="git-absence-reports-a-blank-instead-of-a-cause",
+        kind="prose",
+        path="python/quantrisk/experiments/metadata.py",
+        anchor='            "git_unavailable_because": git_availability(),',
+        replacement='            "git_unavailable_because": "unavailable",',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_an_absent_git_reports_which_kind_of_absence_it_is"
+        ),
+        claim="the record names which kind of git absence it is, not just that one is missing",
+    ),
+    Mutation(
         identifier="ci-lane-drops-a-declared-type-checked-directory",
         kind="prose",
         path=".github/workflows/ci.yml",
@@ -367,7 +391,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 555 pytest tests with the validation",
+        anchor="and 557 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -499,7 +523,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 174/174 planted defects rejected",
+        anchor="# 176/176 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -641,7 +665,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 486 collected without them",
+        anchor="oracles installed, 488 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -766,7 +790,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 555 pytest tests with the `oracles` extra here",
+        anchor="# 557 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"

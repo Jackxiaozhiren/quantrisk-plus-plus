@@ -317,8 +317,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 555 pytest tests with
-    the `oracles` extra installed, and the same tree collects 486 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 557 pytest tests with
+    the `oracles` extra installed, and the same tree collects 488 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:

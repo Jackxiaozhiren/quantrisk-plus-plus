@@ -193,6 +193,7 @@ what does compare them is the replay guard `_assert_same_result`, which walks `.
 | V2-22 | guard-denominator | **High** | `test_every_registered_experiment_is_named_in_the_report` asks whether the report names every registered experiment, and built its denominator as `{experiments/<dir>/ for member in suite if member.script.startswith("experiments/")}`. P3.3a made `member.script` a property over the registry, so each absorbed task started reporting `python/quantrisk/...` and **fell out of the filter** -- six commits later the guard checked 7 of the 14 studies under `experiments/`, while passing every run and keeping its own plant green | set difference between the registry's artifact directories and the set the guard constructs: `dropped out of the guard: fifth_order, fourth_order, restrike, second_book, sixth_book, stress_testing, two_factor` | a gate that lost half its coverage is the L3 failure this lane is not allowed to have caused, and it caused it without touching a `skip`. The report can now omit any absorbed experiment and stay green -- and the plant that exists to catch exactly that was anchored on the stale citation, so it proved the *old* denominator only | the guard keyed its population on the shape of the pre-refactor path rather than on the registry, and the refactor changed that shape one task at a time -- which is precisely the case V2-09 registered for the disk-to-member guard, where the same trap was avoided by walking both layouts and printing each pattern's count | fixed in absorption 7: the denominator comes from `Task.artifact` parts, and the token carries no trailing slash so `experiments/<dir>/run.py`, `experiments/<dir>/results/...` and `python/quantrisk/experiments/<dir>` all name the study. The plant was re-keyed to the new citation and proved to fire by applying it in-tree (guard rc 1), restoring under a SHA-256 check (`b70cca9ac01e`) and seeing rc 0 again | the two other prefix classifiers -- `tests/python/test_task_registry_parity.py:35` and `tools/inventory_orphan_code.py:332` -- were read and are layout-safe, which is how `filesystem_units` reaches 19 with 7 units in the package | 0 $, carried by absorption 7's commit | this one guard, one plant anchor, `paper/technical_report.tex` read-only | high -- measured, fixed and negative-controlled at absorption 7 |
 
 | V2-23 | artifact-reconciliation | Medium | `content_digest` waives the keys in `VOLATILE_KEYS`, which covers `environment` -- but four committed artifacts record the **package version outside** that block, under `oracles.versions.quantrisk` or `oracle.versions.quantrisk`, and neither container is in the set. The replay guards already know this: `tests/python/test_two_factor_bound.py` waives `oracles` by name in its own comparison list. So an artifact's *content* hash moves when the version moves, with no number in the study changing, and P3.5's L1 digest report would have to explain a difference that is pure release metadata | walk every committed artifact through `strip(VOLATILE_KEYS)` and keep paths ending in `quantrisk`: four hits -- `linearisation_error_bound.json`, `two_factor_bound.json`, `var_backtesting_validation.json` all at 1.8.0, `real_data_risk_study.json` at 1.9.0, each under a `.or…cle.versions.quantrisk` path that survives the waiver | `quantrisk_version` is volatile *information* under an ad-hoc key name, and the two instruments that compare artifacts -- the digest and the replay guard -- disagree about it. That disagreement is the finding, not a residual to caveat: one of the two is wrong about what an artifact's content is | the version block was named study by study in Phases 2 to 13, before `VOLATILE_KEYS` existed, and the set grew by listing what each phase happened to notice rather than by a rule about environment | decide at P3.5 with the other declared movements: either add the two container spellings to `VOLATILE_KEYS` with the reason recorded in `tools/refactor_ceilings.json`, or move the field inside `environment`, where it is already waived. The second is a producer change to four studies and re-derives their artifacts; the first is one line and a declaration. Neither is this lane's call to make silently | whichever is chosen, the digest report must not enumerate these four as "numbers moved", and the waiver must live in one place -- the replay guard's local list is deleted or replaced by the shared set, not duplicated | 0 $ | `python/quantrisk/experiments/evidence.py`'s set, four artifacts, the replay guard's local waiver list, `evidence/manifest.json` digests | medium -- population measured, instrument disagreement read, the fix is a P3.5 decision |
+| V2-24 | installed-surface | **High** | `quantrisk run --list` advertises 19 registered tasks to an installed user, and 15 of them do not run from a wheel: measured on `3f5245b` through `build/p41-surface.sh` (clean venv outside the checkout, empty extras, neutral cwd), 4 pass (`fifth_order_crossing_map`, `linearisation_error_bound`, `mc_speed`, `second_book_crossing_map`), 8 die on `No module named 'matplotlib'`, 2 on `scipy`, 1 on `cvxpy`, 3 exit 2 inside the QuantLib validators, and 1 (`sixth_book_crossing_map`) raises `RuntimeError: ... is not inside a QuantRisk++ checkout` because it validates against the committed fifth-order artifact | the census runs every id through the installed CLI and records each exit code and last line; the wheel resolves inside the venv (`in-checkout: False`), so the failures are the install's, not the laptop's | the list is a promise, and a promise that holds for 4 of 19 is the class of defect this register exists for: a reader follows the documented command, gets a `ModuleNotFoundError` naming no remedy, and cannot tell a broken install from an unsupported task | optional extras were introduced as a *test* concern (`oracles` keeps CI offline) and the studies that draw figures grew a hard dependency on `plot` without any surface naming that; the registry owns paths and invocations but was never asked to own requirements | declare each task's requirement set in the registry, derived-and-pinned against the imports its module tree actually makes (AST, not a second hand list), and let `quantrisk run <id>` name the missing extra from that declaration rather than from a traceback | `tools/verify_installed_surface.py` classifies all 19 and a guard compares its classification with the declaration both ways, so a task that declares `base` and fails -- or declares `plot` and runs -- reddens | 0 $ | `python/quantrisk/experiments/registry.py`, `python/quantrisk/data/fixtures.py` (the path shape), `tools/verify_installed_surface.py`, one plant, `docs/reproducibility.md` | high -- the fix touches the surface P3.6 froze, so the `run --list` contract must be widened deliberately, not as a side effect |
 
 One investigator's claim was **refuted by reading the code** and is not carried: that
 `test_artifact_metadata.py:917`/`:927` compare a glob against the README with no floor. They do have one —
@@ -2060,3 +2061,102 @@ in place, and it now names the second half of D6 as well: `run` reaches a regist
 registry rather than a path the packaging had to learn about. `docs/portfolio_audit.md` keeps its "Three
 commands" line: the document declares itself a record "against the repository as of `v1.0.0`", so that
 sentence was true when written and stays.
+
+### 2026-10-25, P4.1 — the wheel is installed outside the checkout, and the surface says what it can do
+
+§11 item 1, and the two register rows that made it a lie if skipped: V2-11 (the fixture corpus is not
+packaged and `available()` answered as if it were simply empty) and V2-14 (a shipped module shells out
+to git and reports nothing when git cannot answer). The proof is instrumented rather than narrated:
+`tools/verify_installed_surface.py` takes a venv interpreter and a working directory, and answers the
+four questions §11 asks. It is a tool, not a pytest case, because building a wheel and creating an
+environment costs minutes per commit, and a suite that spends them teaches people to skip the suite --
+the same reasoning §9 records for the mutation sweep.
+
+**What was built and where it resolved.** `uv build` produced a 2,803,517-byte
+`quantrisk-1.9.0-cp312-cp312-macosx_27_0_arm64.whl` and a 4,844,061-byte sdist. The environment was
+created *outside* the checkout at `/Users/jackson/quantrisk-p41-env`, so the venv's own path can never
+be the string the identity assertion is looking for; installing the wheel alone pulled a fresh
+dependency set -- `numpy 2.5.4`, `pandas 3.1.0` -- which is not the lock's pinned pair of 2.5.3 and
+3.0.6, and that is the point: an installed user resolves against the ranges in
+`[project.dependencies]`, not against `uv.lock`. The probe then read
+`module = /Users/jackson/quantrisk-p41-env/lib/python3.12/site-packages/quantrisk/__init__.py`,
+`prefix = /Users/jackson/quantrisk-p41-env`, `version = 1.9.0` matching `pyproject.toml`, and
+`in-checkout: False`. `quantrisk validate` passed 7/7 *there*, printing `commit unknown` for the
+configure-time stamp -- an installed build has no configure-time git, and says so.
+
+**The registry promise, checked from outside.** `quantrisk run --list` in the installed environment
+enumerated 19 ids, set-equal to `TASKS` and agreeing with its own tally line, from a working directory
+that is not inside the repository. One offline study executed end to end through the CLI with an
+explicit `--out`: `linearisation_error_bound` returned rc 0 and wrote
+`linearisation_error_bound.json` under the root it was pointed at, not beside the package.
+
+**V2-11, and the number that was measured after the fix rather than before it.** The census that ran
+first -- `build/p41-surface.sh`, 19 tasks through the installed CLI, each exit code taken from the
+command -- found `real_data_risk_study` refusing on `No module named 'scipy'`: the oracles blocked the
+fixture question entirely. So a second environment was built with `[oracles,plot]` installed, and there
+the refusal is the one §11 asks for:
+`FixturesNotShipped: no fixture corpus at .../quantrisk-p41-env-full/lib/python3.12/data/fixtures: that
+is where the repository-relative rule points from this install, and no install carries the corpus there
+-- the committed snapshots live in `data/fixtures/` of a QuantRisk++ checkout, which the wheel does not
+package.` Previously that path produced `[]`, which is indistinguishable from a checkout that has no
+snapshots. `available()` now refuses when the *default* root is absent and keeps returning `[]` for a
+root the caller names, because those are different questions; `load()` refuses the same way before it
+can be read as "this project has no data". Nothing in the refusal generates a series: V1 §4 forbids
+synthesised market data, and §11 names a convenient fallback as the same defect.
+
+**V2-14, answered in the artifact rather than in a comment.** `working_tree_state()` used to return
+`{"working_tree_dirty": None, "uncommitted_paths": []}` wherever git could not answer. The `None` is
+right for the field and wrong for the reader -- it is the same bytes an unreadable tree and an
+uninitialised repository produce -- so the absence now carries `git_unavailable_because`, filled by
+`git_availability()` with one of three named conditions: no `git` on PATH, git refusing to run, or the
+resolved root not being a work tree (with git's own exit code and first stderr line quoted). The test
+pins both directions, including the assertion that *here* the field is absent and `git answers`.
+
+**One study is not runnable from an install at all, for an honest reason.**
+`sixth_book_crossing_map` validates the sixth book against the committed fifth-order artifact, so it
+reads a repository file regardless of `--out`, and its failure said only `... is not inside a
+QuantRisk++ checkout: no ancestor holds pyproject.toml and .git; refusing to guess at a root`. It now
+says that it validates against `CONTROL_TASK.artifact`, which only exists in a checkout, and keeps the
+root walk's words as the clause behind it. A refusal is only useful if it names the thing that is
+missing; `checkout_root()` was right and merely uninformative about *why* the caller cared.
+
+**The census result is registered, not quietly absorbed.** Of the 19 tasks, **4 run from a bare wheel**
+(`fifth_order_crossing_map`, `linearisation_error_bound`, `mc_speed`, `second_book_crossing_map`); 8 fail
+on `matplotlib`, 2 on `scipy`, 1 on `cvxpy`, 3 exit 2 inside the QuantLib validators, and
+`sixth_book_crossing_map` is the checkout-only study above. That is **V2-24**, registered with the
+population, the command that measured it, and the reason it is not fixed in this commit: making the
+requirement per task means widening the surface `run --list` publishes, and P3.6 froze that shape on
+purpose, so it is a deliberate contract change with its own guard rather than a side effect of a
+documentation phase. The residue the refusal leaves -- an empty four-directory tree with no files, which
+the probe now counts separately as `empty_directories_left` -- is the same shape
+`docs/integrity_audit.md` 62(e) recorded for the sweep's probe directories: recorded, not cleaned, and
+no published artifact depends on it.
+
+**The instrument `62(d)` needed caught this phase's own file.** The first P4.1 suite run reddened
+`test_the_formatter_walks_exactly_the_tracked_files_of_the_kinds_it_accepts` with
+`the formatter walks ['tools/verify_installed_surface.py'], which nothing tracks` -- the new tool existed
+on disk, was neither tracked nor ignored, and had moved every published formatting count by one before
+any commit did. The guard written yesterday for a *historical* mis-attribution fired on the phase that
+followed it, which is the only test of such a guard that matters. Staging the file cleared it; the count
+is 227 now, and the census still reads 0 in both directions.
+
+**Two guards, two plants, and the pair.** V2-11 and V2-14 each carry one case
+(`test_an_install_without_the_corpus_refuses_instead_of_listing_nothing`,
+`test_an_absent_git_reports_which_kind_of_absence_it_is`), moving the counting pair **555/486 →
+557/488** across 22 replacements in the same six files, plus the sweep annotation
+`# 174/174 planted defects rejected` → `176/176` and its own plant anchor. Two plants were added --
+`installed-corpus-refusal-falls-back-to-silence` (anchors on the `if root is None:` branch) and
+`git-absence-reports-a-blank-instead-of-a-cause` (anchors on the `git_unavailable_because` field) -- so
+the inventory is **176**. Both of their targets hold this commit's edits, which is the rule P3.7 wrote
+down: a plant cannot be fired against a dirty target because a restore would take the fix with it, so
+both proofs are scheduled on the committed head and recorded here after the fact.
+
+**The report follows its tex.** Re-rendered after the pair moved: bundle `bfcc63e33c6b`, PDF
+`d0035e180c36`, 1,005,924 bytes; the evidence manifest is untouched and verifies, because the paper is
+not among the 95 artifacts it hashes.
+
+**Gate lane on this tree.** Eleven commands, each exit code taken from the command itself: ruff, ruff
+format (227 files), `mypy python/quantrisk tools` (74 source files), clang-format, ctest 204/204,
+`quantrisk validate` 7/7, `pytest -q` **557 passed in 96.71 s**, the manifest verifier ("Evidence is
+intact"), the offline probe (**488 tests collected**), the plant inventory (176 lines) and
+`--check-ceilings`. All eleven rc=0.

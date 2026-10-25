@@ -140,9 +140,12 @@
       "measured_at_baseline": null,
       "max": 0,
       "reach_by_phase": "P4.1",
-      "corpus": "a wheel built at the final commit, installed into a fresh venv, probed from a neutral cwd",
-      "can_fail_because": "the probe prints module.__file__ and sys.prefix and asserts the checkout path is not among them",
+      "corpus": "the reading is produced by `uv run python -m tools.verify_installed_surface --python <clean venv> --work <neutral dir>`: a wheel built from this tree, installed into a fresh environment outside the checkout, then probed for identity, registry parity of `run --list`, `validate`, one offline study into an explicit `--out`, and the refusal's text. It cannot run on the runner because it installs a second environment, so the verdict lives in `REFACTOR_LEDGER.md` and this collector reports the precondition's absence rather than a proxy.",
+      "can_fail_because": "the probe asserts `quantrisk.__file__` and `sys.prefix` both resolve under the environment root and neither contains the checkout path, and `--self-test` proves the assertion fails when aimed at the checkout's own interpreter: measured at P4.1 on the wheel built from `a0021e5`, which printed the refusal `identity: /Users/jackson/QuantRisk++/python/quantrisk/__init__.py resolves outside the environment root .../QuantRisk++/.venv; the checkout ... appears in the resolved import path` and exited 0 because the refusal was the point",
       "exemptions": [],
+      "measured_at_phase": {
+        "P4.1": 0
+      },
       "may_be_unmeasured": true
     },
     {

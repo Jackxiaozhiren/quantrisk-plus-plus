@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import NoReturn
 
 from quantrisk.data.provenance import Provenance
 
@@ -29,6 +30,29 @@ FIXTURE_ROOT = Path(__file__).resolve().parents[3] / "data" / "fixtures"
 
 class FixtureNotFound(FileNotFoundError):
     pass
+
+
+class FixturesNotShipped(FileNotFoundError):
+    """The corpus itself is absent, which is a different fact from one name missing.
+
+    V2-11. `data/fixtures/` is committed to the repository and is not packaged into the wheel, so an
+    installed user who asks what is available was told `[]` -- a list that reads as "this project
+    has no snapshots" when the truth is "the snapshot corpus lives beside the checkout, and this
+    install does not carry it". The refusal names the path it looked for, because the caller's next
+    action is a filesystem action. Nothing here falls back to fetching or generating a series: V1 §4
+    forbids synthesised market data, and a fixture invented to keep a study running is that same
+    defect wearing a convenient default.
+    """
+
+
+def _refuse_unshipped(directory: Path) -> NoReturn:
+    raise FixturesNotShipped(
+        f"no fixture corpus at {directory}: that is where the repository-relative rule points from "
+        "this install, and no install carries the corpus there -- the committed snapshots live in "
+        "`data/fixtures/` of a QuantRisk++ checkout, which the wheel does not package. Run from a "
+        "checkout, or pass an explicit `root=`; nothing in this project substitutes generated data "
+        "for a missing fixture."
+    )
 
 
 @dataclass(frozen=True)
@@ -55,6 +79,8 @@ def available(root: Path | None = None) -> list[str]:
     """
     directory = root or FIXTURE_ROOT
     if not directory.exists():
+        if root is None:
+            _refuse_unshipped(directory)
         return []
     return sorted(
         path.name[: -len(".provenance.json")].split(".", 1)[0]
@@ -65,6 +91,8 @@ def available(root: Path | None = None) -> list[str]:
 def load(name: str, *, root: Path | None = None) -> Fixture:
     """Read a fixture and verify it still matches its own provenance record."""
     directory = root or FIXTURE_ROOT
+    if root is None and not directory.exists():
+        _refuse_unshipped(directory)
     sidecar = directory / f"{name}.provenance.json"
     if not sidecar.exists():
         # Accept the extension-free form too, which is what `available` returns.

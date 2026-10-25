@@ -32,6 +32,7 @@ from quantrisk.experiments.metadata import (
     artifact_manifest,
     describe_provenance,
     environment,
+    git_availability,
     package_versions,
     parse_porcelain_status,
     repo_relative,
@@ -117,6 +118,31 @@ def test_uncommitted_paths_are_relative_and_never_escape_the_repository() -> Non
     for path in state["uncommitted_paths"]:
         assert not path.startswith("/")
         assert not path.startswith("..")
+
+
+def test_an_absent_git_reports_which_kind_of_absence_it_is(tmp_path: Path, monkeypatch) -> None:
+    """V2-14: `None` is the right value for a field and the wrong answer to the reader's question.
+
+    Off-repo -- which is every installed user, and was the state the first clean-venv probe of
+    `tools/verify_installed_surface.py` ran in -- `working_tree_state()` returned
+    `{"working_tree_dirty": None, "uncommitted_paths": []}`. A reader holding that artifact could
+    not tell "git refused" from "git said clean", and the empty path list looks like an answer. So
+    the absence now carries the condition that produced it, and this pins both directions: a
+    directory outside any work tree names that, and this checkout still reports a decided value with
+    no absence attached.
+    """
+    here = working_tree_state()
+    answered = git_availability()
+    monkeypatch.setattr("quantrisk.experiments.metadata.REPO_ROOT", tmp_path)
+    state = working_tree_state()
+    assert state["working_tree_dirty"] is None
+    assert state["uncommitted_paths"] == []
+    reason = state["git_unavailable_because"]
+    assert "not a Git work tree" in reason, reason
+
+    assert here["working_tree_dirty"] in (True, False), here
+    assert "git_unavailable_because" not in here
+    assert answered == "git answers"
 
 
 def test_sha256_file_matches_the_standard_hash_of_the_same_bytes(tmp_path: Path) -> None:
@@ -2958,8 +2984,8 @@ _CENSUS_REPRO_GOLD = (
     "20.8% spread",
     "204 tests",
     "32.6% spread",
-    "486 tests",
-    "555 pytest tests",
+    "488 tests",
+    "557 pytest tests",
     "548,368 assertions",
     "7 identity checks",
     "four modules",
@@ -2995,11 +3021,11 @@ _CENSUS_SHEET_GOLD = (
     "4 scenarios",
     "4,453,163 paths",
     "45,982,736 paths",
-    "486 tests",
+    "488 tests",
     "492 rows",
     "5 books",
-    "555 pytest tests",
-    "555 python tests",
+    "557 pytest tests",
+    "557 python tests",
     "548,368 assertions",
     "69 cases",
     "80,258,165 paths",
@@ -3091,7 +3117,7 @@ _CENSUS_REPORT_GOLD = (
     "41 pytest tests",
     "492 rows",
     "50 steps",
-    "555 pytest tests",
+    "557 pytest tests",
     "548{,}368 assertions",
     "582 windows",
     "6 failing cases",
