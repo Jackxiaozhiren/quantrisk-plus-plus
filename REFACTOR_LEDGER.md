@@ -2027,3 +2027,36 @@ staleness that enumeration is designed to catch is exactly what fired once in th
 annotation). The full 174-plant sweep stays scheduled for the end-of-phase falsification run, with the
 `plants_not_rejected_by_their_guard` ceiling reading the declaration on the runner and the verdict from
 this file, which is the split P3.2 recorded and this phase did not change.
+
+**CI on the P3.7 head.** Run 40161363131 on `dbf0176`: **all four jobs success** -- `Format and static
+checks`, `Configure, build, C++ tests, Python tests`, `macOS native C++ and Python parity`,
+`Benchmark suite against live oracles`. Read from the job's own step list, not from its colour: step 9 of
+the lint job is `refactor ceilings` and its conclusion is `success`, so the ceilings file was evaluated
+on the runner, for the first time, and it ran rather than skipped.
+
+**What the runner measured, and why that is the phase's best evidence.** The step's own log carries the
+two P3.7 readings, and they agree with the laptop on every number while naming a different tool:
+
+- `static_check_coverage`: `mypy_command` `uv run mypy python/quantrisk tools`, `mypy_targets`
+  `["python/quantrisk", "tools"]`, `mypy_enumerated_per_target` `{"python/quantrisk": 62, "tools": 11}`,
+  `mypy_reported_source_files` 73, `mypy_two_sided_agreement` true, `ruff_admitted_python` 107,
+  `ruff_admitted_non_python` 112, `tracked_python_files` 107, `undeclared_directories` `[]`,
+  `uncovered_paths` `[]`, `files_outside_their_declaration` 0, buckets `mypy and ruff` 73 and
+  `ruff only` 34.
+- `formatter_census`: `reported_already_formatted` 226, `reported_total` 226, `tracked_formattable` 226,
+  `walked_formattable` 226, `walked_other_kinds` 112, exit 0.
+- `instruments` / `binary` resolve to `/home/runner/work/quantrisk-plus-plus/quantrisk-plus-plus/.venv/bin/
+  {mypy,ruff}` -- the absolute path the laptop cannot share, now printed instead of assumed, which is what
+  makes the two readings comparable rather than merely equal.
+
+The 107 / 73 / 34 / 226 / 112 quintet on a Linux runner is the shape `docs/integrity_audit.md` 62(d) could
+only assert from one side: two environments, one named corpus, no spread. P3.7's census is what turns that
+from a hope into a reading.
+
+**Amendment, same day: one stale sentence P3.6 left behind.** `pyproject.toml`'s `[project.scripts]`
+comment still said the CLI "is three commands", which P3.6 made four and no guard sees, because the
+comment is prose inside a build file and the contract guard reads the parser, not the packaging. Corrected
+in place, and it now names the second half of D6 as well: `run` reaches a registered study through the
+registry rather than a path the packaging had to learn about. `docs/portfolio_audit.md` keeps its "Three
+commands" line: the document declares itself a record "against the repository as of `v1.0.0`", so that
+sentence was true when written and stays.

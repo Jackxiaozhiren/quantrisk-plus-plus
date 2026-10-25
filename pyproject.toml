@@ -14,8 +14,9 @@ keywords = ["quantitative-finance", "monte-carlo", "risk", "reproducibility"]
 dependencies = ["numpy>=1.26", "pandas>=2.0"]
 
 [project.scripts]
-# The CLI is three commands over the same functions the library exposes, so `validate`
-# checks the installed build rather than a source checkout.
+# The CLI is four commands over the same functions the library exposes, so `validate`
+# checks the installed build rather than a source checkout, and `run` reaches a registered
+# study through the registry rather than a path the packaging had to learn about.
 quantrisk = "quantrisk.cli:main"
 
 [project.optional-dependencies]
