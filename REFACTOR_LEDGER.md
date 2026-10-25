@@ -1817,62 +1817,70 @@ Gate lane after all of it, on this tree: ruff, ruff format (226 files), mypy ove
 clang-format, ctest 204/204, `quantrisk validate` 7/7, `pytest -q` **554 passed**, manifest "Evidence is
 intact", offline probe **485 tests collected**, plant inventory lists with rc=0.
 
-**Amended the same day, after the runner read it and after the replay.** Three things the entry above
-understates, each found by a machine rather than by re-reading.
+**CI, and the one guard it broke.** Run 40077546383 on `1313c51`: `Format and static checks` and the macOS
+parity lane passed, `Benchmark suite against live oracles` passed, and `Configure, build, C++ tests, Python
+tests` → *Python tests (pytest, fully offline)* failed on
+`test_cli_pre_existing_command_outputs_kept_their_contracts_when_run_landed` with
+`quantrisk validate` → `27de67ecc3ba5772` against the pinned `82047dafac7aa0a5`. The defect was in the
+guard, not in the CLI, and it was the same class as everything else this phase has met: the fingerprint was
+taken over a fold that collapsed digits and horizontal space, while `validate`'s second line prints this
+build's **compiler, build type and commit** and `benchmark`'s first prints `platform.platform()`. Those are
+letters. The guard had pinned the machine that measured it, so it could only ever be green on one machine
+-- which is why the local lane said nothing.
 
-*The contract guard pinned the machine, and CI said so.* Run 40077546383 on `1313c51` put
-`Configure, build, C++ tests, Python tests` → *Python tests (pytest, fully offline)* red on
-`test_cli_pre_existing_command_outputs_kept_their_contracts_when_run_landed`: `quantrisk validate`
-fingerprinted `27de67ecc3ba5772` where the entry above had pinned `82047dafac7aa0a5`. Nothing about the
-CLI had changed on the runner; what had changed was the compiler name, the host string and the commit the
-binary was configured at -- all printed on `validate`'s second line, all letters, all invisible to a fold
-that collapsed digits and spaces. Local green was real and irrelevant: the guard had been measuring this
-machine's build identity and calling it an output contract. The fold now absorbs
-`platform.platform()` and every `build_metadata()` value before it folds numbers with their signs,
-separators and exponents, and the four shapes are pinned at `1641f50f239d95da` (`validate`),
-`0e920879a7834e6c` (`validate --json`), `e077aed0cd074780` (`demo`), `cb18d49dabffd62c`
-(`benchmark --iterations 2`). The guard also now *simulates the other machine*: it rewrites the captured
-text with a second toolchain's identity -- different compiler, host, commit, arch, build type, flags and
-version -- and requires that text, folded against that identity, to equal this machine's fold. A
-`swapped != printed` assertion makes the simulation do work rather than restate itself, and the stand-in
-starts from this build's own key list, so a metadata field added by a future phase is carried on both
-sides instead of quietly going stale.
+**The fold, widened.** It now removes identity before it removes numbers: `platform.platform()` and every
+`build_metadata()` value become `<id>`, then a number with its sign, thousands separators and exponent
+becomes `#`, then runs of horizontal space collapse. The four pinned shapes re-measured to
+`1641f50f239d95da` (`validate`), `0e920879a7834e6c` (`validate --json`), `e077aed0cd074780` (`demo`) and
+`cb18d49dabffd62c` (`benchmark --iterations 2`), stable across two in-process passes, and the failure
+message now prints the folded text so a future cross-environment red names its own line rather than two
+opaque digests. Run 40155860918 on the correcting head `60ed21b`: **all four jobs success**, including the
+offline lane that had failed, and the two figures in the entry above were corrected rather than caveated --
+the fold's `9db3461feed27779` / `87ebf00e4a8d43aa` pair stays as the record of the *right-alignment*
+problem it also solved, because that one was real and is a different thing.
 
-*The control for that fold is two-sided, because a one-sided control proves only that red is possible.*
-`build/v2-p36-falsify-fold.py` copies the test module and deletes the identity absorption, then re-pins
-all four digests under the weakened fold -- the exact repair that would turn the CI red back to green
-without fixing anything. The honest copy comes back `rc=0`; the defective copy comes back `rc=1`, and the
-failing line is the cross-machine comparison (`assert elsewhere == _fold_cli_output(printed)`), not the
-pinned loop. Attribution is by reported line number read against the copy's own text, because pytest
-echoes every assert statement's source into the traceback and the message strings cannot say which one
-fired.
+**What the widened fold is tested against.** A fold that absorbs identity can also absorb a contract change,
+so the guard simulates the other machine instead of trusting this one: it takes the captured text, swaps in a
+second toolchain's identity -- different compiler, host, commit, arch, build type and flags, plus version --
+and requires that text, folded against *that* identity, to equal the fold of this machine's text. Two details
+keep that honest rather than tautological: `assert swapped != printed` fails if the substitution found nothing
+to replace, so the simulation cannot silently degenerate into comparing a text with itself; and the stand-in
+starts from `dict(build_metadata())`, this build's own key list, so a metadata field added by a future phase is
+carried on both sides instead of going stale-and-green or stale-and-red. Two controls
+run against it. `build/v2-p36-falsify.py` plants five defects in `cli.py` and restores the file byte-identically
+after each (snapshot digest `66e7dca05e75204d`): drop the last listed task, repeat the unknown-id message on a
+bare `run`, skip the `runpy` call but print PASS, reword `validate`'s summary line, and add a fifth subcommand
+to the parser -- each reddens exactly one test, and the fifth fails on the *command-set* assertion inside the
+contract guard rather than on its digests, which is the point of having it. `build/v2-p36-falsify-fold.py` then
+attacks the guard itself in a copy under `build/`: it deletes the identity absorption, re-pins all four digests
+under that weakened fold -- exactly the repair that would turn the CI red back to green while fixing nothing --
+and asserts both directions. The honest copy comes back `rc=0`; the defective copy comes back `rc=1` at the
+comparison line (`assert elsewhere == _fold_cli_output(printed)`) and *not* at the pinned loop. Attribution is
+by the reported line number read against the copy's own text, because pytest echoes every assert statement's
+source into the traceback and the message strings cannot say which one fired.
 
-*`quantrisk run` executes every registered study, and the numbers say so.* `build/v2-p36-run-all.py`
-enumerated the tasks through the CLI, ran all 19 through `quantrisk run <id> --out build/p36-all`, and
-checked each one wrote the artifact its registry row declares: **19/19 rc=0 in 261 s**, `--out` honoured
-everywhere, no committed path touched. Their content digests were then compared with the committed ones
-under the evidence chain's own volatile-stripping rule: **15 of the 19 are byte-identical**, and the four
-that are not (`monte_carlo_vs_analytic`, `path_dependent_vs_quantlib`, `pricing_vs_quantlib`,
-`two_factor_error_bound`) differ in **exactly one leaf each** -- the artifact quoting the root it was told
-to write into, as `csv: benchmarks/quantlib/results/pricing_vs_quantlib.csv` →
-`build/p36-all/benchmarks/quantlib/results/pricing_vs_quantlib.csv`, or as `figure_status: "wrote <png>"`.
-No result field moved in any of the nineteen. That single leaf is worth keeping as an observation rather
-than a fix: `VOLATILE_KEYS` strips a path under the key `path`, but these two fields echo paths under
-`csv` and `figure_status`, so a *relocated* run is classified as content movement when the only thing that
-moved is where a file says it put its sibling. Nothing committed today is produced with `--out`, so the
-gap is latent; Phase 5's ceilings review decides whether the fields should carry repo-relative paths --
-the published bundle's actual fact -- or whether the key list should learn the two names. Silently
-changing what a content digest covers would be an adjudication, not a cleanup.
+**D6's user-facing claim, measured.** `build/v2-p36-run-all.py` enumerates the tasks through
+`quantrisk run --list`, executes all nineteen through `quantrisk run <id> --out build/p36-all`, and checks each
+wrote the artifact its registry row declares: **19/19 rc=0 in 261 s**, and no committed path was touched -- the
+manifest still verifies `0 on disk but not in the manifest`, and D5's one re-run remains the only one. Their
+content digests were compared with the committed ones under the evidence chain's own volatile-stripping rule:
+**15 of the 19 are identical**, and the four that are not (`monte_carlo_vs_analytic`,
+`path_dependent_vs_quantlib`, `pricing_vs_quantlib`, `two_factor_error_bound`) each differ in **exactly one
+leaf** -- three times `csv` and once `figure_status`, the fields by which an artifact quotes the root it was
+told to write into (`benchmarks/quantlib/results/x.csv` → `build/p36-all/benchmarks/quantlib/results/x.csv`).
+No result field moved anywhere in the nineteen, which is the strongest form of the claim this phase makes: the
+CLI route reproduces the published mathematics. It also exposes a rule that is latent rather than broken:
+`VOLATILE_KEYS` strips a path under the key `path`, so these two echo fields count as content, and a relocated
+replay therefore reads as movement. Nothing committed is produced with `--out`, so no digest today depends on
+it; deciding whether those fields should carry repo-relative paths -- the published bundle's actual fact -- or
+whether the key list should learn the two names changes what a content digest covers, which is an adjudication
+for Phase 5's ceilings review rather than a cleanup to slip into a refactor.
 
-*One tool line, found by being misled twice.* `tools/rewrap_docstrings.py` without `--apply` prints the
-tally of the rewrite it *would* make -- `docstrings reflowed: 1`, `lines still longer than 100: []` -- and
-writes nothing. I read that as a completed repair twice in this session and then nearly filed the tool as
-dishonest when ruff stayed red on lines it does not own: the tally is the proposed file, and the remaining
-E501s were comment and f-string lines, which the tool deliberately never touches. It now also prints
-`dry run: <path> not written; pass --apply to write the rewrite`, and
-`test_a_second_run_finds_nothing_left_to_do` asserts both halves of that -- the sentence in the output and
-the file byte-unchanged -- with the notice deleted to prove the assertion reddens. No new pytest case, so
-the pair above stays at 554/485.
-
-
-
+**One tool line, found by being misled twice.** `tools/rewrap_docstrings.py` without `--apply` prints the tally
+of the rewrite it *would* make -- `docstrings reflowed: 1`, `lines still longer than 100: []` -- and writes
+nothing. I read that as a completed repair twice, and nearly filed the tool as dishonest when ruff stayed red on
+lines it never touches: the tally describes the proposed file, and the remaining E501s were comment and
+f-string lines. It now prints `dry run: <path> not written; pass --apply to write the rewrite`, and
+`test_a_second_run_finds_nothing_left_to_do` asserts both halves of that -- the sentence in the output and the
+file byte-unchanged -- with the notice deleted to prove the assertion reddens (`rc=1`, one failed). No pytest
+case was added there, so the pair above stays at 554/485.
