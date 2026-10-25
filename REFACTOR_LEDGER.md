@@ -2160,3 +2160,13 @@ format (227 files), `mypy python/quantrisk tools` (74 source files), clang-forma
 `quantrisk validate` 7/7, `pytest -q` **557 passed in 96.71 s**, the manifest verifier ("Evidence is
 intact"), the offline probe (**488 tests collected**), the plant inventory (176 lines) and
 `--check-ceilings`. All eleven rc=0.
+
+**Amendment, same day: both plants fired on the committed head.** `c1eb53a` holds the two files these
+plants mutate, so the sweep could run against them:
+`--only installed-corpus-refusal-falls-back-to-silence` and
+`--only git-absence-reports-a-blank-instead-of-a-cause` each print
+`1/1 planted defects were rejected by their guard.` with exit 0, and `git status --porcelain` is empty
+after each pair -- the fixtures branch and the `git_unavailable_because` field both restored
+byte-identically. This is the P3.7 rule applied a second time, in the phase right after the one that
+wrote it down: neither of these could have been proven before the commit, and claiming them before the
+commit would have been exactly the leak §16 forbids.
