@@ -43,8 +43,18 @@ jobs:
       # raised TypeError on every documented input, and two public signatures whose `bytes`
       # annotation resolved to a dataclass field rather than the builtin. A gate that cannot
       # fail is not a gate.
+      #
+      # `tools/` joins the target list at V2 P3.7 (D7): the eight repository tools moved into the
+      # package at P3.4, and a type checker that stops at `python/quantrisk` leaves a migrated
+      # directory in no bucket at all. Four real errors surfaced on the first run over it.
       - name: mypy
-        run: uv run mypy python/quantrisk
+        run: uv run mypy python/quantrisk tools
+      # The ceilings file is the policy asset §4.3 names: what a run is measured against. Until now
+      # only a laptop ever measured it, so a key whose corpus had silently shrunk -- the defect P3.5
+      # found in the command classifier -- would have stayed invisible between sessions. This step is
+      # the same reading on the runner, and it prints every key with its value and its ceiling.
+      - name: refactor ceilings
+        run: uv run python -m tools.inventory_orphan_code --check-ceilings
 
   build-and-test:
     name: Configure, build, C++ tests, Python tests

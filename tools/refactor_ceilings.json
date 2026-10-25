@@ -61,14 +61,46 @@
     {
       "key": "tracked_python_files_in_no_static_check_bucket",
       "law": "L9",
-      "metric": "tracked *.py files admitted by neither mypy's target list nor ruff's own resolver log",
-      "measured_at_baseline": 0,
+      "metric": "tracked *.py files whose bucket is not the one their top-level directory declares, counted from `files_outside_their_declaration`",
+      "measured_at_baseline": null,
+      "baseline_note": "no reading exists at the Phase 0 baseline, because the metric is a comparison against this row's own `bucket_expectations` and the row did not exist there. The first reading of the metric is this tree at P3.7 before any directory was declared: 107 -- every tracked file in it. `measured_at_phase` below records where it landed.",
+      "measured_at_phase": {
+        "P3.7": 0
+      },
       "max": 0,
       "reach_by_phase": "P3.7",
-      "corpus": "86 tracked *.py, tested against mypy's reported source-file count (23, agreed by independent enumeration of python/quantrisk) and ruff's `check . --verbose` admission log, which names every path it admits",
-      "can_fail_because": "the key is not already at its goal by absence: ruff admitted 86 of 86 Python files and a further 112 non-Python ones, and the snapshot prints `tracked_not_admitted_by_ruff` explicitly so an excluded directory shows up as a named list rather than as a quiet zero",
+      "corpus": "107 tracked *.py, each classified by two independent readings -- the target list CI hands to `mypy`, parsed out of `.github/workflows/ci.yml` so no second copy of it can go stale, and ruff's own inclusion log -- and then compared against this row's `bucket_expectations`. The snapshot prints `undeclared_directories`, `buckets_moving_from_their_declaration`, `uncovered_paths` and `tracked_not_admitted_by_ruff`, each a named list rather than a count.",
+      "can_fail_because": "measured on this tree: 73 files are type-checked (`python/quantrisk` 62 and `tools` 11, mypy's own reported count agreeing with the enumeration of both targets), 34 are reached by ruff alone. Delete the `tests` declaration and the metric is 34; move a file into a new directory, or make `scripts/` exist again, and it is named in `undeclared_directories`; drop `tools` from the CI command and `mypy_two_sided_agreement` goes false because the lane and the census stop agreeing. It was 107 -- every file in the tree -- on the first run of this row, before any directory had a declaration: the zero is a measured partition, not an absence.",
       "exemptions": [],
-      "open_at_baseline": "the bucket is satisfied but lopsided: 23 files are covered by mypy and 63 by ruff only. P3.7 extends mypy's targets so every destination module is type-checked, and the census must still print exactly one bucket per file."
+      "bucket_expectations": {
+        "python": {
+          "bucket": "mypy and ruff",
+          "why": "the destination package, and the one surface `mypy` has checked since Phase 1"
+        },
+        "tools": {
+          "bucket": "mypy and ruff",
+          "why": "D7's extension: the repository tools became a package at P3.4, and a type checker stopping at `python/quantrisk` left a migrated directory in no bucket at all. Four real errors came out of the first run over them."
+        },
+        "tests": {
+          "bucket": "ruff only",
+          "why": "L9 admits ruff-covered-already as a bucket. Type-checking the suite is a separate job with its own size: measured at P3.7, `uv run mypy tests/python` reports 48 errors in 10 files, and none of them is a bug in a test -- they are dict and attribute shapes mypy cannot pin through pytest fixtures. Declaring the bucket is what makes that a decision a reader can disagree with instead of a silence."
+        }
+      }
+    },
+    {
+      "key": "tracked_files_outside_the_formatter_corpus",
+      "law": "L10",
+      "metric": "the symmetric difference between the files `ruff format --check .` admits and the tracked `*.py`, `*.pyi` and `*.md` files, named in both directions",
+      "measured_at_baseline": null,
+      "baseline_note": "this metric is measurable at any revision and was never measured at the Phase 0 baseline, so no figure is claimed for it. The first reading is this tree at P3.7: 0 in both directions, with 226 files on each side and 112 further paths the formatter walks that are not of the three kinds.",
+      "measured_at_phase": {
+        "P3.7": 0
+      },
+      "max": 0,
+      "reach_by_phase": "P3.7",
+      "corpus": "the formatter's own inclusion log (`ruff format --check . --verbose`, the `Included path via` lines resolved against the checkout) set-differenced against `git ls-files '*.py' '*.pyi' '*.md'`. On this tree both sides are 226 -- 107 Python, 8 stubs, 111 Markdown -- and the log admits 112 further paths that are not Python or stubs, which is the fact `docs/integrity_audit.md` 62(d) had explained by machine.",
+      "can_fail_because": "the difference is computed from two enumerations that disagree by construction when either moves: `git status --porcelain -uall` shows the sweep's scratch files as untracked-and-not-ignored, the formatter walks them, and they appear in `walked_but_not_tracked` -- which is what the plant `formatter-census-sees-a-page-no-commit-declares` does, and the census guard rejects it. The other direction catches a tracked file Ruff has stopped walking, which is how an `exclude` entry silences a claim without a word changing.",
+      "exemptions": []
     },
     {
       "key": "registry_parity_mismatch",
@@ -92,8 +124,8 @@
       "measured_at_baseline": null,
       "max": 0,
       "reach_by_phase": "P3.2",
-      "corpus": "172 declared plants read from `-m quantrisk.verification.runner --list`. The rejection verdict is the sweep's own summary line and lives in REFACTOR_LEDGER.md \u00a79, because the sweep writes gitignored scratch that CI never has \u2014 a key computed from that file could not fail on the runner that evaluates it, so the collector measures only the declaration.",
-      "can_fail_because": "the declaration is non-empty (172) and the last full sweep on 58b6c22 printed 172/172, so a plant that stops firing is a visible difference rather than a missing key",
+      "corpus": "every declared plant, the count printed live by this file's own `plant_liveness` reading, which reads `-m quantrisk.verification.runner --list`. The rejection verdict is the sweep's own summary line and lives in REFACTOR_LEDGER.md \u00a79, because the sweep writes gitignored scratch that CI never has \u2014 a key computed from that file could not fail on the runner that evaluates it, so the collector measures only the declaration.",
+      "can_fail_because": "the declaration is non-empty (read it from `plant_liveness`, never from this row) and the last full sweep, on 58b6c22, printed 172/172 for the 172 plants declared then, so a plant that stops firing is a visible difference rather than a missing key",
       "exemptions": [],
       "may_be_unmeasured": true,
       "measured_at_phase": {

@@ -2958,8 +2958,8 @@ _CENSUS_REPRO_GOLD = (
     "20.8% spread",
     "204 tests",
     "32.6% spread",
-    "485 tests",
-    "554 pytest tests",
+    "486 tests",
+    "555 pytest tests",
     "548,368 assertions",
     "7 identity checks",
     "four modules",
@@ -2995,11 +2995,11 @@ _CENSUS_SHEET_GOLD = (
     "4 scenarios",
     "4,453,163 paths",
     "45,982,736 paths",
-    "485 tests",
+    "486 tests",
     "492 rows",
     "5 books",
-    "554 pytest tests",
-    "554 python tests",
+    "555 pytest tests",
+    "555 python tests",
     "548,368 assertions",
     "69 cases",
     "80,258,165 paths",
@@ -3091,7 +3091,7 @@ _CENSUS_REPORT_GOLD = (
     "41 pytest tests",
     "492 rows",
     "50 steps",
-    "554 pytest tests",
+    "555 pytest tests",
     "548{,}368 assertions",
     "582 windows",
     "6 failing cases",
@@ -6108,6 +6108,8 @@ def test_the_performance_guards_are_not_vacuous() -> None:
 
 
 CI_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+CEILINGS = REPO_ROOT / "tools" / "refactor_ceilings.json"
+STATIC_CHECK_CEILING = "tracked_python_files_in_no_static_check_bucket"
 
 _CI_PATH = re.compile(r"[a-z0-9_.][a-z0-9_.-]*(?:/[a-z0-9_.-][a-z0-9_.-]*)+")
 
@@ -6210,6 +6212,38 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
     assert not missing, (
         "a CI step runs against a path the repository does not have, which is how a job turns "
         f"green by executing nothing: {missing}"
+    )
+
+    # The same divorce one level up: the ceilings file declares which directories are type-
+    # checked, and only the lane decides whether any of them actually is. A target dropped there
+    # does not fail the check -- it shrinks it, and the census reads a policy no run executed.
+    mypy_steps = [
+        step
+        for job in (workflow.get("jobs") or {}).values()
+        for step in job.get("steps") or []
+        if str(step.get("name", "")) == "mypy"
+    ]
+    assert len(mypy_steps) == 1, (
+        f"the lane has {len(mypy_steps)} mypy steps, so which one declares the checked "
+        "a question the census would have to answer by picking"
+    )
+    tokens = str(mypy_steps[0].get("run", "")).split()
+    lane_targets = {
+        token.split("/")[0]
+        for token in tokens[tokens.index("mypy") + 1 :]
+        if not token.startswith("-")
+    }
+    ceilings = json.loads(CEILINGS.read_text(encoding="utf-8"))
+    declared = next(item for item in ceilings["ceilings"] if item["key"] == STATIC_CHECK_CEILING)
+    checked_as_declared = {
+        directory
+        for directory, expectation in declared["bucket_expectations"].items()
+        if expectation["bucket"] == "mypy and ruff"
+    }
+    assert lane_targets == checked_as_declared, (
+        f"the lane type-checks {sorted(lane_targets)} while the ceilings file declares "
+        f"{sorted(checked_as_declared)} as mypy-covered; the collector reads the lane, so the "
+        "declaration would certify a check that no run performs"
     )
 
 
@@ -6323,4 +6357,87 @@ def test_every_manifest_command_resolves_as_a_module_without_being_run() -> None
     needle = "uv run python tools/inventory_orphan_code.py"
     assert not needle.startswith(_COMMAND_PREFIX), (
         "the legacy spelling started with the module prefix, so the check above would accept it"
+    )
+
+
+# Ruff's formatter takes these three kinds. The claim under test is that a published count is a
+# census of exactly this set, so the set is written down here -- named, so it can be refuted.
+FORMATTER_KINDS = ("*.py", "*.pyi", "*.md")
+FORMATTER_SUFFIXES = frozenset({".py", ".pyi", ".md"})
+FORMATTED_TALLY = re.compile(
+    r"(?:(\d+) files? would be reformatted, )?(\d+) files? already formatted"
+)
+
+
+def test_the_formatter_walks_exactly_the_tracked_files_of_the_kinds_it_accepts() -> None:
+    """V2-05: the line `N files already formatted` is a census of three kinds, and now it says so.
+
+    That sentence is quoted by gate logs, phase reports and this repository's tools across most of
+    the tracked tree, and every one of those quotations reads as a Python-formatting signal. Ruff's
+    formatter also accepts Markdown, so the figure moves when a page is written -- and it moves when
+    a file exists that is neither tracked nor ignored -- one mechanism by which two readings of one
+    commit can differ by one. `docs/integrity_audit.md` 62(d) records such a pair and attributes it
+    to the machine; this census makes that attribution testable rather than restatable, and leaves
+    the historical reading alone, because the two trees it compared are gone. No count of the
+    quotations is written here, because this phase's own edits moved the one it would have carried:
+    the live reading is `formatter_census` in `tools/inventory_orphan_code.py`, and the ceiling that
+    watches it is `tracked_files_outside_the_formatter_corpus`.
+
+    So this compares two enumerations of the same walk instead of quoting a number: what `git
+    ls-files` tracks of the three kinds the formatter accepts, and what the formatter's own resolver
+    says it admitted. Both directions are asserted -- a walked file nobody tracks, and a tracked
+    file the walk stopped seeing, are the two ways a formatter count can stay true while meaning
+    nothing, the second one reachable by a single `exclude` line -- and the printed tally is the
+    third reading of the same corpus.
+    """
+    listed = subprocess.run(
+        ["git", "ls-files", "--", *FORMATTER_KINDS],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    assert listed.returncode == 0, listed.stderr[-300:]
+    tracked_files = sorted({line for line in listed.stdout.splitlines() if line})
+    assert len(tracked_files) >= 200, (
+        f"the tracked corpus of formatter-accepted kinds holds {len(tracked_files)} files, small "
+        "enough that an empty admission log would read as agreement rather than vanished corpus"
+    )
+
+    venv_ruff = REPO_ROOT / ".venv" / "bin" / "ruff"
+    binary = str(venv_ruff) if venv_ruff.exists() else shutil.which("ruff")
+    assert binary, f"no ruff at {venv_ruff} and none on PATH, so this census has no instrument"
+    walk = subprocess.run(
+        [binary, "format", "--check", ".", "--verbose"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    transcript = walk.stdout + walk.stderr
+    tally = FORMATTED_TALLY.search(transcript)
+    assert tally, f"the formatter printed no file tally: {transcript[-300:]}"
+    counted = sum(int(group) for group in tally.groups() if group)
+
+    admitted: set[str] = set()
+    for line in transcript.splitlines():
+        if "Included path via `include`" not in line:
+            continue
+        raw = line.split("`include`: ", 1)[1].strip().strip('"')
+        try:
+            admitted.add(str(Path(raw).resolve().relative_to(REPO_ROOT.resolve())))
+        except ValueError:
+            continue
+    walked = {path for path in admitted if Path(path).suffix in FORMATTER_SUFFIXES}
+    assert walked, "ruff's resolver admitted no formattable file, so the sets below prove nothing"
+
+    assert not walked - set(tracked_files), (
+        f"the formatter walks {sorted(walked - set(tracked_files))[:5]}, which nothing tracks: a "
+        "file neither tracked nor ignored moves every published count, with no commit touching it"
+    )
+    assert not set(tracked_files) - walked, (
+        f"{sorted(set(tracked_files) - walked)[:5]} is tracked and of an accepted kind, and the "
+        "walk names none: an `exclude` line silences a corpus without changing a word"
+    )
+    assert counted == len(walked), (
+        f"the tally counts {counted} files and the resolver admitted {len(walked)} of the three "
+        "kinds, so one of the two readings is not describing this tree"
     )

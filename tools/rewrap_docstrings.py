@@ -49,15 +49,23 @@ def docstrings(tree: ast.AST) -> list[tuple[str, int, int, str]]:
     The text comes from `ast`, not from the source lines, because a line-joined proxy would carry
     the wrapping in its own value: re-wrapping alone would then look like a word change.
     """
-    found = []
+    found: list[tuple[str, int, int, str]] = []
     for node in ast.walk(tree):
         if not isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             continue
         text = ast.get_docstring(node, clean=False)
         if text is None:
             continue
-        literal = node.body[0].value
-        found.append((getattr(node, "name", "<module>"), literal.lineno, literal.end_lineno, text))
+        statement = node.body[0]
+        if not isinstance(statement, ast.Expr) or not isinstance(statement.value, ast.Constant):
+            continue
+        literal = statement.value
+        # A parsed tree always positions a literal it can print; the guard is what lets the tuple be
+        # typed, since a docstring without a line range could not be re-wrapped into one either.
+        if literal.lineno is None or literal.end_lineno is None:
+            continue
+        name = str(getattr(node, "name", "<module>"))
+        found.append((name, literal.lineno, literal.end_lineno, text))
     return sorted(found, key=lambda item: item[1])
 
 
@@ -209,7 +217,14 @@ def signature(source: str) -> str:
             continue
         if ast.get_docstring(node, clean=False) is None:
             continue
-        node.body[0].value.value = non_space(node.body[0].value.value)
+        statement = node.body[0]
+        if (
+            not isinstance(statement, ast.Expr)
+            or not isinstance(statement.value, ast.Constant)
+            or not isinstance(statement.value.value, str)
+        ):
+            continue
+        statement.value.value = non_space(statement.value.value)
     return ast.dump(tree, include_attributes=False)
 
 

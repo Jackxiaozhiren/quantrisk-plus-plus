@@ -191,7 +191,7 @@ def main() -> int:
 
     state = repo_state()
     build_environment = environment()
-    payload = {
+    payload: dict[str, Any] = {
         "schema": "quantrisk-evidence-manifest/1",
         "generated_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "generated_by_command": "uv run python -m tools.build_evidence_manifest",

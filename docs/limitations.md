@@ -30,6 +30,14 @@ never removed just because a later phase shipped.
    and uses the same presets, but no CI job executes on macOS.
 7. **`mypy` is advisory.** It is invoked in CI and its findings are reported as
    a warning, not a failure, until the typed Python facades exist (Phase 9).
+   **Amended 2026-10-25 by V2 P3.7:** the entry was already false on its first
+   claim -- `mypy` became a blocking CI step when finding 12 was surfaced by
+   running it -- and this phase made it false on scope, which is the part worth
+   recording. The target list is now `python/quantrisk` plus `tools`, the two
+   directories holding every tracked Python file the project ships or runs;
+   `tests/` is declared `ruff`-only in `tools/refactor_ceilings.json`, with the
+   error count measured there registered rather than fixed. The first sentence
+   stands as the Phase 1 state.
 8. **Eigen is not linked yet.** The Phase 1 core has no dense linear algebra to
    do; it is introduced where it is first needed (Phase 6) rather than scaffolded
    in advance.
@@ -309,8 +317,8 @@ never removed just because a later phase shipped.
     unimportable in a child interpreter and collecting there, which is a measurement rather than the
     subtraction this item forbids -- `test_the_offline_test_count_is_measurable_before_the_runner`
     requires the gated modules to skip in that probe, so a probe that merely looked local would not
-    pass it.** `uv run pytest -q` at HEAD gives 554 pytest tests with
-    the `oracles` extra installed, and the same tree collects 485 tests without it — the CI lane
+    pass it.** `uv run pytest -q` at HEAD gives 555 pytest tests with
+    the `oracles` extra installed, and the same tree collects 486 tests without it — the CI lane
     runs a plain `uv sync`, and its own collected count for this revision is what the guard below
     compares against, where the earlier 353-test commit reported `284 passed, 4 skipped`. The two
     readings of that older commit are different quantities which happen to coincide:

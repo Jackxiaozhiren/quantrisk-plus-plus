@@ -351,7 +351,7 @@ uv run --frozen ruff check .
 uv run --frozen ruff format --check .
 find cpp bindings tests/cpp \( -name '*.cpp' -o -name '*.hpp' \) | sort \
   | xargs uv run clang-format --dry-run --Werror
-uv run --frozen mypy python/quantrisk
+uv run --frozen mypy python/quantrisk tools
 uv run --frozen cmake --preset ci
 uv run --frozen cmake --build --preset ci
 uv run --frozen ctest --preset ci

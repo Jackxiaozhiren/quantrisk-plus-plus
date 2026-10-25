@@ -30,7 +30,7 @@ Run the gates in this order, and quote each tool's own output rather than summar
 ```bash
 uv run ruff check .                      # lint
 uv run ruff format --check .             # format
-uv run mypy python/quantrisk             # types (the scope CI enforces)
+uv run mypy python/quantrisk tools       # types (the scope CI enforces)
 uv run cmake --build --preset dev
 uv run ctest --preset dev                # C++ suite
 uv run pytest tests/python -q            # Python suite

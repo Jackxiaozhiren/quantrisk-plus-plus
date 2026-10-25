@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 485 tests collected offline",
+        anchor="# 486 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -289,6 +289,30 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="an undeclared results directory is evidence the frozen manifest never hashed",
     ),
     Mutation(
+        identifier="ci-lane-drops-a-declared-type-checked-directory",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor="uv run mypy python/quantrisk tools",
+        replacement="uv run mypy python/quantrisk",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read"
+        ),
+        claim="the surface the policy declares type-checked is the surface the lane checks",
+    ),
+    Mutation(
+        identifier="formatter-census-sees-a-page-no-commit-declares",
+        kind="tree",
+        path="experiments/_mutation_probe/page.md",
+        anchor="",
+        replacement="# Probe page written by the mutation sweep; never committed.\n",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_formatter_walks_exactly_the_tracked_files_of_the_kinds_it_accepts"
+        ),
+        claim="a Markdown file neither tracked nor ignored moves the formatter's published count",
+    ),
+    Mutation(
         identifier="volga-uses-its-own-square",
         kind="core",
         path="cpp/src/pricing/black_scholes.cpp",
@@ -343,7 +367,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 554 pytest tests with the validation",
+        anchor="and 555 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -475,7 +499,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 172/172 planted defects rejected",
+        anchor="# 174/174 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -617,7 +641,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 485 collected without them",
+        anchor="oracles installed, 486 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -742,7 +766,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 554 pytest tests with the `oracles` extra here",
+        anchor="# 555 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"

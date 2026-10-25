@@ -1480,6 +1480,27 @@ output for the commit that carries it, and this one is a tool's output for a dif
 by a dated block appended to the release body, tag and assets untouched, per the rule that an asset
 published from a tag is not edited.
 
+    **Amended 2026-10-25 by V2 P3.7: the paragraph above diagnosed the wrong variable, and the phase
+    that found it did not re-adjudicate the historical reading.** The 164/165 pair is attributed there to
+    "this Ruff version's walk of one environment". A walk of *this* repository's corpus is not
+    environment-dependent in that way: `ruff format` takes `*.py`, `*.pyi` **and Markdown**, so the count
+    is a census of prose as much as of code, and it also counts any file that is neither tracked nor
+    ignored -- which is exactly the mechanism 62(e) describes two paragraphs later, the sweep's own probe
+    directories. P3.7 could not reopen the 164/165 comparison: the two trees that produced it are gone,
+    and an unreconstructable reading is not a refuted one. What it did was replace the restatement with an
+    instrument. The collector's `formatter_census` now differences Ruff's own inclusion log against
+    `git ls-files '*.py' '*.pyi' '*.md'` and names both directions -- a file walked that nothing tracks, a
+    tracked file the walk stopped seeing -- and the ceiling `tracked_files_outside_the_formatter_corpus`
+    carries the reading, so the next time two numbers disagree the corpus is the first thing checked rather
+    than the last thing assumed. Measured here: 226 on both sides -- 107 `.py`, 8 `.pyi`, 111 `.md` -- with
+    112 further paths in the log that are of none of those kinds. The falsification is
+    `formatter-census-sees-a-page-no-commit-declares`, a `tree` plant that writes an untracked, un-ignored
+    `experiments/_mutation_probe/page.md`, requires the census guard to reject its existence, then deletes it
+    and requires green again: `1/1 planted defects were rejected by their guard.` Related: `REFACTOR_LEDGER.md`
+    V2-05 keeps its own 91/62 reading as the record of the revision it was measured at, and
+    finding 91's rule -- a transcribed *sentence* needs a producer too, not only a transcribed figure -- is
+    what the two docstrings that quoted that reading now obey instead.
+
 (e) **The sweep leaves an empty `experiments/_mutation_probe/` tree behind.** Both `tree`-kind plants
 create files that did not exist before and `unlink()` them afterwards, but not the directories, so the
 sweep that reported `53/53` with `git status` empty was empty *because git does not track empty

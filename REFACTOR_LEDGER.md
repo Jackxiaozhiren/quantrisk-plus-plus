@@ -1884,3 +1884,131 @@ f-string lines. It now prints `dry run: <path> not written; pass --apply to writ
 `test_a_second_run_finds_nothing_left_to_do` asserts both halves of that -- the sentence in the output and the
 file byte-unchanged -- with the notice deleted to prove the assertion reddens (`rc=1`, one failed). No pytest
 case was added there, so the pair above stays at 554/485.
+
+### 2026-10-25, P3.7 — static checks follow the code, the census reads its own declaration, and the formatter says what it walks
+
+D7 and L9, one commit's worth of work, plus V2-05's formatter corpus. Three things had to be true: every
+tracked Python file sits in exactly one static-check bucket, the bucket table lives in the policy asset
+rather than in the code that reads it, and the count that everyone quotes as "Python formatted" names the
+corpus it actually walks.
+
+**`mypy` extends, and four real errors come out of `tools/`.** The lane's target list is now
+`uv run mypy python/quantrisk tools` -- `Success: no issues found in 73 source files`, where the same
+command over `python/quantrisk` alone reports 62. The eight repository tools became a package at P3.4 and
+the type checker never followed them, which is D7's exact failure mode: a migrated directory in no bucket
+at all. Four errors surfaced on the first run over it, and they are named here from the instrument, not
+from memory -- the fix had already landed, so the HEAD versions were exported to `build/p37-head-tools` and
+checked there, which returns `Found 4 errors in 2 files (checked 3 source files)`:
+
+- `tools/rewrap_docstrings.py:59` and `:212`, `"stmt" has no attribute "value"` [attr-defined]. The tool
+  assumed the first statement of any defensible body is a string expression; mypy knows a `stmt` may be
+  anything, so the walk now tests `ast.Expr`, `ast.Constant` and `str` before reading `.value`, and refuses
+  a literal with no recorded line range.
+- `tools/build_evidence_manifest.py:239` and `:241`, `Value of type "Collection[Collection[str]]" is not
+  indexable` [index]. The manifest's `payload` literal is built by inserting `entries` (a list of dicts), so
+  the inferred value type is `Collection[Collection[str]]`, and the two `payload["totals"]["bytes"]` reads
+  below it index something mypy has no right to say is indexable. Annotated `dict[str, Any]`, which is what
+  the JSON writer treats it as anyway.
+
+**The census reads the declaration instead of being the declaration.** `static_check_coverage` used to
+hard-code `PACKAGE_DIR` as "the mypy target", so the collector certified a scope the lane could change
+without noticing. It now has three inputs, each from a different owner: the target list parsed out of
+`.github/workflows/ci.yml` (and it raises if the workflow does not have exactly one `mypy` step, because a
+census that has to *choose* between two lanes is inventing a policy), ruff's own inclusion log, and the
+`bucket_expectations` table in `tools/refactor_ceilings.json`. The partition is asserted, not assumed --
+`sum(buckets) == len(corpus)` and no file named by two targets -- and mypy's reported 73 is compared against
+the enumeration of both targets (62 + 11), so a target list that stops matching the lane reddens the
+instrument rather than the code. Buckets: **73 in "mypy and ruff", 34 in "ruff only", 107 total, 0
+uncovered, 0 outside their declaration**. The first reading of this metric on this tree, before any
+directory had a declaration, was **107 -- every file in it**, which is the difference between a measured
+partition and an absence; that reading is in the row, and so is the reason `tests` is declared `ruff`-only:
+`uv run mypy tests/python` at P3.7 reports **48 errors in 10 files** over 34 checked sources, none of them a
+bug in a test. Declaring that is a decision a reader can disagree with; leaving it undeclared is the silence
+L9 forbids.
+
+**Two `measured_at_baseline` fields I wrote and then corrected.** Both new rows first said `0`, which claims
+a reading at the Phase 0 baseline that nobody took. For the static-check key the claim is not merely
+unsupported but impossible -- the metric *is* a comparison against this row's own declaration, and the row
+did not exist at the baseline -- so both are now `null` with a `baseline_note` naming the first real reading
+and where it was taken. The precedent the file already carries is the registry row's "unmeasurable at the
+Phase 0 baseline because the registry did not exist"; the error was mine, made while writing the row, and it
+was caught by re-reading the row rather than by a guard, which is the class of thing the guards here do not
+cover.
+
+**The ceilings file is measured on the runner for the first time.** CI gained `refactor ceilings` --
+`uv run python -m tools.inventory_orphan_code --check-ceilings` -- which prints every key with its value,
+its ceiling, and its phase, and exits non-zero on the first breach. Until this commit only a laptop ever
+evaluated §4.3's policy asset, so a key whose corpus had silently shrunk -- P3.5's command-classifier
+defect, exactly -- would have stayed invisible between sessions. The lane prints honest `SKIP`s for the two
+keys whose corpora live in gitignored scratch (`installed_user_identity_mismatch`, awaiting Phase 4's wheel;
+`plants_not_rejected_by_their_guard`, whose verdict is the sweep's own summary line). Rows: 9 to **10**.
+
+**V2-05: the formatter count is a census of three kinds, and now it says so.** `formatter_census` differences
+Ruff's inclusion log against `git ls-files '*.py' '*.pyi' '*.md'`, both directions named, with the printed
+tally as a third reading. Measured: **226 = 226**, composed **107 `.py` + 8 `.pyi` + 111 `.md`**, and the log
+admits **112** further paths that are of none of those kinds -- which is the fact that made `226 files already
+formatted` a misleading quotation, and the reason `docs/integrity_audit.md` 62(d) gains a dated clause rather
+than a restatement. Its own diagnosis there (spread = machine) was left un-reopened: the two trees that
+produced 164 vs 165 are gone, and an unreconstructable reading is not a refuted one; what changed is that the
+corpus is now the first suspect instead of the last.
+
+**Two plants, and one harness property that split this phase's proof across the commit boundary.**
+`python/quantrisk/verification/plants.py` gained `formatter-census-sees-a-page-no-commit-declares` (kind
+`tree`: writes an untracked, un-ignored `experiments/_mutation_probe/page.md`, requires the census guard to
+reject its existence, deletes it, requires green again) and `ci-lane-drops-a-declared-type-checked-directory`
+(prose: `uv run mypy python/quantrisk tools` -> `uv run mypy python/quantrisk`, guarding the CI-lane test).
+Inventory **172 -> 174**. The first was proven standalone on the working tree:
+`1/1 planted defects were rejected by their guard.` The second could not be, because the harness refuses to
+plant on a target that differs from HEAD -- `target-already-modified: these mutation targets differ from HEAD
+-> .github/workflows/ci.yml`, exit 2. That refusal is correct and load-bearing: a plant restores its target
+from HEAD bytes, so firing it here would have destroyed the very lane edit being falsified. The consequence
+is a rule worth having written down: **a plant whose target file this phase edits cannot be falsified before
+that file is committed**, so the phase's own falsification proof is necessarily post-commit and is recorded
+below rather than claimed here.
+
+**The counting pair, and the leg the guard found that I did not.** One new pytest case moves the pair
+**554/485 -> 555/486**, and the cascade is 23 lines across six files: `paper/technical_report.tex`,
+`docs/reproducibility.md`, `docs/interview_defense.md`, `docs/limitations.md` (item 63), four plant anchors in
+`python/quantrisk/verification/plants.py`, and six census-gold entries in `tests/python/test_artifact_metadata.py`.
+Each replacement asserted its anchor's occurrence count before writing, which is what caught the two
+`"485 tests",` and three `"554 pytest tests",` entries as one list per document rather than six separate
+finds. What my pass did **not** find: adding two plants also moves the *sweep* count, and
+`docs/interview_defense.md:1037` annotated the runner's verdict as `# 172/172 planted defects rejected` -- a
+number no grep of mine was looking for, since every pattern I ran was keyed to 554 and 485. The guard found
+it in the lane: `test_a_command_line_that_counts_plants_counts_the_declared_ones` reddened with
+`docs/interview_defense.md annotates the sweep as 172/172 while the harness declares 174`, inside a run of
+`1 failed, 554 passed`. Re-keying the document and its plant
+(`docs-command-comment-counts-superseded-plants`, anchor on that very comment) in the same pass is 62(c)'s
+one-pass enumeration working as designed -- and the honest reading of this entry is that the instrument, not
+the author, is what kept the phase from shipping a disarmed plant.
+
+**Three documents corrected rather than annotated.** `REFACTOR_PROMPT.md` §7 step 4's lane list now carries
+the extended `mypy` command (the prompt is the resume-where-I-left-off artifact, and a step 4 that runs the
+narrower scope measures a tree the phase no longer has). `CONTRIBUTING.md` §2's gate block, whose comment
+literally says "the scope CI enforces", likewise. `docs/limitations.md` item 7 was stale twice over: it
+still calls `mypy` *advisory*, which stopped being true when finding 12 was surfaced by running it, and its
+scope claim died with this commit; it keeps its Phase 1 sentence as history and carries a dated amendment
+naming the current target list and the declared `tests` bucket.
+
+**The report follows its tex.** `uv run python -m tools.build_report` re-rendered after the pair moved:
+bundle `5d43a049202a`, PDF `7649a2c60cd5`, 1,005,924 bytes -- same byte length as the render it replaced,
+because `555` is as wide as `554`. The evidence manifest is untouched and verifies (`95 OK`,
+`0 on disk but not in the manifest`, "Evidence is intact"), which is the expected shape: the manifest hashes
+artifacts, not the paper.
+
+**One edit the new CI step forced.** The collector resolved its tools as `REPO_ROOT / ".venv" / "bin" /
+"ruff"`, which had never mattered while only a laptop ran it, and matters the moment a runner does: an
+absolute path into a checkout is a fact about the machine, not the lane. `project_binary()` now takes the
+project's own venv first -- deliberately, because the census is a reading of *this* Ruff's walk and a PATH
+lookup could answer the question about another tool -- falls back to `shutil.which`, refuses by name if
+neither exists, and the resolved path is printed inside both readings (`instruments` in the static-check
+corpus, `binary` in the formatter census). The new formatter test resolves the same way. The absolute path
+still appears -- in the printed reading, where it is a *reported* fact about the run that measured it,
+which is exactly what lets a runner's reading be told apart from a laptop's.
+
+**Gate lane on this tree, after every edit above.** Eleven commands, each exit code taken from the command
+and never from a pipeline stage: `ruff check .`, `ruff format --check .` (226 files), `mypy python/quantrisk
+tools` (73 source files), clang-format over the C++ corpus, `ctest` 204/204, `quantrisk validate` 7/7,
+`pytest -q` **555 passed in 206.82 s**, the manifest verifier ("Evidence is intact", `0 on disk but not in
+the manifest`), the offline probe (**486 tests collected**), `-m quantrisk.verification.runner --list` (174
+plants), and `--check-ceilings` with all ten keys at or under their ceiling. **All eleven rc=0.**
