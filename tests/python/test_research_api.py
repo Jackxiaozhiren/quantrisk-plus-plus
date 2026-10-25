@@ -11,8 +11,10 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import platform
 import re
 from pathlib import Path
+from typing import Any
 
 import pytest
 import quantrisk
@@ -340,15 +342,38 @@ def test_cli_run_distinguishes_a_typo_from_a_bare_run(capsys) -> None:
     assert "name a task" in err, err
 
 
+def _fold_cli_output(
+    printed: str, host: str | None = None, build: dict[str, Any] | None = None
+) -> str:
+    """The CLI's printed text with the machine-dependent parts replaced, leaving the contract.
+
+    `host` and `build` default to this machine's own values and can be supplied to fold a text
+    another toolchain would have printed -- the case the guard actually has to survive, because the
+    runner is not the development machine.
+    """
+    values = quantrisk.build_metadata() if build is None else build
+    identity = {platform.platform() if host is None else host}
+    identity.update(str(value) for value in values.values())
+    folded = printed
+    for token in sorted((item for item in identity if item), key=len, reverse=True):
+        folded = folded.replace(token, "<id>")
+    folded = re.sub(r"[-+]?\d[\d,]*(?:\.\d+)?(?:[eE][-+]?\d+)?", "#", folded)
+    return re.sub(r"[ \t]+", " ", folded)
+
+
 def test_cli_pre_existing_command_outputs_kept_their_contracts_when_run_landed(capsys) -> None:
     """D6 requires the earlier commands to be unchanged; this pins that rather than trusting it.
 
-    Each fingerprint is taken over the printed text with the measured part folded away -- every
-    digit run becomes `#`, and runs of spaces become one -- so what is pinned is the contract (every
-    line, its wording, its order) and not this machine's arithmetic. The space fold is load-bearing:
-    `benchmark` right-aligns its timings, so a number gaining an integer digit shifts a pad space,
-    and without the fold the same unchanged build fingerprints twice. The digests were measured when
-    `run` was added.
+    Each fingerprint is taken over the printed text with the two things that legitimately
+    moved away: every value `build_metadata()` reports -- the compiler, the host, the commit
+    this binary was built at -- and `platform.platform()` become `<id>`, every measured number
+    becomes `#`, and runs of horizontal space collapse to one. What survives is the contract:
+    the lines, their wording, their order, the label each line carries. The space fold is
+    load-bearing for `benchmark`, which right-aligns its timings, so a number gaining an
+    integer digit shifts a pad space and the same unchanged build fingerprints twice. The digit
+    fold alone was not enough and the runner proved it: the first version of this guard failed
+    on `validate` because a compiler name and a build commit are letters. The digests were
+    measured when `run` was added.
 
     The command *set* is read out of the parser's own usage line rather than from a list written
     here, so a fifth subcommand can only land by changing the surface the documents describe.
@@ -358,18 +383,51 @@ def test_cli_pre_existing_command_outputs_kept_their_contracts_when_run_landed(c
     assert named, f"the usage line names no subcommand set: {usage!r}"
     assert set(named.group(1).split(",")) == {"validate", "benchmark", "demo", "run"}, usage
     expected = {
-        ("validate",): "82047dafac7aa0a5",
-        ("validate", "--json"): "69068e3ccf816cda",
-        ("demo",): "2a7bb172d846b2c3",
-        ("benchmark", "--iterations", "2"): "64fbd3b57b61a6ab",
+        ("validate",): "1641f50f239d95da",
+        ("validate", "--json"): "0e920879a7834e6c",
+        ("demo",): "e077aed0cd074780",
+        ("benchmark", "--iterations", "2"): "cb18d49dabffd62c",
     }
     for argv, digest in expected.items():
         code, printed, _err = _cli(list(argv), capsys)
         assert code == 0, f"`quantrisk {' '.join(argv)}` exited {code}"
-        folded = re.sub(r"[ \t]+", " ", re.sub(r"\d+(?:\.\d+)?(?:e-?\d+)?", "#", printed))
+        folded = _fold_cli_output(printed)
         assert hashlib.sha256(folded.encode("utf-8")).hexdigest()[:16] == digest, (
             f"`quantrisk {' '.join(argv)}` changed shape; D6 says the pre-existing subcommands "
-            "keep their output contracts byte-for-byte, so this needs a stated reason"
+            "keep their output contracts byte-for-byte, so this needs a stated reason. "
+            f"Folded text:\n{folded}"
+        )
+
+    # The fold's whole purpose is that the runner is not this machine, so that is simulated rather
+    # than trusted: the same words printed by another toolchain -- different compiler, host, commit,
+    # arch, build type and flags -- must fold to the contract this machine's own text folds to. A
+    # label that moved with the toolchain would fail here instead of failing on the runner later.
+    # The stand-in starts from this build's own keys, so a metadata field added by a future phase
+    # cannot make the comparison stale-and-green or stale-and-red: it is carried on both sides.
+    own = quantrisk.build_metadata()
+    other = dict(own)
+    other.update(
+        {
+            "version": "9.9.9",
+            "git_commit": "0123456789ab",
+            "compiler": "GNU 13.4.0",
+            "arch": "x86_64",
+            "os": "Linux 6.8.0",
+            "build_type": "Debug",
+            "cxx_flags": "-O2 -Wall",
+        }
+    )
+    host_other = "Linux-6.8.0-x86_64-with-glibc2.39"
+    for argv in expected:
+        code, printed, _err = _cli(list(argv), capsys)
+        assert code == 0
+        swapped = printed.replace(platform.platform(), host_other)
+        for key, value in other.items():
+            swapped = swapped.replace(str(own[key]), str(value))
+        assert swapped != printed, f"`{' '.join(argv)}` printed none of the build identity"
+        elsewhere = _fold_cli_output(swapped, host=host_other, build=other)
+        assert elsewhere == _fold_cli_output(printed), (
+            f"`quantrisk {' '.join(argv)}` moves with the toolchain:\n{elsewhere}"
         )
 
 

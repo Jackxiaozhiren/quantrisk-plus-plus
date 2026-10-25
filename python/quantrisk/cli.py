@@ -1,10 +1,10 @@
 """The `quantrisk` command line: four commands, and each one earns its place.
 
 PROJECT_SPEC.md §Phase 9 asks for `validate`, `benchmark` and `demo` and explicitly says
-not to build a web app, because the project's value is not UI. V2's D6 added `run`, whose
-task list and execution targets are the registry's own entries resolved by module path --
-so "what can this repository execute" has one answer instead of a second list to keep true.
-What each one does:
+not to build a web app, because the project's value is not UI. V2's D6 added `run`, over the
+task registry, so the question "which studies does this repository publish, and how does one
+run them" has one answer -- the registry's own entries, resolved by module path -- instead of a
+second list that someone has to keep true. What each one does:
 
   validate   run the identities the library claims, and exit non-zero if any fail
   benchmark  time a few core operations on this machine, right now

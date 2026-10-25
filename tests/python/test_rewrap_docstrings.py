@@ -106,7 +106,7 @@ def test_the_rewrite_moves_line_breaks_and_nothing_else(tmp_path: Path) -> None:
     )
 
 
-def test_a_second_run_finds_nothing_left_to_do(tmp_path: Path) -> None:
+def test_a_second_run_finds_nothing_left_to_do(tmp_path: Path, capsys) -> None:
     """Idempotence, because a formatter that keeps re-wrapping its own output is not finished."""
     tool = load_tool()
     path = tmp_path / "sample.py"
@@ -118,6 +118,12 @@ def test_a_second_run_finds_nothing_left_to_do(tmp_path: Path) -> None:
     assert tool.rewrap_source(once, tool.line_length())[1] == 0, (
         "the run reported success while work remained, so the tally is not the truth"
     )
+    # The no-write path reports the same tally, so the only thing separating it from a completed run
+    # is the sentence that says nothing was written -- and a dry run that reads as a fix is how a
+    # file stays red while its operator believes it was repaired.
+    assert tool.process(path, apply_changes=False) == 0
+    dry = capsys.readouterr().out
+    assert "not written" in dry and path.read_text(encoding="utf-8") == once, dry
 
 
 def test_the_tool_takes_its_width_from_the_configuration_not_from_itself() -> None:

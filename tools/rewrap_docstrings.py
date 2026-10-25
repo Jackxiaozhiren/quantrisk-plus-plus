@@ -265,6 +265,10 @@ def process(path: Path, apply_changes: bool, width: int | None = None) -> int:
     if apply_changes:
         path.write_text(after, encoding="utf-8")
         print(f"applied to {path}")
+    else:
+        # The tally above describes the rewrite this run *would* make. Without this line a dry run
+        # reads as a completed one, and the file stays exactly as ruff last saw it.
+        print(f"dry run: {path} not written; pass --apply to write the rewrite")
     return 0
 
 

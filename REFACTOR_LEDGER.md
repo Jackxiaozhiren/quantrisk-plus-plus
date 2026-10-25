@@ -1739,9 +1739,12 @@ them was shown to be able to fail before this was written:
   through the installed surface, two-sided as P3.1 established: the listing comes from the registry,
   the expected modules from a filesystem walk of the two shapes a runnable unit has
   (`experiments/*/__main__.py`, `benchmarks/*/*.py`), and neither enumeration reads the other. The walk
-  is what caught a bug in its own first draft -- deriving a study's module from its filename gave
-  `quantrisk.experiments.pricing_validation.__main__` for every study, because what `-m` executes is the
-  *package*, so the module has to come from the path's parts with `__main__` dropped.
+  caught a bug in its own first draft twice over: a filter that skipped every file whose name begins
+  with an underscore deleted all fourteen `__main__.py` studies and left only the five benchmark
+  modules, and deriving the module from the filename instead of the path's parts named what `-m`
+  executes as `quantrisk.experiments.pricing_validation.__main__` when the runnable unit is the
+  *package*. Both readings are now the shipped ones -- fourteen studies and five benchmarks, nineteen
+  rows -- and the guard asserts the equality in both directions.
 * `test_cli_run_executes_a_task_into_the_root_it_is_given` runs a real study into a `tmp_path` and then
   reads the artifact it wrote, asserting its recorded `command` is the registry's invocation. A `run`
   that executed some other program would still exit 0, so the exit code alone is not the evidence.
@@ -1750,17 +1753,18 @@ them was shown to be able to fail before this was written:
 * `test_cli_pre_existing_command_outputs_kept_their_contracts_when_run_landed` fingerprints the three
   earlier commands' printed shapes (11 lines for `validate`, 63 for its `--json`, 32 for `demo`, 8 for
   `benchmark`) and pins the parser's own usage set to the four names, so a fifth command cannot arrive
-  quietly. The digit fold alone was not enough: `benchmark` right-aligns its timings, so the same
-  unchanged build fingerprinted **twice** across four runs (`9db3461feed27779` / `87ebf00e4a8d43aa`)
-  when a timing gained an integer digit and shifted a pad space. Collapsing runs of spaces as well as
-  digit runs makes the fingerprint stable (`64fbd3b57b61a6ab`) and still pins wording, order and line
-  count -- the contract -- while the measured arithmetic stays out of it. A pinned flaky guard would
-  have been worse than none.
+  quietly. The fingerprint is taken over a fold, not over bytes, and two machines taught the fold what it
+  needs: a digit-only fold left `benchmark` fingerprinting **twice** across four runs of one unchanged
+  build (`9db3461feed27779` / `87ebf00e4a8d43aa`), because its timings are right-aligned and a value
+  gaining an integer digit shifts a pad space; and a digit-plus-space fold still failed **on the runner**,
+  because `validate` prints this build's compiler, commit and host, which are letters. Absorbing
+  `platform.platform()`, every `build_metadata()` value, every number with its sign and separators, and
+  runs of horizontal space is what makes the contract the thing under test.
 
 Falsification was done as a harness rather than as declared plants, and the difference is worth keeping:
 `build/v2-p36-falsify.py` snapshots `python/quantrisk/cli.py`, applies one of five defects, runs the CLI
 tests, and writes the snapshot back, asserting the file is byte-identical after every plant. Each defect
-reddenes exactly one test and names it -- drop the last listed task → the parity guard; make a bare `run`
+reddens exactly one test and names it -- drop the last listed task → the parity guard; make a bare `run`
 repeat the unknown-id message → the exit-code guard; skip the `runpy` call but print PASS → the execution
 guard; reword `validate`'s summary line, or add a fifth subcommand to the parser → the contract guard. A
 plant that cannot fire is the failure mode this repo has been bitten by (`#103`), so the harness prints
@@ -1768,39 +1772,107 @@ plant that cannot fire is the failure mode this repo has been bitten by (`#103`)
 clean run.
 
 The cascade was paid in the same commit as the guard, as P3.5 established: **23 changed lines across six
-files** carry the new pair -- four phrases in `docs/reproducibility.md`, five in `docs/interview_defense.md`
-(including its provenance row), two in `docs/limitations.md` #63, the report's headline sentence and its
-growth sentence in `paper/technical_report.tex`, four plant anchors in
-`python/quantrisk/verification/plants.py`, and six census-gold entries in the guard file -- and the report
-was then re-typeset from the corrected tex (bundle `d2d7be3ba44c`, PDF `daf891282ae2`, 6 sources).
+files** carry the new pair -- four in `docs/reproducibility.md`, five in `docs/interview_defense.md` (one of
+them its provenance row), two in `docs/limitations.md` #63, two in `paper/technical_report.tex`, four plant
+anchors in `python/quantrisk/verification/plants.py`, and six census-gold entries in the guard file. Line
+counting is not claim counting here, and this repo already has a finding for why: in four of those six
+files the pair sits on opposite sides of a line break (`554 pytest tests with the validation` / `oracles
+installed, 485 collected without them`), so the 23 lines are fewer statements than they look, and only the
+folded view the guards read sees the claim at all. The report was then re-typeset from the corrected tex
+(bundle `d2d7be3ba44c`, PDF `daf891282ae2`, 6 sources).
 
-Five documents describe the command surface, and each says something different about it, so each was
+Seven documents describe the command surface, and each says something different about it, so each was
 edited for its own reason rather than by pattern: `README.md`'s front-page block and
 `docs/reproducibility.md`'s fresh-clone sequence gained a `run --list` line (the front page is where a
 reader decides what this is, the reproduce block is where they execute a study); `docs/architecture.md`'s
 mermaid node now lists four; `CONTRIBUTING.md` now says the CLI's *four* subcommands are frozen;
 `INTERFACE_ROADMAP.md:167` keeps its audit-time wording ("three subcommands already ship") and carries a
-dated amendment beside it, because that row is the evidence for adopting the CLI at all.
-`docs/project_scope.md` §10 gained the Phase 9 block it never had: `CONTRIBUTING.md` has pointed at it for
-nine phases as the list of frozen surfaces, and the CLI was not in it -- so the sentence that tells a
-contributor "extending a frozen surface means a new type, not a new field" was describing a document that
-did not carry the surface. The new block states the contract the test enforces: the output shapes are
-pinned, and `run` is a projection of the registry.
+dated amendment beside it, because that row is the evidence for adopting the CLI at all;
+`docs/interview_defense.md`'s one-line scope statement moved with it. `docs/project_scope.md` §10 gained
+the Phase 9 block it never had. `CONTRIBUTING.md` has pointed at §10 as the list of frozen surfaces since
+it wrote that sentence in Phase 14 (`f526171`), and the CLI was never in it -- so the instruction that
+tells a contributor "extending a frozen surface means a new type, not a new field" was describing a
+document that did not carry the surface it named. The new block states the contract the test enforces: the
+output shapes are pinned, and `run` is a projection of the registry.
 
 Two things this phase did **not** claim, both owned by Phase 4. The docstring originally said an installed
-wheel can enumerate *and execute* the published studies; execution was proven in a checkout, and a
-docstring is not a wheel test, so the sentence now states what is proven (the list and the targets are the
-registry's own entries, resolved by module path) and Phase 4's clean-venv wheel proof owns the rest. And
-the four-command count is prose the claim inventory cannot see -- `the four-command CLI` in the rehearsal
-sheet is hyphenated with a singular noun, outside `_REPORT_NOUNS`' reach, which is #102's blind-spot class
-measured rather than assumed: the guard pins the set, the document does not have to agree with it.
+wheel can enumerate *and execute* the published studies; what was proven is every study executing in a
+checkout (the 19/19 replay below), and a docstring is not a wheel test, so the sentence now states what is
+proven -- the list and the targets are the registry's own entries, resolved by module path -- and Phase 4's
+clean-venv wheel proof owns the rest. And
+the four-command count is prose the claim inventory cannot see -- measured, not assumed. `command` and
+`commands` are both in `_REPORT_NOUN_BODY`, yet `_extract_claims` over the rehearsal sheet returns nothing
+for `the four-command CLI` while the same words written `the four commands` do extract: the rule needs
+whitespace between the numeral and its noun, and a hyphen removes it. #100 closed the hyphen *before* a
+number; this is the hyphen *after* one, and it is #102's recall boundary rather than a new claim. Rewriting
+the phrase to be legible was declined for a specific reason: a legible claim must then be owned, cited or
+declared, so the sentence would have pulled the census ratchet and the ownership table into a phase whose
+subject is a command line. The document says four; the guard knows which four.
 
 Ceilings unchanged and still zero where they were zero; no artifact content moved, because P3.6 ran no
-study into a committed path -- the one study it executed wrote to a `tmp_path`, and the manifest verified
-`0 on disk but not in the manifest` afterwards.
+study into a committed path -- the studies it executed wrote under `build/p36-all`, and the manifest
+verified `0 on disk but not in the manifest` afterwards.
 
 Gate lane after all of it, on this tree: ruff, ruff format (226 files), mypy over 62 source files,
 clang-format, ctest 204/204, `quantrisk validate` 7/7, `pytest -q` **554 passed**, manifest "Evidence is
 intact", offline probe **485 tests collected**, plant inventory lists with rc=0.
+
+**Amended the same day, after the runner read it and after the replay.** Three things the entry above
+understates, each found by a machine rather than by re-reading.
+
+*The contract guard pinned the machine, and CI said so.* Run 40077546383 on `1313c51` put
+`Configure, build, C++ tests, Python tests` → *Python tests (pytest, fully offline)* red on
+`test_cli_pre_existing_command_outputs_kept_their_contracts_when_run_landed`: `quantrisk validate`
+fingerprinted `27de67ecc3ba5772` where the entry above had pinned `82047dafac7aa0a5`. Nothing about the
+CLI had changed on the runner; what had changed was the compiler name, the host string and the commit the
+binary was configured at -- all printed on `validate`'s second line, all letters, all invisible to a fold
+that collapsed digits and spaces. Local green was real and irrelevant: the guard had been measuring this
+machine's build identity and calling it an output contract. The fold now absorbs
+`platform.platform()` and every `build_metadata()` value before it folds numbers with their signs,
+separators and exponents, and the four shapes are pinned at `1641f50f239d95da` (`validate`),
+`0e920879a7834e6c` (`validate --json`), `e077aed0cd074780` (`demo`), `cb18d49dabffd62c`
+(`benchmark --iterations 2`). The guard also now *simulates the other machine*: it rewrites the captured
+text with a second toolchain's identity -- different compiler, host, commit, arch, build type, flags and
+version -- and requires that text, folded against that identity, to equal this machine's fold. A
+`swapped != printed` assertion makes the simulation do work rather than restate itself, and the stand-in
+starts from this build's own key list, so a metadata field added by a future phase is carried on both
+sides instead of quietly going stale.
+
+*The control for that fold is two-sided, because a one-sided control proves only that red is possible.*
+`build/v2-p36-falsify-fold.py` copies the test module and deletes the identity absorption, then re-pins
+all four digests under the weakened fold -- the exact repair that would turn the CI red back to green
+without fixing anything. The honest copy comes back `rc=0`; the defective copy comes back `rc=1`, and the
+failing line is the cross-machine comparison (`assert elsewhere == _fold_cli_output(printed)`), not the
+pinned loop. Attribution is by reported line number read against the copy's own text, because pytest
+echoes every assert statement's source into the traceback and the message strings cannot say which one
+fired.
+
+*`quantrisk run` executes every registered study, and the numbers say so.* `build/v2-p36-run-all.py`
+enumerated the tasks through the CLI, ran all 19 through `quantrisk run <id> --out build/p36-all`, and
+checked each one wrote the artifact its registry row declares: **19/19 rc=0 in 261 s**, `--out` honoured
+everywhere, no committed path touched. Their content digests were then compared with the committed ones
+under the evidence chain's own volatile-stripping rule: **15 of the 19 are byte-identical**, and the four
+that are not (`monte_carlo_vs_analytic`, `path_dependent_vs_quantlib`, `pricing_vs_quantlib`,
+`two_factor_error_bound`) differ in **exactly one leaf each** -- the artifact quoting the root it was told
+to write into, as `csv: benchmarks/quantlib/results/pricing_vs_quantlib.csv` →
+`build/p36-all/benchmarks/quantlib/results/pricing_vs_quantlib.csv`, or as `figure_status: "wrote <png>"`.
+No result field moved in any of the nineteen. That single leaf is worth keeping as an observation rather
+than a fix: `VOLATILE_KEYS` strips a path under the key `path`, but these two fields echo paths under
+`csv` and `figure_status`, so a *relocated* run is classified as content movement when the only thing that
+moved is where a file says it put its sibling. Nothing committed today is produced with `--out`, so the
+gap is latent; Phase 5's ceilings review decides whether the fields should carry repo-relative paths --
+the published bundle's actual fact -- or whether the key list should learn the two names. Silently
+changing what a content digest covers would be an adjudication, not a cleanup.
+
+*One tool line, found by being misled twice.* `tools/rewrap_docstrings.py` without `--apply` prints the
+tally of the rewrite it *would* make -- `docstrings reflowed: 1`, `lines still longer than 100: []` -- and
+writes nothing. I read that as a completed repair twice in this session and then nearly filed the tool as
+dishonest when ruff stayed red on lines it does not own: the tally is the proposed file, and the remaining
+E501s were comment and f-string lines, which the tool deliberately never touches. It now also prints
+`dry run: <path> not written; pass --apply to write the rewrite`, and
+`test_a_second_run_finds_nothing_left_to_do` asserts both halves of that -- the sentence in the output and
+the file byte-unchanged -- with the notice deleted to prove the assertion reddens. No new pytest case, so
+the pair above stays at 554/485.
+
 
 
