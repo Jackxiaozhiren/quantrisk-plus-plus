@@ -2409,3 +2409,12 @@ from HEAD bytes, so it cannot fire while the file carries the edits it is testin
 it fired and the guard objected (`1/1 planted defects were rejected by their guard.`), with the worktree
 left clean. `offline-probe-counts-skips-without-naming-them` had already fired on the working tree for
 the same reason it does not need this wait: it writes a file the sweep creates rather than edits.
+
+*Runner reading (2026-10-26, `504a3b8`, run `40287506433`).* All four jobs green, and the collector the
+`Format and static checks` job runs prints `plant_liveness: {"declared_plants": 181}` -- the first time
+the lane itself has read this number rather than this laptop, and the reason the entry above insisted on
+the distinction. The same job's log carries the new clang-format step verbatim and exits 0 over the 77
+files it enumerated, so the refusal branch was exercised on the runner only in the sense that it did not
+fire; the branch that fails is the one proven by hand. `plants_not_rejected_by_their_guard` reports
+`SKIP ... precondition absent` there, which is its declared shape: the rejection verdict is the sweep's
+own summary line, and the sweep writes gitignored scratch that a runner never has.
