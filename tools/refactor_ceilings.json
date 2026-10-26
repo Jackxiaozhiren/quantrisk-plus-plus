@@ -10,6 +10,15 @@
     "manifest_artifacts": 95,
     "declared_plants": 172
   },
+  "byte_only_evidence": {
+    "criterion": "manifest entries whose `content_sha256` is null -- what `canonical_text` returns for anything that is neither JSON nor CSV, so the entry's only owner is its byte hash",
+    "declared_by_extension": {
+      ".md": 1,
+      ".png": 17
+    },
+    "law": "L1 / V2-08",
+    "why": "A re-run necessarily rewrites bytes it holds no measurement of, so L1's content comparison has nothing to compare and the verifier's only reading is CHANGED. V2-08 asked for this set to be declared before the single re-run rather than discovered during it; what happened instead is recorded in REFACTOR_LEDGER.md §9, and this key is the declaration arriving late rather than a second account of it."
+  },
   "ceilings": [
     {
       "key": "bootstrap_sites_outside_package",

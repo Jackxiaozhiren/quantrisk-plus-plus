@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 181/181 planted defects rejected",
+        anchor="# 182/182 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2600,6 +2600,21 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim=(
             "the oracle-free reading says which comparisons it silenced, so a module that starts "
             "skipping is named rather than added to a count that stays plausible"
+        ),
+    ),
+    Mutation(
+        identifier="byte-only-evidence-declaration-drifts-from-the-manifest",
+        kind="prose",
+        path="tools/refactor_ceilings.json",
+        anchor='".png": 17',
+        replacement='".png": 18',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_manifest_records_both_a_byte_hash_and_a_content_hash"
+        ),
+        claim=(
+            "the L1 exemption list is compared with the evidence it exempts, so a declaration that "
+            "drifts from the manifest reddens instead of licensing a byte change nobody reads"
         ),
     ),
 )

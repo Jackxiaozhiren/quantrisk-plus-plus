@@ -20,6 +20,7 @@ import subprocess
 import sys
 import tempfile
 import tomllib
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -1166,9 +1167,21 @@ def test_content_digest_treats_wall_clock_csv_columns_as_volatile(tmp_path: Path
 
 
 def test_manifest_records_both_a_byte_hash_and_a_content_hash(tmp_path: Path) -> None:
-    """`--strict` is only meaningful if the manifest carries the content digest to compare to."""
+    """`--strict` is only meaningful if the manifest carries the content digest to compare to.
+
+    V2-08's half of the same claim: the entries with no content digest are the ones a re-run moves
+    on bytes alone, so the ceilings file has to declare them, and a declaration nobody compares with
+    the manifest is a second number to believe. Both sides are read here and both are printed on
+    failure, because the register's 18 and the digest report's 18 were different sets that happened
+    to share a count, and a count is the one shape of agreement that proves nothing.
+    """
     payload = json.loads((REPO_ROOT / "evidence" / "manifest.json").read_text(encoding="utf-8"))
     assert payload["artifacts"], "the manifest lists nothing"
+    byte_only = Counter(
+        Path(entry["path"]).suffix
+        for entry in payload["artifacts"]
+        if entry.get("content_sha256") is None
+    )
     for entry in payload["artifacts"]:
         assert "sha256" in entry
         path = REPO_ROOT / entry["path"]
@@ -1176,6 +1189,15 @@ def test_manifest_records_both_a_byte_hash_and_a_content_hash(tmp_path: Path) ->
             assert entry["content_sha256"], f"{entry['path']} has no content digest"
         else:
             assert entry["content_sha256"] is None, "binary evidence has no canonical form"
+
+    declared = json.loads(CEILINGS.read_text(encoding="utf-8"))["byte_only_evidence"]
+    declared_by_extension = dict(declared["declared_by_extension"])
+    assert byte_only, "no entry lacks a content digest, so this guard would certify an empty set"
+    assert dict(byte_only) == declared_by_extension, (
+        f"the manifest holds no content digest for {dict(byte_only)} by extension, while "
+        f"tools/refactor_ceilings.json declares {declared_by_extension} -- the lane's L1 exemption "
+        "list and the evidence it exempts have stopped agreeing"
+    )
 
 
 MATRIX_DOCUMENTS = {
