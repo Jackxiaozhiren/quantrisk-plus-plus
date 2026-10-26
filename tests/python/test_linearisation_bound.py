@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING
 import pytest
 
 quantrisk = pytest.importorskip("quantrisk")
-registry = pytest.importorskip("quantrisk.experiments.registry")
 
 if TYPE_CHECKING:
     # mypy cannot see attributes through a name bound by `pytest.importorskip`, so the two types
@@ -340,6 +339,8 @@ def test_the_bound_degenerates_honestly_at_zero_volatility() -> None:
 
 
 def test_the_experiment_artifact_carries_the_provenance_the_chain_requires() -> None:
+    from quantrisk.experiments import registry
+
     payload = _payload()
     # P3.5's single re-run rewrote this artifact, so the pre-refactor spelling is history now, and
     # the assertion that had to learn both spellings during the moves collapses to one form.
