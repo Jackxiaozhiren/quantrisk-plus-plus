@@ -2402,3 +2402,10 @@ plant inventory at **181**, and the ceilings gate with each row at its own ceili
 179 for this range and cannot have printed 181 before this commit exists, so `plant_liveness` on this
 revision is verified here rather than claimed there; `40270133682`'s `Format and static checks` log is
 quoted in the P4.3 entry for exactly that distinction.
+
+*Plants read after the commit (2026-10-26, on `504a3b8`).* `ci-lane-formats-without-refusing-an-empty-corpus`
+was held back because its target is `.github/workflows/ci.yml` and the harness restores plant targets
+from HEAD bytes, so it cannot fire while the file carries the edits it is testing; on the committed head
+it fired and the guard objected (`1/1 planted defects were rejected by their guard.`), with the worktree
+left clean. `offline-probe-counts-skips-without-naming-them` had already fired on the working tree for
+the same reason it does not need this wait: it writes a file the sweep creates rather than edits.
