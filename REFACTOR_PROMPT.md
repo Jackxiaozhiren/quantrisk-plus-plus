@@ -349,8 +349,9 @@ development machine (capture each command's own exit code; never a pipeline's la
 ```bash
 uv run --frozen ruff check .
 uv run --frozen ruff format --check .
-find cpp bindings tests/cpp \( -name '*.cpp' -o -name '*.hpp' \) | sort \
-  | xargs uv run clang-format --dry-run --Werror
+files=$(find cpp bindings tests/cpp -name '*.cpp' -o -name '*.hpp' | sort)
+test -n "$files" || { echo "the C++ corpus is empty" >&2; exit 1; }
+printf '%s\n' "$files" | xargs -r uv run clang-format --dry-run --Werror
 uv run --frozen mypy python/quantrisk tools
 uv run --frozen cmake --preset ci
 uv run --frozen cmake --build --preset ci
