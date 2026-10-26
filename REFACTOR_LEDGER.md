@@ -2537,3 +2537,208 @@ keeps the two corpora from drifting apart again -- a documented gate now has to 
 clang-format over the 77 enumerated sources, ctest 204/204, `validate` 7/7, pytest **559 passed** in 179 s,
 the manifest verifier intact, the offline probe at **490 collected with the same four skips named**, the
 plant inventory at **183**, and every ceilings row at its ceiling.
+
+### 2026-10-26, V2 Phase 5 — the report, the liveness table, and what V3 inherits
+
+Assembled from this ledger and a fresh reading at `035e797`. Cost of the whole series: **0 $** (L12's diff
+of `pyproject.toml` over `7d4f656..HEAD` moves no dependency line). Sixty-two commits in the range, 61 of
+them carrying a V2 subject and one (`941f041`) a CI lane this series did not write. Twenty-seven findings
+in the register, V2-19 deliberately absent, two of the twenty-seven still open at the end.
+
+#### 1. Evidence Ledger
+
+| ID | verdict | the probe that decides it | closed at |
+|---|---|---|---|
+| V2-01 | fixed, by procedure | §7 steps 3 and 8 both executed, in the adjudicated order, at every one of the 62 commits | `2094b21`, readings at `13e3814` |
+| V2-02 | fixed | collector `bootstrap_sites_outside_package: 0`, `by_path_load_sites: 0` over a corpus of 108 tracked files outside the package | `17d14b1` (tools), the 19 absorptions, `949fbef` (the last sibling loads) |
+| V2-03 | fixed | collector `command_executability: {module-path-resolves: 95}`; both command ceilings at 0 | `cc8430e` and `5be00b3` |
+| V2-04 | fixed, by declaration | ceilings note `no-run-trap`, naming the three paths the suite command rewrites | `13e3814` |
+| V2-05 | fixed | collector `formatter_census`: walked 227 == tracked 227, 112 other kinds, exit 0 | `3f5245b`, corpus printed at `a0021e5` |
+| V2-06 | fixed | `static_check_coverage`: `uncovered_paths: []`, declared dirs `[python, tests, tools]`, mypy 74 agreeing two-sided with its per-target enumeration | `3f5245b` |
+| V2-07 | fixed | `commands_not_module_path: 0`, and the classifier's dead branch found and killed in the same phase | `26aef06` |
+| V2-08 | fixed at Phase 5, late | `byte_only_evidence` in the ceilings file, diffed against the manifest census both ways by a guard | declaration `05c128d`; the risk itself retired at `cc8430e` |
+| V2-09 | fixed | `registry_parity: {filesystem_units: 19, registry_sources: 19}`, each side printed, neither reading the other | `4f123f6` |
+| V2-10 | fixed | the sweep: 183 plants, 23 harness self-anchors re-keyed and firing | `214ad87`, `21f27be`, `3f78b2e` |
+| V2-11 | fixed | a wheel in a venv outside the checkout refuses the missing corpus by naming it | `c1eb53a` |
+| V2-12 | fixed | every task writes to the registry-owned artifact path; the manifest verifies 95 of 95 | the 19 absorptions, closed `af75957` |
+| V2-13 | fixed | `quantrisk run --list` is a CI step (`study-catalogue`), not a laptop habit | `1313c51` |
+| V2-14 | fixed | `git_availability()` reports which kind of absence it found | `c1eb53a` |
+| V2-15 | fixed | two-sided layout guard over `docs/architecture.md` plus the verbatim-invocation guard over CI | `24fea01` |
+| V2-16 | fixed | both branches of the new CI refusal run by hand; the probe names its four skips | `504a3b8` |
+| V2-17 | fixed | the five benchmark producers are registry tasks; `filesystem_units: 19` counts them | `af75957` |
+| V2-18 | fixed | every §7 command runs as a module path from the root | `24fea01` |
+| V2-20 | fixed, by declaration | three provenance-citation movements declared; the `<path>:<symbol>` strings became `<task>:<symbol>` | adjudicated `75d6e81`, declared in the ceilings file |
+| V2-21 | fixed | `test_every_repository_path_the_report_cites_resolves` green | `bde0563` |
+| V2-22 | fixed | the guard's denominator built from `Task.artifact`, not from a path prefix | `bde0563` |
+| V2-23 | fixed, by declaration | `release-metadata-version-fields` movement, and the replay guard using the shared `VOLATILE_KEYS` | `ce9566b` |
+| V2-24 | **deferred** | re-measured at Phase 5 on a HEAD-export wheel: **4 of 19 tasks run**, 15 fail, and `sixth_book_crossing_map` refuses by naming the checkout requirement | open; the remedy is a deliberate contract change, handed to V3 |
+| V2-25 | fixed | the L3 filter over the whole range returns no added skip marker | `934651e` |
+| V2-26 | fixed | the step-4 block and the clang-format step now differ only in how the refusal is spelled | `e696472` |
+| V2-27 | fixed | drift falsified, restore proven (`327e06eee698`) | `05c128d` |
+| V2-28 | fixed | documented `-m tools.*` set is a subset of the executed set, both printed | `035e797` |
+| V2-29 | **deferred** | `quantrisk validate` appears in no CI job; the ceiling note declares the instrument that does check it dev-only | open, named in the not-done list below |
+
+#### 2. The liveness table
+
+Every row below was executed, not reasoned about; the reading is the figure the instrument printed.
+
+| Law | status | the reading that decided it |
+|---|---|---|
+| L1 | ACTIVE, satisfied | D5 ran once (`5be00b3`): the digest report reads 95 entries, 59 unchanged, 18 with content movement, 0 undeclared, rc=0; the eight declared movements in the ceilings file are what the 18 are made of |
+| L2 | ACTIVE, satisfied only in its weaker half | 61 of 62 subjects name a V2 step; the register id appears in the subject for 8 commits and in the body or the dated entry for the rest. A finding named only by its phase step is traceable through this ledger, not through `git log --grep` |
+| L3 | ACTIVE, satisfied | the diff over `7d4f656..HEAD` returns no tolerance literal loosened and, after V2-25, no added skip-family marker |
+| L4 | ACTIVE, satisfied | 95 of 95 commands resolve as module paths; the plant that corrupts one is rejected |
+| L5 | ACTIVE, satisfied | 19 registry entries against 19 filesystem units, computed from sources that never call each other |
+| L6 | ACTIVE, satisfied | bootstrap sites 0, by-path loads 0, corpus of 108 files printed by the census |
+| L7 | ACTIVE, satisfied | the sweep's own line: `183/183 planted defects were rejected by their guard.` |
+| L8 | ACTIVE, satisfied | the installed probe asserts `module.__file__` under the venv and `sys.prefix` equal to it; its ceiling is a declared SKIP on the runner |
+| L9 | ACTIVE, satisfied | uncovered bucket `[]`, buckets read from their own declaration, `mypy_two_sided_agreement: true` |
+| L10 | ACTIVE, satisfied | the claim guards green in the suite at 559/490; every count the documents quote has a producer named in the same commit |
+| L11 | ACTIVE, satisfied, with a defect found in the instrument | the three premises re-derived each phase; two document-vs-tree divergences (V2-18, V2-26) and one gate-vs-document divergence (V2-28) closed. §4.4's leak test cannot tell a rule from a leak: all five of its hits are the rules stating themselves |
+| L12 | ACTIVE, satisfied | `external_spend_usd: 0` against a ceiling of 0; the dependency diff is empty |
+| L13 | ACTIVE, satisfied | the per-lane table immediately below, with the environment named for each reading |
+
+
+#### 2b. Per-lane verification reading (L13)
+
+Named per lane, with the revision and the environment. "runner" is the GitHub Actions job on `035e797`;
+"dev" is this macOS/AppleClang checkout with the oracles installed.
+
+| lane | revision | environment | the reading |
+|---|---|---|---|
+| `ruff check .` | `035e797` | dev and runner | exit 0 in both |
+| `ruff format --check .` | `035e797` | dev and runner | 227 files already formatted |
+| `mypy python/quantrisk tools` | `035e797` | dev and runner | 74 source files, exit 0; the runner's own `/home/runner/.../.venv/bin/mypy` |
+| clang-format | `035e797` | dev and runner | 77 files enumerated, exit 0. The **refusal branch is verified on dev only** -- it was run by hand against an empty enumeration (exit 1) and cannot be exercised on a runner that holds the corpus |
+| `ctest --preset ci` | `035e797` | dev (`build/dev`) and runner (`build/ci`) | 100% tests passed out of 204 in both |
+| `pytest -q` | `035e797` | dev with oracles; runner without | **559 passed** in 179 s on dev; **489 passed, 5 skipped** in 180 s on the runner. The arithmetic agrees: the probe's 490 collected plus 4 module-level skips is the runner's 494 nodes, and the fifth skip is the latexmk guard the runner cannot satisfy |
+| `quantrisk validate` | `035e797` | **dev only** | 7/7 checks passed. It runs on no CI job -- V2-29, named in the not-done list rather than smoothed over |
+| `tools.verify_evidence_manifest` | `035e797` | dev, HEAD export, and runner | `Evidence is intact.` in all three; the runner step is new at this commit (V2-28) |
+| `tools.measure_offline_collection` | `035e797` | dev only, by declaration | 490 collected, 4 skips named |
+| plant inventory | `035e797` | dev and runner | 183 both; the runner prints `plant_liveness` itself |
+| `--check-ceilings` | `035e797` | dev and runner | 8 keys at their ceiling, 2 declared SKIP, identical figures in both environments |
+| mutation sweep | `035e797` | dev, clean tree | the sweep's own summary line, read below |
+| installed-surface proof | `035e797` | dev, second venv, HEAD-export wheel, neutral cwd | identity asserted under the venv; **4 of 19** tasks run -- V2-24 |
+| `run_benchmark_suite --require-all` | `035e797` | runner (benchmark job) and dev | 19/19 executed, 0 failed, 0 skipped (the 19/19 line first read at `17d14b1`) |
+| D5, the one re-run | `5be00b3`/`cc8430e` | dev, oracles installed | run once for the series: 95 entries, 59 unchanged, 18 moved, 0 undeclared |
+
+#### 3. The ceilings file as the maintainer receives it
+
+`tools/refactor_ceilings.json` at `035e797` carries ten ceiling keys, three notes, eight declared
+movements and one exemption census (`byte_only_evidence`, added at V2-27).
+
+- Eight keys read **0 against a ceiling of 0** and are evaluated on the runner:
+  `bootstrap_sites_outside_package`, `by_path_load_sites`, `commands_not_module_path`,
+  `commands_unrunnable_from_the_root`, `tracked_python_files_in_no_static_check_bucket`,
+  `tracked_files_outside_the_formatter_corpus`, `registry_parity_mismatch`, `external_spend_usd`.
+- Two keys **SKIP on the runner by declaration**, each with its reason in the file:
+  `installed_user_identity_mismatch` needs a second environment, `plants_not_rejected_by_their_guard` needs
+  gitignored scratch. Both verdicts live in this ledger and both were read this session; §4.3's rule that a
+  key must be able to fail where it runs is satisfied precisely because the file says where it cannot.
+- The eight declared movements are the categories L1 permits to change: artifact self-reference, the three
+  V2-20 provenance shapes, `figure_status`, the `csv` landing path, the V2-23 release-metadata version
+  fields, and the suite aggregate as a record of its own run.
+- **Three review notes for the maintainer**, in the order I would contest them. First, `csv` and
+  `figure_status` are waived because they echo the `--out` root; an in-place re-run leaves them identical, so
+  the waiver is only ever exercised under `--out`, and a reader may prefer the producer to omit them when no
+  root was given. Second, `collector-is-dev-only` keeps `tools/` out of the wheel; that is what makes the
+  two SKIP keys unrunnable on the runner, so the declaration and its consequence are one decision. Third,
+  `formatter-corpus-includes-prose` means a documentation edit moves a verification number; it is why every
+  phase in this series paid a census, and it will keep doing so.
+
+#### 4. Deliberately not done
+
+An empty list would be the suspicious one.
+
+- **V2-24, the installed user.** 15 of 19 registered tasks still cannot run from a wheel -- 8 for
+  `matplotlib`, 2 for `scipy`, 1 for `cvxpy`, 3 inside the QuantLib validators, and `sixth_book_crossing_map`
+  refusing because it validates against a committed sibling artifact. The remedy is not a code fix: the
+  registry has to declare each task's requirements and `run --list` has to widen its contract to say which
+  extras a task needs. P3.6 froze that output byte-for-byte, so widening it is a deliberate change to a
+  surface the prompt told me not to touch on the way. It is handed to V3 with the census attached, not
+  attempted in the last hour of V2.
+- **V2-29, `quantrisk validate` runs on no CI job.** The seven-check smoke surface the wheel ships is
+  exercised by `tools.verify_installed_surface.py`, which the ceilings file declares dev-only, and on a
+  laptop. A step would cost one line and a clause to police it; it was found after the Phase 3 queue had
+  closed, and V2-16's lesson is that an unexecuted queue row is invisible unless somebody names it. It is
+  named here and carried open.
+- **§4.4's leak test.** Five hits, all of them the document stating its own rules. The test needs an
+  exemption for the sentence that defines it, and editing §4.4 to add one while citing §4.4 is the wrong way
+  to get there. V3 decides.
+- **L2's stronger half.** Eight of 62 commit subjects carry a finding id. Rewriting 54 subjects to satisfy a
+  predicate the prompt means literally would be history rewriting, which §14 forbids; the honest reading is
+  that the traceable chain is commit → dated entry → register row, and that is what the table above shows.
+- **The 13 files the orphan census calls unreachable.** Left in place at P4.3 with the reason recorded: the
+  metric measures static reachability, and seven are collected by pytest's path convention while six are run
+  as `python -m tools.*`. Deleting them would have been the metric misleading me.
+- **§6's target diagram in `PROJECT_SPEC.md`.** K3 says divergences get recorded, not painted over; V2
+  recorded the three departures in a dated note rather than redrawing V1's picture.
+- **The §7 block's `--frozen` flags and the refusal's spelling.** Left different on purpose: `uv sync` in CI
+  and `uv sync --frozen` on a laptop are the documented distinction in §7 step 2, and the guard compares
+  module identities for exactly that reason.
+
+#### 5. The three premises, re-stated with their final readings
+
+§0 justifies V2 by three measured premises and says a premise that no longer holds voids the law built on
+it. All three are now false, and false because the series made them so:
+
+1. *Executable Python lives outside the package and reaches it through bootstrap hacks and by-path loads.*
+   At the baseline the ceilings file records 10 bootstrap sites and 19 by-path loads; the tests-only
+   hygiene note counted 24 `spec_from_file_location` sites inside `tests/python/`, a different corpus. Now:
+   **0 and 0**, printed by a census whose
+   corpus is the 46 tracked Python files outside `python/quantrisk` -- 63 at the baseline, and the difference is the
+   move this premise was about. The law built on it (L6, and D1's move) is
+   satisfied; what V3 must not do is cite the premise as a reason to plan another absorption.
+2. *The manifest's recorded commands are not uniformly executable, and nothing polices their form.* At the
+   baseline: 43 of 95 unfusable, 27 naming no file. Now: **95 of 95 resolve as module paths**, with the
+   classifier that missed them fixed at P3.5 and a plant holding the line. L4 and D4 are satisfied.
+3. *Static type checking covers the package but not the code outside it.* At the baseline: mypy over 23 of
+   86. Now: **74 files, two-sided agreement between the reported count and the per-target enumeration**, and
+   the uncovered bucket structurally able to be non-empty. L9 and D7 are satisfied.
+
+The termination condition is therefore met: there is no premise left for V2 to run against. §0's sentence
+"*stop, write the contradiction into the Phase 5 report, and re-scope with the maintainer*" is what this
+entry is, and the re-scope is the handoff below rather than a Phase 6.
+
+#### 6. What V3 has to contain, derived from this run
+
+Not from §5's target list -- from what actually went wrong here.
+
+1. **A process lane, not only an architecture lane.** Three of this series' five Phase-5 findings are about
+   the process: a queue row that never ran (V2-16), a `git diff`-shaped law with no commit at which to run it
+   (V2-25), and a documented gate that no gate executes (V2-28). V3 should state, for every law, the commit
+   at which its predicate gets run, and should diff its own plan table against its own `git log`.
+2. **The installed user, as the first finding.** V2-24 is the only case where the project's public promise --
+   `quantrisk run <study>` -- is false for 15 of 19 tasks. Registry-declared requirements, a widened
+   `run --list`, and the census re-run as the acceptance test.
+3. **Reachability from the runtime, not from `ast`.** P4.3 removed three dynamic loads and found a real
+   typing defect behind one of them; V2-27 found that a census reading `ast` calls nine live files dead
+   because their loaders are `importlib`. V3's instrument should walk what Python can actually reach.
+4. **Compare declarations with measurements.** Both V2-27 and V2-28 were the same shape: a policy file
+   asserting something no run checked against the thing it asserts about. Each got a clause that prints both
+   sides and refuses an empty corpus. That is the rule V3 should apply on its own initiative.
+5. **Numbers are not agreements.** The register's 18 null-digest entries and the digest report's 18 moved
+   artifacts are unrelated populations that shared a count, and the shared count is why a missing
+   declaration looked satisfied for the 57 commits between `b8daf28` and `05c128d`. V3's digit guards should compare *structures* -- the census
+   by extension, the skip set by name, the invocation sets by content.
+6. **The priced locks still work.** K1 kept C++ out of 62 commits (`git diff --name-only` over the range for
+   `cpp/`, `bindings/`, both CMake files is empty); K3 kept V1's spec honest by recording rather than
+   redrawing it. Nothing in V2 needs either bypassed, and V3 should inherit both unchanged.
+
+**L7's line, read whole on the report's own head.** `-m quantrisk.verification.runner --all` at `035e797`
+with a clean tree: **`183/183 planted defects were rejected by their guard.`** -- 183 `ok caught` verdicts,
+no `no-guard-objected`, no `sweep-stopped-early`, exit 0, and the worktree clean again afterwards. That is
+the reading the lane table promised and the only form in which `plants_not_rejected_by_their_guard` can be
+stated, because the sweep's scratch is gitignored and the runner declares the SKIP.
+
+**The CI rows this phase read.** `e696472` and `035e797` each green on all four jobs; `05c128d` green;
+`949fbef` **cancelled by `cancel-in-progress`**, which is why the P4.3 entry records its verification as
+coming from its successor's run and its own local lane rather than from a run of its own. The runner's
+`Format and static checks` log at `035e797` carries both new readings: `plant_liveness: 183` and, from the
+step V2-28 added, `Evidence is intact.`
+
+**Series close.** Twenty-seven findings registered, twenty-five closed, two handed open (V2-24, V2-29).
+Three premises measured false and false because they were fixed. Ten ceilings, eight at zero on both
+environments, two declaring where they cannot run. Sixty-two commits, 0 $, no gate weakened, no test
+deleted, no `skip` added to reach green, no tag moved -- each of those clauses read from the diff of
+`7d4f656..HEAD` in this session rather than asserted here.
