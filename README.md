@@ -7,7 +7,7 @@
 
 - **Understand the models:** [Mathematical specification](docs/mathematical_specification.md) and [Architecture](docs/architecture.md)
 - **Check numerical claims:** [Validation](#validation), [Benchmark](#benchmark), and [Reproducibility](#reproducibility)
-- **Assess boundaries:** [Limitations](docs/limitations.md) · [Contribution guide](CONTRIBUTING.md)
+- **Assess boundaries:** [Limitations](docs/limitations.md) · [Contribution guide](CONTRIBUTING.md) · [Security policy](SECURITY.md)
 - Treat any benchmark number as environment- and version-specific; follow the linked evidence rather than interpreting it as a universal performance guarantee.
 
 ## What QuantRisk++ is
