@@ -6251,6 +6251,7 @@ def test_the_performance_guards_are_not_vacuous() -> None:
 
 
 CI_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+REFACTOR_PROMPT = REPO_ROOT / "REFACTOR_PROMPT.md"
 CEILINGS = REPO_ROOT / "tools" / "refactor_ceilings.json"
 STATIC_CHECK_CEILING = "tracked_python_files_in_no_static_check_bucket"
 
@@ -6441,6 +6442,29 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
     assert not empty_roots, (
         f"{empty_roots} holds no C++ source, and the enumeration the step guards is already empty "
         "there -- the refusal would fire on a corpus the refactor moved, not on the gate's own bug"
+    )
+
+    # V2-28 is the same divorce one document higher. §7 step 4 prints a block under the words "These
+    # are the CI lanes", and a lane command the workflow does not run is a gate that exists only
+    # where somebody remembers to type it -- which is how the evidence-chain verifier sat unexecuted
+    # for the whole of V2 while every phase reported a green suite. Both sides are module-path
+    # invocations read from the two files that disagree, and each is printed so an empty corpus
+    # cannot pass.
+    prompt_text = REFACTOR_PROMPT.read_text(encoding="utf-8")
+    step_four = re.search(r"\*\*Step 4[^\n]*\n.*?```bash\n(.*?)```", prompt_text, re.S)
+    assert step_four, "REFACTOR_PROMPT.md no longer carries the step-4 block to compare with"
+    documented = set(re.findall(r"-m\s+(tools\.[\w.]+)", step_four.group(1)))
+    assert documented, "step 4 names no tool module, so this half would certify an empty set"
+    executed = {
+        module
+        for job in (workflow.get("jobs") or {}).values()
+        for step in job.get("steps") or []
+        for module in re.findall(r"-m\s+(tools\.[\w.]+)", str(step.get("run", "")))
+    }
+    unrun = sorted(documented - executed)
+    assert not unrun, (
+        f"the prompt's step-4 block calls {sorted(documented)} CI lanes; the workflow runs "
+        f"{sorted(executed)}; documented and never executed: {unrun}"
     )
 
 

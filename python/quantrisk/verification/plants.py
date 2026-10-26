@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 182/182 planted defects rejected",
+        anchor="# 183/183 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2615,6 +2615,21 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim=(
             "the L1 exemption list is compared with the evidence it exempts, so a declaration that "
             "drifts from the manifest reddens instead of licensing a byte change nobody reads"
+        ),
+    ),
+    Mutation(
+        identifier="ci-lane-stops-running-a-command-the-prompt-calls-a-lane",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor="run: uv run python -m tools.verify_evidence_manifest",
+        replacement="run: uv run python -m tools.verify_evidence_manifest_on_the_runner",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read"
+        ),
+        claim=(
+            "every command the prompt calls a CI lane is run by a lane, so the evidence chain is "
+            "gated on the runner rather than on whoever remembers to type it locally"
         ),
     ),
 )

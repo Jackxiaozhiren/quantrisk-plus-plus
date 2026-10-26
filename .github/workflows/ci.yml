@@ -63,6 +63,13 @@ jobs:
       # the same reading on the runner, and it prints every key with its value and its ceiling.
       - name: refactor ceilings
         run: uv run python -m tools.inventory_orphan_code --check-ceilings
+      # V2-28. §7 step 4 introduces its block with "These are the CI lanes", and this command has been
+      # printed there since Phase 0 while no lane executed it: the evidence chain -- the project's answer
+      # to "how do I know these numbers are the ones the repository produced" -- was gated only on a
+      # machine where somebody remembers to type it. A push that corrupted a committed artifact was
+      # green. The step is the reading the document already promised, and a guard now compares the two.
+      - name: evidence manifest
+        run: uv run python -m tools.verify_evidence_manifest
 
   build-and-test:
     name: Configure, build, C++ tests, Python tests
