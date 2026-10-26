@@ -2742,3 +2742,31 @@ Three premises measured false and false because they were fixed. Ten ceilings, e
 environments, two declaring where they cannot run. Sixty-two commits, 0 $, no gate weakened, no test
 deleted, no `skip` added to reach green, no tag moved -- each of those clauses read from the diff of
 `7d4f656..HEAD` in this session rather than asserted here.
+
+### 2026-10-26, release v1.9.0 published — the tag's own bytes, six days after the tag
+
+Phase 59 cut `v1.9.0` and left the release page as debt item 1; it is now published, and this is the
+post-publication half the note could not contain at the time. Release id `424060629`,
+`https://github.com/Jackxiaozhiren/quantrisk-plus-plus/releases/tag/v1.9.0`, published `2026-10-26T09:35:44Z`,
+not draft, not prerelease, annotated tag `d9deb7f76` peeling to `b2dda33f6` -- the commit CI run
+`39410055875` verified `success`, while the release commit `2441c5c` has no run of its own, which is named
+rather than glossed.
+
+The four assets were exported with `git archive v1.9.0` and each extracted file's `git hash-object` compared
+with `git rev-parse v1.9.0:<path>` -- seven comparisons, all equal -- so what went up is the tag's tree and
+not this laptop's. Sizes and digests are in the release note; GitHub's own recorded `sha256:` digest for
+each asset matches the on-the-way-up hash, and all four were downloaded back and re-hashed equal. The body
+is the tag's note, 12,473 bytes, stored with the one trailing newline GitHub adds, saved as
+`docs/release_bodies/v1.9.0-body-2026-10-26.md` and cited with its own digest by the guard that polices such
+citations. Nothing about the tag moved: no re-tagging, no force-push, no asset replacement.
+
+Two things this publication deliberately does *not* claim. The PDF in the release is the one `v1.9.0`
+carries, not the head-of-tree report -- the lane re-rendered it seven times after the tag, and the note says
+so in its own words. And the release does not close V2-24: an installed user who downloads these assets and
+runs `quantrisk run --list` still finds 4 of 19 studies executable, which is the finding handed to V3 and is
+now a fact about a *published* artifact rather than about a checkout.
+
+**The lane on this commit.** 11 of 11 rc=0 on the tree that adds the snapshot and the record -- ruff, the
+formatter census (now 228 tracked formattable files, the new snapshot among them), mypy over 74 files,
+clang-format, ctest 204/204, `validate` 7/7, the full pytest lane, the manifest verifier intact, the offline
+probe, the plant inventory at 183, and every ceiling at its value.

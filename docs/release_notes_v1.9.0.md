@@ -155,3 +155,43 @@ no market data inside it. The limitations register is a statement of where the c
 every item in it carries the mechanism it asked for or the reason the mechanism was refused with its cost
 named, and the two remaining steps that are not this project's to take -- minting a DOI, and publishing to
 PyPI -- need the repository owner, not a phase.
+
+## Publication record, appended 2026-10-26
+
+The tag existed for six days before the release page did: Phase 59 cut `v1.9.0` and recorded the release
+window as debt item 1, and it was published at the close of the V2 refactor lane. This section is the
+post-publication record the note's own first paragraph said it could not contain, and it is appended rather
+than folded into the sections above for that reason.
+
+- **What was published.** `https://github.com/Jackxiaozhiren/quantrisk-plus-plus/releases/tag/v1.9.0`,
+  release id `424060629`, published `2026-10-26T09:35:44Z`, not draft, not prerelease. The tag is annotated:
+  the ref `d9deb7f764b3c16a091dc86effb9d523b1d2c7d0` peels to the commit `b2dda33f6726d7f36fbe3491aec7cd7a66184809`,
+  which CI run `39410055875` verified `success`. The release commit `2441c5c` itself has no run -- it is the
+  post-tag bookkeeping commit, and saying so is the point of this bullet rather than a caveat.
+- **The body is the tag's own note, byte for byte.** `git show v1.9.0:docs/release_notes_v1.9.0.md` is
+  12,473 bytes, sha256 `2e0101ca64a14fec2234d0f7c2ed27fcbe3a9c05f9a3b82fde09ea8afd09d14a`; GitHub stores it
+  with one further trailing newline, 12,474 bytes. That published text is saved as
+  `docs/release_bodies/v1.9.0-body-2026-10-26.md` (12,474 bytes, sha256
+  `4b3da82fa4232a27aa5cb15970c8915224628cc0957a1206c40c5eacece73ccf`), which is the bytes a reader would
+  need to restore this page to what it is now.
+- **Assets, built from the tag and proved up and back.** Each of the four was extracted with
+  `git archive v1.9.0` into a scratch directory, and every extracted file's `git hash-object` was first
+  compared with `git rev-parse v1.9.0:<path>` -- seven files, all equal, so what went up is the tag's own
+  bytes and not this laptop's working tree. They were hashed on the way up, and GitHub's own recorded
+  `sha256:` digest for each asset matches that hash; all four were then downloaded back and re-hashed to the
+  same values.
+
+  | Asset | Bytes | sha256 |
+  |---|---|---|
+  | `CITATION.cff` | 2,978 | `1b9aee9fc9229ce11e9676b8b49de820b6250801314f1f7f3b36a69aea0fca5b` |
+  | `manifest.json` | 55,780 | `97aa659e78df2893b3125aebe8b39308f17112aa7f9d20180f9d4fd975c392ca` |
+  | `technical_report.pdf` | 1,005,786 | `7d8336f86cfb55c6d8856799cf9b60766f89cad49ad58004d807696f6cb138d6` |
+  | `quantrisk-suite-results.zip` | 145,672 | `c96e6053402ff00e0f0193ea01fbacb3ea050dd10b77d25a1009d3d4835e5569` |
+
+  The zip holds the four suite roll-up files, as every release since `v1.4.0` has, written with the tag
+  commit's own timestamp so two builds of it produce the same bytes.
+- **What the assets are not.** `technical_report.pdf` here is the PDF the tag carries, not the one the
+  current head renders: the refactor lane has re-rendered the report seven times since `v1.9.0` was cut, and
+  its head-of-tree copy hashes differently. A reader who wants the report that describes the refactor should
+  build it from the tree, which `docs/reproducibility.md` explains; this page is the release of the revision
+  the tag names, and nothing here pretends to be later than that.
