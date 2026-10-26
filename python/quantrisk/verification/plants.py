@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 488 tests collected offline",
+        anchor="# 489 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -289,6 +289,18 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim="an undeclared results directory is evidence the frozen manifest never hashed",
     ),
     Mutation(
+        identifier="architecture-layout-omits-a-shipped-subpackage",
+        kind="prose",
+        path="docs/architecture.md",
+        anchor="python/quantrisk/{benchmarks,data,experiments,plotting,verification}/",
+        replacement="python/quantrisk/{benchmarks,data,experiments,plotting}/",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_path_the_architecture_document_declares_exists"
+        ),
+        claim="the layout the document presents as the tree names every subpackage the tree ships",
+    ),
+    Mutation(
         identifier="installed-corpus-refusal-falls-back-to-silence",
         kind="prose",
         path="python/quantrisk/data/fixtures.py",
@@ -391,7 +403,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 557 pytest tests with the validation",
+        anchor="and 558 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -523,7 +535,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 176/176 planted defects rejected",
+        anchor="# 178/178 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -665,7 +677,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 488 collected without them",
+        anchor="oracles installed, 489 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -790,7 +802,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 557 pytest tests with the `oracles` extra here",
+        anchor="# 558 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -2523,6 +2535,21 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim=(
             "the shipped-phase range is a current claim about the report directory, and it sat at "
             "43 for fifteen phases with nothing on disk able to disagree with it"
+        ),
+    ),
+    Mutation(
+        identifier="ci-lane-stops-executing-the-documented-invocation",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor="        run: uv run quantrisk run --list\n",
+        replacement="        run: uv run quantrisk --help\n",
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_a_documented_invocation_is_executed_verbatim_by_the_lane"
+        ),
+        claim=(
+            "the step keeps running the command the contributor documentation prints, so a reader "
+            "typing it gets what the lane gets rather than a paraphrase"
         ),
     ),
 )

@@ -364,6 +364,14 @@ quantrisk/
     └── workflows/
 ```
 
+> **本节是最初目标图，保留原样；实际结构以 `docs/architecture.md` §5 为准。**
+> 与本图有三处刻意不同，且都在那份文档里逐条说明：`scripts/` 已在 V2 P3.4 退役，仓库工具成为
+> `tools/` 包（命令一律走 `python -m tools.<name>`）；变异测试工装位于 `python/quantrisk/verification/`
+> 而非顶层目录；`evidence/` 与 `benchmarks/` 是后续阶段新增的顶层目录。图中出现的 `data/sample/`
+> 也已被 `data/fixtures/`（带 provenance sidecar 的真实响应）取代。按本图字面创建 `scripts/` 会
+> 与 `tracked_python_files_in_no_static_check_bucket` 这条上限冲突——它会把该目录里的文件报成
+> 未声明的静态检查盲区。
+
 不要一次创建大量空文件。
 
 目录随着阶段逐渐生成。

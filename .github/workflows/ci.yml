@@ -86,6 +86,13 @@ jobs:
         run: uv run ctest --preset ci
       - name: Install the Python package from the same tree
         run: uv pip install -e .
+      # V2 P4.4 (D18): run a documented command exactly as the contributor documentation prints it.
+      # Every other step here re-expresses a check in YAML (`ruff check .`, `mypy <targets>`,
+      # `pytest -q`), so nothing proved that a reader who copies the documented command gets what CI
+      # gets. This one is byte-identical to CONTRIBUTING.md section 2's line;
+      # test_a_documented_invocation_is_executed_verbatim_by_the_lane holds the two texts together.
+      - name: study-catalogue
+        run: uv run quantrisk run --list
       - name: Python tests (pytest, fully offline)
         env:
           QUANTRISK_REFERENCE_TOOL: ${{ github.workspace }}/build/ci/quantrisk_reference_tool

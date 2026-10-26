@@ -176,8 +176,8 @@ project: a project can be a donor on one axis and negative evidence on another.
   against a schema pinned by commit; nautilus runs a CI-inputs verification script at named stages and fails
   on any change to the paths that define its jobs; its verifier is tested by flipping a stored payload byte
   and truncating an entry (`crates/event_store/tests/integration/verifier.rs`). This repository already
-  falsifies its guards by planting — the declared inventory is `run_mutation_suite.py --list`, and the
-  ceilings file carries it — but nothing yet reads `ci.yml` and asserts that every declared task is
+  falsifies its guards by planting — the declared inventory is `-m quantrisk.verification.runner --list`, and
+  the ceilings file carries it — but nothing yet reads `ci.yml` and asserts that every declared task is
   reachable from some job. That closes the gap this lane opens: after a move, a CI step can point at a path
   that no longer exists and the lane stays green because the step never ran.
 - **Repo tooling as a real package, with its own tests.** mlflow keeps its dev tooling in a uv workspace of

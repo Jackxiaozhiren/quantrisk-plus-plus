@@ -36,6 +36,7 @@ uv run ctest --preset dev                # C++ suite
 uv run pytest tests/python -q            # Python suite
 uv run python -m tools.run_benchmark_suite --require-all
 uv run quantrisk validate                # seven identities against the build you just made
+uv run quantrisk run --list              # the studies the registry owns, with their artifacts
 uv run python -m tools.verify_evidence_manifest
 ```
 

@@ -357,13 +357,14 @@ uv run --frozen cmake --build --preset ci
 uv run --frozen ctest --preset ci
 uv pip install -e .
 QUANTRISK_REFERENCE_TOOL="$PWD/build/ci/quantrisk_reference_tool" uv run --frozen pytest -q
-uv run --frozen python scripts/verify_evidence_manifest.py
+uv run --frozen python -m tools.verify_evidence_manifest
+uv run --frozen python -m tools.inventory_orphan_code --check-ceilings
 ```
 
 **Step 5 — The suite binding check, and its trap.**
 
 ```bash
-uv run --frozen python scripts/run_benchmark_suite.py --no-run
+uv run --frozen python -m tools.run_benchmark_suite --no-run
 ```
 
 This command is *read-only in intent but not in bytes*: it re-aggregates the suite's two
@@ -375,7 +376,7 @@ exemption notes; it is the reason Step 4 runs the verifier *after* any suite inv
 **Step 6 — Mutation instrumentation check.**
 
 ```bash
-uv run --frozen python scripts/run_mutation_suite.py --list
+uv run --frozen python -m quantrisk.verification.runner --list
 ```
 
 Record the declared plant inventory in the snapshot. The full sweep (every plant must be

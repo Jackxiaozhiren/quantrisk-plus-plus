@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -175,6 +176,52 @@ def test_a_control_that_would_not_apply_is_reported_rather_than_counted() -> Non
             green_again=True,
         )
         == harness.ANCHOR_NOT_UNIQUE
+    )
+
+
+def _ci_text() -> str:
+    """The workflow file, read where the lane's own steps live."""
+    return (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+
+
+def test_a_documented_invocation_is_executed_verbatim_by_the_lane() -> None:
+    """V2-18 and D18: a command the docs teach has to be a command a runner executes.
+
+    §7's lane list and CONTRIBUTING section 2 both re-expressed the checks in their own words, so a
+    reader could not tell whether typing the documented command reproduces what CI does -- and after
+    a move, a step can point at a path that no longer exists while the job stays green because
+    nothing ran it. One command is now shared verbatim between the two texts: `uv run quantrisk run
+    --list`, executed by the `study-catalogue` step in the job that installs the package. The
+    comparison is a set intersection over *every* documented line, so the reading prints how much of
+    the documented surface the lane executes; if the intersection empties, or the shared command
+    goes, the docs have quietly become a promise again.
+    """
+    doc = (REPO_ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+    block = re.search(r"## 2\. .*?```bash\n(.*?)```", doc, flags=re.S)
+    assert block, "CONTRIBUTING.md no longer carries the section-2 bash block"
+    documented = {
+        re.sub(r"\s+", " ", line.split("#", 1)[0]).strip()
+        for line in block.group(1).splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    }
+    assert len(documented) >= 8, f"only {len(documented)} documented commands parsed"
+
+    workflow = yaml.safe_load(_ci_text())
+    runs = {
+        re.sub(r"\s+", " ", str(step.get("run", ""))).strip()
+        for job in (workflow.get("jobs") or {}).values()
+        for step in (job.get("steps") or [])
+        if isinstance(step.get("run"), str)
+    }
+
+    shared = sorted(documented & runs)
+    assert shared, (
+        f"none of the {len(documented)} commands CONTRIBUTING section 2 documents is executed "
+        "verbatim by any CI step, so the docs and the lane have drifted back into paraphrase"
+    )
+    assert "uv run quantrisk run --list" in shared, (
+        "the registry invocation is no longer executed as documented: it was reworded in "
+        "CONTRIBUTING.md or dropped from the job that installs the package"
     )
 
 

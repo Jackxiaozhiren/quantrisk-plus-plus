@@ -538,6 +538,14 @@ def test_every_path_the_architecture_document_declares_exists() -> None:
     that ever existed: the facades are one module per domain, and the layer table named the same
     phantom directory. A prose file that lists paths makes claims of the kind an artifact does,
     and this is the check that was missing when the layout drifted from the target.
+
+    That check read one direction only -- declared, therefore present -- which is the shape that
+    cannot see an omission. §5's block is headed "as it actually is" and had not been re-derived
+    since two shipped subpackages (`benchmarks`, `verification`) and four top-level modules (`api`,
+    `checkout`, `cli`, `_reexport`) joined the tree, so the document understated the package it
+    documents and nothing objected. The second half below closes that: every tracked subpackage and
+    every tracked top-level module of `python/quantrisk` has to be named by the block. `__init__.py`
+    is the one exemption, because the directory above it is the declaration its names live under.
     """
     text = (REPO_ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
     declared = _declared_layout(text)
@@ -548,6 +556,32 @@ def test_every_path_the_architecture_document_declares_exists() -> None:
     assert not missing, f"architecture.md §5 declares paths that are not in the tree: {missing}"
     assert "python/quantrisk/analytics" not in " ".join(declared), (
         "the phantom package is back in the layout the document presents as fact"
+    )
+
+    package = "python/quantrisk"
+    # The block writes modules with their extension (`.../risk.py`) and directories with a trailing
+    # slash, which the parser strips; both spellings are normalised to a bare name before comparing.
+    listed = {item[: -len(".py")] if item.endswith(".py") else item for item in declared}
+    tracked = subprocess.run(
+        ["git", "ls-files", "--", f"{package}/*"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    assert tracked.returncode == 0, tracked.stderr[-300:]
+    shipped = set()
+    for line in tracked.stdout.splitlines():
+        parts = line.split("/")
+        if len(parts) < 3 or parts[2] in ("__pycache__", "__init__.py"):
+            continue
+        if len(parts) == 3 and parts[2].endswith(".py"):
+            shipped.add(f"{package}/{parts[2][: -len('.py')]}")
+        elif len(parts) > 3:
+            shipped.add(f"{package}/{parts[2]}")
+    undeclared = sorted(name for name in shipped if name not in listed)
+    assert not undeclared, (
+        f"the tree holds {undeclared}, which §5 presents as the layout without naming it: the half "
+        "above passes on any omission, because a path the document never claims is never looked for"
     )
 
 
@@ -2984,8 +3018,8 @@ _CENSUS_REPRO_GOLD = (
     "20.8% spread",
     "204 tests",
     "32.6% spread",
-    "488 tests",
-    "557 pytest tests",
+    "489 tests",
+    "558 pytest tests",
     "548,368 assertions",
     "7 identity checks",
     "four modules",
@@ -3021,11 +3055,11 @@ _CENSUS_SHEET_GOLD = (
     "4 scenarios",
     "4,453,163 paths",
     "45,982,736 paths",
-    "488 tests",
+    "489 tests",
     "492 rows",
     "5 books",
-    "557 pytest tests",
-    "557 python tests",
+    "558 pytest tests",
+    "558 python tests",
     "548,368 assertions",
     "69 cases",
     "80,258,165 paths",
@@ -3117,7 +3151,7 @@ _CENSUS_REPORT_GOLD = (
     "41 pytest tests",
     "492 rows",
     "50 steps",
-    "557 pytest tests",
+    "558 pytest tests",
     "548{,}368 assertions",
     "582 windows",
     "6 failing cases",

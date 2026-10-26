@@ -2170,3 +2170,66 @@ after each pair -- the fixtures branch and the `git_unavailable_because` field b
 byte-identically. This is the P3.7 rule applied a second time, in the phase right after the one that
 wrote it down: neither of these could have been proven before the commit, and claiming them before the
 commit would have been exactly the leak §16 forbids.
+
+### 2026-10-25, P4.2 + P4.4 — the documents are re-derived from the tree, and one of them is now executed verbatim
+
+§11 item 2 and item 4 together, because item 4's proof is the thing item 2's re-derivation had to
+produce: a documented command that a runner executes as written, rather than a paraphrase of a lane.
+
+**The layout block was understating the package it documents.** `docs/architecture.md` §5 is headed
+"as it actually is" and is policed by `test_every_path_the_architecture_document_declares_exists`,
+which checks one direction: every path the block prints has to exist. That direction cannot see an
+omission, and six shipped paths had gone undeclared -- the `benchmarks/` and `verification/`
+subpackages and the `api`, `checkout`, `cli`, `_reexport` modules. The block now names them, and the
+guard reads the other way too: it enumerates the tracked contents of `python/quantrisk/` (the
+extension-stripped spellings normalised, `__init__.py` and `__pycache__` exempted by name) and refuses
+anything the block does not claim. It was forged before it was believed: deleting `verification` from
+the block returns `the tree holds ['python/quantrisk/verification'], which §5 presents as the layout
+without naming it`, and the file restored byte-identically. The plant
+`architecture-layout-omits-a-shipped-subpackage` keeps that direction permanently falsifiable.
+
+**§7's lane list named three retired paths.** `REFACTOR_PROMPT.md` step 4 still told a resuming session
+to run `scripts/verify_evidence_manifest.py`, step 5 `scripts/run_benchmark_suite.py --no-run`, step 6
+`scripts/run_mutation_suite.py --list` -- all three retired by P3.4 and P3.2b, so the resume-the-lane
+artifact was prescribing commands that exit 2. They now name `tools.verify_evidence_manifest`,
+`tools.run_benchmark_suite` and `quantrisk.verification.runner`, and step 4 gained the ceilings lane
+P3.7 added to CI, which the list had never been told about. `docs/ecosystem_research.md` carried the
+same stale harness path in a present-tense sentence about this repository and was corrected in place;
+`PROJECT_SPEC.md` §6 keeps its target diagram as written and gains a Chinese pointer at the real
+structure, listing the three declared departures and the fact that creating `scripts/` today would
+breach `tracked_python_files_in_no_static_check_bucket` rather than merely age.
+
+**What item 4 shipped.** `CONTRIBUTING.md` §2 documents `uv run quantrisk run --list`, and CI now
+executes that exact string as a step of its own (`study-catalogue`) in the job that has already run
+`uv pip install -e .`, so the console script exists there for the same reason it exists on a reader's
+machine. The guard `test_a_documented_invocation_is_executed_verbatim_by_the_lane` folds both texts and
+intersects them: measured, the lane executes **five** documented commands verbatim -- ruff check, ruff
+format --check, `mypy python/quantrisk tools`, `python -m tools.run_benchmark_suite --require-all` and
+the catalogue line -- and the guard requires the intersection to be non-empty *and* the catalogue
+command to be inside it. The plant
+`ci-lane-stops-executing-the-documented-invocation` rewrites the step's `run:` to `quantrisk --help`,
+which keeps the step, keeps the job green, and is exactly the drift the assertion exists for.
+
+**Two things the sweep claimed were not true, measured and dropped.** The `.pyi` faces beside the eight
+domain modules are not hand-maintained residue: `tools/generate_shim_stubs.py` writes them from the
+imported module's `__all__` and `tests/python/test_shim_stubs.py` regenerates and compares, so CI
+already refuses a stale stub; and `_reexport.py` is live machinery -- all eight façades import
+`copy_core_names` from it, which is what makes `from quantrisk.risk import RiskEngine` work at all
+because pybind11 binds those submodules as attributes rather than entries of `sys.modules`. A first
+flag-by-flag probe of the documented commands also reported four stale flags (`--require-all`,
+`--no-run`, `--paths`, `--list`); all four were the probe attributing a subcommand's flags to its
+parent invocation -- running each tool's own `--help` shows every one of them offered -- so the
+correction went into the probe, not into eleven correct documents.
+
+**The counts.** One case added, pair **557/488 → 558/489** across 22 replacements in the same six
+files; two plants added, inventory **176 → 178**, and the rehearsal sheet's sweep annotation and its
+plant anchor re-keyed to `# 178/178 planted defects rejected` in the same pass. Report re-rendered:
+bundle `3a96b9297e39`, PDF `10324876020c`, 1,005,924 bytes.
+
+**P4.3 is still open, with its scope now measured rather than recalled.** The two real pieces of glue
+are `python/quantrisk/experiments/fifth_order_crossing_map/__init__.py:57-59`, which imports
+`second_book_crossing_map` as `P18` and then binds `quantrisk = P18.quantrisk` -- a shipped study module
+that shadows the package's own name inside itself -- and `tools/run_benchmark_suite.py`'s `MEMBERS`
+tuple, which is hand-written and only *cross-checked* against the registry (line 638 refuses an
+unregistered key) rather than derived from it. Both are §11 item 3's subject; neither is the
+bootstrap-or-by-path residue the ceilings keys measure, because those read 0 sites and have stayed 0.
