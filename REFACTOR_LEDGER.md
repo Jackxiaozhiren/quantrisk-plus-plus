@@ -2316,6 +2316,14 @@ own ceiling. No published number moved and nothing needed re-running: the three 
 touches were re-run into a scratch root and their digests matched the committed artifacts, which is the
 L1 reading D5 asks for.
 
+*CI, read on 2026-10-26.* `949fbef` was pushed and its own run `40269823339` came back **cancelled** -- the
+lane is `cancel-in-progress`, and `934651e` landed on the same branch while it was still queued. So the
+revision P4.3 shipped on has never executed by itself, and this row says so rather than calling it green:
+the four jobs that went green on `934651e` (`40270133682`: format and static checks, build and C++ tests,
+oracles, macOS parity) ran the same tree with one test file and this ledger added to it, and the local
+lane above ran the whole suite on `949fbef` itself before the commit. Under L13 the honest entry is
+"verified on its successor's run and on its own tree locally", not "CI green on 949fbef".
+
 ### 2026-10-26, V2-25 — the L3 sweep over the whole range, and the one skip it found
 
 §13's L3 check is `git diff` of the range for skip/xfail markers and tolerance literals, and it was run
@@ -2344,3 +2352,53 @@ because no phase ever looked for it. Phase 1 registered 23 findings by reading t
 nothing until now read the *range* -- which is the other half of what the laws are about: a law with a
 `git diff` predicate needs a commit at which the diff gets run, and §13 does not name one. Carried to V3
 as that wording, not as an apology here.
+
+### 2026-10-26, V2-16 — the commit the Phase 3 queue lost, and what its two halves turned out to be
+
+Phase 2's sequence table row 20 is `P3.4b | V2-16 -> xargs -r, the reference-tool skip's declared
+sentence, ceilings corpus prints | full suite`. It never ran. The queue went P3.4a (17d14b1) to P3.5
+(17df062) and nothing between them carried the row, so V2-16 sat in the register for the 20 commits since
+17d14b1 while every phase after it reported a green suite. Nothing detected the omission because nothing was looking
+for *queue rows that did not happen*: the guards police the tree, and the tree was exactly as
+unscheduled as it had been. That is a finding about the process, recorded once here rather than
+repaired into a rule -- the Phase 5 report carries it as the reason the liveness table needs a commit
+at which each `git diff`-shaped predicate gets run.
+
+**Half one got a stronger fix than the register asked for.** The remedy said `add -r`, and `-r` alone
+leaves the defect in place: with an empty list, `xargs -r` runs nothing and the step exits 0, which is
+the green job that formatted nothing -- the register's own defect, unchanged, just quieter. So the CI
+step now enumerates the corpus into a variable, refuses when that variable is empty, and only then
+pipes it through `xargs -r`. Both branches were run by hand: with the repository's three C++ roots the
+enumeration holds **77 files** and the step proceeds; with an enumeration made empty the refusal exits
+1 rather than falling through. `ci-lane-formats-without-refusing-an-empty-corpus` plants the `-r` back
+out of the step and is proven after this commit lands, because its target is ci.yml and a plant cannot
+fire on a file that carries uncommitted edits.
+
+**Half two needed re-measuring before it could be written down.** The register says the reference tool
+resolves through a `pytest.skip` fallback so "a missing binary silently removes a whole comparison". It
+does, and that skip is the *designed* one: `tests/python/conftest.py:83-92` names the remedy in its own
+message, and the C++/Python comparison is one module. What the register did not say is that the lane
+already counts skips and reports only their number: `tools/measure_offline_collection.py` printed
+`module_skips: 4` and nothing else, so four skips of a *different* four modules read identically to the
+four the design intends. The producer now emits `skipped_modules`, the four names it saw, and the guard
+compares the set against a declared list before it compares the count -- a fifth name is named in the
+failure, and so is a substitution. The oracle-free reading is unchanged at **490 collected, 4 module
+skips**, and the new assertion was falsified by adding a module that gates on a blocked distribution:
+`absent from the run [], new to it ['tests/python/test_mutation_probe_offline.py']`. `offline-probe-counts-skips-without-naming-them`
+plants that file and was rejected by the guard (`1/1 planted defects were rejected by their guard.`).
+
+**Two plants, no new cases.** The inventory moves **179 -> 181**; the pytest pair stays at **559/490**
+because both halves were written as clauses inside existing guards rather than as new test functions --
+which is also why only one document re-key was needed (`docs/interview_defense.md`'s sweep annotation),
+and why the plant-anchor census reddened on its own: `docs-command-comment-counts-superseded-plants`
+was anchored on `# 179/179 planted defects rejected`, the superseded number, and re-aimed at the new
+one in the same pass. The register row and the `done-when` it carries are left as written: the row is a
+dated record of what Phase 1 measured, and this entry is where the adjudication lives.
+
+**The lane, run on this tree.** All 11 lanes returned rc=0: ruff, the 227-file formatter census, mypy over
+74 files, the clang-format step in its new shape, ctest 204/204, `validate` 7/7, pytest **559 passed** in
+149 s, the manifest verifier intact, the offline probe at **490 collected with the four named skips**, the
+plant inventory at **181**, and the ceilings gate with each row at its own ceiling. The runner has printed
+179 for this range and cannot have printed 181 before this commit exists, so `plant_liveness` on this
+revision is verified here rather than claimed there; `40270133682`'s `Format and static checks` log is
+quoted in the P4.3 entry for exactly that distinction.

@@ -36,8 +36,16 @@ jobs:
         run: uv run ruff format --check .
       - name: clang-format
         run: |
-          find cpp bindings tests/cpp -name '*.cpp' -o -name '*.hpp' | sort |
-            xargs uv run clang-format --dry-run --Werror
+          # V2-16. This was `find ... | xargs clang-format` with no `-r` and no emptiness test, so a
+          # corpus that emptied -- one directory moved, one glob mistyped -- handed clang-format no
+          # files, the step exited 0, and the gate certified nothing while still looking like a check.
+          # `-r` alone would still pass on the empty corpus; the refusal is the gate.
+          files=$(find cpp bindings tests/cpp -name '*.cpp' -o -name '*.hpp' | sort)
+          if [ -z "$files" ]; then
+            echo "the C++ corpus is empty: clang-format would have checked nothing" >&2
+            exit 1
+          fi
+          printf '%s\n' "$files" | xargs -r uv run clang-format --dry-run --Werror
       # Blocking. It was `|| echo "::warning::"` from Phase 1 through v1.0.0, which let 25
       # errors sit in the log permanently -- and three of them were real: a facade method that
       # raised TypeError on every documented input, and two public signatures whose `bytes`

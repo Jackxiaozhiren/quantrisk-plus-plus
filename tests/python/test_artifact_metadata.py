@@ -5438,6 +5438,18 @@ def _offline_probe() -> dict[str, Any]:
     return importlib.import_module("tools.measure_offline_collection").measure()
 
 
+# The suites that gate at module level on a distribution the CI lane does not install. Declared here
+# by name rather than counted, because V2-16's complaint was that a number cannot say which
+# comparisons left the lane: four skips of a different set of modules is the same reading with a
+# different meaning, and a fifth name is a comparison that started silently not running.
+_ORACLE_GATED_SUITES = {
+    "tests/python/test_covariance_vs_oracles.py",
+    "tests/python/test_monte_carlo_vs_oracles.py",
+    "tests/python/test_portfolio_optimisation_vs_oracles.py",
+    "tests/python/test_pricing_vs_quantlib.py",
+}
+
+
 def test_the_offline_test_count_is_measurable_before_the_runner() -> None:
     """#63 forbade deriving the offline count, so this measures it instead of waiting.
 
@@ -5448,17 +5460,23 @@ def test_the_offline_test_count_is_measurable_before_the_runner() -> None:
     `tools/measure_offline_collection.py` is the second producer, so a document can be compared
     with an oracle-free measurement in the same command that reads the other one.
 
-    Three assertions make `collected` mean the runner's number rather than this machine's: nothing
-    may error during collection, the four oracle-gated modules have to appear as skip records, and
-    the blocked set has to be non-empty. Without them a probe that blocked nothing would report the
-    with-oracles total and look green.
+    Four assertions make `collected` mean the runner's number rather than this machine's: nothing
+    may error during collection, the oracle-gated modules have to appear as skip records *by name*,
+    their count has to be the declared set's size, and the blocked set has to be non-empty. Without
+    them a probe that blocked nothing would report the with-oracles total and look green -- and a
+    probe that blocked the wrong four would report the right number of skips and look greener still.
     """
     probe = _offline_probe()
     assert len(probe["blocked_imports"]) >= 4, probe
     assert probe["collection_errors"] == 0, (
         f"gated modules became collection errors, which is not the runner's shape: {probe['tail']}"
     )
-    assert probe["module_skips"] == 4, probe
+    assert set(probe["skipped_modules"]) == _ORACLE_GATED_SUITES, (
+        "the oracle-free run silenced a different set of comparisons than the one declared: "
+        f"absent from the run {sorted(_ORACLE_GATED_SUITES - set(probe['skipped_modules']))}, "
+        f"new to it {sorted(set(probe['skipped_modules']) - _ORACLE_GATED_SUITES)}"
+    )
+    assert probe["module_skips"] == len(_ORACLE_GATED_SUITES), probe
 
     # The note states the same figure in words, and #95's reader can now see it: a count written as
     # `four modules` was invisible to a digit-only inventory, so nothing compared it with the skip
@@ -6238,6 +6256,19 @@ def _ci_run_paths(run: str) -> list[str]:
     return paths
 
 
+def _names_root(script: str, root: str) -> bool:
+    """Whether a shell script names `root` as a whole argument of its own.
+
+    `cpp` is a substring of `tests/cpp`, so a plain `in` reports the corpus as complete when the
+    step lost the first of its three arguments -- the same shape of blind spot, one string smaller.
+    """
+    for line in script.splitlines():
+        for token in re.split(r"[\s|&;()]+", line):
+            if token.strip("'\"`()$") == root:
+                return True
+    return False
+
+
 def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
     """A guard that reads commits is a claim about the checkout, and nothing checked the checkout.
 
@@ -6347,6 +6378,47 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
         f"the lane type-checks {sorted(lane_targets)} while the ceilings file declares "
         f"{sorted(checked_as_declared)} as mypy-covered; the collector reads the lane, so the "
         "declaration would certify a check that no run performs"
+    )
+
+    # V2-16, one level down the same divorce: a formatting gate whose input list can be empty passes
+    # by checking nothing. `xargs` without `-r` runs clang-format with no arguments when the pipe is
+    # empty, and clang-format with no files reads stdin and exits 0 -- so the job that formatted
+    # nothing is green, and it stays green for as long as the corpus stays missing. The step must
+    # therefore refuse an empty enumeration, and the directories it claims to format are read from
+    # the tree rather than from the shell doing the formatting: a guard that asks the command
+    # whether it ran is not a guard.
+    format_steps = [
+        step
+        for job in (workflow.get("jobs") or {}).values()
+        for step in job.get("steps") or []
+        if str(step.get("name", "")) == "clang-format"
+    ]
+    assert len(format_steps) == 1, (
+        f"the lane has {len(format_steps)} steps named clang-format, so nothing can say which one "
+        "formats the C++ corpus"
+    )
+    script = str(format_steps[0].get("run", ""))
+    assert "xargs -r" in script, (
+        "clang-format is piped through `xargs` without `-r`: an empty list runs the formatter with "
+        "no files, it reads stdin, and the step passes having checked nothing"
+    )
+    assert '[ -z "$files" ]' in script, (
+        "the clang-format step no longer refuses an empty enumeration: `--Werror` over zero "
+        "files is exit 0, which is a green job that formatted nothing"
+    )
+    format_roots = [root for root in ("cpp", "bindings", "tests/cpp") if _names_root(script, root)]
+    assert len(format_roots) == 3, (
+        f"the step names {format_roots} of the three C++ roots the repository holds, so the "
+        "corpus it formats is smaller than the corpus that exists"
+    )
+    empty_roots = [
+        root
+        for root in format_roots
+        if not any((REPO_ROOT / root).rglob(pattern) for pattern in ("*.cpp", "*.hpp"))
+    ]
+    assert not empty_roots, (
+        f"{empty_roots} holds no C++ source, and the enumeration the step guards is already empty "
+        "there -- the refusal would fire on a corpus the refactor moved, not on the gate's own bug"
     )
 
 

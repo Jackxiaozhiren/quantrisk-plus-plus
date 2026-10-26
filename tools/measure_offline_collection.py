@@ -86,10 +86,16 @@ def measure() -> dict[str, object]:
     collected = re.search(r"^(\d+) tests? collected", output, flags=re.M)
     skips = len(re.findall(r"^SKIPPED \[1\]", output, flags=re.M))
     errors = len(re.findall(r"^ERROR tests/", output, flags=re.M))
+    # V2-16's second half: the count alone cannot tell which comparisons left the lane. Four skips
+    # is the shape the design intends; four skips of a *different* set of modules -- one comparison
+    # swapped for another -- is the same number with a different meaning, and only the names can
+    # see that. A fifth module joining the set is a test that used to run and now silently does not.
+    skipped = sorted(set(re.findall(r"^SKIPPED \[\d+\] ([^\s:]+\.py)", output, re.M)))
     return {
         "blocked_imports": blocked,
         "collected": int(collected.group(1)) if collected else None,
         "module_skips": skips,
+        "skipped_modules": skipped,
         "collection_errors": errors,
         "exit_code": run.returncode,
         "tail": output[-400:],

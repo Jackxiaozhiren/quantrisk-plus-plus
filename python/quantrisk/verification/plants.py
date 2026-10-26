@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 179/179 planted defects rejected",
+        anchor="# 181/181 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2566,6 +2566,40 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim=(
             "the step keeps running the command the contributor documentation prints, so a reader "
             "typing it gets what the lane gets rather than a paraphrase"
+        ),
+    ),
+    Mutation(
+        identifier="ci-lane-formats-without-refusing-an-empty-corpus",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor="printf '%s\\n' \"$files\" | xargs -r uv run clang-format --dry-run --Werror",
+        replacement="printf '%s\\n' \"$files\" | xargs uv run clang-format --dry-run --Werror",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read"
+        ),
+        claim=(
+            "the format gate says what it formatted: an emptied corpus fails the step instead of "
+            "running the formatter over nothing and reporting success"
+        ),
+    ),
+    Mutation(
+        identifier="offline-probe-counts-skips-without-naming-them",
+        kind="tree",
+        path="tests/python/test_mutation_probe_offline.py",
+        anchor="",
+        replacement=(
+            '"""Probe written by the mutation sweep; never committed."""\n\n'
+            "import pytest\n\n"
+            'pytest.importorskip("QuantLib")\n'
+        ),
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_offline_test_count_is_measurable_before_the_runner"
+        ),
+        claim=(
+            "the oracle-free reading says which comparisons it silenced, so a module that starts "
+            "skipping is named rather than added to a count that stays plausible"
         ),
     ),
 )
