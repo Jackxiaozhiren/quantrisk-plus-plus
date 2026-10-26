@@ -49,12 +49,16 @@ that axis is where Phase 20's two contradictory outcomes sat).
 from __future__ import annotations
 
 import datetime as dt
-import importlib
 import json
 import sys
 from collections.abc import Sequence
 from typing import Any
 
+# Phase 20 owns the books, the measure column, the piece arithmetic, the sweep and the radius rule;
+# Phase 18's module is imported directly rather than reached through Phase 20's alias, so the study
+# whose grid this one is checked against is named in the import block instead of two hops away.
+import quantrisk.experiments.fifth_order_crossing_map as P20
+import quantrisk.experiments.second_book_crossing_map as P18
 from quantrisk.checkout import checkout_root
 from quantrisk.experiments.metadata import repo_relative
 from quantrisk.experiments.registry import (
@@ -63,10 +67,6 @@ from quantrisk.experiments.registry import (
     parse_out,
     results_directory,
 )
-
-# Phase 20 owns the books, the measure column, the piece arithmetic, the sweep and the radius rule.
-P20 = importlib.import_module("quantrisk.experiments.fifth_order_crossing_map")
-P18 = P20.P18
 
 PUBLISHED_BOOKS = P20.BOOKS
 MIN_COLUMNS = P18.MIN_COLUMNS_WITH_A_CROSSING

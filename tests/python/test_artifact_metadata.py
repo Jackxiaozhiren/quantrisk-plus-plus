@@ -585,6 +585,49 @@ def test_every_path_the_architecture_document_declares_exists() -> None:
     )
 
 
+def test_shipped_modules_reach_each_other_by_import_name_not_by_lookup() -> None:
+    r"""V2 P4.3: a dependency you cannot see is a dependency you cannot type, lint or move.
+
+    Three studies used `importlib.import_module` to reach a sibling, and `fifth_order_crossing_map`
+    then bound `quantrisk = P18.quantrisk` -- rebinding the package's own name to another module's
+    global. Both forms were residue of the layout P3.3 dissolved, when a study lived at
+    `experiments/<task>/run.py` and had to be loaded rather than imported. The shadow was not
+    cosmetic: it was load-bearing (`quantrisk.pricing...` resolved only through it), and it made the
+    type checker blind -- with the alias, `P18.TOLERANCE` is `Any`, so the comparison
+    `distances[order] <= TOLERANCE` passed mypy; importing the module instead typed the constant as
+    the `float | None` it is and surfaced a real narrowing error on the comparison at that line. The
+    three files now use `import quantrisk.experiments.<sibling> as <handle>`, the form
+    `fourth_order_crossing_map` already used.
+
+    Walked from disk, not from `git ls-files`: the plant that proves this guard writes a file
+    nothing tracks, which is the same reason §5's census compares a walk against the index.
+    """
+    dynamic = []
+    shadowed = []
+    for path in sorted((REPO_ROOT / "python" / "quantrisk").rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        relative = path.relative_to(REPO_ROOT)
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "import_module"
+            ):
+                dynamic.append(f"{relative}:{node.lineno}")
+        for node in tree.body:
+            if not isinstance(node, ast.Assign):
+                continue
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == "quantrisk":
+                    shadowed.append(f"{relative}:{node.lineno}")
+    assert not dynamic, f"modules loaded by name, invisible to imports and typing: {dynamic}"
+    assert not shadowed, (
+        f"the package name rebound to another module's global, invisible to the checker: {shadowed}"
+    )
+
+
 def test_the_layout_parser_does_not_pass_on_nothing() -> None:
     """Negative control: a bogus path inside the block has to be reported, not skipped.
 
@@ -3018,8 +3061,8 @@ _CENSUS_REPRO_GOLD = (
     "20.8% spread",
     "204 tests",
     "32.6% spread",
-    "489 tests",
-    "558 pytest tests",
+    "490 tests",
+    "559 pytest tests",
     "548,368 assertions",
     "7 identity checks",
     "four modules",
@@ -3055,11 +3098,11 @@ _CENSUS_SHEET_GOLD = (
     "4 scenarios",
     "4,453,163 paths",
     "45,982,736 paths",
-    "489 tests",
+    "490 tests",
     "492 rows",
     "5 books",
-    "558 pytest tests",
-    "558 python tests",
+    "559 pytest tests",
+    "559 python tests",
     "548,368 assertions",
     "69 cases",
     "80,258,165 paths",
@@ -3151,7 +3194,7 @@ _CENSUS_REPORT_GOLD = (
     "41 pytest tests",
     "492 rows",
     "50 steps",
-    "558 pytest tests",
+    "559 pytest tests",
     "548{,}368 assertions",
     "582 windows",
     "6 failing cases",

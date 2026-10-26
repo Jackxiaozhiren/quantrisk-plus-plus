@@ -35,7 +35,6 @@ been measured at all -- such books are flagged rather than counted as wins or lo
 from __future__ import annotations
 
 import csv
-import importlib
 import json
 import pathlib
 import sys
@@ -43,6 +42,11 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Any
 
+# Phase 18 owns the books, the grid and the radius rule; it owns v1.5.0's and v1.6.0's truncations
+# transitively. Loading it is what makes "the same radius, one order higher" a statement about the
+# same quantity rather than about a new one.
+import quantrisk
+import quantrisk.experiments.second_book_crossing_map as P18
 from quantrisk.experiments.registry import (
     TASKS_BY_ID,
     artifact_path,
@@ -50,13 +54,6 @@ from quantrisk.experiments.registry import (
     results_directory,
 )
 
-# Phase 18 owns the books, the grid and the radius rule; it owns v1.5.0's and v1.6.0's truncations
-# transitively. Loading it is what makes "the same radius, one order higher" a statement about the
-# same
-# quantity rather than about a new one.
-P18 = importlib.import_module("quantrisk.experiments.second_book_crossing_map")
-
-quantrisk = P18.quantrisk
 BOOKS = P18.BOOKS
 DELTAS = P18.DELTAS
 TOLERANCE = P18.TOLERANCE
@@ -195,17 +192,16 @@ def column_row(
         order: min((abs(a - b) for a in zeros[order] for b in measured), default=None)
         for order in ORDERS
     }
+    within_tolerance = {
+        order: distance is not None and distance <= TOLERANCE
+        for order, distance in distances.items()
+    }
     verdicts = {
         "delta": delta,
         "abs_delta": abs(delta),
         "measured_zero_count": len(measured),
         **{f"{order}_zero_count": len(zeros[order]) for order in ORDERS},
-        **{
-            f"{order}_within_tolerance": (
-                distances[order] is not None and distances[order] <= TOLERANCE
-            )
-            for order in ORDERS
-        },
+        **{f"{order}_within_tolerance": within_tolerance[order] for order in ORDERS},
     }
     return verdicts, {f"{order}_nearest_zero_distance": distances[order] for order in ORDERS}
 

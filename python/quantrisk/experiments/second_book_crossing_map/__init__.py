@@ -67,7 +67,6 @@ change of a scanned function, not an analytic root.
 from __future__ import annotations
 
 import csv
-import importlib
 import json
 import math
 import sys
@@ -78,6 +77,12 @@ from pathlib import Path
 from typing import Any
 
 import quantrisk
+
+# v1.5.0 owns the grid, the tolerance and the root finder; v1.6.0 owns the order-four terms of
+# the published book and its truncation. Both are imported rather than re-typed, so "the same
+# truncation, on another book" cannot quietly become "a truncation this file invented".
+import quantrisk.experiments.fourth_order_crossing_map as P16
+import quantrisk.experiments.restrike_gamma_map as P15
 from quantrisk import stress as STRESS
 from quantrisk.experiments.metadata import repo_relative
 from quantrisk.experiments.registry import (
@@ -88,12 +93,6 @@ from quantrisk.experiments.registry import (
 )
 
 TASK = TASKS_BY_ID["second_book_crossing_map"]
-
-# v1.5.0 owns the grid, the tolerance and the root finder; v1.6.0 owns the order-four terms of
-# the published book and its truncation. Both are imported rather than re-typed, so "the same
-# truncation, on another book" cannot quietly become "a truncation this file invented".
-P15 = importlib.import_module("quantrisk.experiments.restrike_gamma_map")
-P16 = importlib.import_module("quantrisk.experiments.fourth_order_crossing_map")
 
 DELTAS = P15.DELTAS
 VOL_MOVES = P15.VOL_MOVES
