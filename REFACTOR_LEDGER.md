@@ -2770,3 +2770,8 @@ now a fact about a *published* artifact rather than about a checkout.
 formatter census (now 228 tracked formattable files, the new snapshot among them), mypy over 74 files,
 clang-format, ctest 204/204, `validate` 7/7, the full pytest lane, the manifest verifier intact, the offline
 probe, the plant inventory at 183, and every ceiling at its value.
+
+*CI, read after both records landed.* `3ebbd2c` (the Phase 5 report) and `70f6782` (this release record)
+each completed `success` on their own runs -- `40300731357` and `40302001706`. The release page's CI claim
+above is about `b2dda33`, the commit the tag names; these two rows are about the post-tag bookkeeping, which
+no law asks to be inside the release.
