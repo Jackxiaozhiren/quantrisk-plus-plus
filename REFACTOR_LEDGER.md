@@ -2811,3 +2811,13 @@ repository and the platform, not recalled from the session.
   re-compared from the API rather than from the upload transcript.
 - **No stray instruments.** No `mutation_probe` file is tracked or present, and the sweeps' logs live under
   the gitignored `build/` tree; the verdicts that matter are the summary lines quoted in this file.
+
+**Parity after the close-out, read rather than assumed.** Two more commits followed this file's own
+close-out: `ae94a16` (the confirmation above) completed `success` on its own run `40440780829`, and `79caa34`
+opened V3 (`V3_PROMPT.md`, `V3_LEDGER.md`). On `79caa34`'s tree the local lanes are green -- 11 of 11 rc=0,
+pytest **559 passed** in 100 s, the formatter census at **230** tracked formattable files with nothing outside
+the corpus, ceilings 8 at value and 2 declared SKIP, ruff and mypy clean -- and its runner verdict was read
+part-way: `Format and static checks` and `macOS native C++ and Python parity` both `success`, the benchmark
+and build jobs still running when this line was written. The close-out commit is therefore held locally rather
+than pushed, because pushing would cancel the in-flight run through `cancel-in-progress` and V3's opening
+document is the first artifact worth having its own runner reading for.
