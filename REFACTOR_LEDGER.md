@@ -2542,9 +2542,11 @@ plant inventory at **183**, and every ceilings row at its ceiling.
 ### 2026-10-26, V2 Phase 5 — the report, the liveness table, and what V3 inherits
 
 Assembled from this ledger and a fresh reading at `035e797`. Cost of the whole series: **0 $** (L12's diff
-of `pyproject.toml` over `7d4f656..HEAD` moves no dependency line). Sixty-two commits in the range, 61 of
-them carrying a V2 subject and one (`941f041`) a CI lane this series did not write. Twenty-seven findings
-in the register, V2-19 deliberately absent, two of the twenty-seven still open at the end.
+of `pyproject.toml` over `7d4f656..HEAD` moves no dependency line). Sixty-three commits in the range to
+this report's own revision `3ebbd2c` -- 62 carrying a V2 subject and one (`941f041`) a CI lane this series
+did not write; sixty-six by the close of the release record, where the second non-V2 subject is the release
+commit itself. Twenty-eight findings in the register, V2-19 deliberately absent, two of the twenty-eight
+still open at the end.
 
 #### 1. Evidence Ledger
 
@@ -2738,9 +2740,9 @@ coming from its successor's run and its own local lane rather than from a run of
 `Format and static checks` log at `035e797` carries both new readings: `plant_liveness: 183` and, from the
 step V2-28 added, `Evidence is intact.`
 
-**Series close.** Twenty-seven findings registered, twenty-five closed, two handed open (V2-24, V2-29).
+**Series close.** Twenty-eight findings registered, twenty-six closed, two handed open (V2-24, V2-29).
 Three premises measured false and false because they were fixed. Ten ceilings, eight at zero on both
-environments, two declaring where they cannot run. Sixty-two commits, 0 $, no gate weakened, no test
+environments, two declaring where they cannot run. Sixty-six commits, 0 $, no gate weakened, no test
 deleted, no `skip` added to reach green, no tag moved -- each of those clauses read from the diff of
 `7d4f656..HEAD` in this session rather than asserted here.
 
@@ -2776,3 +2778,36 @@ probe, the plant inventory at 183, and every ceiling at its value.
 each completed `success` on their own runs -- `40300731357` and `40302001706`. The release page's CI claim
 above is about `b2dda33`, the commit the tag names; these two rows are about the post-tag bookkeeping, which
 no law asks to be inside the release.
+
+### 2026-10-26, V2 close-out — the records re-read before anything else starts
+
+Confirmation requested and performed: every artifact this series produced was re-read against the
+repository and the platform, not recalled from the session.
+
+- **Push parity.** `git status --porcelain` empty; `HEAD` and `origin/main` both `32c6355`; all twelve
+  commits this session created (`949fbef`, `934651e`, `504a3b8`, `1ce41ce`, `6374357`, `e696472`, `05c128d`,
+  `035e797`, `3ebbd2c`, `70f6782`, `812caa0`, `32c6355`) are ancestors of `origin/main`.
+- **CI read for the two record commits.** `32c6355` completed `success` on its own run (`40439597254`).
+  `812caa0` completed **`cancelled`** (`40439494321`) -- the lane is `cancel-in-progress` and the register-row
+  commit landed on the same branch while it queued, which is the same shape as `949fbef` above and is
+  recorded the same way: its content was verified by the successor's run and by the local lanes, not by a
+  run of its own.
+- **Register integrity.** §6 carries 28 rows -- V2-01 through V2-29 with V2-19 declared absent in the table's
+  own note -- and the Phase 5 report's Evidence Ledger has a row for each of the 28. The report's
+  self-counts were stale by one because V2-29 was registered after the report was written: they now read
+  twenty-eight registered, twenty-six closed, two open, and the commit-range figures are pinned to the
+  revision each was measured at (`3ebbd2c`: 63 commits, 62 V2-subject; `32c6355`: 66 commits, the second
+  non-V2 subject being the release commit itself) instead of pointing at a moving `HEAD`.
+- **Nothing cited a superseded count.** The only living document quoting the plant total is
+  `docs/interview_defense.md`, and it reads 183; no living document quotes 181, 182, or a formatter count,
+  and V2-05's finding is why that is expected rather than surprising.
+- **Lanes re-run on the corrected tree.** ruff, the 228-file formatter census, mypy over 74 files,
+  `tools.verify_evidence_manifest` (`Evidence is intact.`) and `--check-ceilings` (every key at its value) all
+  rc=0. No guard reads this ledger, which is why the count correction above had to be found by reading the
+  table against the text rather than by running something.
+- **Release and tag.** `v1.9.0` is still the annotated object `d9deb7f76` peeling to `b2dda33f6`, identical
+  locally and on the remote -- no re-tagging, no movement. Release `424060629` carries four assets, and each
+  row of the note's asset table matches the platform's own recorded `name / size / sha256` exactly,
+  re-compared from the API rather than from the upload transcript.
+- **No stray instruments.** No `mutation_probe` file is tracked or present, and the sweeps' logs live under
+  the gitignored `build/` tree; the verdicts that matter are the summary lines quoted in this file.
