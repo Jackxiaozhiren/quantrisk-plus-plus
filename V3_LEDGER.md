@@ -529,3 +529,12 @@ has a defect that fires it, not merely a deflection that was seen once. The re-k
 `docs-command-comment-counts-superseded-plants` printed `caught` as well, and the inventory now declares 186
 plants. N6 moves from "ACTIVE, unexecuted" to satisfied by a reading: both instruments exist, the difference is
 printed by name, and the ceilings gate refuses a residual above zero.
+
+**The push that did not happen.** `676b7d3` and `15e09e0` are local only. Two attempts failed at the
+transport, not at the remote: `fatal: unable to access …: CONNECT tunnel failed, response 502` and, on the
+retry, `Error in the HTTP2 framing layer`. `gh api rate_limit` answered on the same machine, so the failure is
+the git-over-HTTPS tunnel rather than a credential or a permission. The pushes were not retried a third time;
+`origin/main` stands at `06ac057`, and these two commits have **no runner verdict** — they are not green by
+inheritance and this line is the reason a later session must not assume otherwise. Everything they claim was
+measured locally: the census reading, both deflections, the plant sweep, the full suite at `559 passed, 1
+failed` (the bytecode plant this sandbox cannot run), and the ceilings gate at eleven keys.
