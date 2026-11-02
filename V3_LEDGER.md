@@ -354,3 +354,12 @@ uncommitted edits). `--only registry-declares-a-study-that-needs-no-plot` printe
 id, and printed `5/5 planted defects were rejected by their guard.` — so the re-key preserved what it touched
 rather than silencing it, which is the failure mode a moved anchor would otherwise hide. The declaration count
 in the Phase 1 liveness table (183) is now 184; the row is left as the reading of its own date.
+
+**One gap this commit leaves open, recorded rather than papered over.** The refusal path itself has no pytest
+guard. Its *input* is guarded — the declaration cannot drift from the import tree — but nothing in the suite
+would redden if `command_run` stopped calling `unsatisfied_requirements`, because the only instrument that
+executes the refusal against a real absence is `tools/verify_installed_surface --refusal pricing_grid`, and
+that gate is declared dev-only (its ceiling key SKIPs on the runner by design). Closing it costs a new pytest
+case, which costs the counted pair again — 560 → 561, three gold lists, five or six plant anchors, the report
+PDF — for a mechanism this session measured on eighteen real tasks. Deferred deliberately, priced, and left
+for the session that takes Fix #2, which already pays a count cascade for its own guard.
