@@ -6467,6 +6467,54 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
         f"{sorted(executed)}; documented and never executed: {unrun}"
     )
 
+    # V3-03 / N6, the same divorce one instrument further out. The census classifies a file as
+    # `not_reachable` from static import edges alone, and this session measured what that class
+    # actually contains: thirteen files, thirteen of them reached by something at runtime, and the
+    # thirteenth being the collector itself. Two instruments keep the label honest, and both can
+    # fail by absence -- an import probe whose control import fails reports thirteen failures, and
+    # a collection that reached nothing reports an empty reachable set -- so the controls are
+    # asserted before the residual is. A reading that cannot say it measured anything is the
+    # failure this clause exists for, not a zero to pass on.
+    from tools import inventory_orphan_code as census
+
+    dead = [
+        row["path"]
+        for row in census.inspect_corpus(
+            [
+                path
+                for path in census.tracked(("*.py",))
+                if not path.startswith(f"{census.PACKAGE_DIR}/")
+            ]
+        )
+        if row["class"] == "not_reachable"
+    ]
+    reading = census.runtime_reachability(dead)
+    print(
+        f"census calls {len(dead)} files dead; import reaches {len(reading['import_reachable'])}; "
+        f"pytest collects {len(reading['pytest_collected'])}; "
+        f"reached by neither: {reading['reached_by_neither']}"
+    )
+    assert dead, (
+        "the census classifies no file as not_reachable, so this clause would certify an empty set"
+    )
+    assert reading["available"], reading["unavailable_because"]
+    assert reading["instruments"]["pytest_collection"]["collected"] > 0, (
+        "pytest's collection reached no file, so the reachable set is empty by instrument failure "
+        "rather than by measurement"
+    )
+    assert reading["instruments"]["import_probe"]["control_result"] is None, (
+        "the import probe could not import the package itself, so every failure it reports below "
+        f"that is the environment's: {reading['instruments']['import_probe']['control_result']}"
+    )
+    assert reading["import_reachable"], (
+        "the import probe reached none of the files the census calls dead, which is the shape of a "
+        "probe that stopped running rather than of thirteen dead files"
+    )
+    assert not reading["reached_by_neither"], (
+        "these files are called dead by the census and reached by neither runtime instrument, so a "
+        f"deletion decision would be acting on one reading: {reading['reached_by_neither']}"
+    )
+
     # V3-02, the same divorce from the other side: the CLI is the surface a wheel actually ships,
     # and the workflow executed exactly one of its subcommands (`run --list`). `validate` was
     # pinned only in process, through a digest test that calls `cli.main(["validate"])` -- which is

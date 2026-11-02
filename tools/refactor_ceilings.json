@@ -42,7 +42,7 @@
       "corpus": "the same corpus; each site printed with the path expression it names",
       "can_fail_because": "19 sites exist today across 18 files, including five studies that load sibling studies at import time",
       "exemptions": [],
-      "note": "these are not only test plumbing: experiments/fourth_order_crossing_map/run.py and experiments/sixth_book_crossing_map/run.py load a published sibling study rather than re-implementing it, which is what makes 'the same truncation plus the next order' a claim the file cannot quietly break. The destination is a package import of the same sibling, not a copy."
+      "note": "these are not only test plumbing: experiments/fourth_order_crossing_map/run.py and experiments/sixth_book_crossing_map/run.py load a published sibling study rather than re-implementing it, which is what makes 'the same truncation plus the next order' a claim the file cannot quietly break. The destination is a package import of the same sibling, not a copy. A dynamic load is invisible to this census by construction: it reads static import edges, so a file reached only through `importlib` -- or through pytest's own path insertion -- has no edge for it to see. That is why `runtime_reachability_gap` sits beside this count, and why driving this one to zero never made the thirteen files it called dead actually dead."
     },
     {
       "key": "commands_not_module_path",
@@ -125,6 +125,21 @@
         "P3.1": 0
       },
       "note": "unmeasurable at the Phase 0 baseline because the registry did not exist; the flag that let it be skipped was removed in the commit that made it measurable, which is the rule \u00a79 states for every may_be_unmeasured key"
+    },
+    {
+      "key": "runtime_reachability_gap",
+      "law": "N6",
+      "metric": "tracked Python files outside the package that the ast census calls `not_reachable` and that neither the import probe nor pytest's collection reaches",
+      "measured_at_baseline": null,
+      "baseline_note": "no instrument existed at the baseline, so no figure is claimed there. Phase 0 measured the question by hand at ed9db5a: thirteen files called dead, thirteen reached by the union of `importlib.import_module` and pytest's collection log, residual 0. That hand reading is what this row was written to replace.",
+      "max": 0,
+      "reach_by_phase": "V3 Phase 3 item 3",
+      "corpus": "the tracked *.py outside python/quantrisk whose class is `not_reachable` in the orphan_inventory reading; each is imported by name in one child interpreter and matched against `pytest --collect-only`'s node ids. The other direction -- a file the census calls dead that runtime does reach -- is printed by name in the reading (`ast_dead_but_runtime_reaches`) and is not counted here, because that disagreement is the finding this key exists for rather than a budget to stay under.",
+      "can_fail_because": "the residual is 0 today with all thirteen named as reached. A new tracked file that nothing imports and no collection reaches makes it 1; a broken instrument -- a failed control import, or a collection that reached no file at all -- yields no measurement instead of a zero, and this row carries no `may_be_unmeasured`, so the gate fails rather than skipping.",
+      "measured_at_phase": {
+        "V3-P3": 0
+      },
+      "exemptions": []
     },
     {
       "key": "plants_not_rejected_by_their_guard",

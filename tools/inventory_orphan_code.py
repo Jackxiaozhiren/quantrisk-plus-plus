@@ -527,6 +527,170 @@ def formatter_census() -> dict[str, Any]:
     }
 
 
+# --- N6: what the `ast` census cannot see ------------------------------------
+#
+# `inspect_corpus` classifies a file as `not_reachable` when it holds no `sys.path` bootstrap, no
+# by-path load and no `quantrisk` import. That is a statement about *static import edges*, and V3-03
+# found it disagreeing with reality on every file it named: twelve of the thirteen were reached by
+# pytest's own path convention or by `importlib.import_module`, and the thirteenth was the collector
+# you are reading, executed by `-m tools.inventory_orphan_code`. A metric that calls a live module
+# dead will eventually be used to delete it, so the class keeps its name and gains a second reader.
+
+_PROBE_SCRIPT = r"""
+import importlib, json, sys
+
+roots, names = json.loads(sys.argv[1]), json.loads(sys.argv[2])
+sys.path[:0] = roots
+failures = {}
+
+
+def attempt(name):
+    try:
+        importlib.import_module(name)
+    except BaseException as error:  # every way an import fails, not only ImportError
+        return f"{type(error).__name__}: {error}"[:160]
+    return None
+
+
+control = attempt("quantrisk")
+for relative, name in names.items():
+    problem = attempt(name)
+    if problem is not None:
+        failures[relative] = problem
+print(json.dumps({"control": control, "failures": failures}))
+"""
+
+
+def module_name(rel: str) -> str | None:
+    """The name a runtime import would use for this file, or None when it has no such name.
+
+    The two conventions are the two the repository runs under: `tests/python` is on pytest's path
+    by its own rootdir insertion, so a test module is reachable by its bare stem; `tools` is a
+    package on the checkout root, so a tool is reachable as `tools.<stem>`. A path outside both is
+    left unnamed rather than guessed at, and the reading says so instead of silently counting it.
+    """
+    if rel.startswith("tests/python/"):
+        return Path(rel).stem
+    if rel.startswith("tools/"):
+        stem = Path(rel).stem
+        return "tools" if stem == "__init__" else f"tools.{stem}"
+    return None
+
+
+def import_probe(dead: list[str]) -> dict[str, Any]:
+    """Import every dead file by name in one child interpreter, and record what each one did.
+
+    One child, not thirteen: the question is reachability, and a second process per file would cost
+    a second of interpreter start-up each for no additional reading. The control is the package
+    itself -- if `quantrisk` will not import, every failure below it is the environment's and the
+    reading says so rather than reporting thirteen dead files.
+    """
+    names = {rel: name for rel in dead if (name := module_name(rel)) is not None}
+    roots = [str(REPO_ROOT), str(REPO_ROOT / "tests" / "python")]
+    result = subprocess.run(
+        [sys.executable, "-c", _PROBE_SCRIPT, json.dumps(roots), json.dumps(names)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=600,
+    )
+    try:
+        payload = json.loads(result.stdout.strip().splitlines()[-1])
+    except (IndexError, json.JSONDecodeError):
+        return {
+            "control": f"the probe process produced no reading (exit {result.returncode})",
+            "failures": {},
+            "reachable": [],
+            "attempted": len(names),
+            "unnamed": sorted(set(dead) - set(names)),
+            "interpreter": sys.executable,
+        }
+    failures = payload["failures"]
+    return {
+        "control": payload["control"],
+        "failures": failures,
+        "reachable": sorted(set(names) - set(failures)),
+        "attempted": len(names),
+        "unnamed": sorted(set(dead) - set(names)),
+        "interpreter": sys.executable,
+    }
+
+
+def pytest_collection() -> dict[str, Any]:
+    """Every file pytest's own collection reaches, by node id, in one collect-only run.
+
+    Collection rather than execution: the question is whether anything will *run* the file, and a
+    file that collects is a file the suite will execute. `-p no:cacheprovider` keeps the run from
+    writing `.pytest_cache`, so a census never dirties the tree it is measuring.
+    """
+    result = subprocess.run(
+        [sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=1200,
+    )
+    files: set[str] = set()
+    errors: list[str] = []
+    for line in result.stdout.splitlines():
+        if line.startswith("ERROR "):
+            errors.append(line.split(" ", 1)[1][:120])
+        elif "::" in line and not line.startswith((" ", "=", "_")):
+            files.add(line.split("::", 1)[0])
+    tail = next((line for line in reversed(result.stdout.splitlines()) if line.strip()), "")
+    return {
+        "command": "python -m pytest --collect-only -q -p no:cacheprovider",
+        "exit_code": result.returncode,
+        "collected": len(files),
+        "files": sorted(files),
+        "collection_errors": errors,
+        "tail": tail[:160],
+    }
+
+
+def runtime_reachability(dead: list[str]) -> dict[str, Any]:
+    """Both runtime readings beside the census verdict, with each side's difference named.
+
+    Three sets, never one number: what the parser calls dead, what an import reaches, and what
+    pytest collects. The metric the ceilings file gates is the *residual* -- files dead by every
+    instrument -- because that is the dangerous direction: a file this reading also cannot reach is
+    the only kind a deletion may act on, and even then the reading is required first (N6).
+    """
+    probe = import_probe(dead)
+    collection = pytest_collection()
+    collected = set(collection["files"])
+    by_import = probe["reachable"]
+    by_pytest = sorted(rel for rel in dead if rel in collected)
+    reached = set(by_import) | set(by_pytest)
+    neither = sorted(set(dead) - reached)
+    unavailable: list[str] = []
+    if probe["control"] is not None:
+        unavailable.append(f"the import probe's control failed: {probe['control']}")
+    if not collected:
+        unavailable.append("pytest's collection reached no file at all")
+    return {
+        "available": not unavailable,
+        "unavailable_because": unavailable,
+        "ast_dead": dead,
+        "import_reachable": by_import,
+        "import_failures": probe["failures"],
+        "pytest_collected": by_pytest,
+        "reached_by_neither": neither,
+        "ast_dead_but_runtime_reaches": sorted(reached),
+        "instruments": {
+            "import_probe": {
+                "command": "python -c <import probe>",
+                "interpreter": probe["interpreter"],
+                "attempted": probe["attempted"],
+                "unnamed": probe["unnamed"],
+                "control": "quantrisk",
+                "control_result": probe["control"],
+            },
+            "pytest_collection": collection,
+        },
+    }
+
+
 def _is_runnable_unit(path: str) -> bool:
     """A file that can be run, in either the root layout or the package layout."""
     if path.startswith("experiments/"):
@@ -606,6 +770,7 @@ def build_snapshot() -> dict[str, Any]:
     corpus = [path for path in all_python if path.endswith(".py")]
     outside = [path for path in corpus if not path.startswith(PACKAGE_DIR + "/")]
     rows = inspect_corpus(outside)
+    dead = [row["path"] for row in rows if row["class"] == "not_reachable"]
     return {
         "schema": "quantrisk-refactor-inventory/1",
         "generated_utc": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -625,6 +790,14 @@ def build_snapshot() -> dict[str, Any]:
                 "name": "orphan_inventory",
                 "command": "git ls-files -- '*.py' outside python/quantrisk, then ast.parse each",
                 "value": {"classes": dict(Counter(row["class"] for row in rows)), "files": rows},
+            },
+            {
+                "name": "runtime_reachability",
+                "command": (
+                    "importlib.import_module in one child interpreter, plus "
+                    "pytest --collect-only over the same corpus"
+                ),
+                "value": runtime_reachability(dead),
             },
             {
                 "name": "bootstrap_census",
@@ -684,6 +857,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
     coverage = by_name["static_check_coverage"]
     formatter = by_name["formatter_census"]
     parity = by_name["registry_parity"]
+    reachability = by_name["runtime_reachability"]
     return {
         "bootstrap_sites_outside_package": len(by_name["bootstrap_census"]),
         "by_path_load_sites": len(by_name["by_path_load_sites"]),
@@ -698,6 +872,9 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
         "registry_parity_mismatch": None
         if not parity.get("applicable")
         else len(parity["mismatch"]),
+        "runtime_reachability_gap": None
+        if not reachability.get("available")
+        else len(reachability["reached_by_neither"]),
         "plants_not_rejected_by_their_guard": None,
         "installed_user_identity_mismatch": None,
         "external_spend_usd": 0,
@@ -745,6 +922,14 @@ def summarize(snapshot: dict[str, Any]) -> None:
             shown = value["classes"]
         elif isinstance(value, dict) and "buckets" in value:
             shown = {**value["buckets"], "corpora": value["corpora"]}
+        elif isinstance(value, dict) and "reached_by_neither" in value:
+            shown = {
+                "available": value["available"],
+                "ast_dead": len(value["ast_dead"]),
+                "import_reachable": len(value["import_reachable"]),
+                "pytest_collected": len(value["pytest_collected"]),
+                "reached_by_neither": len(value["reached_by_neither"]),
+            }
         elif isinstance(value, list):
             shown = f"{len(value)} sites"
         else:

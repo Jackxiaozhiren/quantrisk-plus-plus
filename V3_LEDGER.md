@@ -453,3 +453,72 @@ two-sided output, the bare-wheel census, the 19/19 suite); N3 is satisfied for t
 open for the contract file §5 describes, which V3 has not written; N6, N7, N8, N9, N11, N12 keep the status
 their Phase 1 rows recorded, with N9's plant count now 185. N10 — the one re-run — remains unexecuted in this
 series, which is correct: no evidence category has moved.
+
+---
+
+### 2026-11-02, V3-03 fixed — the census keeps its verdict and gains two runtime readers
+
+**The finding, restated as what it is.** `inspect_corpus` classifies a file as `not_reachable` when it
+holds no `sys.path` bootstrap, no by-path load and no `quantrisk` import. That is a statement about static
+import edges, and it was being read as a statement about liveness: thirteen files, every one of them reached
+by something at runtime, and the thirteenth of them the collector that writes the census. The class name is
+kept — renaming it would hide that the parser still holds one view — and a second reading is put beside it.
+
+**What shipped.**
+
+- `tools/inventory_orphan_code.py` gains `runtime_reachability`, built from two instruments that are named in
+  the snapshot with their own controls: `import_probe` imports every dead file by the name a consumer would
+  use, in one child interpreter, with `quantrisk` itself as the control; `pytest_collection` runs
+  `pytest --collect-only -q -p no:cacheprovider` once and maps node ids back to files. The reading returns
+  `ast_dead`, `import_reachable`, `pytest_collected`, `reached_by_neither`, `ast_dead_but_runtime_reaches`,
+  both instruments' commands and both controls.
+- `tools/refactor_ceilings.json` gains `runtime_reachability_gap`: the **residual** — files dead by the parser
+  *and* by both runtime instruments — with `max: 0` and no `may_be_unmeasured`. A broken instrument yields no
+  measurement, and this row does not excuse that, so the gate fails rather than skipping. The other
+  direction, `ast_dead_but_runtime_reaches`, is printed and deliberately not counted: it is the finding this
+  key exists for, not a budget to stay under. The file now holds eleven keys.
+- `by_path_load_sites`' note says why a dynamic load is invisible to this census by construction, which is the
+  sentence whose absence let this count reaching zero read as "those thirteen files are dead".
+- The guard is a clause inside `test_the_ci_lane_that_runs_the_guards_fetches_what_they_read`, not a new case:
+  the counted pair stays at **560/491** and the plant count pays the only movement (185 → **186**). The clause
+  asserts the controls first — collection reached something, the probe's control import succeeded, the probe
+  reached something — and the residual second, because an instrument that cannot say it measured anything is
+  the failure mode, not a zero.
+
+**The reading on this tree, printed by the census itself.**
+
+```
+orphan_inventory         {"installed_import": 33, "not_reachable": 13}
+runtime_reachability     {"ast_dead": 13, "available": true, "import_reachable": 13,
+                          "pytest_collected": 6, "reached_by_neither": 0}
+```
+
+Six of the thirteen are test modules pytest collects; `tests/python/conftest.py` is reached by import and
+never by a node id, which is why the collection count is 6 and not 7. The six tools are reached by import —
+including `tools/inventory_orphan_code.py` itself, whose only execution path is `-m tools.inventory_orphan_code`
+and which therefore had no static edge for the census to see.
+
+**Why two instruments and not one.** Import-by-name alone is unsound in the direction that matters: Phase 0
+measured `test_second_book_crossing_map.py` failing with `ModuleNotFoundError: No module named
+'test_two_factor_bound'`, because it reaches a sibling test by bare name and resolves only under pytest's path
+insertion; the probe now inserts `tests/python` and reaches it, but the class of failure is real and silent.
+Collection alone is blind to everything pytest does not collect. The union is the reading, and the word it
+supports is *reachable*, not *executed* — nothing here proves a tool ran, only that nothing in the repository
+is dead by every available reading.
+
+**Two deflections, run before the plant was written.** Replacing the collection command with
+`pytest --version` (a command that prints no node ids) reddened the guard with
+`["pytest's collection reached no file at all"]`. Adding a tracked `docs/unreached_probe.py` with no importer
+reddened it with `these files are called dead by the census and reached by neither runtime instrument, so a
+deletion decision would be acting on one reading: ['docs/unreached_probe.py']`. Both were reverted; `git
+status` after each showed only the three files this finding touches.
+
+**Cost, measured.** The collector runs in 5.5 s end to end, up from roughly 1.5 s: one child interpreter and
+one collect-only pass. `--check-ceilings` prints `ok runtime_reachability_gap: 0 against a ceiling of 0 due V3
+Phase 3 item 3` beside the ten existing rows. No evidence category moved, so N10's single re-run stays
+unexecuted and stays correct.
+
+**Not done, and why.** No file was deleted: N6 does not say the thirteen are dead, it says a deletion now
+needs this reading first, and no deletion is proposed. The `not_reachable` class is not renamed for the reason
+above. And the reading is not a liveness claim — a tool that nothing invokes still counts as reachable here,
+which is why `tools/generate_shim_stubs.py` remains a Phase 4 question rather than being closed by a zero.

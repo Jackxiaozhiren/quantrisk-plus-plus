@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 185/185 planted defects rejected",
+        anchor="# 186/186 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2630,6 +2630,21 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim=(
             "every command the prompt calls a CI lane is run by a lane, so the evidence chain is "
             "gated on the runner rather than on whoever remembers to type it locally"
+        ),
+    ),
+    Mutation(
+        identifier="reachability-reading-drops-one-of-its-instruments",
+        kind="prose",
+        path="tools/inventory_orphan_code.py",
+        anchor='    by_import = probe["reachable"]',
+        replacement="    by_import = []",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read"
+        ),
+        claim=(
+            "the runtime reading is the union of two instruments, so a probe that reports nothing "
+            "must redden the guard rather than turn seven live files into deletion candidates"
         ),
     ),
     Mutation(
