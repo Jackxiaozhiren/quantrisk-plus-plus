@@ -347,3 +347,10 @@ runtime-reachability reading) are not started: §0's one-scope-unit rule and the
 them past this session's boundary. The `oracles`-and-`plot` installed census is unmeasured, as above. No push
 has happened: §14 makes a push an outward action needing per-case approval, and the handoff's "push after each
 commit" is a plan, not that approval.
+
+**The sweep, run after the commit on a clean tree** (N9: a plant cannot fire while its target carries
+uncommitted edits). `--only registry-declares-a-study-that-needs-no-plot` printed `caught` and the summary
+`1/1 planted defects were rejected by their guard.` The five re-keyed anchors were then run the same way, by
+id, and printed `5/5 planted defects were rejected by their guard.` — so the re-key preserved what it touched
+rather than silencing it, which is the failure mode a moved anchor would otherwise hide. The declaration count
+in the Phase 1 liveness table (183) is now 184; the row is left as the reading of its own date.
