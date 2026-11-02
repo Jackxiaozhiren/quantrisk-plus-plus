@@ -522,3 +522,10 @@ unexecuted and stays correct.
 needs this reading first, and no deletion is proposed. The `not_reachable` class is not renamed for the reason
 above. And the reading is not a liveness claim — a tool that nothing invokes still counts as reachable here,
 which is why `tools/generate_shim_stubs.py` remains a Phase 4 question rather than being closed by a zero.
+
+**The sweep, on a clean tree after that commit.** `--only reachability-reading-drops-one-of-its-instruments`
+printed `caught` and `1/1 planted defects were rejected by their guard.` — so the clause's residual assertion
+has a defect that fires it, not merely a deflection that was seen once. The re-keyed
+`docs-command-comment-counts-superseded-plants` printed `caught` as well, and the inventory now declares 186
+plants. N6 moves from "ACTIVE, unexecuted" to satisfied by a reading: both instruments exist, the difference is
+printed by name, and the ceilings gate refuses a residual above zero.
