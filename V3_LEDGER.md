@@ -363,3 +363,50 @@ that gate is declared dev-only (its ceiling key SKIPs on the runner by design). 
 case, which costs the counted pair again — 560 → 561, three gold lists, five or six plant anchors, the report
 PDF — for a mechanism this session measured on eighteen real tasks. Deferred deliberately, priced, and left
 for the session that takes Fix #2, which already pays a count cascade for its own guard.
+
+---
+
+### 2026-11-02, V3-02 fixed — `validate` gets a runner home, and the guard compares the parser's whole surface
+
+**The finding.** V2-29's "why it matters" cell said a build that breaks `validate` ships green. The Phase 0
+reading narrowed it and this commit closes the narrowed form: the function was executed in process by a
+digest-pinned test, and the *entry point* — `[project.scripts]`, the installed distribution, the packaged
+environment — was executed by nothing. `.github/workflows/ci.yml` gains one step after `pytest`, in the job
+that already installed the package from this tree:
+
+```
+- name: Validate installed CLI
+  run: uv run quantrisk validate
+```
+
+**The guard, extended rather than added.** A new pytest case would have cost the counted pair again — 560 to
+561, three gold lists, six plant anchors, the report PDF — for a reading that belongs inside a guard already
+reading this workflow. `test_the_ci_lane_that_runs_the_guards_fetches_what_they_read` gained a clause that
+takes the declared set from `quantrisk.cli.subcommands()` (the parser, not a second list), scrapes the
+executed set from every `run:` line, and compares them in both directions. Its print on this tree:
+
+```
+cli declares ['benchmark', 'demo', 'run', 'validate']; the workflow executes ['run', 'validate']
+```
+
+`benchmark` and `demo` are declared in-process-only **with their reasons in the guard**, and the same clause
+refuses a declaration that outlives its command, or one that stays behind after a step starts running it.
+
+**The deflection, run before the plant was written.** Replacing the new step's command with
+`uv run quantrisk --version` and re-running the guard printed:
+
+```
+the parser declares ['benchmark', 'demo', 'run', 'validate'] and the workflow executes ['run'];
+declared, expected to run and absent: ['validate']; executed but declared in-process-only: []
+```
+
+The file was restored from a copy, and `git diff --stat` confirms the step is the only change on that path.
+
+**The cascade.** Adding a plant moves the inventory 184 → **185**, which moves
+`docs/interview_defense.md`'s `# 184/184 planted defects rejected` and re-keys the plant that anchors on that
+line. No test-count movement: the guard was extended, not added, so the pair stays at **560/491**. The plant
+`ci-lane-stops-validating-the-installed-cli` replaces the step's command with `--version`.
+
+**What this does not prove yet.** The step has executed on no runner at the moment this entry is written; the
+commit that carries it is not pushed. Until a run reads it, the lane's own verdict is unknown, and this entry
+claims only what the local guard printed.

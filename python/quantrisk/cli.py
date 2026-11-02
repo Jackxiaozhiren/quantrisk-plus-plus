@@ -552,6 +552,20 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def subcommands() -> tuple[str, ...]:
+    """The subcommand names this parser accepts, read from the parser rather than restated.
+
+    V3-02 needs the declared surface as data: the guard compares it with the steps the workflow
+    executes, and a hand-written tuple beside the parser would be the second list this repository
+    keeps relearning not to keep. `argparse` exposes no public accessor for a subparser's choices,
+    so the private action type is read here once, in the module that owns the parser.
+    """
+    for action in build_parser()._actions:  # noqa: SLF001 - argparse has no public accessor
+        if isinstance(action, argparse._SubParsersAction):  # noqa: SLF001 - same reason
+            return tuple(action.choices)
+    return ()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     arguments = parser.parse_args(argv)

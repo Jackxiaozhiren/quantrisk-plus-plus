@@ -6467,6 +6467,52 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
         f"{sorted(executed)}; documented and never executed: {unrun}"
     )
 
+    # V3-02, the same divorce from the other side: the CLI is the surface a wheel actually ships,
+    # and the workflow executed exactly one of its subcommands (`run --list`). `validate` was
+    # pinned only in process, through a digest test that calls `cli.main(["validate"])` -- which is
+    # a reading of the function, not of `[project.scripts]`, the installed distribution or the
+    # packaged environment. The declared set comes from the parser itself; the executed set is
+    # scraped from every `run:` line; and a subcommand that is deliberately left to the in-process
+    # pin says so here, with its reason, so the omission is a decision a reader can disagree with
+    # rather than a silence. Both directions are compared: a declaration that stays behind after a
+    # step starts running the command would be the same defect wearing the other coat.
+    from quantrisk.cli import subcommands
+
+    declared_cli = set(subcommands())
+    assert declared_cli, "the parser declares no subcommand, so this comparison is vacuous"
+    in_process_only = {
+        "benchmark": (
+            "the numbers it prints are timings from whatever machine ran it, so a CI assertion "
+            "would pin a figure the runner does not own; tests/python/test_research_api.py runs "
+            "it in process and pins its shape by digest"
+        ),
+        "demo": (
+            "it re-executes the README examples, which the same digest-pinned test runs in "
+            "process; a second execution would add cost without adding a reading"
+        ),
+    }
+    invoked: dict[str, list[str]] = {}
+    for job_name, job in sorted((workflow.get("jobs") or {}).items()):
+        for step in job.get("steps") or []:
+            tokens = str(step.get("run", "")).split()
+            for index, token in enumerate(tokens[:-1]):
+                if token.split("/")[-1] == "quantrisk" and tokens[index + 1] in declared_cli:
+                    invoked.setdefault(tokens[index + 1], []).append(job_name)
+    executed_cli = set(invoked)
+    expected_cli = declared_cli - set(in_process_only)
+    print(f"cli declares {sorted(declared_cli)}; the workflow executes {sorted(executed_cli)}")
+    assert executed_cli == expected_cli, (
+        f"the parser declares {sorted(declared_cli)} and the workflow executes "
+        f"{sorted(executed_cli)}; declared, expected to run and absent: "
+        f"{sorted(expected_cli - executed_cli)}; executed but declared in-process-only: "
+        f"{sorted(executed_cli & set(in_process_only))}"
+    )
+    for name in sorted(in_process_only):
+        assert name in declared_cli, (
+            f"{name!r} is declared in-process-only but the parser no longer offers it, so the "
+            "exemption outlived the command it excused"
+        )
+
 
 _CITATION = re.compile(r"\\src(?:in)?\{([^{}]*)\}")
 _CITATION_DEFINITION = re.compile(r"\\newcommand\{\\src")

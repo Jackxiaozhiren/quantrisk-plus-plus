@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 184/184 planted defects rejected",
+        anchor="# 185/185 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2630,6 +2630,21 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim=(
             "every command the prompt calls a CI lane is run by a lane, so the evidence chain is "
             "gated on the runner rather than on whoever remembers to type it locally"
+        ),
+    ),
+    Mutation(
+        identifier="ci-lane-stops-validating-the-installed-cli",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor="        run: uv run quantrisk validate\n",
+        replacement="        run: uv run quantrisk --version\n",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read"
+        ),
+        claim=(
+            "every subcommand the parser declares is run by a step or declared in-process-only "
+            "with its reason, so `validate` cannot lose its runner home while the suite is green"
         ),
     ),
     Mutation(

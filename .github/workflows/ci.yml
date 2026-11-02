@@ -112,6 +112,16 @@ jobs:
         env:
           QUANTRISK_REFERENCE_TOOL: ${{ github.workspace }}/build/ci/quantrisk_reference_tool
         run: uv run pytest -q
+      # V3-02, the narrowing of V2-29. `validate` was executed on no runner: the only reading was
+      # in process, through `cli.main(["validate"])` in a digest-pinned test, which proves the
+      # function and says nothing about `[project.scripts]`, the installed distribution or the
+      # packaged environment. A wheel whose entry point was broken, or whose declared dependencies
+      # did not match what `validate` imports, shipped green. This step runs the console script the
+      # wheel exposes, in the job that installed it from this tree. The guard
+      # `test_the_ci_lane_that_runs_the_guards_fetches_what_they_read` compares the parser's whole
+      # subcommand set with what the workflow executes, in both directions.
+      - name: Validate installed CLI
+        run: uv run quantrisk validate
 
   macos-native:
     # QuantLib tests its C++ core on Linux, Windows, and macOS. QuantRisk++'s
