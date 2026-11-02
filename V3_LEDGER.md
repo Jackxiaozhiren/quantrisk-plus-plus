@@ -152,3 +152,102 @@ diagnoses. The seeds this phase leaves for Phase 1 are: the entry-point gap abov
 bare sibling import in `test_second_book_crossing_map.py:30`, the runtime-reachability gap of 13/13 against a
 census that reports 0, `tools/generate_shim_stubs` being named by no document's `-m` invocation while nothing
 imports it statically, and V2-24 carried open as the premise-1 work item.
+
+---
+
+### 2026-11-02, V3 Phase 1 — eight lanes at `ed9db5a`, five findings, and one instrument that answers before it measures
+
+**Revision, vantage, and the parity reading this time is not a cached ref.** `HEAD` = `ed9db5a`, working tree
+clean except one untracked file (`tools/derive_requires.py`, finding V3-04), branch `main`. `git fetch` now
+*reaches* the network where the Phase 0 session could not: `git ls-remote origin refs/heads/main` returns
+`ed9db5aa9c9f64eb9d618cbee5654a73d3ba5322`, equal to `HEAD`, so parity is a statement about the server read
+from the server. CI for the tip: run `40445732572`, event `push`, `completed success`. Two facts about the
+remote are recorded rather than acted on: three `pull_request` runs (`3f5b28d`, `79f031f`, `7db01e8`) and two
+`codex/*` branches exist on the server and none of them is `main`; they are another session's work and this
+session did not fetch, check out, or touch them.
+
+**The five findings.** Each is a measurement taken in this checkout at this revision; the probe is quoted so a
+later session can re-run it rather than inherit it.
+
+| id | lane | severity | the reading | the probe |
+|---|---|---|---|---|
+| V3-01 | installed surface | High | the registry declares no requirement for any of its 19 tasks, and `[project.optional-dependencies]` declares two extras (`plot`, `oracles`) that nothing compares with the modules that need them | `Task.__dataclass_fields__` has no `requires`; `run --list` prints three columns, none of them a requirement; `pyproject.toml` §optional-dependencies |
+| V3-02 | CI and gates | Medium | `validate`, `benchmark` and `demo` are invoked by no step of any job; the only execution of `validate` is in-process, through `cli.main(["validate"])` in `tests/python/test_research_api.py`, which pins its output by digest | `.github/workflows/ci.yml` parsed as YAML: every `run:` string, searched for the three subcommands — zero hits; the `study-catalogue` step runs `run --list` only |
+| V3-03 | runtime reachability | Medium | the `ast` census calls 13 tracked files outside the package unreachable; `importlib.import_module` reaches 12 of them and pytest's collection log reaches 6, and the union is 13 of 13 | Phase 0's two probes, re-read here as a finding rather than a premise: the census prints `not_reachable: 13`, and no runtime reading is emitted by any committed instrument |
+| V3-04 | process artifacts | Low | the untracked `tools/derive_requires.py` computes `REPO_ROOT = Path(__file__).parents[2]`, which is `/Users/jackson`, so every source path it builds is absent and it prints `base` for all 19 tasks — including the 14 whose trees import `matplotlib` | `uv run python -m tools.derive_requires --json` → 19 rows, `["base"]` in each; `pathlib.Path('tools/derive_requires.py').resolve().parents[2]` → `/Users/jackson` |
+| V3-05 | documentation coherence | Low | three documents describe what `run --list` prints (`README.md` 105, `docs/reproducibility.md` 77, `CONTRIBUTING.md` 39) and all three describe a surface with no requirement column, because that is what the code prints | read at the line cited, not grepped |
+
+**V3-01's measurement, because the remedy is only as good as this table.** The declaration cannot be derived
+from the four-way split in a ledger entry; it has to come from each task's own import tree. Two probes were
+run, and they disagree in a way worth recording:
+
+1. **Import-time probe** — each task's module imported in a subprocess whose `sys.meta_path` raises
+   `ModuleNotFoundError` for a named set of roots. Under `base` (all seven optional roots blocked) seven
+   modules fail to import: `pricing_grid`, `mc_convergence`, `variance_reduction`, `portfolio_estimation_cost`,
+   `stress_testing` on `matplotlib`; `var_backtesting`, `real_data_risk_study` on `scipy`.
+2. **Execution probe** — Phase 0's own transcript (`build/v3-p0-surface.out`, gitignored) records **15**
+   failures, eight of them `No module named 'matplotlib'`. The three extras beyond the import probe —
+   `fourth_order_crossing_map`, `restrike_gamma_map`, `two_factor_error_bound` — import cleanly without
+   matplotlib and fail later, from a plotting helper reached inside a function.
+
+So an import-time-only reading under-declares by three tasks, and the derivation §5 asks for must walk the
+whole tree rather than the import-time frontier. The measured union, root-by-root:
+
+| extras | tasks |
+|---|---|
+| `plot` only | `pricing_grid`, `mc_convergence`, `variance_reduction`, `portfolio_estimation_cost`, `stress_testing`, `linearisation_error_bound`, `two_factor_error_bound`, `restrike_gamma_map`, `fourth_order_crossing_map`, `second_book_crossing_map`, `fifth_order_crossing_map`, `sixth_book_crossing_map` |
+| `oracles` only | `pricing_vs_quantlib`, `monte_carlo_vs_analytic`, `path_dependent_vs_quantlib`, `optimisation_vs_oracles`, `real_data_risk_study` |
+| `plot` and `oracles` | `var_backtesting` |
+| `base` | `mc_speed` |
+
+Fourteen tasks import matplotlib somewhere reachable; eight of them fail on it from a wheel and three of the
+remaining six produce a figure of `not generated (matplotlib unavailable)` instead. That gap is the decision
+the K6 contract change turns on, and it is recorded below rather than smoothed into the number.
+
+**Decision, K6 — the widened `run --list` (recorded here because §5 calls it a decision, not a consequence).**
+`requires` names the extras needed to reproduce a task's published artifact, not the minimum needed to exit 0.
+A study whose figure degrades to a string when matplotlib is absent declares `plot`, because its committed
+artifact carries a PNG that a bare run cannot reproduce; declaring `base` would make the list honest about
+startability and dishonest about the artifact. The consequence is priced and accepted: a bare wheel will refuse
+18 of 19 tasks instead of silently under-producing six of them, every refusal names the module and the install
+line, and `--list` says which extra buys which task. The alternative — refusing nothing that would have limped
+— was considered and rejected because the six would then keep writing artifacts that do not match the ones the
+repository publishes.
+
+**Two things this phase did not do, named so Phase 3 cannot inherit them silently.** The eight-lane read did
+not touch the evidence chain beyond re-running the Phase 0 verifier reading, and it did not open the cost lane
+past `pyproject.toml` (no dependency change is proposed, so the lane has no movement to price). `sixth_book_
+crossing_map`'s `RuntimeError` is not a requirement defect and is not filed as one: it names the committed
+sibling artifact it validates against, which is the acceptable failure shape of §15 #8, and K2 freezes that
+path.
+
+#### The liveness table at Phase 1
+
+| # | law | precondition holds? | state |
+|---|---|---|---|
+| N1 | requirement truth | no — the declaration does not exist yet | ACTIVE, unexecuted; Phase 3 item 1 is its first run |
+| N2 | advertised surface honesty | no — `run --list` prints no requirement | ACTIVE, unexecuted |
+| N3 | lane contract | partly — the contract file does not exist; the `validate` gap is V3-02 | ACTIVE, unexecuted |
+| N4 | no silence by count | yes — the census prints names, not totals | ACTIVE; `--check-ceilings` read at Phase 0 |
+| N5 | declarations are checkable | no — V3-01 and V3-05 are both this shape | ACTIVE, unexecuted |
+| N6 | runtime reachability | no — only the `ast` reading is committed | ACTIVE; V3-03 is its first run |
+| N7 | plan equals log | yes — the plan rows are the three Phase 3 items | ACTIVE; audited at each close |
+| N8 | no gate weakened | yes — the §7.1 suite is green at the tip | ACTIVE |
+| N9 | plant liveness | yes — 183 plants declared, last sweep 183/183 per `REFACTOR_LEDGER.md` §9 | ACTIVE; re-run at Phase 5 on a clean tree |
+| N10 | one re-run | yes — the evidence chain is frozen at 95 entries | ACTIVE; not run this series |
+| N11 | facts precedence | yes — the leak list is a named exclusion in the collector | ACTIVE |
+| N12 | baseline purity | yes — one vantage, one revision, one CI run read | ACTIVE |
+
+#### Phase 2 — the approval this session runs under
+
+The maintainer's instruction for this session is the handoff prompt that opened it, and its scope is quoted
+rather than paraphrased: *"Execute **Phase 3 targeted fixes first** (three items), then proceed to Phases 4-5"*,
+with Fix #1 = V2-24/V3-01 (`requires` derivation, widened `run --list`, declared-vs-actual guard, one plant),
+Fix #2 = V2-29/V3-02 (the `validate` step and the CLI-surface guard), Fix #3 = V3-03 (the runtime reading).
+Read against §9, that is a blanket approval for those three rows and nothing else: no push, release, PR or
+comment is approved by it, and §0's one-scope-unit-per-session rule caps this session at the first of the
+three. This entry is committed before any source file is touched, which is the order §0 requires.
+
+**Owner per row, as §9 asks.** All three rows: this session, at the maintainer's direction. Priced locks
+expected: K6 only (the widened list, with its own guard updated in the same commit), and K2 not at all —
+`sixth_book_crossing_map`'s artifact path stays where it is.
