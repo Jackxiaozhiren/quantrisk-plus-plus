@@ -415,3 +415,41 @@ claims only what the local guard printed.
 printed `caught` and `1/1 planted defects were rejected by their guard.`; the re-keyed
 `docs-command-comment-counts-superseded-plants` printed the same. Both claims therefore have a guard that
 fails without them, and the anchor this commit moved still points at a live defect.
+
+---
+
+### 2026-11-02, the two runs that read it — what each commit's verdict actually is
+
+**Run `41453407921`, event `push`, tip `7007f19`, `completed success`.** Four jobs, all `success`:
+`Format and static checks`; `Configure, build, C++ tests, Python tests`; `macOS native C++ and Python
+parity`; `Benchmark suite against live oracles`. Three readings from it matter here:
+
+- **The pytest lane printed `490 passed, 5 skipped in 231.94s`.** That is 495 nodes, and the arithmetic now
+  closes with the moved numbers: the offline probe collects **491**, the four oracle-gated modules collapse
+  into four records, and the fifth skip is the `latexmk` guard the Ubuntu runner cannot satisfy. Before this
+  session the same line read `489 passed, 5 skipped` against a probe of 490; the extra case moved both sides.
+- **The bytecode-cache plant passed on the runner.** It is the test this session's machine cannot run —
+  `sys.dont_write_bytecode` is `True` in that sandbox — and the runner's pass is the confirmation that the
+  local failure was the environment's and not the commit's. N12's rule applied: the lane was marked
+  unverified here and green only where it ran.
+- **The benchmark suite printed `19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped`** in
+  a job that installs `--extra oracles` and carries `matplotlib` from the dev group. That is N2's second
+  half, which the V3-01 entry explicitly did not claim: with both extras present, every one of the nineteen
+  tasks starts and finishes, so the declaration names what is *missing* rather than excusing what is broken.
+
+**Run `41459024242`, event `push`, tip `0e8b900`, `completed success`.** Same four jobs green, and the new
+step executed: `Run uv run quantrisk validate` → `7/7 checks passed`. So V3-02's claim is now a reading about
+a runner rather than about a guard: the console script that `[project.scripts]` publishes, resolved in the
+environment the job installed from this tree, runs the identities and passes.
+
+**What no run covers, stated rather than glossed.** `cancel-in-progress` means a push produces one run on its
+tip, so `87207d4`, `6696059`, `1501bde` have no verdict of their own — they are ancestors of a green tip, not
+individually verified — and `999af8d` shares `0e8b900`'s run. That is the V2 close-out's "cancelled run named
+as cancelled" rule applied forward: a commit carried by a green tip inherits the tip's evidence and nothing
+more.
+
+**Where the liveness table stands after these runs.** N1 and N2 are satisfied by readings (the guard's
+two-sided output, the bare-wheel census, the 19/19 suite); N3 is satisfied for the `validate` row and remains
+open for the contract file §5 describes, which V3 has not written; N6, N7, N8, N9, N11, N12 keep the status
+their Phase 1 rows recorded, with N9's plant count now 185. N10 — the one re-run — remains unexecuted in this
+series, which is correct: no evidence category has moved.
