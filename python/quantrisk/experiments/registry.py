@@ -6,10 +6,12 @@ the command is the canonical prefix plus that module. A hand-typed command is re
 construction, because a string nobody generated is exactly how 43 of this repository's 95 frozen
 commands came to name a file that does not exist.
 
-Two rules make the table worth having. An entry validates itself (§5 D3-prime): unknown keys cannot
-appear on a dataclass, an unknown category is a build failure, and `absorbed=True` asserts that the
-module is importable here. And the table is a literal, never a directory scan: a registry assembled
-by globbing would share its source with the filesystem side of the parity test in
+Three rules make the table worth having. An entry validates itself (§5 D3-prime): unknown keys
+cannot appear on a dataclass, an unknown category is a build failure, and `absorbed=True` asserts
+that the module is importable here. An entry declares the extra its artifact needs (`requires`), so
+a wheel can say what is missing instead of raising a bare `ModuleNotFoundError` three frames into a
+study. And the table is a literal, never a directory scan: a registry assembled by globbing would
+share its source with the filesystem side of the parity test in
 `tests/python/test_task_registry_parity.py`, and a two-sided guard computed from one list proves
 nothing.
 """
@@ -25,8 +27,46 @@ from typing import Any
 
 from quantrisk.checkout import checkout_root
 
-REGISTRY_VERSION = "1"
+REGISTRY_VERSION = "2"
 COMMAND_PREFIX = "uv run python -m "
+
+# V3-01 / V2-24. `[project.optional-dependencies]` is the only place this distribution says what
+# an extra installs, and until V3 nothing connected that declaration to the tasks that need it: a
+# wheel advertised nineteen studies, four ran, and the other fifteen failed with a bare
+# `ModuleNotFoundError` that named no remedy. The mapping below is the connection, and it is
+# deliberately one-directional -- an extra names the *modules* it provides, and a task names the
+# *extras* it needs, so neither table can be derived from the other by looking at itself.
+EXTRA_MODULES: dict[str, tuple[str, ...]] = {
+    "plot": ("matplotlib",),
+    "oracles": ("scipy", "statsmodels", "QuantLib", "pypfopt", "cvxpy", "sklearn"),
+}
+
+
+def requirement_label(task: Task) -> str:
+    """What `run --list` prints for one task: `base`, or the extras it needs, alphabetised.
+
+    `base` is a word rather than an empty column on purpose. A blank cell reads as "not measured",
+    and the one column that exists to stop a silent failure should not itself be able to look
+    unmeasured.
+    """
+    return "+".join(sorted(task.requires)) if task.requires else "base"
+
+
+def unsatisfied_requirements(task: Task) -> list[tuple[str, str]]:
+    """Every (extra, module) pair a task declares whose module this environment cannot import.
+
+    An extra is the unit of installation, so a declared extra counts as satisfied only when *all*
+    the modules it provides resolve. That is stricter than "the one module this task imports" and
+    deliberately so: the extra is what the user is told to install, and an environment carrying
+    half of it is an environment the declaration does not describe.
+    """
+    missing: list[tuple[str, str]] = []
+    for extra in sorted(task.requires):
+        missing.extend(
+            (extra, module) for module in EXTRA_MODULES[extra] if not module_resolves(module)
+        )
+    return missing
+
 
 CATEGORIES = frozenset(
     {
@@ -99,6 +139,11 @@ class Task:
     `source` is the path the unit is reachable at today; `module` is the dotted path it will be
     reachable at once absorbed. `absorbed` is flipped by the commit that moves the unit, and it is
     the flag that turns "this module exists" from a hope into an assertion.
+
+    `requires` is the extra set this task needs to reproduce its published artifact. It is a
+    declaration, not a derivation: `tests/python/test_task_registry_parity.py` re-derives the set
+    from the task's own import tree and refuses an entry that disagrees in either direction, which
+    is why a task that starts importing `scipy` cannot keep saying `plot` and stay green.
     """
 
     task_id: str
@@ -106,6 +151,7 @@ class Task:
     module: str
     artifact: str
     category: str
+    requires: frozenset[str] = frozenset()
     absorbed: bool = False
     command: str | None = field(default=None, compare=False)
 
@@ -123,6 +169,7 @@ class Task:
             "module": self.module,
             "artifact": self.artifact,
             "category": self.category,
+            "requires": sorted(self.requires),
             "command": self.invocation,
             "absorbed": self.absorbed,
         }
@@ -153,6 +200,17 @@ def validate_task(task: Task) -> None:
             f"{task.task_id}: canonical invocation must be generated from the module path; "
             f"refusing the typed command {task.command!r}"
         )
+    if not isinstance(task.requires, frozenset):
+        raise ValueError(
+            f"{task.task_id}: requires must be a frozenset of extra names, got "
+            f"{type(task.requires).__name__}"
+        )
+    unknown = sorted(set(task.requires) - set(EXTRA_MODULES))
+    if unknown:
+        raise ValueError(
+            f"{task.task_id}: requires {unknown}, which [project.optional-dependencies] does not "
+            f"declare ({sorted(EXTRA_MODULES)}); an undeclared extra is a remedy nobody can install"
+        )
     if task.absorbed and not module_resolves(task.module):
         raise ValueError(f"{task.task_id} claims to be absorbed but {task.module} does not resolve")
 
@@ -161,7 +219,14 @@ def _task(**kwargs: Any) -> Task:
     return Task(**kwargs)
 
 
-def _study(task_id: str, directory: str, artifact: str, *, absorbed: bool = False) -> Task:
+def _study(
+    task_id: str,
+    directory: str,
+    artifact: str,
+    *,
+    requires: frozenset[str] = frozenset(),
+    absorbed: bool = False,
+) -> Task:
     """A published study, named by its directory in both layouts the lane moves between."""
     package = f"{PACKAGE_DIR}/{EXPERIMENTS}/{directory}"
     return _task(
@@ -170,12 +235,19 @@ def _study(task_id: str, directory: str, artifact: str, *, absorbed: bool = Fals
         module=f"quantrisk.{EXPERIMENTS}.{directory}",
         artifact=f"{EXPERIMENTS}/{directory}/results/{artifact}",
         category="statistical_experiment",
+        requires=requires,
         absorbed=absorbed,
     )
 
 
 def _benchmark(
-    task_id: str, suite: str, script: str, artifact: str, *, absorbed: bool = False
+    task_id: str,
+    suite: str,
+    script: str,
+    artifact: str,
+    *,
+    requires: frozenset[str] = frozenset(),
+    absorbed: bool = False,
 ) -> Task:
     package = f"{PACKAGE_DIR}/{BENCHMARKS}/{suite}/{script}.py"
     return _task(
@@ -184,6 +256,7 @@ def _benchmark(
         module=f"quantrisk.{BENCHMARKS}.{suite}.{script}",
         artifact=f"{BENCHMARKS}/{suite}/results/{artifact}",
         category="correctness_benchmark",
+        requires=requires,
         absorbed=absorbed,
     )
 
@@ -194,6 +267,7 @@ TASKS: tuple[Task, ...] = (
         "quantlib",
         "pricing_validation",
         "pricing_vs_quantlib.json",
+        requires=frozenset({"oracles"}),
         absorbed=True,
     ),
     _benchmark(
@@ -201,6 +275,7 @@ TASKS: tuple[Task, ...] = (
         "quantlib",
         "monte_carlo_validation",
         "monte_carlo_validation.json",
+        requires=frozenset({"oracles"}),
         absorbed=True,
     ),
     _benchmark(
@@ -208,6 +283,7 @@ TASKS: tuple[Task, ...] = (
         "quantlib",
         "path_dependent_validation",
         "path_dependent_vs_quantlib.json",
+        requires=frozenset({"oracles"}),
         absorbed=True,
     ),
     _benchmark(
@@ -215,6 +291,7 @@ TASKS: tuple[Task, ...] = (
         "pyportfolioopt",
         "optimisation_validation",
         "optimisation_vs_oracles.json",
+        requires=frozenset({"oracles"}),
         absorbed=True,
     ),
     _task(
@@ -225,73 +302,102 @@ TASKS: tuple[Task, ...] = (
         category="performance_benchmark",
         absorbed=True,
     ),
-    _study("pricing_grid", "pricing_validation", "summary.json", absorbed=True),
+    _study(
+        "pricing_grid",
+        "pricing_validation",
+        "summary.json",
+        requires=frozenset({"plot"}),
+        absorbed=True,
+    ),
     _study(
         "mc_convergence",
         "monte_carlo_convergence",
         "summary.json",
+        requires=frozenset({"plot"}),
         absorbed=True,
     ),
-    _study("variance_reduction", "variance_reduction", "summary.json", absorbed=True),
+    _study(
+        "variance_reduction",
+        "variance_reduction",
+        "summary.json",
+        requires=frozenset({"plot"}),
+        absorbed=True,
+    ),
     _study(
         "var_backtesting",
         "var_backtesting",
         "var_backtesting_validation.json",
+        requires=frozenset({"plot", "oracles"}),
         absorbed=True,
     ),
     _study(
         "portfolio_estimation_cost",
         "portfolio_optimization",
         "portfolio_optimisation_study.json",
+        requires=frozenset({"plot"}),
         absorbed=True,
     ),
     _study(
         "linearisation_error_bound",
         "linearisation_error_bound",
         "linearisation_error_bound.json",
+        requires=frozenset({"plot"}),
         absorbed=True,
     ),
     _study(
         "two_factor_error_bound",
         "two_factor_error_bound",
         "two_factor_bound.json",
+        requires=frozenset({"plot"}),
         absorbed=True,
     ),
-    _study("stress_testing", "stress_testing", "stress_testing_study.json", absorbed=True),
+    _study(
+        "stress_testing",
+        "stress_testing",
+        "stress_testing_study.json",
+        requires=frozenset({"plot"}),
+        absorbed=True,
+    ),
     _study(
         "real_data_risk_study",
         "real_data_risk_study",
         "real_data_risk_study.json",
+        requires=frozenset({"plot", "oracles"}),
         absorbed=True,
     ),
     _study(
         "restrike_gamma_map",
         "restrike_gamma_map",
         "restrike_gamma_map.json",
+        requires=frozenset({"plot"}),
         absorbed=True,
     ),
     _study(
         "fourth_order_crossing_map",
         "fourth_order_crossing_map",
         "fourth_order_crossing_map.json",
+        requires=frozenset({"plot"}),
         absorbed=True,
     ),
     _study(
         "second_book_crossing_map",
         "second_book_crossing_map",
         "second_book_crossing_map.json",
+        requires=frozenset({"plot"}),
         absorbed=True,
     ),
     _study(
         "fifth_order_crossing_map",
         "fifth_order_crossing_map",
         "fifth_order_crossing_map.json",
+        requires=frozenset({"plot"}),
         absorbed=True,
     ),
     _study(
         "sixth_book_crossing_map",
         "sixth_book_crossing_map",
         "sixth_book_crossing_map.json",
+        requires=frozenset({"plot"}),
         absorbed=True,
     ),
 )

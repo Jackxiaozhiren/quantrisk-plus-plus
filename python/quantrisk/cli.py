@@ -9,7 +9,7 @@ second list that someone has to keep true. What each one does:
   validate   run the identities the library claims, and exit non-zero if any fail
   benchmark  time a few core operations on this machine, right now
   demo       execute the documented API examples end to end
-  run        list the registered tasks (`--list`), or execute one by id
+  run        list the registered tasks and the extra each needs (`--list`), or run one by id
 
 `run` is the reason the registry exists as data rather than as a list in a runner script:
 this command reads the same entries the suite and the evidence manifest do, so "what can
@@ -423,18 +423,58 @@ def _registered_tasks() -> list[Any]:
     return sorted(TASKS, key=lambda task: task.task_id)
 
 
+def _install_line(extras: list[str]) -> str:
+    """The one command that turns a refusal into a running study.
+
+    V3 chose this over naming the extra alone: `oracles` is a word this project invented, and a
+    reader who has to guess its spelling in `pip install quantrisk[...]` has been told what is
+    wrong without being told what to do.
+    """
+    return f"pip install 'quantrisk[{','.join(extras)}]'"
+
+
+def _refuse_unsatisfied(task: Any, missing: list[tuple[str, str]]) -> int:
+    """Report every absent module a declared extra promises, and the install line, then exit 1.
+
+    Exit 1 rather than 2: `2` is "you named no such task", and this id was valid. The failure is
+    the environment's, and it is the same failure class a study's own crash would be.
+    """
+    extras = sorted({extra for extra, _module in missing})
+    named = ", ".join(f"No module named {module!r}" for _extra, module in missing)
+    noun = "extra" if len(extras) == 1 else "extras"
+    print(
+        _paint(f"  FAIL  {task.task_id:38s} needs the {', '.join(extras)} {noun}: {named}", _RED),
+        file=sys.stderr,
+    )
+    print(f"        install it with: {_install_line(extras)}", file=sys.stderr)
+    return 1
+
+
 def command_run(arguments: argparse.Namespace) -> int:
     """List what can be run, or run one of it. Non-zero means the task said so.
 
     Two exit codes are deliberately distinct: `2` is "no such task", which is a rejected
     argument, and `1` is "the task ran and failed", which is a result. Collapsing them would
     make a typo look like a broken study and a broken study look like a typo.
+
+    The requirement check runs before `runpy`, so a bare wheel is told which extra it lacks
+    instead of being handed a traceback from inside the study. V3-01: the wheel advertised
+    nineteen studies, four ran, and the other fifteen raised `ModuleNotFoundError` naming no
+    remedy while `run --list` said nothing about requirements.
     """
+    from quantrisk.experiments.registry import requirement_label, unsatisfied_requirements
+
     tasks = _registered_tasks()
     if arguments.list_tasks:
         for task in tasks:
-            print(f"  {task.task_id:32s} {task.module:58s} {task.artifact}")
-        print(f"{len(tasks)} registered tasks; run one with `quantrisk run <id> [--out DIR]`")
+            print(
+                f"  {task.task_id:32s} {task.module:58s} "
+                f"{requirement_label(task):9s} {task.artifact}"
+            )
+        print(
+            f"{len(tasks)} registered tasks; the third column is the extra each one needs beyond "
+            f"the base install; run one with `quantrisk run <id> [--out DIR]`"
+        )
         return 0
     if arguments.task is None:
         print(
@@ -452,6 +492,9 @@ def command_run(arguments: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 2
+    missing = unsatisfied_requirements(wanted)
+    if missing:
+        return _refuse_unsatisfied(wanted, missing)
     argv = [wanted.module]
     if arguments.out is not None:
         argv += ["--out", str(arguments.out)]

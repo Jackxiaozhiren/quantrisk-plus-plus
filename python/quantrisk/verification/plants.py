@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 490 tests collected offline",
+        anchor="# 491 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -419,7 +419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 559 pytest tests with the validation",
+        anchor="and 560 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 183/183 planted defects rejected",
+        anchor="# 184/184 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -693,7 +693,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 490 collected without them",
+        anchor="oracles installed, 491 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -818,7 +818,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 559 pytest tests with the `oracles` extra here",
+        anchor="# 560 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -2630,6 +2630,32 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim=(
             "every command the prompt calls a CI lane is run by a lane, so the evidence chain is "
             "gated on the runner rather than on whoever remembers to type it locally"
+        ),
+    ),
+    Mutation(
+        identifier="registry-declares-a-study-that-needs-no-plot",
+        kind="prose",
+        path="python/quantrisk/experiments/registry.py",
+        anchor=(
+            '        "pricing_grid",\n'
+            '        "pricing_validation",\n'
+            '        "summary.json",\n'
+            '        requires=frozenset({"plot"}),'
+        ),
+        replacement=(
+            '        "pricing_grid",\n'
+            '        "pricing_validation",\n'
+            '        "summary.json",\n'
+            "        requires=frozenset(),"
+        ),
+        guard=(
+            "tests/python/test_task_registry_parity.py::"
+            "test_the_registry_declared_requirements_match_their_import_trees"
+        ),
+        claim=(
+            "the declaration is compared with the task's own import tree in both directions, so a "
+            "study that under-declares the figure dependency reddens here instead of shipping a "
+            "wheel that advertises it and then fails inside the study naming no remedy"
         ),
     ),
 )

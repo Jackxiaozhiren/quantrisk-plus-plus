@@ -251,3 +251,99 @@ three. This entry is committed before any source file is touched, which is the o
 **Owner per row, as §9 asks.** All three rows: this session, at the maintainer's direction. Priced locks
 expected: K6 only (the widened list, with its own guard updated in the same commit), and K2 not at all —
 `sixth_book_crossing_map`'s artifact path stays where it is.
+
+---
+
+### 2026-11-02, V3-01 fixed — the registry declares what each task needs, and a wheel that lacks it says so
+
+**One finding, one commit.** V2-24 carried into V3 as V3-01: nineteen tasks advertised, four runnable from a
+wheel, and fifteen failures naming no remedy. This commit adds the declaration, the widened `run --list` (K6's
+priced contract change), the preemptive refusal, the guard that re-derives the declaration from each task's
+import tree, one plant, and the three documents that described the old three-column list.
+
+**What the declaration is, and what it is not.** `Task.requires` is a `frozenset` of names drawn from
+`[project.optional-dependencies]`, and `EXTRA_MODULES` maps each extra to the modules it installs.
+`requirement_label` prints `base` rather than a blank column, because the one column that exists to stop a
+silent failure must not itself be able to look unmeasured. The semantic is *what reproduces the published
+artifact*, not *what exits 0*: a study whose figure degrades to `not generated (matplotlib unavailable)` still
+declares `plot`, because the committed artifact holds a PNG a bare run cannot produce. That decision was
+priced in the Phase 1 entry and is unchanged here.
+
+**The derivation, measured before it was written.** The corrected walker follows every `quantrisk.*` import
+into the package at any nesting depth, and the two probes disagree in a way that mattered: `restrike_gamma_map`,
+`fourth_order_crossing_map` and `two_factor_error_bound` import cleanly with matplotlib blocked and fail later,
+so an import-time-only walker under-declares by three. The measured table, 19 rows:
+
+| extras | count | tasks |
+|---|---|---|
+| `plot` only | 12 | `pricing_grid`, `mc_convergence`, `variance_reduction`, `portfolio_estimation_cost`, `linearisation_error_bound`, `two_factor_error_bound`, `stress_testing`, `restrike_gamma_map`, `fourth_order_crossing_map`, `second_book_crossing_map`, `fifth_order_crossing_map`, `sixth_book_crossing_map` |
+| `oracles` only | 4 | `pricing_vs_quantlib`, `monte_carlo_vs_analytic`, `path_dependent_vs_quantlib`, `optimisation_vs_oracles` |
+| `plot` and `oracles` | 2 | `var_backtesting`, `real_data_risk_study` |
+| `base` | 1 | `mc_speed` |
+
+**Correction to the Phase 1 entry's table.** That entry listed `real_data_risk_study` under `oracles` only.
+The measurement above says `plot` as well: the task reaches matplotlib through a guarded figure call the first
+walker did not follow, and the package's own `quantrisk.plotting` is where most of these studies meet it. The
+Phase 1 table is left as written — superseded in date order — and this line is the supersession.
+
+**The guard, and what makes it able to disagree.** `test_the_registry_declared_requirements_match_their_import_trees`
+reads each task's module, follows `import`, `from … import …` and relative imports with the package anchor
+computed from the file's own position, and compares the resulting extra set with the declaration in
+**both** directions: an over-declaration would ask a reader to install what the task never touches, an
+under-declaration is V2-24 itself. A third comparison keeps the mapping honest: any non-stdlib root the walk
+reaches that is neither a base dependency from `pyproject.toml` nor named by an extra is refused, so a new
+import cannot slip in unclassified. Both sides are printed for all nineteen tasks on every run.
+
+**The installed-surface reading, taken on a wheel built from this tree and installed outside the checkout.**
+Identity first, because the number means nothing without it: `quantrisk.__file__` =
+`/private/tmp/v3-01-venv/lib/python3.12/site-packages/quantrisk/__init__.py`, `sys.prefix` =
+`/private/tmp/v3-01-venv`, checkout path absent, version `1.9.0`. Then every id `run --list` printed, from
+`/tmp/v3-01-neutral`:
+
+- **1 ran**: `mc_speed`, the one task declaring `base`, writing
+  `benchmarks/performance/results/monte_carlo_speed.json` and exiting 0.
+- **18 refused**, each naming its declared extras, the absent modules and the install line, each exiting 1:
+  `needs the plot extra: No module named 'matplotlib'` / `install it with: pip install 'quantrisk[plot]'`,
+  and for the two-extra tasks `needs the oracles, plot extras: …` / `pip install 'quantrisk[oracles,plot]'`.
+- **No refusal left anything behind**: `out-plot`, `out-or` and the eighteen `census/` roots do not exist
+  after the sweep; only the successful run's directory does.
+
+That is N2's first half measured in full — every advertised id either runs or names the extra it needs — and
+its second half is *not* claimed here: no environment with `plot` and `oracles` installed was built in this
+session, so "the declaration is sufficient to run each task" is unmeasured and belongs to the Phase 3
+acceptance or the runner's own `benchmark-suite` job, which already installs `oracles` and executes all
+nineteen.
+
+**The cascade this one case cost, paid in the same commit.** Adding a pytest case moves the counted pair and
+the plant count, exactly as §10 warns. Measured after the guard landed: 559 → **560** collected, the
+oracle-free probe 490 → **491**, the plant inventory 183 → **184**. That moved twenty-two quotations across
+`docs/reproducibility.md`, `docs/interview_defense.md`, `docs/limitations.md` and `paper/technical_report.tex`,
+re-keyed the three claim-inventory gold lists in `test_artifact_metadata.py`, and invalidated five existing
+plant anchors that pointed at the moved strings (`# 490 tests collected offline`, `and 559 pytest tests with
+the validation`, `# 183/183 planted defects rejected`, `oracles installed, 490 collected without them`,
+`# 559 pytest tests with the oracles extra here`) — all five re-keyed, and the anchor-uniqueness guard is what
+caught them. Editing the `.tex` also broke the report's PDF binding, so `tools.build_report` re-rendered it:
+6 sources, 1,005,924 bytes, `{"bundle": "b7f5ccc598b0", "pdf": "f06c296f6b6c"}`, and the three guards that
+compare the PDF with its source are green again.
+
+**Two instruments were retired rather than kept.** `tools/derive_requires.py` — the untracked script from the
+previous session, V3-04 — is deleted: `REPO_ROOT = Path(__file__).parents[2]` resolved to `/Users/jackson`, so
+it printed `base` for all nineteen tasks including the twelve that import matplotlib. A second measurement tool
+would also have violated §4.1, which asks for one collector; the derivation lives in the guard, where it can
+fail. `tools/verify_installed_surface`'s defaults moved with the contract: the study probe is now `mc_speed`
+(the only `base` task, and the only one a bare wheel can still run) and the refusal probe is `pricing_grid`
+(whose refusal is the new message rather than an accident of a missing fixture).
+
+**Environment caveat, marked rather than smoothed.** The full suite printed **559 passed, 1 failed** in 221 s.
+The failure is `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache`, and it is this
+sandbox: `uv run python -c "import sys; print(sys.dont_write_bytecode)"` prints `True` here, so the test's own
+control — a first import that must leave a `.pyc` beside the module — cannot hold. Nothing in this commit
+touches bytecode handling; the lane is **unverified on this machine**, not green, and CI is where it gets its
+reading. Everything else in the suite, `--check-ceilings` (184 declared plants, 19 registry sources, 8 keys at
+their ceiling, 2 declared SKIP), `ruff`, `ruff format` (230 files) and `mypy` (74 files) is green.
+
+**Not done, and why.** Fix #2 (V3-02, the `validate` step and the CLI-surface guard) and Fix #3 (V3-03, the
+runtime-reachability reading) are not started: §0's one-scope-unit rule and the size of this one's cascade put
+them past this session's boundary. The `oracles`-and-`plot` installed census is unmeasured, as above. No push
+has happened: §14 makes a push an outward action needing per-case approval, and the handoff's "push after each
+commit" is a plan, not that approval.

@@ -251,7 +251,7 @@ def test_cli_benchmark_reports_measured_numbers(capsys) -> None:
     assert "measured timings" in printed
 
 
-_RUN_ROW = re.compile(r"^  (\S+)\s+(\S+)\s+(\S+)$")
+_RUN_ROW = re.compile(r"^  (\S+)\s+(\S+)\s+(\S+)\s+(\S+)$")
 
 
 def _cli(argv: list[str], capsys) -> tuple[int, str, str]:
@@ -273,16 +273,29 @@ def test_cli_run_lists_every_registered_task_and_the_package_agrees(capsys) -> N
     `benchmarks/<suite>/<name>.py`. Neither side reads the other, so a registry entry whose module
     was never shipped and a shipped unit the registry forgot both fail here. That is the L5 parity
     question asked through the installed surface, where a missing entry would actually be felt.
+
+    The third column is V3's K6 widening: the extra a task needs beyond the base install. A row
+    without one would parse as three columns and fail the shape, which is the point -- the column
+    that exists to stop a silent failure must not be able to go missing silently.
     """
     code, printed, _err = _cli(["run", "--list"], capsys)
     assert code == 0
     listed = [
-        (match.group(1), match.group(2), match.group(3))
+        (match.group(1), match.group(2), match.group(3), match.group(4))
         for line in printed.splitlines()
         if (match := _RUN_ROW.match(line))
     ]
     assert len(listed) >= 19, f"only {len(listed)} rows parsed out of `run --list`"
     assert len(listed) == len({row[0] for row in listed}), "a task id is listed twice"
+    requirements = {row[0]: row[2] for row in listed}
+    assert set(requirements.values()) - {"base", "plot", "oracles", "oracles+plot"} == set(), (
+        f"`run --list` printed a requirement outside the two extras the manifest declares: "
+        f"{sorted(set(requirements.values()))}"
+    )
+    assert len(set(requirements.values())) > 1, (
+        "every task prints the same requirement, so the column would pass whether or not it was "
+        "measured: " + repr(sorted(set(requirements.values())))
+    )
 
     root = Path(cli.__file__).resolve().parents[2]
     package = root / "python" / "quantrisk"

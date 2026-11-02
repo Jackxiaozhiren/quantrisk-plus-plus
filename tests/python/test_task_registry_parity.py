@@ -9,8 +9,12 @@ nothing (§4.3: counters must not pass by absence).
 
 from __future__ import annotations
 
+import ast
 import importlib
+import re
 import subprocess
+import sys
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -245,3 +249,154 @@ def test_the_absorption_sequence_never_moves_a_study_before_its_dependencies() -
                 f"{task_id} loads {dependency} as a published sibling, so {dependency} must be "
                 "absorbed first"
             )
+
+
+# --- N1: the declared requirement set versus the import tree ------------------
+#
+# The registry's `requires` field is a literal a human writes, and a literal about code drifts the
+# moment the code changes: a study that starts importing `scipy` would keep saying `plot` and stay
+# green, which is the V2-27 shape (a declaration nothing compares with the artifact it declares).
+# The walk below is the comparison. It reads the task's module and follows every `quantrisk.*`
+# import into the package, so a dependency reached through a shared helper counts even though the
+# task never names it -- which is how `restrike_gamma_map` needs `matplotlib` while the word appears
+# in it only in a comment.
+
+PACKAGE = Path(__file__).resolve().parents[2] / "python" / "quantrisk"
+
+
+def _module_file(dotted: str) -> Path | None:
+    """The file a dotted module name resolves to inside this checkout, or None."""
+    base = PACKAGE.parent / Path(*dotted.split("."))
+    for candidate in (base / "__init__.py", base.with_suffix(".py"), base / "__main__.py"):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _package_of(dotted: str, path: Path) -> str:
+    """The package a file's relative imports are anchored to.
+
+    A package's `__init__.py` *is* the package; any other file is one level below it. Getting this
+    wrong by the one level that `__init__.py` differs by turns `from . import x` into an import of
+    the parent, which silently loses the matplotlib that most of these studies reach through
+    `quantrisk.plotting`.
+    """
+    return dotted if path.name == "__init__.py" else dotted.rsplit(".", 1)[0]
+
+
+def _targets(node: ast.ImportFrom, package: str) -> list[str]:
+    """Every module a `from ... import ...` can name, absolute and relative alike.
+
+    `from quantrisk import plotting` names two things: the package `quantrisk` and the module
+    `quantrisk.plotting`. Both are returned because only one of them may exist as a module, and
+    resolving the shorter one alone would miss the import that carries matplotlib.
+    """
+    if not node.level:
+        base = node.module or ""
+    else:
+        parts = package.split(".")[: len(package.split(".")) - (node.level - 1)]
+        base = ".".join([*parts, *(node.module.split(".") if node.module else [])])
+    if not base:
+        return []
+    return [base, *(f"{base}.{alias.name}" for alias in node.names)]
+
+
+def _walk(dotted: str, seen: set[str], roots: dict[str, set[str]], chain: tuple[str, ...]) -> None:
+    """Follow one module's imports, recording every non-`quantrisk` root it can reach."""
+    if dotted in seen:
+        return
+    path = _module_file(dotted)
+    if path is None:
+        return
+    seen.add(dotted)
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    package = _package_of(dotted, path)
+    names: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names.extend(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            names.extend(_targets(node, package))
+    for name in names:
+        root = name.split(".")[0]
+        if root == "quantrisk":
+            _walk(name, seen, roots, (*chain, name))
+        else:
+            roots.setdefault(root, set()).add("/".join(chain[-2:]))
+
+
+def _imported_roots(module: str) -> dict[str, set[str]]:
+    roots: dict[str, set[str]] = {}
+    _walk(module, set(), roots, (module,))
+    return roots
+
+
+def _base_dependency_roots() -> set[str]:
+    """What the wheel installs without any extra, read from the manifest rather than restated."""
+    manifest = tomllib.loads((Path(__file__).resolve().parents[2] / "pyproject.toml").read_text())
+    roots = {"_quantrisk"}  # the compiled extension ships in the wheel, not in `dependencies`
+    for requirement in manifest["project"]["dependencies"]:
+        name = re.split(r"[\s<>=!~\[]", requirement, maxsplit=1)[0]
+        roots.add(name.replace("-", "_"))
+    return roots
+
+
+def test_the_registry_declared_requirements_match_their_import_trees() -> None:
+    """N1, both directions: a task declares exactly the extras its own module tree imports.
+
+    The reading this replaces is V2-24's: fifteen of nineteen tasks failed from a wheel with no
+    remedy named, and the failure mode was silent because `run --list` advertised the study and
+    said nothing about what it needed. A one-directional guard would not have caught it either --
+    `requires: base` on every task is consistent with "no task declares an extra it does not use".
+    So the sets are compared symmetrically, and both sides are printed.
+    """
+    from quantrisk.experiments.registry import EXTRA_MODULES, TASKS, requirement_label
+
+    base_roots = _base_dependency_roots() | set(sys.stdlib_module_names)
+    extra_of = {module: extra for extra, modules in EXTRA_MODULES.items() for module in modules}
+    derived: dict[str, frozenset[str]] = {}
+    undeclared: dict[str, list[str]] = {}
+    for task in TASKS:
+        reached = _imported_roots(task.module)
+        assert reached, (
+            f"{task.task_id}: the walk found no import at all, so a comparison over it would be "
+            "vacuous -- the module may have moved without the registry noticing"
+        )
+        derived[task.task_id] = frozenset(extra_of[root] for root in reached if root in extra_of)
+        undeclared[task.task_id] = sorted(
+            root for root in reached if root not in extra_of and root not in base_roots
+        )
+
+    print(f"derived requirements for {len(derived)} tasks:")
+    for task in TASKS:
+        print(
+            f"  {task.task_id:32s} derived={sorted(derived[task.task_id]) or ['base']!s:24s} "
+            f"declared={requirement_label(task)}"
+        )
+    assert any(derived.values()), (
+        "no task's tree reaches any optional module, so the two comparisons below would both pass "
+        "by absence"
+    )
+    assert not any(undeclared.values()), (
+        "a task imports a module that neither the base dependencies nor a declared extra accounts "
+        f"for, so no install line could provide it: { {k: v for k, v in undeclared.items() if v} }"
+    )
+
+    over = {
+        task.task_id: sorted(task.requires - derived[task.task_id])
+        for task in TASKS
+        if task.requires - derived[task.task_id]
+    }
+    under = {
+        task.task_id: sorted(derived[task.task_id] - task.requires)
+        for task in TASKS
+        if derived[task.task_id] - task.requires
+    }
+    assert not over, (
+        "these tasks declare an extra their import tree never reaches, so the install line would "
+        f"ask for something they do not use: {over}"
+    )
+    assert not under, (
+        "these tasks need an extra they do not declare, which is the V2-24 failure: a wheel would "
+        f"run them and fail inside the study naming no remedy: {under}"
+    )

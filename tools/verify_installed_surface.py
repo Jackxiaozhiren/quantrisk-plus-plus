@@ -216,8 +216,14 @@ def main(argv: list[str]) -> int:
         help="environment root; defaults to the interpreter's grandparent, unsymlinked",
     )
     parser.add_argument("--work", type=Path, help="empty working directory outside the checkout")
-    parser.add_argument("--study", default="linearisation_error_bound")
-    parser.add_argument("--refusal", default="real_data_risk_study")
+    # V3-01 moved both defaults, and the reason is the probe's own subject. A bare wheel now
+    # refuses a task that declares an extra instead of running it with a degraded figure, so
+    # `linearisation_error_bound` -- which declares `plot` -- can no longer be the study that
+    # proves a wheel runs end to end; `mc_speed` declares `base` and is. The refusal probe moves
+    # the other way: `pricing_grid` declares `plot`, so its refusal is the new message rather than
+    # the accident of a fixture that happened to be missing.
+    parser.add_argument("--study", default="mc_speed")
+    parser.add_argument("--refusal", default="pricing_grid")
     parser.add_argument(
         "--self-test", action="store_true", help="prove the identity check can fail"
     )

@@ -36,12 +36,20 @@ uv run ctest --preset dev                # C++ suite
 uv run pytest tests/python -q            # Python suite
 uv run python -m tools.run_benchmark_suite --require-all
 uv run quantrisk validate                # seven identities against the build you just made
-uv run quantrisk run --list              # the studies the registry owns, with their artifacts
+uv run quantrisk run --list              # the studies the registry owns, with their extras and artifacts
 uv run python -m tools.verify_evidence_manifest
 ```
 
 `--require-all` on the suite is what makes the run mean something: without the `oracles` extra some
 members *skip*, and a green that skipped is a claim about a measurement that was not made.
+
+`quantrisk run --list` prints, per task, the extra its published artifact needs. That field is not
+typed twice: `registry.py` declares it and
+`test_the_registry_declared_requirements_match_their_import_trees` re-derives it from the task's own
+import tree, in both directions. A study that starts importing `scipy` therefore reddens the suite
+instead of shipping a wheel that advertises it and fails three frames into the run. Running a task
+without its extra refuses up front, naming the module and the install line — `pip install
+'quantrisk[plot]'` — rather than raising a traceback from inside the study.
 
 Local green is not evidence about the runner. CI is where a change is verified, and a job that passes
 here and fails there is the normal case on a project whose numerics depend on `libm`
