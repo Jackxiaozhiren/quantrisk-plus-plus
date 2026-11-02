@@ -410,3 +410,8 @@ line. No test-count movement: the guard was extended, not added, so the pair sta
 **What this does not prove yet.** The step has executed on no runner at the moment this entry is written; the
 commit that carries it is not pushed. Until a run reads it, the lane's own verdict is unknown, and this entry
 claims only what the local guard printed.
+
+**The sweep, on a clean tree after that commit.** `--only ci-lane-stops-validating-the-installed-cli`
+printed `caught` and `1/1 planted defects were rejected by their guard.`; the re-keyed
+`docs-command-comment-counts-superseded-plants` printed the same. Both claims therefore have a guard that
+fails without them, and the anchor this commit moved still points at a live defect.
