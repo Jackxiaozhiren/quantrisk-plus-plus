@@ -634,3 +634,136 @@ ok      external_dependencies_added: 0 against a ceiling of 0 due continuously
 `490 passed, 5 skipped`, `7/7 checks passed`, `19/19 executed and passed` — the counted pair did not move,
 because neither of the two fixes added a case. `ba09c20` shares this run with `fdad068` and is an ancestor of
 a green tip rather than an individually verified commit, the same attribution the earlier entries record.
+
+---
+
+## V3 Phase 5 — the report, and the archival confirmation
+
+**Revision and vantage.** `HEAD` = `origin/main` = `d502a61`, working tree clean, tag `v1.9.0` still at
+`d9deb7f` (read from the API when the git tunnel refused, and read again here), `evidence/manifest.json`
+verifying as **`Evidence is intact.`** with 95 entries. V3 opened at `79caa34`; **16 commits** carry it,
+`ed9db5a` being the Phase 0 baseline the series inherited.
+
+### 1. Evidence ledger
+
+| id | verdict | the probe that decided it | closing commit |
+|---|---|---|---|
+| V3-01 | **fixed** | `run --list` prints a requirement per task; a wheel installed outside the checkout runs 1 of 19 and refuses the other 18 naming the extra and the install line; the declaration is re-derived from each task's import tree in both directions | `6696059` |
+| V3-02 | **fixed** | `uv run quantrisk validate` is a CI step and printed `7/7 checks passed` on run `41459024242`; the guard compares the parser's four subcommands with the executed set in both directions | `999af8d` |
+| V3-03 | **fixed** | the census prints `ast_dead 13, import_reachable 13, pytest_collected 6, reached_by_neither 0` on this machine and identically on the runner; `runtime_reachability_gap` is a ceiling key | `676b7d3` |
+| V3-04 | **fixed by deletion** | the untracked `tools/derive_requires.py` resolved its root one directory too high and printed `base` for all nineteen tasks; deleted rather than repaired, because §4.1 asks for one collector | `6696059` |
+| V3-05 | **fixed** | three documents described a three-column list; re-derived to four columns in the same commit as the contract change | `6696059` |
+| V3-06 | **fixed** | Phase 4's third audit: `external_spend_usd` was the literal `0` in `metrics()`, a declaration nothing could disagree with; replaced by a dependency-set comparison whose reading is `{"added": [], "declared": 9, "measured": 9, "removed": []}` | `ba09c20` |
+
+### 2. The liveness table, final
+
+| # | law | state | the reading that decided it |
+|---|---|---|---|
+| N1 | requirement truth | **satisfied** | guard prints both sides for 19 tasks, both directions empty |
+| N2 | advertised surface honesty | **satisfied** | 1 ran / 18 refused on a bare wheel at this tip; `19/19 executed and passed` on the runner with both extras |
+| N3 | lane contract | **PARTIAL** | the `validate` row is satisfied and guarded; the contract file §5 asks for was never written |
+| N4 | no silence by count | **satisfied** | every producer names its corpus; the sweep's own line names the 182 and the 5 |
+| N5 | declarations are checkable | **satisfied for ceilings** | eleven rows, each with a comparison; the eleventh was V3-06 |
+| N6 | runtime reachability | **satisfied** | both instruments exist, their difference is printed, and the ceiling refuses a residual above zero |
+| N7 | plan equals log | **satisfied** | 13 commits enumerated, every one mapped, difference empty |
+| N8 | no gate weakened | **satisfied** | zero skip/xfail and zero tolerance movements across the range |
+| N9 | plant liveness | **VOID for the full-census form** | the sweep printed **182/187**; the five named exceptions pass 30/30 when run as the last thirty, and each passes alone. A single clean line was not obtained, and this row is not green |
+| N10 | one re-run | **not applicable** | no evidence category moved; the re-run stays unspent |
+| N11 | facts precedence | **satisfied** | `V3_PROMPT.md` was not edited this series, so its corpus is unchanged; the collector reading was re-run and agrees |
+| N12 | baseline purity, per-lane provenance | **satisfied with two named exceptions** | the table below |
+
+### 3. Ceilings final state — eleven keys
+
+`bootstrap_sites_outside_package 0`, `by_path_load_sites 0`, `commands_not_module_path 0`,
+`commands_unrunnable_from_the_root 0`, `external_dependencies_added 0`, `registry_parity_mismatch 0`,
+`runtime_reachability_gap 0`, `tracked_files_outside_the_formatter_corpus 0`,
+`tracked_python_files_in_no_static_check_bucket 0`; `installed_user_identity_mismatch` and
+`plants_not_rejected_by_their_guard` declared SKIP with their reasons and their verdicts in this ledger.
+
+**For the maintainer's review, three changes this series made to the policy asset rather than to code:** the
+`external_spend_usd` row became `external_dependencies_added` (V3-06, a metric that could not fail became one
+that can); `runtime_reachability_gap` was added with `max: 0` **and no `may_be_unmeasured`**, so a broken
+instrument fails the gate instead of skipping; and `by_path_load_sites`' note now says why a dynamic load is
+invisible to a static census. No ceiling was raised, no exemption was added, and the two SKIPs are the same two
+V2 declared.
+
+### 4. Deliberately not done
+
+1. **The refusal path has no pytest guard.** Its input is guarded (the declaration cannot drift); nothing would
+   redden if `command_run` stopped consulting it. Priced in the V3-01 entry, deferred to keep the counted pair
+   still twice in one series.
+2. **The lane-contract file does not exist.** §5 and N3 name it; V3 shipped the `validate` row of it inside a
+   guard instead of a contract a reader can open. This is the largest gap the series leaves.
+3. **The five full-census sweep failures are named, not diagnosed.** `tree-did-not-recover` for
+   `experiment-results-the-evidence-freeze-never-saw`, `project-adds-a-dependency-the-declaration-does-not-name`,
+   `reachability-reading-drops-one-of-its-instruments`, `ci-lane-stops-validating-the-installed-cli` and
+   `registry-declares-a-study-that-needs-no-plot`. They pass 30/30 as the last thirty plants and each passes
+   alone, so the failure lives in the long run's accumulated state rather than in the plants — but that is an
+   inference from two readings, not a cause, and it is recorded as an open question rather than a dismissal.
+4. **`tools/generate_shim_stubs.py` is reachable but nothing invokes it.** The runtime reading says it can be
+   imported, not that anything runs it; whether it should exist is a V4 question.
+5. **The `docs/` row of §5 ("the same five re-derived")** was paid only where a claim moved: three documents
+   that describe `run --list`, and the report PDF that quotes the test counts. The other documents were read
+   and their claims did not change, which this line records rather than claiming a re-derivation that did not
+   happen.
+
+### 5. Premises audit
+
+1. **The advertised surface is false for an installed user — CLOSED.** At `d502a61`, a wheel built from this
+   tree and installed outside the checkout gives `1 ran, 18 refused, 0 other`, and every refusal names the
+   modules, the extra and the install line; with `plot` and `oracles` present the runner executes all nineteen.
+   The residual is semantic, not silent: `plot` means "reproduce the published artifact", so a study whose
+   figure would degrade still refuses rather than under-producing. That is the K6 decision, priced in Phase 1.
+2. **Some gates execute nowhere the project names — CLOSED for the entry point, PARTIAL overall.** `validate`
+   ran through `[project.scripts]` on two runners. `benchmark` and `demo` are declared in-process-only with
+   reasons, which makes the omission a decision; the contract file that would hold that declaration for a
+   reader does not exist.
+3. **The audit instruments read source, not runtime — CLOSED for the census.** `runtime_reachability` gives the
+   runtime reading beside the `ast` verdict, and the ceilings gate refuses a residual. The other instruments
+   (`static_check_coverage`, `formatter_census`) read source because that is their subject; no claim of
+   liveness is made from them.
+
+### 6. Per-lane verification table
+
+| lane | revision | environment | reading |
+|---|---|---|---|
+| `ruff check` | `d502a61` | local, macOS, Python 3.12.14 | `All checks passed!` |
+| `ruff format --check` | `d502a61` | local | 230 files already formatted |
+| `mypy python/quantrisk tools` | `d502a61` | local | 74 source files, no issues |
+| clang-format | `d502a61` | runner `ubuntu-latest` | green in run `41841699451` |
+| `cmake --preset ci`, build, `ctest` | `d502a61` | runner | green in run `41841699451` |
+| `pytest` | `d502a61` | local | **559 passed, 1 failed** — the bytecode-cache plant, which this sandbox cannot run (`dont_write_bytecode`) |
+| `pytest` | `d502a61` | runner `ubuntu-latest` | `490 passed, 5 skipped` |
+| manifest verifier | `d502a61` | local | `Evidence is intact.` |
+| `--check-ceilings` | `d502a61` | local | 11 keys, 9 at their ceiling, 2 SKIP |
+| installed-surface proof | `d502a61` | `/tmp/v3-p5-venv`, outside the checkout | identity holds, list is the registry, `mc_speed` ran, `validate` 7/7, refusal named what it needed |
+| bare-wheel census, 19 tasks | `d502a61` | same venv, cwd `/tmp/v3-p5-neutral` | 1 ran, 18 refused, 0 other, 1 artifact |
+| mutation sweep | `d502a61` | local, clean tree | **182/187**; the five named in §4, passing 30/30 as the last thirty |
+
+Two lanes are marked rather than green: the local pytest lane, for the reason in its cell, and the sweep,
+because 182 is not 187.
+
+### 7. Series handoff — what V4 must contain
+
+1. **A lane contract as a file**, with `lanes_documented_vs_executed` as its reading, so N3 stops being a
+   clause inside a guard.
+2. **A mutation harness that can tell a crash from an objection.** `decide()` accepts any non-zero guard exit
+   as a rejection; the eleven `tree-did-not-recover` results in the first census were guards erroring on a
+   temp directory, not guards objecting. The same harness needs per-plant isolation that survives 187
+   consecutive runs — §4's open question is the entry point.
+3. **The with-extras installed census as its own reading**, rather than as a by-product of the benchmark job.
+4. **The refusal path's pytest guard**, whose absence is the one place this series left a mechanism unguarded.
+5. **The re-derivation of `docs/`** as a lane, not as three files that happened to quote a moved number.
+
+### 8. Archival confirmation
+
+- Tree clean at `d502a61`; `HEAD` equal to `origin/main` (read from the API when the tunnel refused).
+- Every commit the series created is an ancestor of that tip; **CI was read for each tip** — `41453407921`
+  (`7007f19`), `41459024242` (`0e8b900`), `41460928526` (`06ac057`), `41836020533` (`02bf7a9`),
+  `41837439249` (`efb8edd`), `41840394202` (`fdad068`), `41841699451` (`d502a61`) — all `success`. Commits that
+  shared a push with a tip are named as sharing it rather than credited individually.
+- Tag `v1.9.0` = `d9deb7f`, unmoved; no release asset replaced; `evidence/manifest.json` intact at 95 entries.
+- Registers, ledgers and documents re-counted against the artifacts they describe: 19 registry tasks, 187
+  plants, 11 ceiling keys, 95 manifest entries, 230 formatter-tracked files, 560/491 pytest nodes.
+- No stray instrument tracked: `tools/derive_requires.py` is deleted, and the two sweep wrappers live only in
+  the gitignored `build/` tree.
