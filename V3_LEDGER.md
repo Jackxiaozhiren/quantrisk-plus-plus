@@ -619,3 +619,18 @@ is a scope unit this session did not open.
 `caught` and `1/1 planted defects were rejected by their guard.`, and the re-keyed
 `docs-command-comment-counts-superseded-plants` printed the same. The declaration now has a defect that fires
 its guard, which is what separates a policy row from a comment.
+
+**Run `41840394202`, event `push`, tip `fdad068`, `completed success`.** Four jobs green, and the two readings
+this session added are both in the lint job's output, on a runner, at this tip:
+
+```
+runtime_reachability     {"ast_dead": 13, "available": true, "import_reachable": 13,
+                          "pytest_collected": 6, "reached_by_neither": 0}
+external_dependencies    {"added": [], "declared": 9, "measured": 9, "removed": []}
+ok      runtime_reachability_gap: 0 against a ceiling of 0 due V3 Phase 3 item 3
+ok      external_dependencies_added: 0 against a ceiling of 0 due continuously
+```
+
+`490 passed, 5 skipped`, `7/7 checks passed`, `19/19 executed and passed` — the counted pair did not move,
+because neither of the two fixes added a case. `ba09c20` shares this run with `fdad068` and is an ancestor of
+a green tip rather than an individually verified commit, the same attribution the earlier entries record.
