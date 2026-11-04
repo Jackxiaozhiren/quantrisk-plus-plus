@@ -538,3 +538,21 @@ the git-over-HTTPS tunnel rather than a credential or a permission. The pushes w
 inheritance and this line is the reason a later session must not assume otherwise. Everything they claim was
 measured locally: the census reading, both deflections, the plant sweep, the full suite at `559 passed, 1
 failed` (the bytecode plant this sandbox cannot run), and the ceilings gate at eleven keys.
+
+**Run `41836020533`, event `push`, tip `02bf7a9`, `completed success`.** Four jobs green. The readings that
+matter, and why each is a different claim from the local ones:
+
+- **The lint job printed the new reading, and it is the same reading this machine produced.**
+  `runtime_reachability {"ast_dead": 13, "available": true, "import_reachable": 13, "pytest_collected": 6,
+  "reached_by_neither": 0}`, followed by `ok runtime_reachability_gap: 0 against a ceiling of 0 due V3 Phase 3
+  item 3`. Two operating systems, two interpreter builds, one answer: the instrument is not measuring this
+  laptop. That is the property a census needs and the one V2-05 lacked.
+- **`490 passed, 5 skipped in 156.46s`** — unchanged from the previous run, which is the point: V3-03 extended a
+  guard's loop and added no case, so the counted pair did not move.
+- **`7/7 checks passed`** and **`19/19 executed and passed`** — the two V3-02/V3-01 readings hold at this tip as
+  well, so the three fixes compose rather than merely coexist.
+
+**What this run does not cover.** `676b7d3` and `15e09e0` reached the remote in the same push as `02bf7a9` and
+share its single run; they are ancestors of a green tip, not individually verified. The push itself is now part
+of the record: two transport failures on 2026-11-02 (`CONNECT tunnel failed, response 502`, then `Error in the
+HTTP2 framing layer`), retried on 2026-11-04 and accepted on the first attempt, `06ac057..02bf7a9`.
