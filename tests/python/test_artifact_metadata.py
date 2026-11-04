@@ -6515,6 +6515,30 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
         f"deletion decision would be acting on one reading: {reading['reached_by_neither']}"
     )
 
+    # L12's row was the last declaration in the policy file with nothing that could disagree with
+    # it: `external_spend_usd: 0` was a literal the collector returned, so a budget was asserted by
+    # one file and echoed by the other. Phase 4's third audit found it, and the comparison that can
+    # fail is the dependency set -- the only way this lane adds external spend without a network
+    # call. Both directions are asserted, because a name the declaration keeps and the manifest has
+    # dropped is the same defect wearing the other coat.
+    spend = census.external_dependencies()
+    print(
+        f"dependencies measured {len(spend['measured'])}; declared {len(spend['declared'])}; "
+        f"added {spend['added']}; removed {spend['removed']}"
+    )
+    assert spend["measured"], "pyproject.toml declares no dependency, so this comparison is vacuous"
+    assert spend["declared"], (
+        "the ceilings row carries no declared dependency set, so it would agree with anything"
+    )
+    assert not spend["added"], (
+        "a dependency the policy file does not name is external spend by another route, and "
+        f"nothing would have priced it: {spend['added']}"
+    )
+    assert not spend["removed"], (
+        "the ceilings row still declares dependencies the manifest no longer carries, so the "
+        f"declaration describes a distribution that is not this one: {spend['removed']}"
+    )
+
     # V3-02, the same divorce from the other side: the CLI is the surface a wheel actually ships,
     # and the workflow executed exactly one of its subcommands (`run --list`). `validate` was
     # pinned only in process, through a digest test that calls `cli.main(["validate"])` -- which is

@@ -556,3 +556,61 @@ matter, and why each is a different claim from the local ones:
 share its single run; they are ancestors of a green tip, not individually verified. The push itself is now part
 of the record: two transport failures on 2026-11-02 (`CONNECT tunnel failed, response 502`, then `Error in the
 HTTP2 framing layer`), retried on 2026-11-04 and accepted on the first attempt, `06ac057..02bf7a9`.
+
+---
+
+### 2026-11-04, V3 Phase 4 — three audits, one finding, and the declaration that was a literal
+
+**Audit 1, plan versus log.** The approved plan was three rows (V3-01, V3-02, V3-03). `git log
+--oneline 79caa34..HEAD` enumerates **13** commits, and every one maps to a registered finding or a named step:
+
+| commit | maps to |
+|---|---|
+| `4e85539` | V2 close-out addendum, carried into the range by the opening commit |
+| `ed9db5a` | Phase 0 |
+| `87207d4` | Phase 1 (five findings, K6 decision) |
+| `6696059`, `1501bde`, `7007f19` | V3-01 |
+| `999af8d`, `0e8b900` | V3-02 |
+| `676b7d3`, `15e09e0`, `02bf7a9`, `efb8edd` | V3-03 |
+| `06ac057` | the CI-record entry |
+
+Difference: **empty**. No approved row went unexecuted, and no commit is an orphan. All five Phase 1 findings
+are closed: V3-01, V3-02, V3-03 by the fixes above; V3-04 by deleting the broken instrument rather than
+repairing it; V3-05 by re-deriving the three documents that described the old three-column list.
+
+**Audit 2, diff-shaped laws.** Two of the twelve have predicates over a range, and both were run at this tip:
+
+- **N7** — the table above, produced by comparing the approved rows with `git log`, not by memory.
+- **N8** — `git diff 79caa34..HEAD` over `tests/` and `pyproject.toml`: 270 added lines, 8 removed, and
+  **zero** added or removed `pytest.mark.skip` / `xfail` / `skipif` markers, **zero** tolerance-shaped
+  constants (`tol=`, `atol=`, `rtol=`) added or removed. The suite got a new case and two extended guards; it
+  did not lose a comparison.
+- **N10** is not applicable and is recorded as such rather than as satisfied: `git diff --stat 79caa34..HEAD --
+  evidence/ experiments/ benchmarks/` is empty, so no evidence category moved and the single re-run stays
+  unspent.
+
+**Audit 3, declarations versus measurements — and the finding it produced.** Every row in
+`tools/refactor_ceilings.json` was walked for a comparison that can disagree with it. Ten had one: eight are
+computed by the collector from the tree and gated by `--check-ceilings`, two are declared SKIP with their
+verdicts in this ledger, and two of the eight also carry a pytest guard. The eleventh did not.
+
+**V3-06.** `external_spend_usd` was `"external_spend_usd": 0` in `metrics()` — a literal the collector returned,
+compared with a `max` of 0 that it could never exceed. A policy file asserting a budget and an instrument
+echoing it: V2-27's shape exactly, in the one row whose whole purpose is to prove nothing was bought. The row
+is replaced by `external_dependencies_added`, which set-differences pyproject's runtime and optional dependency
+names against a `declared_dependencies` list in the same file, both directions, with `max: 0`. The measured set
+is nine names and the declared set is the same nine, so the reading is
+`{"added": [], "declared": 9, "measured": 9, "removed": []}`. The paid-call half of L12 has no static detector
+and is named as a ledger reading rather than dressed as a number. A guard clause asserts both directions, and
+the plant `project-adds-a-dependency-the-declaration-does-not-name` adds `requests` to the manifest to prove
+the clause can fire.
+
+**The liveness table after Phase 4.** N1, N2, N4, N5, N6, N7, N8 satisfied by readings taken in this session;
+N3 satisfied for the `validate` row and open for the lane-contract file §5 describes, which V3 has not written;
+N9 **partial** — the eight plants this series added or re-keyed were run by id and fired, but the full sweep
+over 187 plants is Phase 5 work; N10 not applicable, as above; N11 and N12 hold, with N12's per-lane table
+still to be assembled.
+
+**Deliberately not done.** The full plant sweep; the refusal path's pytest guard (priced in the V3-01 entry);
+the lane-contract file; and Phase 5's report, per-lane table and archival confirmation. None is blocked — each
+is a scope unit this session did not open.

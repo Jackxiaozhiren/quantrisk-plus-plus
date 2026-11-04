@@ -173,14 +173,26 @@
       "may_be_unmeasured": true
     },
     {
-      "key": "external_spend_usd",
+      "key": "external_dependencies_added",
       "law": "L12",
-      "metric": "total paid external spend attributable to this lane",
-      "measured_at_baseline": 0,
+      "metric": "dependency names in pyproject.toml that the declared set below does not name, plus the declared names the manifest no longer carries",
+      "measured_at_baseline": null,
+      "baseline_note": "the row was `external_spend_usd` and its value was the literal 0 returned by the collector -- a budget asserted by a policy file and echoed by the instrument, with nothing that could disagree. Phase 4's third audit found it; this row replaces it with the comparison.",
       "max": 0,
       "reach_by_phase": "continuously",
-      "corpus": "diff of pyproject.toml dependency sections over the refactor range, plus the count of network calls with a price",
-      "can_fail_because": "a new dependency or a paid API call moves it; the only priced call in the repository, a FRED fetch, is not in scope",
+      "corpus": "pyproject.toml [project].dependencies and every [project.optional-dependencies] group, read with tomllib and set-differenced against `declared_dependencies` here; [dependency-groups].dev is excluded by name as tooling rather than runtime need. The paid-call half of L12 has no static detector -- the only priced call the repository has, a FRED fetch, is out of scope -- so it stays a ledger reading rather than a number in this row.",
+      "can_fail_because": "the measured set is the same nine names the declaration holds, so the difference is empty today; adding `requests` to [project].dependencies, or removing a name the declaration still claims, makes it non-zero and the gate reddens. The plant `project-adds-a-dependency-the-declaration-does-not-name` proves the guard fires.",
+      "declared_dependencies": [
+        "PyPortfolioOpt",
+        "QuantLib",
+        "cvxpy",
+        "matplotlib",
+        "numpy",
+        "pandas",
+        "scikit-learn",
+        "scipy",
+        "statsmodels"
+      ],
       "exemptions": []
     }
   ],

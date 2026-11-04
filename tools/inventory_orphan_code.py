@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tomllib
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
@@ -691,6 +692,50 @@ def runtime_reachability(dead: list[str]) -> dict[str, Any]:
     }
 
 
+def external_dependencies() -> dict[str, Any]:
+    """The runtime and optional dependency sets, against the names the ceilings file declares.
+
+    L12's row used to report `external_spend_usd: 0` as a literal: a policy file asserting a budget
+    and a collector returning the number it was told to return. Phase 4's third audit found it --
+    the one shape this repository names as its own (V2-27, a declaration nobody compares) -- and the
+    comparison that can disagree is the dependency set. A new package is the only way a refactor
+    adds external spend without a network call, and the paid-call half has no static detector at
+    all, so it stays a ledger reading rather than a number here.
+
+    The dev group is excluded by name: `pytest`, `ruff`, `mypy`, `cmake`, `ninja`, `clang-format`,
+    `pybind11`, `scipy`, `matplotlib`, `sympy` and `pyyaml` are instruments this lane runs, not
+    runtime dependencies of the distribution, and counting them would make every tooling addition
+    look like spend.
+    """
+    manifest = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    declared = set(
+        next(
+            row
+            for row in json.loads(CEILINGS_PATH.read_text(encoding="utf-8"))["ceilings"]
+            if row["key"] == "external_dependencies_added"
+        )["declared_dependencies"]
+    )
+    measured: set[str] = set()
+    for requirement in manifest["project"]["dependencies"]:
+        measured.add(re.split(r"[\s<>=!~\[]", requirement, maxsplit=1)[0])
+    for group in (manifest["project"].get("optional-dependencies") or {}).values():
+        for requirement in group:
+            measured.add(re.split(r"[\s<>=!~\[]", requirement, maxsplit=1)[0])
+    return {
+        "measured": sorted(measured),
+        "declared": sorted(declared),
+        "added": sorted(measured - declared),
+        "removed": sorted(declared - measured),
+        "corpus": (
+            "pyproject.toml [project].dependencies and every "
+            "[project.optional-dependencies] group, set-differenced against this key's "
+            "declared_dependencies; [dependency-groups].dev is excluded by name as tooling "
+            "rather than runtime need"
+        ),
+        "probe": "tomllib.loads(pyproject.toml) against tools/refactor_ceilings.json",
+    }
+
+
 def _is_runnable_unit(path: str) -> bool:
     """A file that can be run, in either the root layout or the package layout."""
     if path.startswith("experiments/"):
@@ -830,6 +875,13 @@ def build_snapshot() -> dict[str, Any]:
                 "value": registry_parity(),
             },
             {
+                "name": "external_dependencies",
+                "command": (
+                    "tomllib.loads(pyproject.toml) against the declared set in the ceilings file"
+                ),
+                "value": external_dependencies(),
+            },
+            {
                 "name": "plant_liveness",
                 "command": "python python/quantrisk/verification/runner.py --list",
                 "value": plant_liveness(),
@@ -858,6 +910,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
     formatter = by_name["formatter_census"]
     parity = by_name["registry_parity"]
     reachability = by_name["runtime_reachability"]
+    dependencies = by_name["external_dependencies"]
     return {
         "bootstrap_sites_outside_package": len(by_name["bootstrap_census"]),
         "by_path_load_sites": len(by_name["by_path_load_sites"]),
@@ -877,7 +930,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
         else len(reachability["reached_by_neither"]),
         "plants_not_rejected_by_their_guard": None,
         "installed_user_identity_mismatch": None,
-        "external_spend_usd": 0,
+        "external_dependencies_added": len(dependencies["added"]) + len(dependencies["removed"]),
     }
 
 
@@ -929,6 +982,13 @@ def summarize(snapshot: dict[str, Any]) -> None:
                 "import_reachable": len(value["import_reachable"]),
                 "pytest_collected": len(value["pytest_collected"]),
                 "reached_by_neither": len(value["reached_by_neither"]),
+            }
+        elif isinstance(value, dict) and "added" in value:
+            shown = {
+                "measured": len(value["measured"]),
+                "declared": len(value["declared"]),
+                "added": value["added"],
+                "removed": value["removed"],
             }
         elif isinstance(value, list):
             shown = f"{len(value)} sites"
