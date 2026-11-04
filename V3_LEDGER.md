@@ -614,3 +614,8 @@ still to be assembled.
 **Deliberately not done.** The full plant sweep; the refusal path's pytest guard (priced in the V3-01 entry);
 the lane-contract file; and Phase 5's report, per-lane table and archival confirmation. None is blocked — each
 is a scope unit this session did not open.
+
+**The sweep, after that commit.** `--only project-adds-a-dependency-the-declaration-does-not-name` printed
+`caught` and `1/1 planted defects were rejected by their guard.`, and the re-keyed
+`docs-command-comment-counts-superseded-plants` printed the same. The declaration now has a defect that fires
+its guard, which is what separates a policy row from a comment.
