@@ -332,3 +332,34 @@ runner decides.
 **The push, and how its CI reading is recorded.** This entry is committed after the implementation commit and
 pushed with it. The CI reading for the pushed tip is appended in the next entry once `gh` reports it; the
 ledger never states an outcome before the tool does.
+
+### 2026-11-06, V4-02 — the runner read the new verdict, and the tip is green
+
+**The push.** `git push origin main` accepted on the first attempt, `4c2b144..adf9918`, carrying
+`d06f998` (Phase 0 entry), `501dd3e` (implementation) and `adf9918` (the readings entry).
+
+**Run `42061987436`, event `push`, tip `adf9918`, attempt 1, `completed success`** at
+`2026-11-05T16:19:33Z`. Four jobs, all `success`:
+
+| lane | runner | window (UTC) | reading |
+|---|---|---|---|
+| Format and static checks | `ubuntu-latest` / `GitHub Actions 1000010099` | 16:11:36–16:12:50 | `232 files already formatted`; `74 source files`, no issues; 12 keys, 10 `ok`, 2 `SKIP`; `lanes_documented_vs_executed_gap: 0`; `Evidence is intact.` |
+| Configure, build, C++ tests, Python tests | `ubuntu-latest` / `GitHub Actions 1000010101` | 16:11:36–16:19:32 | `100% tests passed out of 204`; **`490 passed, 5 skipped in 232.77s`**; `7/7 checks passed` |
+| Benchmark suite against live oracles | `ubuntu-latest` / `GitHub Actions 1000010100` | 16:11:36–16:18:46 | `19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 272.9s total` |
+| macOS native C++ and Python parity | `macos-15` / `GitHub Actions 1000010102` | 16:11:52–16:15:29 | `100% tests passed out of 204`; `98 passed in 3.27s` |
+
+**The count that mattered did not move.** `490 passed, 5 skipped` is identical to the readings at `8ffcb32`
+and at V3's `41858982944`/`d502a61`. The new assertions live inside an existing test, so the counted pair is
+still 560/491 and no gold list, plant anchor or report PDF had to move for this unit.
+
+**One caveat, unchanged and still not diagnosed.** The benchmark summary prints
+`revision: adf9918abfd2 (working tree was dirty at run time)` for the third consecutive run. It is the same
+line V3 §9 named; this unit neither explains it nor cites any number from that job's generated artifacts.
+
+**Archival state after the push.** Local `HEAD` = `origin/main` =
+`adf9918abfd219d6cbf5eb578e9ae3cbb22f13b4`; `git status --porcelain` printed 0 lines; `v1.9.0` = `d9deb7f`,
+unmoved; `evidence/manifest.json` intact at 95 entries and re-verified by the lint job.
+
+**The terminal commit.** This entry is itself a commit; its own CI is read after the push and reported in the
+session handoff rather than written into the file whose content is fixed before that push, the same convention
+V2, V3 and V4-01 used.
