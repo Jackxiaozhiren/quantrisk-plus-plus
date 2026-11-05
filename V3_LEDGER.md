@@ -767,3 +767,65 @@ because 182 is not 187.
   plants, 11 ceiling keys, 95 manifest entries, 230 formatter-tracked files, 560/491 pytest nodes.
 - No stray instrument tracked: `tools/derive_requires.py` is deleted, and the two sweep wrappers live only in
   the gitignored `build/` tree.
+
+### 9. 2026-11-05, post-report addendum — the CI reading for the report commit
+
+**The gap this closes.** §8 was written at the vantage of `d502a61`, before the report commit existed. Its list
+of seven successful runs therefore does not name the report commit `487bd19` itself. §16 item 8 asks for a CI
+read for every commit in the range, and §15.5 forbids reading a cancelled run as green. This addendum is written
+after the push, from tool readings only; it changes no source, lock, artifact, guard or policy asset.
+
+**The approval for this case, recorded verbatim (§14).** The instruction that continued the session was
+`继续`; the decision for this specific addendum and its push was `补记并推送（推荐）`. The push below is that
+case and no other.
+
+**Run `41858982944`, event `push`, head_sha `487bd19afa1d`, three attempts.**
+
+| attempt | macOS native C++ and Python parity | the three ubuntu jobs | run conclusion |
+|---|---|---|---|
+| 1 | `cancelled`, 0 steps, `runner_name` empty, label `macos-15` | `success` | `failure` |
+| 2, `gh run rerun --failed` | `cancelled`, 0 steps, `runner_name` empty | the same three `success` jobs carried forward | `failure` |
+| 3, `gh run rerun --failed` | `success`, 14 steps, runner `GitHub Actions 1000009905`, label `macos-15` | the same three `success` jobs carried forward | `success`, updated `2026-11-05T05:12:27Z` |
+
+The two cancelled attempts are named as cancelled and credited with nothing: the job never received a runner and
+executed no step. The macOS lane's verification belongs to attempt 3, produced `2026-11-05T05:08:46Z` to
+`05:12:27Z` on `macos-15`; the three ubuntu lanes belong to attempt 1, produced `2026-11-04T15:33:33Z` to
+`15:41:14Z` on `ubuntu-latest` runners `1000009857`, `1000009858` and `1000009859`. That is the attribution
+§16 item 8 asks for, rather than one green line for a run that did not execute all four jobs in one attempt.
+
+**The four readings at this tip.**
+
+| lane | runner / attempt | what the log printed |
+|---|---|---|
+| Format and static checks | `ubuntu-latest` / 1 | `All checks passed!`; `230 files already formatted`; `Success: no issues found in 74 source files`; `runtime_reachability {"ast_dead": 13, "import_reachable": 13, "pytest_collected": 6, "reached_by_neither": 0}`; `external_dependencies {"added": [], "declared": 9, "measured": 9, "removed": []}`; 11 ceiling keys, 9 `ok` and 2 `SKIP`; `Evidence is intact.` |
+| Configure, build, C++ tests, Python tests | `ubuntu-latest` / 1 | `100% tests passed out of 204`; `490 passed, 5 skipped in 124.44s`; `7/7 checks passed` |
+| Benchmark suite against live oracles | `ubuntu-latest` / 1 | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 287.2s total` |
+| macOS native C++ and Python parity | `macos-15` / 3 | `100% tests passed out of 204`; `98 passed in 3.08s` |
+
+**One caveat the report did not name, recorded rather than explained.** The benchmark job's own summary at this
+tip prints `revision: 487bd19afa1d (working tree was dirty at run time)`, `Because the tree was dirty, these
+artifacts describe uncommitted work.` and `Re-run on a clean tree before citing them.` The condition is emitted
+by `tools/run_benchmark_suite.py:952` when `working_tree_dirty` is set. Its cause was not diagnosed in this
+session and is not asserted here. The `19/19` line above is a count of executions, not a scientific figure from
+that run, and no number from the job's generated artifacts is cited in this ledger.
+
+**Archival re-check at `487bd19`, read after the retry.** `v1.9.0` = `d9deb7f`, unmoved; local `HEAD` =
+`origin/main` = `487bd19afa1dd1d684d19ad29d04498b76aa0ecf` (the remote value read from the API); `git status
+--porcelain` printed 0 lines before this edit. `evidence/manifest.json` was verified on the runner by the lint
+job's `Evidence is intact.` No tag moved and no published asset was replaced.
+
+**The local gates at this edit, and one transient they caught.** `ruff check .` → `All checks passed!`;
+`ruff format --check .` → `230 files already formatted`; `mypy python/quantrisk tools` → `Success: no issues
+found in 74 source files`; `--check-ceilings` → 11 keys, 9 `ok`, 2 `SKIP`; `verify_evidence_manifest` →
+`Evidence is intact.`. The first ceilings reading instead printed
+`VIOLATION tracked_files_outside_the_formatter_corpus: 1`, because the agent-local
+`.workbuddy/memory/2026-11-05.md` is an untracked `.md` that the formatter walks while `git ls-files` does not
+name it — the case `formatter_census()`'s docstring describes as "any file neither tracked nor ignored". That
+directory was then made ignored in `.git/info/exclude`, a local untracked configuration rather than a repository
+file, and the same gate printed `0`. No ceiling moved, no file joined the tracked corpus, and the runner never
+has that path. `git status --short` at the commit shows this one modified file.
+
+**Scope.** This is a post-series process commit, not a fourteenth V3 fix: §7's thirteen-commit enumeration and
+N7's plan-versus-log comparison are readings of the V3 range that closed at `487bd19` and are unchanged. This
+commit's own CI is read after the push and reported in the handoff rather than written into the file whose
+content is fixed before that push — the same terminal-commit convention V2's close-out used.
