@@ -224,3 +224,49 @@ entries and re-verified by the lint job.
 session handoff rather than written into the file whose content is fixed before that push — the same
 terminal-commit convention V2 and V3 used, named here so a reader does not mistake the absence for an
 unread run.
+
+### 2026-11-06, V4 Phase 0 for V4-02 — `decide()` cannot tell a crash from an objection
+
+**The reading that decides the finding.** `quantrisk.verification.runner.decide()` is a pure function of
+eight steps. Called with every other step satisfied and only the guard's exit code varied, it prints:
+
+```
+rc 0 -> no-guard-objected
+rc 1 -> caught
+rc 2 -> caught
+rc 3 -> caught
+rc 4 -> caught
+rc 5 -> caught
+```
+
+pytest's documented meanings are `0` all passed, `1` tests failed, `2` interrupted, `3` internal error, `4`
+usage error, `5` no tests collected. Four of those five non-zero codes are the harness failing to run the
+guard, not the guard rejecting the defect — and `decide()` scores all four as `caught`. V3 §7 item 2 named
+this and V3 §4 recorded eleven `tree-did-not-recover` results from the first census; the second half of that
+item (per-plant isolation across 187 consecutive runs) is **not** this unit.
+
+**The principle already exists one function away, which is why this is a defect rather than a design choice.**
+`Harness.module_failures()` carries the table in its own docstring: "0 is everything passed and 1 is some
+tests failed, while 2, 3, 4 and 5 are collection, internal, usage and no-tests-collected errors. Folding
+those into an empty failing set would report a broken run as a plant that escaped every guard, which is the
+confusion this instrument exists to remove." The pairing audit applies it; `decide()` — the function the
+default sweep uses — does not. The fix is therefore to apply an existing rule, not to invent one.
+
+**What the unit will and will not change.** It adds one outcome for "the guard process errored without
+objecting", keeps pytest `1` as the only objection code, leaves CTest's non-zero convention alone (its
+failures and its usage errors are not separable from the exit code alone, and the `green_again` step already
+catches a CTest that errors on both trees), extends the existing status-table test rather than adding a case
+(the counted pair stays 560/491), and adds one plant whose mutation removes the new branch. It does **not**
+add per-plant isolation, does not diagnose the five full-census failures, and does not re-run N9.
+
+**A named observation, deliberately not fixed here.** `runner.py` assigns `ESCAPED` twice: line 84
+`"guard-stayed-green"` and line 93 `"no-guard-objected"`, the pairing audit's vocabulary reusing the sweep's
+name. The module-level value is therefore the second one, while `docs/interview_defense.md` line 873 still
+tells the reader a guard that cannot see a defect comes back `guard-stayed-green`. Repairing it changes a
+verdict string that dated phase reports quote, so it needs its own unit and its own guard; recording it here
+is this unit's obligation under "no silence", and fixing it is not.
+
+**The approval for this case, recorded verbatim (§14).** The maintainer's instruction is
+`我都听你的，请按照你的思路建议进行`, given after the V4-01 handoff proposed this unit by name. As with
+V4-01, that is a direction to choose and execute one scope unit, not a standing approval for every outward
+action: this unit takes **one** push, attributed below, and no second one is implied.
