@@ -68,3 +68,82 @@ console subcommands in `docs/reproducibility.md` + `CONTRIBUTING.md`, against th
 - executed but documented nowhere: `tools.inventory_orphan_code` — the ceilings gate V3 added to the lint job
   without a line in either document. It is repaired by declaring the command in `docs/reproducibility.md`, not
   by deleting the step or by widening the contract to excuse it.
+
+### 2026-11-05, V4-01 — the lane contract is a file, and its reading has two sides
+
+**What shipped.** `.github/lane_contract.md` (new): eight rows — five `executed`, three `dev-only`, the latter
+with reasons. `lanes_documented_vs_executed()` in `tools/inventory_orphan_code.py`: one reading, both
+enumerations printed, every mismatch class named. `lanes_documented_vs_executed_gap` in
+`tools/refactor_ceilings.json`: `max 0`, **no `may_be_unmeasured`**, so an instrument that reads nothing fails
+the gate instead of skipping. The existing pytest guard
+`test_the_ci_lane_that_runs_the_guards_fetches_what_they_read` was **extended**, not duplicated, so the counted
+pair did not move. One plant added and one anchor re-keyed. `docs/reproducibility.md` gained the one command
+line that was executing in CI with no document claiming it; `docs/interview_defense.md` moved `187/187` to
+`188/188`.
+
+**The reading at this commit**, printed by `uv run --frozen python -c "…lanes_documented_vs_executed()"`:
+
+```
+documented 8: quantrisk run, quantrisk validate, quantrisk.verification.runner,
+             tools.build_evidence_manifest, tools.build_report, tools.inventory_orphan_code,
+             tools.run_benchmark_suite, tools.verify_evidence_manifest
+executed   5: quantrisk run, quantrisk validate, tools.inventory_orphan_code,
+             tools.run_benchmark_suite, tools.verify_evidence_manifest
+documented_not_executed 3: quantrisk.verification.runner, tools.build_evidence_manifest, tools.build_report
+executed_not_documented 0
+undeclared 0; declared_not_present 0; status_mismatch 0; dev_only_without_reason 0;
+ci_reference_mismatch 0; claimed_by_mismatch 0; duplicate_rows 0; gap 0
+```
+
+Each of the five executed rows names the pair the parsed workflow actually contains: `build-and-test ::
+study-catalogue`, `build-and-test :: Validate installed CLI`, `lint :: refactor ceilings`,
+`benchmark-suite :: Run every benchmark and experiment`, `lint :: evidence manifest`. The reading is not a
+count of rows: a row whose pair is absent lands in `ci_reference_mismatch`, and a command in either enumeration
+with no row lands in `undeclared`.
+
+**The plant, and the neighbours it did not disturb.** `lane-contract-claims-a-step-the-workflow-dropped`
+replaces the evidence-manifest step's `run:` line with `true`; the guard then reads a contract that claims a
+step the workflow no longer contains. Sweep at `d5408f4`, clean tree:
+
+```
+caught  lane-contract-claims-a-step-the-workflow-dropped
+1/1 planted defects were rejected by their guard.
+```
+
+Because the guard was extended, the three plants that already target it were re-run rather than assumed:
+`docs-command-comment-counts-superseded-plants` (its anchor moved to `188/188`),
+`ci-lane-stops-validating-the-installed-cli`, and `reachability-reading-drops-one-of-its-instruments` printed
+`3/3 planted defects were rejected by their guard.` on the same clean tree.
+
+**Counts that moved, and the one that did not.**
+
+| quantity | before | after | why |
+|---|---|---|---|
+| declared plants | 187 | 188 | the new plant; one anchor re-keyed in the same commit |
+| ceiling keys | 11 | 12 | `lanes_documented_vs_executed_gap`, `max 0`, no `may_be_unmeasured` |
+| formatter-tracked files | 230 | 232 | `V4_LEDGER.md` and `.github/lane_contract.md`; both sides equal, difference 0 |
+| pytest nodes | 560 / 491 | **560 / 491** | the guard was extended; `--collect-only` printed `560`, the offline probe `491` |
+
+**Local gates at `d5408f4`.** `ruff check .` → `All checks passed!`; `ruff format --check .` → `232 files
+already formatted`; `mypy python/quantrisk tools` → `74 source files`, no issues; `--check-ceilings` → 12 keys,
+10 `ok`, 2 `SKIP`; `verify_evidence_manifest` → `Evidence is intact.`; `pytest -q` → **559 passed, 1 failed**,
+the bytecode-cache plant this sandbox cannot run (`sys.dont_write_bytecode`), the same single failure V3
+recorded. The runner's reading is the one that decides that lane.
+
+**Deliberately not done, and why each is named rather than omitted.**
+
+1. **The full mutation sweep was not re-run.** N9 remains VOID for the full-census form from V3 (182/187), and
+   this unit proves its own plant and the three neighbours its guard touches, not 188. Re-running the census
+   would spend the N9 question without changing it.
+2. **Gaps 2–5 are untouched**: `decide()` still cannot distinguish a crash from an objection, the with-extras
+   census is still a by-product, the refusal path still has no pytest guard, and `docs/` is still not a lane.
+3. **The report PDF was not re-rendered.** `paper/technical_report.tex` quotes `560` and `491`, neither moved;
+   it does not quote the plant count, the ceiling-key count or the formatter count. Re-rendering without a
+   source change would rewrite a byte-only artifact for nothing.
+4. **`quantrisk benchmark` and `quantrisk demo` are not contract rows.** They are declared in-process-only in the
+   guard, with reasons; no document claims them as a lane and no step invokes them. The contract's prose says
+   so, which keeps the row set equal to the two enumerations rather than to every subcommand that exists.
+
+**The push, and how its CI reading is recorded.** This entry is committed after the implementation commit and
+pushed with it. The CI reading for the pushed tip is appended in the next entry once `gh` reports it; the
+ledger never states an outcome before the tool does.
