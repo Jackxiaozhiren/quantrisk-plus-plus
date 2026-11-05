@@ -31,6 +31,12 @@ STATIC_CHECK_KEY = "tracked_python_files_in_no_static_check_bucket"
 FORMATTER_KEY = "tracked_files_outside_the_formatter_corpus"
 MANIFEST_PATH = REPO_ROOT / "evidence" / "manifest.json"
 PREFIXES = ("uv run --frozen python ", "uv run python ", "python ")
+LANE_CONTRACT_PATH = REPO_ROOT / ".github" / "lane_contract.md"
+LANE_DOCUMENTS = ("docs/reproducibility.md", "CONTRIBUTING.md")
+CI_WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+LANE_COMMAND = re.compile(
+    r"-m\s+((?:tools|quantrisk)\.[\w.]+)|\bquantrisk\s+(validate|benchmark|demo|run)\b"
+)
 
 
 def git(*args: str) -> str:
@@ -810,6 +816,153 @@ def excluded_top_levels(corpus: list[str]) -> list[str]:
     return [name for name in dirs if name not in named]
 
 
+def _lane_commands(text: str) -> set[str]:
+    return {
+        match.group(1) or f"quantrisk {match.group(2)}" for match in LANE_COMMAND.finditer(text)
+    }
+
+
+def _lane_unavailable(reason: str) -> dict[str, Any]:
+    """A reading that measured nothing is a failure, not a zero (§9, N4)."""
+    return {
+        "available": False,
+        "unavailable_because": reason,
+        "documented": [],
+        "documented_by_file": {},
+        "executed": [],
+        "executed_at": {},
+        "declared": [],
+        "documented_not_executed": [],
+        "executed_not_documented": [],
+        "undeclared": [],
+        "declared_not_present": [],
+        "status_mismatch": [],
+        "dev_only_without_reason": [],
+        "ci_reference_mismatch": [],
+        "claimed_by_mismatch": [],
+        "duplicate_rows": [],
+        "gap": None,
+    }
+
+
+def lanes_documented_vs_executed() -> dict[str, Any]:
+    """The contract's two enumerations, and every way the declaration can disagree with them.
+
+    N3 asks for a contract file, both enumerations printed, and a reason on every dev-only gate.
+    V2-28 is the failure this replaces: a command sat in a document's "these are the CI lanes"
+    block for a whole series while no lane executed it. The reverse is equally silent -- V3 added
+    `tools.inventory_orphan_code` to the lint job without a line in either document -- so both
+    directions are refused rather than one being forgiven. A row naming a `ci_job` / `ci_step`
+    pair the parsed workflow does not contain is a claim about a step that does not exist. The
+    controls at the top refuse to certify an empty corpus as a green reading.
+    """
+    documented_by_file = {
+        name: _lane_commands((REPO_ROOT / name).read_text(encoding="utf-8"))
+        for name in LANE_DOCUMENTS
+    }
+    documented: set[str] = set().union(*documented_by_file.values())
+    workflow = yaml.safe_load(CI_WORKFLOW_PATH.read_text(encoding="utf-8"))
+    steps: list[tuple[str, str, str]] = []
+    for job_name, job in sorted((workflow.get("jobs") or {}).items()):
+        for step in job.get("steps") or []:
+            run = step.get("run")
+            if isinstance(run, str):
+                steps.append((job_name, str(step.get("name", "")), run))
+    executed: set[str] = set().union(*(_lane_commands(run) for _, _, run in steps))
+    executed_at = {
+        command: sorted(
+            {f"{job} :: {name}" for job, name, run in steps if command in _lane_commands(run)}
+        )
+        for command in executed
+    }
+    if not documented or not executed or not steps:
+        return _lane_unavailable(
+            "a lane enumeration is empty, so the comparison would agree with anything"
+        )
+
+    contract_text = LANE_CONTRACT_PATH.read_text(encoding="utf-8")
+    block = re.search(r"```json\n(.*?)\n```", contract_text, re.S)
+    if not block:
+        return _lane_unavailable("the contract carries no machine-readable json block")
+    try:
+        rows = json.loads(block.group(1)).get("lanes") or []
+    except json.JSONDecodeError as error:
+        return _lane_unavailable(f"the contract's json block does not parse: {error}")
+    commands = [row.get("command") for row in rows]
+    if not rows or any(not isinstance(command, str) or not command for command in commands):
+        return _lane_unavailable("the contract declares no lane, or a row has no command")
+    declared = set(commands)
+    duplicates = sorted(command for command in declared if commands.count(command) > 1)
+    by_command = {row["command"]: row for row in rows}
+
+    status_mismatch: list[str] = []
+    no_reason: list[str] = []
+    bad_reference: list[str] = []
+    bad_claim: list[str] = []
+    for command, row in sorted(by_command.items()):
+        status = row.get("status")
+        if status not in {"executed", "dev-only"}:
+            status_mismatch.append(command)
+            continue
+        actual_claims = {name for name, found in documented_by_file.items() if command in found}
+        if set(row.get("claimed_by") or []) != actual_claims:
+            bad_claim.append(command)
+        if status == "executed":
+            if command not in executed:
+                status_mismatch.append(command)
+            reference = f"{row.get('ci_job')} :: {row.get('ci_step')}"
+            if reference not in executed_at.get(command, []):
+                bad_reference.append(command)
+        else:
+            if command in executed:
+                status_mismatch.append(command)
+            if not str(row.get("reason") or "").strip():
+                no_reason.append(command)
+            if row.get("ci_job") is not None or row.get("ci_step") is not None:
+                bad_reference.append(command)
+
+    documented_not_executed = sorted(documented - executed)
+    executed_not_documented = sorted(executed - documented)
+    undeclared = sorted((documented | executed) - declared)
+    declared_not_present = sorted(declared - (documented | executed))
+    gap = sum(
+        len(group)
+        for group in (
+            undeclared,
+            declared_not_present,
+            status_mismatch,
+            no_reason,
+            bad_reference,
+            bad_claim,
+            duplicates,
+            executed_not_documented,
+        )
+    )
+    return {
+        "available": True,
+        "unavailable_because": "",
+        "documented": sorted(documented),
+        "documented_by_file": {name: sorted(found) for name, found in documented_by_file.items()},
+        "executed": sorted(executed),
+        "executed_at": executed_at,
+        "declared": sorted(declared),
+        "documented_not_executed": documented_not_executed,
+        "executed_not_documented": executed_not_documented,
+        "undeclared": undeclared,
+        "declared_not_present": declared_not_present,
+        "status_mismatch": sorted(status_mismatch),
+        "dev_only_without_reason": sorted(no_reason),
+        "ci_reference_mismatch": sorted(bad_reference),
+        "claimed_by_mismatch": sorted(bad_claim),
+        "duplicate_rows": duplicates,
+        "gap": gap,
+        "command": (
+            "the lane contract's json block, the two lane-bearing documents and every "
+            "run: line of .github/workflows/ci.yml, each enumeration printed"
+        ),
+    }
+
+
 def build_snapshot() -> dict[str, Any]:
     all_python = tracked(("*.py", "*.pyi"))
     corpus = [path for path in all_python if path.endswith(".py")]
@@ -886,6 +1039,14 @@ def build_snapshot() -> dict[str, Any]:
                 "command": "python python/quantrisk/verification/runner.py --list",
                 "value": plant_liveness(),
             },
+            {
+                "name": "lanes_documented_vs_executed",
+                "command": (
+                    "the lane contract's json block against the two lane-bearing documents and "
+                    "every run: line of .github/workflows/ci.yml"
+                ),
+                "value": lanes_documented_vs_executed(),
+            },
         ],
     }
 
@@ -911,6 +1072,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
     parity = by_name["registry_parity"]
     reachability = by_name["runtime_reachability"]
     dependencies = by_name["external_dependencies"]
+    lanes = by_name["lanes_documented_vs_executed"]
     return {
         "bootstrap_sites_outside_package": len(by_name["bootstrap_census"]),
         "by_path_load_sites": len(by_name["by_path_load_sites"]),
@@ -931,6 +1093,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
         "plants_not_rejected_by_their_guard": None,
         "installed_user_identity_mismatch": None,
         "external_dependencies_added": len(dependencies["added"]) + len(dependencies["removed"]),
+        "lanes_documented_vs_executed_gap": None if not lanes["available"] else lanes["gap"],
     }
 
 

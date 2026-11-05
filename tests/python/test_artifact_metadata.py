@@ -6585,6 +6585,41 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
             "exemption outlived the command it excused"
         )
 
+    # N3 / V4-01, the contract one level above both comparisons. V3 shipped the `validate` row
+    # inside this guard instead of in a file a reader could open, and closed with N3 PARTIAL. The
+    # contract now declares every lane with the job and step that execute it, or with a reason for
+    # staying dev-only. Both enumerations are printed, so a corpus that shrank to nothing cannot be
+    # certified as agreement; and the comparison is two-sided, because V3 added the ceilings gate
+    # to the lint job without a line in either lane-bearing document. A row whose status says
+    # `executed` while the workflow has dropped that step is exactly the plant this clause rejects.
+    lanes = census.lanes_documented_vs_executed()
+    print(
+        f"lane contract declares {lanes['declared']}; documents claim {lanes['documented']}; "
+        f"the workflow executes {lanes['executed']}"
+    )
+    assert lanes["available"], lanes["unavailable_because"]
+    assert lanes["documented"] and lanes["executed"] and lanes["declared"], (
+        "one of the two enumerations or the declaration is empty, so this clause would agree "
+        "with anything"
+    )
+    for field in (
+        "undeclared",
+        "declared_not_present",
+        "status_mismatch",
+        "dev_only_without_reason",
+        "ci_reference_mismatch",
+        "claimed_by_mismatch",
+        "duplicate_rows",
+        "executed_not_documented",
+    ):
+        assert not lanes[field], (
+            f"the lane contract disagrees with the tree on {field}: {lanes[field]}"
+        )
+    assert lanes["documented_not_executed"], (
+        "no documented gate is dev-only, so the reason half of the contract checks nothing"
+    )
+    assert lanes["gap"] == 0, f"the lane contract's gap is {lanes['gap']}, above its ceiling of 0"
+
 
 _CITATION = re.compile(r"\\src(?:in)?\{([^{}]*)\}")
 _CITATION_DEFINITION = re.compile(r"\\newcommand\{\\src")

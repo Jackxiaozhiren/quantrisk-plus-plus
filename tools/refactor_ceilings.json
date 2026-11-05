@@ -194,6 +194,18 @@
         "statsmodels"
       ],
       "exemptions": []
+    },
+    {
+      "key": "lanes_documented_vs_executed_gap",
+      "law": "N3",
+      "metric": "the sum of the named disagreements between the lane contract's declaration and the two enumerations it is measured against: commands with no row, rows with no command in either enumeration, status/reference/claim mismatches, dev-only rows with no reason, duplicate rows, and commands the workflow runs that neither document claims",
+      "measured_at_baseline": null,
+      "baseline_note": "no contract file existed at the Phase 0 baseline, so no figure is claimed there. V3 Phase 5 recorded N3 as PARTIAL for exactly this absence, and §4 called it the largest gap the series left.",
+      "max": 0,
+      "reach_by_phase": "V4-01",
+      "corpus": "the json block of .github/lane_contract.md, the module-path and console invocations in docs/reproducibility.md and CONTRIBUTING.md, and every run: line of .github/workflows/ci.yml parsed as YAML. Both enumerations, their two differences, and each mismatch class are printed by name; a dev-only row must not appear in the executed set and must carry a non-empty reason; an executed row must name the job and step that actually contain the command.",
+      "can_fail_because": "a command the documents claim but no lane runs is allowed only as a declared dev-only row with a reason, and a command the workflow runs without either document claiming it is a defect in the other direction. Dropping a claimed CI step, changing a row's status to executed without a step, removing a reason, or editing a claimed_by list makes the sum non-zero. The plant that proves it removes a claimed step from ci.yml. An instrument that reads no document, no step or no contract row returns unavailable rather than zero, and this row carries no may_be_unmeasured, so the gate fails instead of skipping.",
+      "exemptions": []
     }
   ],
   "notes": [

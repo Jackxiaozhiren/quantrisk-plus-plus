@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 187/187 planted defects rejected",
+        anchor="# 188/188 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2701,6 +2701,22 @@ MUTATIONS: tuple[Mutation, ...] = (
             "the declaration is compared with the task's own import tree in both directions, so a "
             "study that under-declares the figure dependency reddens here instead of shipping a "
             "wheel that advertises it and then fails inside the study naming no remedy"
+        ),
+    ),
+    Mutation(
+        identifier="lane-contract-claims-a-step-the-workflow-dropped",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor="        run: uv run python -m tools.verify_evidence_manifest",
+        replacement="        run: true",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read"
+        ),
+        claim=(
+            "the lane contract declares the evidence-manifest verifier as executed by a named job "
+            "and step; dropping that step leaves the declaration claiming a gate no run performs, "
+            "which is N3's own failure and the reason the contract is a file rather than a clause"
         ),
     ),
 )

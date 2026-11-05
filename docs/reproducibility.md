@@ -37,6 +37,7 @@ tree was dirty at the time, and the full build and package environment.
 ```bash
 uv run python -m tools.build_evidence_manifest    # write the manifest
 uv run python -m tools.verify_evidence_manifest   # check the tree against it
+uv run python -m tools.inventory_orphan_code --check-ceilings   # the policy gate; CI runs this one too
 ```
 
 `verify` reports `OK`, `VOLATILE`, `CHANGED`, `MISSING` and unlisted-but-present separately, and
