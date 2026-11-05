@@ -178,3 +178,49 @@ are consistent there and the local `.git/info/exclude` was not hiding a tracked-
 showed the collector failing closed when `ruff` is absent from both the clone's `.venv` and `PATH`
 (`AssertionError: … the census has no instrument`) rather than reporting zero, which is the behaviour the new
 ceiling key depends on.
+
+### 2026-11-05, V4-01 — the runner read the contract, and the tip is green
+
+**The push.** The transport recovered at 23:10: `git ls-remote origin -h refs/heads/main` answered and
+`curl https://github.com` returned `200`. `git push origin main` was then accepted on the first attempt,
+`9e0bf03..8ffcb32`. The two earlier `502` failures and the read-only probe that confirmed them stay recorded
+above rather than being erased by the success.
+
+**Run `42052330523`, event `push`, tip `8ffcb32`, attempt 1, `completed success`** at
+`2026-11-05T15:21:28Z`. Four jobs, all `success`, each on its own runner:
+
+| lane | runner | window (UTC) | reading |
+|---|---|---|---|
+| Format and static checks | `ubuntu-latest` / `GitHub Actions 1000010048` | 15:10:57–15:11:53 | `All checks passed!`; `232 files already formatted`; `74 source files`, no issues; 12 ceiling keys, 10 `ok`, 2 `SKIP`; `Evidence is intact.` |
+| Configure, build, C++ tests, Python tests | `ubuntu-latest` / `GitHub Actions 1000010049` | 15:10:57–15:18:37 | `100% tests passed out of 204`; `490 passed, 5 skipped in 231.99s`; `7/7 checks passed` |
+| Benchmark suite against live oracles | `ubuntu-latest` / `GitHub Actions 1000010047` | 15:10:57–15:21:27 | `19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 407.1s total` |
+| macOS native C++ and Python parity | `macos-15` / `GitHub Actions 1000010050` | 15:11:46–15:14:51 | `100% tests passed out of 204`; `98 passed in 2.48s` |
+
+**The new reading, on a runner rather than on this laptop.** The lint job printed
+`lanes_documented_vs_executed {"available": true, …, "gap": 0, "unavailable_because": ""}` followed by
+`ok      lanes_documented_vs_executed_gap: 0 against a ceiling of 0 due V4-01`. Its `executed_at` map names the
+same five pairs the local reading named — `build-and-test :: study-catalogue`,
+`build-and-test :: Validate installed CLI`, `lint :: refactor ceilings`,
+`benchmark-suite :: Run every benchmark and experiment`, `lint :: evidence manifest` — and
+`documented_by_file` resolves the same two documents. Two operating systems, two interpreters, one answer:
+the contract describes the workflow, not this checkout.
+
+**The counted pair did not move on the runner either.** `490 passed, 5 skipped` is identical to V3's reading
+in `41858982944` (`d502a61`), which is the fact the "extend the guard, do not add a case" decision was made
+for. A V4 unit that had added a test would have printed 491 here and moved three gold lists, five plant
+anchors and the report PDF for one assertion.
+
+**One caveat, repeated rather than newly found.** The benchmark summary again prints
+`revision: 8ffcb32c23e1 (working tree was dirty at run time)` and "Re-run on a clean tree before citing them."
+V3 §9 named the same line at `487bd19` and did not diagnose it; this entry does not claim a cause either. The
+`19/19` line is a count of executions, and no number from that job's generated artifacts is cited in this
+ledger.
+
+**Archival state after the push.** Local `HEAD` = `origin/main` = `8ffcb32c23e10a3ad8e30fd364f4250baaaab643`;
+`git status --porcelain` printed 0 lines; `v1.9.0` = `d9deb7f`, unmoved; `evidence/manifest.json` intact at 95
+entries and re-verified by the lint job.
+
+**The terminal commit.** This entry is itself a commit. Its own CI is read after the push and reported in the
+session handoff rather than written into the file whose content is fixed before that push — the same
+terminal-commit convention V2 and V3 used, named here so a reader does not mistake the absence for an
+unread run.
