@@ -144,6 +144,18 @@ recorded. The runner's reading is the one that decides that lane.
    guard, with reasons; no document claims them as a lane and no step invokes them. The contract's prose says
    so, which keeps the row set equal to the two enumerations rather than to every subcommand that exists.
 
-**The push, and how its CI reading is recorded.** This entry is committed after the implementation commit and
-pushed with it. The CI reading for the pushed tip is appended in the next entry once `gh` reports it; the
-ledger never states an outcome before the tool does.
+**The push that did not happen.** `0b84a51`, `d5408f4` and `0a72b61` are local only. Two `git push origin
+main` attempts failed at the transport, both with `CONNECT tunnel failed, response 502`. The failure is not
+credentials or permission: `gh api rate_limit` answered on the same machine with 4990 requests remaining, and a
+read-only `git ls-remote origin -h refs/heads/main` failed with the identical 502, so the git-over-HTTPS tunnel
+is what is down. The push was not attempted a third time. `origin/main` stands at `9e0bf03`, and these three
+commits have **no runner verdict** — they are not green by inheritance, and this paragraph is the reason a later
+session must not assume otherwise.
+
+Everything those commits claim was measured locally, on a clean tree, at `d5408f4` / `0a72b61`: the lane
+reading at `gap 0` with all eight mismatch classes empty and both enumerations printed; the new plant `caught`
+`1/1` and the three plants its guard already owned `3/3`; `--check-ceilings` at 12 keys, 10 `ok`, 2 `SKIP`;
+`232` formatter files on both sides with a difference of `0`; `560` collected and `491` offline; `Evidence is
+intact.`; and the suite at `559 passed, 1 failed` — the bytecode-cache plant this sandbox cannot run, which is
+the one lane only the runner can decide. **The CI reading for these commits is unknown, not green**, and the
+next session's first act is to read it after the transport recovers rather than to re-run the work.
