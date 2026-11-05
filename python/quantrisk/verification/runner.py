@@ -81,6 +81,7 @@ ANCHOR_NOT_UNIQUE = "anchor-not-unique"
 NO_OP = "mutation-was-a-no-op"
 BUILD_FAILED = "mutation-did-not-compile"
 GUARD_NOT_RUN = "guard-could-not-be-run"
+GUARD_ERRORED = "guard-errored-without-objecting"
 ESCAPED = "guard-stayed-green"
 NOT_RESTORED = "restore-mismatch"
 NOT_GREEN_AGAIN = "tree-did-not-recover"
@@ -122,10 +123,21 @@ def decide(
     build_ok: bool,
     guard_ran: bool,
     guard_returncode: int,
+    guard_protocol: str = "pytest",
     restored: bool,
     green_again: bool,
 ) -> str:
-    """Which step of the proof failed, if any. A catch requires all of them to hold, in order."""
+    """Which step of the proof failed, if any. A catch requires all of them to hold, in order.
+
+    The guard's exit code is not one signal. pytest's table is `0` all passed, `1` tests failed,
+    and `2`/`3`/`4`/`5` interrupted, internal error, usage error and no-tests-collected — four ways
+    for the guard to fail to *run* rather than to object. `module_failures()` already refuses to
+    fold those into "some tests failed"; this function is the other consumer of the same code, and
+    until V4-02 it scored every non-zero value as a rejection, so a guard that could not load its
+    module was tallied as a caught defect. CTest keeps the coarser convention on purpose: its exit
+    code does not separate a failing case from a usage error, and a guard that errors on both the
+    mutated and the restored tree is already refused by `green_again`.
+    """
     if not anchor_ok:
         return ANCHOR_NOT_UNIQUE
     if not probe_free:
@@ -138,6 +150,8 @@ def decide(
         return GUARD_NOT_RUN
     if guard_returncode == 0:
         return ESCAPED
+    if guard_protocol == "pytest" and guard_returncode != 1:
+        return GUARD_ERRORED
     if not restored:
         return NOT_RESTORED
     if not green_again:
@@ -365,6 +379,7 @@ def run_one_probe(mutation: Mutation, harness: Harness) -> dict[str, str]:
             build_ok=True,
             guard_ran=guard_ran,
             guard_returncode=guard_returncode,
+            guard_protocol="pytest",
             restored=restored,
             green_again=green_again,
         ),
@@ -414,6 +429,7 @@ def run_one(mutation: Mutation, harness: Harness) -> dict[str, str]:
             build_ok=build_ok,
             guard_ran=guard_ran,
             guard_returncode=guard_returncode,
+            guard_protocol="ctest" if mutation.kind == "core" else "pytest",
             restored=restored,
             green_again=green_again,
         ),

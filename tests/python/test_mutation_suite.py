@@ -370,6 +370,27 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired() -> No
         harness.decide(**{**cycle, "restored": False, "green_again": False}) == harness.NOT_RESTORED
     )
 
+    # V4-02. pytest's table is 0 all passed, 1 tests failed, and 2/3/4/5 interrupted, internal
+    # error, usage error and no-tests-collected. Only `1` is the guard objecting; the other four are
+    # the guard failing to run, and before this clause every one of them was scored `caught` -- the
+    # same folding `module_failures()` refuses one function away. CTest keeps the coarse convention:
+    # its exit code carries no finer reading, so a non-zero code is still an objection provided the
+    # tree recovered and the same guard passes again.
+    for code in (2, 3, 4, 5):
+        assert harness.decide(**{**cycle, "guard_returncode": code}) == harness.GUARD_ERRORED, (
+            f"pytest exit {code} is not an objection, and must not be counted as one"
+        )
+    assert (
+        harness.decide(**{**cycle, "guard_protocol": "ctest", "guard_returncode": 1})
+        == harness.CAUGHT
+    ), "CTest's exit code is not pytest's table; a non-zero code there is still an objection"
+    assert (
+        harness.decide(
+            **{**cycle, "guard_protocol": "ctest", "guard_returncode": 1, "green_again": False}
+        )
+        == harness.NOT_GREEN_AGAIN
+    ), "a CTest that fails on the restored tree too is not evidence about the mutation"
+
 
 def test_the_selected_mutations_resolve_by_kind_and_identifier(capsys) -> None:
     """`--only` and `--kind` are how an operator runs one case, so they must resolve exactly.

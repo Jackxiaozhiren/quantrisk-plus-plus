@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 188/188 planted defects rejected",
+        anchor="# 189/189 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2717,6 +2717,21 @@ MUTATIONS: tuple[Mutation, ...] = (
             "the lane contract declares the evidence-manifest verifier as executed by a named job "
             "and step; dropping that step leaves the declaration claiming a gate no run performs, "
             "which is N3's own failure and the reason the contract is a file rather than a clause"
+        ),
+    ),
+    Mutation(
+        identifier="pytest-error-code-is-counted-as-an-objection",
+        kind="prose",
+        path="python/quantrisk/verification/runner.py",
+        anchor='    if guard_protocol == "pytest" and guard_returncode != 1:',
+        replacement='    if guard_protocol == "pytest" and guard_returncode == 0:',
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_status_table_only_calls_a_case_caught_when_every_step_fired"
+        ),
+        claim=(
+            "a guard process that errors before it can object -- pytest's 2, 3, 4 and 5 -- has its "
+            "own verdict, so a sweep cannot tally a guard that never ran as a caught defect"
         ),
     ),
 )
