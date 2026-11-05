@@ -270,3 +270,65 @@ is this unit's obligation under "no silence", and fixing it is not.
 `我都听你的，请按照你的思路建议进行`, given after the V4-01 handoff proposed this unit by name. As with
 V4-01, that is a direction to choose and execute one scope unit, not a standing approval for every outward
 action: this unit takes **one** push, attributed below, and no second one is implied.
+
+### 2026-11-06, V4-02 — a guard that errors before it objects is its own verdict
+
+**What shipped.** `GUARD_ERRORED = "guard-errored-without-objecting"` in `runner.py`;
+`decide()` gains `guard_protocol` and applies pytest's own table (`1` is the only objection code, `2`–`5` are
+the guard failing to run); `run_one()` passes `"ctest"` for core plants and `"pytest"` otherwise;
+`run_one_probe()` passes `"pytest"` explicitly. The status-table test was **extended**, not duplicated. One
+plant was added and one anchor re-keyed.
+
+**The reading after the change**, same call shape as the Phase 0 reading:
+
+```
+pytest rc 0 -> no-guard-objected
+pytest rc 1 -> caught
+pytest rc 2 -> guard-errored-without-objecting
+pytest rc 3 -> guard-errored-without-objecting
+pytest rc 4 -> guard-errored-without-objecting
+pytest rc 5 -> guard-errored-without-objecting
+ctest  rc 1 -> caught
+```
+
+**The plant, and the anchor it moved.** `pytest-error-code-is-counted-as-an-objection` inverts the new
+condition (`!= 1` → `== 0`), so the branch can never fire; the extended status-table test then reads `caught`
+where it requires `GUARD_ERRORED`. Sweep at `501dd3e`, clean tree:
+
+```
+caught  docs-command-comment-counts-superseded-plants   (anchor re-keyed to 189/189)
+caught  pytest-error-code-is-counted-as-an-objection
+2/2 planted defects were rejected by their guard.
+```
+
+`git status --porcelain` printed 0 lines afterwards, so both targets were restored byte-for-byte.
+
+**Counts that moved, and the ones that did not.**
+
+| quantity | before | after | why |
+|---|---|---|---|
+| declared plants | 188 | 189 | the new plant; one anchor re-keyed in the same commit |
+| pytest nodes | 560 / 491 | **560 / 491** | the test was extended, not added |
+| ceiling keys | 12 | **12** | no new policy row; the change is inside an existing guard |
+| formatter-tracked files | 232 | **232** | no new document |
+
+**Local gates at `501dd3e`.** `ruff check .` → `All checks passed!`; `ruff format --check .` → `232 files
+already formatted`; `mypy python/quantrisk tools` → `74 source files`, no issues; `--check-ceilings` → 12 keys,
+10 `ok`, 2 `SKIP`; `verify_evidence_manifest` → `Evidence is intact.`; `pytest -q` → **559 passed, 1 failed**,
+the bytecode-cache plant this sandbox cannot run — the same single failure V3 recorded, and the lane the
+runner decides.
+
+**Deliberately not done, named rather than omitted.**
+
+1. **Per-plant isolation was not added.** V3 §7 item 2 has two halves; this unit takes the crash-versus-
+   objection half only. The five `tree-did-not-recover` results from the full census are still undiagnosed, and
+   N9 remains VOID at 182/187 until a sweep runs clean.
+2. **The `ESCAPED` collision is recorded, not repaired** — see the Phase 0 entry. It changes a verdict string
+   that dated reports quote, and needs its own unit.
+3. **No CTest code table was invented.** CTest's exit code does not separate a failing case from a usage error,
+   so the coarse convention stands; a CTest that errors on the restored tree is already refused by
+   `green_again`, and the extended test pins that.
+
+**The push, and how its CI reading is recorded.** This entry is committed after the implementation commit and
+pushed with it. The CI reading for the pushed tip is appended in the next entry once `gh` reports it; the
+ledger never states an outcome before the tool does.
