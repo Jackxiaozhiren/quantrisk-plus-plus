@@ -159,3 +159,22 @@ reading at `gap 0` with all eight mismatch classes empty and both enumerations p
 intact.`; and the suite at `559 passed, 1 failed` — the bytecode-cache plant this sandbox cannot run, which is
 the one lane only the runner can decide. **The CI reading for these commits is unknown, not green**, and the
 next session's first act is to read it after the transport recovers rather than to re-run the work.
+
+**Pre-flight in a clean clone, while the transport stayed down.** A later probe at 22:54 on the same day found
+`github.com` still answering `CONNECT tunnel failed, response 502` through the proxy while `api.github.com`
+answered `200`, so the push remained impossible and was not attempted again. Instead the reading was re-run
+from `git clone --no-hardlinks . /tmp/qr-v4-clone`, at `0be2c5b`, with `git status --porcelain` printing 0
+lines and both new files tracked:
+
+```
+lanes_documented_vs_executed: available True, gap 0, documented 8, executed 5, declared 8,
+                              documented_not_executed 3, every mismatch class empty
+formatter_census:             exit 0, reported 232, walked 232, tracked 232,
+                              walked_but_not_tracked [], tracked_but_not_walked []
+```
+
+That is the corpus CI checks out — no `.workbuddy`, no untracked scratch — so the lint lane's two new inputs
+are consistent there and the local `.git/info/exclude` was not hiding a tracked-file defect. The same run also
+showed the collector failing closed when `ruff` is absent from both the clone's `.venv` and `PATH`
+(`AssertionError: … the census has no instrument`) rather than reporting zero, which is the behaviour the new
+ceiling key depends on.
