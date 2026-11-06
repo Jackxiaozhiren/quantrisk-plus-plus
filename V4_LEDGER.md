@@ -363,3 +363,72 @@ unmoved; `evidence/manifest.json` intact at 95 entries and re-verified by the li
 **The terminal commit.** This entry is itself a commit; its own CI is read after the push and reported in the
 session handoff rather than written into the file whose content is fixed before that push, the same convention
 V2, V3 and V4-01 used.
+
+---
+
+### 2026-11-06, V4 Phase 0 for V4-03 — the full census, measured again at `b5db84f`
+
+**Revision and vantage.** `HEAD` = `origin/main` = `b5db84f88f5cf2c848223a8ee797046d1464f163`,
+`git status --porcelain` 0 lines, `v1.9.0` = `d9deb7f` unmoved. Vantage: the development checkout,
+`.venv` Python 3.12, macOS, the same WorkBuddy interpreter shim V3 Phase 5 recorded. The declared
+counts were re-measured, not inherited: 189 plants, 12 ceiling keys (10 `ok` / 2 `SKIP`), 95 manifest
+entries, 232 formatter-tracked files, 560/491 pytest nodes.
+
+**Reading A — the unwrapped sweep.** `uv run --frozen python -m quantrisk.verification.runner --all
+--verbose` printed 19 `caught`, then aborted at plant 20 (`experiment-added-without-a-registry-entry`,
+the first `tree` case) with `OSError: [Errno 5] Path is a directory: rm returned EISDIR` from
+`run_one_probe`'s `parent.rmdir()`. The shim replaces both `pathlib.Path.rmdir` and `os.rmdir` with a
+broker that answers `EISDIR` for a directory inside the workspace; outside it (`/tmp`) the same call
+succeeds. The probe file itself was already unlinked, so `git status --porcelain` was 0 lines. This is
+a property of the local test environment, not a repository defect, and no source change is made to
+accommodate it.
+
+**Reading B — the full census under V3's wrapper.** `build/run_sweep.py` (gitignored scratch) swallowed
+that `OSError` so the sweep could finish. Its own summary line, captured:
+
+```
+176/189 planted defects were rejected by their guard.
+```
+
+13 non-`caught` rows, all `tree-did-not-recover`, exit 1, tree clean afterwards. The first plant's
+mutated and restored guard tails are both `FAILED ... / 1 failed` — the restored tree stayed red
+because the wrapper left `experiments/_mutation_probe/results/` behind, and
+`test_the_manifest_hashes_every_experiment_results_directory` walks `experiments/*/results`. Six more
+carry `ERROR ... / 1 error` on **both** runs, from guards that use `tmp_path` (the temporary-tree
+reproduction tests, `test_an_absent_git_reports_which_kind_of_absence_it_is`, the manifest-hash and
+rewrap tests): a pytest temp-root error, not an objection, and not cured by restoring the bytes. The
+last six, from `project-adds-a-dependency-the-declaration-does-not-name` onward, print the same
+`uv` tail on both runs — `hint: This usually indicates a problem with the package or the build /
+environment.` — so from that point every `uv run --frozen pytest` in the sweep failed to start.
+
+**Controls, so the three shapes are not conflated.** Running
+`project-adds-a-dependency-the-declaration-does-not-name` alone printed `caught`, `1/1`. Re-applying
+its exact `pyproject.toml` mutation by hand and running its guard produced `rc = 1` with the expected
+assertion (`dependencies measured 10; declared 9; added ['requests']`) and a clean `uv` build, then
+restored the file. A 40-invocation compressed `uv run --frozen pytest` loop printed `invocation 10 ok`
+and was then killed by the command timeout (`SIGTERM`, exit 137); that partial run is **unknown**, not
+a verdict about the loop. So none of the 13 is a plant whose guard failed to understand its own defect:
+they are states one invocation left for the next.
+
+**The three leaks this unit will close, named from those readings.**
+
+1. **Probe-directory residue.** V3's wrapper skipped the removal, so one plant's empty directory made
+   the next plant's restored tree red. The local wrapper is rewritten to call the unpatched C entry
+   point `posix.rmdir`, which does remove an empty workspace directory here; this is a change to
+   gitignored scratch only, and `git status` remains the proof the tree is clean.
+2. **A shared pytest temp root.** `Harness.isolation_environment()` isolates the bytecode cache per
+   invocation but leaves pytest's `tmp_path` root shared across the whole sweep. Each guard invocation
+   gets its own `--basetemp`, derived from the same per-invocation directory as its bytecode prefix.
+3. **A shared `TMPDIR`.** `uv run --frozen` rebuilds the editable package on every guard call here;
+   its build scratch and pytest's default temp root both live under one shared `TMPDIR`. Each
+   invocation gets a private one.
+
+**The approval for this case, recorded verbatim (§14).** The maintainer's instruction is
+`我都听你的，请按照你的思路建议进行`, given after the V4-02 handoff named this unit first and proposed
+per-plant isolation by name. As in V4-01 and V4-02, that is a direction to choose and execute one
+scope unit, not a standing approval: this unit takes two pushes — the implementation-and-readings tip,
+and the entry recording that tip's CI — both attributed below, and no third is implied.
+
+**Deliberately not done in Phase 0.** No source file was edited, no ceiling key added, no plant added,
+and no claim was carried forward from V3 §4's "undiagnosed" wording: every number above comes from a
+reading taken at this tip. The `ESCAPED` collision named in V4-02's Phase 0 entry stays open.
