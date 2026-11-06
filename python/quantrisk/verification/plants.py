@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 189/189 planted defects rejected",
+        anchor="# 190/190 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2732,6 +2732,24 @@ MUTATIONS: tuple[Mutation, ...] = (
         claim=(
             "a guard process that errors before it can object -- pytest's 2, 3, 4 and 5 -- has its "
             "own verdict, so a sweep cannot tally a guard that never ran as a caught defect"
+        ),
+    ),
+    Mutation(
+        identifier="guard-invocations-share-one-pytest-temp-root",
+        kind="prose",
+        path="python/quantrisk/verification/runner.py",
+        anchor='    return cache_dir / "pytest-tmp"',
+        replacement='    return Path("/tmp/quantrisk-shared-pytest-tmp")',
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated"
+        ),
+        claim=(
+            "a full census runs hundreds of guard invocations through one pytest temp "
+            "root unless each derives its own from its bytecode prefix; the shared "
+            "root leaves tmp_path residue that reddens the restored tree of an "
+            "unrelated plant, which the 176/189 census at b5db84f measured as "
+            "thirteen tree-did-not-recover rows"
         ),
     ),
 )

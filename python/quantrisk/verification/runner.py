@@ -159,13 +159,28 @@ def decide(
     return CAUGHT
 
 
-# The environment variable CPython reads its bytecode-cache location from. Named once so the
-# guard that polices it and the code that sets it cannot drift apart.
+# The environment variables this harness owns for one guard invocation. Named once so the guard
+# that polices them and the code that sets them cannot drift apart.
 BYTECODE_PREFIX = "PYTHONPYCACHEPREFIX"
+TEMP_ROOT = "TMPDIR"
+PYTEST_OPTIONS = "PYTEST_ADDOPTS"
+
+
+def pytest_basetemp(cache_dir: Path) -> Path:
+    """The pytest temp root for exactly one invocation, beside its bytecode prefix.
+
+    A shared root is why a long census degrades: pytest's default basetemp is a numbered directory
+    cleaned by deleting older ones, and a guard that uses `tmp_path` sees whatever the previous
+    invocations left there. V4-03's Phase 0 measured six guards erroring on that root on both the
+    mutated and the restored run -- a state one plant left for the next, not an objection to either
+    tree. Deriving the root from `cache_dir` makes it impossible to share across invocations, and
+    gives the guard a path it can compare against the prefix.
+    """
+    return cache_dir / "pytest-tmp"
 
 
 def isolation_environment(cache_dir: Path) -> dict[str, str]:
-    """An environment whose bytecode cache cannot be shared with the repository.
+    """An environment whose caches and temp roots cannot be shared across invocations.
 
     A prose plant that edits a Python file without changing its length -- `32.6` to `99.9` -- leaves
     the source size identical, and a restore inside the same clock second leaves the integer mtime
@@ -176,9 +191,23 @@ def isolation_environment(cache_dir: Path) -> dict[str, str]:
     *invocation* for that pair of runs -- a plant's mutated step and its restored step are two
     invocations of one sweep, which is exactly the window the defect lives in. See
     `Harness.next_environment`.
+
+    The same prefix now owns two more private roots. `TMPDIR` is where `uv run --frozen` builds the
+    editable package on every guard call here; sharing it across a few hundred calls is the third
+    leak V4-03's census named. `PYTEST_ADDOPTS` carries a per-invocation `--basetemp` so pytest's
+    `tmp_path` cannot inherit a numbered root another invocation cleaned or left behind. An operator
+    who already set `--basetemp` in `PYTEST_ADDOPTS` has that one replaced, not silently doubled.
     """
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    private_tmp = cache_dir / "tmp"
+    private_tmp.mkdir(parents=True, exist_ok=True)
     environment = os.environ.copy()
     environment[BYTECODE_PREFIX] = str(cache_dir)
+    environment[TEMP_ROOT] = str(private_tmp)
+    inherited = re.sub(r"--basetemp(?:=|\s+)\S+\s*", "", environment.get(PYTEST_OPTIONS, ""))
+    environment[PYTEST_OPTIONS] = (
+        f"{inherited.strip()} --basetemp={pytest_basetemp(cache_dir)}"
+    ).strip()
     return environment
 
 

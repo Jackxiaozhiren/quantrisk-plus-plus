@@ -548,6 +548,11 @@ def test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated(
     in-test control proved the environment builder works; this proves nothing bypasses it, which is
     the half a control cannot cover -- a later edit that passes `None` instead would keep that
     control green.
+
+    V4-03 widens "fresh prefix" to the three roots one census invocation owns. The bytecode prefix,
+    `TMPDIR`, and pytest's `--basetemp` all have to be derived from the same per-invocation
+    directory: the full census at `b5db84f` lost 13 of 189 plants to residue in the other two, and
+    every one of them printed `tree-did-not-recover` on both the mutated and the restored run.
     """
     seen: list[dict[str, str] | None] = []
 
@@ -559,17 +564,39 @@ def test_every_subprocess_the_harness_runs_a_guard_in_is_bytecode_isolated(
     swept = harness.Harness(build_dir="build/dev")
     for node in ("tests/python/a.py::test_one", "tests/python/b.py::test_two"):
         assert swept.pytest(node) == 0
+    # The pairing audit's module run goes through `_run` directly; it must not be the one guard
+    # path that inherits a shared temp root while the default sweep is isolated.
+    swept.module_failures("tests/python/x.py")
 
-    assert len(seen) == 2, "the guard steps did not both reach the one subprocess function"
-    prefixes = []
+    assert len(seen) == 3, "not every guard path reached the one subprocess function"
+    prefixes: list[str] = []
+    temp_roots: list[str] = []
+    basetemps: list[str] = []
     for environment in seen:
         assert environment, "a guard subprocess was spawned with no environment at all"
         prefix = environment.get(harness.BYTECODE_PREFIX)
         assert prefix, "a guard subprocess runs without bytecode isolation"
         prefixes.append(str(prefix))
+        temp_root = environment.get(harness.TEMP_ROOT)
+        assert temp_root, "a guard subprocess inherits a shared TMPDIR"
+        temp_roots.append(str(temp_root))
+        assert Path(temp_root).parent == Path(prefix), (
+            "the private TMPDIR is not derived from this invocation's own isolation directory"
+        )
+        roots = re.findall(r"--basetemp=(\S+)", environment.get(harness.PYTEST_OPTIONS, ""))
+        assert len(roots) == 1, "a guard invocation must name exactly one pytest temp root"
+        basetemps.append(roots[0])
+        assert Path(roots[0]).parent == Path(prefix), (
+            "the pytest temp root is not derived from this invocation's own isolation directory"
+        )
     assert len(set(prefixes)) == len(prefixes), (
         f"two guard steps share {prefixes[0]}, which is the window the mutated run and its "
         "restored re-run both sit in"
+    )
+    assert len(set(temp_roots)) == len(temp_roots), "two guard steps share one build temp root"
+    assert len(set(basetemps)) == len(basetemps), (
+        "two guard steps share one pytest temp root, so a long census reads the previous plant's "
+        "tmp_path residue instead of its own tree"
     )
 
 
