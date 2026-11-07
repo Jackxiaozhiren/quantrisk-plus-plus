@@ -842,6 +842,64 @@ reported in the session handoff rather than written into the file whose content 
 push — the convention V2, V3, V4-01, V4-02 and V4-03 used. The second push authorised verbatim in the
 Phase 0 entry carries this entry only; no third is implied.
 
+---
+
+### 2026-11-07, V4 Phase 0 for V4-05 — the refusal path gets a pytest guard, measured at `0919138`
+
+**Revision and vantage.** `HEAD` = `origin/main` = `091913892a86a108d995cd26e29649667b7e5f5d`,
+`git status --porcelain` 0 lines, `v1.9.0` tag object `d9deb7f` unmoved. Vantage: the development
+checkout, `.venv` Python 3.12, macOS. Counts re-measured: **191** plants (`declared_plants: 191`),
+**12** ceiling keys (10 `ok` / 2 `SKIP`), **95** manifest `artifacts`, **232** formatter-tracked files,
+**560** collected pytest nodes.
+
+**The gap, in V3's own words.** `V3_LEDGER.md:358`: "The refusal path itself has no pytest guard. Its
+*input* is guarded — the declaration cannot drift from the import tree — but nothing in the suite would
+redden if `command_run` stopped calling `unsatisfied_requirements`, because the only instrument that
+executes the refusal against a real absence is `tools/verify_installed_surface --refusal pricing_grid`,
+and that gate is declared dev-only (its ceiling key SKIPs on the runner by design)." V3 §4 item 1 and
+§7 item 4 carry the same sentence; this unit closes it.
+
+**The code the guard must reach.** `cli.command_run` resolves the task, then:
+
+```
+    missing = unsatisfied_requirements(wanted)
+    if missing:
+        return _refuse_unsatisfied(wanted, missing)
+```
+
+`_refuse_unsatisfied` prints `FAIL <task> needs the <extras> extra: No module named '<module>'` and
+`install it with: pip install 'quantrisk[<extras>]'` to stderr, and returns `1` — distinct from `2`,
+which is "no such task". `unsatisfied_requirements` calls the module-level `module_resolves`, so a
+monkeypatched resolver drives the branch deterministically without needing an environment that lacks
+the extra. `tools/verify_installed_surface.assert_refusal_names_what_is_missing` asserts the same three
+things end to end (non-zero exit, the missing thing named, no file published), but only in a clean venv
+outside the checkout.
+
+**The shape chosen, and why it differs from V3's price.** V3 priced closure at a **new** pytest case
+and therefore `560 → 561`, "three gold lists, five or six plant anchors, the report PDF". This unit
+**extends** `test_an_absorbed_task_is_invocable_and_writes_where_it_is_told` instead — the existing
+node already owns the `--out` contract and the registry import — so the counted pair stays 560/491 and
+no gold list, report PDF or pre-existing anchor moves for the count. Only the plant total moves,
+191 → 192, with `docs/interview_defense.md:1037` and the anchor plant re-keyed in the same commit.
+
+**The new plant.** `command-run-skips-the-requirement-check` replaces
+`    if missing:` with `    if False and missing:` in `command_run`. The extended guard then sees
+`command_run` return `0` (an installed extra lets the study run) or return `1` with a `FAIL` line that
+names no extra (a bare wheel raises inside the study), and in both shapes the `quantrisk[<extra>]`
+install line is absent — which is exactly the state V3 said nothing would catch.
+
+**The approval for this case, recorded verbatim (§14).** The maintainer's instruction is
+`我都听你的，请按照你的思路建议进行，如果有什么是需要我来完成的，请告诉我具体的操作流程`, given after the
+V4-04 handoff named this unit first. As in V4-01…V4-04, that is a direction to choose and execute one
+scope unit, not a standing approval: this unit takes **two** pushes — the implementation-and-readings
+tip, and the entry recording that tip's CI — both attributed below, and no third is implied.
+
+**Deliberately not done in Phase 0.** No source file was edited, no plant added, no ceiling key
+changed. The with-extras census and the `docs/` re-derivation lane remain open. No full 192-plant
+census is claimed: the last captured full summary is `190/190` at `f5fe7ae`, and this unit's plant is
+verified by a targeted run, as V4-02 and V4-04 did.
+
+
 
 
 
