@@ -82,7 +82,7 @@ NO_OP = "mutation-was-a-no-op"
 BUILD_FAILED = "mutation-did-not-compile"
 GUARD_NOT_RUN = "guard-could-not-be-run"
 GUARD_ERRORED = "guard-errored-without-objecting"
-ESCAPED = "guard-stayed-green"
+ESCAPED = "no-guard-objected"
 NOT_RESTORED = "restore-mismatch"
 NOT_GREEN_AGAIN = "tree-did-not-recover"
 DIRTY_TARGET = "target-already-modified"
@@ -91,7 +91,6 @@ STOPPED = "sweep-stopped-early"
 
 PAIRED = "paired"
 MIS_PAIRED = "named-guard-stayed-green"
-ESCAPED = "no-guard-objected"
 MODULE_NOT_RUN = "module-could-not-be-run"
 
 

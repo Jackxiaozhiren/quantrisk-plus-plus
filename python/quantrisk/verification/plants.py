@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 190/190 planted defects rejected",
+        anchor="# 191/191 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2750,6 +2750,23 @@ MUTATIONS: tuple[Mutation, ...] = (
             "root leaves tmp_path residue that reddens the restored tree of an "
             "unrelated plant, which the 176/189 census at b5db84f measured as "
             "thirteen tree-did-not-recover rows"
+        ),
+    ),
+    Mutation(
+        identifier="status-name-assigned-twice-keeps-the-last-value",
+        kind="prose",
+        path="python/quantrisk/verification/runner.py",
+        anchor='MIS_PAIRED = "named-guard-stayed-green"',
+        replacement=('MIS_PAIRED = "named-guard-stayed-green"\nESCAPED = "guard-stayed-green"'),
+        guard=(
+            "tests/python/test_mutation_suite.py::"
+            "test_the_status_table_only_calls_a_case_caught_when_every_step_fired"
+        ),
+        claim=(
+            "a status name assigned twice keeps only the last value, so the earlier "
+            "string is unreachable while documents still quote it; the module-level "
+            "duplicate-assignment reading and the ESCAPED pin both redden, which is "
+            "the V4-02 Phase 0 residue this plant re-opens"
         ),
     ),
 )

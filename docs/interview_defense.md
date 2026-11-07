@@ -870,7 +870,7 @@ never ran is scored as `guard-could-not-be-run`, and a `-N` listing before the r
 resolves to exactly one test.
 
 **Deeper.** The tool is shown capable of saying *no*: a probe defect written into prose no guard
-reads, aimed at a guard that cannot see that file, comes back `guard-stayed-green` instead of being
+reads, aimed at a guard that cannot see that file, comes back `no-guard-objected` instead of being
 counted. Its inputs are policed by the ordinary test suite — `tests/python/test_mutation_suite.py`
 re-asserts on every run that each mutation's anchor still occurs exactly once, that each named guard
 still exists as a `def` or a `TEST_CASE`, and that the status function names each way a cycle can
@@ -1034,7 +1034,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 204 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
   .venv/bin/python -m pytest -q                                          # 491 tests collected offline
-uv run python -m quantrisk.verification.runner                            # 190/190 planted defects rejected
+uv run python -m quantrisk.verification.runner                            # 191/191 planted defects rejected
 uv run python -m quantrisk.experiments.pricing_validation
 uv run python -m quantrisk.experiments.monte_carlo_convergence
 uv run python -m quantrisk.experiments.variance_reduction

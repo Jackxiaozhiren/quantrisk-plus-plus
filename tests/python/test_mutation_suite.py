@@ -384,6 +384,23 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired() -> No
         harness.decide(**{**cycle, "guard_protocol": "ctest", "guard_returncode": 1})
         == harness.CAUGHT
     ), "CTest's exit code is not pytest's table; a non-zero code there is still an objection"
+
+    # V4-04. A status name assigned twice keeps only the last value: `ESCAPED` was written as
+    # `"guard-stayed-green"` and then again as `"no-guard-objected"`, so the first string was
+    # unreachable while `docs/interview_defense.md` still quoted it. The table is read from the
+    # module's own source, so a second assignment to any status name is refused here rather than
+    # waiting for a reader to notice that two documents disagree.
+    module_assignments: dict[str, int] = {}
+    for node in ast.parse(HARNESS_PATH.read_text(encoding="utf-8")).body:
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id.isupper():
+                    module_assignments[target.id] = module_assignments.get(target.id, 0) + 1
+    repeated = sorted(name for name, count in module_assignments.items() if count > 1)
+    assert not repeated, f"a status name is assigned more than once: {repeated}"
+    assert harness.ESCAPED == "no-guard-objected", (
+        "the no-objection verdict must be the string the current documents quote"
+    )
     assert (
         harness.decide(
             **{**cycle, "guard_protocol": "ctest", "guard_returncode": 1, "green_again": False}
