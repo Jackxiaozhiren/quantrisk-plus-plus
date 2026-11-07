@@ -543,3 +543,54 @@ pushes. This entry is committed after the implementation commit and pushed with 
 the pushed tip is appended in the next entry once `gh` reports it. The ledger states no outcome before
 the tool does.
 
+---
+
+### 2026-11-07, V4-03 — the push is blocked, and the CI reading is unknown
+
+**This entry corrects the tense of the preceding one.** Its last paragraph describes the intended
+sequence, not a completed push. No push has reached the remote for this unit. The `190/190` reading
+above is a development-vantage sweep summary and stands on its own; nothing in it is claimed as CI.
+
+**Local state.** `HEAD` = `af3949d7ff4725de9c99aaae89e7487876e2defe`, `git status --porcelain` 0
+lines, `origin/main` = `b5db84f88f5cf2c848223a8ee797046d1464f163`. Four local commits are ahead of
+the remote tip: `91535b6` (Phase 0), `f5fe7ae` (implementation), `af3949d` (readings), and this
+entry's commit.
+
+**The readings that make the push unknown, in order.**
+
+| attempt | channel | tool reading |
+|---|---|---|
+| 1 | `git push origin main`, HTTPS via `127.0.0.1:56037` | `fatal: ... CONNECT tunnel failed, response 502`, exit 128 |
+| 2 | same, plus `git ls-remote origin` | same 502; no remote ref obtained |
+| 3 | retry, same channel | same 502, exit 128 |
+| 4 | SSH `git@github.com`, key `id_ed25519_interve` | `Hi Jackxiaozhiren/Interve-AI! ... successfully authenticated` on the auth probe, then `ERROR: Permission to Jackxiaozhiren/quantrisk-plus-plus.git denied to deploy key`, exit 128 |
+| 5 | `git -c http.proxy= -c https.proxy= push` | `Failed to connect to github.com port 443 after 75003 ms`, exit 128 |
+
+**Controls, so the failure is not misread as a repository or credential problem.**
+
+- `gh api repos/Jackxiaozhiren/quantrisk-plus-plus --jq ...` → `Jackxiaozhiren/quantrisk-plus-plus main`,
+  exit 0; `curl -w '%{http_code}' https://api.github.com` → `200`; `curl ... https://github.com` → `000`.
+  The failure is specific to the git host behind the local HTTP proxy, not to GitHub's API.
+- `gh api repos/.../commits/main --jq .sha` → `b5db84f88f5cf2c848223a8ee797046d1464f163` after
+  every attempt, so no push arrived. `gh run list --limit 5` still shows `42063687017` at `b5db84f`
+  as the newest run; there is no run for `af3949d`.
+- `nc -z github.com 22` and `nc -z ssh.github.com 443` both succeeded, so SSH transport is reachable;
+  the blocker is the deploy key's authorization, not the port. `~/.ssh/` holds only
+  `id_ed25519_interve`, and `ssh-add -l` reports no agent identities.
+- `HTTP_PROXY`/`HTTPS_PROXY` = `http://127.0.0.1:56037`, no `git config http.proxy`. Removing the
+  proxy (attempt 5) produced a 75-second connect timeout, so there is no working direct route.
+
+**Verdict.** The V4-03 CI reading is **unknown**. No cancelled, partial, API-only or escalated-shell
+result is recorded as green, and §15.5's cancelled-run rule is not relaxed. Attempt 4 is an
+authentication success but an authorization failure; it is not a push and creates no run. No further
+push is attempted here: V3 §9 set the precedent of stopping after repeated tunnel 502s and resuming
+only when the maintainer asks or the channel is measured to be restored.
+
+**What remains for this unit.** One push carrying the four local commits, then a `gh run view` reading
+attributed to that run's attempt, runner and environment (§16.8), then this unit's second push with
+the entry recording that CI reading, and a final CI read reported in the session handoff. The two
+pushes authorised verbatim in the Phase 0 entry are both still outstanding: no push has reached the
+remote, so neither has been consumed. The `ESCAPED` collision, the with-extras census, the
+refusal-path pytest guard and the `docs/` re-derivation lane remain open, unchanged by this entry.
+
+
