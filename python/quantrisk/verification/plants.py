@@ -2479,8 +2479,12 @@ MUTATIONS: tuple[Mutation, ...] = (
         kind="prose",
         path="python/quantrisk/verification/runner.py",
         anchor=(
-            'UNATTRIBUTED_PLANTS = frozenset({"'
-            'release-note-cites-a-digest-its-file-does-not-carry"})'
+            "UNATTRIBUTED_PLANTS = frozenset(\n"
+            "    {\n"
+            '        "release-note-cites-a-digest-its-file-does-not-carry",\n'
+            '        "command-run-skips-the-requirement-check",\n'
+            "    }\n"
+            ")"
         ),
         replacement="UNATTRIBUTED_PLANTS = frozenset()",
         guard=(

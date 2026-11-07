@@ -543,7 +543,18 @@ CLOSURE_DEPTH = 8
 #: the guard rejected *about* the mutated line, and text answers only when the guard spells the
 #: mutated name somewhere in what it reads. A plant that leaves this list without a change here,
 #: or a new plant that belongs on it, reddens the pairing guard.
-UNATTRIBUTED_PLANTS = frozenset({"release-note-cites-a-digest-its-file-does-not-carry"})
+#:
+#: `command-run-skips-the-requirement-check` belongs here because its guard observes
+#: `command_run` by calling it and reading the captured output; it never spells `missing` or
+#: `_refuse_unsatisfied`, so the link is behavioural rather than textual.
+#: `release-note-cites-a-digest-its-file-does-not-carry` belongs here because its anchor is a
+#: 40-character digest that no guard can spell.
+UNATTRIBUTED_PLANTS = frozenset(
+    {
+        "release-note-cites-a-digest-its-file-does-not-carry",
+        "command-run-skips-the-requirement-check",
+    }
+)
 
 
 def anchor_tokens(anchor: str) -> set[str]:
