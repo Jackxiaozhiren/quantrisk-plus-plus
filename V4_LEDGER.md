@@ -794,6 +794,55 @@ reading for the pushed tip is appended in the next entry once `gh` reports it, a
 no outcome before the tool does. Both pushes authorised verbatim in the Phase 0 entry are consumed by
 this unit's implementation-and-readings tip and the entry recording its CI.
 
+---
+
+### 2026-11-07, V4-04 — the implementation-and-readings tip is green
+
+**The push, by the same transport V4-03 measured.** The git smart-HTTP host is still blocked, so the
+three commits (`2eb9751`, `622b9f1`, `f3fc84b`) were appended through the GitHub Git Data API by the
+same gitignored `build/api_push.py`: every blob, tree and commit was compared with its local SHA
+before the next object was created, all three matched, and `refs/heads/main` was moved with
+`{"sha": <last>, "force": false}` — a fast-forward from `e4ec51036ddb578c84508610bf2b8052059d7ed8`.
+No history rewriting, no tag movement. `gh api repos/.../commits/main --jq .sha` →
+`f3fc84b6e52968bb58a1c1d2d9dc64460a69d9a7`; local `origin/main` synced with `git update-ref`
+(`git rev-list --count origin/main..HEAD` → 0). This is the first of the two pushes authorised
+verbatim in the Phase 0 entry.
+
+**Run `42354746001`, event `push`, tip `f3fc84b`, attempt 1, `completed success`**, created
+`2026-11-07T08:16:05Z`, updated `08:22:23Z`. Four jobs, all `success`, each with 13–14 steps:
+
+| lane | runner | window (UTC) | reading |
+|---|---|---|---|
+| Format and static checks | `ubuntu-latest` / `GitHub Actions 1000010265` | 08:16:08–08:17:24 | `All checks passed!`; `232 files already formatted`; `Success: no issues found in 74 source files`; 12 keys, 10 `ok`, 2 `SKIP`; `declared_plants: 191`; `lanes_documented_vs_executed_gap: 0`; `Evidence is intact.` |
+| macOS native C++ and Python parity | `macos-15` / `GitHub Actions 1000010267` | 08:16:09–08:19:04 | `100% tests passed out of 204`; `98 passed in 2.30s` |
+| Benchmark suite against live oracles | `ubuntu-latest` / `GitHub Actions 1000010266` | 08:16:09–08:22:22 | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 240.0s total` |
+| Configure, build, C++ tests, Python tests | `ubuntu-latest` / `GitHub Actions 1000010268` | 08:16:09–08:20:52 | `100% tests passed out of 204`; **`490 passed, 5 skipped in 132.42s`** |
+
+**The count that mattered did not move.** `490 passed, 5 skipped` is identical to the readings at
+`8ffcb32`, `adf9918`, `b5db84f`, `8b57cd2` and `e4ec510`. The status-table test was extended rather
+than duplicated, so the counted pair stays 560/491; the only declaration that moved is
+`declared_plants`, 190 → 191, which is the new plant and is exactly what the lint job printed.
+
+**One caveat, unchanged and still not diagnosed.** The benchmark summary prints
+`revision: f3fc84b6e529 (working tree was dirty at run time)` for the sixth consecutive run. It is
+the same line V3 §9 named; this unit neither explains it nor cites any number from that job's
+generated artifacts.
+
+**The 191-plant census is still a targeted proof.** This entry does **not** claim a full 191-plant
+sweep. The most recent captured full sweep summary remains `190/190` at `f5fe7ae`; the 191st plant
+was verified by the `2/2` reading in the preceding entry. The runner's
+`plants_not_rejected_by_their_guard` key stays `SKIP` by design.
+
+**Archival state after the push.** Local `HEAD` = `origin/main` =
+`f3fc84b6e52968bb58a1c1d2d9dc64460a69d9a7`; `git status --porcelain` 0 lines; `v1.9.0` tag object
+`d9deb7f` unmoved; `evidence/manifest.json` intact at 95 `artifacts` and re-verified by the lint job.
+
+**The terminal commit.** This entry is itself a commit; its own CI is read after the second push and
+reported in the session handoff rather than written into the file whose content is fixed before that
+push — the convention V2, V3, V4-01, V4-02 and V4-03 used. The second push authorised verbatim in the
+Phase 0 entry carries this entry only; no third is implied.
+
+
 
 
 
