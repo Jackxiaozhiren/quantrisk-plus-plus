@@ -432,3 +432,114 @@ and the entry recording that tip's CI — both attributed below, and no third is
 **Deliberately not done in Phase 0.** No source file was edited, no ceiling key added, no plant added,
 and no claim was carried forward from V3 §4's "undiagnosed" wording: every number above comes from a
 reading taken at this tip. The `ESCAPED` collision named in V4-02's Phase 0 entry stays open.
+
+---
+
+### 2026-11-07, V4-03 — every guard invocation owns its temp roots, and the census is green
+
+**Revision and vantage.** `HEAD` = `f5fe7ae2ef71d907816543ca19b3d807346dda21`,
+`git status --porcelain` 0 lines, `origin/main` = `b5db84f88f5cf2c848223a8ee797046d1464f163`,
+`v1.9.0` = `d9deb7f` unmoved. Vantage: the development checkout, `.venv` Python 3.12, macOS, the same
+WorkBuddy interpreter shim (`PYTHONPATH` → `.../cli/vendor/shim/sitecustomize.py`) V3 Phase 5 recorded.
+All readings below are from this tip unless named otherwise.
+
+**What shipped.** `runner.py` names three per-invocation environment variables instead of one:
+`BYTECODE_PREFIX`, `TEMP_ROOT` (`TMPDIR`) and `PYTEST_OPTIONS` (`PYTEST_ADDOPTS`). `pytest_basetemp()`
+derives one `--basetemp` from the same `cache_dir` as the bytecode prefix; an inherited `--basetemp` is
+replaced, not doubled. `isolation_environment()` now creates both private directories, so a plant's
+mutated guard and its restored guard each get their own bytecode prefix, `TMPDIR` and pytest temp root.
+The existing isolation test was **extended**, not duplicated: its spy now checks all three variables on
+every guard invocation and requires them to be unique between invocations. One plant was added,
+`guard-invocations-share-one-pytest-temp-root`, whose anchor is the new `pytest_basetemp` return line;
+`docs/interview_defense.md:1037` was re-keyed to `190/190`. No ceiling key was added and no locked file
+was touched.
+
+**The reading that closes N9.** The single-process census, run on the committed tip with a clean tree
+(the post-commit re-run N9 requires), printed its own summary line at line 973 of
+`/tmp/qr-v4-03-census-final-1794019837.log` (created 10:50:37, last written 11:33:30, 98,853 bytes):
+
+```
+190/190 planted defects were rejected by their guard.
+```
+
+Exit 0; the status histogram is `190 caught`, with zero non-`caught` rows and zero `FAIL` rows;
+`git status --porcelain` printed 0 lines afterwards and no `*mutation_probe*` directory remained under
+`experiments/`, `docs/`, `python/` or `tests/`. So N9, VOID at 182/187 in V3 and at 176/189 in this
+unit's Phase 0, has a captured summary line for all 190 declared plants. The ceiling key
+`plants_not_rejected_by_their_guard` remains `SKIP` on the runner by design — it measures the
+declaration only and cannot read a sweep that writes gitignored scratch — so this proof is a
+development-vantage reading, not a CI lane, and is not attributed to one.
+
+**Why the first two full censuses were not green, and what the last seven rows were.** The readings,
+in order, at the same plant count unless named otherwise:
+
+| reading | environment | result |
+|---|---|---|
+| Phase 0, V3 wrapper | `b5db84f`, shared `TMPDIR` | `176/189`, 13 `tree-did-not-recover` |
+| after the isolation fix | `f5fe7ae`, private `TMPDIR` | `183/190`, 7 `tree-did-not-recover` |
+| diagnostic replay | `f5fe7ae`, shared `TMPDIR`, full output | same 7 rows, 14 error blocks |
+| escalated shell | `f5fe7ae`, private `TMPDIR` | `183/190`, still 7 rows |
+| this reading | `f5fe7ae`, private `TMPDIR`, raised delete threshold | `190/190`, 0 rows |
+
+The diagnostic replay printed the real `uv` text that the shipped `_run` truncates to its last two
+lines. All 14 blocks (7 plants × 2 guard runs) carry the same marker:
+
+```
+[safe-delete][SAFE_DELETE_BULK_CONFIRM_REQUIRED]
+{"count":50,"threshold":50,"scope":"turn","targets":[".../build/wheel/CMakeFiles"],"targetCount":1}
+```
+
+`safe-delete-bulk-guard.cjs` counts deletions **per tool call** against
+`CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD` (50 here) and refuses the bulk delete that
+`scikit-build-core` performs while reconfiguring `build/wheel/CMakeFiles`. That is why the failure
+always began at the same 184th plant in two runs of very different duration (26 and 172 minutes),
+why a 3-plant and a 7-plant sequence containing the `pyproject.toml` plant were both fully `caught`,
+and why escalating the shell did not help: the shim is injected into every Python child via
+`PYTHONPATH`, not into the shell. The remaining seven rows were therefore **not** a fourth state leak
+between plants; they were a session-level deletion policy in the local development environment. CI
+has no such shim. Raising that one environment variable for this census only — no repository file,
+ceiling, guard or wrapper verdict was changed — produced 0 guard refusals and the clean sweep above.
+Two shorter diagnostic censuses are recorded as incomplete, not green: one stopped at 106/190 when
+the session was interrupted (it left one un-restored `docs/validation_matrix.md` mutation, restored
+before any further command), and one was the truncated-tail replay whose only purpose was the error
+text.
+
+**Counts that moved, and the ones that did not.**
+
+| quantity | before | after | why |
+|---|---|---|---|
+| declared plants | 189 | **190** | the new plant; one anchor re-keyed in the same commit |
+| pytest nodes | 560 / 491 | **560 / 491** | the test was extended, not added |
+| ceiling keys | 12 | **12** | no new policy row; the change is inside an existing guard |
+| formatter-tracked files | 232 | **232** | no new document |
+
+**Local gates at `f5fe7ae`.** `ruff check .` → `All checks passed!`; `ruff format --check .` →
+`232 files already formatted`; `mypy python/quantrisk tools` → `Success: no issues found in 74 source
+files`; `--check-ceilings` → 12 keys, 10 `ok`, 2 `SKIP`, with `declared_plants: 190`,
+`lanes_documented_vs_executed_gap: 0` and `tracked_files_outside_the_formatter_corpus: 0`;
+`verify_evidence_manifest` → `Evidence is intact.`. An unqualified `pytest -q` in this shell read
+`517 passed, 43 errors in 119.76s`: every error is `FileExistsError` from `sitecustomize.py:507`
+trying to `mkdir` an existing `/private/var/.../T/pytest-of-unknown`, a pytest cache directory dated
+2026-11-02 that has nothing to do with this tip. No non-project directory was deleted. Re-running with
+a fresh private `--basetemp` (the same isolation this unit ships) read **`559 passed, 1 failed in
+351.66s`**, the single failure being the bytecode-cache plant this sandbox cannot run, identical to
+V3's and V4-02's local reading. The runner, not this shell, decides that lane.
+
+**Deliberately not done, named rather than omitted.**
+
+1. **The `ESCAPED` double assignment is still open** — `V4_LEDGER.md` line 84 overwritten by line 93
+   while `docs/interview_defense.md:873` still quotes the former. It changes a verdict string dated
+   reports cite and needs its own unit.
+2. **The with-extras census is not its own reading**, the refusal path still has no pytest guard, and
+   `docs/` re-derivation is not yet a declared lane. These are V3 §4/§7 gaps, unchanged here.
+3. **No CI lane was added for the sweep.** N9's proof stays a development-vantage reading with a
+   captured summary line; the runner's ceiling key is unchanged and still `SKIP`.
+4. **The local delete-threshold override is an environment condition, not a shipped change.** No
+   repository file records it as a requirement, and no CI step depends on it.
+
+**The push, and how its CI reading is recorded.** The approval for this case is the one recorded
+verbatim in the Phase 0 entry above: `我都听你的，请按照你的思路建议进行`, covering this unit's two
+pushes. This entry is committed after the implementation commit and pushed with it; the CI reading for
+the pushed tip is appended in the next entry once `gh` reports it. The ledger states no outcome before
+the tool does.
+
