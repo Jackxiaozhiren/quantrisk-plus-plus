@@ -1067,6 +1067,96 @@ CI — both attributed below, and no third is implied.
 changed. The `docs/` re-derivation lane remains open. No full 193-plant census is claimed: the last
 captured full summary is `190/190` at `f5fe7ae`.
 
+---
+
+### 2026-11-07, V4-06 — the artifact a run writes is the census, and something reads it
+
+**What shipped.** `with_extras_census()` in `tools/inventory_orphan_code.py` reads
+`benchmarks/suite/results/suite_run.json` and compares it four ways: member `key` set against the
+registry in both directions, every member's `status` against `passed`, duplicate keys against
+nothing, and `totals.members`/`passed`/`failed`/`skipped` against the member list they describe. The
+collector gains a `--reading NAME` flag so the reading prints its own JSON instead of being a slice
+of a larger snapshot. `with_extras_census_gap` enters `tools/refactor_ceilings.json` with `max 0` and
+**no** `may_be_unmeasured`. The benchmark job gains a `With-extras census` step that runs
+`--reading with_extras_census` against the artifact it just wrote, so the census is a step with its
+own output rather than a line in another step's log. The registry/member test is **extended**, not
+duplicated, to assert `gap == 0` from the artifact. One plant added, one anchor re-keyed.
+
+**The reading, printed by the new flag at `dbbb33d` on the committed artifact:**
+
+```json
+{
+  "artifact": "benchmarks/suite/results/suite_run.json",
+  "available": true,
+  "duplicate_keys": [],
+  "gap": 0,
+  "members": 19,
+  "missing_from_census": [],
+  "missing_from_registry": [],
+  "not_passed": [],
+  "passed": 19,
+  "revision": "17df062040b8",
+  "self_inconsistent": []
+}
+```
+
+`revision` names the commit that artifact was written at, not the reading's own tip — the reading
+reports what the file says rather than implying it was regenerated here.
+
+**The targeted reading at `dbbb33d`, clean tree:**
+
+```
+caught  docs-command-comment-counts-superseded-plants
+caught  suite-artifact-drops-a-member-the-registry-declares
+2/2 planted defects were rejected by their guard.
+```
+
+exit 0; `git status --porcelain` printed 0 lines afterwards, so the 60 KB JSON was restored
+byte-for-byte.
+
+**Why the plant is falsifiable.** `suite_run.json` has exactly one `"members": 19` line, in `totals`.
+The plant rewrites it to `"members": 18`, so the artifact still carries nineteen member objects while
+its own totals say eighteen. The key-set comparisons stay green — both sides still hold nineteen —
+and only the self-consistency clause fires, which is precisely the disagreement a log line cannot
+show.
+
+**Counts that moved, and the ones that did not.**
+
+| quantity | before | after | why |
+|---|---|---|---|
+| declared plants | 192 | **193** | the new plant; one anchor re-keyed |
+| ceiling keys | 12 | **13** | one new policy row, measured and `ok` |
+| pytest nodes | 560 / 491 | **560 / 491** | the test was extended, not added |
+| formatter-tracked files | 232 | **232** | no new document |
+
+**Local gates at `dbbb33d`.** `ruff check .` → `All checks passed!`; `ruff format --check .` →
+`232 files already formatted`; `mypy python/quantrisk tools` → `Success: no issues found in 74 source
+files`; `--check-ceilings` → **13** keys, 11 `ok`, 2 `SKIP`, with `with_extras_census_gap: 0` and
+`declared_plants: 193`; manifest `Evidence is intact.`; `pytest -q --basetemp=<fresh>` →
+**`559 passed, 1 failed in 388.40s`**, the single failure the bytecode-cache plant this sandbox cannot
+run.
+
+**A guard the new step had to keep green.** `tools.inventory_orphan_code` now appears in two CI
+steps, `lint :: refactor ceilings` and `benchmark-suite :: With-extras census`. The lane reading
+reports `executed_at` as a set and requires the contract's named pair to be a member of it, so the
+second step does not disturb `lanes_documented_vs_executed_gap`, which printed `0`.
+
+**What this reading does not claim.** It does not re-run the nineteen studies; it reads the artifact a
+run wrote. The lint job therefore reads the committed artifact (revision `17df062040b8`), and the
+benchmark job reads the one it generates in its own run — two vantages of one reading, each named by
+its revision. No full 193-plant census is claimed; the last captured full summary is `190/190` at
+`f5fe7ae`.
+
+**Deliberately not done.** The `docs/` re-derivation lane remains open. The `19/19` log line is left
+in place beside the new step rather than deleted, because the step output is additive evidence and
+removing a job's own summary would be a separate decision.
+
+**The push.** This entry is committed after the implementation commit and pushed with it; the CI
+reading for the pushed tip is appended in the next entry once `gh` reports it, and the ledger states
+no outcome before the tool does. Both pushes authorised in the Phase 0 entry are consumed by this
+unit's implementation-and-readings tip and the entry recording its CI.
+
+
 
 
 
