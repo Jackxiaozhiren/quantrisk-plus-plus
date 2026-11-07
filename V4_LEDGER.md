@@ -1009,6 +1009,65 @@ reported in the session handoff rather than written into the file whose content 
 push — the convention V2, V3 and V4-01…V4-04 used. The second push authorised in the Phase 0 entry
 carries this entry only; no third is implied.
 
+---
+
+### 2026-11-07, V4 Phase 0 for V4-06 — the with-extras census becomes its own reading, measured at `0967dc8`
+
+**Revision and vantage.** `HEAD` = `origin/main` = `0967dc89c937fbef9151e46aff003f49d96654db`,
+`git status --porcelain` 0 lines, `v1.9.0` tag object `d9deb7f` unmoved. Vantage: the development
+checkout, `.venv` Python 3.12, macOS. Counts re-measured: **192** plants (`declared_plants: 192`),
+**12** ceiling keys (10 `ok` / 2 `SKIP`), **95** manifest `artifacts`, **232** formatter-tracked files,
+**560** collected pytest nodes.
+
+**The gap, as V4's own Phase 0 wrote it.** "The with-extras installed census is not its own reading.
+`tools/verify_installed_surface.py` exists and is declared dev-only (the ceiling key SKIPs on the
+runner by design); the `19/19 executed and passed` line is a by-product of the benchmark job, not an
+instrument with its own output." This unit takes that gap.
+
+**Where the claim actually lives, measured.** Three places carry the census, and none of them is an
+instrument over the *run*:
+
+| carrier | what it holds | what reads it |
+|---|---|---|
+| `benchmarks/suite/results/suite_run.json` | `members` (19), each with `key`, `status`, `artifact`, `artifact_sha256`, plus `totals` | **nothing in `tools/`**; only the benchmark job uploads it |
+| `tests/python/test_artifact_metadata.py::test_every_registry_task_is_aggregated_by_exactly_one_member` | a two-way comparison of `key` against `TASKS_BY_ID` | the comparison is over `_load_suite_members()`, i.e. the **source-level** `MEMBERS` tuple, not the artifact |
+| the benchmark job's log | `suite: 19/19 executed and passed, ...` | a reader's eye |
+
+So the missing piece is precise: the artifact that a run writes is compared with nothing, and the
+comparison that exists is over the declaration instead of the product. The two can disagree —
+a job that writes 18 members and a log line that says 19 — and every gate stays green.
+
+**What this unit will ship.**
+
+1. `with_extras_census()` in `tools/inventory_orphan_code.py`: reads
+   `benchmarks/suite/results/suite_run.json`, names every member it carries, compares the member
+   `key` set against the registry **in both directions**, requires every member's `status` to be
+   `passed`, and requires `totals.members` / `totals.passed` / `totals.failed` / `totals.skipped` to
+   agree with the member list it describes. `gap` is the number of disagreements.
+2. A `--reading NAME` flag on the same collector, so the reading has its own printable JSON instead
+   of being a slice of a larger snapshot.
+3. `with_extras_census_gap` in `tools/refactor_ceilings.json`: `max 0`, **no `may_be_unmeasured`**,
+   because the artifact is committed and always readable on the runner.
+4. One CI step in the benchmark job, after the suite runs: `--reading with_extras_census`. The job
+   therefore prints its own census reading, from the artifact it just wrote, rather than leaving
+   `19/19` as prose in a log.
+5. The existing registry/member test is **extended**, not duplicated, to assert `gap == 0` from the
+   artifact — the counted pair stays 560/491.
+6. One plant (`suite-artifact-drops-a-member-the-registry-declares`) rewrites
+   `  "members": 19,` to `  "members": 18,` in `suite_run.json`, which the self-consistency clause
+   catches. Plant total 192 → 193, `docs/interview_defense.md:1037` re-keyed.
+
+**The approval for this case, recorded verbatim (§14).** The maintainer's instruction is
+`我都听你的，请按照你的思路建议进行`, given after the V4-05 handoff named this unit next. As in
+V4-01…V4-05, that is a direction to choose and execute one scope unit, not a standing approval: this
+unit takes **two** pushes — the implementation-and-readings tip, and the entry recording that tip's
+CI — both attributed below, and no third is implied.
+
+**Deliberately not done in Phase 0.** No source file was edited, no plant added, no ceiling key
+changed. The `docs/` re-derivation lane remains open. No full 193-plant census is claimed: the last
+captured full summary is `190/190` at `f5fe7ae`.
+
+
 
 
 
