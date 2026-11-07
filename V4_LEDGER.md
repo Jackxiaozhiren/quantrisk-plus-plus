@@ -670,6 +670,61 @@ reported in the session handoff rather than written into the file whose content 
 push — the same convention V2, V3, V4-01 and V4-02 used. The second push authorised verbatim in the
 Phase 0 entry carries this entry only; no third is implied.
 
+---
+
+### 2026-11-07, V4 Phase 0 for V4-04 — the status name assigned twice, measured at `e4ec510`
+
+**Revision and vantage.** `HEAD` = `origin/main` = `e4ec51036ddb578c84508610bf2b8052059d7ed8`,
+`git status --porcelain` 0 lines, `v1.9.0` tag object `d9deb7f` unmoved. Vantage: the development
+checkout, `.venv` Python 3.12, macOS. The declared counts were re-measured, not inherited: **190**
+plants (`declared_plants: 190` from the ceilings reading), **12** ceiling keys (10 `ok` / 2 `SKIP`),
+**95** manifest `artifacts`, **232** formatter-tracked files, **560** collected pytest nodes.
+
+**The gap, as a reading rather than a recollection.** `runner.py` assigns `ESCAPED` twice:
+
+```
+85: ESCAPED = "guard-stayed-green"
+94: ESCAPED = "no-guard-objected"
+```
+
+`decide()` returns `ESCAPED` when `guard_returncode == 0`, so a sweep can only ever print the
+**second** value; the first is unreachable code that reads like a live status. `docs/interview_defense.md:873`
+still says a probe defect "comes back `guard-stayed-green`", i.e. it quotes the string this harness
+can no longer produce. That is the V4-02 Phase 0 residue named as "the `ESCAPED` double assignment",
+carried here as its own unit.
+
+**The reference census, so the repair stays scoped.** `git grep` finds **25** occurrences of
+`guard-stayed-green` in tracked files. They fall into three classes, and only the first two move:
+
+| class | occurrences | disposition |
+|---|---|---|
+| the dead assignment | `runner.py:85` | deleted; the live value moves up into the status block |
+| current-behaviour prose | `docs/interview_defense.md:873` | re-keyed to `no-guard-objected` |
+| historical readings and substring hits | 23, including `runner.py:93`'s `MIS_PAIRED = "named-guard-stayed-green"` (a different status, matched as a substring), `V4_LEDGER.md`'s own two records of this gap, `tests/python/test_mutation_suite.py:284`'s comment about finding 86, and the phase reports / `integrity_audit.md` / `limitations.md` / `release_notes_v1.4.0.md` / `project_scope.md` / `REFACTOR_LEDGER.md` records | **not rewritten** (§9: a reading is not retro-edited because a later tip renamed a string) |
+
+**What the unit will change, and how it is falsified.** One deletion and one move in `runner.py`
+(behaviour unchanged: `ESCAPED` still equals `"no-guard-objected"`); one string in
+`docs/interview_defense.md`; an **extension** of the existing status-table test, not a new node, so
+the counted pair stays 560/491. The extension parses `runner.py` and refuses any module-level
+upper-case name assigned more than once, then pins `ESCAPED` to `"no-guard-objected"`. One plant
+(`status-name-assigned-twice-keeps-the-last-value`) re-inserts a second `ESCAPED` assignment after
+`MIS_PAIRED`, which both reddens the duplicate-assignment reading and flips the runtime value back to
+the stale string; `docs/interview_defense.md:1037`'s `190/190` is re-keyed to `191/191` in the same
+commit. Targeted sweep: the new plant plus the re-keyed anchor, expected `2/2`.
+
+**The approval for this case, recorded verbatim (§14).** The maintainer's instruction is
+`我都听你的，请按照你的思路建议进行，如果有什么是需要我来完成的，请告诉我具体的操作流程`, given after the
+V4-03 handoff named this unit as the next one. As in V4-01…V4-03, that is a direction to choose and
+execute one scope unit, not a standing approval: this unit takes **two** pushes — the
+implementation-and-readings tip, and the entry recording that tip's CI — both attributed below, and no
+third is implied.
+
+**Deliberately not done in Phase 0.** No source file was edited, no plant added, no ceiling key
+changed, and no historical document rewritten. The full 191-plant census is **not** claimed here: the
+most recent full sweep summary is `190/190` at `f5fe7ae`, and this unit's new plant is verified by a
+targeted run, exactly as V4-02's 189th plant was.
+
+
 
 
 
