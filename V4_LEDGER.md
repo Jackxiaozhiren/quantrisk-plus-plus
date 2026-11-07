@@ -593,4 +593,20 @@ pushes authorised verbatim in the Phase 0 entry are both still outstanding: no p
 remote, so neither has been consumed. The `ESCAPED` collision, the with-extras census, the
 refusal-path pytest guard and the `docs/` re-derivation lane remain open, unchanged by this entry.
 
+---
+
+### 2026-11-07, V4-03 — a partial host recovery is not a restored git channel
+
+**Reading.** `curl -w '%{http_code}' https://github.com` → `200` (it was `000` during attempts 1–5),
+but `curl ... /Jackxiaozhiren/quantrisk-plus-plus.git/info/refs?service=git-upload-pack` → `000`,
+and a sixth `git push origin main` → `fatal: ... CONNECT tunnel failed, response 502`, exit 128.
+`gh api repos/.../commits/main --jq .sha` still → `b5db84f88f5cf2c848223a8ee797046d1464f163`, and
+`origin/main` is unchanged. The local proxy therefore serves the web host but not the repository's
+git smart-HTTP endpoint. Under the criterion written in the preceding entry, the channel is **not**
+measured as restored, the V4-03 CI reading remains **unknown**, and no further push is attempted.
+Five local commits now sit ahead of the remote tip: the four named above and this entry's commit.
+Nothing in this entry changes the `190/190` sweep reading, which is a development-vantage proof and
+never depended on a push.
+
+
 
