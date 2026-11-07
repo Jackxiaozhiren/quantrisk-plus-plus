@@ -899,6 +899,71 @@ changed. The with-extras census and the `docs/` re-derivation lane remain open. 
 census is claimed: the last captured full summary is `190/190` at `f5fe7ae`, and this unit's plant is
 verified by a targeted run, as V4-02 and V4-04 did.
 
+---
+
+### 2026-11-07, V4-05 — the suite drives the refusal, and the pin is named
+
+**What shipped.** `test_an_absorbed_task_is_invocable_and_writes_where_it_is_told` gains a refusal
+section: it monkeypatches `registry.module_resolves` so `pricing_grid`'s `plot` extra cannot resolve,
+calls `cli.command_run` with an explicit `--out` root, and asserts three readings — exit `1`, the
+`quantrisk[plot]` install line on stderr, and no file under that root. **No new pytest node**: the
+counted pair stays 560/491, which is why this closure costs no gold list, no report PDF and no
+pre-existing anchor — the price V3 quoted for a new case. One plant added (`command-run-skips-the-
+requirement-check`), one anchor re-keyed (`docs/interview_defense.md:1037`, 191 → 192), and
+`UNATTRIBUTED_PLANTS` gains a second member **with its reason**.
+
+**The targeted reading at `87a7812`, clean tree:**
+
+```
+caught  docs-command-comment-counts-superseded-plants
+caught  pinned-residual-list-emptied
+caught  command-run-skips-the-requirement-check
+3/3 planted defects were rejected by their guard.
+```
+
+The third is the new guard's falsification. The second is in the run because the new pin changed the
+set that plant anchors on: a re-keyed anchor has to be re-fired, not assumed. exit 0;
+`git status --porcelain` printed 0 lines afterwards.
+
+**Why the pin is a decision, not a workaround.** `pairing_sample`'s attribution rule is textual: a
+guard is linked when its reading closure spells the edited path or a token from the anchor. The new
+guard observes `command_run` by **calling** it and reading the captured output, and never spells
+`missing` or `_refuse_unsatisfied`, so the link is behavioural. `UNATTRIBUTED_PLANTS` is the audit's
+declared residual, and the guard refuses both an unlisted member and a listed plant that gained a
+text link. Adding the id with its reason is exactly the decision the test asks for.
+
+**Counts that moved, and the ones that did not.**
+
+| quantity | before | after | why |
+|---|---|---|---|
+| declared plants | 191 | **192** | the new plant; one anchor and one pin re-keyed |
+| pytest nodes | 560 / 491 | **560 / 491** | the test was extended, not added |
+| ceiling keys | 12 | **12** | no new policy row |
+| formatter-tracked files | 232 | **232** | no new document |
+
+**Local gates at `87a7812`.** `ruff check .` → `All checks passed!`; `ruff format --check .` →
+`232 files already formatted`; `mypy python/quantrisk tools` → `Success: no issues found in 74 source
+files`; `--check-ceilings` → 12 keys, 10 `ok`, 2 `SKIP`, `declared_plants: 192`; manifest
+`Evidence is intact.`; `pytest -q --basetemp=<fresh>` → **`559 passed, 1 failed in 181.98s`**, the
+single failure the bytecode-cache plant this sandbox cannot run.
+
+**What the guard does not claim.** It drives the refusal with a monkeypatched resolver, so it proves
+`command_run` consults `unsatisfied_requirements` and prints the install line; it does **not** prove
+the extra is genuinely absent from an installed wheel. That end-to-end reading remains
+`tools/verify_installed_surface --refusal pricing_grid`, dev-only by design (its ceiling key SKIPs on
+the runner). The two are complementary: the suite now reddens if the branch disappears, and the
+dev-only tool still reddens if a wheel advertises a study it cannot serve.
+
+**Deliberately not done, named rather than omitted.** The with-extras census and the `docs/`
+re-derivation lane remain open. No full 192-plant census is claimed; the last captured full summary
+is `190/190` at `f5fe7ae`.
+
+**The push.** This entry is committed after the implementation commit and pushed with it; the CI
+reading for the pushed tip is appended in the next entry once `gh` reports it, and the ledger states
+no outcome before the tool does. Both pushes authorised verbatim in the Phase 0 entry are consumed by
+this unit's implementation-and-readings tip and the entry recording its CI.
+
+
 
 
 
