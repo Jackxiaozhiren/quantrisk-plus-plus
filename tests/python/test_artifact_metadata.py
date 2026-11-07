@@ -296,6 +296,17 @@ def test_every_registry_task_is_aggregated_by_exactly_one_member() -> None:
         "section of the summary"
     )
 
+    # V4-06. The comparison above reads the *declared* member tuple. Nothing compared the artifact a
+    # run writes, so a job that wrote eighteen members while its log said nineteen kept every gate
+    # green -- the census was a by-product of a job, not a reading. This asks the same two-way
+    # question of the product: the artifact's keys against the registry, its statuses against
+    # `passed`, and its totals against the list they describe.
+    from tools.inventory_orphan_code import with_extras_census
+
+    reading = with_extras_census()
+    assert reading["available"], reading
+    assert reading["gap"] == 0, f"the suite artifact and the registry disagree: {reading}"
+
 
 def test_suite_headline_csv_is_machine_readable_and_points_at_its_source(
     tmp_path: Path,

@@ -206,6 +206,18 @@
       "corpus": "the json block of .github/lane_contract.md, the module-path and console invocations in docs/reproducibility.md and CONTRIBUTING.md, and every run: line of .github/workflows/ci.yml parsed as YAML. Both enumerations, their two differences, and each mismatch class are printed by name; a dev-only row must not appear in the executed set and must carry a non-empty reason; an executed row must name the job and step that actually contain the command.",
       "can_fail_because": "a command the documents claim but no lane runs is allowed only as a declared dev-only row with a reason, and a command the workflow runs without either document claiming it is a defect in the other direction. Dropping a claimed CI step, changing a row's status to executed without a step, removing a reason, or editing a claimed_by list makes the sum non-zero. The plant that proves it removes a claimed step from ci.yml. An instrument that reads no document, no step or no contract row returns unavailable rather than zero, and this row carries no may_be_unmeasured, so the gate fails instead of skipping.",
       "exemptions": []
+    },
+    {
+      "key": "with_extras_census_gap",
+      "law": "L8",
+      "metric": "the sum of the named disagreements between benchmarks/suite/results/suite_run.json and the registry, plus the artifact's own totals disagreeing with the member list they describe: registry tasks the artifact omits, members the artifact carries and the registry does not declare, duplicate member keys, members whose status is not `passed`, and totals that do not count the members beside them",
+      "measured_at_baseline": null,
+      "baseline_note": "the artifact existed at the V4-06 baseline but nothing compared it with the registry, so no figure is claimed before this unit. The `19/19 executed and passed` line was a benchmark-job log line, not a reading with its own output.",
+      "max": 0,
+      "reach_by_phase": "V4-06",
+      "corpus": "benchmarks/suite/results/suite_run.json, which the benchmark job rewrites on every run and uploads as an artifact: its member `key` set is compared with the registry's task ids in both directions, every member's `status` with `passed`, and `totals.members`/`passed`/`failed`/`skipped` with the member list they describe.",
+      "can_fail_because": "a job that writes eighteen members while the registry declares nineteen, an artifact carrying a member the registry does not declare, a duplicate key, a member whose status is `failed` or `skipped`, or a totals block that counts a different number than the list beside it all make the sum non-zero. The plant rewrites `\"members\": 19` to `\"members\": 18` in the artifact. An absent artifact returns unavailable rather than zero, and this row carries no may_be_unmeasured, so the gate fails instead of skipping.",
+      "exemptions": []
     }
   ],
   "notes": [

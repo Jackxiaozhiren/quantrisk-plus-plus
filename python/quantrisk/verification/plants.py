@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 192/192 planted defects rejected",
+        anchor="# 193/193 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2790,6 +2790,22 @@ MUTATIONS: tuple[Mutation, ...] = (
             "ModuleNotFoundError from inside the study; bypassing it removes the "
             "install line the guard reads, which is the V3 §4 item 1 residue this "
             "plant re-opens"
+        ),
+    ),
+    Mutation(
+        identifier="suite-artifact-drops-a-member-the-registry-declares",
+        kind="prose",
+        path="benchmarks/suite/results/suite_run.json",
+        anchor='  "members": 19,',
+        replacement='  "members": 18,',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_registry_task_is_aggregated_by_exactly_one_member"
+        ),
+        claim=(
+            "the artifact a run writes is the census; a totals block that counts a "
+            "different number than the member list beside it is exactly the shape a "
+            "log line cannot catch, which is the V4 gap 3 residue this plant re-opens"
         ),
     ),
 )

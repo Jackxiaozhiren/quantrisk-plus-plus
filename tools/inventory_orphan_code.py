@@ -32,6 +32,7 @@ FORMATTER_KEY = "tracked_files_outside_the_formatter_corpus"
 MANIFEST_PATH = REPO_ROOT / "evidence" / "manifest.json"
 PREFIXES = ("uv run --frozen python ", "uv run python ", "python ")
 LANE_CONTRACT_PATH = REPO_ROOT / ".github" / "lane_contract.md"
+BENCHMARK_SUITE_RUN = REPO_ROOT / "benchmarks" / "suite" / "results" / "suite_run.json"
 LANE_DOCUMENTS = ("docs/reproducibility.md", "CONTRIBUTING.md")
 CI_WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "ci.yml"
 LANE_COMMAND = re.compile(
@@ -963,6 +964,71 @@ def lanes_documented_vs_executed() -> dict[str, Any]:
     }
 
 
+def with_extras_census() -> dict[str, Any]:
+    """What the suite's own artifact says ran, compared with the registry and with itself.
+
+    V4's gap 3: the census had three carriers and no instrument over the run. The log line
+    (`suite: 19/19 executed and passed`) and the summary table are prose a reader has to trust, and
+    the JSON beside them was read by nothing -- while the one two-way comparison in the suite walked
+    the *declared* `MEMBERS` tuple instead of the artifact a run writes. The two can disagree, a job
+    that writes eighteen members and a log that says nineteen, and every gate stays green.
+
+    This reading compares the artifact's member keys with the registry in both directions, requires
+    every member to be `passed`, refuses a duplicate key, and requires the artifact's own totals to
+    describe the member list they sit beside. `gap` is the number of disagreements. An absent
+    artifact is `available: False` rather than zero, so the ceiling fails instead of skipping.
+    """
+    if not BENCHMARK_SUITE_RUN.exists():
+        relative = BENCHMARK_SUITE_RUN.relative_to(REPO_ROOT)
+        return {
+            "available": False,
+            "unavailable_because": f"{relative} is not in the tree",
+            "gap": None,
+        }
+    payload = json.loads(BENCHMARK_SUITE_RUN.read_text(encoding="utf-8"))
+    members = payload.get("members", [])
+    keys = [str(member.get("key", "")) for member in members]
+    statuses = [str(member.get("status", "")) for member in members]
+    totals = payload.get("totals", {})
+    registry = {task.task_id for task in _load_registry().TASKS}
+    missing_from_census = sorted(registry - set(keys))
+    missing_from_registry = sorted(set(keys) - registry)
+    duplicate_keys = sorted({key for key in keys if keys.count(key) > 1})
+    not_passed = sorted(
+        str(member.get("key")) for member in members if member.get("status") != "passed"
+    )
+    self_inconsistent: list[str] = []
+    if totals.get("members") != len(members):
+        self_inconsistent.append(
+            f"totals.members={totals.get('members')} but {len(members)} members"
+        )
+    for status in ("passed", "failed", "skipped"):
+        if totals.get(status) != statuses.count(status):
+            self_inconsistent.append(
+                f"totals.{status}={totals.get(status)} but {statuses.count(status)} {status}"
+            )
+    gap = (
+        len(missing_from_census)
+        + len(missing_from_registry)
+        + len(duplicate_keys)
+        + len(not_passed)
+        + len(self_inconsistent)
+    )
+    return {
+        "available": True,
+        "artifact": str(BENCHMARK_SUITE_RUN.relative_to(REPO_ROOT)),
+        "revision": payload.get("repository", {}).get("git_commit", ""),
+        "members": len(members),
+        "passed": statuses.count("passed"),
+        "missing_from_census": missing_from_census,
+        "missing_from_registry": missing_from_registry,
+        "duplicate_keys": duplicate_keys,
+        "not_passed": not_passed,
+        "self_inconsistent": self_inconsistent,
+        "gap": gap,
+    }
+
+
 def build_snapshot() -> dict[str, Any]:
     all_python = tracked(("*.py", "*.pyi"))
     corpus = [path for path in all_python if path.endswith(".py")]
@@ -1047,6 +1113,15 @@ def build_snapshot() -> dict[str, Any]:
                 ),
                 "value": lanes_documented_vs_executed(),
             },
+            {
+                "name": "with_extras_census",
+                "command": (
+                    "read benchmarks/suite/results/suite_run.json, compare its member keys with "
+                    "the registry in both directions, require every status to be passed, and "
+                    "require its totals to describe its own member list"
+                ),
+                "value": with_extras_census(),
+            },
         ],
     }
 
@@ -1073,6 +1148,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
     reachability = by_name["runtime_reachability"]
     dependencies = by_name["external_dependencies"]
     lanes = by_name["lanes_documented_vs_executed"]
+    census = by_name["with_extras_census"]
     return {
         "bootstrap_sites_outside_package": len(by_name["bootstrap_census"]),
         "by_path_load_sites": len(by_name["by_path_load_sites"]),
@@ -1094,6 +1170,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
         "installed_user_identity_mismatch": None,
         "external_dependencies_added": len(dependencies["added"]) + len(dependencies["removed"]),
         "lanes_documented_vs_executed_gap": None if not lanes["available"] else lanes["gap"],
+        "with_extras_census_gap": None if not census["available"] else census["gap"],
     }
 
 
@@ -1165,6 +1242,10 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="print the whole snapshot")
     parser.add_argument(
+        "--reading",
+        help="print one reading's value as JSON and exit, for a lane that owns that reading",
+    )
+    parser.add_argument(
         "--check-ceilings",
         action="store_true",
         help="compare every metric against tools/refactor_ceilings.json and exit 1 on a violation",
@@ -1175,6 +1256,12 @@ def main(argv: list[str]) -> int:
     SNAPSHOT_PATH.write_text(
         json.dumps(snapshot, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    if args.reading:
+        by_name = {row["name"]: row["value"] for row in snapshot["readings"]}
+        if args.reading not in by_name:
+            parser.error(f"no reading named {args.reading!r}")
+        print(json.dumps(by_name[args.reading], indent=2, sort_keys=True))
+        return 0
     if args.json:
         print(json.dumps(snapshot, indent=2, sort_keys=True))
         return 0
