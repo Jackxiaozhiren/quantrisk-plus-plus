@@ -608,5 +608,68 @@ Five local commits now sit ahead of the remote tip: the four named above and thi
 Nothing in this entry changes the `190/190` sweep reading, which is a development-vantage proof and
 never depended on a push.
 
+---
+
+### 2026-11-07, V4-03 — the implementation-and-readings tip is green
+
+**The push, by a different transport.** The git smart-HTTP host stayed blocked (`CONNECT tunnel
+failed, response 502`) while `api.github.com` remained reachable and `gh auth status` reported a
+`gho_` token with `repo`, `workflow`, `read:org`, `gist` scopes. The five local commits were therefore
+appended through the GitHub Git Data API by `build/api_push.py`, a gitignored scratch script that is
+**not** a shipped repository dependency. For each commit the script uploaded every changed blob,
+rebuilt the tree from its parent tree, and created the commit object with the local author, committer
+and message; each object's SHA was compared with the local one **before** the next object was made.
+All five matched exactly:
+
+```
+91535b67840cde707acd7d9d426601018c27bcd5
+f5fe7ae2ef71d907816543ca19b3d807346dda21
+af3949d7ff4725de9c99aaae89e7487876e2defe
+3c3c2648ba147ad2e51c8f0aae0adbbfe642f7e3
+8b57cd2ad0d09d5d577104ecf4100b654ca148e7
+```
+
+Only then was `refs/heads/main` moved with `{"sha": <last>, "force": false}` — a non-forced
+fast-forward from `b5db84f88f5cf2c848223a8ee797046d1464f163`, with no history rewriting, no tag
+movement and no release asset change. `gh api repos/.../commits/main --jq .sha` →
+`8b57cd2ad0d09d5d577104ecf4100b654ca148e7`. The local `origin/main` was then synced with
+`git update-ref` (a local remote-tracking cache, not a commit), because `git fetch` cannot traverse
+the same blocked host; `git rev-list --count origin/main..HEAD` → 0. This is the first of the two
+pushes authorised verbatim in the Phase 0 entry; it is attributed here rather than left implicit.
+
+**Run `42337259111`, event `push`, tip `8b57cd2`, attempt 1, `completed success`**, created
+`2026-11-07T04:10:28Z`, updated `04:19:02Z`. Four jobs, all `success`, each with 13–14 steps — no
+cancelled job and no zero-step runner, so §15.5's cancelled-run rule is not engaged:
+
+| lane | runner | window (UTC) | reading |
+|---|---|---|---|
+| Format and static checks | `ubuntu-latest` / `GitHub Actions 1000010254` | 04:10:31–04:11:52 | `All checks passed!`; `232 files already formatted`; `Success: no issues found in 74 source files`; 12 keys, 10 `ok`, 2 `SKIP`; `declared_plants: 190`; `lanes_documented_vs_executed_gap: 0`; `Evidence is intact.` |
+| macOS native C++ and Python parity | `macos-15` / `GitHub Actions 1000010255` | 04:10:31–04:13:18 | `100% tests passed out of 204`; `98 passed in 2.27s` |
+| Benchmark suite against live oracles | `ubuntu-latest` / `GitHub Actions 1000010256` | 04:10:31–04:19:02 | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 327.1s total` |
+| Configure, build, C++ tests, Python tests | `ubuntu-latest` / `GitHub Actions 1000010257` | 04:10:31–04:17:25 | `100% tests passed out of 204`; **`490 passed, 5 skipped in 201.70s`** |
+
+**The count that mattered did not move.** `490 passed, 5 skipped` is identical to the readings at
+`8ffcb32`, `adf9918` and `b5db84f`. The new assertions live inside an existing test, so the counted
+pair stays 560/491 and no gold list, plant anchor or report PDF moved for this unit.
+
+**One caveat, unchanged and still not diagnosed.** The benchmark summary prints
+`revision: 8b57cd2ad0d0 (working tree was dirty at run time)` for the fourth consecutive run. It is
+the same line V3 §9 named; this unit neither explains it nor cites any number from that job's
+generated artifacts.
+
+**N9 is a development-vantage proof, not a CI lane.** The `190/190` sweep summary stands on its own
+reading. `plants_not_rejected_by_their_guard` remains `SKIP` on the runner by design, so no CI job
+is claimed to have run the sweep and no CI result is written into that key.
+
+**Archival state after the push.** Local `HEAD` = `origin/main` =
+`8b57cd2ad0d09d5d577104ecf4100b654ca148e7`; `git status --porcelain` 0 lines; `v1.9.0` = `d9deb7f`,
+unmoved; `evidence/manifest.json` intact at 95 entries and re-verified by the lint job.
+
+**The terminal commit.** This entry is itself a commit; its own CI is read after the second push and
+reported in the session handoff rather than written into the file whose content is fixed before that
+push — the same convention V2, V3, V4-01 and V4-02 used. The second push authorised verbatim in the
+Phase 0 entry carries this entry only; no third is implied.
+
+
 
 
