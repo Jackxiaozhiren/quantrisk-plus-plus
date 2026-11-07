@@ -724,6 +724,77 @@ changed, and no historical document rewritten. The full 191-plant census is **no
 most recent full sweep summary is `190/190` at `f5fe7ae`, and this unit's new plant is verified by a
 targeted run, exactly as V4-02's 189th plant was.
 
+---
+
+### 2026-11-07, V4-04 — one status name, one assignment, and a string the documents can quote
+
+**What shipped.** `runner.py` loses the dead `ESCAPED = "guard-stayed-green"` and keeps a single
+definition in the status block, `ESCAPED = "no-guard-objected"`. Behaviour is unchanged: the deleted
+line was already overwritten by the surviving one, so `decide()` returns the same string it returned
+before the change. `docs/interview_defense.md:873` is re-keyed to `no-guard-objected`, and line
+1037's `190/190` to `191/191`. The status-table test is **extended**, not duplicated: it parses
+`runner.py`'s own source, refuses any module-level upper-case name assigned more than once, and pins
+`ESCAPED` to the documented string. One plant added, one anchor re-keyed.
+
+**The targeted reading at `622b9f1`, clean tree.** The two cases were run through the gitignored
+wrapper with `CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD` raised for this local sweep only — the same
+session-level deletion guard V4-03 diagnosed, which exists in this development environment and in no
+CI step:
+
+```
+caught  docs-command-comment-counts-superseded-plants
+caught  status-name-assigned-twice-keeps-the-last-value
+2/2 planted defects were rejected by their guard.
+```
+
+exit 0; `git status --porcelain` printed 0 lines afterwards, so both targets were restored
+byte-for-byte.
+
+**Why the new plant is falsifiable, not merely different.** Its anchor is
+`MIS_PAIRED = "named-guard-stayed-green"`; the replacement inserts a second
+`ESCAPED = "guard-stayed-green"` after it. That does two things at once: the module-level
+duplicate-assignment reading fails, and the stale string becomes the **runtime** value again, so the
+`ESCAPED` pin fails as well. A plant that looked like the old defect without changing the reachable
+value would leave the second assertion green and would be a no-op for half the guard.
+
+**Counts that moved, and the ones that did not.**
+
+| quantity | before | after | why |
+|---|---|---|---|
+| declared plants | 190 | **191** | the new plant; one anchor re-keyed in the same commit |
+| pytest nodes | 560 / 491 | **560 / 491** | the test was extended, not added |
+| ceiling keys | 12 | **12** | no new policy row; the change is inside an existing guard |
+| formatter-tracked files | 232 | **232** | no new document |
+
+**Local gates at `622b9f1`.** `ruff check .` → `All checks passed!`; `ruff format --check .` →
+`232 files already formatted`; `mypy python/quantrisk tools` → `Success: no issues found in 74 source
+files`; `--check-ceilings` → 12 keys, 10 `ok`, 2 `SKIP`, `declared_plants: 191`,
+`tracked_files_outside_the_formatter_corpus: 0`; `verify_evidence_manifest` → `Evidence is intact.`;
+`pytest -q --basetemp=<fresh>` → **`559 passed, 1 failed in 148.22s`**, the single failure being the
+bytecode-cache plant this sandbox cannot run — the same one V3, V4-02 and V4-03 recorded.
+
+**The census this unit does not claim.** The most recent full sweep summary is `190/190` at
+`f5fe7ae`. The 191st plant is verified by the targeted `2/2` above, **not** by a 191-plant full
+sweep, and this entry does not write a `191/191` summary line it has not captured. Recording the
+difference is the point.
+
+**Deliberately not done, named rather than omitted.**
+
+1. **The 23 historical `guard-stayed-green` occurrences are not rewritten.** They are readings taken
+   at other tips (§9), including `V4_LEDGER.md`'s own two records of this gap and
+   `tests/python/test_mutation_suite.py:284`'s comment about finding 86. `MIS_PAIRED =
+   "named-guard-stayed-green"` is a different status and stays.
+2. **The with-extras census, the refusal-path pytest guard and the `docs/` re-derivation lane**
+   remain open, unchanged by this unit.
+3. **No ceiling key was added for "no name assigned twice".** The reading lives inside the existing
+   status-table test; a policy row would need its own instrument and its own failure mode.
+
+**The push.** This entry is committed after the implementation commit and pushed with it; the CI
+reading for the pushed tip is appended in the next entry once `gh` reports it, and the ledger states
+no outcome before the tool does. Both pushes authorised verbatim in the Phase 0 entry are consumed by
+this unit's implementation-and-readings tip and the entry recording its CI.
+
+
 
 
 
