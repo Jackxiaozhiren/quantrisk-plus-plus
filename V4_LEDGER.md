@@ -1156,6 +1156,76 @@ reading for the pushed tip is appended in the next entry once `gh` reports it, a
 no outcome before the tool does. Both pushes authorised in the Phase 0 entry are consumed by this
 unit's implementation-and-readings tip and the entry recording its CI.
 
+---
+
+### 2026-11-07, V4-06 — the implementation-and-readings tip is green
+
+**The push, by the same transport V4-03 measured.** The git smart-HTTP host is still blocked, so the
+three commits (`d6ed061`, `dbbb33d`, `575d620`) were appended through the GitHub Git Data API with
+every blob, tree and commit SHA compared locally before the next object; `refs/heads/main` moved with
+`{"sha": <last>, "force": false}` from `0967dc89c937fbef9151e46aff003f49d96654db`. No rewriting, no
+tag movement, no force. `gh api repos/.../commits/main --jq .sha` →
+`575d6205a94d298c40247e8e32d010f1790a38cd`; local `origin/main` synced with `git update-ref` (a
+remote-tracking cache, not a commit).
+
+**Run `42362912014`, event `push`, tip `575d620`, attempt 1, `completed success`**, created
+`2026-11-07T10:11:44Z`, updated `10:22:59Z`. Four jobs, all `success`:
+
+| lane | runner | window (UTC) | reading |
+|---|---|---|---|
+| Format and static checks | `ubuntu-latest` / `GitHub Actions 1000010411` | 10:11:48–10:13:02 | `All checks passed!`; `232 files already formatted`; `74 source files`; `declared_plants: 193`; **`with_extras_census_gap: 0`**; `Evidence is intact.` |
+| macOS native C++ and Python parity | `macos-15` / `GitHub Actions 1000010408` | 10:11:48–10:15:20 | `100% tests passed out of 204`; `98 passed in 3.59s` |
+| Benchmark suite against live oracles | `ubuntu-latest` / `GitHub Actions 1000010410` | 10:11:48–10:22:59 | `19/19 executed and passed, 0 failed, 0 skipped, 429.7s`; the **`With-extras census`** step printed its own JSON |
+| Configure, build, C++ tests, Python tests | `ubuntu-latest` / `GitHub Actions 1000010409` | 10:11:48–10:17:47 | `100% tests passed out of 204`; **`490 passed, 5 skipped in 172.08s`** |
+
+**The reading that closes gap 3, quoted from the step's own output.** The benchmark job's new step
+ran `--reading with_extras_census` after the suite and printed:
+
+```json
+{
+  "artifact": "benchmarks/suite/results/suite_run.json",
+  "available": true,
+  "duplicate_keys": [],
+  "gap": 0,
+  "members": 19,
+  "missing_from_census": [],
+  "missing_from_registry": [],
+  "not_passed": [],
+  "passed": 19,
+  "revision": "575d6205a94d",
+  "self_inconsistent": []
+}
+```
+
+The `revision` is `575d6205a94d` — the tip of this run, i.e. the artifact the job had just written,
+not the committed artifact at `17df062040b8` the lint job reads. That difference is exactly what the
+gap named: the census is now a reading over the run that produced it, with the policy gate reading
+the committed copy and the job reading its own.
+
+**The count that mattered did not move.** `490 passed, 5 skipped` is identical to every reading since
+`8ffcb32`. The registry/member test was extended, so the counted pair stays 560/491. Two declarations
+moved, both by construction and both printed by the lint job: `declared_plants` 192 → 193, and the
+ceiling set 12 → 13 with `with_extras_census_gap: 0`.
+
+**One caveat, unchanged and still not diagnosed.** The benchmark summary prints
+`revision: 575d6205a94d (working tree was dirty at run time)` for the eighth consecutive run. Same
+line V3 §9 named; not explained here, and no number from that job's artifacts is cited.
+
+**What this entry does not claim.** The reading compares an artifact; it does not re-run the studies
+itself. The `19/19` log line remains beside the new step rather than being replaced, so the two
+readings sit side by side and either can be quoted. No full 193-plant census is claimed: the last
+captured full summary is `190/190` at `f5fe7ae`.
+
+**Archival state after the push.** Local `HEAD` = `origin/main` =
+`575d6205a94d298c40247e8e32d010f1790a38cd`; `git status --porcelain` 0 lines; `v1.9.0` tag object
+`d9deb7f` unmoved; `evidence/manifest.json` intact at 95 `artifacts`.
+
+**The terminal commit.** This entry is itself a commit; its own CI is read after the second push and
+reported in the session handoff rather than written into the file whose content is fixed before that
+push — the convention V2, V3 and V4-01…V4-05 used. The second push authorised in the Phase 0 entry
+carries this entry only; no third is implied.
+
+
 
 
 
