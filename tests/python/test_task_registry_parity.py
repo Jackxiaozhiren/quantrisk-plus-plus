@@ -18,6 +18,8 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 REGISTRY_MODULE = "quantrisk.experiments.registry"
 UNIT_PATTERNS = (
     "experiments/",
@@ -187,7 +189,9 @@ STUDY_IDS: tuple[str, ...] = (
 )
 
 
-def test_an_absorbed_task_is_invocable_and_writes_where_it_is_told(tmp_path: Path) -> None:
+def test_an_absorbed_task_is_invocable_and_writes_where_it_is_told(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
     """D1's destination, asserted per absorbed task rather than assumed from the file being there.
 
     Two things make a moved study usable: it resolves as a module, because that is the form
@@ -200,7 +204,6 @@ def test_an_absorbed_task_is_invocable_and_writes_where_it_is_told(tmp_path: Pat
     import importlib
     import inspect
 
-    import pytest
     from quantrisk.experiments.registry import TASKS, checkout_root, results_directory
 
     root = Path(__file__).resolve().parents[2]
@@ -230,6 +233,32 @@ def test_an_absorbed_task_is_invocable_and_writes_where_it_is_told(tmp_path: Pat
     outside.mkdir()
     with pytest.raises(RuntimeError, match="not inside a QuantRisk\\+\\+ checkout"):
         checkout_root(start=outside)
+
+    # V3 §4 item 1 closed here. The declaration is guarded against drift, but nothing in this suite
+    # reddened if `command_run` stopped consulting it: the only instrument that executed the refusal
+    # against a real absence was `tools/verify_installed_surface --refusal pricing_grid`, whose
+    # ceiling key SKIPs on the runner by design. Driving the branch from the suite makes the pytest
+    # lane itself the gate, and `module_resolves` is monkeypatched rather than the extra being
+    # uninstalled, so the reading does not depend on what this machine happens to carry.
+    import argparse
+
+    import quantrisk.cli as cli
+    from quantrisk.experiments import registry
+
+    refusing = next(task for task in registry.TASKS if task.task_id == "pricing_grid")
+    extra = sorted(refusing.requires)[0]
+    absent = registry.EXTRA_MODULES[extra][0]
+    monkeypatch.setattr(registry, "module_resolves", lambda name: name != absent)
+    refused_out = tmp_path / "refused"
+    code = cli.command_run(
+        argparse.Namespace(task=refusing.task_id, out=refused_out, list_tasks=False)
+    )
+    captured = capsys.readouterr()
+    printed = captured.out + captured.err
+    assert code == 1, f"{refusing.task_id} must be refused with exit 1, not {code}"
+    assert f"quantrisk[{extra}]" in printed, printed
+    published = [path for path in refused_out.rglob("*") if path.is_file()]
+    assert not published, f"a refused task published {published} under {refused_out}"
 
 
 def test_the_absorption_sequence_never_moves_a_study_before_its_dependencies() -> None:

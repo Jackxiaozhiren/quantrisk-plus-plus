@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 191/191 planted defects rejected",
+        anchor="# 192/192 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2767,6 +2767,25 @@ MUTATIONS: tuple[Mutation, ...] = (
             "string is unreachable while documents still quote it; the module-level "
             "duplicate-assignment reading and the ESCAPED pin both redden, which is "
             "the V4-02 Phase 0 residue this plant re-opens"
+        ),
+    ),
+    Mutation(
+        identifier="command-run-skips-the-requirement-check",
+        kind="prose",
+        path="python/quantrisk/cli.py",
+        anchor="    if missing:\n        return _refuse_unsatisfied(wanted, missing)",
+        replacement=(
+            "    if False and missing:\n        return _refuse_unsatisfied(wanted, missing)"
+        ),
+        guard=(
+            "tests/python/test_task_registry_parity.py::"
+            "test_an_absorbed_task_is_invocable_and_writes_where_it_is_told"
+        ),
+        claim=(
+            "the requirement check is the only thing between a bare wheel and a "
+            "ModuleNotFoundError from inside the study; bypassing it removes the "
+            "install line the guard reads, which is the V3 §4 item 1 residue this "
+            "plant re-opens"
         ),
     ),
 )
