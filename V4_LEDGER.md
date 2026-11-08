@@ -1459,6 +1459,253 @@ V4-07 verified their four plants by targeted sweeps only. No V4 prompt file is c
 PDF is not rebuilt, and the sweep is not added as a CI lane. Every number above is a reading at
 `ad03b89`; none is quoted from this file's earlier entries without being re-measured.
 
+---
+
+## V4 Phase 5 — the report, the liveness table, and the archival confirmation
+
+**Revision and vantage.** V4 opened at `9e0bf03` (V3's post-report addendum) and its implementation
+range closes at `ad03b89`. This report is written at `a74cf9a`, the Phase 0 commit of this unit, on a
+clean tree; the commit that carries this section changes only `V4_LEDGER.md`. The full census, the
+local gates and the local pytest reading below were taken at `a74cf9a` with `git status --porcelain`
+printing 0 lines. Runner readings are attributed to run `42442031942` at `ad03b89`, attempt 1, whose
+four jobs each executed **14** steps on runners `GitHub Actions 1000010444`–`1000010447`. A reading
+that was not re-run in V4 is named as inherited rather than counted as current.
+
+**The census that closes N9 at the final revision.** `CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=100000
+QR_DIAG_FULL=1 uv run --frozen python build/run_sweep.py --all --verbose` ran on the committed
+`a74cf9a` with a clean tree. Its own summary line, captured at line 993 of
+`/tmp/qr-v4-p5-census-rerun-20261108.log` (993 lines, 102,033 bytes, 37m31s wall clock, last
+written 21:04:04 local):
+
+```
+194/194 planted defects were rejected by their guard.
+```
+
+Exit **0**; the log holds **194** `ok caught` rows and **zero** non-`caught` status rows;
+`git status --porcelain` printed 0 lines afterwards and no `experiments/_mutation_probe` or
+`docs/_mutation_probe_band.md` residue remained. This is the first captured full summary at a
+194-plant tip: V4-03's `190/190` was at `f5fe7ae`, and V4-04…V4-07 used targeted sweeps only.
+
+**The interrupted attempt, recorded as unknown rather than as a verdict.** A first run of the same
+command on 2026-11-08 was cut short at line 225 of `/tmp/qr-v4-p5-census-20261108.log`, inside
+`readme-quotes-a-stale-assertion-total`. It left one un-restored `README.md` mutation
+(`548,368 assertions` → `548,000 assertions`), which was restored from `HEAD` before any further
+command; the tree then printed 0 lines and no probe directory existed. Per §14, that incomplete
+reading is neither green nor failed — it is the reason the sweep above was re-run from the beginning.
+
+**Why the census still describes the report tip.** The sweep ran at `a74cf9a`; the report commit and
+the CI-entry commit edit only this ledger. `python/quantrisk/verification/plants.py` contains no
+reference to `V4_LEDGER.md` or `V3_LEDGER.md`, no test under `tests/` reads either file, and no
+plant, guard, ceiling, source file or artifact moves in those two commits. The corpus the sweep
+measured is therefore identical at all three tips.
+
+### 1. Evidence ledger
+
+| id | verdict | the probe that decided it | closing commit |
+|---|---|---|---|
+| V4-01 | **fixed** | `.github/lane_contract.md` exists; `--reading lanes_documented_vs_executed` prints `gap: 0` over 8 declared / 5 executed commands with `dev_only_without_reason []`; the plant that deletes the evidence-manifest step is `caught` in this report's census | `d5408f4` |
+| V4-02 | **fixed** | `GUARD_ERRORED = "guard-errored-without-objecting"`; `decide()` applies pytest's return-code table (only `1` is an objection, `2`–`5` are a guard that never ran), CTest keeps its coarse convention; `pytest-error-code-is-counted-as-an-objection` is `caught` | `501dd3e` |
+| V4-03 | **fixed** | each invocation owns a bytecode prefix, a private `TMPDIR` and a fresh `--basetemp`; the census at `f5fe7ae` printed `190/190`; `guard-invocations-share-one-pytest-temp-root` is `caught` | `f5fe7ae` |
+| V4-04 | **fixed by deletion** | the dead `ESCAPED = "guard-stayed-green"` assignment is gone; the extended status-table test parses `runner.py`, refuses any module-level name assigned twice and pins `ESCAPED`; `status-name-assigned-twice-keeps-the-last-value` is `caught` | `622b9f1` |
+| V4-05 | **fixed** | the existing absorbed-task test was extended, not duplicated: monkeypatched `module_resolves` and `command_run` with an explicit `--out`, exit `1`, `pip install 'quantrisk[plot]'` on stderr, no file published; the behavioural-link plant is pinned in `UNATTRIBUTED_PLANTS` and `pinned-residual-list-emptied` re-keyed; `command-run-skips-the-requirement-check` is `caught` | `1764231`, `87a7812` |
+| V4-06 | **fixed** | `with_extras_census()` reads `suite_run.json`, compares member keys with the registry both ways, requires every `status` to be `passed` and checks `totals` against its own member list; `--reading with_extras_census` prints `gap: 0`, `members: 19`, `passed: 19`; a `With-extras census` CI step prints it; `suite-artifact-drops-a-member-the-registry-declares` is `caught` | `dbbb33d` |
+| V4-07 | **fixed** | `docs_rederivation()` derives four values from committed artifacts and compares **seven** printed claims across the five documents `CONTRIBUTING.md` enumerates; `--reading docs_rederivation` prints `documents: 5`, `derived {19, 19, 194, 95}`, `gap: 0`; a `Docs re-derivation` CI step prints it; `a-living-document-transcribes-a-number-the-artifact-does-not-hold` is `caught` | `c36a2c3` |
+
+### 2. The liveness table, final
+
+| # | law | state | the reading that decided it |
+|---|---|---|---|
+| N1 | requirement truth | **satisfied** | `registry_parity` prints `filesystem_units 19`, `registry_sources 19`, `mismatch []`; V4-05's extended test reddens if `command_run` stops consulting the declaration. The bare-wheel `1 ran / 18 refused` half is inherited from `d502a61`, not re-run (§4 item 5) |
+| N2 | advertised surface honesty | **satisfied for the with-extras side; inherited for the bare-wheel side** | benchmark job `19/19 executed and passed` at `ad03b89`; `--reading with_extras_census` `gap: 0`, `not_passed []`. V3 §6's installed-wheel census is not re-measured in V4 |
+| N3 | lane contract | **satisfied** | the contract file exists; `lanes_documented_vs_executed_gap: 0` with **32** named CI steps, `documented_not_executed` holding the three dev-only commands with reasons; `lane-contract-claims-a-step-the-workflow-dropped` is `caught` |
+| N4 | no silence by count | **satisfied** | `plant_liveness.declared_plants 194`, `formatter_census` both sets, `with_extras_census` member lists, `docs_rederivation` seven named claims, `runtime_reachability` both instruments — every count names its population |
+| N5 | declarations are checkable | **satisfied** | 14 keys, 12 with a comparison that reddens; the three V4 keys carry `max: 0` and no `may_be_unmeasured`; the two SKIPs name their absent precondition |
+| N6 | runtime reachability | **satisfied** | `ast_dead 13`, `import_reachable 13`, `pytest_collected 6`, `reached_by_neither 0`, `runtime_reachability_gap: 0` |
+| N7 | plan equals log | **satisfied** | each of the 33 commits in `9e0bf03..ad03b89` maps to one of the seven units' approved Phase 0 rows or a named step within it; the 14 pushed tips in §8 carry every one of them; difference empty |
+| N8 | no gate weakened | **satisfied** | `git diff 9e0bf03..ad03b89 -- tests/ tools/refactor_ceilings.json .github/workflows/ci.yml` (340 lines) adds three `"max": 0` rows and no `skip`/`xfail` marker; no ceiling bound was raised; the node pair stayed 560/491 through all seven units |
+| N9 | plant liveness | **satisfied** | `194/194 planted defects were rejected by their guard.` at `a74cf9a`, clean tree, post-commit, captured summary, 194 `ok caught` rows and zero other status rows |
+| N10 | one re-run | **not applicable** | no evidence category moved; `evidence/manifest.json` is unchanged at 95 artifacts generated 2026-10-24 from `26aef06ba288`; the re-run stays unspent |
+| N11 | facts precedence | **satisfied** | `--reading docs_rederivation` `gap: 0` over five documents and seven claims; `V3_PROMPT.md` was not edited in V4; the ceilings gate was re-run after the census with the same 14-key verdict |
+| N12 | baseline purity, per-lane provenance | **satisfied with three named exceptions** | §6 names the revision and environment of every lane. Exceptions: the local pytest lane's sandbox-only bytecode failure, the sweep's development-only vantage, and the installed-surface proof not re-run in V4 |
+
+### 3. Ceilings final state — fourteen keys
+
+`bootstrap_sites_outside_package 0`, `by_path_load_sites 0`, `commands_not_module_path 0`,
+`commands_unrunnable_from_the_root 0`, `docs_rederivation_gap 0`,
+`external_dependencies_added 0`, `lanes_documented_vs_executed_gap 0`,
+`registry_parity_mismatch 0`, `runtime_reachability_gap 0`,
+`tracked_files_outside_the_formatter_corpus 0`,
+`tracked_python_files_in_no_static_check_bucket 0`, `with_extras_census_gap 0`;
+`installed_user_identity_mismatch` and `plants_not_rejected_by_their_guard` are declared `SKIP` with
+their precondition-absent reasons printed by the collector itself.
+
+**For the maintainer's review, three changes this series made to the policy asset, all additions:**
+`lanes_documented_vs_executed_gap` (V4-01), `with_extras_census_gap` (V4-06) and
+`docs_rederivation_gap` (V4-07), each `max: 0` and each with **no `may_be_unmeasured`**, so a broken
+or empty instrument fails the gate instead of skipping. No ceiling was raised, no exemption added,
+no tolerance loosened and no marker added to a test. `plants_not_rejected_by_their_guard` stays
+`SKIP` even though this report captures a 194/194 sweep: the key measures the declaration on the
+runner and cannot read a sweep that writes gitignored scratch, which is the reason V3 gave for it.
+
+### 4. Deliberately not done
+
+1. **The sweep is not a CI lane.** Its 194/194 proof is a development-vantage reading with a captured
+   summary line; the runner's ceiling key still SKIPs. §16 item 5 is satisfied by the summary, not
+   by a gate that could fail on CI.
+2. **The benchmark summary's `working tree was dirty at run time` is still undiagnosed.** Job
+   `128613091928` of run `42442031942` prints `revision: ad03b890da5b **(working tree was dirty at
+   run time)**`. V3 §9 named the line and V4 recorded it at every tip; the condition emitted by
+   `tools/run_benchmark_suite.py:952` is not explained here, and no number from that job's generated
+   artifacts is cited.
+3. **The committed with-extras artifact is not pinned to HEAD.** `--reading with_extras_census`
+   reads `suite_run.json` at `revision 17df062040b8`, while the benchmark job's own `With-extras
+   census` step reads a freshly generated artifact at `ad03b890da5b`; both print `gap: 0`. The
+   reading checks member keys, statuses and totals, not the artifact's age.
+4. **The report PDF is not rebuilt.** `tools.build_report` stays `dev-only` in the lane contract for
+   the reason it gives; `docs_rederivation` reads `paper/technical_report.tex` rather than rendering
+   it, and no published asset was touched.
+5. **The installed-surface proof was not re-run in V4.** Its bare-wheel / clean-venv reading is
+   inherited from V3 §6 at `d502a61`; N2's with-extras half is current, its refusal half is not.
+6. **`tools/generate_shim_stubs.py` is reachable but nothing invokes it.** V3 §4 item 4 carried this
+   forward; `runtime_reachability` measures importability, not use.
+7. **V4 has no written prompt.** This file's opening paragraph says so; the series ran on inherited
+   §14–§16 rails with one case-by-case approval per unit.
+8. **The local delete-threshold override is an environment condition, not a shipped requirement.**
+   Raising `CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD` for the census changed no repository file, ceiling,
+   guard or wrapper verdict; CI has no such shim (V4-03's diagnosis at `f5fe7ae`).
+9. **No full census was taken at every intermediate tip.** V4-04…V4-07 verified their four plants
+   with targeted sweeps; only the final tip has a captured 194-plant summary.
+10. **Neither new reading regenerates what it reads.** `with_extras_census` and `docs_rederivation`
+    compare an artifact and five documents with their sources; they do not rewrite `suite_run.json`,
+    the five documents or the PDF.
+
+### 5. Premises audit
+
+1. **The advertised surface is false for an installed user — CLOSED.** Re-measured at the final tip:
+   `registry_parity` 19/19 with an empty mismatch, `with_extras_census` `members 19`, `passed 19`,
+   `not_passed []`, and the benchmark job's `19/19 executed and passed` on the runner. V4-05 put a
+   pytest guard on the refusal path V3-01 had left unguarded. Voiding this premise would make N1 and
+   N2 VOID and force V5 to re-open the installed-wheel lane.
+2. **Some gates execute nowhere the project names — CLOSED.** `.github/lane_contract.md` exists;
+   `--reading lanes_documented_vs_executed` prints `gap: 0`, five executed commands with their
+   `executed_at` steps (including the two V4-added steps), and three dev-only commands with reasons.
+   Voiding it would make N3 VOID and re-open the largest gap V3 left.
+3. **The audit instruments read source, not runtime — CLOSED.** `runtime_reachability_gap: 0` with
+   `ast_dead 13`, `import_reachable 13`, `pytest_collected 6`, `reached_by_neither 0`; V4's two new
+   readings read a produced artifact and five prose documents against their sources rather than
+   transcribing a number. Voiding it would make N6 VOID.
+
+V4's own five gaps, re-measured in this unit's Phase 0 entry, are all closed. **What voiding means
+for V5:** the three new ceiling keys carry no `may_be_unmeasured`, so an instrument that stops
+reading its corpus fails the gate rather than silently skipping; a V5 that weakens that property
+would lose the only mechanism by which a silent reading is visible.
+
+### 6. Per-lane verification table
+
+| lane | revision | environment | reading |
+|---|---|---|---|
+| `ruff check .` | `a74cf9a` | local, macOS, `.venv` Python 3.12 | `All checks passed!` |
+| `ruff format --check .` | `a74cf9a` | local | `232 files already formatted` |
+| `mypy python/quantrisk tools` | `a74cf9a` | local | `Success: no issues found in 74 source files` |
+| `--check-ceilings` | `a74cf9a` | local | 14 keys, **12 `ok` / 2 `SKIP`**; `declared_plants 194`; all three V4 keys `0` |
+| `--reading docs_rederivation` | `a74cf9a` | local | `documents 5`, seven claims, `derived {19, 19, 194, 95}`, `gap: 0` |
+| `--reading with_extras_census` | `a74cf9a` | local, committed artifact at `17df062040b8` | `members 19`, `passed 19`, `gap: 0` |
+| `--reading lanes_documented_vs_executed` | `a74cf9a` | local | `gap: 0`, 32 named steps, three `tools.inventory_orphan_code` steps |
+| `--reading registry_parity` | `a74cf9a` | local | `19 / 19`, `mismatch []` |
+| `--reading formatter_census` | `a74cf9a` | local | `tracked 232`, `walked 232`, both differences empty |
+| manifest verifier | `a74cf9a` | local | `95 OK`, `0 CHANGED`, `0 MISSING`, `Evidence is intact.` |
+| `pytest --collect-only -q`; offline collection | `a74cf9a` | local | `560 tests collected`; `491 tests collected`, `collection_errors 0` |
+| full `pytest -q` | `a74cf9a` | local, fresh private `--basetemp` | **1 failed, 559 passed in 259.07s** — the bytecode-cache plant this sandbox cannot run (`sys.dont_write_bytecode`); tree 0 lines afterwards |
+| full mutation sweep | `a74cf9a` | local development vantage, clean tree | **`194/194 planted defects were rejected by their guard.`**, exit 0, 993-line log |
+| `ruff` / format / mypy / ceilings / docs step | `ad03b89` | run `42442031942` attempt 1, lint job `128613091839`, runner `1000010445`, `ubuntu-latest` | `All checks passed!`; `232 files already formatted`; `74 source files`; `declared_plants: 194`; `Evidence is intact.`; docs step prints `documents: 5`, `gap: 0` |
+| `cmake --preset ci`, build, `ctest` | `ad03b89` | same run, jobs `128613092026` (`1000010446`) and `128613091965` (`1000010447`, `macos-15`) | `100% tests passed out of 204` on both |
+| `pytest` | `ad03b89` | same run, runner `1000010446` | **`490 passed, 5 skipped in 234.01s`**; `7/7 checks passed` from `validate` |
+| `pytest` | `ad03b89` | same run, runner `1000010447` | `98 passed in 3.16s` |
+| benchmark suite | `ad03b89` | same run, job `128613091928`, runner `1000010444` | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 430.4s total` |
+| `With-extras census` step | `ad03b89` | same job, runner `1000010444` | `gap: 0`, `members: 19`, `passed: 19`, `revision: ad03b890da5b` (fresh artifact) |
+| installed-surface proof | — | **not re-run in V4**; ceiling `SKIP` | marked unverified; last reading V3 §6 at `d502a61` |
+
+Three lanes are marked rather than green: the local pytest lane for its one sandbox-only failure,
+the sweep because it is a development-vantage reading with no runner lane, and the installed-surface
+proof because V4 did not re-run it. No lane in this table is credited to a cancelled run; every
+runner reading above comes from attempt 1 of a run whose four jobs all completed `success` with 14
+steps each.
+
+### 7. Series handoff — what V5 must contain
+
+1. **A written V5 prompt.** V4 had none and ran on inherited rails with seven case-by-case
+   approvals; a series that changes a policy asset again should state its own premises, lanes and
+   termination condition.
+2. **A decision on the sweep's vantage.** Either make it runner-executable so
+   `plants_not_rejected_by_their_guard` can stop SKIPping, or record explicitly that the proof stays
+   development-only. `194/194` at `a74cf9a` is the baseline any such change must not weaken.
+3. **A diagnosis of `working_tree_dirty`** in `tools/run_benchmark_suite.py:952`, the one line V3
+   and every V4 tip recorded without explaining.
+4. **A revision check for `suite_run.json`**, so the committed artifact the lint job reads can be
+   shown to describe the tip being verified rather than `17df062040b8`.
+5. **A re-run of the installed-surface proof** at a V5 tip if N2's inherited half is to become a
+   current reading.
+6. **A decision on `tools/generate_shim_stubs.py`** and on the two SKIP keys, both of which are
+   reachable-but-uninvoked or precondition-absent rather than fixed.
+7. **No change to the published asset set.** If the report is ever regenerated, it must be a new
+   artifact inside the repository; K5 forbids replacing a `v1.9.0` release asset.
+
+### 8. Archival confirmation
+
+- **Tree and tip.** `git status --porcelain` printed 0 lines at `a74cf9a` before this section was
+  written and again after the census and the local pytest run. `origin/main` was read from the
+  platform as `ad03b890da5b19682189cc5da9e408ab11821b10`; the two pushes of this unit are attributed
+  in the next entry and in the handoff.
+- **CI for every commit in the range.** `9e0bf03..ad03b89` holds **33** commits, partitioned below
+  into the **14** pushed tips. Every run is `event: push`, `run_attempt: 1`, `conclusion: success`;
+  no cancelled or failed run belongs to the V4 range. Commits sharing a push are credited to that
+  push's tip rather than individually, the convention V3 §8 used.
+
+| run | tip | commits carried | conclusion |
+|---|---|---|---|
+| `42052330523` | `8ffcb32` | 5 | `success` |
+| `42054617879` | `4c2b144` | 1 | `success` |
+| `42061987436` | `adf9918` | 3 | `success` |
+| `42063687017` | `b5db84f` | 1 | `success` |
+| `42337259111` | `8b57cd2` | 5 | `success` |
+| `42338131004` | `e4ec510` | 1 | `success` |
+| `42354746001` | `f3fc84b` | 3 | `success` |
+| `42355307417` | `0919138` | 1 | `success` |
+| `42358106717` | `3af53f4` | 4 | `success` |
+| `42359080745` | `0967dc8` | 1 | `success` |
+| `42362912014` | `575d620` | 3 | `success` |
+| `42363846255` | `bff0b35` | 1 | `success` |
+| `42441028241` | `a9af730` | 3 | `success` |
+| `42442031942` | `ad03b89` | 1 | `success` |
+
+  The 33-commit sum is 5+1+3+1+5+1+3+1+4+1+3+1+3+1. `41858982944` (three attempts, two cancelled)
+  and `41974525922` belong to V3 and are not credited here.
+- **Tags, releases and assets re-read from the platform.** `refs/tags/v1.9.0` → tag object
+  `d9deb7f764b3c16a091dc86effb9d523b1d2c7d0`, dereferenced to commit
+  `b2dda33f6726d7f36fbe3491aec7cd7a66184809`, tagger `2026-10-20T12:56:35Z`. Release `424060629`
+  was published `2026-10-26T09:35:44Z` with four assets (`CITATION.cff`, `manifest.json`,
+  `quantrisk-suite-results.zip`, `technical_report.pdf`), all created and updated between
+  `09:35:41Z` and `09:35:43Z` on that date — before V4 opened on 2026-11-05. No asset was replaced.
+- **Registers re-counted against their artifacts at this tip:** 19 registry tasks, 19 suite members,
+  **194** plants, **14** ceiling keys, **95** manifest entries, **232** formatter-tracked files,
+  **560 / 491** pytest nodes, **32** named CI steps, five living documents and seven printed claims.
+- **No stray instrument tracked.** `git ls-files -- tools/derive_requires.py build/run_sweep.py
+  build/api_push.py` prints nothing; `.gitignore:2` ignores `build/` and `.git/info/exclude:9`
+  ignores `.workbuddy/`, so the sweep wrappers and the agent-local memory stay outside
+  `formatter_census`'s tracked corpus (both of its differences are empty).
+- **The locks are intact.** `git diff --name-only 9e0bf03..ad03b89` lists 12 files — the lane
+  contract, the workflow, both verification modules, three test files, the collector, the ceilings
+  file, two documents and this ledger — with 2,341 insertions and 17 deletions. The same command
+  restricted to `cpp/`, `bindings/`, `CMakeLists.txt`, `PROJECT_SPEC.md`, `REFACTOR_PROMPT.md`,
+  `V3_PROMPT.md`, `evidence/manifest.json` and `paper/` prints nothing.
+
+**The push.** This section is committed after the Phase 0 commit and pushed with it; the CI reading
+for that tip is appended in the next entry once the tool reports it, and the ledger states no outcome
+before it does. The first of the two pushes authorised in the Phase 0 entry carries the
+report-and-readings tip; the second carries the entry recording its CI. The terminal commit's own CI
+is read after the second push and reported in the session handoff, not written into the file whose
+content is fixed before that push.
+
 
 
 
