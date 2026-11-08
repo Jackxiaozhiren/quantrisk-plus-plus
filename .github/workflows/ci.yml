@@ -61,6 +61,14 @@ jobs:
       # only a laptop ever measured it, so a key whose corpus had silently shrunk -- the defect P3.5
       # found in the command classifier -- would have stayed invisible between sessions. This step is
       # the same reading on the runner, and it prints every key with its value and its ceiling.
+      # V4-07. §5's `docs/` row asks for the same five documents "re-derived, never transcribed";
+      # V3 §4 item 5 records it as paid only where a claim moved, and V3 §7 item 5 asks for it as
+      # a lane. The pytest guards over those documents are real but live inside a job step, and
+      # the lane contract says a job step is not a lane. This module-path invocation is the lane:
+      # it prints its own reading over the five documents, and the ceilings step below adjudicates
+      # the same reading's gap. The command is already an `executed` row of the contract.
+      - name: Docs re-derivation
+        run: uv run python -m tools.inventory_orphan_code --reading docs_rederivation
       - name: refactor ceilings
         run: uv run python -m tools.inventory_orphan_code --check-ceilings
       # V2-28. §7 step 4 introduces its block with "These are the CI lanes", and this command has been

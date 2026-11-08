@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 193/193 planted defects rejected",
+        anchor="# 194/194 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2806,6 +2806,23 @@ MUTATIONS: tuple[Mutation, ...] = (
             "the artifact a run writes is the census; a totals block that counts a "
             "different number than the member list beside it is exactly the shape a "
             "log line cannot catch, which is the V4 gap 3 residue this plant re-opens"
+        ),
+    ),
+    Mutation(
+        identifier="a-living-document-transcribes-a-number-the-artifact-does-not-hold",
+        kind="prose",
+        path="docs/validation_matrix.md",
+        anchor="uv run python -m tools.run_benchmark_suite            # all 19 members",
+        replacement="uv run python -m tools.run_benchmark_suite            # all 18 members",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_the_ci_lane_that_runs_the_guards_fetches_what_they_read"
+        ),
+        claim=(
+            "the five living documents are re-derived from the artifacts by a named lane, "
+            "not transcribed when a number happens to move; a document that prints a value "
+            "the suite artifact does not hold reddens the re-derivation reading, which is the "
+            "V3 §7 item 5 residue this plant re-opens"
         ),
     ),
 )

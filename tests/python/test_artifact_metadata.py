@@ -6631,6 +6631,37 @@ def test_the_ci_lane_that_runs_the_guards_fetches_what_they_read() -> None:
     )
     assert lanes["gap"] == 0, f"the lane contract's gap is {lanes['gap']}, above its ceiling of 0"
 
+    # V4-07. The contract checks that a declared command executes; §5's `docs/` row asks something
+    # else of one of them: that the five living documents are re-derived from the artifacts rather
+    # than transcribed in the commit that happened to move a number. The guards over those documents
+    # live inside a pytest step, which the contract says is not a lane. So both halves are pinned
+    # here: a named step that disappears, a document that drops its claim, or a printed number that
+    # stops matching its artifact all redden this guard.
+    from tools.inventory_orphan_code import docs_rederivation
+
+    docs_steps = [
+        step
+        for job in (workflow.get("jobs") or {}).values()
+        for step in job.get("steps") or []
+        if str(step.get("name", "")) == "Docs re-derivation"
+    ]
+    assert len(docs_steps) == 1, (
+        f"the workflow has {len(docs_steps)} Docs re-derivation steps, so which one is the lane "
+        "would be a choice rather than a reading"
+    )
+    assert "--reading docs_rederivation" in str(docs_steps[0].get("run", "")), (
+        "the Docs re-derivation step no longer prints the reading the ceiling adjudicates"
+    )
+    reading = docs_rederivation()
+    assert reading["available"], reading
+    assert reading["documents"] == 5, (
+        f"the re-derivation walked {reading['documents']} documents, not the five that "
+        "CONTRIBUTING.md enumerates"
+    )
+    assert reading["gap"] == 0, (
+        f"a living document transcribed a number its artifact does not hold: {reading}"
+    )
+
 
 _CITATION = re.compile(r"\\src(?:in)?\{([^{}]*)\}")
 _CITATION_DEFINITION = re.compile(r"\\newcommand\{\\src")

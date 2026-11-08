@@ -39,6 +39,55 @@ LANE_COMMAND = re.compile(
     r"-m\s+((?:tools|quantrisk)\.[\w.]+)|\bquantrisk\s+(validate|benchmark|demo|run)\b"
 )
 
+#: The five living documents that quote a regenerated artifact, enumerated by CONTRIBUTING.md's
+#: "Sync the prose last among the regenerations" paragraph. V3 §4 item 5 records that §5's `docs/`
+#: row was paid only where a claim moved: the pytest guards over these documents are real, but they
+#: run inside a job step that the lane contract explicitly excludes from being a lane. Each entry is
+#: (metric, pattern, shape): `one` captures a single token, `pair` captures both halves of a slash
+#: reading, and every captured token must equal the value the artifact produced. The values are
+#: never written here -- they are re-derived from the artifacts on every run.
+LIVING_DOCUMENT_CLAIMS: dict[str, tuple[tuple[str, str, str], ...]] = {
+    "README.md": (("suite_members", r"runs\s+all\s+(\w+)\s+members", "one"),),
+    "docs/reproducibility.md": (("suite_members", r"all\s+(\d+)\s+members", "one"),),
+    "docs/validation_matrix.md": (("suite_members", r"all\s+(\d+)\s+members", "one"),),
+    "docs/interview_defense.md": (
+        ("suite_members", r"(\d+)/(\d+)\s+benchmark-suite\s+members\s+executed", "pair"),
+        ("plants", r"(\d+)/(\d+)\s+planted\s+defects\s+rejected", "pair"),
+    ),
+    "paper/technical_report.tex": (
+        ("suite_members", r"(\d+)\s+benchmark-suite\s+members\s+execute", "one"),
+        ("manifest_artifacts", r"(\d+)\s+artifacts", "one"),
+    ),
+}
+_NUMBER_WORDS = {
+    word: index
+    for index, word in enumerate(
+        [
+            "zero",
+            "one",
+            "two",
+            "three",
+            "four",
+            "five",
+            "six",
+            "seven",
+            "eight",
+            "nine",
+            "ten",
+            "eleven",
+            "twelve",
+            "thirteen",
+            "fourteen",
+            "fifteen",
+            "sixteen",
+            "seventeen",
+            "eighteen",
+            "nineteen",
+            "twenty",
+        ]
+    )
+}
+
 
 def git(*args: str) -> str:
     result = subprocess.run(
@@ -1029,6 +1078,105 @@ def with_extras_census() -> dict[str, Any]:
     }
 
 
+def _claim_value(token: str) -> int | None:
+    """`19` and `nineteen` are the same claim about the same artifact (V2's `_as_int` rule)."""
+    if token.isdigit():
+        return int(token)
+    return _NUMBER_WORDS.get(token.lower())
+
+
+def docs_rederivation() -> dict[str, Any]:
+    """Re-derive the five living documents' printed counts from the artifacts that own them.
+
+    V4's gap 5, and V3 §7 item 5: `docs/` re-derivation was paid only where a claim moved, as
+    "three files that happened to quote a moved number". The pytest guards over those documents
+    are real, but they live inside a job step, and the lane contract says a job step is not a
+    lane. This reading is the lane: it derives four values from committed artifacts -- suite
+    members from `suite_run.json` and the registry in both directions, plants from the runner's
+    own `--list`, manifest entries from `evidence/manifest.json` -- then reads all five living
+    documents and compares each printed claim with the value the artifact produced.
+
+    Every document must carry at least one re-derived claim, so the five are a census and not a
+    sample. `gap` counts a missing document, a claim that went missing, a claim whose printed
+    value disagrees with its artifact, and a source that disagrees with itself. An absent artifact
+    is `available: False` rather than zero, so the ceiling fails instead of skipping.
+    """
+    for path in (BENCHMARK_SUITE_RUN, MANIFEST_PATH):
+        if not path.exists():
+            return {
+                "available": False,
+                "unavailable_because": f"{path.relative_to(REPO_ROOT)} is not in the tree",
+                "gap": None,
+            }
+    suite = json.loads(BENCHMARK_SUITE_RUN.read_text(encoding="utf-8"))
+    registry = {task.task_id for task in _load_registry().TASKS}
+    derived = {
+        "suite_members": len(suite.get("members", [])),
+        "registry_tasks": len(registry),
+        "plants": plant_liveness()["declared_plants"],
+        "manifest_artifacts": len(
+            json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))["artifacts"]
+        ),
+    }
+    source_disagreements: list[str] = []
+    if derived["suite_members"] != derived["registry_tasks"]:
+        source_disagreements.append(
+            f"the suite artifact carries {derived['suite_members']} members while the registry "
+            f"declares {derived['registry_tasks']} tasks"
+        )
+    claims: list[dict[str, Any]] = []
+    mismatches: list[str] = []
+    for document, entries in LIVING_DOCUMENT_CLAIMS.items():
+        path = REPO_ROOT / document
+        if not path.exists():
+            mismatches.append(f"{document} is absent from the tree")
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        checked = 0
+        for metric, pattern, shape in entries:
+            match = re.search(pattern, text)
+            if not match:
+                mismatches.append(f"{document} no longer states {metric} in the declared form")
+                continue
+            observed = [_claim_value(token) for token in match.groups()]
+            if shape == "one" and len(observed) != 1:
+                mismatches.append(f"{document} prints a malformed {metric}: {match.group(0)!r}")
+                continue
+            if shape == "pair" and len(observed) != 2:
+                mismatches.append(f"{document} prints a malformed {metric}: {match.group(0)!r}")
+                continue
+            if any(value is None for value in observed):
+                mismatches.append(f"{document} prints an unreadable {metric}: {match.group(0)!r}")
+                continue
+            expected = derived[metric]
+            if any(value != expected for value in observed):
+                mismatches.append(
+                    f"{document} prints {match.group(0)!r} for {metric}; the artifact says "
+                    f"{expected}"
+                )
+            checked += 1
+            claims.append(
+                {
+                    "document": document,
+                    "metric": metric,
+                    "printed": match.group(0),
+                    "observed": observed,
+                    "derived": expected,
+                }
+            )
+        if not checked:
+            mismatches.append(f"{document} re-derived no claim, so the census would be a sample")
+    return {
+        "available": True,
+        "documents": len(LIVING_DOCUMENT_CLAIMS),
+        "claims": claims,
+        "derived": derived,
+        "mismatches": mismatches,
+        "source_disagreements": source_disagreements,
+        "gap": len(mismatches) + len(source_disagreements),
+    }
+
+
 def build_snapshot() -> dict[str, Any]:
     all_python = tracked(("*.py", "*.pyi"))
     corpus = [path for path in all_python if path.endswith(".py")]
@@ -1122,6 +1270,15 @@ def build_snapshot() -> dict[str, Any]:
                 ),
                 "value": with_extras_census(),
             },
+            {
+                "name": "docs_rederivation",
+                "command": (
+                    "re-derive suite members, plants and manifest entries from their artifacts, "
+                    "then read all five living documents and compare every printed claim with "
+                    "the value the artifact produced"
+                ),
+                "value": docs_rederivation(),
+            },
         ],
     }
 
@@ -1149,6 +1306,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
     dependencies = by_name["external_dependencies"]
     lanes = by_name["lanes_documented_vs_executed"]
     census = by_name["with_extras_census"]
+    docs = by_name["docs_rederivation"]
     return {
         "bootstrap_sites_outside_package": len(by_name["bootstrap_census"]),
         "by_path_load_sites": len(by_name["by_path_load_sites"]),
@@ -1171,6 +1329,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
         "external_dependencies_added": len(dependencies["added"]) + len(dependencies["removed"]),
         "lanes_documented_vs_executed_gap": None if not lanes["available"] else lanes["gap"],
         "with_extras_census_gap": None if not census["available"] else census["gap"],
+        "docs_rederivation_gap": None if not docs["available"] else docs["gap"],
     }
 
 

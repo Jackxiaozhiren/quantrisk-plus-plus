@@ -27,6 +27,18 @@ in-process-only, with reasons, in
 `tests/python/test_artifact_metadata.py::test_the_ci_lane_that_runs_the_guards_fetches_what_they_read`;
 no document claims them as a command to run and no CI step invokes them.
 
+**The `docs/` re-derivation lane.** `V3_PROMPT.md` §5 asks for the five documents describing the
+surface to be "re-derived, never transcribed", and V3 §7 item 5 asks for that re-derivation *as a
+lane*. `CONTRIBUTING.md`'s "Sync the prose last among the regenerations" paragraph enumerates them:
+`README.md`, `docs/interview_defense.md`, `docs/validation_matrix.md`, `docs/reproducibility.md` and
+the report's source `paper/technical_report.tex`. The lane is the `Docs re-derivation` step of the
+`lint` job, which runs `tools.inventory_orphan_code --reading docs_rederivation`; that reading
+derives its values from `suite_run.json`, the registry, the runner's `--list` and
+`evidence/manifest.json`, then reads all five documents and prints every claim beside the value the
+artifact produced. The `refactor ceilings` step adjudicates its `docs_rederivation_gap`. The source
+is read, not rendered: `tools.build_report` stays dev-only for the reason its row gives. The pytest
+guards over the same documents remain in place; this lane does not replace them, it names them.
+
 ```json
 {
   "schema": "quantrisk-lane-contract/1",

@@ -218,6 +218,18 @@
       "corpus": "benchmarks/suite/results/suite_run.json, which the benchmark job rewrites on every run and uploads as an artifact: its member `key` set is compared with the registry's task ids in both directions, every member's `status` with `passed`, and `totals.members`/`passed`/`failed`/`skipped` with the member list they describe.",
       "can_fail_because": "a job that writes eighteen members while the registry declares nineteen, an artifact carrying a member the registry does not declare, a duplicate key, a member whose status is `failed` or `skipped`, or a totals block that counts a different number than the list beside it all make the sum non-zero. The plant rewrites `\"members\": 19` to `\"members\": 18` in the artifact. An absent artifact returns unavailable rather than zero, and this row carries no may_be_unmeasured, so the gate fails instead of skipping.",
       "exemptions": []
+    },
+    {
+      "key": "docs_rederivation_gap",
+      "law": "V3 §5 / §7.5",
+      "metric": "the sum of named disagreements between the five living documents and the artifacts that own their printed counts: a document absent from the tree, a claim that no longer appears in the declared form, a printed value that differs from the re-derived value, a document that re-derived no claim, and a suite artifact whose member count disagrees with the registry",
+      "measured_at_baseline": null,
+      "baseline_note": "the five documents were policed by pytest guards at the V4-07 baseline, but no named CI lane read them and no reading printed its own verdict, so no figure is claimed before this unit. V3 §4 item 5 records the row as paid only where a claim moved.",
+      "max": 0,
+      "reach_by_phase": "V4-07",
+      "corpus": "the five living documents enumerated by CONTRIBUTING.md's regeneration paragraph (README.md, docs/reproducibility.md, docs/validation_matrix.md, docs/interview_defense.md and paper/technical_report.tex), read in full, against four values re-derived from benchmarks/suite/results/suite_run.json, the registry, the runner's own --list and evidence/manifest.json. The source is read rather than rendered, so tools.build_report stays dev-only.",
+      "can_fail_because": "a document that transcribes a superseded number instead of re-deriving it, a claim sentence that disappears, one of the five documents going missing, or the suite artifact and the registry disagreeing all make the sum non-zero. The plant rewrites `all 19 members` to `all 18 members` in docs/validation_matrix.md. An absent artifact returns unavailable rather than zero, and this row carries no may_be_unmeasured, so the gate fails instead of skipping.",
+      "exemptions": []
     }
   ],
   "notes": [
