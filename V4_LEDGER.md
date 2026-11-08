@@ -1225,6 +1225,84 @@ reported in the session handoff rather than written into the file whose content 
 push — the convention V2, V3 and V4-01…V4-05 used. The second push authorised in the Phase 0 entry
 carries this entry only; no third is implied.
 
+---
+
+### 2026-11-08, V4 Phase 0 for V4-07 — `docs/` re-derivation becomes a lane, measured at `bff0b35`
+
+**Revision and vantage.** `HEAD` = `origin/main` = `bff0b359dbec7359703703e2513e89dcbd1600cd`,
+`git status --porcelain` 0 lines, `v1.9.0` tag object `d9deb7f` unmoved. Vantage: the development
+checkout, `.venv` Python 3.12, macOS. Counts re-measured at this tip: **193** plants, **13** ceiling
+keys (11 `ok` / 2 `SKIP`), **95** manifest `artifacts`, **232** formatter-tracked files, **560**
+collected pytest nodes, **31** named CI steps.
+
+**The gap, in the words that opened it.** V4 Phase 0 gap 5 says "`docs/` re-derivation is not a
+lane." V3 §7 item 5 asks for "The re-derivation of `docs/` as a lane, not as three files that
+happened to quote a moved number", and V3 §4 item 5 records that the §5 `docs/` row — "five documents
+describing the surface" / "the same five re-derived, never transcribed" — was paid "only where a
+claim moved: three documents that describe `run --list`, and the report PDF that quotes the test
+counts. The other documents were read and their claims did not change."
+
+**Where the claim actually lives, measured.** `CONTRIBUTING.md`'s "Sync the prose last among the
+regenerations" paragraph enumerates the five living documents that quote a regenerated artifact:
+`README.md`, `docs/interview_defense.md`, `docs/validation_matrix.md`, `docs/reproducibility.md` and
+the report. Their current, readable claims are:
+
+| document | a claim it prints | what re-derives it today |
+|---|---|---|
+| `README.md:169` | `runs all nineteen members` | one pytest guard over the registry |
+| `docs/reproducibility.md:76` | `all 19 members` | one pytest guard over the registry |
+| `docs/validation_matrix.md:140` | `all 19 members` | one pytest guard over the registry |
+| `docs/interview_defense.md:48` | `19/19 benchmark-suite members executed` | one pytest guard over the registry |
+| `docs/interview_defense.md:1037` | `# 193/193 planted defects rejected` | one plant anchor and one pytest guard over the plant list |
+| `paper/technical_report.tex:152` | `95 artifacts` | one pytest guard over the manifest |
+
+So the five documents *are* policed, but only as assertions inside a pytest step. `grep -c
+"      - name:" .github/workflows/ci.yml` reads **31** and none of those steps reads the documents it
+re-derives; the lane contract itself says "Nothing else counts: `cmake`, `ctest`, `ruff`, `mypy` and
+`clang-format` are steps of jobs, not lanes with a separate declaration". A lane here must therefore
+be a module-path invocation with its own named step, its own printed reading, and a ceiling that can
+redden it. That is the difference between a number that was updated by hand in the commit that moved
+it and a number that a lane re-derives from the artifact on every push.
+
+**What this unit will ship.**
+
+1. `docs_rederivation()` in `tools/inventory_orphan_code.py` — the one collector §4.1 permits. It
+   re-derives three values from committed artifacts (suite members from
+   `benchmarks/suite/results/suite_run.json` against the registry in both directions, plants from
+   the runner's own `--list`, and manifest entries from `evidence/manifest.json`), then reads all
+   five living documents and compares each document's printed claim with the value the artifact
+   produced. Every document must carry at least one re-derived claim, so the reading is a census of
+   the five and not a sample. `gap` counts missing documents, missing or stale claims and a source
+   that disagrees with itself.
+2. `--reading docs_rederivation` already exists as a flag from V4-06, so the reading prints its own
+   JSON rather than being a slice of the snapshot.
+3. `docs_rederivation_gap` in `tools/refactor_ceilings.json`: a **14th** ceiling key, `max 0`, with
+   **no `may_be_unmeasured`** — every input is a committed file on the runner.
+4. One named CI step, `Docs re-derivation`, in the lint job, executing
+   `uv run python -m tools.inventory_orphan_code --reading docs_rederivation`.
+5. A paragraph in `.github/lane_contract.md` naming that step as the lane that reads the five
+   documents; `tools.inventory_orphan_code` is already an `executed` row, and the contract permits
+   one command in several steps, as V4-06 measured.
+6. The existing `test_the_ci_lane_that_runs_the_guards_fetches_what_they_read` is **extended**, not
+   duplicated, to assert the step exists and the reading's `gap` is zero over all five documents —
+   the counted pair stays 560/491.
+7. One plant, `a-living-document-transcribes-a-number-the-artifact-does-not-hold`, rewrites
+   `all 19 members` to `all 18 members` in `docs/validation_matrix.md`. Plant total 193 → 194;
+   `docs/interview_defense.md:1037` and the existing command-comment plant are re-keyed to `194/194`.
+
+**The approval for this case, recorded verbatim (§14).** The maintainer's instruction that opened
+this unit is `继续`, given immediately after the V4-06 handoff named `docs/` re-derivation as the sole
+remaining gap and recommended it as V4-07. Read against §14, it continues the same case-by-case
+direction used in V4-01…V4-06: one scope unit, **two** pushes — the implementation-and-readings tip
+and the entry recording that tip's CI — both attributed below, and no third is implied. No other
+wording is attributed to the maintainer here.
+
+**Deliberately not done in Phase 0.** No source file was edited, no plant added, no ceiling key
+changed, no step added. The report PDF is not rebuilt: `tools.build_report` stays `dev-only` for the
+reason the contract already gives, and this reading reads `paper/technical_report.tex` rather than
+rendering it. No full 194-plant census is claimed; the last captured full summary is `190/190` at
+`f5fe7ae`. V4's Phase 5 report is a separate unit and is not opened here.
+
 
 
 
