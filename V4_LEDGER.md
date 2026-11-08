@@ -1303,6 +1303,46 @@ reason the contract already gives, and this reading reads `paper/technical_repor
 rendering it. No full 194-plant census is claimed; the last captured full summary is `190/190` at
 `f5fe7ae`. V4's Phase 5 report is a separate unit and is not opened here.
 
+---
+
+### 2026-11-08, V4-07 — the five living documents are re-derived, and the lane prints it
+
+**What shipped, and at which tip.** Phase 0 is `68bda4d1f828dc0908a3038c8e8fdb85ed87c147`; the
+implementation tip is `c36a2c348636953d459d10a5701568f61884a471`. The range
+`bff0b35..c36a2c3` touches eight files, 319 insertions and 2 deletions. `git diff --name-only` over
+that range contains none of `cpp/`, `bindings/`, `CMakeLists.txt`, `PROJECT_SPEC.md`,
+`REFACTOR_PROMPT.md`, `evidence/manifest.json` or `paper/`; `v1.9.0` is unmoved.
+
+**The readings this unit produced, all at `c36a2c3` on a clean tree.**
+
+| reading | command | value |
+|---|---|---|
+| docs re-derivation | `uv run --frozen python -m tools.inventory_orphan_code --reading docs_rederivation` | `documents: 5`, **7** printed claims, `mismatches: []`, `source_disagreements: []`, `gap: 0`; `derived` = `suite_members 19`, `registry_tasks 19`, `plants 194`, `manifest_artifacts 95` |
+| ceilings | `uv run --frozen python -m tools.inventory_orphan_code --check-ceilings` | **14** keys — **12 `ok` / 2 `SKIP`**; `docs_rederivation_gap: 0 against a ceiling of 0 due V4-07` |
+| lane contract | `--reading lanes_documented_vs_executed` | `gap: 0` with **32** named CI steps, so the new step did not vacate the contract |
+| static gates | `ruff check .`, `ruff format --check .`, `mypy python/quantrisk tools` | `All checks passed!`; `232 files already formatted`; `Success: no issues found in 74 source files` |
+| manifest | `uv run --frozen python -m tools.verify_evidence_manifest` | `Evidence is intact.` (95 `artifacts`) |
+| pytest collection | `uv run --frozen pytest --collect-only -q` | `560 tests collected in 1.18s` — the counted pair stays **560/491** because the lane test was extended, not added |
+| local full pytest | `uv run --frozen pytest -q --basetemp=<fresh>` | `1 failed, 559 passed in 139.83s`; the single failure is `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache`, the known sandbox-only bytecode-cache plant, unchanged from V4-02…V4-06 |
+| targeted sweep | `build/run_sweep.py --all --verbose --only <new plant> --only docs-command-comment-counts-superseded-plants` | `2/2 planted defects were rejected by their guard.`, exit 0, `git status --porcelain` 0 lines |
+
+The new plant rewrites `all 19 members` to `all 18 members` in `docs/validation_matrix.md`; the
+extended lane test reddens because `docs_rederivation()` reads that document and finds the printed
+value disagrees with the suite artifact. The second plant is the command-comment anchor, re-keyed
+from `193/193` to `194/194` together with `docs/interview_defense.md:1037`; the plant total is
+**193 → 194**.
+
+**What this entry does not claim.** The reading reads the five documents; it does not regenerate
+them, and the report PDF is not rebuilt. No full 194-plant census is claimed — the last captured
+full sweep summary is `190/190` at `f5fe7ae`, and this unit's plant is verified by the targeted
+`2/2` run, as V4-04, V4-05 and V4-06 did. The benchmark summary's
+`(working tree was dirty at run time)` line is still recorded rather than diagnosed.
+
+**The push.** This entry is committed after the implementation commit and pushed with it; the CI
+reading for the pushed tip is appended in the next entry once `gh` reports it, and the ledger states
+no outcome before the tool does. The first of the two pushes authorised in the Phase 0 entry carries
+this implementation-and-readings tip; the second carries the entry recording its CI.
+
 
 
 
