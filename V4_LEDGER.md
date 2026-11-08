@@ -1387,6 +1387,78 @@ reported in the session handoff rather than written into the file whose content 
 push — the convention V2, V3 and V4-01…V4-06 used. The second push authorised in the Phase 0 entry
 carries this entry only; no third is implied.
 
+---
+
+### 2026-11-08, V4 Phase 0 for V4 Phase 5 — the series report and the archival confirmation, measured at `ad03b89`
+
+**Revision and vantage.** `HEAD` = `origin/main` =
+`ad03b890da5b19682189cc5da9e408ab11821b10`, `git status --porcelain` 0 lines, `v1.9.0` =
+`d9deb7f764b3c16a091dc86effb9d523b1d2c7d0` unmoved. Vantage: the development checkout, `.venv` Python
+3.12, macOS, the same WorkBuddy interpreter shim V3 Phase 5 recorded. The 14 pushed tips and their
+`conclusion`s below are read from `gh api repos/Jackxiaozhiren/quantrisk-plus-plus/actions/runs`, not
+from this file: the git smart-HTTP channel is still blocked, so this unit's pushes use the Git Data
+API as V4-03…V4-07 did.
+
+**The archive re-counted at this tip, not inherited from V4-07's prose.**
+
+| quantity | command that produced the reading | value |
+|---|---|---|
+| registry tasks | `uv run --frozen python -m tools.inventory_orphan_code --reading registry_parity` | `filesystem_units 19`, `registry_sources 19`, `mismatch []` |
+| suite members | `--reading with_extras_census` | `members 19`, `passed 19`, `gap 0`, `revision 17df062040b8` from the committed `suite_run.json` |
+| plants | `uv run --frozen python -m quantrisk.verification.runner --list` | **194** lines; `plant_liveness.declared_plants 194` |
+| ceiling keys | `--check-ceilings` | **14** — **12 `ok` / 2 `SKIP`**; `lanes_documented_vs_executed_gap`, `with_extras_census_gap` and `docs_rederivation_gap` all `0` |
+| manifest | `uv run --frozen python -m tools.verify_evidence_manifest` | `95 OK`, `0 CHANGED`, `0 MISSING`, `Evidence is intact.` |
+| formatter corpus | `--reading formatter_census` | `tracked_formattable 232`, `walked_formattable 232`, both differences empty |
+| pytest nodes | `uv run --frozen pytest --collect-only -q`; `uv run --frozen python -m tools.measure_offline_collection` | **560** collected; offline tail `491 tests collected`, `collection_errors 0` |
+| lane contract | `--reading lanes_documented_vs_executed` | `gap: 0`; `executed_at` names the three `tools.inventory_orphan_code` steps; `grep -c '^      - name:' .github/workflows/ci.yml` prints **32** |
+| living documents | `--reading docs_rederivation` | `documents 5`, seven claims, `derived` = `suite_members 19`, `registry_tasks 19`, `plants 194`, `manifest_artifacts 95`, `mismatches []`, `gap: 0` |
+| static gates | `uv run --frozen ruff check .`; `ruff format --check .`; `mypy python/quantrisk tools` | `All checks passed!`; `232 files already formatted`; `Success: no issues found in 74 source files` |
+
+**The authority for this unit.** `V3_PROMPT.md` §12 enumerates the eight deliverables of a Phase 5
+report; §16 item 5 asks for the sweep's own summary line at the final revision on a clean tree, item
+7 for the report and archival confirmation to be committed and pushed, and item 8 for a CI reading
+for every commit in the range. V4 has no written prompt — this file's opening paragraph says so — so
+the inherited rails in §14–§16 are applied to this one scope unit. Nothing in this unit edits
+`V3_PROMPT.md`, `REFACTOR_PROMPT.md` or `PROJECT_SPEC.md`.
+
+**The five gaps V4 opened with, re-measured as closed at this tip.**
+
+| gap | closing commit | the reading that closes it |
+|---|---|---|
+| 1. lane contract is not a file | `d5408f4` | `--reading lanes_documented_vs_executed` prints `gap: 0` over 8 declared / 5 executed commands |
+| 2. a crash is scored as an objection | `501dd3e` | `GUARD_ERRORED` and the pytest return-code table in `decide()`; CTest keeps its coarse convention |
+| 3. the full census has no isolation | `f5fe7ae` | private `TMPDIR` and per-invocation `--basetemp`; `190/190` at that tip |
+| 4. the `ESCAPED` name is assigned twice | `622b9f1` | one live assignment, pinned by the extended status-table test |
+| 5. refusal, with-extras census and docs re-derivation are unguarded | `1764231`, `dbbb33d`, `c36a2c3` | the extended refusal test; `with_extras_census_gap: 0`; `docs_rederivation_gap: 0` |
+
+**What this unit ships.** One `## V4 Phase 5` section in this ledger carrying the eight §12
+deliverables: an evidence ledger for V4-01…V4-07, the N1…N12 liveness table, the 14-key ceilings
+final state, an honestly non-empty deliberately-not-done list, a premises audit, a series handoff, a
+per-lane verification table and an archival confirmation over all **33** V4 commits. It also ships
+the full **194**-plant census on the committed Phase 0 tip with a clean tree, its own summary line
+captured in a log outside the repository, and the post-census tree check — §16 item 5 has not been
+satisfied at a 194-plant tip before. The local `CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD` override is an
+environment condition of that one census, not a repository change; V4-03 diagnosed it at `f5fe7ae`.
+Only `V4_LEDGER.md` is edited: no source, guard, plant, ceiling, artifact, lock, PDF, tag or locked
+path moves, and no new pytest node is collected.
+
+**The approval for this case, recorded verbatim (§14).** The maintainer's instruction that opened
+this unit is `授权`, given in response to the V4-07 handoff which stated that the series report and
+archival close-out is a separate unit and that the next scope unit needs a new case-by-case approval.
+Read against §14, that is approval for this one scope unit and its **two** pushes — the
+report-and-readings tip, and the entry recording that tip's CI — both attributed below; no third is
+implied, and it is not a standing approval. The approvals recorded in the V4-01…V4-07 Phase 0
+entries each covered their own unit and are not the authority for this one. The terminal commit's own
+CI is read after the second push and reported in the session handoff, as in every earlier V4 unit.
+
+**Deliberately not done in Phase 0.** No source file was edited, no plant added, no ceiling key
+changed, no CI step added, no census was run, no report section written and no push made. In
+particular, the 194-plant census is an *intended reading*, not a result: the last captured full sweep
+summary remains `190/190 planted defects were rejected by their guard.` at `f5fe7ae`, and V4-04…
+V4-07 verified their four plants by targeted sweeps only. No V4 prompt file is created, the report
+PDF is not rebuilt, and the sweep is not added as a CI lane. Every number above is a reading at
+`ad03b89`; none is quoted from this file's earlier entries without being re-measured.
+
 
 
 
