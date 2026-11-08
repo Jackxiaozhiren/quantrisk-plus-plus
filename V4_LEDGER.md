@@ -1343,6 +1343,50 @@ reading for the pushed tip is appended in the next entry once `gh` reports it, a
 no outcome before the tool does. The first of the two pushes authorised in the Phase 0 entry carries
 this implementation-and-readings tip; the second carries the entry recording its CI.
 
+---
+
+### 2026-11-08, V4-07 — the implementation-and-readings tip is green, and the lane is attributed
+
+**The CI reading, attributed to the run, attempt, runner and environment that produced it.** Run
+`42441028241` is a `push` run for `a9af730f7a1156db1cd1f230f2096d5c88b6269d`, attempt **1**, read
+from the GitHub Actions API after `gh run watch` returned exit 0: `status: completed`,
+`conclusion: success`. All **four** jobs are `completed success` with 14 steps each, on runners
+`GitHub Actions 1000010440`–`1000010443` (`ubuntu-latest` for three, `macos-15` for the parity job).
+No job was cancelled or reported zero steps, so §15.5 does not apply.
+
+| job | runner | the reading |
+|---|---|---|
+| Format and static checks | `1000010443` | `All checks passed!`; `232 files already formatted`; `Success: no issues found in 74 source files`; `declared_plants: 194`; `ok docs_rederivation_gap: 0 against a ceiling of 0 due V4-07`; `ok lanes_documented_vs_executed_gap: 0 against a ceiling of 0 due V4-01`; `Evidence is intact.` |
+| `Docs re-derivation` step (same job) | `1000010443` | `available: true`, `documents: 5`, seven printed claims, `derived` = `suite_members 19`, `registry_tasks 19`, `plants 194`, `manifest_artifacts 95`, `mismatches: []`, `source_disagreements: []`, `gap: 0` |
+| Configure, build, C++ tests, Python tests | `1000010441` | `100% tests passed out of 204`; `490 passed, 5 skipped in 230.64s`; `7/7 checks passed` |
+| macOS native C++ and Python parity | `1000010440` | `100% tests passed out of 204`; `98 passed in 2.21s` |
+| Benchmark suite against live oracles | `1000010442` | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 426.3s total`; the with-extras census step prints `gap: 0`, `members: 19`, `passed: 19`, `revision: a9af730f7a11` |
+
+`490 passed, 5 skipped` is unchanged from `8ffcb32`, `adf9918`, `b5db84f`, `8b57cd2`, `e4ec510`,
+`f3fc84b`, `0919138`, `3af53f4`, `0967dc8`, `575d620` and `bff0b35`: the lane test was extended, so
+the counted pair 560/491 did not move. The new step and the `refactor ceilings` step read the same
+collector from the same job, one printing the reading and one adjudicating its gap; the lane
+contract's `executed_at` set permits the one command to appear in several steps, and its gap stayed
+0 with 32 named CI steps.
+
+**One caveat, unchanged and still not diagnosed.** The benchmark summary prints
+`revision: a9af730f7a11 (working tree was dirty at run time)` for the ninth consecutive run. Same
+line V3 §9 named; not explained here, and no number from that job's artifacts is cited.
+
+**What this entry does not claim.** No full 194-plant census: the last captured full sweep summary
+is `190/190` at `f5fe7ae`, and the 194th plant is verified by the targeted `2/2` run. The reading
+compares the five documents with their artifacts; it does not regenerate them, and the report PDF
+was not rebuilt. V4's Phase 5 report is a separate unit, not opened by this entry.
+
+**Archival state after the push.** Local `HEAD` = `origin/main` =
+`a9af730f7a1156db1cd1f230f2096d5c88b6269d`; `git status --porcelain` 0 lines; `v1.9.0` tag object
+`d9deb7f` unmoved; `evidence/manifest.json` intact at 95 `artifacts`; no locked path touched.
+
+**The terminal commit.** This entry is itself a commit; its own CI is read after the second push and
+reported in the session handoff rather than written into the file whose content is fixed before that
+push — the convention V2, V3 and V4-01…V4-06 used. The second push authorised in the Phase 0 entry
+carries this entry only; no third is implied.
+
 
 
 
