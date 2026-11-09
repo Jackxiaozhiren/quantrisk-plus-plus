@@ -308,3 +308,121 @@ plant, ceiling key, CI step and readings, and the entry attributing the implemen
 the second carries this unit's terminal entry only. No third is implied.
 
 ---
+
+### 2026-11-09, V5-02 implementation — F4's reading, and the four decisions beside it
+
+**What changed.** Six files, +174 / −3, committed as `3c6092f` on a tree that printed 0 lines
+before the commit.
+
+| file | change | why |
+|---|---|---|
+| `tools/inventory_orphan_code.py` | `artifact_revision()`, `revision_exists()`, `_artifact_path()`; one snapshot row; one metric | F4: a reading that compares the artifact's claim with the tip and can redden |
+| `tools/refactor_ceilings.json` | fifteenth key `artifact_revision_gap`, `max 0`, no `may_be_unmeasured` | the reading is adjudicated, not printed |
+| `tests/python/test_artifact_metadata.py` | extended `test_every_registry_task_is_aggregated_by_exactly_one_member` with two fixtures | the guard reddens on a forged revision; the counted pair stays 560 / 491 |
+| `python/quantrisk/verification/plants.py` | one new plant, and one existing anchor re-keyed from `194/194` to `195/195` | the plant that mutates the revision; the existing plant counts the declared list, which moved |
+| `.github/workflows/ci.yml` | `Artifact revision` in `lint`, `Artifact revision at the run tip` in `benchmark-suite` | the two vantages are executed, not inferred |
+| `docs/interview_defense.md` | `194/194` → `195/195` | the printed claim is re-derived in the same commit (§4) |
+
+**F4: what the reading refuses, and what it deliberately cannot.** A file cannot carry the SHA of
+the commit that contains it, so the reading does not demand equality with `HEAD`. It demands that
+the claim be checkable: `git_commit` must be a hexadecimal revision, `git cat-file -e
+<revision>^{commit}` must find it in this repository, the artifact's own `provenance` sentence must
+name the revision and the binary stamp beside it, and a revision other than the tip must be
+attributed to `working_tree_dirty: true` with the paths that made it dirty. Those four refusals are
+the gap. The reading therefore cannot be satisfied by a typed SHA that nothing holds, which is the
+state both vantages were in when both printed `gap: 0`.
+
+**The two vantages, read rather than averaged.** At `3c6092f` the committed artifact prints
+`artifact_revision 17df062040b8`, `tip_being_verified 3c6092fbc8f1`, `matches_tip false`,
+`uncommitted_paths 21`, `working_tree_dirty true`, `vantage "committed artifact read by the lint
+job; it names an earlier revision and attributes the difference to 21 uncommitted paths"`, `gap 0`.
+The benchmark job's fresh artifact names its own run tip, so the same reading returns
+`matches_tip true` there. The two jobs now run the same reading and the reading says which vantage
+it took.
+
+**The targeted sweeps.** Both were captured after the implementation commit, because the runner
+refuses a target that differs from `HEAD` — the first attempt printed `target-already-modified:
+these mutation targets differ from HEAD -> docs/interview_defense.md` and exited 2, which is the
+instrument working rather than a failure. On the clean tree:
+`1/1 planted defects were rejected by their guard.` for
+`suite-artifact-claims-a-revision-the-repository-does-not-hold` (`caught`), and the same line for
+the re-keyed `docs-command-comment-counts-superseded-plants` (`caught`). The tree printed 0 lines
+after each. No full census is claimed here; the final one belongs to V5-03.
+
+**F3, traced from the consumer to the producer.** The V5 prompt's `run_benchmark_suite.py:1075`
+is the consumer: `"git_commit": env["git_commit"]`. The producer is
+`python/quantrisk/experiments/metadata.py`'s `working_tree_state()`, whose
+`_git("status", "--porcelain")` sets `working_tree_dirty = bool(paths)`. The trigger is ordering:
+`main()` runs all nineteen members first (`for member in selected`, then `execute(member)`), and
+`build()` calls `environment()` on its first line — after the members have rewritten their own
+tracked artifacts. The committed artifact's 21 paths confirm it: all nineteen members' `artifact`
+paths are among them, and the only two others (`monte_carlo_convergence/results/convergence.csv`,
+`variance_reduction/results/variance_by_method.csv`) are companion CSVs those same two members
+write. `working_tree_dirty` is therefore the suite observing its own output, not an external
+contamination; the marker is accurate and the sentence it feeds is the misleading part. This is the
+`check:` F3 asks for — traced and explained with a reading, no code change needed.
+
+**F5, re-run in a clean environment.** A wheel was built from this tree
+(`quantrisk-1.9.0-cp312-cp312-macosx_27_0_arm64.whl`, 2,811,622 bytes), installed into a fresh
+`uv venv` outside the checkout (five packages: `numpy 2.5.4`, `pandas 3.1.1`,
+`python-dateutil 4.0.0`, `quantrisk 1.9.0`, `tzdata 2026.6`), and probed by
+`tools.verify_installed_surface`. It printed `identity.module
+/private/tmp/qr-v5-venv/lib/python3.12/site-packages/quantrisk/__init__.py`, `prefix
+/private/tmp/qr-v5-venv`, `version 1.9.0`; `list.tasks 19` with `tally 19`; `validate.passed 7`;
+`study mc_speed` exiting 0 and writing `monte_carlo_speed.json`; `refusal pricing_grid` exiting 1,
+naming what it needed, with `empty_directories_left 0`. The tool's own sentence:
+`installed surface: identity holds, the list is the registry, one study ran, and the refusal named
+what it needed`. This is a V5-tip reading with an asserted module identity, which is F5's first
+branch. The `installed_user_identity_mismatch` key keeps its `SKIP` because the collector cannot
+build a second environment on the runner; its precondition and the reason now sit beside a
+verdict rather than replacing one.
+
+**F2 and F6, decided rather than left open.** F2 takes the second branch §5 offers: the sweep stays
+development-only, and `plants_not_rejected_by_their_guard` keeps `SKIP` with `max 0` and
+`may_be_unmeasured: true`. The declaration and the reason agree — the sweep writes gitignored
+scratch into the checkout and rewrites tracked files one at a time, so a key computed from its
+summary line could not fail on the runner that evaluates it. F6 decides all three of its subjects.
+`tools/generate_shim_stubs.py` stays a dev-only producer: `tests/python/test_shim_stubs.py`
+imports it with `importlib.import_module` and compares the regenerated text, so the *guard* is what
+CI runs; invoking the producer on the runner would rewrite eight tracked `.pyi` files, the same
+shape as the frozen-evidence rule that keeps `tools.build_evidence_manifest` dev-only.
+`runtime_reachability` still reports `reached_by_neither 0`, and the difference it does not measure
+is stated here: importability is reachability by *something* — an import, a collection — while use
+is a consumer that needs the code to act. A dev-only producer can be reachable and still have no
+invoking lane; that is a decision, not a zero. Both `SKIP` keys are named in the deliberately-not-done
+list of the Phase 5 report with this reason.
+
+**The counts after the change, and their deltas.**
+
+| quantity | before (Phase 0) | after (`3c6092f`) | delta |
+|---|---|---|---|
+| plants | 194 | **195** | +1, the revision plant; the `194/194` anchor re-keyed to `195/195` |
+| ceiling keys | 14 | **15** | +1 `artifact_revision_gap`, `ok` at 0 |
+| `ok` / `SKIP` | 12 / 2 | **13 / 2** | +1 `ok` |
+| named CI steps | 32 | **34** | +2, one per vantage |
+| formatter corpus | 234 / 234 | **234 / 234** | 0; no new tracked `.md` |
+| pytest nodes | 560 / 491 | **560 / 491** | 0; the guard gained fixtures, not nodes |
+| manifest entries | 95 | **95** | 0 |
+| suite members | 19 / 19 | **19 / 19** | 0; `revision 17df062040b8` unchanged |
+
+**What the gates print at this tip.** `ruff check .` → `All checks passed!`; `ruff format --check .`
+→ `234 files already formatted`; `mypy python/quantrisk tools` → `Success: no issues found in 74
+source files`; `--check-ceilings` → 15 keys, 13 `ok`, 2 `SKIP`; `--reading docs_rederivation` →
+`documents 5`, `derived {19, 19, 195, 95}`, `gap 0`; `--reading lanes_documented_vs_executed` →
+`gap 0`, with `tools.inventory_orphan_code` now executed at five steps across two jobs;
+`--reading with_extras_census` → `gap 0`; `--reading formatter_census` → both differences empty;
+`tools.verify_evidence_manifest` → `Evidence is intact.`; `pytest --collect-only -q` → `560 tests
+collected`; `measure_offline_collection` → `491 tests collected`, `collection_errors 0`. A full
+local `pytest -q` printed `1 failed, 559 passed in 209.95s`; the single failure is the known
+sandbox-only bytecode-cache plant, unchanged from V3 through V4-07 and V5-01.
+
+**How the plant total moved after Phase 0.** Phase 0's row says 194, and that row is not rewritten
+(§9). The `docs/interview_defense.md` command comment moved with the declaration, and the plant
+that polices that comment was re-keyed in the same commit, so the re-derivation reading and the
+sweep both hold at 195. The full 195-plant census is not claimed here.
+
+**The first push.** This entry and the implementation commit are pushed together in the first of
+the two pushes authorised in the Phase 0 entry. Its CI is read once the tool reports it and recorded
+in the next entry; this file states no outcome for a push that has not happened yet.
+
+---
