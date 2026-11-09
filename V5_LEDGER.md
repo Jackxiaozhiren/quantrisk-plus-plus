@@ -507,3 +507,70 @@ reported in the session handoff rather than written into the file whose content 
 push. No fourth push is implied.
 
 ---
+
+### 2026-11-09, V5-03 Phase 0 — the final census, F7, and the series report at `ea8beb4`
+
+**Why this phase exists.** This is the last unit of the series. `V5_PROMPT.md` §7 asks Phase 5 to
+deliver the eight `V3_PROMPT.md` §12 items assembled from this ledger plus a fresh reading, and
+`§4` requires the full 195-plant census at the final V5 tip on a clean tree. Both are readings this
+unit must take, not restate.
+
+**Approval, verbatim.** `帮我完成剩余未完成部分` (2026-11-09), the selection
+`整个剩余系列（推荐）`, and the subsequent `继续`. The same case that authorised V5-02 authorises
+this unit: the Phase 0 entry of V5-02 records the override of §6 in full, and this entry re-records
+it because §6 asks every unit to name its own case. The scope here is F7, the final census and the
+Phase 5 report. It does not authorise a new finding, a new plant, a new lane, a `V5_PROMPT.md` edit,
+a release, or a fourth V5-02 push.
+
+**Revision and vantage.** `HEAD` = `origin/main` =
+`ea8beb4414f53540fd4e82b4024882c1b0d03ec0`; `git status --porcelain` prints 0 lines. Vantage: the
+development checkout, `.venv` Python 3.12, macOS, with the `CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD`
+raised to 100000 for the sweep only. Git smart-HTTP remains blocked; both pushes use the Git Data
+API.
+
+**The final census, already reported by the tool.** On this clean tree,
+`CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=100000 QR_DIAG_FULL=1 uv run --frozen python
+build/run_sweep.py --all --verbose` printed, at line 998 of its log,
+**`195/195 planted defects were rejected by their guard.`** with exit 0. The log carries 195 lines
+matching `ok   caught` and zero lines naming `guard-errored-without-objecting`,
+`no-guard-objected`, `tree-did-not-recover` or `named-guard-stayed-green`; the tree printed 0 lines
+after the sweep and no probe directory survived. This is `V3_PROMPT.md` §16 item 5 at the final V5
+tip.
+
+**The archive re-counted at this tip.**
+
+| quantity | reading | value |
+|---|---|---|
+| plants | `runner --list`; the sweep's own summary | **195** declared, **195/195** caught |
+| ceiling keys | `--check-ceilings` | **15** — 13 `ok`, 2 `SKIP` |
+| manifest | `tools.verify_evidence_manifest` | `Evidence is intact.` (95 entries) |
+| formatter corpus | `--reading formatter_census` | **234 / 234**, both differences empty |
+| pytest nodes | `--collect-only`; `measure_offline_collection` | **560**; offline **491**, `collection_errors 0` |
+| named CI steps | `grep -c` | **34** |
+| docs / lanes / with-extras / revision | four readings | `gap 0` each |
+| static gates | `ruff check`; `ruff format --check`; `mypy` | green; `234 files already formatted`; 74 files |
+| full local pytest | `pytest -q --basetemp=<fresh>` | `1 failed, 559 passed in 162.74s`; the failure is the known sandbox-only bytecode plant |
+
+**Platform readings for F7, re-read at this tip.** `refs/tags/v1.9.0` is tag object
+`d9deb7f764b3c16a091dc86effb9d523b1d2c7d0`, dereferenced to commit
+`b2dda33f6726d7f36fbe3491aec7cd7a66184809`, tagger `2026-10-20T12:56:35Z`. Release `424060629`
+is `v1.9.0`, published `2026-10-26T09:35:44Z`, four assets: `CITATION.cff` (2,978 bytes),
+`manifest.json` (55,780), `quantrisk-suite-results.zip` (145,672), `technical_report.pdf`
+(1,005,786), all created `09:35:41Z` and updated `09:35:42Z`–`09:35:43Z`. Every field matches
+V5-01's Phase 0 row and V5-02's re-read; the check F7 asks for is the comparison, and it is empty.
+
+**What this unit will deliver.** The eight §12 items — evidence ledger for F1–F7 with verdict,
+probe and closing commit; the liveness table at this tip; the ceilings file's final state with
+review notes; a non-empty deliberately-not-done list; the premises audit; the V5→V6 handoff; the
+per-lane table with revision and environment; and the archival confirmation covering all eight V5
+commits and all five runs. It will be assembled from this ledger and a fresh reading, not from the
+prompt's prose.
+
+**Deliberately not done in Phase 0.** No source, guard, plant, ceiling key or CI step was changed;
+no document was edited; no report section written; no push made. The census above is the only sweep
+this unit runs, and its summary line is quoted from the log rather than re-typed.
+
+**The two pushes.** The first carries the Phase 0 commit and the Phase 5 report with its readings;
+the second carries the terminal entry only. No third is implied.
+
+---
