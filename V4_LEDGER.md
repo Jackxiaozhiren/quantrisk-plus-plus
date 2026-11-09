@@ -1706,6 +1706,58 @@ report-and-readings tip; the second carries the entry recording its CI. The term
 is read after the second push and reported in the session handoff, not written into the file whose
 content is fixed before that push.
 
+---
+
+### 2026-11-09, V4 Phase 5 — the report-and-readings tip is green, and every lane is attributed
+
+**The push.** The first of the two pushes authorised in the Phase 0 entry carried `a74cf9a` (Phase 0)
+and `821d9bc8dde44735a41e981b8f8094e141ca7635` (this report). The git smart-HTTP channel stayed
+blocked, so `build/api_push.py` rebuilt both commits through the GitHub Git Data API: every blob,
+tree and commit SHA matched the local object before one non-forced fast-forward moved
+`refs/heads/main` from `ad03b890da5b19682189cc5da9e408ab11821b10` to `821d9bc8dde4…`. The remote
+tip was then re-read from the platform and the local tracking ref updated to the same SHA.
+
+**Run `42484094313`, event `push`, head_sha `821d9bc8dde44735a41e981b8f8094e141ca7635`,
+attempt 1, `completed success`** at `2026-11-08T13:24:21Z` (created `13:15:38Z`). All **four** jobs
+are `completed success` with **14 steps each**; no job was cancelled, none reported zero steps, and
+no runner field is empty, so §15.5 does not apply. `gh run watch --exit-status` returned 0 and the
+API verdict above is the authority, not that exit code.
+
+| job | runner | window (UTC) | the reading |
+|---|---|---|---|
+| Format and static checks | `GitHub Actions 1000010465`, `ubuntu-latest` | 13:15:41–13:17:04 | `All checks passed!`; `232 files already formatted`; `Success: no issues found in 74 source files`; `declared_plants: 194`; `docs_rederivation_gap: 0`, `lanes_documented_vs_executed_gap: 0`, `with_extras_census_gap: 0`; `Evidence is intact.` The `Docs re-derivation` step printed `documents: 5`, seven claims, `derived {19, 19, 194, 95}`, `gap: 0` |
+| Configure, build, C++ tests, Python tests | `GitHub Actions 1000010466`, `ubuntu-latest` | 13:15:41–13:21:37 | `100% tests passed out of 204`; **`490 passed, 5 skipped in 171.94s`**; `7/7 checks passed` |
+| Benchmark suite against live oracles | `GitHub Actions 1000010467`, `ubuntu-latest` | 13:15:41–13:24:20 | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 330.4s total`; the `With-extras census` step printed `gap: 0`, `members: 19`, `passed: 19`, `revision: 821d9bc8dde4` |
+| macOS native C++ and Python parity | `GitHub Actions 1000010468`, `macos-15` | 13:15:42–13:19:48 | `100% tests passed out of 204`; `98 passed in 3.32s` |
+
+**What the two with-extras readings say.** The benchmark job's own step reads the artifact it just
+generated at `821d9bc8dde4`; the lint job's `refactor ceilings` step reads the committed
+`suite_run.json` at `17df062040b8`. Both print `gap: 0` with 19 members and 19 passed. The report §4
+item 3 named this difference rather than hiding it; neither reading pins the committed artifact's
+revision to `HEAD`, and this run did not change that.
+
+**The counts that did not move.** `490 passed, 5 skipped` is unchanged from `8ffcb32` through
+`ad03b89`: the report edits only this ledger, so the counted pair is still 560/491, `declared_plants`
+is still 194 and the 14-key ceilings verdict is unchanged. The 194/194 sweep at `a74cf9a` is a
+development-vantage reading; no CI step executes it and `plants_not_rejected_by_their_guard` still
+SKIPs, as report §4 item 1 records.
+
+**One caveat, recorded rather than explained.** The benchmark job's summary prints
+`revision: 821d9bc8dde4 (working tree was dirty at run time)`. V3 §9 named the line and every V4
+tip has printed it; its cause is not diagnosed here, and no number from that job's generated
+artifacts is cited.
+
+**Archival state after the push.** Local `HEAD` = `origin/main` =
+`821d9bc8dde44735a41e981b8f8094e141ca7635`; `git status --porcelain` 0 lines; `v1.9.0` tag object
+`d9deb7f` → commit `b2dda33` unmoved; `evidence/manifest.json` intact at 95 artifacts; no locked
+path touched. The report's §8 archival table describes `9e0bf03..ad03b89`, the implementation
+range; this entry and the terminal commit are process commits after that range, as V3 §9 was.
+
+**The terminal commit.** This entry is itself a commit and the sole content of the second push
+authorised in the Phase 0 entry. Its own CI is read after that push and reported in the session
+handoff rather than written into the file whose content is fixed before it — the convention V2, V3
+and V4-01…V4-07 used. No third push is implied.
+
 
 
 
