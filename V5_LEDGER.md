@@ -171,3 +171,58 @@ once the tool reports it and recorded in the next entry; this file states no out
 that has not happened yet.
 
 ---
+
+### 2026-11-09, V5-01 — the implementation tip is green, and the run is attributed
+
+**The first push, as read from the platform.** `build/api_push.py` rebuilt both commits through
+the GitHub Git Data API and moved `refs/heads/main` from `eb75b3277d28307f29fe9fc16b86e24d3f96ba24`
+to `8c787bdee6604f232b67085875e3630bb1bba035` with `force: false`. Every commit SHA matched its
+local object (`69821a16bad18e56c6494d1bbc206424fe52abd4`,
+`8c787bdee6604f232b67085875e3630bb1bba035`), and the two new blobs matched too:
+`V5_LEDGER.md` = `49cbff1980ce92a2a383d6cfc3699acc110eaed0`, `V5_PROMPT.md` =
+`148e5fa54c2b363d6cf463d21d283e8b6b475f79` on both sides. `git rev-parse HEAD` equals
+`git rev-parse origin/main`; `git status --porcelain` printed 0 lines.
+
+**The CI reading (§16.8).** `gh api repos/.../actions/runs/42553273948` reports `event push`,
+`status completed`, `conclusion success`, `run_attempt 1`, `head_sha
+8c787bdee6604f232b67085875e3630bb1bba035`, created `2026-11-09T02:52:19Z`, updated
+`02:59:34Z`. The four jobs, each with **14** executed steps:
+
+| job | conclusion | runner | labels | completed at |
+|---|---|---|---|---|
+| `128953337375` Format and static checks | `success` | `1000010493` | `ubuntu-latest` | `02:53:42Z` |
+| `128953337425` macOS native C++ and Python parity | `success` | `1000010496` | `macos-15` | `02:55:33Z` |
+| `128953337399` Configure, build, C++ tests, Python tests | `success` | `1000010495` | `ubuntu-latest` | `02:58:23Z` |
+| `128953337230` Benchmark suite against live oracles | `success` | `1000010494` | `ubuntu-latest` | `02:59:34Z` |
+
+No job is cancelled and none has 0 steps. **An interrupted watch is not a verdict:** the first
+`gh run watch 42553273948 --exit-status` returned exit 1 with `failed to get run ... unexpected
+EOF` while the run was still `in_progress`. Under §14 that absence is `unknown`, not failure and
+not success; the API was re-read (one job `success`, three `in_progress`), the watch was retried
+to exit 0, and the run and jobs above were read again from the API before any conclusion was
+written here. Two informational annotations accompanied the run — the `ubuntu-latest` image-label
+migration notice and a macOS arm64 capacity notice; neither changed a job's conclusion.
+
+**What the four job logs printed.** Lint (`128953337375`): `All checks passed!`,
+`234 files already formatted`, `Success: no issues found in 74 source files`,
+`declared_plants 194`, `documents 5 / gap 0`, 14 keys with 12 `ok` and 2 `SKIP`,
+`Evidence is intact.`. Build-and-test (`128953337399`): `100% tests passed out of 204`,
+`490 passed, 5 skipped in 173.42s`, `7/7 checks passed`. macOS (`128953337425`):
+`100% tests passed out of 204`, `98 passed in 2.69s`. Benchmark (`128953337230`):
+`suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 260.9s total`;
+its `With-extras census` step printed `gap: 0`, `members: 19`, `passed: 19`,
+`revision: 8c787bdee660` from the freshly generated artifact, while the lint job's committed
+artifact still reads `17df062040b8`. The benchmark summary again prints
+`- revision: 8c787bdee660 **(working tree was dirty at run time)**`.
+
+**F2, F3 and F4 are still open at this tip.** Two vantages of the same with-extras reading print
+two different revisions and both print `gap: 0`, and the dirty marker is still unexplained. These
+are recorded as readings, not as diagnoses: V5-01 took F1 only. `plants_not_rejected_by_their_guard`
+and `installed_user_identity_mismatch` are the two SKIPs in the lint log above.
+
+**The second push.** This entry is the second of the two pushes authorised in the Phase 0 entry,
+and carries this entry only; no third is implied. The terminal commit's own CI is read after that
+push and reported in the session handoff, not written into the file whose content is fixed before
+that push — the convention V2, V3, V4 and this unit's implementation entry used.
+
+---
