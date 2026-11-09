@@ -116,3 +116,58 @@ and no push made. The seven items above are *measurements*, not verdicts. Every 
 entry is a reading at `eb75b32`; none is quoted from `V4_LEDGER.md` without being re-measured.
 
 ---
+
+### 2026-11-09, V5-01 — the written rails ship, and the corpus is re-counted at 234
+
+**What this commit carries.** `V5_PROMPT.md`, 208 lines in eight numbered sections: three measured
+premises and a termination condition (§0), the mission (§1), the priced locks and the no-weakening
+rule (§2), a six-clause Facts Protocol (§3), the lane and policy-asset inventory (§4), the F1–F7
+candidate findings each with a `check:` predicate (§5), the one-unit-per-approval rule (§6), the
+Phase 0 / Phase 5 / Definition-of-Done procedure (§7), and a size ratchet (§8). Its prose sections
+(§1–§3 and §6–§8) span **104** lines against `V3_PROMPT.md` §0's **431**-line bound, measured by
+heading span: 49 and 55 lines respectively. The prompt is a rule set, not an approval: §6 states
+that V5-02 and every later unit, including one that edits the prompt itself, need their own
+verbatim case-by-case approval.
+
+**The readings after both new files exist.** These were taken with `V5_LEDGER.md` committed at
+`69821a1` and `V5_PROMPT.md` staged, so the formatter census sees both enumerations on the same
+side; the 232 → 234 delta is exactly the two new tracked `.md` files, named rather than repainted
+(§15 item 7).
+
+| quantity | command | reading |
+|---|---|---|
+| formatter corpus | `--reading formatter_census` | `tracked_formattable 234`, `walked_formattable 234`, `reported_already_formatted 234`, `reported_would_reformat 0`, `tracked_but_not_walked []`, `walked_but_not_tracked []`, `walked_other_kinds 119` |
+| static gates | `ruff check .`; `ruff format --check .`; `mypy python/quantrisk tools` | `All checks passed!`; `234 files already formatted`; `Success: no issues found in 74 source files` |
+| ceiling keys | `--check-ceilings` | **14** — **12 `ok` / 2 `SKIP`**; `tracked_files_outside_the_formatter_corpus: 0`, `docs_rederivation_gap: 0`, `with_extras_census_gap: 0`, `lanes_documented_vs_executed_gap: 0` |
+| living documents | `--reading docs_rederivation` | `documents 5`, `gap: 0`, `mismatches []`, `source_disagreements []` |
+| lane contract | `--reading lanes_documented_vs_executed` | `gap: 0`, `executed_not_documented []`, `undeclared []`; `grep -c '^      - name:' .github/workflows/ci.yml` prints **32** |
+| with-extras artifact | `--reading with_extras_census` | `gap: 0`, `members 19`, `passed 19`, `revision 17df062040b8` — unchanged from Phase 0, and still not pinned to HEAD |
+| registry / plants | `--reading registry_parity`; `-m quantrisk.verification.runner --list` | `19 / 19`, `mismatch []`; **194** lines |
+| manifest | `python -m tools.verify_evidence_manifest` | `95 OK`, `0 CHANGED`, `0 MISSING`, `Evidence is intact.` |
+| pytest nodes | `pytest --collect-only -q`; `tools.measure_offline_collection` | `560 tests collected`; offline `491 tests collected`, `collection_errors 0` |
+| local full suite | `pytest -q --basetemp=<fresh private TMPDIR>` | **1 failed, 559 passed in 124.32s**; the sole failure is `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache`, the sandbox-only plant V3 and V4 recorded. `git status --porcelain` afterwards prints **one** line, `A  V5_PROMPT.md` — this unit's own implementation file, staged before the pytest run, not a plant residue; no probe directory or mutation remains. |
+| locks | `git diff --name-only HEAD -- cpp/ bindings/ CMakeLists.txt PROJECT_SPEC.md REFACTOR_PROMPT.md V3_PROMPT.md evidence/manifest.json paper/` | empty |
+
+**F1's `check:` predicate, run at this commit.** The prompt exists; it states premises, lanes,
+rails and termination; §6's approval rule was followed by this launch unit's Phase 0 entry, which
+records `授权启动` verbatim, names its two pushes and no third, and says V5-02 needs a new
+approval. **F1 is the only finding this unit closes.** F2–F7 remain open with their Phase 0
+readings; in particular `plants_not_rejected_by_their_guard` still SKIPs, `working_tree_dirty` is
+still undiagnosed, `suite_run.json` still carries `17df062040b8`, and neither SKIP key has a
+decision.
+
+**Deliberately not done.** No source file, guard, plant, ceiling key, CI step, test node, artifact,
+PDF, tag, release asset or locked path was changed. No plant was added, so no targeted sweep is
+claimed; the last captured full sweep remains `194/194 planted defects were rejected by their
+guard.` at `a74cf9a`, and `V5_PROMPT.md` §4 requires the next full census at the **final** V5 tip,
+not at every intermediate one. The two new files are prose: `LIVING_DOCUMENT_CLAIMS` still holds
+five documents, and `LANE_DOCUMENTS` still holds `docs/reproducibility.md` and
+`CONTRIBUTING.md`, so neither new file enters those two readings. Every number above was printed
+by a tool in this unit.
+
+**The first push.** The Phase 0 commit `69821a1` and this implementation-and-readings commit are
+pushed together in the first of the two pushes authorised in the Phase 0 entry. Its CI is read
+once the tool reports it and recorded in the next entry; this file states no outcome for a push
+that has not happened yet.
+
+---
