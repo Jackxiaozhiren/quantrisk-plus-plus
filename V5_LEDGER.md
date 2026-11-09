@@ -441,3 +441,69 @@ the two pushes authorised in the Phase 0 entry. Its CI is read once the tool rep
 in the next entry; this file states no outcome for a push that has not happened yet.
 
 ---
+
+### 2026-11-09, V5-02 terminal entry — the repair tip is green, and three pushes are accounted for
+
+**The first push failed, and the ledger says so first.** Run `42604294221` on `c763666` was
+`completed` / `failure` at attempt 1. `Format and static checks` failed with 15 executed steps;
+`Configure, build, C++ tests, Python tests` and `macOS native C++ and Python parity` succeeded, and
+`Benchmark suite against live oracles` was still `in_progress` when the conclusion was read, so its
+outcome for that run is recorded as unknown rather than assumed. The failing log printed
+`artifact_revision_gap: 1` and `VIOLATION artifact_revision_gap: 1 against a ceiling of 0`, then
+exit 1. The cause was the reading measuring its own vantage: the `lint` job checks out at depth 1,
+so `git cat-file -e 17df062040b8^{commit}` could not resolve a commit that predates the clone. That
+is the instrument reporting an absence it cannot establish, not a defect in the artifact.
+
+**The repair, and its own reading.** `e2a39a3` adds `repository_is_shallow()` and an `object_check`
+field: a shallow clone prints `skipped: a shallow clone cannot tell an earlier revision from an
+absent one` instead of inventing a forgery, while `provenance` and the dirty-tree attribution still
+refuse a typed SHA there. The branch was verified on a real depth-1 clone of this repository
+(`git rev-parse --is-shallow-repository` → `true`), which printed `object_present: false`,
+`object_check: "skipped: ..."`, `gap: 0` for the genuine artifact. The full local guard still
+reddens on a forged revision (`gap: 2`), so the skip is about the clone, not about the claim.
+
+**The green run, attributed.** Run `42605248227` on `e2a39a371c52ec35db9413bafc0ffa0ecb381a51` is
+`completed` / `success`, `run_attempt 1`, created `10:58:44Z`, updated `11:10:13Z`. Four jobs, all
+`success`:
+
+| job | steps | runner | labels |
+|---|---|---|---|
+| `129119598742` Format and static checks | **15** | `1000010526` | `ubuntu-latest` |
+| `129119598836` Benchmark suite against live oracles | **15** | `1000010528` | `ubuntu-latest` |
+| `129119598745` Configure, build, C++ tests, Python tests | 14 | `1000010529` | `ubuntu-latest` |
+| `129119598248` macOS native C++ and Python parity | 14 | `1000010527` | `macos-15` |
+
+No job is cancelled and none has 0 steps. `gh run watch` returned 0 on the second attempt; the first
+attempt on the failed run had returned 1 with `unexpected EOF` while the run was still running,
+which under §14 was `unknown` until the API above was read.
+
+**What the four logs printed.** Lint: `All checks passed!`, `234 files already formatted`,
+`Success: no issues found in 74 source files`, `declared_plants 195`, `documents 5 / gap 0`,
+15 ceiling keys, `artifact_revision 17df062040b8` with
+`object_check "skipped: a shallow clone cannot tell an earlier revision from an absent one"` and
+`gap 0`, `lanes_documented_vs_executed gap 0`, `with_extras_census gap 0`,
+`Evidence is intact.`. Build-and-test: `100% tests passed out of 204`,
+`490 passed, 5 skipped in 234.08s`, `7/7 checks passed`. macOS: `100% tests passed out of 204`,
+`98 passed in 3.34s`. Benchmark: `suite: 19/19 executed and passed, 0 aggregated from disk, 0
+failed, 0 skipped, 425.9s total`, and its `Artifact revision at the run tip` step printed
+`artifact_revision e2a39a371c52`, `matches_tip true`, `object_check "the revision names a commit in
+this clone"`, `gap 0`. The two vantages now print the same reading with different, stated answers:
+the committed artifact's revision is not the tip and is attributed; the fresh one is the tip.
+
+**Three pushes, not two, and why.** The Phase 0 entry authorised two pushes. The first carried
+`6a63b58`, `3c6092f` and `c763666`; its lint job failed on the instrument's shallow-clone error.
+The second carried the repair `e2a39a3` alone, because a failed CI cannot be closed by writing about
+it. The third carries this terminal entry only. The additional push is the repair of the first
+push's own CI, not a widening of the unit: no finding was added, no scope changed, and the same
+tree is the subject. This paragraph is the record §6 asks for when the count moves.
+
+**F2, F3, F4, F5 and F6 are closed at this tip.** F4 by the reading and its two vantages; F3 by the
+traced producer and the 21-path reading; F5 by the clean-venv wheel probe; F2 and F6 by the
+decisions above, with both `SKIP` keys still naming their preconditions. F7, the final 195-plant
+census and the Phase 5 report remain for V5-03, whose Phase 0 records the same series-wide approval.
+
+**The terminal commit.** This entry is itself a commit; its own CI is read after the third push and
+reported in the session handoff rather than written into the file whose content is fixed before that
+push. No fourth push is implied.
+
+---
