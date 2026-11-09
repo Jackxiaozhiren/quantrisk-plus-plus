@@ -226,3 +226,85 @@ push and reported in the session handoff, not written into the file whose conten
 that push — the convention V2, V3, V4 and this unit's implementation entry used.
 
 ---
+
+### 2026-11-09, V5-02 Phase 0 — the open findings taken together, measured at `9e35c9c`
+
+**Why this phase exists.** V5-01 closed F1 and left F2–F7 open. The maintainer asked for the
+remaining work in one request, then chose the series-wide option when asked how far that authority
+reached: `帮我完成剩余未完成部分`, followed by `整个剩余系列（推荐）`. Both are recorded verbatim
+below because §6 requires the approval for a unit to name its case.
+
+**Approval, verbatim.** `帮我完成剩余未完成部分` (2026-11-09), the selection
+`整个剩余系列（推荐）` whose stated plan is *"我按 F4→F3→F2→F5→F6→F7→最终 census→Phase 5 顺序
+逐单元连续推进，每单元仍单独写 Phase 0（逐字记录本句授权）、两次推送与两次 CI 归因"*, and the
+subsequent `继续`. This entry does not edit §6 and cannot: it records that the maintainer granted
+the whole remaining series in one case, which is the explicit override §6 asks the assistant to
+request rather than assume. The override is bounded to V5's remaining findings, the final census
+and the Phase 5 report. Nothing in it authorises a change to `V5_PROMPT.md`, a new release, or work
+outside V5.
+
+**Revision and vantage.** `HEAD` = `origin/main` =
+`9e35c9cd6060a89f560b3ab6b5a17a737116cf0a`; `git status --porcelain` prints 0 lines. Vantage: the
+development checkout, `.venv` Python 3.12, macOS, the same WorkBuddy interpreter shim V3 Phase 5,
+V4 and V5-01 recorded. Git smart-HTTP remains blocked, so both pushes use the Git Data API.
+
+**The archive re-counted at this tip.**
+
+| quantity | reading | value |
+|---|---|---|
+| registry tasks | `--reading registry_parity` | `filesystem_units 19`, `registry_sources 19`, mismatch empty |
+| suite members | `--reading with_extras_census` | `members 19`, `passed 19`, `gap 0`, `revision 17df062040b8` |
+| plants | `runner --list` | **194** |
+| ceiling keys | `--check-ceilings` | **14** — 12 `ok`, 2 `SKIP` |
+| manifest | `tools.verify_evidence_manifest` | `Evidence is intact.` (95 entries) |
+| formatter corpus | `--reading formatter_census` | **234 / 234**, both differences empty |
+| pytest nodes | `--collect-only`; `measure_offline_collection` | **560** collected; offline `491 tests collected`, `collection_errors 0` |
+| named CI steps | `grep -c '^      - name:' .github/workflows/ci.yml` | **32** |
+| living documents | `--reading docs_rederivation` | `documents 5`, `gap 0` |
+| runtime reachability | `--check-ceilings` | `reached_by_neither 0`, gap 0 |
+| static gates | `ruff check`; `ruff format --check`; `mypy python/quantrisk tools` | `All checks passed!`; `234 files already formatted`; `74 source files`, no issues |
+
+**Platform state, re-read rather than remembered.** `refs/tags/v1.9.0` is tag object
+`d9deb7f764b3c16a091dc86effb9d523b1d2c7d0`, dereferenced to commit
+`b2dda33f6726d7f36fbe3491aec7cd7a66184809`, tagger `2026-10-20T12:56:35Z`. Release `424060629`
+was published `2026-10-26T09:35:44Z` with four assets, all created `09:35:41Z` and updated between
+`09:35:42Z` and `09:35:43Z`. Runs `42553273948` and `42554133271` re-read as `completed` /
+`success`, `run_attempt 1`.
+
+**What this unit takes, and why together.** §5 says the unit's Phase 0 decides which finding it
+takes. This unit takes **F2, F3, F4, F5 and F6**, because the maintainer's single case covers the
+whole remainder and because only one of the five changes the corpus: F4 needs a reading that can
+redden; F2, F5 and F6 are decided or recorded against findings that already carry their evidence;
+F3 needs its producer traced. Splitting them into five units would push the same tree five times
+and read five more CIs without changing a byte between them, which is the mechanical repetition §6
+exists to prevent, not the cross-session drift it exists to catch. F7, the final 194-plant census
+and the Phase 5 report stay out of this unit and belong to V5-03, whose Phase 0 records the same
+approval again.
+
+**What each finding will be closed by.** F4 gets a new collector reading `artifact_revision` that
+compares the suite artifact's `repository.git_commit` with the tip being verified, names which
+vantage produced the artifact, refuses a revision that is not a commit in this repository or that
+its own `provenance` does not name, and reports the disagreement as a gap a ceiling adjudicates. It
+is added to the snapshot, to `metrics()` and to `tools/refactor_ceilings.json` as a fifteenth key
+with `max 0`, and both CI jobs that hold an artifact run it: `lint` against the committed file,
+`benchmark-suite` against the one the job just wrote. F3's producer is traced from the consumer at
+`run_benchmark_suite.py:1068` to `python/quantrisk/experiments/metadata.py`'s
+`working_tree_state()`, and the 21 paths the committed artifact lists are checked against the
+suite's own output set. F2 is recorded as a decision: the sweep stays development-only and
+`plants_not_rejected_by_their_guard` keeps its `SKIP`, with the contract's reason and the key's
+declaration agreeing. F5 is attempted as a real clean-venv wheel reading with
+`tools/verify_installed_surface`, and carried as a named precondition if the wheel cannot be built
+in this environment. F6 decides `tools/generate_shim_stubs.py` and the two `SKIP` keys, and states
+the difference between importability and use against `runtime_reachability`'s `reached_by_neither 0`.
+
+**Deliberately not done in Phase 0.** No source file was edited, no reading added, no ceiling key
+changed, no plant added, no CI step added, no census run, no report section written and no push
+made. F7 is not re-read here beyond the platform rows above, because its `check:` names the final
+tip. Every number above is a reading at `9e35c9c`; the `17df062040b8` in the with-extras row is the
+artifact's own revision, not this tip.
+
+**The two pushes.** The first carries the Phase 0 commit, the implementation commit with its guard,
+plant, ceiling key, CI step and readings, and the entry attributing the implementation tip's CI;
+the second carries this unit's terminal entry only. No third is implied.
+
+---
