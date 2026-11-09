@@ -1090,6 +1090,18 @@ def revision_exists(revision: str) -> bool:
     return completed.returncode == 0
 
 
+def repository_is_shallow() -> bool:
+    """Whether this clone carries only the tip, which makes an earlier revision unprovable."""
+    completed = subprocess.run(
+        ["git", "rev-parse", "--is-shallow-repository"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return completed.stdout.strip() == "true"
+
+
 def _artifact_path(path: Path) -> str:
     """An artifact's path for a reading, shortened only when it is inside the checkout.
 
@@ -1132,15 +1144,32 @@ def artifact_revision() -> dict[str, Any]:
     uncommitted = [str(path) for path in repository.get("uncommitted_paths", []) or []]
     dirty = repository.get("working_tree_dirty")
     tip = git("rev-parse", "HEAD")
+    shallow = repository_is_shallow()
     problems: list[str] = []
+    object_present: bool | None = None
     if not re.fullmatch(r"[0-9a-f]{7,40}", declared):
         problems.append(f"git_commit {declared!r} is not a hexadecimal revision")
-    elif not revision_exists(declared):
-        problems.append(f"git_commit {declared} names no commit in this repository")
+    else:
+        object_present = revision_exists(declared)
+        # A depth-1 checkout cannot tell an earlier revision from an absent one: the `lint` job
+        # reads a committed artifact naming a commit that predates its clone. Reporting that as a
+        # forgery is the instrument measuring its own environment, and it reddened run 42604294221
+        # exactly that way. The provenance check below still fires on a typed SHA, so the reading
+        # does not go quiet in a shallow clone -- it stops claiming a fact it cannot establish.
+        if not object_present and not shallow:
+            problems.append(f"git_commit {declared} names no commit in this repository")
     if declared and declared[:12] not in provenance:
         problems.append(f"provenance does not name the revision {declared[:12]}")
     if binary and binary[:12] not in provenance:
         problems.append(f"provenance does not name the binary stamp {binary[:12]}")
+    if object_present is True:
+        object_check = "the revision names a commit in this clone"
+    elif shallow:
+        object_check = "skipped: a shallow clone cannot tell an earlier revision from an absent one"
+    elif object_present is False:
+        object_check = "the revision names no commit in this clone"
+    else:
+        object_check = "not checked: the revision is not hexadecimal"
     matches_tip = bool(declared) and (tip == declared or tip.startswith(declared))
     if declared and not matches_tip and not (dirty is True and uncommitted):
         problems.append(
@@ -1162,6 +1191,9 @@ def artifact_revision() -> dict[str, Any]:
         "tip_being_verified": tip,
         "matches_tip": matches_tip,
         "vantage": vantage,
+        "object_present": object_present,
+        "object_check": object_check,
+        "repository_is_shallow": shallow,
         "uncommitted_paths": len(uncommitted),
         "working_tree_dirty": dirty,
         "problems": problems,

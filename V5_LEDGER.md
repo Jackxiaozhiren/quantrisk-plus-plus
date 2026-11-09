@@ -340,6 +340,21 @@ The benchmark job's fresh artifact names its own run tip, so the same reading re
 `matches_tip true` there. The two jobs now run the same reading and the reading says which vantage
 it took.
 
+**The first CI reading failed, and the failure was the instrument.** Run `42604294221` on
+`c763666` was read as `completed` / `failure` at attempt 1: `Format and static checks` failed with
+15 executed steps while the other three jobs passed. Its log printed
+`artifact_revision {"artifact_revision": "17df062040b8", "gap": 1, ...}` and
+`VIOLATION artifact_revision_gap: 1 against a ceiling of 0`, then exit 1. The cause is the job's
+vantage, not the artifact: `lint` checks out at the default depth 1, so `git cat-file -e
+17df062040b8^{commit}` cannot resolve a commit that predates the clone. The reading was reporting
+its own shallow checkout as a forged revision. The repair distinguishes the two: a new
+`repository_is_shallow()` makes the object check print
+`skipped: a shallow clone cannot tell an earlier revision from an absent one` instead of inventing
+an absence, while the `provenance` and dirty-tree refusals still fire there — a typed SHA is still
+refused in a shallow clone, because the sentence that claims to name it does not contain it. Run
+`42604294221`'s reading is the reason the `object_check` field exists; it is recorded here as a
+measurement of the environment, not written off as noise.
+
 **The targeted sweeps.** Both were captured after the implementation commit, because the runner
 refuses a target that differs from `HEAD` — the first attempt printed `target-already-modified:
 these mutation targets differ from HEAD -> docs/interview_defense.md` and exited 2, which is the
