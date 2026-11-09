@@ -127,3 +127,42 @@ pushes authorised in the Phase 0 entry. Its CI is read once the tool reports it 
 next entry; this file states no outcome for a push that has not happened.
 
 ---
+
+### 2026-11-09, V6-01 terminal entry — the rail set's tip is green
+
+**The tip's CI, attributed.** Run `42615110830` on
+`1804c866150ee206571acbfb602836baf6782615` is `completed` / `success`, `run_attempt 1`, created
+`12:12:44Z`, updated `12:24:08Z`. Four jobs, all `success`:
+
+| job | steps | runner | labels |
+|---|---|---|---|
+| `129152922771` Format and static checks | **15** | `1000010597` | `ubuntu-latest` |
+| `129152922172` Benchmark suite against live oracles | **15** | `1000010595` | `ubuntu-latest` |
+| `129152922596` Configure, build, C++ tests, Python tests | 14 | `1000010596` | `ubuntu-latest` |
+| `129152922761` macOS native C++ and Python parity | 14 | `1000010598` | `macos-15` |
+
+No job is cancelled and none has 0 steps. The watch returned 0 on its first attempt; the run and
+jobs above were read again from the API before this entry was written.
+
+**What the four logs printed.** Lint: `236 files already formatted` — the formatter corpus moved
+from 234 to 236 and the runner agrees with the local census, `declared_plants 195`,
+`artifact_revision` `gap 0` with `object_check "skipped: a shallow clone cannot tell an earlier
+revision from an absent one"`, `lanes_documented_vs_executed gap 0`, `Evidence is intact.`.
+Build-and-test: `100% tests passed out of 204`, `490 passed, 5 skipped in 236.11s`,
+`7/7 checks passed`. macOS: `98 passed in 3.37s`. Benchmark: `suite: 19/19 executed and passed, 0
+aggregated from disk, 0 failed, 0 skipped, 431.1s total`, and its `Artifact revision at the run tip`
+step printed `matches_tip true`.
+
+**Two pushes, as recorded.** The first carried `2a902eb` (Phase 0) and `1804c86` (the rail set and
+the readings); each commit SHA and both new blobs' SHAs were checked against the local object before
+the ref moved. The second carries this entry only. The terminal commit's own CI is read after that
+push and reported in the session handoff, not written into this file.
+
+**What V6-01 closed, and what it left.** G1 (a written V6 prompt) and G2 (the sweep's vantage made
+permanent) are closed by `V6_PROMPT.md` and the readings above. G3 (the artifact's pin), G4 (the
+two `SKIP` keys re-read at a V6 tip), G5 (a second vantage for development-only counts) and G6 (the
+re-freeze rule in practice) stay open in §5 of the prompt. No full census and no local `pytest -q`
+is claimed here: the unit changes no code, so the last captured census remains `195/195` at
+`ea8beb4`, and the next one belongs to the final V6 tip.
+
+---
