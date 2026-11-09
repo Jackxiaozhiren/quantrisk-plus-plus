@@ -753,3 +753,52 @@ pushes authorised in the V5-03 Phase 0 entry. Its CI is read once the tool repor
 in the terminal entry; no outcome is stated here for a push that has not happened.
 
 ---
+
+### 2026-11-09, V5-03 terminal entry — the report tip is green, and the series closes
+
+**The report tip's CI, attributed.** Run `42610931234` on
+`49a33cda05c389ce8fa54ee81543c45517b7e567` is `completed` / `success`, `run_attempt 1`, created
+`11:40:44Z`, updated `11:49:32Z`. Four jobs, all `success`:
+
+| job | steps | runner | labels |
+|---|---|---|---|
+| `129138856151` Format and static checks | **15** | `1000010567` | `ubuntu-latest` |
+| `129138855717` Benchmark suite against live oracles | **15** | `1000010565` | `ubuntu-latest` |
+| `129138856463` Configure, build, C++ tests, Python tests | 14 | `1000010568` | `ubuntu-latest` |
+| `129138856202` macOS native C++ and Python parity | 14 | `1000010566` | `macos-15` |
+
+No job is cancelled and none has 0 steps. **The first watch was not a verdict:** it exited 1 with
+`tls: failed to verify certificate: x509: certificate is valid for www.python.org ..., not
+api.github.com`, a transport failure rather than a CI conclusion. Under §14 that absence was
+`unknown`; the run was re-read from the API (still `in_progress`, lint and macOS already `success`),
+the watch was retried to 0, and the run and jobs above were read again before this entry was
+written.
+
+**What the four logs printed.** Lint: `234 files already formatted`,
+`artifact_revision 17df062040b8` with
+`object_check "skipped: a shallow clone cannot tell an earlier revision from an absent one"` and
+`gap 0`, `declared_plants 195`, `lanes_documented_vs_executed gap 0`, `Evidence is intact.`.
+Build-and-test: `100% tests passed out of 204`, `490 passed, 5 skipped in 241.25s`,
+`7/7 checks passed`. macOS: `100% tests passed out of 204`, `98 passed in 4.00s`. Benchmark:
+`suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 327.2s total`, and
+its `Artifact revision at the run tip` step printed `matches_tip true`, `gap 0`.
+
+**The series' commit count, final.** Eleven commits in `eb75b32..` — the eight listed in §8 of the
+report, plus `9205536` (V5-03 Phase 0), `49a33cd` (this report) and this terminal entry. The first
+two were reconstructed through the Git Data API with their blob/tree/commit SHA checked against the
+local object before the ref moved; the terminal commit is pushed after this file's content is
+fixed, and its own CI is read in the session handoff rather than written here.
+
+**Two pushes, as recorded in the V5-03 Phase 0 entry.** The first carried `9205536` and `49a33cd`;
+the second carries this entry only. Unlike V5-02, no repair was needed: the report changed no
+source file, no guard, no plant and no ceiling key, so the instrument that reddened on a shallow
+clone in V5-02 was already correct here. The lint log's `object_check: skipped` is the same repair
+working on the same vantage.
+
+**V5 is closed.** F1–F7 are each fixed, rejected with evidence, or in the deliberately-not-done
+list; the full 195-plant census was captured at `ea8beb4` on a clean tree; the eight §12
+deliverables are in this entry's preceding section; the platform's tag, release and four asset
+timestamps were re-read at `ea8beb4` and match the Phase 0 rows. What remains open is named in the
+report's §4 and §6 and belongs to V6.
+
+---
