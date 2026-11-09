@@ -273,7 +273,9 @@ def test_the_suite_member_list_carries_no_path_of_its_own(
     assert member.kind == "performance_benchmark"
 
 
-def test_every_registry_task_is_aggregated_by_exactly_one_member() -> None:
+def test_every_registry_task_is_aggregated_by_exactly_one_member(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """A task the suite does not read publishes no headline number, and silence used to hide it.
 
     The member list and the registry now describe the same work by construction, so what this
@@ -306,6 +308,33 @@ def test_every_registry_task_is_aggregated_by_exactly_one_member() -> None:
     reading = with_extras_census()
     assert reading["available"], reading
     assert reading["gap"] == 0, f"the suite artifact and the registry disagree: {reading}"
+
+    # V5-02, F4. The comparison above asks whether the artifact's members are the registry's. This
+    # asks the other question the two CI vantages made visible: which commit does the artifact say
+    # its numbers belong to, and can that claim be checked? A file cannot carry the SHA of the
+    # commit that contains it, so the committed artifact is expected to name an earlier revision
+    # and attribute the difference; a fresh one is expected to name the tip. The forged copy is the
+    # proof that the reading reddens rather than only printing, which is what `gap: 0` from two
+    # vantages without a comparison could not do.
+    from tools import inventory_orphan_code as collector
+    from tools.inventory_orphan_code import artifact_revision
+
+    revision = artifact_revision()
+    assert revision["available"], revision
+    assert revision["gap"] == 0, f"the artifact's revision claim does not hold: {revision}"
+    assert revision["tip_being_verified"], revision
+    assert revision["vantage"], revision
+
+    forged_payload = json.loads(collector.BENCHMARK_SUITE_RUN.read_text(encoding="utf-8"))
+    forged_payload["repository"]["git_commit"] = "deadbeefdead"
+    forged = tmp_path / "suite_run.json"
+    forged.write_text(json.dumps(forged_payload), encoding="utf-8")
+    monkeypatch.setattr(collector, "BENCHMARK_SUITE_RUN", forged)
+    forged_reading = artifact_revision()
+    assert forged_reading["gap"] > 0, (
+        "the revision reading accepted a commit this repository does not hold and that the "
+        f"artifact's own provenance does not name: {forged_reading}"
+    )
 
 
 def test_suite_headline_csv_is_machine_readable_and_points_at_its_source(

@@ -69,6 +69,12 @@ jobs:
       # the same reading's gap. The command is already an `executed` row of the contract.
       - name: Docs re-derivation
         run: uv run python -m tools.inventory_orphan_code --reading docs_rederivation
+      # V5-02, F4. The lint job reads the *committed* artifact; the benchmark job reads the one its
+      # own run just wrote. Both used to print `gap: 0` because nothing compared either revision
+      # with the tip being verified. This step is the same reading the ceilings key adjudicates,
+      # and it names which vantage it took so the two jobs are attributed rather than averaged.
+      - name: Artifact revision
+        run: uv run python -m tools.inventory_orphan_code --reading artifact_revision
       - name: refactor ceilings
         run: uv run python -m tools.inventory_orphan_code --check-ceilings
       # V2-28. §7 step 4 introduces its block with "These are the CI lanes", and this command has been
@@ -223,6 +229,10 @@ jobs:
         run: uv run python -m tools.run_benchmark_suite --require-all
       - name: With-extras census
         run: uv run python -m tools.inventory_orphan_code --reading with_extras_census
+      # The second vantage of the same reading: this artifact was written by the run above, so its
+      # revision must be this run's tip. A producer that recorded the wrong commit reddens here.
+      - name: Artifact revision at the run tip
+        run: uv run python -m tools.inventory_orphan_code --reading artifact_revision
       - name: Show the generated summary
         run: cat benchmarks/suite/results/suite_summary.md
       - name: Upload the suite artifacts

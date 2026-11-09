@@ -1078,6 +1078,97 @@ def with_extras_census() -> dict[str, Any]:
     }
 
 
+def revision_exists(revision: str) -> bool:
+    """Whether a revision names a commit in this repository, without assuming that it does."""
+    completed = subprocess.run(
+        ["git", "cat-file", "-e", f"{revision}^{{commit}}"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return completed.returncode == 0
+
+
+def _artifact_path(path: Path) -> str:
+    """An artifact's path for a reading, shortened only when it is inside the checkout.
+
+    The F4 guard points `artifact_revision` at a forged copy under pytest's temporary root, which
+    is outside the repository; `relative_to` would raise there and hide the refusal the copy exists
+    to prove.
+    """
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
+def artifact_revision() -> dict[str, Any]:
+    """Which commit the suite artifact says its numbers belong to, and whether that holds.
+
+    V5's F4. Two jobs hold two artifacts of the same suite and both printed `gap: 0`: the `lint`
+    job reads the committed `suite_run.json`, whose `git_commit` is `17df062040b8`, while
+    `benchmark-suite` reads the file its own run just wrote. Nothing compared either revision with
+    the tip being verified, so a revision anyone could type was as good as one a run produced.
+
+    A file cannot carry the SHA of the commit that contains it, so this cannot demand equality
+    with `HEAD`. What it can demand is that the claim be checkable: the named revision exists in
+    this repository, the artifact's own `provenance` sentence names it, and a revision other than
+    the tip is attributed to a dirty tree with the paths that made it dirty. `gap` counts the
+    refusals. `matches_tip` and `vantage` say which of the two artifacts was read, so a reading
+    from `lint` and one from `benchmark-suite` are attributed rather than averaged.
+    """
+    if not BENCHMARK_SUITE_RUN.exists():
+        return {
+            "available": False,
+            "unavailable_because": f"{_artifact_path(BENCHMARK_SUITE_RUN)} is not in the tree",
+            "gap": None,
+        }
+    payload = json.loads(BENCHMARK_SUITE_RUN.read_text(encoding="utf-8"))
+    repository = payload.get("repository", {})
+    declared = str(repository.get("git_commit", "") or "")
+    binary = str(repository.get("binary_git_commit", "") or "")
+    provenance = str(repository.get("provenance", "") or "")
+    uncommitted = [str(path) for path in repository.get("uncommitted_paths", []) or []]
+    dirty = repository.get("working_tree_dirty")
+    tip = git("rev-parse", "HEAD")
+    problems: list[str] = []
+    if not re.fullmatch(r"[0-9a-f]{7,40}", declared):
+        problems.append(f"git_commit {declared!r} is not a hexadecimal revision")
+    elif not revision_exists(declared):
+        problems.append(f"git_commit {declared} names no commit in this repository")
+    if declared and declared[:12] not in provenance:
+        problems.append(f"provenance does not name the revision {declared[:12]}")
+    if binary and binary[:12] not in provenance:
+        problems.append(f"provenance does not name the binary stamp {binary[:12]}")
+    matches_tip = bool(declared) and (tip == declared or tip.startswith(declared))
+    if declared and not matches_tip and not (dirty is True and uncommitted):
+        problems.append(
+            f"the artifact names {declared[:12]} while the tip is {tip[:12]}, and it does not "
+            "attribute the difference to a dirty tree with the paths that made it dirty"
+        )
+    if matches_tip:
+        vantage = "fresh artifact written by the run being verified, at that run's own tip"
+    else:
+        vantage = (
+            "committed artifact read by the lint job; it names an earlier revision and "
+            f"attributes the difference to {len(uncommitted)} uncommitted paths"
+        )
+    return {
+        "available": True,
+        "artifact": _artifact_path(BENCHMARK_SUITE_RUN),
+        "artifact_revision": declared,
+        "binary_revision": binary,
+        "tip_being_verified": tip,
+        "matches_tip": matches_tip,
+        "vantage": vantage,
+        "uncommitted_paths": len(uncommitted),
+        "working_tree_dirty": dirty,
+        "problems": problems,
+        "gap": len(problems),
+    }
+
+
 def _claim_value(token: str) -> int | None:
     """`19` and `nineteen` are the same claim about the same artifact (V2's `_as_int` rule)."""
     if token.isdigit():
@@ -1271,6 +1362,15 @@ def build_snapshot() -> dict[str, Any]:
                 "value": with_extras_census(),
             },
             {
+                "name": "artifact_revision",
+                "command": (
+                    "read the suite artifact's repository block, check that its git_commit names "
+                    "a commit in this repository and that its own provenance names it, and "
+                    "attribute a revision other than the tip to the dirty tree it reports"
+                ),
+                "value": artifact_revision(),
+            },
+            {
                 "name": "docs_rederivation",
                 "command": (
                     "re-derive suite members, plants and manifest entries from their artifacts, "
@@ -1306,6 +1406,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
     dependencies = by_name["external_dependencies"]
     lanes = by_name["lanes_documented_vs_executed"]
     census = by_name["with_extras_census"]
+    revision = by_name["artifact_revision"]
     docs = by_name["docs_rederivation"]
     return {
         "bootstrap_sites_outside_package": len(by_name["bootstrap_census"]),
@@ -1329,6 +1430,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
         "external_dependencies_added": len(dependencies["added"]) + len(dependencies["removed"]),
         "lanes_documented_vs_executed_gap": None if not lanes["available"] else lanes["gap"],
         "with_extras_census_gap": None if not census["available"] else census["gap"],
+        "artifact_revision_gap": None if not revision["available"] else revision["gap"],
         "docs_rederivation_gap": None if not docs["available"] else docs["gap"],
     }
 

@@ -230,6 +230,18 @@
       "corpus": "the five living documents enumerated by CONTRIBUTING.md's regeneration paragraph (README.md, docs/reproducibility.md, docs/validation_matrix.md, docs/interview_defense.md and paper/technical_report.tex), read in full, against four values re-derived from benchmarks/suite/results/suite_run.json, the registry, the runner's own --list and evidence/manifest.json. The source is read rather than rendered, so tools.build_report stays dev-only.",
       "can_fail_because": "a document that transcribes a superseded number instead of re-deriving it, a claim sentence that disappears, one of the five documents going missing, or the suite artifact and the registry disagreeing all make the sum non-zero. The plant rewrites `all 19 members` to `all 18 members` in docs/validation_matrix.md. An absent artifact returns unavailable rather than zero, and this row carries no may_be_unmeasured, so the gate fails instead of skipping.",
       "exemptions": []
+    },
+    {
+      "key": "artifact_revision_gap",
+      "law": "V5 §5 F4",
+      "metric": "the number of refusals in the suite artifact's own revision claim: a git_commit that is not a hexadecimal revision, a revision that names no commit in this repository, a provenance sentence that does not name the revision or the binary stamp beside it, and a revision other than the tip that the artifact does not attribute to a dirty tree with the paths that made it dirty",
+      "measured_at_baseline": 0,
+      "baseline_note": "the committed artifact names 17df062040b8 while the tip is 9e35c9c; it attributes the difference to 21 uncommitted paths, all of them results the suite itself wrote. Run 42554133271's fresh artifact named 9e35c9cd6060. Both readings printed gap: 0 because no reading compared either revision with the tip being verified.",
+      "max": 0,
+      "reach_by_phase": "V5-02",
+      "corpus": "benchmarks/suite/results/suite_run.json, read in full: repository.git_commit, repository.binary_git_commit, repository.provenance, repository.working_tree_dirty and repository.uncommitted_paths, compared with `git rev-parse HEAD` and `git cat-file -e <revision>^{commit}` in this checkout. The lint job reads the committed file; the benchmark job reads the one its own run wrote.",
+      "can_fail_because": "a git_commit edited to a revision this repository does not hold, a provenance sentence that stops naming the revision, or a revision other than the tip with no dirty-tree attribution all make the sum non-zero. The plant rewrites `\"git_commit\": \"17df062040b8\"` to `\"git_commit\": \"deadbeefdead\"`. An absent artifact returns unavailable rather than zero, and this row carries no may_be_unmeasured, so the gate fails instead of skipping.",
+      "exemptions": []
     }
   ],
   "notes": [

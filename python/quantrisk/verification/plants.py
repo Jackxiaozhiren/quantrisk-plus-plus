@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 194/194 planted defects rejected",
+        anchor="# 195/195 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2823,6 +2823,24 @@ MUTATIONS: tuple[Mutation, ...] = (
             "not transcribed when a number happens to move; a document that prints a value "
             "the suite artifact does not hold reddens the re-derivation reading, which is the "
             "V3 §7 item 5 residue this plant re-opens"
+        ),
+    ),
+    Mutation(
+        identifier="suite-artifact-claims-a-revision-the-repository-does-not-hold",
+        kind="prose",
+        path="benchmarks/suite/results/suite_run.json",
+        anchor='    "git_commit": "17df062040b8",',
+        replacement='    "git_commit": "deadbeefdead",',
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_registry_task_is_aggregated_by_exactly_one_member"
+        ),
+        claim=(
+            "the artifact's revision is the checkable half of its provenance: the reading "
+            "requires the named commit to exist in this repository and to appear in the "
+            "sentence that says where the numbers came from, so a typed SHA reddens both the "
+            "reading and the guard instead of printing gap: 0 from two vantages, which is the "
+            "V5 F4 residue this plant re-opens"
         ),
     ),
 )
