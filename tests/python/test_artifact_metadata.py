@@ -336,6 +336,67 @@ def test_every_registry_task_is_aggregated_by_exactly_one_member(
         f"artifact's own provenance does not name: {forged_reading}"
     )
 
+    # V7 H1. The deadbeef forgery proves that a *nonexistent* revision reddens. V6 pinned the
+    # committed artifact to 17df062040b8 in prose, and nothing checked that decision: a different
+    # real commit with a provenance rewritten to match it passed every V5 check. Both sides of the
+    # declaration are now forged. A committed file cannot carry the SHA of the commit that
+    # contains it, so matches_tip is necessarily false here and the pin always applies; the
+    # benchmark job's fresh artifact is the one exempt vantage, not a way around the check.
+    assert revision["pinned_revision"] == "17df062040b8", revision
+    assert revision["pin_holds"] is True, revision
+    original_ceilings = collector.CEILINGS_PATH
+    committed_path = collector.REPO_ROOT / revision["artifact"]
+
+    other_revision = "bb914624801bbddeee091914bd42bc39ad4f7d9d"
+    payload = json.loads(forged.read_text(encoding="utf-8"))
+    payload["repository"]["git_commit"] = other_revision
+    payload["repository"]["provenance"] = (
+        f"ran from {other_revision[:12]} plus the uncommitted changes listed in "
+        "uncommitted_paths; the extension binary was configured at af7595749188"
+    )
+    forged.write_text(json.dumps(payload), encoding="utf-8")
+    drifted = artifact_revision()
+    assert drifted["gap"] >= 1, f"the artifact moved off its pin without a refusal: {drifted}"
+    assert drifted["pin_holds"] is False, drifted
+    assert any("pins it to" in problem for problem in drifted["problems"]), drifted
+
+    monkeypatch.setattr(collector, "BENCHMARK_SUITE_RUN", committed_path)
+    ceilings_payload = json.loads(original_ceilings.read_text(encoding="utf-8"))
+    row = next(
+        item for item in ceilings_payload["ceilings"] if item["key"] == "artifact_revision_gap"
+    )
+    forged_ceilings = tmp_path / "refactor_ceilings.json"
+    row["pinned_revision"] = "deadbeefdead"
+    forged_ceilings.write_text(json.dumps(ceilings_payload), encoding="utf-8")
+    monkeypatch.setattr(collector, "CEILINGS_PATH", forged_ceilings)
+    wrong_pin = artifact_revision()
+    assert wrong_pin["gap"] > 0 and wrong_pin["pin_holds"] is False, wrong_pin
+    assert any("pins it to" in problem for problem in wrong_pin["problems"]), wrong_pin
+
+    del row["pinned_revision"]
+    forged_ceilings.write_text(json.dumps(ceilings_payload), encoding="utf-8")
+    missing_pin = artifact_revision()
+    assert missing_pin["gap"] > 0 and missing_pin["pinned_revision"] is None, missing_pin
+    assert any("no usable pinned_revision" in p for p in missing_pin["problems"]), missing_pin
+
+    monkeypatch.setattr(collector, "CEILINGS_PATH", original_ceilings)
+    fresh_payload = json.loads(committed_path.read_text(encoding="utf-8"))
+    fresh_payload["repository"]["git_commit"] = revision["tip_being_verified"]
+    fresh_payload["repository"]["provenance"] = (
+        f"ran from {revision['tip_being_verified'][:12]} plus the uncommitted changes listed "
+        "in uncommitted_paths; the extension binary was configured at af7595749188"
+    )
+    fresh = tmp_path / "fresh_suite_run.json"
+    fresh.write_text(json.dumps(fresh_payload), encoding="utf-8")
+    monkeypatch.setattr(collector, "BENCHMARK_SUITE_RUN", fresh)
+    fresh_reading = artifact_revision()
+    assert fresh_reading["matches_tip"] is True, fresh_reading
+    assert fresh_reading["gap"] == 0, (
+        f"the pin check would fail a green benchmark job's fresh upload: {fresh_reading}"
+    )
+    assert fresh_reading["pin_holds"] is None, fresh_reading
+    assert "not applicable" in fresh_reading["pin_check"], fresh_reading
+
 
 def test_suite_headline_csv_is_machine_readable_and_points_at_its_source(
     tmp_path: Path,

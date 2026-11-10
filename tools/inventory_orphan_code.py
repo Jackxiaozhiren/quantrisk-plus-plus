@@ -1115,6 +1115,22 @@ def _artifact_path(path: Path) -> str:
         return str(path)
 
 
+def pinned_suite_revision() -> str:
+    """The revision the policy asset pins the committed suite artifact to.
+
+    V7 H1. The pin is a declaration in `tools/refactor_ceilings.json`, not a literal in this
+    module: a literal would be a second copy that nothing in the tree could disagree with. A
+    missing, unreadable or malformed declaration returns an empty string so the reading refuses
+    instead of silently passing.
+    """
+    try:
+        ceilings = json.loads(CEILINGS_PATH.read_text(encoding="utf-8"))
+        row = next(item for item in ceilings["ceilings"] if item["key"] == "artifact_revision_gap")
+    except (OSError, ValueError, KeyError, StopIteration, TypeError):
+        return ""
+    return str(row.get("pinned_revision", "") or "")
+
+
 def artifact_revision() -> dict[str, Any]:
     """Which commit the suite artifact says its numbers belong to, and whether that holds.
 
@@ -1129,6 +1145,13 @@ def artifact_revision() -> dict[str, Any]:
     the tip is attributed to a dirty tree with the paths that made it dirty. `gap` counts the
     refusals. `matches_tip` and `vantage` say which of the two artifacts was read, so a reading
     from `lint` and one from `benchmark-suite` are attributed rather than averaged.
+
+    V7's H1 adds the pin. V6 decided in prose that the committed artifact stays at
+    `17df062040b8`, but a different real revision with a self-consistent provenance still passed
+    every check above. The decision now lives in the ceilings row, and a committed artifact --
+    which cannot name the commit that contains it, so `matches_tip` is necessarily false -- must
+    equal it. A fresh artifact naming the run's tip is the CI upload and is exempt. `gap` counts
+    the refusals, so either side of the declaration can redden it.
     """
     if not BENCHMARK_SUITE_RUN.exists():
         return {
@@ -1147,6 +1170,9 @@ def artifact_revision() -> dict[str, Any]:
     shallow = repository_is_shallow()
     problems: list[str] = []
     object_present: bool | None = None
+    # V7 H1. V6's pin was prose; the declaration now lives in the policy asset so both sides can
+    # be forged and compared. A literal here would be a second copy nothing could disagree with.
+    pin = pinned_suite_revision()
     if not re.fullmatch(r"[0-9a-f]{7,40}", declared):
         problems.append(f"git_commit {declared!r} is not a hexadecimal revision")
     else:
@@ -1171,6 +1197,30 @@ def artifact_revision() -> dict[str, Any]:
     else:
         object_check = "not checked: the revision is not hexadecimal"
     matches_tip = bool(declared) and (tip == declared or tip.startswith(declared))
+    pin_holds: bool | None = None
+    if not pin or not re.fullmatch(r"[0-9a-f]{7,40}", pin):
+        problems.append(
+            "the policy asset declares no usable pinned_revision for the committed suite artifact"
+        )
+        pin_check = "unavailable: the policy asset declares no usable pinned_revision"
+    elif matches_tip:
+        # A committed file cannot carry the SHA of the commit that contains it, so a reading with
+        # matches_tip true is the fresh artifact the benchmark job wrote at its own tip. V6 G3
+        # declared that upload free to move; demanding the pin there would fail every green run.
+        pin_check = "not applicable: the fresh artifact names the tip of the run that wrote it"
+    else:
+        pin_holds = declared == pin
+        pin_check = (
+            "the committed artifact names the pinned historical revision"
+            if pin_holds
+            else "the committed artifact disagrees with the declared pin"
+        )
+        if not pin_holds:
+            problems.append(
+                f"the committed artifact names {declared[:12]} but the policy asset pins it to "
+                f"{pin[:12]}; an undeclared re-freeze would otherwise pass the object and "
+                "provenance checks"
+            )
     if declared and not matches_tip and not (dirty is True and uncommitted):
         problems.append(
             f"the artifact names {declared[:12]} while the tip is {tip[:12]}, and it does not "
@@ -1196,6 +1246,9 @@ def artifact_revision() -> dict[str, Any]:
         "repository_is_shallow": shallow,
         "uncommitted_paths": len(uncommitted),
         "working_tree_dirty": dirty,
+        "pinned_revision": pin or None,
+        "pin_holds": pin_holds,
+        "pin_check": pin_check,
         "problems": problems,
         "gap": len(problems),
     }
