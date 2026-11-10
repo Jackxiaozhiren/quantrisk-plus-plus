@@ -209,3 +209,209 @@ those require a clean tree after this commit and are attributed in the Phase 5 r
 first of the two pushes. No outcome is written here for a push that has not happened.
 
 ---
+
+### 2026-11-10, V7 Phase 5 — the report, the liveness table, and the archival confirmation
+
+**How this was assembled.** From this ledger's Phase 0 and V7-01 entries plus fresh readings at
+`0c239c589c0804e53b4a9da10814bb713518141f` on a clean tree. Where a number appeared in an earlier
+entry it was re-measured rather than copied; the census line is quoted from `/tmp/v7_census.log`
+line 998, not retyped. Every platform figure is a fresh API reading.
+
+#### 1. Evidence ledger
+
+| id | verdict | probe | closing commit |
+|---|---|---|---|
+| H1 | **fixed** | `artifact_revision_gap` declares `pinned_revision`, `artifact_revision()` compares it with the committed artifact and refuses a missing declaration; four forged-input cases in the extended F4 test redden both sides while the fresh vantage stays at `gap 0`; `--check-ceilings` prints 15 keys with `artifact_revision_gap 0` | `0c239c5` |
+| H2 | **fixed** | both `SKIP` keys re-read at a V7 tip, each `corpus` agreeing with its printed `precondition absent` reason; both retained, neither promoted, retired or given a new flag | `0c239c5` |
+| H3 | **fixed** | every V7 citation of `195/195` carries the development-side label on the same line; `docs_rederivation gap 0`, `documents 5`, `derived {95, 195, 19, 19}` | `14fde09`, `0c239c5` |
+| H4 | **fixed** | Phase 0 states no harness redesign before any source file was touched; V7 added no sweep lane, plant, ceiling key or CI step; §4's decision is not reopened | `14fde09`, `0c239c5` |
+| H5 | **fixed** | an undeclared rewrite of the committed artifact now has `matches_tip false` and `git_commit != 17df062040b8`, so the pin check refuses it; manifest (95 intact) and platform tag/release/four assets re-read in Phase 0 and §8 below; nothing regenerated | `0c239c5`, this entry |
+| H6 | **PARTIAL — named in §4** | `V3_PROMPT.md` §0's 431-line bound holds (154 total / 98 prose lines); this prompt's §8 soft figure of 88 is exceeded by 10, §8's stated condition is met by naming `V6_PROMPT.md` §7's never-executed "implementation unit ships a guard and a plant" rule, but §8's "growth only in §5 and §3" is not satisfied and the prompt is not edited because §6 excludes that from the series-wide approval | `14fde09`, reported here |
+| H7 | **fixed** | `1 failed, 559 passed in 224.11s` attributed to the sandbox bytecode-cache plant in §7 below; no marker, tolerance or test deletion added; CI's pytest verdict is read instead | `0c239c5` |
+
+#### 2. Liveness table, re-evaluated at `0c239c5`
+
+| # | law | verdict | the reading that decided it |
+|---|---|---|---|
+| N1 | requirement truth | **ACTIVE** | `registry_parity`: `filesystem_units 19`, `registry_sources 19`, `mismatch []` |
+| N2 | advertised surface honesty | **ACTIVE** | the V5 F5 clean-venv wheel proof (19 tasks, 7 validations, one study, one refusal, zero residue); labelled development-only in §7, not promoted |
+| N3 | lane contract | **ACTIVE** | `lanes_documented_vs_executed gap 0`; **34** named CI steps; the five `tools.inventory_orphan_code` steps are unchanged |
+| N4 | no silence by count | **ACTIVE** | `with_extras_census gap 0`, `members 19`, `passed 19`; `docs_rederivation gap 0`, `mismatches []`, `source_disagreements []` |
+| N5 | declarations are checkable | **ACTIVE** | 15 keys, 13 `ok`, 2 `SKIP` with named preconditions; the new `pinned_revision` declaration is compared in **both** directions — a drifted artifact and a wrong or missing declaration each print `gap 1` |
+| N6 | runtime reachability | **ACTIVE** | `runtime_reachability` prints `reached_by_neither []` |
+| N7 | one finding, one commit | **ACTIVE** | Phase 0, V7-01 implementation, this report and the terminal entry map to H1–H7 and the two named pushes; §8 below carries the mapping |
+| N8 | no gate weakened | **ACTIVE** | the V7 range adds no `skip`/`xfail`, no exemption, no tolerance and deletes no test; the ceilings change strengthens one existing key and adds none |
+| N9 | plant liveness | **ACTIVE** | `195/195 planted defects were rejected by their guard.` at `0c239c5`, clean tree, 195 `ok   caught` rows, zero other verdict rows (development-side vantage; the sweep has no CI lane) |
+| N10 | one re-run | **ACTIVE, not triggered** | no evidence artifact regenerated in V7: `suite_run.json` still names `17df062040b8`, the manifest still holds 95 intact entries, and no freeze was re-run |
+| N11 | facts precedence | **ACTIVE** | `docs_rederivation gap 0`, 5 documents, `derived {95, 195, 19, 19}`; no printed count moved, so no document required re-derivation |
+| N12 | baseline purity and per-lane provenance | **ACTIVE** | §7 names a revision, an environment **and** a vantage for every lane; the baseline was measured at `d975baa`, whose own CI run `42761772828` is `completed / success`, attempt 1 |
+
+#### 3. The ceilings file's final state
+
+`tools/refactor_ceilings.json` carries **15** keys, unchanged in count by V7. Thirteen are `ok` at
+`0`; two are `SKIP` with `may_be_unmeasured: true`:
+`plants_not_rejected_by_their_guard` and `installed_user_identity_mismatch`.
+
+**Review notes.** V7 added no key, loosened no `max`, retired no `SKIP` and added no
+`may_be_unmeasured`. Its only change is inside `artifact_revision_gap`: a new `pinned_revision`
+declaration (`17df062040b8`), a matching `pinned_revision_why`, and `law`, `metric`, `corpus`,
+`can_fail_because` and `reach_by_phase` extended to describe the new refusal. The declaration is
+read by `pinned_suite_revision()` rather than duplicated as a literal in the collector, so a forged
+policy asset reddens the reading. `can_fail_because` now names four live failure modes instead of
+three, and the V5-02 shallow-clone repair is unchanged: the lint vantage's `object_check` still
+reads `skipped`, and the pin check does not depend on object presence. A future series that wants a
+runner-side verdict for either `SKIP` must redesign the harness first; it may not retire a key to
+make a local reading look like a gate.
+
+#### 4. The deliberately-not-done list
+
+1. **The sweep still has no CI lane.** `plants_not_rejected_by_their_guard` stays `SKIP`
+   permanently; `195/195` is a development-side reading. Converting it requires the harness
+   redesign `V6_PROMPT.md` §4 names as the sole condition, excluded by V7's Phase 0.
+2. **The installed-surface proof is still not a CI lane.** The V5 F5 clean-venv proof remains
+   local; the runner cannot install a second environment without changing the job's shape.
+3. **The committed `suite_run.json` was not regenerated.** V7 guarded its pin rather than
+   refreshing it. A declared re-run remains a future unit with its own approval, because it would
+   move `evidence/manifest.json` and the release asset set.
+4. **No second vantage was built for `195/195`.** The 195 declared plants have two vantages; the
+   rejection verdict has one. V7 labelled it rather than promoting it.
+5. **`V7_PROMPT.md` §8's 88-line soft figure is exceeded** (154 total / 98 prose lines). §8's
+   "growth only in §5 and §3" is not satisfied: the extra lines sit in §6's series-wide approval
+   clause as well. §6 excludes editing this prompt from the series-wide approval, so the sentence
+   is named rather than reworded; H6 is partial, not fixed.
+6. **The full census was captured at the implementation tip, not the literal final tip.** It ran
+   on `0c239c5` on a clean tree; the report and terminal commits that follow are ledger-only.
+   `V7_PROMPT.md` §0 says "final V7 tip" and V6 §7 made the same claim about `9486c7a`. This is
+   the same structural gap named in H6's evidence row, carried to V8 rather than disguised.
+7. **No new plant, ceiling key, CI step or lane.** H1 extends an existing guard, ceiling row and
+   pytest guard; adding machinery to police a sentence is the failure V5 §1 warns about.
+8. **The report PDF was not rebuilt.** `tools.build_report` stays dev-only; the byte-bound PDF and
+   `paper/technical_report.tex` were read, not re-rendered.
+9. **No V7 release.** The published asset set is unchanged by design; H5's check is that it did
+   not move.
+10. **The one local pytest failure was not silenced.**
+    `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache` fails only under this
+    sandbox's bytecode-cache plant; it is named in §7 as a failure with its environment, and CI's
+    `490 passed, 5 skipped` is read instead. No marker was added.
+
+#### 5. Premises audit
+
+1. **The published chain is frozen and V7 must not move it silently.** *Final reading:* tag
+   object `d9deb7f764b3c16a091dc86effb9d523b1d2c7d0` → commit
+   `b2dda33f6726d7f36fbe3491aec7cd7a66184809`, tagger `2026-10-20T12:56:35Z`; release `424060629`
+   published `2026-10-26T09:35:44Z` with four assets sized 2,978 / 55,780 / 145,672 / 1,005,786
+   bytes, created `09:35:41Z`, updated `09:35:42Z`–`09:35:43Z`; manifest 95 entries and
+   `Evidence is intact.`. **Closed**; every field matches Phase 0's row.
+2. **The committed suite artifact is pinned in writing but not guarded.** *Final reading:*
+   `--reading artifact_revision` at `0c239c5` prints `artifact_revision 17df062040b8`,
+   `pinned_revision 17df062040b8`, `pin_holds true`, `gap 0`, `matches_tip false`,
+   `object_check "the revision names a commit in this clone"`, `problems []`. **Closed**: the
+   residue named in premise 2 is now a guard, and the four forged cases in the implementation
+   entry prove it reddens.
+3. **The two `SKIP` keys hold only while their preconditions are re-read.** *Final reading:* 15
+   keys, 13 `ok`, 2 `SKIP`; both printed `precondition absent` with their `corpus` describing the
+   missing runner precondition; both retained. **Closed**; the residue is that both verdicts
+   remain development-only, which H2 labelled rather than hid.
+
+#### 6. Series handoff — what V8 must contain
+
+Derived from this run's evidence, not from the prompt's prose:
+
+1. **The pin is now a guard with a declared owner.** Changing `pinned_revision` is a policy
+   decision, not a code edit; a V8 unit that regenerates `suite_run.json` must change both the
+   artifact and the declaration in its Phase 0 and Phase 5, and must carry its own approval.
+2. **The sweep's vantage is still closed.** `V6_PROMPT.md` §4 and `V7_PROMPT.md` §4 permit
+   reopening only through a harness redesign whose Phase 0 says so. A V8 that lists it as an open
+   question has read neither.
+3. **The two `SKIP` keys still have no runner vantage.** They were re-read twice more and retained
+   with reasons; a second vantage for development-only counts remains an idea, not a gate.
+4. **The printed `195/195` line is labelled.** Any new document quoting the census verdict must
+   label it development-side on the same line, and `docs_rederivation` must stay at `gap 0`.
+5. **Two size-ratchet sentences are standing and unsatisfied.** `V7_PROMPT.md` §8's 88-line soft
+   figure and "growth only in §5 and §3" were reported as partial rather than reworded. A V8 unit
+   that edits that prompt needs its own verbatim approval; §6 forbids widening authority.
+6. **The census-at-final-tip gap is structural.** V6 and V7 both captured the census on the
+   implementation tip, then shipped ledger-only commits. If V8 wants the literal reading, its
+   Phase 0 must plan a census after the terminal entry's own push on a clean tree.
+7. **No silent re-freeze remains standing.** The 95-entry manifest and the `v1.9.0` assets are
+   the published chain; any regeneration must appear in both Phase 0 and Phase 5.
+8. **The local pytest failure is environmental.** Do not weaken a gate to turn
+   `1 failed, 559 passed` into green; attribute it to the sandbox and read CI instead.
+
+#### 7. Per-lane verification table
+
+| lane | revision | environment | vantage | verdict |
+|---|---|---|---|---|
+| `ruff check .` | `0c239c5` | macOS, `.venv` Python 3.12, development checkout | development | `All checks passed!` |
+| `ruff format --check .` | `0c239c5` | same | development + CI lint | `238 files already formatted` |
+| `mypy python/quantrisk tools` | `0c239c5` | same | development | `Success: no issues found in 74 source files` |
+| `pytest -q` (full) | `0c239c5` | same, private `--basetemp=/tmp/qr-v7-final` | development | **1 failed, 559 passed in 224.11s**; the failure is the sandbox-only bytecode-cache plant |
+| `pytest --collect-only` / `measure_offline_collection` | `0c239c5` | same | development | 560 / 491, `collection_errors 0` |
+| mutation sweep, targeted (2 plants) | `0c239c5` | same, clean tree after the implementation commit | development-only | two `1/1 planted defects were rejected by their guard.`, tree 0 dirty |
+| mutation sweep, full census | `0c239c5` | same, bulk-delete threshold raised locally | **development-only, labelled** | **195/195**, 195 `ok   caught` rows, 0 other verdict rows, tree 0 dirty, exit 0, 998-line log |
+| `--check-ceilings` | `0c239c5` | same | development + CI lint | 15 keys, 13 `ok`, 2 `SKIP`, no `FAIL` |
+| `--reading docs_rederivation` | `0c239c5` | same | development + CI lint | `gap 0`, 5 documents, `derived {95, 195, 19, 19}` |
+| `--reading lanes_documented_vs_executed` | `0c239c5` | same | development + CI lint | `gap 0` |
+| `--reading with_extras_census` | `0c239c5` | same | development + CI lint + benchmark-job fresh artifact | `gap 0`, 19/19 |
+| `--reading artifact_revision` | `0c239c5` | same | development (deep clone) + lint (shallow clone) + benchmark (fresh artifact) | `gap 0`, `pin_holds true`, `matches_tip false` in the committed vantage; fresh vantage `matches_tip true` and pin-exempt |
+| `--reading formatter_census` / `registry_parity` / `runtime_reachability` | `0c239c5` | same | development + CI lint | 238/238 (both differences empty), 19/19, `reached_by_neither []` |
+| `tools.verify_evidence_manifest` | `0c239c5` | same | development + CI lint | `Evidence is intact.` |
+| `tools.verify_installed_surface` | `3c6092f` | `/tmp/qr-v5-venv`, wheel from that tree, neutral cwd | **development-only, labelled** | identity, 19 tasks, 7 validations, one study, one refusal, 0 residue |
+| CI four jobs | `d975baa` (run `42761772828`) | `ubuntu-latest` `1000010672`–`1000010675`, `macos-15` `1000010673` | runner | `completed / success`, attempt 1, 15 / 14 / 14 / 15 steps; re-read from the API for this report |
+| CI four jobs | report tip (first V7 push) | runners named in the terminal entry | runner | **not yet read**; no outcome is written for a push that has not happened |
+| CI four jobs | terminal tip (second V7 push) | runners named in the session handoff | runner | **not yet read** |
+
+No lane is marked green on a mixed vantage. The census log contains `tree-did-not-recover` and
+`ESCAPED` only inside two plants' claim text at lines 991–992; neither is a verdict row. The one
+local failure is named as a failure with its cause and environment, not averaged into the green
+rows.
+
+#### 8. Archival confirmation
+
+- **Tree and tip.** `git status --porcelain` prints 0 lines; `HEAD` =
+  `0c239c589c0804e53b4a9da10814bb713518141f` before this report's commit, with `origin/main` at
+  `d975baa`. The Phase 0, implementation and report commits are pushed in the first V7 push; the
+  terminal entry follows in the second, and the session handoff records the final tip.
+- **Every V7 commit an ancestor of the remote.** `14fde09` (Phase 0), `0c239c5` (implementation)
+  and this report are local ancestors of the terminal commit and ship in the first push; each
+  object SHA is checked against the local object before the ref moves. The platform `/compare`
+  reading for the pushed range is taken after the push and recorded in the terminal entry; the
+  terminal commit is verified after its own push. No reading is written before the tool reports it.
+- **CI for every commit.** The baseline `d975baa` has its own run `42761772828`
+  (`completed / success`, `run_attempt 1`, four jobs 15 / 14 / 14 / 15, runners
+  `1000010672`–`1000010675`, created `05:22:55Z`, updated `05:33:58Z`). The two V7 push tips are
+  attributed in the terminal entry and the session handoff after the API reports them; no run is
+  named green before it is read. No V7 run is cancelled and no job has 0 steps.
+- **Registers and documents re-counted.** `registry_parity` 19/19; `with_extras_census` 19/19,
+  `gap 0`; `plant_liveness` 195 and the census's 195/195 (development-side vantage); manifest 95
+  intact; `docs_rederivation` 5 documents / `gap 0`; formatter 238/238; nodes 560/491; CI steps
+  34; ceiling keys 15. `artifact_revision gap 0` with `pin_holds true`,
+  `lanes_documented_vs_executed gap 0`, `runtime_reachability` `reached_by_neither []`.
+- **Tags, releases and assets re-read from the platform.** Tag object
+  `d9deb7f764b3c16a091dc86effb9d523b1d2c7d0` → commit
+  `b2dda33f6726d7f36fbe3491aec7cd7a66184809`, tagger `2026-10-20T12:56:35Z`; release `424060629`
+  (`v1.9.0`) published `2026-10-26T09:35:44Z` with four assets, sizes 2,978 / 55,780 / 145,672 /
+  1,005,786 bytes, created `09:35:41Z`, updated `09:35:42Z`–`09:35:43Z`. All match the Phase 0
+  rows; no asset was replaced.
+- **No stray instrument tracked or left on disk.** `git ls-files -- tools/derive_requires.py
+  build/run_sweep.py build/api_push.py` prints nothing; `git check-ignore` confirms
+  `build/api_push.py`, `build/run_sweep.py` and `.workbuddy/` are ignored; the census left 0 dirty
+  paths and no `_mutation_probe` directory; the only external log is `/tmp/v7_census.log`, outside
+  the repository; no background process remains running.
+
+#### 9. What V7 changed, and what it did not
+
+It added `V7_PROMPT.md` and `V7_LEDGER.md`, declared `pinned_revision` inside one existing ceiling
+row, extended `artifact_revision()` with a pin check and one helper, and extended one existing
+pytest guard with four forged cases. `git diff --name-only d975baa..0c239c5` prints exactly five
+paths. It changed no plant total, ceiling-key count, CI step, manifest entry, committed suite
+artifact, document count or release asset. It did not touch `cpp/`, `bindings/`,
+`CMakeLists.txt`, `PROJECT_SPEC.md`, `REFACTOR_PROMPT.md`, `V3_PROMPT.md`, `V5_PROMPT.md`,
+`V6_PROMPT.md`, `evidence/manifest.json` or `paper/`, and it did not move `v1.9.0`.
+
+**The first push.** This report, the Phase 0 commit and the implementation commit are pushed
+together in the first of the two pushes authorised in the V7 Phase 0 entry. Its CI is read once the
+tool reports it and recorded in the terminal entry; no outcome is stated here for a push that has
+not happened.
+
+---
