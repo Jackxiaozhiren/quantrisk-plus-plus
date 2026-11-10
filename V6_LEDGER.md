@@ -342,3 +342,199 @@ tree after this commit and are attributed in the Phase 5 report.
 pushes named in the Phase 0 entry. No outcome is written here for a push that has not happened.
 
 ---
+
+### 2026-11-10, V6 Phase 5 — the report, the liveness table, and the archival confirmation
+
+**How this was assembled.** From this ledger's V6 Phase 0, V6-01 and V6-02 entries plus fresh
+readings at `9486c7a39e380f0f2411ab7ce2bfb33f4c7ee6e8` on a clean tree. Where a number appears in
+an earlier entry it was re-measured rather than copied; the census line is quoted from
+`/tmp/v6_census.log` line 998, not retyped. Every platform figure is a fresh API reading.
+
+#### 1. Evidence ledger
+
+| id | verdict | probe | closing commit |
+|---|---|---|---|
+| G1 | **fixed** | `V6_PROMPT.md` exists with three premises, the Facts Protocol, the lane inventory, G1–G6 with `check:` predicates, the one-unit-per-approval rule, DoD and the size ratchet; its §6 was followed and the approval recorded verbatim in Phase 0 | `2a902eb` (Phase 0), `1804c86` (delivered) |
+| G2 | **fixed** | `V6_PROMPT.md` §4 states the development-only decision permanently, names the mechanical reason and the sole condition for revisiting it; no V6 entry lists it as open; the key's declaration and reason still agree | `1804c86` |
+| G3 | **fixed** | the implementation entry pins `suite_run.json` to `17df062040b8` in writing and states the freeze boundary; `--reading artifact_revision` at `9486c7a` prints `gap 0`, `matches_tip false`, `problems []`, 21 attributed paths | `9486c7a` |
+| G4 | **fixed** | both `SKIP` keys re-read at `321e8b3` and again after the edit: 15 keys, 13 `ok`, 2 `SKIP`; each `corpus` still agrees with its printed `precondition absent` reason; both retained, neither retired | `1e649f5`, `9486c7a` |
+| G5 | **fixed** | the implementation entry names a vantage for every development-only count; the sole living document printing `195/195` labels it on the same line; §7 below carries a `vantage` column; no dev-only count is promoted to a CI gate | `9486c7a` |
+| G6 | **fixed** | the 95-entry manifest and the platform's tag/release/four assets were re-read in Phase 0 and again in §8 below; this unit regenerated none and replaced no asset | `1e649f5`, this entry |
+
+#### 2. Liveness table, re-evaluated at `9486c7a`
+
+| # | law | verdict | the reading that decided it |
+|---|---|---|---|
+| N1 | requirement truth | **ACTIVE** | `registry_parity`: `filesystem_units 19`, `registry_sources 19`, `mismatch []` |
+| N2 | advertised surface honesty | **ACTIVE** | the V5 F5 clean-venv wheel proof (19 tasks, 7 validations, one study, one refusal, zero residue); labelled development-only in G5's table, not promoted |
+| N3 | lane contract | **ACTIVE** | `lanes_documented_vs_executed gap 0`, both differences empty; **34** named CI steps; five `tools.inventory_orphan_code` steps across two jobs |
+| N4 | no silence by count | **ACTIVE** | `with_extras_census` prints `gap 0`, `members 19`, `passed 19`, empty `missing_*` / `duplicate_keys` / `not_passed` / `self_inconsistent` lists; `docs_rederivation` prints `mismatches []` and `source_disagreements []` |
+| N5 | declarations are checkable | **ACTIVE** | 15 keys, 13 `ok`, 2 `SKIP` with named preconditions and `may_be_unmeasured: true`; both `SKIP` reasons re-read at this tip |
+| N6 | runtime reachability | **ACTIVE** | `runtime_reachability` prints `reached_by_neither []` |
+| N7 | one finding, one commit | **ACTIVE** | seven V6 commits map to G1–G2, the terminal entry, Phase 0, G3–G6, the report and the terminal entry; the mapping is §8 below |
+| N8 | no gate weakened | **ACTIVE** | the V6 range adds no `skip`/`xfail`, no exemption, no tolerance and deletes no test; the only source-adjacent change is a comment suffix on one printed line |
+| N9 | plant liveness | **ACTIVE** | `195/195 planted defects were rejected by their guard.` at `9486c7a`, clean tree, 195 `ok   caught` rows, zero other verdict rows |
+| N10 | one re-run | **ACTIVE, not triggered** | no evidence artifact regenerated in V6: `suite_run.json` still names `17df062040b8`, the manifest still holds 95 intact entries, and no freeze was re-run |
+| N11 | facts precedence | **ACTIVE** | `docs_rederivation gap 0`, 5 documents, `derived {95, 195, 19, 19}`; the one edited printed claim was re-derived in the same commit |
+| N12 | baseline purity and per-lane provenance | **ACTIVE** | §7 names a revision, an environment **and** a vantage for every lane; the baseline was measured at `321e8b3`, which has a CI run of its own (`42616940263`) |
+
+#### 3. The ceilings file's final state
+
+`tools/refactor_ceilings.json` carries **15** keys, unchanged by V6. Thirteen are `ok` at `0`:
+`bootstrap_sites_outside_package`, `by_path_load_sites`, `commands_not_module_path`,
+`commands_unrunnable_from_the_root`, `tracked_python_files_in_no_static_check_bucket`,
+`tracked_files_outside_the_formatter_corpus`, `registry_parity_mismatch`,
+`runtime_reachability_gap`, `external_dependencies_added`,
+`lanes_documented_vs_executed_gap`, `with_extras_census_gap`, `docs_rederivation_gap` and
+`artifact_revision_gap`. Two are `SKIP` with `may_be_unmeasured: true`:
+`plants_not_rejected_by_their_guard` and `installed_user_identity_mismatch`.
+
+**Review notes.** V6 added no key and loosened none. G2 made the first `SKIP` permanent in writing;
+G4 re-read both at a V6 tip and retained them with their printed reasons. The fifteenth key's
+`can_fail_because` still names the shallow-clone repair from V5-02, and the lint vantage's
+`object_check "skipped: a shallow clone cannot tell an earlier revision from an absent one"` is the
+same repair working on a different vantage. A future series that wants a runner-side verdict must
+redesign the harness first; it may not retire either key to make a local reading look like a gate.
+
+#### 4. The deliberately-not-done list
+
+1. **The sweep still has no CI lane.** `plants_not_rejected_by_their_guard` stays `SKIP` permanently;
+   `195/195` is a development-side reading. Converting it requires the harness redesign that
+   `V6_PROMPT.md` §4 names as the sole condition.
+2. **The installed-surface proof is still not a CI lane.** The clean-venv proof remains local; the
+   runner cannot install a second environment without changing the job's shape.
+3. **The committed `suite_run.json` was not regenerated.** G3 pinned the artifact to
+   `17df062040b8` instead. A declared re-run is a future unit with its own approval, not a silent
+   refresh that would move `evidence/manifest.json` and the release asset set.
+4. **No second vantage was built for `195/195`.** G5 labelled the count rather than promoting it;
+   the 195 declared plants have two vantages, the rejection verdict has one.
+5. **`V6_PROMPT.md` and every earlier prompt are unedited.** §6 makes a prompt edit its own scope
+   unit; the series-wide approval excluded it.
+6. **No new guard, plant, ceiling key, CI step or lane.** G3–G6 are written decisions about
+   existing readings; adding machinery to police a sentence would be the "counting a declaration"
+   failure V5 §4 warns about.
+7. **The report PDF was not rebuilt.** `tools.build_report` stays dev-only; the byte-bound PDF and
+   `paper/technical_report.tex` were read, not re-rendered.
+8. **No V6 release.** The published asset set is unchanged by design; G6's check is that it did not
+   move.
+9. **The one local pytest failure was not silenced.** `test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache`
+   fails only under this sandbox's bytecode-cache plant; it is named in §7 as a failure with its
+   environment, and CI reads `490 passed, 5 skipped`. No marker was added.
+
+#### 5. Premises audit
+
+1. **The published chain is frozen and V6 must not move it silently.** *Final reading at
+   `9486c7a`:* tag object `d9deb7f764b3c16a091dc86effb9d523b1d2c7d0` → commit
+   `b2dda33f6726d7f36fbe3491aec7cd7a66184809`, tagger `2026-10-20T12:56:35Z`; release `424060629`
+   published `2026-10-26T09:35:44Z` with four assets sized 2,978 / 55,780 / 145,672 / 1,005,786
+   bytes, created `09:35:41Z`, updated `09:35:42Z`–`09:35:43Z`; manifest 95 entries and
+   `Evidence is intact.`. **Closed**; every field matches Phase 0's row.
+2. **The committed suite artifact's revision is checkable but undecided.** *Final reading:*
+   `--reading artifact_revision` at `9486c7a` prints `artifact_revision 17df062040b8`, `gap 0`,
+   `matches_tip false`, `object_check "the revision names a commit in this clone"`, 21 attributed
+   paths. The decision is now written in the implementation entry: the artifact is pinned to that
+   historical run. **Closed**; the residue is that the pin is prose, not a new guard (item 3 above).
+3. **The two `SKIP` keys hold only while their preconditions are re-read.** *Final reading:* 15
+   keys, 13 `ok`, 2 `SKIP`; both printed `precondition absent` with their `corpus` describing the
+   missing runner precondition; both retained. **Closed**; the residue is that both verdicts remain
+   development-only, which G5 labelled rather than hid.
+
+#### 6. Series handoff — what V7 must contain
+
+Derived from this run's evidence, not from the prompt's prose:
+
+1. **The pin is a written decision, not a guard.** If V7 wants a checkable artifact pin, it needs a
+   reading with a plant or forged-input proof and its own approval; it must not "fix" the lint
+   vantage's `matches_tip false` by regenerating the committed artifact outside a declared re-run.
+2. **The sweep's vantage is closed.** `V6_PROMPT.md` §4 permits reopening only through a harness
+   redesign whose Phase 0 says so and which carries its own approval. A V7 that lists it as an open
+   question has not read §4.
+3. **The two `SKIP` keys have no runner vantage.** They were re-read and retained with reasons;
+   a second vantage for development-only counts remains an idea, not a gate.
+4. **The printed `195/195` line is labelled.** Any new document that quotes the census verdict must
+   label it development-side on the same line, and `docs_rederivation` must stay at `gap 0`.
+5. **Size ratchet.** `V6_PROMPT.md` is 146 lines with 88 lines of prose; growth is allowed only in
+   §5's finding table and §3's lane inventory, and only after showing which V6 rule was never
+   executed.
+6. **No silent re-freeze remains standing.** The 95-entry manifest and the `v1.9.0` assets are the
+   published chain; any regeneration must appear in both Phase 0 and Phase 5.
+7. **The local pytest failure is environmental.** Do not weaken a gate to turn
+   `1 failed, 559 passed` into green; attribute it to the sandbox and read CI instead.
+
+#### 7. Per-lane verification table
+
+| lane | revision | environment | vantage | verdict |
+|---|---|---|---|---|
+| `ruff check .` | `9486c7a` | macOS, `.venv` Python 3.12, development checkout | development | `All checks passed!` |
+| `ruff format --check .` | `9486c7a` | same | development + CI lint | `236 files already formatted` |
+| `mypy python/quantrisk tools` | `9486c7a` | same | development | `Success: no issues found in 74 source files` |
+| `pytest -q` (full) | `9486c7a` | same, private `--basetemp=/tmp/qr-v6-final` | development | **1 failed, 559 passed in 120.77s**; the failure is the sandbox-only bytecode-cache plant |
+| `pytest --collect-only` / `measure_offline_collection` | `9486c7a` | same | development | 560 / 491, `collection_errors 0` |
+| mutation sweep, targeted | `9486c7a` | same, clean tree after the implementation commit | development-only | `1/1 planted defects were rejected by their guard.`, tree 0 dirty |
+| mutation sweep, full census | `9486c7a` | same, bulk-delete threshold raised locally | **development-only, labelled** | **195/195**, 195 `ok   caught` rows, 0 other verdict rows, tree 0 dirty, exit 0 |
+| `--check-ceilings` | `9486c7a` | same | development + CI lint | 15 keys, 13 `ok`, 2 `SKIP` |
+| `--reading docs_rederivation` | `9486c7a` | same | development + CI lint | `gap 0`, 5 documents, `derived {95, 195, 19, 19}` |
+| `--reading lanes_documented_vs_executed` | `9486c7a` | same | development + CI lint | `gap 0` |
+| `--reading with_extras_census` | `9486c7a` | same | development + CI lint + benchmark-job fresh artifact | `gap 0`, 19/19, `revision 17df062040b8` |
+| `--reading artifact_revision` | `9486c7a` | same | development (deep clone) + lint (shallow clone) + benchmark (fresh artifact) | `gap 0`, `matches_tip false` in the committed vantage; `matches_tip true` on the CI upload |
+| `--reading formatter_census` / `registry_parity` / `runtime_reachability` | `9486c7a` | same | development + CI lint | 236/236, 19/19, `reached_by_neither []` |
+| `tools.verify_evidence_manifest` | `9486c7a` | same | development + CI lint | `Evidence is intact.` |
+| `tools.verify_installed_surface` | `3c6092f` | `/tmp/qr-v5-venv`, wheel from that tree, neutral cwd | **development-only, labelled** | identity, 19 tasks, 7 validations, one study, one refusal, 0 residue |
+| CI `lint` / `build-and-test` / `macOS parity` / `benchmark-suite` | `1804c86` (run `42615110830`) | `ubuntu-latest` `1000010595`–`1000010597`, `macos-15` `1000010598` | runner | `success`, 15 / 14 / 14 / 15 steps |
+| CI four jobs | `321e8b3` (run `42616940263`) | `ubuntu-latest` `1000010606`–`1000010608`, `macos-15` `1000010609` | runner | `success`, 15 / 14 / 14 / 15 steps; `490 passed, 5 skipped`, `19/19`, `matches_tip true` |
+| CI four jobs | report tip (first V6-02 push) | runners named in the terminal entry | runner | **not yet read**; no outcome is written for a push that has not happened |
+| CI four jobs | terminal tip (second V6-02 push) | runners named in the session handoff | runner | **not yet read** |
+
+No lane is marked green on a mixed vantage. The census's log contains the strings
+`tree-did-not-recover` and `ESCAPED` only inside two plants' claim text at lines 991–992; neither is
+a verdict row. The one local failure is named as a failure with its cause and environment, not
+averaged into the green rows.
+
+#### 8. Archival confirmation
+
+- **Tree and tip.** `git status --porcelain` prints 0 lines; `HEAD` =
+  `9486c7a39e380f0f2411ab7ce2bfb33f4c7ee6e8` before this report's commit, with `origin/main` at
+  `321e8b3`. The Phase 0, implementation and report commits are pushed in the first V6-02 push; the
+  terminal entry follows in the second, and the session handoff records the final tip.
+- **Every V6 commit an ancestor of the remote.** Platform `/compare/bb91462...321e8b3` returned
+  `ahead_by 3`, `behind_by 0`, with `2a902eb`, `1804c86`, `321e8b3` all ancestors of the then-tip.
+  `1e649f5` (V6-02 Phase 0) and `9486c7a` (implementation) are local ancestors of this report's
+  commit and ship in the first V6-02 push; each object SHA is checked against the local object
+  before the ref moves. The terminal commit is verified after its own push.
+- **CI for every commit.** Two V6-01 runs cover its range: `42615110830` (`1804c86`, `success`,
+  `run_attempt 1`, 15/15/14/14) and `42616940263` (`321e8b3`, `success`, `run_attempt 1`,
+  15/15/14/14). `2a902eb` was carried in the same first push as `1804c86` and is attributed to the
+  run whose tree contains it. The two V6-02 push tips are attributed in the terminal entry and the
+  session handoff after the API reports them; no run is named green before it is read. No V6 run is
+  cancelled and no job has 0 steps.
+- **Registers and documents re-counted.** `registry_parity` 19/19; `with_extras_census` 19/19,
+  `gap 0`; `plant_liveness` 195 and the census's 195/195; manifest 95 intact;
+  `docs_rederivation` 5 documents / `gap 0`; formatter 236/236; nodes 560/491; CI steps 34;
+  ceiling keys 15. `artifact_revision gap 0`, `lanes_documented_vs_executed gap 0`,
+  `runtime_reachability` `reached_by_neither []`.
+- **Tags, releases and assets re-read from the platform.** Tag object
+  `d9deb7f764b3c16a091dc86effb9d523b1d2c7d0` → commit
+  `b2dda33f6726d7f36fbe3491aec7cd7a66184809`, tagger `2026-10-20T12:56:35Z`; release `424060629`
+  (`v1.9.0`) published `2026-10-26T09:35:44Z` with four assets, sizes 2,978 / 55,780 / 145,672 /
+  1,005,786 bytes, created `09:35:41Z`, updated `09:35:42Z`–`09:35:43Z`. All match the Phase 0
+  rows; no asset was replaced.
+- **No stray instrument tracked or left on disk.** `git ls-files -- tools/derive_requires.py
+  build/run_sweep.py build/api_push.py` prints nothing; `git check-ignore` confirms
+  `build/api_push.py`, `build/run_sweep.py` and `.workbuddy/` are ignored; the census left 0 dirty
+  paths and no `_mutation_probe` directory; the only external log is `/tmp/v6_census.log`, outside
+  the repository; no background process remains running.
+
+#### 9. What V6 changed, and what it did not
+
+It added `V6_PROMPT.md`, `V6_LEDGER.md` and one suffix on a printed command comment. It changed no
+source file, guard, plant, ceiling key, CI step, manifest entry, committed suite artifact or release
+asset. It did not touch `cpp/`, `bindings/`, `CMakeLists.txt`, `PROJECT_SPEC.md`,
+`REFACTOR_PROMPT.md`, `V3_PROMPT.md`, `V5_PROMPT.md`, `evidence/manifest.json` or `paper/`, and it
+did not move `v1.9.0`.
+
+**The first push.** This report, the Phase 0 commit and the implementation commit are pushed together
+in the first of the two pushes authorised in the V6-02 Phase 0 entry. Its CI is read once the tool
+reports it and recorded in the terminal entry; no outcome is stated here for a push that has not
+happened.
+
+---
