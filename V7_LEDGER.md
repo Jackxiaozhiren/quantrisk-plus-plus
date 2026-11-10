@@ -415,3 +415,68 @@ tool reports it and recorded in the terminal entry; no outcome is stated here fo
 not happened.
 
 ---
+
+### 2026-11-10, V7-01 terminal entry — the report tip is green, and the series closes
+
+**The report tip's CI, attributed.** Run `42806583887` on
+`3a70006351cc102159dff19031331988b6ff12d8` is `completed` / `success`, `run_attempt 1`, created
+`11:19:54Z`, updated `11:30:00Z`. `gh run watch` returned 0 after 9m30s; the run and jobs below
+were read again from the API before this entry was written. Four jobs, all `success`:
+
+| job | steps | runner | labels |
+|---|---|---|---|
+| `129797164596` Format and static checks | **15** | `1000010718` | `ubuntu-latest` |
+| `129797164736` Configure, build, C++ tests, Python tests | 14 | `1000010717` | `ubuntu-latest` |
+| `129797164761` macOS native C++ and Python parity | 14 | `1000010719` | `macos-15` |
+| `129797164871` Benchmark suite against live oracles | **15** | `1000010720` | `ubuntu-latest` |
+
+No job is cancelled, none has 0 steps and no step failed. The only annotations are GitHub's
+`ubuntu-latest` migration notice and a macOS capacity notice, neither a failure.
+
+**What the four logs printed.** Lint: `238 files already formatted`, `declared_plants 195`, the
+Docs re-derivation step's `"printed": "195/195 planted defects rejected"` (the V6 vantage label is
+a trailing comment and does not disturb the claim the reading re-derives),
+`artifact_revision_gap 0 ... due V5-02 / V7-01`, `docs_rederivation_gap 0`,
+`with_extras_census_gap 0`, `lanes_documented_vs_executed_gap 0`, `registry_parity_mismatch 0`
+and `Evidence is intact.`. Build-and-test: `100% tests passed out of 204`,
+`490 passed, 5 skipped in 176.16s`, `7/7 checks passed`. macOS: `100% tests passed out of 204`,
+`98 passed in 5.84s`. Benchmark: `suite: 19/19 executed and passed, 0 aggregated from disk, 0
+failed, 0 skipped, 379.2s total`.
+
+**The pin's two CI vantages.** This is the first CI run that executes H1's guard. The lint job's
+`Artifact revision` step (depth-1 checkout) printed `matches_tip false`,
+`object_check "skipped: a shallow clone cannot tell an earlier revision from an absent one"`,
+`pinned_revision "17df062040b8"`, `pin_holds true` and
+`pin_check "the committed artifact names the pinned historical revision"`. The benchmark job's
+`Artifact revision at the run tip` step printed `matches_tip true`,
+`object_check "the revision names a commit in this clone"`, the same `pinned_revision`,
+`pin_holds null` and `pin_check "not applicable: the fresh artifact names the tip of the run that
+wrote it"`. Both vantages held `artifact_revision_gap 0`; the shallow-clone repair and the new pin
+check coexist rather than one masking the other. These are two vantages of one artifact, not a
+disagreement.
+
+**The series' commit count, final.** Four commits in `d975baa..` — `14fde09` (V7 Phase 0),
+`0c239c5` (V7-01 implementation), `3a70006` (this report's predecessor) and this terminal entry.
+Platform `/compare/d975baa...3a70006` returned `ahead_by 3`, `behind_by 0`, with the first three
+as ancestors of the then-tip; the three commits of the first push were each reconstructed through
+the Git Data API with their blob, tree and commit SHAs checked against the local objects before the
+ref moved. `git diff --name-only` over the range prints exactly five paths: `V7_PROMPT.md`,
+`V7_LEDGER.md`, `tools/refactor_ceilings.json`, `tools/inventory_orphan_code.py` and
+`tests/python/test_artifact_metadata.py`. The terminal commit is pushed after this file's content
+is fixed, and its own CI is read in the session handoff rather than written here.
+
+**Two pushes, as recorded in the V7 Phase 0 entry.** The first carried `14fde09`, `0c239c5` and
+`3a70006`; the second carries this entry only. No repair was needed: the CI was green on the first
+attempt, no source or policy file changed after the implementation commit, and the shallow-clone
+reading was already correct.
+
+**V7 is closed.** H1–H5 and H7 are fixed with a written decision or a measured reading; H6 is
+**partial** and is named in Phase 5 §4 item 5 and §6 item 5 rather than claimed fixed — the
+431-line hard bound holds, the 88-line soft figure does not, and `V7_PROMPT.md` was not edited
+because §6 excludes that from the series-wide approval. The full `195/195` census (development-side
+vantage; the sweep has no CI lane) was captured at `0c239c5` on a clean tree; the eight
+`V3_PROMPT.md` §12 deliverables are in the preceding section; the platform's tag, release and four
+asset timestamps were re-read in Phase 0, Phase 5 and again before this entry and match. What
+remains open is named in the report's §4 and §6 and belongs to V8. No third push is implied.
+
+---
