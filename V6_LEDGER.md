@@ -538,3 +538,55 @@ reports it and recorded in the terminal entry; no outcome is stated here for a p
 happened.
 
 ---
+
+### 2026-11-10, V6-02 terminal entry — the report tip is green, and the series closes
+
+**The report tip's CI, attributed.** Run `42760321662` on
+`1cdc515ede7530402d2657fed585161a669d0229` is `completed` / `success`, `run_attempt 1`, created
+`05:09:27Z`, updated `05:20:37Z`. `gh run watch` returned 0 after 10m50s; the run and jobs below
+were read again from the API before this entry was written. Four jobs, all `success`:
+
+| job | steps | runner | labels |
+|---|---|---|---|
+| `129644230709` Configure, build, C++ tests, Python tests | 14 | `1000010668` | `ubuntu-latest` |
+| `129644230940` Benchmark suite against live oracles | **15** | `1000010669` | `ubuntu-latest` |
+| `129644230969` macOS native C++ and Python parity | 14 | `1000010671` | `macos-15` |
+| `129644231049` Format and static checks | **15** | `1000010670` | `ubuntu-latest` |
+
+No job is cancelled, none has 0 steps and no step failed. The only annotation is GitHub's
+`ubuntu-latest` migration notice, not a failure.
+
+**What the four logs printed.** Lint: `236 files already formatted`, `declared_plants 195`, the
+Docs re-derivation step's `"printed": "195/195 planted defects rejected"` (the new vantage label is
+a trailing comment and does not disturb the claim the reading re-derives),
+`docs_rederivation_gap 0`, `with_extras_census_gap 0`, `lanes_documented_vs_executed_gap 0`,
+`artifact_revision_gap 0`, `Evidence is intact.`; its `Artifact revision` step printed
+`matches_tip false` with `object_check "skipped: a shallow clone cannot tell an earlier revision
+from an absent one"`, which is the V5-02 repair working on the committed vantage. Build-and-test:
+`100% tests passed out of 204`, `490 passed, 5 skipped in 124.26s`, `7/7 checks passed`. macOS:
+`100% tests passed out of 204`, `98 passed in 4.26s`. Benchmark: `suite: 19/19 executed and passed,
+0 aggregated from disk, 0 failed, 0 skipped, 426.8s total`; its `Artifact revision at the run tip`
+step printed `matches_tip true` and `object_check "the revision names a commit in this clone"`, the
+fresh vantage G3's pin predicts. The two `matches_tip` values are different vantages of one
+artifact, not a disagreement.
+
+**The series' commit count, final.** Seven commits in `bb91462..` — `2a902eb` (V6 Phase 0),
+`1804c86` (V6-01 implementation), `321e8b3` (V6-01 terminal), `1e649f5` (V6-02 Phase 0),
+`9486c7a` (V6-02 implementation), `1cdc515` (this report) and this terminal entry. Platform
+`/compare/bb91462...1cdc515` returns `ahead_by 6`, `behind_by 0` with the first six as ancestors;
+the three commits of the first V6-02 push were each reconstructed through the Git Data API with
+their blob, tree and commit SHAs checked against the local objects before the ref moved. The
+terminal commit is pushed after this file's content is fixed, and its own CI is read in the session
+handoff rather than written here.
+
+**Two pushes, as recorded in the V6-02 Phase 0 entry.** The first carried `1e649f5`, `9486c7a` and
+`1cdc515`; the second carries this entry only. No repair was needed: the report changed no source
+file, guard, plant, ceiling key or CI step, and the shallow-clone reading was already correct.
+
+**V6 is closed.** G1–G6 are each fixed with a written decision or a measured reading; the full
+`195/195` census was captured at `9486c7a` on a clean tree; the eight `V3_PROMPT.md` §12
+deliverables are in the preceding section; the platform's tag, release and four asset timestamps
+were re-read twice and match Phase 0. What remains open is named in the report's §4 and §6 and
+belongs to V7. No third push is implied.
+
+---
