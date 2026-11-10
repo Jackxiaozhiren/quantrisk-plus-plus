@@ -290,3 +290,57 @@ pushes authorised in the V8 Phase 0 entry. Its CI is read once the tool reports 
 the terminal entry; no outcome is stated here for a push that has not happened.
 
 ---
+
+### 2026-11-10, V8 terminal entry — the report tip is green, and the census moves to the final tip
+
+**The report tip's CI, attributed.** Run `42813273094` on
+`04df4ffceac6a84e55dac970fb4d9016cd2bcee0` is `completed` / `success`, `run_attempt 1`, created
+`12:08:52Z`, updated `12:19:58Z`. `gh run watch` returned 0 after 10m50s; the run and jobs below
+were read again from the API before this entry was written. Four jobs, all `success`:
+
+| job | steps | runner | labels |
+|---|---|---|---|
+| `129819820949` Format and static checks | **15** | `1000010753` | `ubuntu-latest` |
+| `129819821164` Benchmark suite against live oracles | **15** | `1000010755` | `ubuntu-latest` |
+| `129819821232` Configure, build, C++ tests, Python tests | 14 | `1000010754` | `ubuntu-latest` |
+| `129819821857` macOS native C++ and Python parity | 14 | `1000010756` | `macos-15` |
+
+No job is cancelled, none has 0 steps and no step failed. The only annotations are GitHub's
+`ubuntu-latest` migration notice and a macOS capacity notice, neither a failure.
+
+**What the four logs printed.** Lint: `240 files already formatted`, `declared_plants 195`,
+`artifact_revision_gap 0 ... due V5-02 / V7-01`, `docs_rederivation_gap 0`,
+`with_extras_census_gap 0`, `lanes_documented_vs_executed_gap 0` and `Evidence is intact.`; its
+`Artifact revision` step printed `matches_tip false`, `pinned_revision 17df062040b8`,
+`pin_holds true` and `pin_check "the committed artifact names the pinned historical revision"`.
+Build-and-test: `100% tests passed out of 204`, `490 passed, 5 skipped in 128.70s`, `7/7 checks
+passed`. macOS: `100% tests passed out of 204`, `98 passed in 3.73s`. Benchmark: `suite: 19/19
+executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 425.7s total`; its
+`Artifact revision at the run tip` step printed `matches_tip true`, `pin_holds null` and
+`pin_check "not applicable: the fresh artifact names the tip of the run that wrote it"`. The pin's
+two vantages therefore still behave as V7's implementation predicted, with no V8 file involved.
+
+**The series' commit count, final.** Three commits in `4f76337..` — `13814489` (V8 Phase 0),
+`04df4ff` (this report's predecessor) and this terminal entry. Platform `/compare/4f76337...04df4ff`
+returned `ahead_by 2`, `behind_by 0`, with both as ancestors of the then-tip; the two commits of
+the first push were each reconstructed through the Git Data API with their blob, tree and commit
+SHAs checked against the local objects before the ref moved. `git diff --name-only` over the range
+prints exactly two paths: `V8_PROMPT.md` and `V8_LEDGER.md`. The terminal commit is pushed after
+this file's content is fixed, and its own CI is read in the session handoff rather than written
+here.
+
+**Two pushes, as recorded in the V8 Phase 0 entry.** The first carried `13814489` and `04df4ff`;
+the second carries this entry only. No repair was needed: the CI was green on the first attempt and
+V8 changes no source, guard, plant, ceiling key or CI step.
+
+**V8 is closed with one reading still owed by construction.** H2–H6 are fixed or recorded; H1 is
+**deferred to the literal final tip**, which is this commit. The plan is now executed: after this
+entry's push, `build/run_sweep.py --all` runs on the clean tree at that commit, and its summary
+line and revision are quoted in the session handoff. The series is not declared closed in speech
+until that line exists; the ledger deliberately does not claim it early, because a file cannot
+carry the SHA of the commit that contains it without moving the tip it measures. The eight
+`V3_PROMPT.md` §12 deliverables are in the preceding section; the platform's tag, release and four
+asset timestamps were re-read in Phase 0, Phase 5 and again before this entry and match. What
+remains open is named in the report's §4 and §6 and belongs to V9. No third push is implied.
+
+---
