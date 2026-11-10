@@ -166,3 +166,86 @@ is claimed here: the unit changes no code, so the last captured census remains `
 `ea8beb4`, and the next one belongs to the final V6 tip.
 
 ---
+
+### 2026-11-10, V6-02 Phase 0 — the last unit, measured at `321e8b3`
+
+**Why this phase exists.** V6-01 delivered the written rails and made the sweep's vantage permanent.
+`V6_PROMPT.md` §0 ends the series only when G1–G6 are each fixed, rejected with evidence or named as
+deliberately not done, when the full census is captured at the final V6 tip on a clean tree, and when
+the Phase 5 report and archival confirmation are committed and pushed. This is that unit: G3–G6 and
+the eight `V3_PROMPT.md` §12 deliverables, taken together as the remaining series.
+
+**Approval, verbatim.** `继续` (2026-11-10), then the selection `整个剩余系列（推荐）` in the same
+turn. Per `V6_PROMPT.md` §6 this is the maintainer's case-by-case approval for this scope unit,
+recorded here before any outward action. Its scope is G3, G4, G5, G6, the final census, the Phase 5
+report, the archival confirmation and the two named pushes. It does **not** authorise a new finding,
+a new plant, a new ceiling key, a new CI step, an edit to `V6_PROMPT.md` or any earlier prompt, a
+release, a regeneration of the evidence chain, or a third push. The V6-01 approval is spent and is
+not reused.
+
+**Revision and vantage.** `HEAD` = `origin/main` =
+`321e8b337bfc19f7ee7111f4153ce55d25667d5c`; `git status --porcelain` prints 0 lines. Vantage: the
+development checkout, `.venv` Python 3.12, macOS, the same WorkBuddy interpreter shim the earlier
+series recorded. Platform `/compare/bb91462...321e8b3` returns `ahead_by 3`, `behind_by 0`, with
+`2a902eb`, `1804c86` and `321e8b3` all ancestors of the remote tip. Git smart-HTTP remains blocked,
+so both pushes use the Git Data API with `force: false` and per-object SHA verification.
+
+**The three premises, re-measured at this tip.**
+
+1. **The published chain is frozen.** `refs/tags/v1.9.0` is tag object
+   `d9deb7f764b3c16a091dc86effb9d523b1d2c7d0` → commit
+   `b2dda33f6726d7f36fbe3491aec7cd7a66184809`, tagger `2026-10-20T12:56:35Z`; release `424060629`
+   is `v1.9.0`, published `2026-10-26T09:35:44Z`, with `CITATION.cff` 2,978, `manifest.json`
+   55,780, `quantrisk-suite-results.zip` 145,672 and `technical_report.pdf` 1,005,786 bytes, all
+   created `09:35:41Z` and updated `09:35:42Z`–`09:35:43Z`. `tools.verify_evidence_manifest`
+   prints `Evidence is intact.` with 95 entries and `0 on disk but not in the manifest`. Every field
+   matches the V6 Phase 0 row. No regeneration occurred.
+2. **The committed suite artifact's revision is checkable but undecided.**
+   `benchmarks/suite/results/suite_run.json` names `git_commit 17df062040b8`,
+   `binary_git_commit af7595749188`, `working_tree_dirty true` and 21 `uncommitted_paths`;
+   `--reading artifact_revision` prints `gap 0`, `matches_tip false`,
+   `object_check "the revision names a commit in this clone"`, `repository_is_shallow false`,
+   `tip_being_verified 321e8b337bfc`. The claim is checkable and the decision is still absent.
+3. **The two `SKIP` keys hold only while their preconditions are re-read.** `--check-ceilings`
+   prints **15** keys, 13 `ok`, 2 `SKIP`. `plants_not_rejected_by_their_guard` prints
+   `precondition absent` and its `corpus` says the collector measures only the declaration because
+   the sweep's gitignored scratch never reaches the runner. `installed_user_identity_mismatch`
+   prints `precondition absent` and its `corpus` says the clean-venv probe installs a second
+   environment and so cannot run on the runner. Both printed reasons still agree with their `corpus`
+   and `can_fail_because` fields in `tools/refactor_ceilings.json`.
+
+**The archive re-counted at `321e8b3`.**
+
+| quantity | command that produced the reading | value |
+|---|---|---|
+| registry tasks / suite members | `--reading registry_parity`; `with_extras_census` | 19 / 19; `gap 0`, `revision 17df062040b8` |
+| plants | `runner --list` | **195** (development-only census last captured `195/195` at `ea8beb4`) |
+| ceiling keys | `--check-ceilings` | **15** — 13 `ok`, 2 `SKIP` |
+| manifest | `tools.verify_evidence_manifest` | `Evidence is intact.` (95 entries) |
+| formatter corpus | `--reading formatter_census` | **236 / 236**, both differences empty |
+| pytest nodes | `--collect-only`; `measure_offline_collection` | **560**; offline **491**, `collection_errors 0` |
+| named CI steps | the workflow's `- name:` lines | **34** |
+| living documents / lane contract | `docs_rederivation`; `lanes_documented_vs_executed` | 5 documents, `gap 0`; `gap 0` |
+| artifact revision / runtime reachability | two readings | `gap 0`; `reached_by_neither` empty |
+| static gates | `ruff check .`; `ruff format --check .`; `mypy python/quantrisk tools` | `All checks passed!`; `236 files already formatted`; `Success: no issues found in 74 source files` |
+
+**What this unit takes, and what it excludes.** It takes G3 (a written freeze boundary for the
+committed artifact, with `artifact_revision` still at `gap 0`), G4 (both `SKIP` keys retained or
+retired with this tip's reading), G5 (a named vantage for every development-only count, including the
+printed `195/195` line), G6 (manifest and published assets re-read in Phase 0 and again in Phase 5),
+and the Phase 5 report. It excludes new code, guards, plants, keys, CI steps and lanes; it excludes
+editing any prompt; and it excludes regenerating `suite_run.json`, `evidence/manifest.json` or a
+release asset. `V6_PROMPT.md` §4 already supplies the written decision for G2; this unit does not
+reopen it.
+
+**Deliberately not done in Phase 0.** No source file or document was edited, no census was run, no
+report section was written and no push was made. Every number above is a reading at `321e8b3`. The
+full census and the final local `pytest -q` belong to the implementation tip, after the one document
+edit this unit makes, on a clean tree.
+
+**The two pushes.** The first carries the Phase 0 commit, the implementation commit and the Phase 5
+report; the second carries the terminal entry only. No third is implied. Each push's CI is read from
+the API after the tool reports it; the first tip's run is attributed in the terminal entry and the
+second tip's run in the session handoff.
+
+---
