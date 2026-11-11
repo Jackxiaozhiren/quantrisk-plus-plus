@@ -97,3 +97,120 @@ after the tool reports it; the first tip's run is attributed in the terminal ent
 tip's run in the session handoff.
 
 ---
+
+### 2026-11-11, V9 implementation — the attestation and its verification reading
+
+**What D1 adds.** A machine-readable attestation carrying V8's census reading at the literal final
+tip, and one named verification reading that can redden it. Both live in this ledger; neither is a
+new tracked file, guard, plant, ceiling key, CI step, lane, living document or policy asset. The
+mechanism is the absence of self-reference: `5ec3fab` is an ancestor here, so a V9 file can name it
+and git can verify the claim. `V8_LEDGER.md` is not edited; its `deferred` row stays as printed.
+
+This is the answer to `V5_PROMPT.md` §1's "every change must leave the repository more checkable
+than it found it, with a named reading that can redden it" without manufacturing the machinery
+`V8_LEDGER.md` §6 item 8 warns against. The reading uses only git's object and ancestry queries and
+the existing `runner --list`; it is recorded here as a command and its output. Before this commit
+the census was a session-only sentence that nothing in the repository could check. After it, the
+revision is a verifiable object, the count is checked against the harness, and four forged inputs
+are refused. The reading is development-side, with the same vantage as the census itself: it is not
+a CI gate and does not claim to make the sweep reproducible on a runner.
+
+**The attestation.** The markers delimit exactly one JSON block; the reading below parses it.
+
+<!-- V9_ATTESTATION_BEGIN -->
+```json
+{
+  "schema": "quantrisk.final_tip_census_attestation/v1",
+  "subject": "V8 full plant census at its literal final tip",
+  "revision": "5ec3fabe4fa8c83584a50b3ab66b357ae13094e9",
+  "revision_role": "strict ancestor of the commit that carries this attestation, not a self-reference",
+  "command": "CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=100000 QR_DIAG_FULL=1 uv run --frozen python build/run_sweep.py --all --verbose",
+  "exit_code": 0,
+  "log_lines": 998,
+  "declared_plants": 195,
+  "verdict_rows": {"ok_caught": 195, "other": 0},
+  "summary": "195/195 planted defects were rejected by their guard.", "vantage": "development-side vantage; the sweep has no CI lane",
+  "tree_dirty_paths_after": 0,
+  "captured": "2026-11-10, after V8's second push, on the clean tree at the terminal commit",
+  "evidence_limit": "The 998-line log was session-local scratch under /tmp and is no longer on disk. This attestation fixes the reading, not the log; the numbers are not re-runnable from a tracked artifact.",
+  "inherited_from": "V8_LEDGER.md Phase 5 section 7 mutation-sweep row (printed as deferred) and the V8 session handoff"
+}
+```
+<!-- V9_ATTESTATION_END -->
+
+**The verification reading.** Run in the repository root; an optional argument names a forged
+attestation file, so the same function decides the genuine block and each forged input.
+
+```bash
+uv run --frozen python - "${1:-}" <<'PY'
+import json, re, subprocess, sys
+from pathlib import Path
+
+BLOCK = re.search(
+    r"<!-- V9_ATTESTATION_BEGIN -->\s*```json\s*(.*?)\s*```\s*<!-- V9_ATTESTATION_END -->",
+    Path("V9_LEDGER.md").read_text(), re.S,
+)
+if not BLOCK:
+    sys.exit("REFUSED: exactly one attestation block is required, none found")
+a = json.loads(Path(sys.argv[1]).read_text()) if len(sys.argv) > 1 and sys.argv[1] else json.loads(BLOCK.group(1))
+
+def refuse(why):
+    sys.exit(f"REFUSED: {why}")
+
+rev = a["revision"]
+head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+if a["schema"] != "quantrisk.final_tip_census_attestation/v1":
+    refuse("wrong schema")
+if not re.fullmatch(r"[0-9a-f]{40}", rev):
+    refuse("the revision is not a 40-hex object name")
+if subprocess.run(["git", "cat-file", "-e", rev + "^{commit}"], capture_output=True).returncode:
+    refuse("the named revision is not a commit object in this repository")
+if rev == head:
+    refuse("the attestation names the commit that contains it (self-reference)")
+if subprocess.run(["git", "merge-base", "--is-ancestor", rev, "HEAD"], capture_output=True).returncode:
+    refuse("the named revision is not an ancestor of HEAD")
+n = len(subprocess.run(
+    [sys.executable, "-m", "quantrisk.verification.runner", "--list"],
+    capture_output=True, text=True, check=True,
+).stdout.splitlines())
+rows = a["verdict_rows"]
+if rows["ok_caught"] != n or rows["other"] != 0 or a["declared_plants"] != n:
+    refuse(f"the attestation's counts disagree with runner --list ({n})")
+if a["exit_code"] != 0 or a["tree_dirty_paths_after"] != 0 or a["log_lines"] != 998:
+    refuse("the exit code, tree state or log length disagrees")
+if "development-side vantage" not in a["vantage"] or "no CI lane" not in a["vantage"]:
+    refuse("the vantage is not named")
+if "no longer on disk" not in a["evidence_limit"]:
+    refuse("the evidence limit is not named")
+m = re.fullmatch(r"(\d+)/(\d+) planted defects were rejected by their guard\.", a["summary"])
+if not m or m.group(1) != m.group(2) or int(m.group(1)) != n:
+    refuse("the summary line is not the verbatim verdict for the declared count")
+print(f"PASS: {rev[:12]} is a strict ancestor of {head[:12]}; {n}/{n} ok caught, 0 other verdict rows")
+PY
+```
+
+**What the reading printed.** The bash block above was extracted from this ledger into
+`/tmp/v9_verify_reading.sh` and executed unchanged, so the recorded command is the command that
+ran. Five runs: the genuine block and four forged inputs. The forged JSON files are session-local
+scratch under `/tmp`, are not tracked, and are removed in the archival confirmation.
+
+| input | invocation | output | exit |
+|---|---|---|---|
+| genuine block | `bash /tmp/v9_verify_reading.sh` | `PASS: 5ec3fabe4fa8 is a strict ancestor of b77ca0522079; 195/195 ok caught, 0 other verdict rows` — development-side vantage; the sweep has no CI lane | 0 |
+| forged revision, not an object | `bash /tmp/v9_verify_reading.sh /tmp/v9_forge_object.json` with `"revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"` | `REFUSED: the named revision is not a commit object in this repository` | 1 |
+| forged revision, object but not ancestor | `bash /tmp/v9_verify_reading.sh /tmp/v9_forge_ancestor.json` with `"revision": "337790c12da086c7bf664f3d3f7da028d3bb157d"` | `REFUSED: the named revision is not an ancestor of HEAD` | 1 |
+| forged self-reference | `bash /tmp/v9_verify_reading.sh /tmp/v9_forge_self.json` with `"revision": "b77ca0522079df838d09622210578153f87a33af"` (the then-`HEAD`) | `REFUSED: the attestation names the commit that contains it (self-reference)` | 1 |
+| forged count | `bash /tmp/v9_verify_reading.sh /tmp/v9_forge_count.json` with `"ok_caught": 194` | `REFUSED: the attestation's counts disagree with runner --list (195)` | 1 |
+
+The third forged case is the mechanism itself: naming the containing commit is refused, which is
+why V8 could not write this attestation and why V9, one commit later, can. The `PASS` line names the
+`HEAD` at the time of the run, not the final V9 tip; the reading re-derives ancestry from whatever
+`HEAD` the repository has, so it still passes after the report and terminal commits.
+
+**What was decided.** D1 is fixed: the census reading now has a named repository home with a
+revision git can verify, a vantage, an evidence limit and a two-direction forged proof. V9 does not
+claim the census ran at its own tip, does not make it a gate, and does not re-run it. No source,
+policy asset, test, workflow, manifest, artifact, tag or release asset was edited in this commit;
+the only changed tracked path is this ledger.
+
+---
