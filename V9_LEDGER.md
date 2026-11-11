@@ -419,3 +419,47 @@ tool reports it and recorded in the terminal entry; no outcome is stated here fo
 not happened.
 
 ---
+
+### 2026-11-11, V9 terminal entry — the first push is green, and the series closes
+
+**The first push.** `9716cf041abbdd638b9475576781e0136a5b9e8d`, a non-forced fast-forward from
+`5ec3fab`: the tool printed `ref moved to 9716cf041abbdd638b9475576781e0136a5b9e8d (non-forced
+fast-forward)` after checking each object, and the platform then printed `main` = `9716cf0` with
+`/compare` `status ahead`, `ahead_by 3`, `behind_by 0` and the three commits `b77ca05`, `df3f9af`,
+`9716cf0`.
+
+**Its CI, read from the API after the tool reported it.** Run `43033065357`,
+`completed / success`, `run_attempt 1`, `head_sha 9716cf041abbdd638b9475576781e0136a5b9e8d`,
+created `2026-11-11T13:52:20Z`, updated `14:01:16Z`. No cancelled job, no zero-step job and no
+failed step.
+
+| job | job id | runner | environment | steps |
+|---|---|---|---|---|
+| Benchmark suite against live oracles | `130564783009` | `1000010906` | ubuntu-latest | 15 |
+| Format and static checks | `130564783397` | `1000010907` | ubuntu-latest | 15 |
+| macOS native C++ and Python parity | `130564783439` | `1000010910` | macos-15 | 14 |
+| Configure, build, C++ tests, Python tests | `130564783488` | `1000010909` | ubuntu-latest | 14 |
+
+**What the log printed.** `242 files already formatted`; `declared_plants 195`; `Evidence is
+intact.`; `artifact_revision_gap: 0 against a ceiling of 0 due V5-02 / V7-01` beside
+`docs_rederivation_gap: 0`, `lanes_documented_vs_executed_gap: 0` and `with_extras_census_gap: 0`;
+the committed artifact's vantage prints `matches_tip false`, `pin_holds true`,
+`pin_check "the committed artifact names the pinned historical revision"`, while the benchmark's
+fresh upload prints `matches_tip true`, `pin_holds null`, `pin_check "not applicable: the fresh
+artifact names the tip of the run that wrote it"`; `490 passed, 5 skipped in 176.29s (0:02:56)`;
+`7/7 checks passed`; `100% tests passed out of 204`; `98 passed in 3.28s`; and
+`suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 327.0s total`.
+
+**Which commit this run covers.** The implementation commit `df3f9af` has no run of its own: it
+first reached the remote inside this push. The run headed at `9716cf0` therefore covers all three
+commits — Phase 0, the implementation and this report — and the terminal entry records it as the
+implementation tip's CI rather than claiming a separate run that does not exist.
+
+**What the terminal entry records.** D1 is fixed and its reading was re-verified after the report
+commit (`PASS: 5ec3fabe4fa8 is a strict ancestor of 9716cf041abb; 195/195 ok caught, 0 other verdict rows` — development-side vantage; the sweep has no CI lane). The series closes when this
+entry is pushed and its own run is attributed in the session handoff. No new finding is raised
+here, and none is left unnamed.
+
+**The second push.** This entry alone. No third is implied.
+
+---
