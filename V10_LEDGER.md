@@ -88,3 +88,57 @@ tool reports it; the first tip's run is attributed in the terminal entry and the
 the session handoff.
 
 ---
+
+### 2026-11-12, V10 implementation — A1, the §8 repair
+
+**What changed.** One section of `V7_PROMPT.md`, §8, and nothing else. The withdrawn text is quoted
+here because the file no longer carries it:
+
+> `V3_PROMPT.md` §0 caps its prose sections at 431 lines measured by heading span. V6's is 146 lines
+> with 88 lines of prose. V7's prose sections (§1–§3, §6–§8) may not exceed that 88-line figure
+> without the Phase 5 report naming which V6 rule was never executed; the hard bound remains 431.
+> Growth is allowed only in §5's finding table and §3's lane inventory. V7 adds no section beyond
+> V6's eight.
+
+**What replaced it.** §8 now states 431 as this file's only hard bound, records the old soft cap and
+growth clause as withdrawn gates together with the reason, and reports V6–V9's 146 / 88, 154 / 98,
+161 / 107 and 164 / 112 as reference figures that a later file may exceed, printing its own
+measurement beside them. The reason is stated in the file: V7 met §8's escape clause by naming
+`V6_PROMPT.md` §7's never-executed rule, but its added lines sit in §6 as well as §5, so the growth
+clause was not met — and a bound whose author must argue an escape clause to stay inside it is not a
+bound.
+
+**Why this is a repair, not a rewrite of history.** `V7_LEDGER.md` still records H6 as **PARTIAL**
+with its 154 / 98 measurement, and §5's H6 row still prints the V7-era check on line 97, unamended.
+Those are readings at V7's tip; what V10 changes is the rule the file states for itself, which was
+never a reading. `V8_LEDGER.md` and `V9_LEDGER.md` both say the file was untouched — true at their
+tips, and neither ledger is edited. `git diff --stat ca94a2c..HEAD -- V7_LEDGER.md V3_PROMPT.md
+V8_PROMPT.md V9_PROMPT.md V8_LEDGER.md V9_LEDGER.md` prints 0 lines.
+
+**Before and after, measured by the same heading-span rule.**
+
+| reading | before (`ca94a2c`) | after | delta |
+|---|---|---|---|
+| `V7_PROMPT.md` total lines | 154 | **165** | +11 |
+| `V7_PROMPT.md` prose lines (§1–§3, §6–§8) | 98 | **109** | +11 |
+| withdrawn clauses present (`may not exceed that 88-line`, `Growth is allowed only`) | 2 | **0** | −2 |
+| `\| H6 \|` row | line 97 | line 97 | unchanged |
+| `V7_LEDGER.md` bytes | — | unchanged | 0 |
+| `V7_PROMPT.md` section count | 8 | 8 | 0 |
+
+**Gates and counts after the change, at this commit's tree.** `ruff check .` prints
+`All checks passed!`; `ruff format --check .` prints `244 files already formatted`;
+`mypy python/quantrisk tools` prints `Success: no issues found in 74 source files`;
+`--check-ceilings` prints **15** keys, 13 `ok`, 2 `SKIP`, 0 `FAIL`; `--reading formatter_census`
+prints **244 / 244** with both differences empty; `--reading docs_rederivation` prints `gap 0`,
+5 documents, `derived {95, 195, 19, 19}`; `tools.verify_evidence_manifest` prints `Evidence is
+intact.`; `runner --list` prints **195**; the workflow still has **34** named steps;
+`--collect-only` prints **560** collected. No count moved except the formatter corpus, which V10's
+two new Markdown files took from 242 to 244.
+
+**What was decided.** A1 is fixed: the file's sizing rule is now one hard bound plus reported
+references, and the historical partial verdict is preserved in the ledger and in §5. V10 adds no
+guard, plant, ceiling key, CI step, lane, living document or artifact, and no reading was rewritten.
+The only changed paths in this commit are `V7_PROMPT.md` and this ledger.
+
+---

@@ -147,8 +147,19 @@ every ledger entry recording what was run, what it printed and what was decided.
 
 ## 8. Size ratchet
 
-`V3_PROMPT.md` §0 caps its prose sections at 431 lines measured by heading span. V6's is 146 lines
-with 88 lines of prose. V7's prose sections (§1–§3, §6–§8) may not exceed that 88-line figure
-without the Phase 5 report naming which V6 rule was never executed; the hard bound remains 431.
-Growth is allowed only in §5's finding table and §3's lane inventory. V7 adds no section beyond
-V6's eight.
+`V3_PROMPT.md` §0 caps its prose sections at 431 lines measured by heading span, and that is this
+file's only hard bound.
+
+**Repair (V10 A1, under the maintainer's `启动 V10，只做 A 项`).** V7 set a soft cap at V6's 88
+prose lines, allowed an exceedance only when the Phase 5 report named a V6 rule that was never
+executed, and allowed growth only in §5 and §3. V7 measured 154 lines / 98 prose: it named such a
+rule — `V6_PROMPT.md` §7's "an implementation unit ships the change, its guard, its plant and its
+readings in one named commit", which neither V6 implementation unit did — but its added lines sit in
+§6 as well as §5, so the growth clause was not met. `V7_LEDGER.md` records H6 as **partial** for that
+reason, and §5's H6 row is left unamended; both are historical readings, not live rules. A bound
+whose author must argue an escape clause to stay inside it is not a bound, so the soft cap and the
+growth clause are withdrawn as gates. The standing rule: **431 is the only hard bound**; V6–V9
+measured 146 / 88, 154 / 98, 161 / 107 and 164 / 112, and those are **reported reference figures, not
+gates** — a later file may exceed them, prints its own measurement beside them in Phase 5 and names
+the sections that grew. Exceeding a reference is reported, not failed; exceeding 431 fails the
+series.
