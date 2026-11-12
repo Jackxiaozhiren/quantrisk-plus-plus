@@ -332,3 +332,83 @@ tool reports it and recorded in the terminal entry; no outcome is stated here fo
 not happened.
 
 ---
+
+### 2026-11-12, V10 terminal entry — the first push is green, and the series closes
+
+**The first push.** `23b955b3b27ccd67f05bbd1e9aca32a2d974b49b`, a non-forced fast-forward from
+`ca94a2c153d677e1d6b2f174e105c73efc4d57b2`: the tool printed `commits to append: 3; remote tip:
+ca94a2c153d677e1d6b2f174e105c73efc4d57b2`, then three `local=… remote=…` lines in which
+`ceec03e2f19b7de39c49cad46db531e344b7da39`, `9118c5c4535a15c757226da3628af2d57ce989f2` and
+`23b955b3b27ccd67f05bbd1e9aca32a2d974b49b` each matched their remote object exactly, then `ref
+moved to 23b955b3b27ccd67f05bbd1e9aca32a2d974b49b (non-forced fast-forward)`. The platform's
+`/compare/ca94a2c153d677e1d6b2f174e105c73efc4d57b2...23b955b3b27ccd67f05bbd1e9aca32a2d974b49b`
+prints `status ahead`, `ahead_by 3`, `behind_by 0`, with the three commits `ceec03e`, `9118c5c`,
+`23b955b`; `refs/heads/main` reads `23b955b3b27ccd67f05bbd1e9aca32a2d974b49b`.
+
+**Its CI, read from the API after the tool reported it.** Run `43141403906`, `completed / success`,
+`run_attempt 1`, `head_sha 23b955b3b27ccd67f05bbd1e9aca32a2d974b49b`, created
+`2026-11-12T02:26:16Z`, updated `02:34:16Z`. Four jobs, all `success`, every step `success`, no
+cancelled job and no zero-step job.
+
+| job | job id | runner | environment | steps |
+|---|---|---|---|---|
+| Benchmark suite against live oracles | `130928991727` | `1000011004` | ubuntu-latest | 15 |
+| Format and static checks | `130928992107` | `1000011006` | ubuntu-latest | 15 |
+| macOS native C++ and Python parity | `130928992105` | `1000011007` | macos-15 | 14 |
+| Configure, build, C++ tests, Python tests | `130928992054` | `1000011005` | ubuntu-latest | 14 |
+
+**What the four logs printed.** Lint: `244 files already formatted`; `declared_plants: 195`;
+`Evidence is intact.`; `artifact_revision_gap: 0 against a ceiling of 0 due V5-02 / V7-01` beside
+`docs_rederivation_gap: 0`, `lanes_documented_vs_executed_gap: 0`, `runtime_reachability_gap: 0`
+and `with_extras_census_gap: 0`; `docs_rederivation` prints `derived {95, 195, 19, 19}`, 5
+documents, `gap 0`; `with_extras_census` prints `19 / 19`, `gap 0`. Its `Artifact revision` step
+prints `matches_tip false`, `pinned_revision 17df062040b8`, `pin_holds true`, `pin_check "the
+committed artifact names the pinned historical revision"`, and — because CI's checkout is shallow —
+`object_check "skipped: a shallow clone cannot tell an earlier revision from an absent one"`,
+`repository_is_shallow true`, `tip_being_verified 23b955b3b27ccd67f05bbd1e9aca32a2d974b49b`.
+Build-and-test: `100% tests passed out of 204`, `490 passed, 5 skipped in 236.39s (0:03:56)`,
+`7/7 checks passed`. macOS: `100% tests passed out of 204`, `98 passed in 3.70s`. Benchmark:
+`suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 255.0s total`;
+its `Artifact revision at the run tip` step prints `matches_tip true`, `pin_holds null`, `pin_check
+"not applicable: the fresh artifact names the tip of the run that wrote it"`. The pin's two
+vantages therefore still behave as V7's implementation predicted, with no V10 file involved.
+
+**Which commit this run covers.** The implementation commit `9118c5c` has no run of its own: it
+first reached the remote inside this push. The run headed at `23b955b` therefore covers all three
+commits — Phase 0, the implementation and this report — and this entry records it as the
+implementation tip's CI rather than claiming a separate run that does not exist. The per-lane
+table's two `not yet read` rows in §7 are readings at the report tip and are left unamended, as
+`V10_PROMPT.md` §2 item 4 requires of a historical reading; this entry is where the first of them
+is supplied.
+
+**The premises, re-read at this tip before the entry was written.** Tag object
+`d9deb7f764b3c16a091dc86effb9d523b1d2c7d0` → commit
+`b2dda33f6726d7f36fbe3491aec7cd7a66184809`, tagger `2026-10-20T12:56:35Z`; release `424060629`
+(`v1.9.0`) published `2026-10-26T09:35:44Z` with `CITATION.cff` 2,978, `manifest.json` 55,780,
+`quantrisk-suite-results.zip` 145,672 and `technical_report.pdf` 1,005,786 bytes, all created
+`09:35:41Z` and updated `09:35:42Z`–`09:35:43Z`; `Evidence is intact.` with 95 entries and
+`0 on disk but not in the manifest`. `--reading artifact_revision` on the development (deep) clone
+prints `gap 0`, `pin_holds true`, `matches_tip false`, `object_check "the revision names a commit in
+this clone"`, `object_present true`, `repository_is_shallow false`. `--check-ceilings` prints
+**15** keys, 13 `ok`, 2 `SKIP`, 0 `FAIL`, both `SKIP` printing `precondition absent` with their
+`corpus` still describing the runner precondition the sweep and the clean-venv proof cannot have.
+`ruff check .` prints `All checks passed!`; `ruff format --check .` prints `244 files already
+formatted`; `mypy python/quantrisk tools` prints `Success: no issues found in 74 source files`;
+`--reading formatter_census` prints **244 / 244** with `tracked_but_not_walked []` and
+`walked_but_not_tracked []`; `runner --list` prints **195** lines; `pytest --collect-only -q`
+prints `560 tests collected in 1.07s`; the workflow still has **34** named steps;
+`git diff --name-only ca94a2c..HEAD` prints exactly `V10_LEDGER.md`, `V10_PROMPT.md`,
+`V7_PROMPT.md`; `git status --porcelain` prints 0 lines; `git check-ignore` still excludes
+`.workbuddy/memory/MEMORY.md`, `build/api_push.py` and `build/run_sweep.py`.
+
+**What the terminal entry records.** A1 is fixed: `V7_PROMPT.md` §8 measures 165 total / 109 prose
+against 154 / 98 at `ca94a2c`, the two withdrawn clauses return 0 lines, `| H6 |` is still line 97,
+and `V7_LEDGER.md` still prints `PARTIAL` with `154` / `98`. No census was run and none is claimed:
+the last full census remains `195/195` at `5ec3fab` (development-side vantage; the sweep has no CI
+lane). B and C stay refused with the evidence in §4, and the D1 reading stays checkable but not
+gated. The series closes when this entry is pushed and its own run is attributed in the session
+handoff; no new finding is raised here, and none is left unnamed.
+
+**The second push.** This entry alone. No third is implied.
+
+---
