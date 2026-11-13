@@ -264,6 +264,13 @@ jobs:
         run: uv sync
       - name: Materialise the detached worktree
         run: git worktree add --detach "$RUNNER_TEMP/qr-sweep" HEAD
+      - name: Install the environment the guards read, oracles included
+        working-directory: ${{ runner.temp }}/qr-sweep
+        # A plain sync collects 491 tests here instead of 560: four oracle-gated modules skip, and
+        # the plants whose guard counts them cannot redden -- measured at V11's implementation tip,
+        # 14 of 195 escaped on exactly that difference. The sweep runs in the environment its plant
+        # list was written for, which is the with-oracles one the benchmark lane also uses.
+        run: uv sync --frozen --extra oracles
       - name: Configure and build the C++ test target in the worktree
         working-directory: ${{ runner.temp }}/qr-sweep
         run: |
