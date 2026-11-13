@@ -148,14 +148,14 @@
       "measured_at_baseline": null,
       "max": 0,
       "reach_by_phase": "P3.2",
-      "corpus": "every declared plant, the count printed live by this file's own `plant_liveness` reading, which reads `-m quantrisk.verification.runner --list`. The rejection verdict is the sweep's own summary line and lives in REFACTOR_LEDGER.md \u00a79, because the sweep writes gitignored scratch that CI never has \u2014 a key computed from that file could not fail on the runner that evaluates it, so the collector measures only the declaration.",
-      "can_fail_because": "the declaration is non-empty (read it from `plant_liveness`, never from this row) and the last full sweep, on 58b6c22, printed 172/172 for the 172 plants declared then, so a plant that stops firing is a visible difference rather than a missing key",
+      "corpus": "every declared plant, the count printed live by this file's own `plant_liveness` reading, which reads `-m quantrisk.verification.runner --list`, against the verdict the `mutation-census` lane writes from a detached worktree. The lane runs the sweep outside the checkout it evaluates and records every plant's status plus both `git status --porcelain` readings, so the runner that evaluates this key holds the evidence for it. A vantage that did not run the lane leaves the verdict absent and prints the precondition's absence rather than a proxy; the lint job is one of those vantages, and a zero there would be a claim about a census it did not take.",
+      "can_fail_because": "the verdict is produced on the runner that evaluates the key. A plant whose named guard stays green lands in `non_caught`; a verdict that stopped before every declared plant ran has `ran != declared`; a declaration that drifted from `runner --list` reddens the count comparison; and a checkout whose `git status --porcelain` moved while the sweep ran adds one. Each of the four is falsified by a forged verdict in `tests/python/test_mutation_suite.py`, and the lane's first run at V11's implementation tip printed `195/195 planted defects were rejected by their guard.`",
       "exemptions": [],
       "may_be_unmeasured": true,
       "measured_at_phase": {
         "P3.2": 0
       },
-      "note": "P3.2 ran `-m quantrisk.verification.runner --all` on 32b76d5 and printed `172/172 planted defects were rejected by their guard.` with exit 0 and no non-caught status line; the instruments moved twice before that run, so the verdict also proves 23 re-keyed anchors fire rather than vanish"
+      "note": "P3.2 ran `-m quantrisk.verification.runner --all` on 32b76d5 and printed `172/172 planted defects were rejected by their guard.` with exit 0 and no non-caught status line; the instruments moved twice before that run, so the verdict also proves 23 re-keyed anchors fire rather than vanish. V11 reopened this vantage: the `mutation-census` lane runs the sweep in a detached worktree and this key is measured from its verdict there, while the lint vantage keeps `SKIP` with its reason."
     },
     {
       "key": "installed_user_identity_mismatch",

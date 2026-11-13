@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -29,6 +30,8 @@ SNAPSHOT_PATH = REPO_ROOT / "build" / "orphan_inventory.json"
 CEILINGS_PATH = REPO_ROOT / "tools" / "refactor_ceilings.json"
 STATIC_CHECK_KEY = "tracked_python_files_in_no_static_check_bucket"
 FORMATTER_KEY = "tracked_files_outside_the_formatter_corpus"
+SWEEP_VERDICT_ENV = "QUANTRISK_SWEEP_VERDICT"
+SWEEP_VERDICT_PATH = REPO_ROOT / "build" / "sweep_verdict.json"
 MANIFEST_PATH = REPO_ROOT / "evidence" / "manifest.json"
 PREFIXES = ("uv run --frozen python ", "uv run python ", "python ")
 LANE_CONTRACT_PATH = REPO_ROOT / ".github" / "lane_contract.md"
@@ -858,6 +861,90 @@ def plant_liveness() -> dict[str, Any]:
     }
 
 
+def sweep_census_verdict() -> dict[str, Any]:
+    """The census a lane wrote outside the checkout, read as this key's measurement.
+
+    `V6_PROMPT.md` §4 kept `plants_not_rejected_by_their_guard` development-only because its verdict
+    lived in a summary line only the machine that ran the sweep had. The mutation-census lane runs
+    the sweep in a detached worktree and writes that verdict to a json file, so the runner that
+    evaluates the key now also holds the evidence for it. A vantage that did not run the lane leaves
+    the file absent, and the key prints the precondition's absence rather than a zero.
+    """
+    override = os.environ.get(SWEEP_VERDICT_ENV)
+    path = Path(override) if override else SWEEP_VERDICT_PATH
+    absent = {
+        "available": False,
+        "unavailable_because": (
+            f"{path} is absent: the mutation-census lane writes it, and this vantage did not run "
+            "that lane"
+        ),
+        "path": str(path),
+        "revision": "",
+        "declared": None,
+        "ran": None,
+        "caught": None,
+        "non_caught": [],
+        "checkout_status_before": None,
+        "checkout_status_after": None,
+        "malformed": None,
+    }
+    if not path.is_file():
+        return absent
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        return {**absent, "available": True, "malformed": f"{path} does not parse: {error}"}
+    if not isinstance(payload, dict):
+        return {**absent, "available": True, "malformed": f"{path} holds no json object"}
+    declared = payload.get("declared")
+    ran = payload.get("ran")
+    non_caught = payload.get("non_caught") or []
+    malformed = None
+    if not isinstance(declared, int) or not isinstance(ran, int):
+        malformed = "the verdict does not carry integer `declared` and `ran`"
+    elif not isinstance(non_caught, list) or any(not isinstance(item, str) for item in non_caught):
+        malformed = "the verdict's `non_caught` is not a list of plant ids"
+    return {
+        "available": True,
+        "unavailable_because": "",
+        "path": str(path),
+        "revision": str(payload.get("revision", "")),
+        "declared": declared,
+        "ran": ran,
+        "caught": payload.get("caught"),
+        "non_caught": non_caught if isinstance(non_caught, list) else [],
+        "checkout_status_before": payload.get("checkout_status_before"),
+        "checkout_status_after": payload.get("checkout_status_after"),
+        "malformed": malformed,
+    }
+
+
+def sweep_gap(verdict: dict[str, Any], declared_plants: int) -> int:
+    """How far a lane's census is from its ceiling: escaped plants, a stale count, or a dirty tree.
+
+    Four ways to fail, each named rather than folded into one number: a plant whose guard stayed
+    green, a verdict that stopped before every declared plant ran, a verdict whose `declared` no
+    longer matches `runner --list`, and a checkout whose status moved while the sweep ran. The last
+    one is the proof that the worktree really is detached.
+    """
+    if verdict.get("malformed"):
+        return 1
+    declared = verdict.get("declared")
+    ran = verdict.get("ran")
+    declared_count = declared if isinstance(declared, int) else 0
+    ran_count = ran if isinstance(ran, int) else 0
+    non_caught = verdict.get("non_caught") or []
+    clean = (
+        verdict.get("checkout_status_before") == "" and verdict.get("checkout_status_after") == ""
+    )
+    return (
+        len(non_caught)
+        + int(declared_count != declared_plants)
+        + int(ran_count != declared_count)
+        + (0 if clean else 1)
+    )
+
+
 def excluded_top_levels(corpus: list[str]) -> list[str]:
     named = {path.split("/")[0] for path in corpus}
     dirs = sorted(
@@ -1430,6 +1517,14 @@ def build_snapshot() -> dict[str, Any]:
                 "value": plant_liveness(),
             },
             {
+                "name": "sweep_census_verdict",
+                "command": (
+                    "read the json the mutation-census lane writes from a detached worktree; "
+                    "absent on a vantage that did not run the lane"
+                ),
+                "value": sweep_census_verdict(),
+            },
+            {
                 "name": "lanes_documented_vs_executed",
                 "command": (
                     "the lane contract's json block against the two lane-bearing documents and "
@@ -1493,6 +1588,8 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
     census = by_name["with_extras_census"]
     revision = by_name["artifact_revision"]
     docs = by_name["docs_rederivation"]
+    plants = by_name["plant_liveness"]
+    sweep = by_name["sweep_census_verdict"]
     return {
         "bootstrap_sites_outside_package": len(by_name["bootstrap_census"]),
         "by_path_load_sites": len(by_name["by_path_load_sites"]),
@@ -1510,7 +1607,9 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
         "runtime_reachability_gap": None
         if not reachability.get("available")
         else len(reachability["reached_by_neither"]),
-        "plants_not_rejected_by_their_guard": None,
+        "plants_not_rejected_by_their_guard": None
+        if not sweep["available"]
+        else sweep_gap(sweep, plants["declared_plants"]),
         "installed_user_identity_mismatch": None,
         "external_dependencies_added": len(dependencies["added"]) + len(dependencies["removed"]),
         "lanes_documented_vs_executed_gap": None if not lanes["available"] else lanes["gap"],

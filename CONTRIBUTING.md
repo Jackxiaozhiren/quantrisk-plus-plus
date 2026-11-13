@@ -126,7 +126,9 @@ performed out of order in Phase 15, and every one of those produced a red gate r
   guard means adding a mutation to its list, and `tests/python/test_mutation_suite.py` fails if an
   anchor stops resolving, so the sweep cannot rot into a script that reports success while planting
   nothing. Run it before pushing a change to a guard: `uv run python -m quantrisk.verification.runner`
-  (it edits tracked files and rebuilds `quantrisk_tests`, which is why it is not a CI step).
+  (it edits tracked files and rebuilds `quantrisk_tests`). CI runs the same sweep in a detached
+  worktree under `$RUNNER_TEMP` — the `mutation-census` job — so a plant that stops firing is red on
+  the runner, not only on the machine that remembered to type the command.
 - **Never go green by weakening a check.** No lowering a tolerance, no deleting a failing test, no
   `# noqa`, no adding an exclude to a linter — including in scratch tooling. Fix the thing or record
   the failure; failed experiments are published, not dropped.

@@ -1034,7 +1034,7 @@ Regenerate, then compare. Commands are the ones recorded in the phase reports.
 cmake --preset dev && cmake --build --preset dev && ctest --preset dev   # 204 C++ tests
 uv pip install -e . && QUANTRISK_REFERENCE_TOOL=$PWD/build/dev/quantrisk_reference_tool \
   .venv/bin/python -m pytest -q                                          # 491 tests collected offline
-uv run python -m quantrisk.verification.runner                            # 195/195 planted defects rejected (development-side vantage; the sweep has no CI lane)
+uv run python -m quantrisk.verification.runner                            # 195/195 planted defects rejected (development vantage, or the mutation-census lane on the runner)
 uv run python -m quantrisk.experiments.pricing_validation
 uv run python -m quantrisk.experiments.monte_carlo_convergence
 uv run python -m quantrisk.experiments.variance_reduction

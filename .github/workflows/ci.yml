@@ -242,3 +242,47 @@ jobs:
           name: benchmark-suite
           path: benchmarks/suite/results/
           if-no-files-found: error
+
+  mutation-census:
+    # V11 B1. Until this job existed the sweep ran only on a laptop, because it rewrote tracked files
+    # in the tree being evaluated and wrote gitignored scratch a runner never has -- so a key
+    # computed from its summary line could not fail where it was read. The lane now runs the sweep
+    # in a detached worktree under $RUNNER_TEMP and writes a json verdict outside the checkout; the
+    # `--watch-checkout` reading proves the checkout the runner evaluates was never written.
+    name: Mutation census in a detached worktree
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        # Four guards read the repository's history or its tags, and the worktree inherits both.
+        # A flow mapping keeps the mutation harness's single-anchor contract intact.
+        with: {fetch-depth: 0, fetch-tags: true}
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install dev environment
+        run: uv sync
+      - name: Materialise the detached worktree
+        run: git worktree add --detach "$RUNNER_TEMP/qr-sweep" HEAD
+      - name: Configure and build the C++ test target in the worktree
+        working-directory: ${{ runner.temp }}/qr-sweep
+        run: |
+          uv run --frozen cmake --preset dev
+          uv run --frozen cmake --build --preset dev --target quantrisk_tests
+      - name: Run every declared plant in the worktree
+        working-directory: ${{ runner.temp }}/qr-sweep
+        run: |
+          uv run --frozen python -m quantrisk.verification.runner --all \
+            --watch-checkout "$GITHUB_WORKSPACE" \
+            --verdict-out "$RUNNER_TEMP/sweep_verdict.json"
+      - name: Adjudicate the census against the ceilings
+        env:
+          QUANTRISK_SWEEP_VERDICT: ${{ runner.temp }}/sweep_verdict.json
+        run: uv run --frozen python -m tools.inventory_orphan_code --check-ceilings
+      - name: Upload the verdict
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mutation-census
+          path: ${{ runner.temp }}/sweep_verdict.json
+          if-no-files-found: warn

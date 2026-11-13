@@ -59,6 +59,7 @@ from __future__ import annotations
 import argparse
 import ast
 import hashlib
+import json
 import os
 import re
 import signal
@@ -88,6 +89,8 @@ NOT_GREEN_AGAIN = "tree-did-not-recover"
 DIRTY_TARGET = "target-already-modified"
 PROBE_EXISTS = "probe-file-already-in-the-tree"
 STOPPED = "sweep-stopped-early"
+CHECKOUT_WRITTEN = "watched-checkout-was-written"
+VERDICT_SCHEMA = "quantrisk-sweep-verdict/1"
 
 PAIRED = "paired"
 MIS_PAIRED = "named-guard-stayed-green"
@@ -872,6 +875,66 @@ def select(kind: str | None, only: Sequence[str]) -> list[Mutation]:
     return [mutation for mutation in chosen if mutation.identifier in wanted]
 
 
+def checkout_status(root: Path) -> str:
+    """The porcelain status of a checkout, read so a lane can prove it was never written."""
+    completed = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return completed.stdout.strip()
+
+
+def workspace_revision() -> str:
+    """The commit this sweep is running at, taken from the tree it is mutating."""
+    completed = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return completed.stdout.strip()
+
+
+def write_verdict(
+    path: Path,
+    *,
+    selected: Sequence[Mutation],
+    results: Sequence[dict[str, str]],
+    checkout_before: str | None,
+    checkout_after: str | None,
+) -> None:
+    """Record one census where a gate can read it, instead of in one operator's transcript.
+
+    V6_PROMPT.md §4 kept this vantage development-only because the verdict lived only in a summary
+    line a runner never has. The lane now runs the sweep in a detached worktree, so the checkout it
+    evaluates is watched rather than written; both readings travel with the verdict, because a claim
+    of cleanliness that is not printed beside the census is exactly the sentence this file exists to
+    replace.
+    """
+    non_caught = [result["id"] for result in results if result["status"] != CAUGHT]
+    payload = {
+        "schema": VERDICT_SCHEMA,
+        "revision": workspace_revision(),
+        "vantage": "detached worktree; the checkout under evaluation is watched, never written",
+        "declared": len(selected),
+        "ran": len(results),
+        "caught": len(results) - len(non_caught),
+        "non_caught": non_caught,
+        "results": [
+            {"id": result["id"], "kind": result["kind"], "status": result["status"]}
+            for result in results
+        ],
+        "checkout_status_before": checkout_before,
+        "checkout_status_after": checkout_after,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Require every guard to reject a planted defect.")
     parser.add_argument("--list", action="store_true", help="print the mutations and exit")
@@ -892,7 +955,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         "that the named guard objects with the others. One module run per distinct guard.",
     )
     parser.add_argument("--verbose", action="store_true", help="echo each guard's own tail")
+    parser.add_argument(
+        "--verdict-out",
+        help="write the census as json for a gate to read, outside the checkout it watches",
+    )
+    parser.add_argument(
+        "--watch-checkout",
+        help="read this checkout's git status before and after, and fail if it changed",
+    )
     arguments = parser.parse_args(argv)
+
+    verdict_path = Path(arguments.verdict_out) if arguments.verdict_out else None
+    watched = Path(arguments.watch_checkout) if arguments.watch_checkout else None
+    checkout_before = checkout_status(watched) if watched is not None else None
 
     selected = select(arguments.kind, arguments.only)
     unknown = set(arguments.only).difference(mutation.identifier for mutation in MUTATIONS)
@@ -948,11 +1023,26 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{stopped_at}. Pass --all for the full census."
         )
     caught = [result for result in results if result["status"] == CAUGHT]
+    checkout_after = checkout_status(watched) if watched is not None else None
+    if verdict_path is not None:
+        write_verdict(
+            verdict_path,
+            selected=selected,
+            results=results,
+            checkout_before=checkout_before,
+            checkout_after=checkout_after,
+        )
     left = [path for path in snapshots if git_status(str(path.relative_to(REPO_ROOT)))]
     print(f"\n{len(caught)}/{len(selected)} planted defects were rejected by their guard.")
     if left:
         names = ", ".join(sorted(str(path.relative_to(REPO_ROOT)) for path in left))
         print(f"{NOT_RESTORED}: {len(left)} target(s) still differ from HEAD: {names}")
+        return 1
+    if watched is not None and checkout_after != checkout_before:
+        print(
+            f"{CHECKOUT_WRITTEN}: the watched checkout's status changed while the sweep ran, so "
+            "the verdict describes a tree somebody else was writing"
+        )
         return 1
     return 0 if len(caught) == len(results) else 1
 

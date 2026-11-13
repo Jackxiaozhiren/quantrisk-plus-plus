@@ -39,6 +39,17 @@ artifact produced. The `refactor ceilings` step adjudicates its `docs_rederivati
 is read, not rendered: `tools.build_report` stays dev-only for the reason its row gives. The pytest
 guards over the same documents remain in place; this lane does not replace them, it names them.
 
+**The mutation census lane.** `V6_PROMPT.md` §4 kept the sweep development-only because it rewrote
+tracked files one at a time in the tree being evaluated, so a key computed from its summary line
+could not fail on the runner that read it. V11 B1 reverses that: `mutation-census` creates a detached
+worktree under `$RUNNER_TEMP` at the pushed revision, runs the full sweep there, and writes a json
+verdict outside the checkout. The `--watch-checkout` reading records the evaluated checkout's
+porcelain status before and after and fails if either is non-empty, so "the sweep no longer touches
+tracked files" is a printed reading rather than a claim. `refactor ceilings` adjudicates
+`plants_not_rejected_by_their_guard` from that verdict on the same runner; the `lint` job still prints
+`SKIP` for the key, because it does not run the lane and a zero there would be a claim about a census
+it did not take.
+
 ```json
 {
   "schema": "quantrisk-lane-contract/1",
@@ -90,12 +101,12 @@ guards over the same documents remain in place; this lane does not replace them,
     },
     {
       "command": "quantrisk.verification.runner",
-      "status": "dev-only",
+      "status": "executed",
       "claimed_by": ["CONTRIBUTING.md"],
-      "ci_job": null,
-      "ci_step": null,
-      "environment": "local",
-      "reason": "the mutation sweep writes gitignored scratch into the checkout and rewrites tracked files one at a time; a runner that evaluated its own ceiling key could not fail on the scratch it never has, so the verdict is the sweep's own summary line recorded in the ledger"
+      "ci_job": "mutation-census",
+      "ci_step": "Run every declared plant in the worktree",
+      "environment": "ubuntu-latest",
+      "reason": ""
     },
     {
       "command": "tools.build_evidence_manifest",
