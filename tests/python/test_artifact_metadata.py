@@ -3156,7 +3156,7 @@ _CENSUS_README_GOLD = (
     "three entries",
     "seven experiments",
     "548,368 assertions",
-    "four ci jobs",
+    "five ci jobs",
     "six members",
 )
 # Measured empty on 2026-10-17, after the modifier slot stopped accepting a closed-class word. It
