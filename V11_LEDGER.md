@@ -208,3 +208,63 @@ every commit the series created proven an ancestor of the remote, both runs attr
 registers and documents re-counted against their artifacts, and no stray instrument tracked or left
 on disk.
 
+---
+
+## Terminal entry — 2026-11-13, the first push is red and the second carries the toolchain
+
+### 1. The first push
+
+`84d27c81f49d9fa650486a881e781f69ba669645` is `HEAD`, `origin/main` and the platform's `main`;
+`/compare/3725dfa...84d27c8` reads `ahead_by 6 / behind_by 0`. The ref moved non-forced
+(`ref moved to 84d27c81… (non-forced fast-forward)`), and all six commits' blob, tree and commit
+SHAs matched locally and remotely.
+
+### 2. Its CI, read from the API
+
+Run **`43384938848`**, attempt **1**, head `84d27c8`, `conclusion: failure`, created
+`2026-11-13T07:19:32Z`, updated `07:44:38Z`. Five jobs:
+
+| job | job id | runner | steps | verdict |
+|---|---|---|---|---|
+| Format and static checks | 131751090217 | 1000011155 | 15 | success |
+| Configure, build, C++ tests, Python tests | 131751090237 | 1000011156 | 14 | success |
+| macOS native C++ and Python parity | 131751090264 | 1000011157 | 14 | success |
+| Benchmark suite against live oracles | 131751090615 | 1000011158 | 15 | success |
+| **Mutation census in a detached worktree** | 131751089996 | 1000011154 | 13 | **failure** |
+
+### 3. Why it failed, and what it is not
+
+The census step printed `194/195 planted defects were rejected by their guard.` and exited 1. The one
+plant was `report-source-edited-without-a-rebuild-seen-from-the-render`, status `no-guard-objected`.
+Its guard, `test_rebuilding_the_report_from_the_committed_source_typesets_the_same_text`, returns
+`pytest.skip` when `latexmk` or `pdftotext` is absent, and its own docstring says that skip "includes
+CI". So the plant could not object there: this is the lane's environment, not the implementation. The
+adjudication step did not run because the sweep step exited 1.
+
+That is the reading a laptop cannot produce. A machine with TeX measures `195/195`; a runner without
+it measures `194/195`, and the difference is a **skip**, which the census correctly refuses to score
+as a catch.
+
+### 4. The second push, and the approval for its content
+
+Phase 0 declared that the second push would carry the terminal entry only. It carries the terminal
+entry **and** one CI step, because the first push's failure cannot be repaired by prose. The
+maintainer's approval for that change, verbatim:
+
+> 在 lane 里安装 TeX
+
+The step installs `latexmk`, `poppler-utils`, `texlive-latex-base`, `texlive-latex-recommended`,
+`texlive-latex-extra` and `texlive-fonts-recommended` in the `mutation-census` job. The committed PDF
+was typeset by pdfTeX 1.40.29 (TeX Live 2026) on 2026-11-02 — the generation `ubuntu-latest` ships —
+so the re-render can reproduce the extracted text rather than approximate it. The guard compares the
+SHA-256 of `pdftotext`'s raw output, so "approximate" would not be enough.
+
+### 5. What is not claimed
+
+The series is not closed by this entry. It closes only when the second push's run is read from the
+API and its census line quoted — both belong to the session handoff, not here. One tooling fact is
+recorded because it produced a false success during this session:
+`gh run watch … --exit-status | tail` returns `tail`'s exit status, so it reported `0` for run
+`43384938848`, which failed. Every verdict in this ledger comes from `gh api`, not from that pipeline.
+
+---

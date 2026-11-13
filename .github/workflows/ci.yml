@@ -262,6 +262,17 @@ jobs:
           enable-cache: true
       - name: Install dev environment
         run: uv sync
+      - name: Install the TeX toolchain one guard reads
+        # `report-source-edited-without-a-rebuild-seen-from-the-render` mutates the report source and
+        # requires the re-render guard to object. That guard skips when `latexmk` or `pdftotext` is
+        # absent, and a skip reads as a plant that could not redden: measured on run 43384938848,
+        # where the census printed 194/195 on this image. The committed PDF was typeset by pdfTeX
+        # 1.40.29 (TeX Live 2026, 2026-11-02), which is the generation this image ships.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            latexmk poppler-utils texlive-latex-base texlive-latex-recommended \
+            texlive-latex-extra texlive-fonts-recommended
       - name: Materialise the detached worktree
         run: git worktree add --detach "$RUNNER_TEMP/qr-sweep" HEAD
       - name: Install the environment the guards read, oracles included
