@@ -344,7 +344,9 @@ def test_a_sweep_that_needs_no_stop_prints_the_census_it_always_printed(
     assert "3/3 planted defects were rejected by their guard." in output, output
 
 
-def test_the_status_table_only_calls_a_case_caught_when_every_step_fired() -> None:
+def test_the_status_table_only_calls_a_case_caught_when_every_step_fired(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Each lie has its own status, and only the complete chain is a catch."""
     cycle = {
         "anchor_ok": True,
@@ -408,6 +410,83 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired() -> No
         )
         == harness.NOT_GREEN_AGAIN
     ), "a CTest that fails on the restored tree too is not evidence about the mutation"
+
+    # V11 B1. The census key is the aggregate of exactly these statuses, read from the lane's json
+    # verdict rather than from a summary line a runner never has. Reversing `V6_PROMPT.md` §4 is
+    # only worth doing if the aggregate can still go red, so every way of lying to it is exercised:
+    # a plant whose guard stayed green, a sweep that stopped before every declared plant ran, a
+    # declaration that drifted from `runner --list`, a checkout whose status moved while the sweep
+    # ran, and a verdict that does not parse. An absent lane reports the precondition as absent
+    # instead of claiming a zero, which is the difference between a skip and a green.
+    from tools import inventory_orphan_code as census
+
+    declared = len(harness.MUTATIONS)
+    genuine = {plant.identifier: harness.CAUGHT for plant in harness.MUTATIONS}
+
+    monkeypatch.setenv(
+        census.SWEEP_VERDICT_ENV,
+        str(_written_verdict(tmp_path, declared=declared, statuses=genuine)),
+    )
+    verdict = census.sweep_census_verdict()
+    assert verdict["available"], verdict["unavailable_because"]
+    assert census.sweep_gap(verdict, declared) == 0, "a clean census did not score zero"
+
+    escaped = dict(genuine)
+    escaped[harness.MUTATIONS[0].identifier] = harness.ESCAPED
+    monkeypatch.setenv(
+        census.SWEEP_VERDICT_ENV,
+        str(_written_verdict(tmp_path, declared=declared, statuses=escaped)),
+    )
+    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
+        "a plant whose guard stayed green did not redden the census key"
+    )
+
+    stopped = dict(list(genuine.items())[: declared - 1])
+    monkeypatch.setenv(
+        census.SWEEP_VERDICT_ENV,
+        str(_written_verdict(tmp_path, declared=declared, statuses=stopped)),
+    )
+    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
+        "a verdict that stopped before every declared plant ran did not redden the census key"
+    )
+
+    monkeypatch.setenv(
+        census.SWEEP_VERDICT_ENV,
+        str(_written_verdict(tmp_path, declared=declared - 1, statuses=genuine)),
+    )
+    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
+        "a declaration that drifted from runner --list did not redden the census key"
+    )
+
+    monkeypatch.setenv(
+        census.SWEEP_VERDICT_ENV,
+        str(
+            _written_verdict(
+                tmp_path,
+                declared=declared,
+                statuses=genuine,
+                checkout_after="?? build/written-by-somebody-else",
+            )
+        ),
+    )
+    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
+        "a checkout whose status moved while the sweep ran did not redden the census key"
+    )
+
+    malformed = tmp_path / "malformed.json"
+    malformed.write_text("{not json", encoding="utf-8")
+    monkeypatch.setenv(census.SWEEP_VERDICT_ENV, str(malformed))
+    assert census.sweep_gap(census.sweep_census_verdict(), declared) == 1, (
+        "a verdict that does not parse was read as a clean census"
+    )
+
+    monkeypatch.delenv(census.SWEEP_VERDICT_ENV, raising=False)
+    monkeypatch.setattr(census, "SWEEP_VERDICT_PATH", tmp_path / "absent.json")
+    absent = census.sweep_census_verdict()
+    assert not absent["available"], "an absent lane verdict claimed to have measured something"
+    assert "absent" in absent["unavailable_because"], (
+        "the absent verdict does not say why it is absent, so a skip reads as a zero"
+    )
 
 
 def test_the_selected_mutations_resolve_by_kind_and_identifier(capsys) -> None:
@@ -1052,86 +1131,3 @@ def _written_verdict(
     path = tmp_path / "sweep_verdict.json"
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
-
-
-def test_the_census_key_reads_the_lane_verdict_and_rejects_a_forged_one(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Reversing `V6_PROMPT.md` §4 is only worth doing if the new reading can still go red.
-
-    The reading is the lane's json verdict rather than a human's summary line, so the ways to lie to
-    it are enumerated: a plant whose guard stayed green, a sweep that stopped before every declared
-    plant ran, a declaration that drifted from `runner --list`, a checkout whose porcelain status
-    moved while the sweep ran, and a verdict that does not parse. A genuine census scores zero and
-    each forgery scores at least one; an absent lane reports the precondition as absent instead of
-    claiming a zero.
-    """
-    from tools import inventory_orphan_code as census
-
-    declared = len(harness.MUTATIONS)
-    genuine = {plant.identifier: harness.CAUGHT for plant in harness.MUTATIONS}
-
-    monkeypatch.setenv(
-        census.SWEEP_VERDICT_ENV,
-        str(_written_verdict(tmp_path, declared=declared, statuses=genuine)),
-    )
-    verdict = census.sweep_census_verdict()
-    assert verdict["available"], verdict["unavailable_because"]
-    assert census.sweep_gap(verdict, declared) == 0, "a clean census did not score zero"
-
-    escaped = dict(genuine)
-    escaped[harness.MUTATIONS[0].identifier] = harness.ESCAPED
-    monkeypatch.setenv(
-        census.SWEEP_VERDICT_ENV,
-        str(_written_verdict(tmp_path, declared=declared, statuses=escaped)),
-    )
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
-        "a plant whose guard stayed green did not redden the census key"
-    )
-
-    stopped = dict(list(genuine.items())[: declared - 1])
-    monkeypatch.setenv(
-        census.SWEEP_VERDICT_ENV,
-        str(_written_verdict(tmp_path, declared=declared, statuses=stopped)),
-    )
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
-        "a verdict that stopped before every declared plant ran did not redden the census key"
-    )
-
-    monkeypatch.setenv(
-        census.SWEEP_VERDICT_ENV,
-        str(_written_verdict(tmp_path, declared=declared - 1, statuses=genuine)),
-    )
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
-        "a declaration that drifted from runner --list did not redden the census key"
-    )
-
-    monkeypatch.setenv(
-        census.SWEEP_VERDICT_ENV,
-        str(
-            _written_verdict(
-                tmp_path,
-                declared=declared,
-                statuses=genuine,
-                checkout_after="?? build/written-by-somebody-else",
-            )
-        ),
-    )
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
-        "a checkout whose status moved while the sweep ran did not redden the census key"
-    )
-
-    malformed = tmp_path / "malformed.json"
-    malformed.write_text("{not json", encoding="utf-8")
-    monkeypatch.setenv(census.SWEEP_VERDICT_ENV, str(malformed))
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) == 1, (
-        "a verdict that does not parse was read as a clean census"
-    )
-
-    monkeypatch.delenv(census.SWEEP_VERDICT_ENV, raising=False)
-    monkeypatch.setattr(census, "SWEEP_VERDICT_PATH", tmp_path / "absent.json")
-    absent = census.sweep_census_verdict()
-    assert not absent["available"], "an absent lane verdict claimed to have measured something"
-    assert "absent" in absent["unavailable_because"], (
-        "the absent verdict does not say why it is absent, so a skip reads as a zero"
-    )
