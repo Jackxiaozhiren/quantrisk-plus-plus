@@ -268,3 +268,54 @@ recorded because it produced a false success during this session:
 `43384938848`, which failed. Every verdict in this ledger comes from `gh api`, not from that pipeline.
 
 ---
+
+## Third push — 2026-11-14, the environment-blind declaration
+
+### 1. The approval, verbatim
+
+> 授权第三次推送，只做 environment-blind 声明
+
+### 2. What the two red runs established
+
+- Run `43384938848` (`84d27c8`): `194/195`, the missing plant `no-guard-objected`.
+- Run `43401397303` (`7d04939`): `194/195`, the same plant, now `tree-did-not-recover`. TeX was
+  present and the guard ran; the rebuilt extraction simply does not hash to the shipped one.
+- The guard compares the SHA-256 of `pdftotext`'s raw output, with no normalisation, against a PDF
+  typeset by pdfTeX 1.40.29 (TeX Live 2026). The runner is Ubuntu noble (24.04) with `latexmk 4.83-1`
+  — TeX Live 2023. No install on that image can reproduce the digest.
+- So the plant is not unmeasurable because a tool is missing; it is unmeasurable because **the engine
+  that produced the artifact is not the engine on the machine**. That is a version equality, and it
+  is declared as one.
+
+### 3. What this push changes
+
+1. `runner.py` gains `ENVIRONMENT_BLIND_GUARDS`, pinned to one plant id, and three readers:
+   `pdftex_version` (a shape, so both the banner and the build log parse), `local_pdftex_version`,
+   `recorded_pdftex_version`. `environment_blind_reason` returns None only when the two agree;
+   otherwise it prints both readings.
+2. The sweep subtracts that set before running and reports it as `unmeasurable-here`, followed by
+   `195 declared = 194 measurable here + 1 environment-blind`. The census line keeps its text and
+   now prints `194/194`.
+3. The verdict carries `unmeasurable`; `sweep_gap` adds those plants back before comparing with
+   `runner --list`, so an **undeclared** blind plant reddens exactly as a declared one that turns out
+   to be measurable.
+4. The falsification block gains the `194 + 1 = 195` reconciliation, an undeclared-blind forgery, and
+   the two version spellings plus a text that names no engine.
+5. The ceiling row's `can_fail_because` names the reconciliation rather than implying a bare count.
+
+### 4. Amendment to the Definition of Done
+
+Phase 5's DoD item 2 asked for `195/195` on a runner. That literal string is unattainable while the
+shipped PDF's engine is not the runner's, and demanding it would force either a false `195` or a
+weakened ceiling. The rail that matters is that the census **reconciles**: `194/194` measurable plus
+one declared environment-blind equals the 195 `runner --list` declares, the reason is printed with
+both engine versions, and an undeclared blind plant reddens. The literal `195/195` remains true on a
+machine carrying the compiling engine, and is recorded at `c9b46d2` in §2 and §7 of Phase 5.
+
+### 5. What this push carries
+
+The implementation above and this section. It carries no change to any plant, anchor, ceiling key,
+lane or job: `runner --list` still declares 195, and `.github/lane_contract.md` still names
+`mutation-census :: Run every declared plant in the worktree`.
+
+---

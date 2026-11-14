@@ -416,45 +416,88 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired(
     # only worth doing if the aggregate can still go red, so every way of lying to it is exercised:
     # a plant whose guard stayed green, a sweep that stopped before every declared plant ran, a
     # declaration that drifted from `runner --list`, a checkout whose status moved while the sweep
-    # ran, and a verdict that does not parse. An absent lane reports the precondition as absent
-    # instead of claiming a zero, which is the difference between a skip and a green.
+    # ran, and a verdict that does not parse. One plant is declared environment-blind because its
+    # guard needs the pdfTeX that typeset the shipped PDF; the exemption is only honest if removing
+    # it reddens, which is the second case below.
     from tools import inventory_orphan_code as census
 
-    declared = len(harness.MUTATIONS)
-    genuine = {plant.identifier: harness.CAUGHT for plant in harness.MUTATIONS}
+    blind = "report-source-edited-without-a-rebuild-seen-from-the-render"
+    declared = len(harness.MUTATIONS) - 1
+    genuine = {
+        plant.identifier: harness.CAUGHT for plant in harness.MUTATIONS if plant.identifier != blind
+    }
+    declared_blind = [{"id": blind, "reason": "this machine's pdfTeX differs from the build log"}]
 
     monkeypatch.setenv(
         census.SWEEP_VERDICT_ENV,
-        str(_written_verdict(tmp_path, declared=declared, statuses=genuine)),
+        str(
+            _written_verdict(
+                tmp_path,
+                declared=declared,
+                statuses=genuine,
+                unmeasurable=declared_blind,
+            )
+        ),
     )
     verdict = census.sweep_census_verdict()
     assert verdict["available"], verdict["unavailable_because"]
-    assert census.sweep_gap(verdict, declared) == 0, "a clean census did not score zero"
+    assert census.sweep_gap(verdict, len(harness.MUTATIONS)) == 0, (
+        "194 measurable plus one declared-blind did not reconcile to the 195 declared plants"
+    )
+
+    monkeypatch.setenv(
+        census.SWEEP_VERDICT_ENV,
+        str(_written_verdict(tmp_path, declared=declared, statuses=genuine, unmeasurable=[])),
+    )
+    assert census.sweep_gap(census.sweep_census_verdict(), len(harness.MUTATIONS)) >= 1, (
+        "a plant that is blind but undeclared did not redden the census key"
+    )
 
     escaped = dict(genuine)
     escaped[harness.MUTATIONS[0].identifier] = harness.ESCAPED
     monkeypatch.setenv(
         census.SWEEP_VERDICT_ENV,
-        str(_written_verdict(tmp_path, declared=declared, statuses=escaped)),
+        str(
+            _written_verdict(
+                tmp_path,
+                declared=declared,
+                statuses=escaped,
+                unmeasurable=declared_blind,
+            )
+        ),
     )
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
+    assert census.sweep_gap(census.sweep_census_verdict(), len(harness.MUTATIONS)) >= 1, (
         "a plant whose guard stayed green did not redden the census key"
     )
 
     stopped = dict(list(genuine.items())[: declared - 1])
     monkeypatch.setenv(
         census.SWEEP_VERDICT_ENV,
-        str(_written_verdict(tmp_path, declared=declared, statuses=stopped)),
+        str(
+            _written_verdict(
+                tmp_path,
+                declared=declared,
+                statuses=stopped,
+                unmeasurable=declared_blind,
+            )
+        ),
     )
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
-        "a verdict that stopped before every declared plant ran did not redden the census key"
+    assert census.sweep_gap(census.sweep_census_verdict(), len(harness.MUTATIONS)) >= 1, (
+        "a verdict that stopped before every measurable plant ran did not redden the census key"
     )
 
     monkeypatch.setenv(
         census.SWEEP_VERDICT_ENV,
-        str(_written_verdict(tmp_path, declared=declared - 1, statuses=genuine)),
+        str(
+            _written_verdict(
+                tmp_path,
+                declared=declared - 1,
+                statuses=genuine,
+                unmeasurable=declared_blind,
+            )
+        ),
     )
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
+    assert census.sweep_gap(census.sweep_census_verdict(), len(harness.MUTATIONS)) >= 1, (
         "a declaration that drifted from runner --list did not redden the census key"
     )
 
@@ -465,18 +508,19 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired(
                 tmp_path,
                 declared=declared,
                 statuses=genuine,
+                unmeasurable=declared_blind,
                 checkout_after="?? build/written-by-somebody-else",
             )
         ),
     )
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) >= 1, (
+    assert census.sweep_gap(census.sweep_census_verdict(), len(harness.MUTATIONS)) >= 1, (
         "a checkout whose status moved while the sweep ran did not redden the census key"
     )
 
     malformed = tmp_path / "malformed.json"
     malformed.write_text("{not json", encoding="utf-8")
     monkeypatch.setenv(census.SWEEP_VERDICT_ENV, str(malformed))
-    assert census.sweep_gap(census.sweep_census_verdict(), declared) == 1, (
+    assert census.sweep_gap(census.sweep_census_verdict(), len(harness.MUTATIONS)) == 1, (
         "a verdict that does not parse was read as a clean census"
     )
 
@@ -486,6 +530,22 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired(
     assert not absent["available"], "an absent lane verdict claimed to have measured something"
     assert "absent" in absent["unavailable_because"], (
         "the absent verdict does not say why it is absent, so a skip reads as a zero"
+    )
+
+    # The declaration's precondition is a version equality, so the reader that produces it is
+    # exercised on both spellings the tree holds plus a text that names no engine at all.
+    assert (
+        harness.pdftex_version("pdfTeX 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian)") == "1.40.25"
+    ), "the banner's patch level was not read, so a version mismatch could go unnoticed"
+    assert (
+        harness.pdftex_version(
+            "This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) "
+            "(preloaded format=pdflatex 2026.5.17)"
+        )
+        == "1.40.29"
+    ), "the build log's patch level was not read, so the recorded engine is unknown"
+    assert harness.pdftex_version("no engine named here") is None, (
+        "a text naming no engine produced a version, so an absent toolchain would look like a match"
     )
 
 
@@ -1109,6 +1169,7 @@ def _written_verdict(
     *,
     declared: int,
     statuses: dict[str, str],
+    unmeasurable: list[dict[str, str]] | None = None,
     checkout_before: str = "",
     checkout_after: str = "",
 ) -> Path:
@@ -1122,6 +1183,7 @@ def _written_verdict(
         "ran": len(statuses),
         "caught": len(statuses) - len(non_caught),
         "non_caught": non_caught,
+        "unmeasurable": unmeasurable or [],
         "results": [
             {"id": key, "kind": "prose", "status": status} for key, status in statuses.items()
         ],

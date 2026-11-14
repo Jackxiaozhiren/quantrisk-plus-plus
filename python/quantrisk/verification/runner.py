@@ -62,6 +62,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -90,7 +91,21 @@ DIRTY_TARGET = "target-already-modified"
 PROBE_EXISTS = "probe-file-already-in-the-tree"
 STOPPED = "sweep-stopped-early"
 CHECKOUT_WRITTEN = "watched-checkout-was-written"
+UNMEASURABLE = "unmeasurable-here"
 VERDICT_SCHEMA = "quantrisk-sweep-verdict/1"
+
+#: Plants whose guard cannot be measured on a machine that lacks the exact engine the committed
+#: artifact was built with. The render guard re-typesets `paper/technical_report.tex` and compares
+#: the SHA-256 of `pdftotext`'s raw output with the shipped PDF. Any other pdfTeX re-breaks lines,
+#: and the digest differs for a reason that says nothing about the plant, so the precondition is a
+#: version equality read from the tree's own build log — not a guess, and not "TeX is installed".
+ENVIRONMENT_BLIND_GUARDS: dict[str, str] = {
+    "report-source-edited-without-a-rebuild-seen-from-the-render": (
+        "the re-render guard needs the pdfTeX that typeset paper/technical_report.pdf"
+    ),
+}
+PDFTEX_BANNER_COMMAND = ("pdflatex", "--version")
+REPORT_BUILD_LOG = "paper/technical_report.log"
 
 PAIRED = "paired"
 MIS_PAIRED = "named-guard-stayed-green"
@@ -875,6 +890,57 @@ def select(kind: str | None, only: Sequence[str]) -> list[Mutation]:
     return [mutation for mutation in chosen if mutation.identifier in wanted]
 
 
+def pdftex_version(text: str) -> str | None:
+    """The engine version a pdfTeX banner or a build log names, or None when it names none.
+
+    Both spellings carry the patch level inside a longer number: the banner prints
+    `pdfTeX 3.141592653-2.6-1.40.25 (TeX Live …)` and the log prints
+    `This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live …)`. The first three-dot group after
+    the engine's name is `1.40.x` in both, so this reads a shape rather than a pinned string.
+    """
+    match = re.search(r"pdfTeX.*?(\d+\.\d+\.\d+)", text)
+    return match.group(1) if match else None
+
+
+def local_pdftex_version() -> str | None:
+    """The pdfTeX this machine would render with, or None when it has none."""
+    if shutil.which(PDFTEX_BANNER_COMMAND[0]) is None:
+        return None
+    completed = subprocess.run(
+        list(PDFTEX_BANNER_COMMAND), capture_output=True, text=True, check=False
+    )
+    return pdftex_version((completed.stdout or "") + (completed.stderr or ""))
+
+
+def recorded_pdftex_version() -> str | None:
+    """The pdfTeX the committed report names in the log it was built with."""
+    log = REPO_ROOT / REPORT_BUILD_LOG
+    if not log.is_file():
+        return None
+    return pdftex_version(log.read_text(encoding="utf-8"))
+
+
+def environment_blind_reason(identifier: str) -> str | None:
+    """Why this plant cannot be measured here, or None when its declared precondition holds.
+
+    A plant outside the declared set is never blind. A plant inside it is measurable only when the
+    local engine's version equals the one the committed build log names; anything else — absent,
+    different, or a log that names no version — is reported with both readings, so the skip cannot
+    be read as a measurement of zero. This is the declaration `V6_PROMPT.md` §4 asks for, made where
+    the sweep runs rather than in prose beside it.
+    """
+    if identifier not in ENVIRONMENT_BLIND_GUARDS:
+        return None
+    recorded = recorded_pdftex_version()
+    local = local_pdftex_version()
+    if recorded is not None and recorded == local:
+        return None
+    return (
+        f"{ENVIRONMENT_BLIND_GUARDS[identifier]}; this machine's pdfTeX is {local or 'absent'} "
+        f"and {REPORT_BUILD_LOG} names {recorded or 'no version'}"
+    )
+
+
 def checkout_status(root: Path) -> str:
     """The porcelain status of a checkout, read so a lane can prove it was never written."""
     completed = subprocess.run(
@@ -904,6 +970,7 @@ def write_verdict(
     *,
     selected: Sequence[Mutation],
     results: Sequence[dict[str, str]],
+    unmeasurable: dict[str, str],
     checkout_before: str | None,
     checkout_after: str | None,
 ) -> None:
@@ -924,6 +991,10 @@ def write_verdict(
         "ran": len(results),
         "caught": len(results) - len(non_caught),
         "non_caught": non_caught,
+        "unmeasurable": [
+            {"id": identifier, "reason": reason}
+            for identifier, reason in sorted(unmeasurable.items())
+        ],
         "results": [
             {"id": result["id"], "kind": result["kind"], "status": result["status"]}
             for result in results
@@ -979,6 +1050,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"{mutation.identifier}\t{mutation.kind}\t{mutation.guard}")
         return 0
 
+    # The declared environment-blind set is subtracted before anything runs, so a plant whose
+    # precondition is absent is reported as absent rather than scored as a catch or as an escape.
+    unmeasurable = {
+        mutation.identifier: reason
+        for mutation in selected
+        if (reason := environment_blind_reason(mutation.identifier)) is not None
+    }
+    selected = [mutation for mutation in selected if mutation.identifier not in unmeasurable]
+
     dirty = [mutation.path for mutation in selected if git_status(mutation.path)]
     if dirty:
         print(
@@ -1022,6 +1102,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"\n{STOPPED}: {skipped} of {len(selected)} declared plants were never run, after "
             f"{stopped_at}. Pass --all for the full census."
         )
+    if unmeasurable:
+        print()
+        for identifier, reason in sorted(unmeasurable.items()):
+            print(f"{UNMEASURABLE:<22} {identifier}: {reason}")
+        print(
+            f"{len(selected) + len(unmeasurable)} declared = {len(selected)} measurable here "
+            f"+ {len(unmeasurable)} environment-blind"
+        )
     caught = [result for result in results if result["status"] == CAUGHT]
     checkout_after = checkout_status(watched) if watched is not None else None
     if verdict_path is not None:
@@ -1029,6 +1117,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             verdict_path,
             selected=selected,
             results=results,
+            unmeasurable=unmeasurable,
             checkout_before=checkout_before,
             checkout_after=checkout_after,
         )

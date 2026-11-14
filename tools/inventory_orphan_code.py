@@ -884,6 +884,7 @@ def sweep_census_verdict() -> dict[str, Any]:
         "ran": None,
         "caught": None,
         "non_caught": [],
+        "unmeasurable": [],
         "checkout_status_before": None,
         "checkout_status_after": None,
         "malformed": None,
@@ -899,11 +900,16 @@ def sweep_census_verdict() -> dict[str, Any]:
     declared = payload.get("declared")
     ran = payload.get("ran")
     non_caught = payload.get("non_caught") or []
+    unmeasurable = payload.get("unmeasurable") or []
     malformed = None
     if not isinstance(declared, int) or not isinstance(ran, int):
         malformed = "the verdict does not carry integer `declared` and `ran`"
     elif not isinstance(non_caught, list) or any(not isinstance(item, str) for item in non_caught):
         malformed = "the verdict's `non_caught` is not a list of plant ids"
+    elif not isinstance(unmeasurable, list) or any(
+        not isinstance(item, dict) or not item.get("id") for item in unmeasurable
+    ):
+        malformed = "the verdict's `unmeasurable` is not a list of {id, reason} objects"
     return {
         "available": True,
         "unavailable_because": "",
@@ -913,6 +919,7 @@ def sweep_census_verdict() -> dict[str, Any]:
         "ran": ran,
         "caught": payload.get("caught"),
         "non_caught": non_caught if isinstance(non_caught, list) else [],
+        "unmeasurable": unmeasurable if isinstance(unmeasurable, list) else [],
         "checkout_status_before": payload.get("checkout_status_before"),
         "checkout_status_after": payload.get("checkout_status_after"),
         "malformed": malformed,
@@ -923,9 +930,11 @@ def sweep_gap(verdict: dict[str, Any], declared_plants: int) -> int:
     """How far a lane's census is from its ceiling: escaped plants, a stale count, or a dirty tree.
 
     Four ways to fail, each named rather than folded into one number: a plant whose guard stayed
-    green, a verdict that stopped before every declared plant ran, a verdict whose `declared` no
-    longer matches `runner --list`, and a checkout whose status moved while the sweep ran. The last
-    one is the proof that the worktree really is detached.
+    green, a verdict that stopped before every measurable plant ran, a declaration that no longer
+    reconciles with `runner --list` once the declared environment-blind plants are added back, and a
+    checkout whose status moved while the sweep ran. The third is what pins the exemption: a plant
+    that becomes blind without being declared changes the sum, and so does a declared-blind plant
+    the sweep actually measured.
     """
     if verdict.get("malformed"):
         return 1
@@ -934,12 +943,13 @@ def sweep_gap(verdict: dict[str, Any], declared_plants: int) -> int:
     declared_count = declared if isinstance(declared, int) else 0
     ran_count = ran if isinstance(ran, int) else 0
     non_caught = verdict.get("non_caught") or []
+    unmeasurable = verdict.get("unmeasurable") or []
     clean = (
         verdict.get("checkout_status_before") == "" and verdict.get("checkout_status_after") == ""
     )
     return (
         len(non_caught)
-        + int(declared_count != declared_plants)
+        + int(declared_count + len(unmeasurable) != declared_plants)
         + int(ran_count != declared_count)
         + (0 if clean else 1)
     )
