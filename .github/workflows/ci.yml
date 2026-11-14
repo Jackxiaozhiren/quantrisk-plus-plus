@@ -24,7 +24,7 @@ jobs:
       # `git ls-remote --tags`, which is the only check that matters -- the GitHub *release*
       # is called v10.2.0 either way, so reading the release name is not evidence that a ref
       # resolves. actions/checkout and actions/upload-artifact do publish major tags.
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: "3.12"
           enable-cache: true
@@ -101,7 +101,7 @@ jobs:
           # `432 passed, 5 skipped` where the same tree at depth 1 had read `429 passed, 8 skipped`.
           fetch-depth: 0
           fetch-tags: true
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: "3.12"
           enable-cache: true
@@ -159,7 +159,7 @@ jobs:
         # A flow mapping prevents duplicating the mutation harness's unique
         # historical-checkout anchor while keeping both jobs fail-closed.
         with: {fetch-depth: 0, fetch-tags: true}
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: "3.12"
           enable-cache: true
@@ -213,7 +213,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: "3.12"
           enable-cache: true
@@ -253,7 +253,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: "3.12"
           enable-cache: true
@@ -296,7 +296,7 @@ jobs:
         # Four guards read the repository's history or its tags, and the worktree inherits both.
         # A flow mapping keeps the mutation harness's single-anchor contract intact.
         with: {fetch-depth: 0, fetch-tags: true}
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: "3.12"
           enable-cache: true
