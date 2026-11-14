@@ -164,3 +164,57 @@ every commit the series created proven an ancestor of the remote, both runs attr
 and no stray instrument tracked or left on disk.
 
 ---
+
+## Terminal entry — 2026-11-14, the first push is green and the series closes
+
+### 1. The first push
+
+`aad0a93b1964a39f250691c5e2e55691e8e051fc` is `HEAD`, `origin/main` and the platform's `main`;
+`/compare/6eda1fa...aad0a93` reads `ahead_by 1 / behind_by 0`. The ref moved non-forced
+(`ref moved to aad0a93b… (non-forced fast-forward)`), and the commit's blob, tree and commit SHAs
+matched locally and remotely.
+
+### 2. Its CI, read from the API
+
+Run **`43547923324`**, attempt **1**, head `aad0a93`, `conclusion: success`, created
+`2026-11-14T02:44:09Z`, updated `03:00:34Z`. Six jobs, no failed step:
+
+| job | job id | runner | steps |
+|---|---|---|---|
+| Format and static checks | 132303455083 | 1000011347 | 15 |
+| Configure, build, C++ tests, Python tests | 132303455098 | 1000011348 | 14 |
+| macOS native C++ and Python parity | 132303455112 | 1000011351 | 14 |
+| Benchmark suite against live oracles | 132303455099 | 1000011350 | 15 |
+| Mutation census in a detached worktree | 132303455070 | 1000011349 | 14 |
+| **Installed wheel surface in a clean environment** | 132303454912 | 1000011346 | 13 |
+
+### 3. What the new lane printed
+
+```
+"tally": "19", "tasks": 19
+"named": true
+"study": "mc_speed"
+"passed": 7
+installed surface: identity holds, the list is the registry, one study ran, and the refusal
+named what it needed
+ok      installed_user_identity_mismatch: 0 against a ceiling of 0 due P4.1
+```
+
+The wheel was built from the pushed tree, installed into an environment under `$RUNNER_TEMP`, and
+probed there: the import resolved inside that environment, `run --list` enumerated the same 19
+tasks, `validate` passed 7 checks, `mc_speed` ran end to end, and `pricing_grid` refused naming
+what it needed. The key is now measured on the runner that evaluates it, while the lint vantage
+still prints `SKIP` with its reason.
+
+### 4. The second push
+
+Carries this terminal entry only. Its CI is read after the push and attributed in the session
+handoff; no outcome is stated here for a run that has not happened.
+
+### 5. What is not claimed
+
+No tag moved, no release asset was replaced, the manifest still holds 95 entries, and no plant,
+anchor or ceiling key count changed. `installed_user_identity_mismatch` keeps `may_be_unmeasured`
+because the lint vantage genuinely does not run the lane.
+
+---
