@@ -319,3 +319,44 @@ lane or job: `runner --list` still declares 195, and `.github/lane_contract.md` 
 `mutation-census :: Run every declared plant in the worktree`.
 
 ---
+
+## Fourth push — 2026-11-14, the declaration reads the tracked record
+
+### 1. The approval, verbatim
+
+> 授权第四次推送，只修 environment-blind 的记录源
+
+### 2. The defect the third push's own reason string exposed
+
+Run `43540915014` printed `… this machine's pdfTeX is 1.40.25 and paper/technical_report.log names no
+version`. The log is real on a development machine but `paper/*.log` is gitignored (`.gitignore:35`),
+so no runner has it. The tracked record is `paper/technical_report.build.json`, whose `engine` field
+names `pdfTeX … 1.40.29 (TeX Live 2026)`.
+
+The consequence was not a wording problem. On a **fresh clone carrying the right engine** the
+precondition would compare `1.40.29` against `None`, declare the plant environment-blind, and stop
+measuring it — an over-declaration that hides a broken render, which is the exact failure the plant
+exists to catch. A declaration that fires on a machine able to take the reading is the weaker version
+of the defect this series set out to remove.
+
+### 3. What this push changes
+
+Two files. `recorded_pdftex_version()` reads `paper/technical_report.build.json`'s `engine` string
+instead of the ignored log; the constant is renamed `REPORT_BUILD_RECORD`; the reason text names the
+file it read. The census block gains one assertion — `recorded_pdftex_version() == "1.40.29"` — so the
+same defect reddens rather than returning to prose.
+
+### 4. Verified before pushing
+
+- With `paper/technical_report.log` moved aside and pdfTeX 1.40.29 on `PATH`, the plant is `caught`.
+- With a `pdflatex` reporting 1.40.25, it is `environment-blind` and the reason reads
+  `paper/technical_report.build.json records 1.40.29`.
+- `ruff check`, `ruff format --check` (246 files), `mypy` (74 source files) green; collection 560,
+  so no documented count moves.
+
+### 5. What this push carries
+
+Those two files and this section. No plant, anchor, ceiling key, lane or job moves; `runner --list`
+still declares 195, and the census reconciliation keeps its `194 + 1 = 195` shape.
+
+---

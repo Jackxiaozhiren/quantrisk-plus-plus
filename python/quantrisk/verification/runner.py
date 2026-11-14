@@ -105,7 +105,9 @@ ENVIRONMENT_BLIND_GUARDS: dict[str, str] = {
     ),
 }
 PDFTEX_BANNER_COMMAND = ("pdflatex", "--version")
-REPORT_BUILD_LOG = "paper/technical_report.log"
+#: The tracked record of the build, not `paper/*.log` -- that log is gitignored, so a fresh clone
+#: (and every runner) has no log to read and the declaration would fire for the wrong reason.
+REPORT_BUILD_RECORD = "paper/technical_report.build.json"
 
 PAIRED = "paired"
 MIS_PAIRED = "named-guard-stayed-green"
@@ -913,11 +915,22 @@ def local_pdftex_version() -> str | None:
 
 
 def recorded_pdftex_version() -> str | None:
-    """The pdfTeX the committed report names in the log it was built with."""
-    log = REPO_ROOT / REPORT_BUILD_LOG
-    if not log.is_file():
+    """The pdfTeX the committed report records it was built with.
+
+    The engine string lives in `paper/technical_report.build.json`, which is tracked, rather than in
+    `paper/technical_report.log`, which `.gitignore` drops. Reading the log would make every fresh
+    clone -- and every runner -- report "no version", which would declare the plant blind even on a
+    machine carrying the right engine, and would hide a broken render instead of naming it.
+    """
+    record = REPO_ROOT / REPORT_BUILD_RECORD
+    if not record.is_file():
         return None
-    return pdftex_version(log.read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(record.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    engine = payload.get("engine")
+    return pdftex_version(engine) if isinstance(engine, str) else None
 
 
 def environment_blind_reason(identifier: str) -> str | None:
@@ -937,7 +950,7 @@ def environment_blind_reason(identifier: str) -> str | None:
         return None
     return (
         f"{ENVIRONMENT_BLIND_GUARDS[identifier]}; this machine's pdfTeX is {local or 'absent'} "
-        f"and {REPORT_BUILD_LOG} names {recorded or 'no version'}"
+        f"and {REPORT_BUILD_RECORD} records {recorded or 'no version'}"
     )
 
 

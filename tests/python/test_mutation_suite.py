@@ -547,6 +547,10 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired(
     assert harness.pdftex_version("no engine named here") is None, (
         "a text naming no engine produced a version, so an absent toolchain would look like a match"
     )
+    assert harness.recorded_pdftex_version() == "1.40.29", (
+        "the tracked build record's engine did not parse, so the declaration would fire on a "
+        "machine that carries the very engine the PDF was typeset with"
+    )
 
 
 def test_the_selected_mutations_resolve_by_kind_and_identifier(capsys) -> None:
