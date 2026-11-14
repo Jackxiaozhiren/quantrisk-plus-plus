@@ -129,6 +129,11 @@ performed out of order in Phase 15, and every one of those produced a red gate r
   (it edits tracked files and rebuilds `quantrisk_tests`). CI runs the same sweep in a detached
   worktree under `$RUNNER_TEMP` — the `mutation-census` job — so a plant that stops firing is red on
   the runner, not only on the machine that remembered to type the command.
+- **A census of a past revision is checked where ancestry is provable.** `V9_LEDGER.md` fixes the
+  V8 census between two markers, and `uv run python -m tools.verify_final_tip_census` refuses that
+  block unless the revision it names is a strict ancestor of `HEAD` and the block agrees with
+  itself. CI runs it in `build-and-test`, the job with full history; a shallow checkout would make
+  the ancestry check meaningless, which is why it is not in `lint`.
 - **The installed wheel is proved, not assumed.** A wheel is not validated by the checkout that
   built it. `uv run python -m tools.verify_installed_surface --python <clean venv>/bin/python
   --work <empty dir>` proves the four things the checkout cannot: that the import resolves inside

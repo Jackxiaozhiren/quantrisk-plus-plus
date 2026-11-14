@@ -598,6 +598,50 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired(
     absent_surface = census.installed_surface_verdict()
     assert not absent_surface["available"], "an absent lane verdict claimed a measurement"
 
+    # V13 D1: the final-tip attestation reader. Its git calls are stubbed, so the refusals under
+    # test are the reader's own decisions rather than this clone's history; the lane run is the
+    # integration case.
+    from tools import verify_final_tip_census as attester
+
+    passes = {"cat-file": 0, "merge-base": 0}
+
+    def _git(*arguments: str) -> subprocess.CompletedProcess[str]:
+        key = "cat-file" if arguments[0] == "cat-file" else "merge-base"
+        return subprocess.CompletedProcess(arguments, passes[key], "", "")
+
+    monkeypatch.setattr(attester, "_git", _git)
+    attestation = {
+        "schema": attester.SCHEMA,
+        "revision": "a" * 40,
+        "declared_plants": 195,
+        "verdict_rows": {"ok_caught": 195, "other": 0},
+        "summary": "195/195 planted defects were rejected by their guard.",
+        "log_lines": 998,
+        "exit_code": 0,
+        "tree_dirty_paths_after": 0,
+        "evidence_limit": "the log is not tracked",
+    }
+    head = "b" * 40
+    assert attester.verify(attestation, head) == [], "a sound attestation was refused"
+    for forgery in (
+        {**attestation, "schema": "quantrisk.something-else/1"},
+        {**attestation, "revision": "not-a-sha"},
+        {**attestation, "verdict_rows": {"ok_caught": 194, "other": 1}},
+        {**attestation, "verdict_rows": {"ok_caught": 194, "other": 0}},
+        {**attestation, "summary": "194/195 planted defects were rejected by their guard."},
+        {**attestation, "evidence_limit": "   "},
+        {**attestation, "exit_code": 1},
+    ):
+        assert attester.verify(forgery, head), f"this forged attestation passed: {sorted(forgery)}"
+    assert attester.verify({**attestation, "revision": head}, head), "a self-reference passed"
+    passes["merge-base"] = 1
+    assert attester.verify(attestation, head), "a revision that is not an ancestor passed"
+    passes["merge-base"] = 0
+    passes["cat-file"] = 1
+    assert attester.verify(attestation, head), "a revision this clone does not hold passed"
+    passes["cat-file"] = 0
+    assert attester.verify(attestation, head) == [], "the reader did not recover after the stubs"
+
 
 def test_the_selected_mutations_resolve_by_kind_and_identifier(capsys) -> None:
     """`--only` and `--kind` are how an operator runs one case, so they must resolve exactly.

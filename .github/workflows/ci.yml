@@ -136,6 +136,12 @@ jobs:
       # subcommand set with what the workflow executes, in both directions.
       - name: Validate installed CLI
         run: uv run quantrisk validate
+      # V13 D1. The final-tip census attestation in V9_LEDGER.md was read by a heredoc printed in the
+      # ledger itself: it ran where a person pasted it, and it compared a past revision's counts with
+      # today's declaration -- so an unrelated unit adding a plant would have turned it red. This step
+      # runs the tracked reader here, where the full history makes ancestry provable.
+      - name: Final-tip census attestation
+        run: uv run --frozen python -m tools.verify_final_tip_census
 
   macos-native:
     # QuantLib tests its C++ core on Linux, Windows, and macOS. QuantRisk++'s

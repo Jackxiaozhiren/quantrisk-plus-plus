@@ -109,6 +109,15 @@ it did not take.
       "reason": ""
     },
     {
+      "command": "tools.verify_final_tip_census",
+      "status": "executed",
+      "claimed_by": ["CONTRIBUTING.md"],
+      "ci_job": "build-and-test",
+      "ci_step": "Final-tip census attestation",
+      "environment": "ubuntu-latest",
+      "reason": ""
+    },
+    {
       "command": "tools.verify_installed_surface",
       "status": "executed",
       "claimed_by": ["CONTRIBUTING.md"],
