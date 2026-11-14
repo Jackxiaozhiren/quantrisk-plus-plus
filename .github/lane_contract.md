@@ -109,6 +109,15 @@ it did not take.
       "reason": ""
     },
     {
+      "command": "tools.verify_installed_surface",
+      "status": "executed",
+      "claimed_by": ["CONTRIBUTING.md"],
+      "ci_job": "installed-surface",
+      "ci_step": "Prove the installed surface",
+      "environment": "ubuntu-latest",
+      "reason": ""
+    },
+    {
       "command": "tools.build_evidence_manifest",
       "status": "dev-only",
       "claimed_by": ["docs/reproducibility.md", "CONTRIBUTING.md"],

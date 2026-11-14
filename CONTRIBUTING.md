@@ -129,6 +129,12 @@ performed out of order in Phase 15, and every one of those produced a red gate r
   (it edits tracked files and rebuilds `quantrisk_tests`). CI runs the same sweep in a detached
   worktree under `$RUNNER_TEMP` — the `mutation-census` job — so a plant that stops firing is red on
   the runner, not only on the machine that remembered to type the command.
+- **The installed wheel is proved, not assumed.** A wheel is not validated by the checkout that
+  built it. `uv run python -m tools.verify_installed_surface --python <clean venv>/bin/python
+  --work <empty dir>` proves the four things the checkout cannot: that the import resolves inside
+  the environment it was installed into, that `run --list` is the same registry from there, that one
+  offline study runs end to end, and that a task missing an extra refuses loudly. CI runs it in the
+  `installed-surface` job; `--self-test` proves the instrument can object.
 - **Never go green by weakening a check.** No lowering a tolerance, no deleting a failing test, no
   `# noqa`, no adding an exclude to a linter — including in scratch tooling. Fix the thing or record
   the failure; failed experiments are published, not dropped.

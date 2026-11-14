@@ -552,6 +552,52 @@ def test_the_status_table_only_calls_a_case_caught_when_every_step_fired(
         "machine that carries the very engine the PDF was typeset with"
     )
 
+    # V12 C1: the installed-surface key reads the installed-surface lane's verdict, and three ways
+    # of lying to it redden -- a reading the probe never produced, an import that resolved into the
+    # checkout, and a non-zero exit. An absent verdict reports the precondition, not a zero.
+    surface = {
+        "schema": "quantrisk-installed-surface/1",
+        "revision": "0" * 40,
+        "vantage": "test",
+        "checkout": "/repo",
+        "venv_root": "/env",
+        "exit_code": 0,
+        "identity": {"module": "/env/lib/quantrisk/__init__.py", "prefix": "/env"},
+        "list": {"exit": 0},
+        "validate": {"exit": 0, "passed": 7},
+        "study": {"exit": 0},
+        "refusal": {"exit": 0},
+    }
+
+    def _surface(payload: dict[str, object]) -> Path:
+        path = tmp_path / "installed_surface.json"
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        return path
+
+    monkeypatch.setenv(census.INSTALLED_SURFACE_ENV, str(_surface(surface)))
+    proven = census.installed_surface_verdict()
+    assert proven["available"], proven["unavailable_because"]
+    assert census.installed_surface_gap(proven) == 0, "a complete surface proof did not score zero"
+    for forgery in (
+        {**surface, "validate": None},
+        {
+            **surface,
+            "identity": {
+                "module": f"{census.REPO_ROOT}/python/quantrisk/__init__.py",
+                "prefix": "/env",
+            },
+        },
+        {**surface, "exit_code": 1},
+    ):
+        monkeypatch.setenv(census.INSTALLED_SURFACE_ENV, str(_surface(forgery)))
+        assert census.installed_surface_gap(census.installed_surface_verdict()) >= 1, (
+            f"this forged installed-surface verdict did not redden the key: {sorted(forgery)}"
+        )
+    monkeypatch.delenv(census.INSTALLED_SURFACE_ENV, raising=False)
+    monkeypatch.setattr(census, "INSTALLED_SURFACE_PATH", tmp_path / "absent-surface.json")
+    absent_surface = census.installed_surface_verdict()
+    assert not absent_surface["available"], "an absent lane verdict claimed a measurement"
+
 
 def test_the_selected_mutations_resolve_by_kind_and_identifier(capsys) -> None:
     """`--only` and `--kind` are how an operator runs one case, so they must resolve exactly.

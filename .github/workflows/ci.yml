@@ -243,6 +243,46 @@ jobs:
           path: benchmarks/suite/results/
           if-no-files-found: error
 
+  installed-surface:
+    # V12 C1. `installed_user_identity_mismatch` was the last key the ceilings file skipped: the
+    # probe needs a wheel, a second environment outside the checkout and a study run, so it had
+    # never executed on a runner. This job builds the wheel from the pushed tree, installs only that
+    # wheel into an environment under $RUNNER_TEMP, and writes the probe's five readings for the
+    # ceiling gate -- so a wheel whose import resolves into the working tree can no longer ship green.
+    name: Installed wheel surface in a clean environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install dev environment
+        run: uv sync --frozen
+      - name: Build the wheel from this tree
+        run: uv build --wheel
+      - name: Create a clean environment outside the checkout
+        run: uv venv --python 3.12 "$RUNNER_TEMP/installed-venv"
+      - name: Install only that wheel
+        run: uv pip install --python "$RUNNER_TEMP/installed-venv/bin/python" dist/*.whl
+      - name: Prove the installed surface
+        run: |
+          uv run --frozen python -m tools.verify_installed_surface \
+            --python "$RUNNER_TEMP/installed-venv/bin/python" \
+            --work "$RUNNER_TEMP/installed-probe" \
+            --json-out "$RUNNER_TEMP/installed_surface.json"
+      - name: Adjudicate the installed-surface key
+        env:
+          QUANTRISK_INSTALLED_SURFACE: ${{ runner.temp }}/installed_surface.json
+        run: uv run --frozen python -m tools.inventory_orphan_code --check-ceilings
+      - name: Upload the verdict
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: installed-surface
+          path: ${{ runner.temp }}/installed_surface.json
+          if-no-files-found: warn
+
   mutation-census:
     # V11 B1. Until this job existed the sweep ran only on a laptop, because it rewrote tracked files
     # in the tree being evaluated and wrote gitignored scratch a runner never has -- so a key

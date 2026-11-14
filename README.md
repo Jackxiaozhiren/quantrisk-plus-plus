@@ -303,11 +303,13 @@ uv run cmake --build --preset dev   # build core + tests
 uv run ctest --preset dev           # 204 C++ tests, 548,368 assertions
 ```
 
-Five CI jobs run on every push: lint and format, the Ubuntu full C++/Python test build,
+Six CI jobs run on every push: lint and format, the Ubuntu full C++/Python test build,
 native macOS C++/Python parity with a local SHA-256-verified wheel, the benchmark suite
 against live oracles with --require-all so a missing oracle fails the job rather than
-quietly skipping six members, and the mutation census, which runs every planted defect in a
-detached worktree so a guard that stops objecting is red on the runner. Performance benchmarks stay on the original Ubuntu runner,
+quietly skipping six members, the mutation census, which runs every planted defect in a
+detached worktree so a guard that stops objecting is red on the runner, and the installed
+surface, which proves a wheel built from the pushed tree inside an environment that never
+saw the checkout. Performance benchmarks stay on the original Ubuntu runner,
 rather than treating heterogeneous systems as equivalent; see docs/reproducibility.md.
 
 ---

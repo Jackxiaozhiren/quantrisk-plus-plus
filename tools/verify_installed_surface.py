@@ -227,6 +227,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument(
         "--self-test", action="store_true", help="prove the identity check can fail"
     )
+    parser.add_argument(
+        "--json-out",
+        type=Path,
+        help="write the readings as json, for the ceiling gate that adjudicates this lane",
+    )
     arguments = parser.parse_args(argv)
     if arguments.self_test:
         return self_test(Path(sys.executable))
@@ -246,6 +251,23 @@ def main(argv: list[str]) -> int:
         "refusal": assert_refusal_names_what_is_missing(cli, work, arguments.refusal),
     }
     print(json.dumps(readings, indent=2, sort_keys=True))
+    if arguments.json_out is not None:
+        revision = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True, check=False
+        ).stdout.strip()
+        verdict = {
+            "schema": "quantrisk-installed-surface/1",
+            "revision": revision,
+            "vantage": "clean environment outside the checkout, wheel installed from this tree",
+            "checkout": str(REPO_ROOT.resolve()),
+            "venv_root": str(venv_root),
+            "exit_code": 0,
+            **readings,
+        }
+        arguments.json_out.parent.mkdir(parents=True, exist_ok=True)
+        arguments.json_out.write_text(
+            json.dumps(verdict, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
     print(
         "installed surface: identity holds, the list is the registry, one study ran, and the "
         "refusal named what it needed"

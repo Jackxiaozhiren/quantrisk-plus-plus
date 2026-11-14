@@ -32,6 +32,9 @@ STATIC_CHECK_KEY = "tracked_python_files_in_no_static_check_bucket"
 FORMATTER_KEY = "tracked_files_outside_the_formatter_corpus"
 SWEEP_VERDICT_ENV = "QUANTRISK_SWEEP_VERDICT"
 SWEEP_VERDICT_PATH = REPO_ROOT / "build" / "sweep_verdict.json"
+INSTALLED_SURFACE_ENV = "QUANTRISK_INSTALLED_SURFACE"
+INSTALLED_SURFACE_PATH = REPO_ROOT / "build" / "installed_surface.json"
+INSTALLED_SURFACE_READINGS = ("identity", "list", "validate", "study", "refusal")
 MANIFEST_PATH = REPO_ROOT / "evidence" / "manifest.json"
 PREFIXES = ("uv run --frozen python ", "uv run python ", "python ")
 LANE_CONTRACT_PATH = REPO_ROOT / ".github" / "lane_contract.md"
@@ -955,6 +958,77 @@ def sweep_gap(verdict: dict[str, Any], declared_plants: int) -> int:
     )
 
 
+def installed_surface_verdict() -> dict[str, Any]:
+    """The wheel-surface proof a lane wrote outside the checkout, read as this key's measurement.
+
+    `REFACTOR_PROMPT.md` §11 item 1 asks four questions only an installed surface answers, and
+    `V3_PROMPT.md`'s L8 makes the first of them a ceiling. The probe has always been able to answer
+    them; what it lacked was an environment on the runner, which the installed-surface lane now
+    builds under `$RUNNER_TEMP`. A vantage that did not run the lane leaves the verdict absent and
+    prints the precondition's absence rather than a zero.
+    """
+    override = os.environ.get(INSTALLED_SURFACE_ENV)
+    path = Path(override) if override else INSTALLED_SURFACE_PATH
+    absent = {
+        "available": False,
+        "unavailable_because": (
+            f"{path} is absent: the installed-surface lane writes it, and this vantage did not run "
+            "that lane"
+        ),
+        "path": str(path),
+        "revision": "",
+        "vantage": "",
+        "checkout": "",
+        "venv_root": "",
+        "exit_code": None,
+        "missing": list(INSTALLED_SURFACE_READINGS),
+        "identity": {},
+        "malformed": None,
+    }
+    if not path.is_file():
+        return absent
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        return {**absent, "available": True, "malformed": f"{path} does not parse: {error}"}
+    if not isinstance(payload, dict):
+        return {**absent, "available": True, "malformed": f"{path} holds no json object"}
+    missing = [
+        name for name in INSTALLED_SURFACE_READINGS if not isinstance(payload.get(name), dict)
+    ]
+    identity = payload.get("identity")
+    return {
+        "available": True,
+        "unavailable_because": "",
+        "path": str(path),
+        "revision": str(payload.get("revision", "")),
+        "vantage": str(payload.get("vantage", "")),
+        "checkout": str(payload.get("checkout", "")),
+        "venv_root": str(payload.get("venv_root", "")),
+        "exit_code": payload.get("exit_code"),
+        "missing": missing,
+        "identity": identity if isinstance(identity, dict) else {},
+        "malformed": None,
+    }
+
+
+def installed_surface_gap(verdict: dict[str, Any]) -> int:
+    """How far the installed-surface proof is from its ceiling: missing readings, a leak, a failure.
+
+    Three ways to fail, each named: one of the five readings is absent from the verdict, the
+    imported module or `sys.prefix` resolves inside the checkout (the editable-install shape L8
+    exists to catch), or the probe did not exit zero. A verdict that does not parse counts as one.
+    """
+    if verdict.get("malformed"):
+        return 1
+    missing = verdict.get("missing") or []
+    identity = verdict.get("identity") or {}
+    checkout = str(REPO_ROOT.resolve())
+    leaked = any(checkout in str(identity.get(key, "")) for key in ("module", "prefix"))
+    exit_code = verdict.get("exit_code")
+    return len(missing) + int(leaked) + (0 if exit_code == 0 else 1)
+
+
 def excluded_top_levels(corpus: list[str]) -> list[str]:
     named = {path.split("/")[0] for path in corpus}
     dirs = sorted(
@@ -1535,6 +1609,14 @@ def build_snapshot() -> dict[str, Any]:
                 "value": sweep_census_verdict(),
             },
             {
+                "name": "installed_surface_verdict",
+                "command": (
+                    "read the json the installed-surface lane writes from a clean environment "
+                    "outside the checkout; absent on a vantage that did not run the lane"
+                ),
+                "value": installed_surface_verdict(),
+            },
+            {
                 "name": "lanes_documented_vs_executed",
                 "command": (
                     "the lane contract's json block against the two lane-bearing documents and "
@@ -1600,6 +1682,7 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
     docs = by_name["docs_rederivation"]
     plants = by_name["plant_liveness"]
     sweep = by_name["sweep_census_verdict"]
+    surface = by_name["installed_surface_verdict"]
     return {
         "bootstrap_sites_outside_package": len(by_name["bootstrap_census"]),
         "by_path_load_sites": len(by_name["by_path_load_sites"]),
@@ -1620,7 +1703,9 @@ def metrics(snapshot: dict[str, Any]) -> dict[str, int | None]:
         "plants_not_rejected_by_their_guard": None
         if not sweep["available"]
         else sweep_gap(sweep, plants["declared_plants"]),
-        "installed_user_identity_mismatch": None,
+        "installed_user_identity_mismatch": None
+        if not surface["available"]
+        else installed_surface_gap(surface),
         "external_dependencies_added": len(dependencies["added"]) + len(dependencies["removed"]),
         "lanes_documented_vs_executed_gap": None if not lanes["available"] else lanes["gap"],
         "with_extras_census_gap": None if not census["available"] else census["gap"],
