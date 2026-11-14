@@ -140,3 +140,72 @@ Filled after the second push: `HEAD` equal to `origin/main` and to the platform'
 both runs attributed, and no stray instrument tracked or left on disk.
 
 ---
+
+## Terminal entry — 2026-11-14, the first push is green and the series closes
+
+### 1. The first push
+
+`ebd7d84c459e4afc38c75fa1a44c4ec7ebb9374c` is `HEAD`, `origin/main` and the platform's `main`;
+`/compare/5dfd6bb...ebd7d84` reads `ahead_by 1 / behind_by 0`. The ref moved non-forced
+(`ref moved to ebd7d84c… (non-forced fast-forward)`), and the commit's blob, tree and commit SHAs
+matched locally and remotely. One commit carries Phase 0, the implementation and the Phase 5 report;
+`git diff --name-only 5dfd6bb..ebd7d84` prints exactly the seven paths Phase 0 §4 names.
+
+### 2. Its CI, read from the API
+
+Run **`43558380084`**, attempt **1**, head `ebd7d84`, event `push`, `status: completed`,
+`conclusion: success`, created `2026-11-14T04:47:33Z`, updated `05:06:45Z`. Six jobs, no failed
+step; the failed-step query returns an empty list, and the lint job prints no `VIOLATION` or `FAIL`
+line.
+
+| job | job id | runner | environment | steps |
+|---|---|---|---|---|
+| Format and static checks | 132336304218 | 1000011455 | ubuntu-latest | 15 |
+| Configure, build, C++ tests, Python tests | 132336304213 | 1000011456 | ubuntu-latest | 15 |
+| macOS native C++ and Python parity | 132336304208 | 1000011453 | macos-15 | 14 |
+| Benchmark suite against live oracles | 132336304034 | 1000011454 | ubuntu-latest | 15 |
+| Mutation census in a detached worktree | 132336304236 | 1000011457 | ubuntu-latest | 14 |
+| Installed wheel surface in a clean environment | 132336304317 | 1000011458 | ubuntu-latest | 13 |
+
+`build-and-test` grew from 14 to 15 steps: step 12 is `Final-tip census attestation`, conclusion
+`success`. A watcher was interrupted by SIGTERM before the run completed; per `V3_PROMPT.md` §14 the
+absence of its report is `unknown`, so the platform state was re-read from the API. Every verdict in
+this entry is that API reading, not the watcher's exit code. No run is cancelled and no job has zero
+steps.
+
+### 3. What the new step printed
+
+```
+PASS: V9_LEDGER.md attests 5ec3fabe4fa8c83584a50b3ab66b357ae13094e9 as a strict ancestor of ebd7d84c459e, 195 caught of 195 declared
+```
+
+That is `V13_PROMPT.md` §4 item 2, on `ubuntu-latest` in the job with `fetch-depth: 0`. The same job
+printed `490 passed, 5 skipped in 237.92s`; lint printed `All checks passed!`, `251 files already
+formatted`, `Success: no issues found in 75 source files` and 15 keys with 13 `ok` / 2 `SKIP` /
+0 `FAIL`; the census printed `195 declared = 194 measurable here + 1 environment-blind` and
+`ok plants_not_rejected_by_their_guard: 0 against a ceiling of 0 due P3.2`; the installed-surface
+job printed `ok installed_user_identity_mismatch: 0 against a ceiling of 0 due P4.1`.
+
+**One figure was corrected before this push.** Phase 0 §3, §2 N1 and §7 now read 13 `ok` / 2 `SKIP`
+instead of the 14 / 1 copied from V12's ledger. The evidence is V12's own lint log (run
+`43549438249`, job `132308224171`), which prints two `SKIP` lines because that vantage ran neither
+lane. `V13_PROMPT.md` §0 premise 2 was reworded in place to name the vantage rather than the count;
+the edit kept the prompt at 83 total / 57 prose by the heading-span rule. Only V13's own two files
+were corrected; no earlier ledger was amended.
+
+### 4. The second push
+
+Carries this terminal entry only. Its CI is read after the push and attributed in the session
+handoff; no outcome is stated here for a run that has not happened. Work resumed on the maintainer's
+`继续` (2026-11-14) with the implementation present but uncommitted; no new scope was introduced,
+and the unit is still the D1 named by `好的，继续`.
+
+### 5. What is not claimed
+
+No tag moved (`v1.9.0` object `d9deb7f…` → `b2dda33…`), no release asset was replaced
+(`424060629` still holds four), the manifest still holds 95 entries and verifies intact,
+`V9_LEDGER.md`'s attestation is read but never edited, and no plant (195), ceiling key (15), job (6)
+or collected test (560) changed. `lint` stays shallow; the local `pytest -q` keeps its one
+sandbox-only bytecode-plant failure, named rather than silenced; C stays refused under K5.
+
+---
