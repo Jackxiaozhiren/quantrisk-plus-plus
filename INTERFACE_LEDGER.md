@@ -80,6 +80,63 @@ Per §3, until condition 4 holds this lane runs facts and feasibility only and b
 X1 therefore exits with a named VOID and two named attribution gaps. It does not exit with
 "prerequisites satisfied".
 
+### 1.1 Platform verification of the pushed tip
+
+Both commits were appended through the Git Data API with a non-forced fast-forward
+(`force: false`). Every blob, tree and commit SHA was verified against its local value before the
+ref moved, and the ref moved only after both commits matched exactly. This is the first of the
+two ref updates the approval in section 0.1 allows.
+
+| Field | Value |
+|---|---|
+| Run | `43718835599` |
+| Attempt | 1 |
+| Head revision | `21d88a2268bd611d0bd75926b9657dacf0233400` |
+| Event | `push` |
+| Conclusion | `success`; six of six jobs `success`, no failed step |
+| Window | 2026-11-15T13:24:24Z to 2026-11-15T13:42:57Z |
+
+| Job | Runner label | Duration | Conclusion |
+|---|---|---|---|
+| macOS native C++ and Python parity | `macos-15` | 3m50s | success |
+| Mutation census in a detached worktree | `ubuntu-latest` | 18m29s | success |
+| Installed wheel surface in a clean environment | `ubuntu-latest` | 1m38s | success |
+| Benchmark suite against live oracles | `ubuntu-latest` | 8m39s | success |
+| Configure, build, C++ tests, Python tests | `ubuntu-latest` | 7m53s | success |
+| Format and static checks | `ubuntu-latest` | 1m23s | success |
+
+Readings, each attributed to the job that printed it. No reading is carried over from an earlier
+run.
+
+| Reading | Value | Job | Environment |
+|---|---|---|---|
+| Python test suite | `490 passed, 5 skipped in 238.89s` | build-and-test | `ubuntu-latest`, fully offline |
+| Final-tip attestation | `PASS: V9_LEDGER.md attests 5ec3fabe… as a strict ancestor of 21d88a2268bd, 195 caught of 195 declared` | build-and-test | `ubuntu-latest`, `fetch-depth: 0` |
+| Benchmark suite | `19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 326.7s total` | benchmark-suite | `ubuntu-latest`, live oracles |
+| Installed surface | identity holds; `revision 21d88a2…`, `version 1.9.0`, venv outside the checkout | installed-surface | `ubuntu-latest`, clean venv |
+| Mutation census | `195 declared = 194 measurable here + 1 environment-blind` | mutation-census | `ubuntu-latest`, detached worktree |
+| Formatter corpus | `252 files already formatted` | lint | `ubuntu-latest` |
+| Lane contract | `lanes_documented_vs_executed_gap: 0` | mutation-census | `ubuntu-latest` |
+| Docs re-derivation | `gap: 0`; derived 95 manifest artifacts, 195 plants, 19 registry tasks, 19 suite members, over 5 documents | lint and mutation-census | `ubuntu-latest` |
+| Artifact revision | `gap: 0`, `pin_holds: true` against the pinned `17df062040b8` | lint and mutation-census | `ubuntu-latest` |
+
+Ceiling adjudication by vantage. This is the exact shape that made `13 ok / 2 SKIP` and
+`14 ok / 1 SKIP` look like a contradiction in V12: each of the three jobs prints all fifteen keys
+and marks SKIP the ones measured on another runner.
+
+| Vantage | Keys printed | `ok` | `SKIP` |
+|---|---|---|---|
+| Format and static checks | 15 | 13 | `plants_not_rejected_by_their_guard`, `installed_user_identity_mismatch` |
+| Mutation census in a detached worktree | 15 | 14 | `installed_user_identity_mismatch` |
+| Installed wheel surface in a clean environment | 15 | 14 | `plants_not_rejected_by_their_guard` |
+
+Two properties of this run are pre-existing vantage facts rather than effects of this approval,
+and are checked against run `43560290106` so they cannot be mistaken for regressions:
+`artifact_revision` reports `working_tree_dirty: true` with `uncommitted_paths: 21` in both the
+shallow and the full-history vantage, identical to the V13 run; and the shallow lint vantage
+reports `object_present: false` with a skipped object check, which is why it declares itself
+shallow instead of claiming an ancestry it cannot see.
+
 ## 2. Liveness table (I-L1 … I-L8)
 
 Filled from readings, not by editing prose. A law without an executable target is VOID and may
@@ -157,6 +214,7 @@ static publish, and read-only machine surface. No date is attached.
 | # | DoD item | Status |
 |---|---|---|
 | 1 | Phase 0 readings recorded; §3 satisfied or lane stopped at Phase 1 with a written reason | Done-lite: readings recorded, §3 condition 4 named VOID, no surface built |
+| 1a | Platform verification of the X1 commits | Done: run `43718835599`, attempt 1, six of six jobs success; readings in section 1.1 |
 | 2 | I1 CLI provenance surface | 未完成 |
 | 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | 未完成 |
 | 4 | I3 value and provenance returned together, refusals name the gap | 未完成 |
@@ -171,7 +229,7 @@ static publish, and read-only machine surface. No date is attached.
 | Any edit to `REFACTOR_PROMPT.md` or `REFACTOR_LEDGER.md` | Those belong to the refactor rail set; the two attribution gaps are registered, not repaired |
 | Any change to CLI output, public API names, or frozen contracts | X1 scope forbids it |
 | Any H1–H4 measurement | No measurement phase in X1; availability is not a reading |
-| Any push, tag, release, or deploy | Case-by-case external approval required; no approval original obtained |
+| Any tag, release, or deploy | Case-by-case external approval required; none obtained. The one push performed is recorded in section 0.1 and is bounded to two non-forced ref updates |
 | Any rewrite of the V9 historical attestation | Attestation is judged as history; no present-day count comparison is added |
 
 ## 9. Review checklist for the next session
