@@ -2843,4 +2843,23 @@ MUTATIONS: tuple[Mutation, ...] = (
             "V5 F4 residue this plant re-opens"
         ),
     ),
+    Mutation(
+        identifier="manifest-records-a-command-that-is-not-a-module-invocation",
+        kind="prose",
+        path="evidence/manifest.json",
+        anchor="uv run python -m quantrisk.benchmarks.quantlib.pricing_validation",
+        replacement="uv run python python/quantrisk/benchmarks/quantlib/pricing_validation.py",
+        guard=(
+            "tests/python/test_artifact_metadata.py::"
+            "test_every_manifest_command_resolves_as_a_module_without_being_run"
+        ),
+        claim=(
+            "the recorded command is the half of an artifact's provenance a reader is told to "
+            "paste, and the guard resolves its module with `find_spec` rather than running it, "
+            "so a command written in the legacy file form has to redden the reading instead of "
+            "passing because the path it names happens to exist; §3 condition 4 of "
+            "`INTERFACE_ROADMAP.md` asks for a plant that names the command-form guard, and this "
+            "is that sample, where X1 could only record the absence of one"
+        ),
+    ),
 )
