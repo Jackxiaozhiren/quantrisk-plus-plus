@@ -24,6 +24,32 @@ Deliberately outside X1: building any surface; changing CLI output; adding a pla
 key; moving a tag; replacing a published asset; any push, deploy, or publication. Each requires
 its own case-by-case approval recorded verbatim.
 
+### 0.1 External-action approval
+
+Three mutually exclusive options were put to the maintainer for the push step. Option 1 was
+"回复批准原话，由我完成闭环（最推荐）"; option 2 was "你自己本地执行，我只提供步骤"; option 3 was
+"暂不推送，维持现状".
+
+Approval original, verbatim: `批准，回复批准原话，由我完成闭环（最推荐）`
+
+It answers option 1, whose text is the following sentence, quoted verbatim:
+
+> 批准作用域单元 X1 的外部动作：以非强制快进方式推送本地提交 `254a9f6`，并推送其后为回填该次
+> CI 读数而新增的一个账本提交，合计至多两次 ref 更新；读取该次 CI 运行并把 run、attempt、
+> runner、environment 记入 `INTERFACE_LEDGER.md`；不移动 tag、不替换已发布资产、不做发布或部署。
+
+Bounded effect, and nothing beyond it: at most two non-forced updates of `refs/heads/main`;
+reading the jobs and logs of the CI run those commits produce; writing this ledger. Excluded:
+any tag move, any replacement of a published asset, any release, deploy, or publication, any new
+secret or account, any change to the controlled plant inventory or to a ceiling key, any new
+scope unit. X1b remains unapproved and unstarted under this approval.
+
+Recursion limit, recorded so that it is a named boundary rather than a silent gap: the backfill
+commit produced by this approval is itself verified by a CI run of its own, and that run is not
+backfilled, because doing so would require a third ref update which the approval does not cover.
+The readings recorded in section 1 belong to the run over `254a9f6` and are attributed to it; the
+later run is reported as observed-only, with no claim of being verified in this ledger.
+
 ## 1. Phase 0 — prerequisite gate (§3 of INTERFACE_ROADMAP.md)
 
 Revision for every local reading: `e60bba5f303cb74803f671e0a9e00e9f05c3c509`.
