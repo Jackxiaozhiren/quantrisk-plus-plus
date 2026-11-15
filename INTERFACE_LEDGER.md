@@ -90,6 +90,11 @@ control, but §3 asks for a plant proving it can fail, and no named sample is en
 controlled inventory. `REFACTOR_LEDGER.md` Phase 5's sentence about "the plant that corrupts one
 is rejected" is a historical deflection record, not a currently enumerable named sample.
 
+This verdict is the reading at `e60bba5` and stays as one. Section 10 records the scope unit that
+added the missing sample and the readings that retire the VOID at `465735d`; the table above is not
+rewritten, because a reading that is silently edited to match a later state is the failure this
+ledger exists to prevent.
+
 Two document-attribution gaps are registered, not repaired:
 
 | Gap | Location | Nature |
@@ -236,6 +241,7 @@ static publish, and read-only machine surface. No date is attached.
 |---|---|---|
 | 1 | Phase 0 readings recorded; §3 satisfied or lane stopped at Phase 1 with a written reason | Done-lite: readings recorded, §3 condition 4 named VOID, no surface built |
 | 1a | Platform verification of the X1 commits | Done: run `43718835599`, attempt 1, six of six jobs success; readings in section 1.1 |
+| 1b | X1b: one named plant proving the command-form guard fails, restore proving green, mechanism named in a phase report | Done: plant `manifest-records-a-command-that-is-not-a-module-invocation`; red `1 failed`, green `1 passed`, census `196/196` at `465735d`; report in section 10 |
 | 2 | I1 CLI provenance surface | 未完成 |
 | 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | 未完成 |
 | 4 | I3 value and provenance returned together, refusals name the gap | 未完成 |
@@ -262,3 +268,92 @@ static publish, and read-only machine surface. No date is attached.
 4. Confirm section 2's VOID entries before citing any law.
 5. Attribute every platform reading to run, attempt, runner, and environment.
 6. Do not treat a green gate as proof; name the planted sample that made it turn red.
+
+## 10. X1b phase report — the plant that names the command-form guard
+
+Scope, from section 0.2: exactly one named controlled plant that corrupts one manifest command
+field, prove the command-form guard turns red, restore, prove green, and name the mechanism here.
+Four commits, and nothing outside that shape:
+
+| Commit | Change |
+|---|---|
+| `1ec1adb` | this ledger: the scope unit and the approval, verbatim |
+| `c983da1` | `python/quantrisk/verification/plants.py`: the plant itself |
+| `0a426c0` | `docs/interview_defense.md`: the sweep annotation it prints, 195 → 196 |
+| `465735d` | `plants.py`: the anchor of `docs-command-comment-counts-superseded-plants`, which is the string `# 196/196 planted defects rejected` |
+
+The last two are not scope creep; they are the count's blast radius, and both were found by a gate
+turning red rather than by searching for the number. Adding a plant moves a count that one document
+prints and one existing plant anchors on: the docs re-derivation reading went to `gap: 1` until the
+document moved, and the anchored plant reported `anchor-not-unique` until its anchor moved with the
+count. A green full census over a count that no longer matches its readers is exactly the reading
+section 9's sixth line forbids, so both gates were obeyed instead of silenced.
+
+### 10.1 The mechanism, named
+
+| Field | Value |
+|---|---|
+| Plant | `manifest-records-a-command-that-is-not-a-module-invocation`, `kind` `prose` |
+| Target | `evidence/manifest.json`, one `generated_by_command` |
+| Anchor | `uv run python -m quantrisk.benchmarks.quantlib.pricing_validation` |
+| Replacement | `uv run python python/quantrisk/benchmarks/quantlib/pricing_validation.py` |
+| Guard | `tests/python/test_artifact_metadata.py::test_every_manifest_command_resolves_as_a_module_without_being_run` |
+| Mechanism | the guard tests the `uv run python -m ` prefix, then resolves the module name with `importlib.util.find_spec` without executing it; the legacy file spelling fails the prefix test, so the entry is reported as "not a module invocation" |
+| Ceiling keys | `commands_not_module_path` and `commands_unrunnable_from_the_root`, both `max 0` with `can_fail_because` |
+
+The spelling is the residue condition 4 names. A module name that does not import would also redden,
+since the guard resolves rather than runs, but the file form is the shape a reader is most likely to
+paste back out of the manifest, and it is the one the two ceiling keys count.
+
+### 10.2 Readings
+
+Every reading below is development-side, revision `465735d63a340c42705257d8f5faf409dd3dd5ef`, on
+the maintainer workstation, 2026-11-15. A detached worktree at that revision
+(`/tmp/qr-x1b-census`) is the vantage for the sweep; the checkout under evaluation was watched and
+never written. No CI run exists for this revision: a push is excluded by the approval in
+section 0.2, so nothing here is a platform reading.
+
+| Reading | Value | Producer |
+|---|---|---|
+| Single-plant red | `FAILED …::test_every_manifest_command_resolves_as_a_module_without_being_run`, `1 failed in 0.49s` | `runner --only manifest-records-a-command-that-is-not-a-module-invocation --verbose` |
+| Single-plant green after restore | `1 passed in 0.58s`; verdict `caught`; `1/1 planted defects were rejected by their guard` | the same run |
+| Full census | `196/196 planted defects were rejected by their guard` | `runner --all --verdict-out /tmp/sweep_verdict_x1b2.json` |
+| Verdict record | `declared 196`, `ran 196`, `caught 196`, `non_caught []`, `unmeasurable []` | `quantrisk-sweep-verdict/1` json |
+| The watched checkout | `checkout_status_before: ''`, `checkout_status_after: ''` | the same verdict |
+| Plant inventory | `runner --list` prints 196 lines; `plant_liveness` reports `declared_plants: 196` | local |
+| Docs re-derivation | `gap: 0`; derived `plants: 196` over 5 documents; `mismatches: []` | `tools.inventory_orphan_code --reading docs_rederivation` |
+| Ceiling census, census vantage | 15 keys, 14 `ok`, 1 `SKIP` (`installed_user_identity_mismatch`); `plants_not_rejected_by_their_guard: 0` | `--check-ceilings`, after the verdict is placed where that key reads it |
+| Ceiling census, lint vantage | 15 keys, 13 `ok`, 2 `SKIP` (both lane-written verdicts absent) | `--check-ceilings` before the verdict was placed |
+| Python tests | `1 failed, 559 passed in 153.91s` | `pytest -q --basetemp=<private>` |
+
+Two notes that belong beside those numbers rather than in a footnote. The `14 ok / 1 SKIP` reading
+is not a new claim about the repository: it reproduces the mutation-census vantage in section 1.1's
+table, and the same tree reports `13 ok / 2 SKIP` until the verdict is copied to
+`build/sweep_verdict.json`, because that key declares its precondition absent where the lane did
+not run. Placing the verdict is a vantage restoration, not a second measurement, and the key should
+not be read as one: `sweep_gap` checks escapes, the count's reconciliation with `runner --list`, the
+ran-equals-declared identity and the two checkout readings, and it does not compare the verdict's
+revision with the tip, so what it certifies here is the record it was handed, whose own `revision`
+field names `465735d`. The one failing test is
+`test_a_restored_plant_cannot_be_read_back_from_a_stale_bytecode_cache`, which needs a `__pycache__`
+the sandbox shell does not write (`PYTHONDONTWRITEBYTECODE=1`); it is the same single local failure
+V13 recorded, CI's own reading for the previous tip is `490 passed, 5 skipped`, and it is not a
+regression from this unit.
+
+### 10.3 What this closes, and what it leaves open
+
+Condition 4 of §3 has two halves. The guard half was already ACTIVE when X1 read it. The plant half
+had no enumerable sample, which is why section 1 could only record a **named VOID**. From this
+revision that half is an enumerable sample with a red reading and a green reading on the same
+command field, so condition 4 is satisfied at `465735d` and no longer names a VOID. Section 1's
+table is the `e60bba5` reading and is not rewritten; this section is where the change of state is
+recorded.
+
+Deliberately left open:
+
+| Item | Why it stays open |
+|---|---|
+| The two attribution gaps G-A and G-B | They live in `REFACTOR_PROMPT.md` and `REFACTOR_LEDGER.md`; X1b's scope excludes both files, and a repair belongs to the refactor rail set, not to this lane |
+| A platform reading for `465735d` | The approval excludes a push. The census job runs the same sweep, so the runner-side reading arrives with the next push that this lane is authorised to make, without new work |
+| §3's other three conditions | Read at `e60bba5` and untouched by this unit; nothing here re-derives them |
+| X1's surface decisions | Condition 4 is now satisfied, but building the generator, the drift gate or the publish step is a separate scope unit with its own approval |
