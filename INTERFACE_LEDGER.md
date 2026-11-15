@@ -47,8 +47,29 @@ scope unit. X1b remains unapproved and unstarted under this approval.
 Recursion limit, recorded so that it is a named boundary rather than a silent gap: the backfill
 commit produced by this approval is itself verified by a CI run of its own, and that run is not
 backfilled, because doing so would require a third ref update which the approval does not cover.
-The readings recorded in section 1 belong to the run over `254a9f6` and are attributed to it; the
+The readings recorded in section 1 belong to the run over `21d88a2` and are attributed to it; the
 later run is reported as observed-only, with no claim of being verified in this ledger.
+
+### 0.2 X1b approval
+
+Scope unit X1b, as put to the maintainer verbatim:
+
+> 批准作用域单元 X1b：只新增一个具名受控植物，篡改 manifest 中恰好一条命令的字段形式，证明命令
+> 形式守卫转红，恢复后证明转绿，并在阶段报告中具名该机制；不建站点、不改 CLI 输出、不做任何
+> 发布。
+
+Approval original, verbatim: `我都听你的，请按照你的思路建议进行`
+
+The maintainer delegates the choice and answers the paragraph above, which is the only proposal
+that message contained; under the same precedent as section 0, the approval is recorded together
+with the sentence it answers. If the maintainer intends a different scope, this entry is void and
+the unit stops before any further commit.
+
+Bounded effect, and nothing beyond it: exactly one new controlled plant in
+`python/quantrisk/verification/plants.py`; the count claims that the plant list moves are
+re-derived in the same commit that moves them; a phase report in this ledger. Excluded: any second
+plant, any ceiling key, any change to CLI output or to a frozen contract, any surface, any tag,
+release, deploy or publication. A push is a separate external action and is **not** covered here.
 
 ## 1. Phase 0 — prerequisite gate (§3 of INTERFACE_ROADMAP.md)
 
