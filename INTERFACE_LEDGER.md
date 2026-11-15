@@ -357,3 +357,29 @@ Deliberately left open:
 | A platform reading for `465735d` | The approval excludes a push. The census job runs the same sweep, so the runner-side reading arrives with the next push that this lane is authorised to make, without new work |
 | §3's other three conditions | Read at `e60bba5` and untouched by this unit; nothing here re-derives them |
 | X1's surface decisions | Condition 4 is now satisfied, but building the generator, the drift gate or the publish step is a separate scope unit with its own approval |
+
+## 11. X1b external action — the push that buys a platform reading
+
+Section 0.2 excludes a push, so the five commits X1b produced sat on one workstation and section 10
+could only be a development-side reading. The question put to the maintainer, verbatim:
+
+> 本地 main 现领先平台 5 个提交（X1b 的植物 + 账本 §10 阶段报告），全部未推送。平台读数要不要取？
+> 1. 推送并回填（最推荐）：用 `build/api_push.py` 非强制快进推送 5 个提交，读 CI 六作业（census
+> 作业会在 runner 上跑同一套 196 植物），再把平台读数回填成第二个提交。代价：两次 ref 更新、
+> 约 20–30 分钟 CI。
+> 2. 只推送不回填：一次 ref 更新，run 会跑完但账本不引用它的读数。
+> 3. 暂不推送：维持现状，5 个提交留在本地。
+
+Approval original, verbatim: `推送并回填（最推荐）`
+
+Bounded effect, and nothing beyond it: at most two non-forced updates of `refs/heads/main`;
+reading the jobs and logs of the runs those commits produce; writing this ledger. Excluded: any tag
+move, any release, deploy or publication, any new secret or account, any change to the plant
+inventory or to a ceiling key, any new scope unit.
+
+Recursion limit, recorded for the same reason as section 0.1's: the backfill commit is itself
+verified by a run of its own, and that run is not backfilled, because a third ref update is outside
+this approval. Section 11.1's readings belong to the run over the six-commit series; the later run
+is reported as observed-only.
+
+
