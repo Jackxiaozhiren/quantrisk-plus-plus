@@ -242,7 +242,7 @@ static publish, and read-only machine surface. No date is attached.
 | 1 | Phase 0 readings recorded; §3 satisfied or lane stopped at Phase 1 with a written reason | Done-lite: readings recorded, §3 condition 4 named VOID, no surface built |
 | 1a | Platform verification of the X1 commits | Done: run `43718835599`, attempt 1, six of six jobs success; readings in section 1.1 |
 | 1b | X1b: one named plant proving the command-form guard fails, restore proving green, mechanism named in a phase report | Done: plant `manifest-records-a-command-that-is-not-a-module-invocation`; red `1 failed`, green `1 passed`, census `196/196` at `465735d`; runner-side `ok caught` in run `43732028206`; reports in sections 10 and 11.1 |
-| 1c | X2: generator emits artifact-bound pages with provenance; source scan has a named falsifying plant; no deploy, drift gate or new key | Done at `aafb707`: `197/197` at the final tip, single-plant red/green and all development-side readings in section 13; no platform reading because section 12 excludes a push |
+| 1c | X2: generator emits artifact-bound pages with provenance; source scan has a named falsifying plant; no deploy, drift gate or new key | Done at `aafb707` locally and re-verified at `7971299`; section 13 holds the development-side readings, section 15 the first platform run's failure and its lint fix |
 | 2 | I1 CLI provenance surface | 未完成 |
 | 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | 未完成 |
 | 4 | I3 value and provenance returned together, refusals name the gap | 未完成 |
@@ -594,7 +594,48 @@ Bounded effect, the same as section 11's for X1b: at most two non-forced ref upd
 first update produces; write the readings into the ledger as the backfill commit; perform the
 second ref update to carry that commit. No tag, release, deploy or publication moves. The
 backfill commit's own run is observed-only under the same recursion limit — a third ref update is
-outside this approval — so section 15 will say what that run showed but will not make it this
-ledger's claim about the backfill tip.
+outside this approval — so its outcome belongs in the local work log rather than in this ledger,
+and no reading in section 15 is a claim about the backfill tip.
+
+## 15. X2's first platform run: a real failure, and what it cost
+
+The first ref update carried the eight commits through `7cbcc7b`, every SHA verified, no tag moved.
+Run `43843195255`, attempt 1, 16m09s, concluded **failure**: five of six jobs succeeded and
+"Format and static checks" failed in its `ruff check .` step with 17 findings, all in files X2
+added or edited. Fourteen were `E501` on prose lines, and the other three were `UP035`
+(`Sequence` from `collections.abc`), `I001` (import order) and `SIM300` (a Yoda assertion).
+The step ordering matters: the job stopped at `ruff`, so that run has no lint-vantage reading for
+formatter, evidence or ceilings, and none is inferred here. The local preparation had run
+`ruff format --check .` but not `ruff check .`; those are two separate CI steps, and only the first
+had been executed before the push.
+
+The five successful jobs are still readings at that failed tip, attributed to the job that printed
+each one:
+
+| Job | Reading |
+|---|---|
+| Configure, build, C++ tests, Python tests | `498 passed, 5 skipped in 168.95s`; the historical attestation still prints `195 caught of 195 declared` at a 197-plant tip, which is V13's ruling holding |
+| Mutation census | `197 declared = 196 measurable here + 1 environment-blind`, `196/196` `caught`; the blind sample is `report-source-edited-without-a-rebuild-seen-from-the-render`, this runner's pdfTeX being 1.40.28 against the sidecar's 1.40.29 |
+| Benchmark suite | `19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 410.2s total` |
+| Installed wheel surface | revision `7cbcc7b`, version `1.9.0`, clean venv outside the checkout |
+| Ceilings adjudication inside the census/installed jobs | `docs_rederivation` `gap: 0` with 197 derived plants; `with_extras_census` `19/19`; `lanes_documented_vs_executed` `gap: 0` |
+
+The 1.40.28 reading differs from X1b run's 1.40.25 because the runner image changed, not because
+the report drifted; both are environment-blind declarations against the same recorded 1.40.29.
+The job's verdict file declares 196 because that is what ran on that machine, while stdout and
+`docs_rederivation` both derive 197; those are two quantities, not a disagreement.
+
+Commit `7971299` fixes the lint findings as source shape only: prose lines wrapped, `Sequence`
+imported from `collections.abc`, import order and assertion direction corrected, and the plant's
+claim text re-wrapped without moving its anchor, replacement or guard. The generator still contains
+no numeric literal and `LAYOUT_NUMBERS` remains empty. Re-measured locally at `7971299`:
+`ruff check .` all checks passed, `ruff format --check .` 255 files already formatted,
+`docs_rederivation` `gap: 0` at 197 plants, evidence intact, ceilings 14 `ok` / 1 `SKIP` once the
+new verdict is placed at `build/sweep_verdict.json`, full census `declared 197 / ran 197 /
+caught 197` with both failure rows empty and the watched checkout empty before and after, and
+pytest `1 failed, 567 passed` with only the known sandbox bytecode-cache case failing.
+
+The second ref update in this approval carries `7971299` together with this backfill commit. No
+platform success is claimed for `7cbcc7b`, and the run over the backfill tip is observed-only.
 
 
