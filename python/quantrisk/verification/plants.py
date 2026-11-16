@@ -2873,12 +2873,12 @@ MUTATIONS: tuple[Mutation, ...] = (
             "test_the_generator_source_contains_no_numeric_literal"
         ),
         claim=(
-            "the generator's whole warrant is that every figure on a page was read from an artifact "
-            "during the build, and the cheapest way to lose it is to type a comfortable number into "
-            "the source, where it agrees with the evidence until the evidence moves; the scan has to "
-            "redden on any literal the module did not declare, or `I-L2` is a sentence about a "
-            "surface nobody has checked — and this is the sample that makes the boundary mechanical "
-            "rather than aspirational"
+            "the generator's whole warrant is that every figure on a page was read from an "
+            "artifact during the build, and the cheapest way to lose it is to type a comfortable "
+            "number into the source, where it agrees with the evidence until the evidence moves; "
+            "the scan has to redden on any literal the module did not declare, or `I-L2` is a "
+            "sentence about a surface nobody has checked — and this is the sample that makes the "
+            "boundary mechanical rather than aspirational"
         ),
     ),
 )

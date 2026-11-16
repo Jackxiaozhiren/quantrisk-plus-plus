@@ -1,4 +1,4 @@
-"""A surface generated from the evidence chain, so that no page can disagree with the artifact beside it.
+"""A surface generated from the evidence chain, so no page can disagree with its artifact.
 
 The interface lane's one law about surfaces is "generated, never retyped", and this module is the
 smallest thing that can honour it: it reads committed artifacts, reads the manifest that froze them,
@@ -18,11 +18,11 @@ The build never consults the clock or the network. Every page carries the artifa
 difference between them is a difference in the evidence.
 
 This file contains no numeric literal, and `LAYOUT_NUMBERS` names the allowance that makes that
-statement mechanically checkable. It is empty because an unstyled document needs no width, no padding
-and no precision constant; styling belongs to the unit that adds the drift gate, where a rendered
-surface can be policed. The guard in `tests/python/test_interface_site.py` reads this set, so
-widening it is a visible act rather than an accident, and a page that wants a number has to get it
-from the artifact.
+statement mechanically checkable. It is empty because an unstyled document needs no width,
+no padding and no precision constant; styling belongs to the unit that adds the drift gate,
+where a rendered surface can be policed. The guard in `tests/python/test_interface_site.py`
+reads this set, so widening it is a visible act rather than an accident, and a page that wants
+a number has to get it from the artifact.
 
 The invocation is `python -m quantrisk.interface.site --out <directory>`, deliberately not a CLI
 subcommand: the roadmap's third prerequisite counts exactly four subcommands, and a generator is not
@@ -35,8 +35,9 @@ import argparse
 import html
 import json
 import re
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from ..checkout import checkout_root
 from ..experiments.metadata import sha256_file
@@ -136,7 +137,8 @@ def _headline_table(headline: Any) -> str:
 def _study_page(task: Task, artifact: dict[str, Any], provenance: dict[str, str]) -> str:
     claim = artifact.get("claim")
     claim_html = _escaped(claim) if claim else "this artifact records no claim"
-    body = f"""{DOCUMENT_HEAD.format(title=_escaped(task.task_id))}  <h1>{_escaped(task.task_id)}</h1>
+    title = _escaped(task.task_id)
+    body = f"""{DOCUMENT_HEAD.format(title=title)}  <h1>{title}</h1>
   <p>category: {_escaped(task.category)}</p>
   <h2>Claim</h2>
   <p>{claim_html}</p>
@@ -169,9 +171,9 @@ def _index_page(rows: list[str]) -> str:
     joined = "\n".join(rows)
     return f"""{DOCUMENT_HEAD.format(title="QuantRisk++ evidence")}  <h1>QuantRisk++ evidence</h1>
   <p>Every page below is generated from a committed artifact by
-  <code>python -m quantrisk.interface.site</code>. Each one shows the artifact it was read from, that
-  artifact's digest, and the command the manifest records for it; a task whose artifact is not in this
-  tree is listed as absent rather than described.</p>
+  <code>python -m quantrisk.interface.site</code>. Each one shows the artifact it was read
+  from, that artifact's digest, and the command the manifest records for it; a task whose
+  artifact is not in this tree is listed as absent rather than described.</p>
   <table>
     <tr><th>study</th><th>category</th><th>artifact</th><th>sha256</th></tr>
 {joined}

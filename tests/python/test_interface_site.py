@@ -2,17 +2,18 @@
 
 Eight properties, each one chosen because its opposite is the failure a static site makes easy.
 
-The source scan is the strongest form of "generated, never retyped" available without running the
-build: the generator file may contain no numeric literal at all, which is a stricter claim than the
-law's "no evidence-shaped literal" and therefore needs no evidence set to interpret. It is checked
-with a negative control in the same test, because a scan that cannot fail would pass over an empty
-file.
+The source scan is the strongest form of "generated, never retyped" available without running
+the build: the generator file may contain no numeric literal at all, which is a stricter claim
+than the law's "no evidence-shaped literal" and therefore needs no evidence set to interpret.
+It is checked with a negative control in the same test, because a scan that cannot fail would
+pass over an empty file.
 
-The other four are about the build: a page quotes the manifest's digest and command, two builds of one
-tree are byte-identical, a regenerated artifact changes the page that renders it, and an artifact that
-disagrees with the manifest — missing from it, or changed under it — stops the build instead of
-producing a page that looks checkable and is not. Three more bound the edges: an absent artifact is
-listed rather than described, no build opens a socket, and the source scan has a negative control.
+The other four are about the build: a page quotes the manifest's digest and command, two builds
+of one tree are byte-identical, a regenerated artifact changes the page that renders it, and an
+artifact that disagrees with the manifest — missing from it, or changed under it — stops the
+build instead of producing a page that looks checkable and is not. Three more bound the edges:
+an absent artifact is listed rather than described, no build opens a socket, and the source scan
+has a negative control.
 """
 
 from __future__ import annotations
@@ -25,7 +26,6 @@ import socket
 from pathlib import Path
 
 import pytest
-
 from quantrisk.experiments.metadata import REPO_ROOT
 from quantrisk.experiments.registry import TASKS, TASKS_BY_ID
 from quantrisk.interface import site
@@ -77,14 +77,14 @@ def _snapshot(directory: Path) -> dict[str, bytes]:
 
 
 def test_the_generator_source_contains_no_numeric_literal() -> None:
-    """The module carries no figure of its own, so no figure on a page can have come from a literal."""
+    """No figure is carried in the module, so none on a page can have come from a literal."""
     assert Path(site.__file__).resolve() == GENERATOR.resolve(), (
         f"the imported generator is {site.__file__}, not {GENERATOR}: the scan below would certify "
         f"an installed copy while a plant edited the tracked one"
     )
     source = GENERATOR.read_text(encoding="utf-8")
 
-    assert site.LAYOUT_NUMBERS == frozenset(), (
+    assert frozenset() == site.LAYOUT_NUMBERS, (
         "a layout constant was added to the generator; that is a design change, and this test is "
         "where it has to be argued for rather than absorbed"
     )
@@ -113,7 +113,7 @@ def test_every_page_quotes_the_provenance_the_manifest_records(tmp_path: Path) -
 
 
 def test_two_builds_of_one_tree_are_byte_identical(tmp_path: Path) -> None:
-    """Nothing on a page comes from the clock, so a rebuild that differs is a difference in evidence."""
+    """Nothing on a page comes from the clock: a differing rebuild is a difference in evidence."""
     root = _temp_root(tmp_path / "tree")
     first = tmp_path / "first"
     second = tmp_path / "second"
@@ -180,7 +180,7 @@ def test_an_artifact_whose_bytes_moved_stops_the_build(tmp_path: Path) -> None:
 
 
 def test_a_study_without_an_artifact_is_listed_rather_than_described(tmp_path: Path) -> None:
-    """An absent artifact produces a row that says so, never a page with an empty provenance block."""
+    """An absent artifact gets a row that says so, never a page with an empty provenance block."""
     omitted = TASKS_BY_ID[RENDERED_TASK]
     root = _temp_root(tmp_path / "tree", omit=omitted.task_id)
     out = tmp_path / "site"
