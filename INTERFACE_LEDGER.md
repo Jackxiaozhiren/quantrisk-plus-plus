@@ -583,4 +583,18 @@ item 3 stays 未完成 because the drift gate and free-tier publish are Phase 4,
 requires its own verbatim approval under section 12; until then this section has no platform
 counterpart, as section 11.1 has for X1b.
 
+## 14. Push approval for X2 and its bound
+
+The three-option question asked whether to push the seven commits and backfill the platform
+readings, push without backfilling, or leave them local. Approval original, verbatim:
+`推送并回填（最推荐）`.
+
+Bounded effect, the same as section 11's for X1b: at most two non-forced ref updates through
+`build/api_push.py`, each blob, tree and commit SHA verified before it travels; read the run the
+first update produces; write the readings into the ledger as the backfill commit; perform the
+second ref update to carry that commit. No tag, release, deploy or publication moves. The
+backfill commit's own run is observed-only under the same recursion limit — a third ref update is
+outside this approval — so section 15 will say what that run showed but will not make it this
+ledger's claim about the backfill tip.
+
 
