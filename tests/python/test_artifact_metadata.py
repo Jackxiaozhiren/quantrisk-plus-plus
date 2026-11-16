@@ -460,6 +460,12 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
     The CI figure is not asserted here — reproducing it would mean uninstalling the oracles
     from inside the test session — but it is quoted from the runner's own log, and
     `docs/limitations.md` #63 explains why the two numbers differ.
+
+    A later change to that pair exposed a fourth failure mode: only the half belonging to the
+    current environment is compared with `total`, so a stale with-oracles figure is invisible on a
+    runner without the extra. Every restatement within a document, and the pair across all five
+    documents, must now agree as well. That is a comparison neither environment can be blind to,
+    and it is what keeps both plant samples observable on either side of the split.
     """
     total = _collect_in_this_environment()
 
@@ -488,6 +494,7 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
     oracle_prose = r"(\d+)\s+Python tests with the validation oracles installed"
     offline_prose = r"[—-]\s*(\d+)\s+without them"
     documents = ("docs/interview_defense.md", "docs/limitations.md", "docs/reproducibility.md")
+    stated: dict[str, tuple[int, int]] = {}
     for name in documents:
         # Fold the document's line breaks before searching it. A claim is one statement and prose
         # re-wraps it: `... the 69 cases they` / `hold ...` is invisible to a pattern written with a
@@ -498,6 +505,23 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
         high = re.search(with_oracles, text)
         low = re.search(without_oracles, text)
         assert high and low, f"{name} does not state both Python test counts"
+        # Only one half of the pair is measurable in a given environment, so a guard that
+        # compared just that half with `total` would be blind to the other one on a CI lane
+        # without the oracles. Every restatement inside a document, and every document's pair,
+        # is therefore checked against the first one as well -- a comparison any environment
+        # can make. This is what keeps the high figure checkable on the runner, not just on a
+        # workstation that happens to have the extras installed.
+        for value in re.findall(with_oracles, text):
+            assert value == high.group(1), (
+                f"{name} states the with-oracles total as {value} in one place and "
+                f"{high.group(1)} in another"
+            )
+        for value in re.findall(without_oracles, text):
+            assert value == low.group(1), (
+                f"{name} states the offline total as {value} in one place and "
+                f"{low.group(1)} in another"
+            )
+        stated[name] = (int(high.group(1)), int(low.group(1)))
         for pattern, expected, label in (
             (table_pair, high.group(1), "the with-oracles table row"),
             (command_count, low.group(1), "the offline command comment"),
@@ -544,6 +568,13 @@ def test_the_documents_that_count_python_tests_count_the_ones_that_exist() -> No
     )
     tex_low = re.search(r"(\d+)\s+collected\s+without\s+them", report)
     assert tex_high and tex_low, "the report no longer states both Python test counts"
+    stated["paper/technical_report.tex"] = (int(tex_high.group(1)), int(tex_low.group(1)))
+    assert len({pair[0] for pair in stated.values()}) == 1, (
+        f"the documents disagree on the with-oracles total: {stated}"
+    )
+    assert len({pair[1] for pair in stated.values()}) == 1, (
+        f"the documents disagree on the offline total: {stated}"
+    )
     tex_documented = int(tex_high.group(1)) if _oracles_present() else int(tex_low.group(1))
     assert tex_documented == total, (
         f"the report says {tex_documented} for this environment; pytest collects {total}. "
