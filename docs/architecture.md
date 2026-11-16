@@ -128,7 +128,7 @@ below and fails if any path it names is missing from the tree. Three deliberate 
 CMakeLists.txt · CMakePresets.json · pyproject.toml · README.md · LICENSE · CITATION.cff · CONTRIBUTING.md
 cpp/include/quantrisk/{core,math,stochastic,pricing,monte_carlo,risk,portfolio,stress}/
 cpp/src/ · bindings/python_bindings.cpp
-python/quantrisk/{benchmarks,data,experiments,plotting,verification}/ ·
+python/quantrisk/{benchmarks,data,experiments,interface,plotting,verification}/ ·
   python/quantrisk/{api,checkout,cli,_reexport,pricing,stats,monte_carlo,stochastic,risk,portfolio,stress,special}.py
 tests/{cpp,python}/ · benchmarks/{quantlib,pyportfolioopt,performance}/
 experiments/{pricing_validation,monte_carlo_convergence,variance_reduction,linearisation_error_bound,

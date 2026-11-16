@@ -1,6 +1,6 @@
 """The generated site is only worth its provenance, so the provenance is what gets tested.
 
-Five properties, each one chosen because its opposite is the failure a static site makes easy.
+Eight properties, each one chosen because its opposite is the failure a static site makes easy.
 
 The source scan is the strongest form of "generated, never retyped" available without running the
 build: the generator file may contain no numeric literal at all, which is a stricter claim than the
@@ -11,7 +11,8 @@ file.
 The other four are about the build: a page quotes the manifest's digest and command, two builds of one
 tree are byte-identical, a regenerated artifact changes the page that renders it, and an artifact that
 disagrees with the manifest — missing from it, or changed under it — stops the build instead of
-producing a page that looks checkable and is not.
+producing a page that looks checkable and is not. Three more bound the edges: an absent artifact is
+listed rather than described, no build opens a socket, and the source scan has a negative control.
 """
 
 from __future__ import annotations
