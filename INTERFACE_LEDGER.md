@@ -241,7 +241,7 @@ static publish, and read-only machine surface. No date is attached.
 |---|---|---|
 | 1 | Phase 0 readings recorded; §3 satisfied or lane stopped at Phase 1 with a written reason | Done-lite: readings recorded, §3 condition 4 named VOID, no surface built |
 | 1a | Platform verification of the X1 commits | Done: run `43718835599`, attempt 1, six of six jobs success; readings in section 1.1 |
-| 1b | X1b: one named plant proving the command-form guard fails, restore proving green, mechanism named in a phase report | Done: plant `manifest-records-a-command-that-is-not-a-module-invocation`; red `1 failed`, green `1 passed`, census `196/196` at `465735d`; report in section 10 |
+| 1b | X1b: one named plant proving the command-form guard fails, restore proving green, mechanism named in a phase report | Done: plant `manifest-records-a-command-that-is-not-a-module-invocation`; red `1 failed`, green `1 passed`, census `196/196` at `465735d`; runner-side `ok caught` in run `43732028206`; reports in sections 10 and 11.1 |
 | 2 | I1 CLI provenance surface | 未完成 |
 | 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | 未完成 |
 | 4 | I3 value and provenance returned together, refusals name the gap | 未完成 |
@@ -311,7 +311,9 @@ Every reading below is development-side, revision `465735d63a340c42705257d8f5faf
 the maintainer workstation, 2026-11-15. A detached worktree at that revision
 (`/tmp/qr-x1b-census`) is the vantage for the sweep; the checkout under evaluation was watched and
 never written. No CI run exists for this revision: a push is excluded by the approval in
-section 0.2, so nothing here is a platform reading.
+section 0.2, so nothing here is a platform reading. Section 11.1 later records the platform reading
+for the same revision, which is a separate table precisely because it is a different vantage; the
+numbers below stay attributed to the workstation that produced them.
 
 | Reading | Value | Producer |
 |---|---|---|
@@ -381,5 +383,75 @@ Recursion limit, recorded for the same reason as section 0.1's: the backfill com
 verified by a run of its own, and that run is not backfilled, because a third ref update is outside
 this approval. Section 11.1's readings belong to the run over the six-commit series; the later run
 is reported as observed-only.
+
+### 11.1 Platform verification of the X1b commits
+
+Six commits were appended through the Git Data API with a non-forced fast-forward
+(`force: false`). Every blob, tree and commit SHA was verified against its local value before the
+ref moved, and the ref moved only after all six matched exactly. This is the first of the two ref
+updates section 11 allows. No tag moved: `v1.9.0` is still the most recent.
+
+| Field | Value |
+|---|---|
+| Run | `43732028206` |
+| Attempt | 1 |
+| Head revision | `e984a55c32632b089f62dbecb9e94ae8e960e2da` |
+| Event | `push` |
+| Conclusion | `success`; six of six jobs `success`, no failed step |
+| Window | 2026-11-15T15:49:36Z to 2026-11-15T16:08:41Z |
+
+| Job | Runner label | Duration | Conclusion |
+|---|---|---|---|
+| macOS native C++ and Python parity | `macos-15` | 3m56s | success |
+| Mutation census in a detached worktree | `ubuntu-latest` | 19m01s | success |
+| Installed wheel surface in a clean environment | `ubuntu-latest` | 1m43s | success |
+| Benchmark suite against live oracles | `ubuntu-latest` | 10m05s | success |
+| Configure, build, C++ tests, Python tests | `ubuntu-latest` | 4m55s | success |
+| Format and static checks | `ubuntu-latest` | 1m11s | success |
+
+Readings, each attributed to the job that printed it. No reading is carried over from an earlier
+run, and none is carried over from section 10: those are the workstation's.
+
+| Reading | Value | Job | Environment |
+|---|---|---|---|
+| Python test suite | `490 passed, 5 skipped in 135.19s` | build-and-test | `ubuntu-latest`, fully offline |
+| Final-tip attestation | `PASS: V9_LEDGER.md attests 5ec3fabe… as a strict ancestor of e984a55c3263, 195 caught of 195 declared` | build-and-test | `ubuntu-latest`, `fetch-depth: 0` |
+| Census declaration | `196 declared = 195 measurable here + 1 environment-blind` | mutation-census | `ubuntu-latest`, detached worktree |
+| Census verdict | `195/195 planted defects were rejected by their guard` | mutation-census | `ubuntu-latest`, detached worktree |
+| The new plant, on a runner | `ok caught manifest-records-a-command-that-is-not-a-module-invocation` | mutation-census | `ubuntu-latest`, detached worktree |
+| Census verdict record | `declared 195`, `ran 195`, `caught 195`, `revision e984a55c3263`, both checkout readings empty | mutation-census | `ubuntu-latest` |
+| Benchmark suite | `19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 383.8s` | benchmark-suite | `ubuntu-latest`, live oracles |
+| Installed surface | identity holds; `revision e984a55c3263`, `version 1.9.0`, venv at `_temp/installed-venv` | installed-surface | `ubuntu-latest`, clean venv |
+| Formatter corpus | `252 files already formatted`; `reported_total 252`, `tracked_formattable 252`, `walked_formattable 252` | lint | `ubuntu-latest` |
+| Ceiling census, lint | 15 keys, 13 `ok`, 2 `SKIP`; `commands_not_module_path: 0`, `commands_unrunnable_from_the_root: 0` | lint | `ubuntu-latest` |
+| Ceiling census, census | `plants_not_rejected_by_their_guard: 0`, `lanes_documented_vs_executed_gap: 0` | mutation-census | `ubuntu-latest` |
+| Docs re-derivation | `gap: 0`; derived 95 manifest artifacts, 196 plants, 19 registry tasks, 19 suite members, over 5 documents | lint and mutation-census | `ubuntu-latest` |
+| Evidence manifest | `0 MISSING`; `Evidence is intact.` | lint | `ubuntu-latest` |
+
+Three things this run settles that a workstation cannot.
+
+**The plant is caught by something other than its author's machine.** Section 10's red and green
+readings came from a worktree on the same host; the runner reproduced `caught` for the same
+identifier with the same guard name in the same log line, so the sample is not an artifact of one
+environment.
+
+**The environment-blind plant is named, and it is not the new one.**
+`report-source-edited-without-a-rebuild-seen-from-the-render` is the single declared blind sample:
+the re-render guard needs the pdfTeX that typeset `paper/technical_report.pdf`, the runner carries
+1.40.25 and `paper/technical_report.build.json` records 1.40.29. The census therefore declares 196
+and measures 195 there, while the workstation measured 196, which is why section 10.2 has no
+environment-blind entry and this table does.
+
+**The historical attestation did not move, by design.** It still prints `195 caught of 195 declared`
+at a tip that declares 196 plants. That is V13's ruling holding: the attestation is judged as
+history, and a present-day count check bolted onto it would make it a different claim rather than a
+stronger one.
+
+### 11.2 What the second ref update will and will not buy
+
+The backfill commit that carries these readings is verified by a run of its own, and that run is
+observed-only under section 11's recursion limit: a third ref update is outside the approval. So
+section 11's second update closes the platform record for the six-commit series, and the tip that
+holds that record has no run of its own that this ledger claims.
 
 
