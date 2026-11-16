@@ -454,4 +454,51 @@ observed-only under section 11's recursion limit: a third ref update is outside 
 section 11's second update closes the platform record for the six-commit series, and the tip that
 holds that record has no run of its own that this ledger claims.
 
+## 12. Scope unit X2 — the generator, and nothing around it
+
+X1b's plant satisfies §3 condition 4, so the sentence in section 1 that kept this lane at "facts and
+feasibility only" no longer holds and a surface unit is admissible. Phase 3 of
+`INTERFACE_ROADMAP.md` is the generator, and Phase 4 (deploy plus the drift gate) is where a
+deployed surface would come from; X2 takes Phase 3's mechanism and leaves the deployment alone.
+
+Scope unit X2, as put to the maintainer verbatim, with the alternatives that were declined beside it:
+
+> **方案 A（推荐）** 批准作用域单元 X2：只新增一个包内生成器，以
+> `python -m quantrisk.interface.site --out <目录>` 从已提交 artifact 与 `evidence/manifest.json`
+> 生成 study 页与一个索引页，每页带 provenance 块（artifact 路径、sha256、记录的 canonical 命令、
+> 生成时间），页面上每个数字必须在构建时从 artifact 读入而非写死在源码；同时新增一个守卫扫描生成器
+> 源码中的证据型数字字面量（只允许排版常量），并新增一个受控植物证明该守卫会转红；不建部署、不做漂移
+> 门禁、不新增天花板键、不改 CLI 子命令、不新增依赖，产物只写被忽略的 `build/site/`。
+
+Approval original, verbatim: `方案 A（推荐）`
+
+The two declined alternatives are recorded so the boundary is a decision rather than an omission:
+**B** would have taken Phase 3's whole page set in one unit (study, findings and matrix pages), on
+the grounds that a wider surface needs more than one plant to prove; **C** would have added a
+`site_pages_without_provenance` ceiling key, on the grounds that a reading CI cannot see is a
+reading nobody re-checks, at the cost of moving the ceiling inventory from 15 keys to 16 and every
+vantage narration that prints it.
+
+Bounded effect, and nothing beyond it: one new in-package generator reachable as
+`python -m quantrisk.interface.site`; the pages it emits under an ignored output directory; one
+pytest guard that scans the generator's own source for evidence-shaped numeric literals; one
+controlled plant proving that guard can fail; the count claims that plant moves, re-derived in the
+same series. Excluded: any deployment or hosting configuration, any drift gate, any new ceiling key,
+any change to CLI subcommands or to a frozen contract, any new dependency, any committed build
+output, any README or front-page rewrite. A push is a separate external action and is **not**
+covered here.
+
+Three constraints are part of the scope because the readings that would break are already measured:
+
+| Constraint | Reading it would break |
+|---|---|
+| The generator is not a CLI subcommand | §3 condition 3 counts exactly four subcommands: `benchmark`, `demo`, `run`, `validate` |
+| The generator is imported by a test | `runtime_reachability_gap` is the residual of files dead to the parser, the import probe and pytest collection |
+| `stdlib` only, no new dependency | `external_dependencies_added` sits at `max 0` |
+
+Known blast radius, from X1b's own experience rather than from searching: a 197th plant moves the
+`196/196` annotation in `docs/interview_defense.md` and the anchor of
+`docs-command-comment-counts-superseded-plants`, and both turn red until re-derived. X2 treats those
+as part of its own change, not as surprises.
+
 
