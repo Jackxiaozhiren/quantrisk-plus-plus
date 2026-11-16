@@ -20,6 +20,7 @@ import ast
 import hashlib
 import json
 import shutil
+import socket
 from pathlib import Path
 
 import pytest
@@ -188,3 +189,23 @@ def test_a_study_without_an_artifact_is_listed_rather_than_described(tmp_path: P
     index = (out / "index.html").read_text(encoding="utf-8")
     assert "artifact not present in this tree" in index
     assert omitted.artifact in index
+
+
+def test_the_build_opens_no_socket(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Offline is a property of the build, not a wish about it: a socket request fails the test."""
+
+    def refuse(*arguments: object, **keywords: object) -> None:
+        raise AssertionError(
+            "the generator asked for a socket during a build; a page that needs the network is a "
+            "page whose figures can differ from the artifact it claims"
+        )
+
+    monkeypatch.setattr(socket, "socket", refuse)
+    monkeypatch.setattr(socket, "create_connection", refuse)
+    monkeypatch.setattr(socket, "getaddrinfo", refuse)
+
+    root = _temp_root(tmp_path / "tree")
+    out = tmp_path / "site"
+    site.generate(out, root)
+
+    assert (out / "index.html").is_file()
