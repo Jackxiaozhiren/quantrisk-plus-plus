@@ -171,10 +171,10 @@ not be cited to justify or block work.
 | # | State | Predicate or reason it is VOID |
 |---|---|---|
 | I-L1 | VOID | §3 condition 4 is named VOID; no resolvability reading with a named plant to bind a target to |
-| I-L2 | VOID | No generator exists; no source scan or drift gate to execute |
+| I-L2 | Filled for generation; drift half VOID | `python -m quantrisk.interface.site` builds pages from committed artifacts, and `test_the_generator_source_contains_no_numeric_literal` plus plant `site-source-carries-a-figure-of-its-own` make the source scan falsifiable at `aafb707`. No drift gate exists, so the drift half stays VOID |
 | I-L3 | VOID | No deployment exists; no build output to probe for request-execution paths |
 | I-L4 | VOID | No deployment configured; no cost diff over a real range |
-| I-L5 | VOID | No generator exists; no offline build to execute |
+| I-L5 | Partial | `test_the_build_opens_no_socket` refuses `socket.socket`, `create_connection` and `getaddrinfo` for a full build; a build with the network actually down was not run, and a subprocess making a network call would escape this probe |
 | I-L6 | VOID | Manifest and registry exist, but no machine-readable response surface exists to inspect |
 | I-L7 | VOID | Claim-inventory guards belong to the refactor lane; this lane has added no README or site claim, so no I-lane target exists |
 | I-L8 | VOID | No measured H1–H4 value exists to map to a recorded run |
@@ -242,6 +242,7 @@ static publish, and read-only machine surface. No date is attached.
 | 1 | Phase 0 readings recorded; §3 satisfied or lane stopped at Phase 1 with a written reason | Done-lite: readings recorded, §3 condition 4 named VOID, no surface built |
 | 1a | Platform verification of the X1 commits | Done: run `43718835599`, attempt 1, six of six jobs success; readings in section 1.1 |
 | 1b | X1b: one named plant proving the command-form guard fails, restore proving green, mechanism named in a phase report | Done: plant `manifest-records-a-command-that-is-not-a-module-invocation`; red `1 failed`, green `1 passed`, census `196/196` at `465735d`; runner-side `ok caught` in run `43732028206`; reports in sections 10 and 11.1 |
+| 1c | X2: generator emits artifact-bound pages with provenance; source scan has a named falsifying plant; no deploy, drift gate or new key | Done at `aafb707`: `197/197` at the final tip, single-plant red/green and all development-side readings in section 13; no platform reading because section 12 excludes a push |
 | 2 | I1 CLI provenance surface | 未完成 |
 | 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | 未完成 |
 | 4 | I3 value and provenance returned together, refusals name the gap | 未完成 |
@@ -500,5 +501,86 @@ Known blast radius, from X1b's own experience rather than from searching: a 197t
 `196/196` annotation in `docs/interview_defense.md` and the anchor of
 `docs-command-comment-counts-superseded-plants`, and both turn red until re-derived. X2 treats those
 as part of its own change, not as surprises.
+
+## 13. X2 phase report — a generator, and the two red censuses it earned
+
+Section 12 holds the scope sentence and the approval original. A push is excluded there, so every
+reading in this section is development-side and no platform run is claimed for this tip. Six
+commits make the unit: `df0d185` scope and approval; `9dc8c3b` generator, source guard and plant;
+`403b346` the no-socket build test; `4fde6d9` the count and layout re-derivation; `2b3b3ab` the
+report rebuild and claim-census gold move; `aafb707` the environment-independent form of the
+test-count guard.
+
+### 13.1 The mechanism and the sample that can break it
+
+`python -m quantrisk.interface.site --out <dir>` reads the registered studies and
+`evidence/manifest.json`, and writes one page per study plus an index into the ignored
+`build/site/`. A page is refused when its artifact is absent from the manifest, when its bytes no
+longer hash to the frozen digest, or when the manifest records no command; no figure is typed into
+the generator, `generated_utc` comes from the artifact rather than the clock, and two builds of one
+tree are byte-identical. It is not a CLI subcommand — §3 condition 3 counts exactly four — and it
+imports only the standard library, so neither `commands_not_module_path` nor
+`external_dependencies_added` moves.
+
+The guard `test_the_generator_source_contains_no_numeric_literal` parses the tracked module with
+`ast`, checks that the imported module *is* that tracked file (a plant must not be masked by an
+installed copy), verifies a known literal is found by the scan, and requires zero literals in the
+source. The declared allowance `LAYOUT_NUMBERS` is empty; widening it is a visible design change
+rather than an accident. The plant `site-source-carries-a-figure-of-its-own` types a comfortable
+figure into that source: single-plant red `1 failed in 0.49s`, after restore `1 passed in 0.29s` at
+`9dc8c3b`, verdict `caught`. `test_the_build_opens_no_socket` replaces three socket entry points
+with refusals for a full build, which is narrower than "build with the network down" and is why
+I-L5 stays partial.
+
+### 13.2 Two red censuses before the green one
+
+The first full census, at `403b346`, returned `188/197`. All nine non-caught rows were
+`tree-did-not-recover`, and all nine named one of three guards whose *inputs* X2 had moved: eight
+new tests took the collected pair from 560/491 to 568/499, and the new package
+`python/quantrisk/interface/` was missing from `docs/architecture.md` §5. The guard failures were
+already present on the restored tree; the plants did not cause them, they revealed them. An
+intermediate run at `4fde6d9` was stopped after about thirty plants because the report rebuild
+superseded its tip, and no verdict was claimed from it.
+
+The second census, at `2b3b3ab`, returned `195/197`. The two misses were the plants that mutate the
+*with-oracles* half of the pair — `report-counts-stale-python-tests` and
+`reproducibility-quotes-a-superseded-pytest-total` — now reported as `no-guard-objected`. On a
+runner without that extra the count guard compares only the offline half with the collected
+total, so the other half had no observer; those plants had passed the earlier censuses only
+because the offline half happened to be stale there too. The guard now compares every
+restatement of each figure within a document and the pair across all five documents, a comparison
+neither environment can be blind to, while keeping the per-environment comparison with the
+collected total. Both named plants were re-run singly on the no-oracles worktree and are `caught`.
+The final census at `aafb707` is `197/197`; the two red runs are the reason that green sentence is
+a measurement at a named tip rather than a property of the code in general.
+
+### 13.3 Readings at the final tip (`aafb707`)
+
+| Reading | Value |
+|---|---|
+| Full census verdict | `declared 197 / ran 197 / caught 197`, `non_caught []`, `unmeasurable []`; watched checkout empty before and after |
+| Runner list and derived counts | `runner --list` 197; `docs_rederivation` `gap: 0` with 197 derived plants across five documents |
+| Ceiling census | 15 keys: 14 `ok` / 1 `SKIP` once the verdict sits at `build/sweep_verdict.json` (`plants_not_rejected_by_their_guard: 0`); 13 `ok` / 2 `SKIP` where that key's precondition is absent |
+| Evidence and format | `Evidence is intact`, 0 missing; `ruff format --check .` 255 files already formatted |
+| Full pytest, this shell | `1 failed, 567 passed in 148.73s`, the known bytecode-cache plant that needs `__pycache__` writes this shell does not make (`PYTHONDONTWRITEBYTECODE=1`); not a regression |
+| Single-plant proof | `site-source-carries-a-figure-of-its-own`: red `1 failed in 0.49s` → restored `1 passed in 0.29s` |
+
+The ceiling count is a vantage restoration, not a second measurement: `sweep_gap` does not compare
+the verdict's revision with the tip, and placing the verdict where its key reads it changes which
+keys declare their precondition present. The site itself is not committed: `build/site/` is
+ignored, and the scope's exclusion of committed build output is read as that directory. The one
+committed artifact the unit did rebuild is `paper/technical_report.pdf` with its sidecar, because
+`technical_report.tex` changed and a separate guard binds the PDF to the source bytes; pdfTeX
+1.40.29 on this workstation matches the sidecar's recorded engine, while the runner's 1.40.25 is
+exactly the environment-blind plant already registered from X1b.
+
+### 13.4 What X2 did not do
+
+No deployment, hosting, drift gate or new ceiling key; no CLI subcommand, new dependency or frozen
+contract change; no README or front-page rewrite. Liveness I-L2 is filled only for generation and
+the source scan, with its drift half still VOID; I-L5 is partial as recorded in section 2. DoD
+item 3 stays 未完成 because the drift gate and free-tier publish are Phase 4, not this unit. A push
+requires its own verbatim approval under section 12; until then this section has no platform
+counterpart, as section 11.1 has for X1b.
 
 
