@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 196/196 planted defects rejected",
+        anchor="# 197/197 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -2860,6 +2860,25 @@ MUTATIONS: tuple[Mutation, ...] = (
             "passing because the path it names happens to exist; §3 condition 4 of "
             "`INTERFACE_ROADMAP.md` asks for a plant that names the command-form guard, and this "
             "is that sample, where X1 could only record the absence of one"
+        ),
+    ),
+    Mutation(
+        identifier="site-source-carries-a-figure-of-its-own",
+        kind="prose",
+        path="python/quantrisk/interface/site.py",
+        anchor="    rows: list[str] = []",
+        replacement="    rows: list[str] = []\n    pages_expected = 19\n",
+        guard=(
+            "tests/python/test_interface_site.py::"
+            "test_the_generator_source_contains_no_numeric_literal"
+        ),
+        claim=(
+            "the generator's whole warrant is that every figure on a page was read from an artifact "
+            "during the build, and the cheapest way to lose it is to type a comfortable number into "
+            "the source, where it agrees with the evidence until the evidence moves; the scan has to "
+            "redden on any literal the module did not declare, or `I-L2` is a sentence about a "
+            "surface nobody has checked — and this is the sample that makes the boundary mechanical "
+            "rather than aspirational"
         ),
     ),
 )
