@@ -244,9 +244,10 @@ static publish, and read-only machine surface. No date is attached.
 | 1b | X1b: one named plant proving the command-form guard fails, restore proving green, mechanism named in a phase report | Done: plant `manifest-records-a-command-that-is-not-a-module-invocation`; red `1 failed`, green `1 passed`, census `196/196` at `465735d`; runner-side `ok caught` in run `43732028206`; reports in sections 10 and 11.1 |
 | 1c | X2: generator emits artifact-bound pages with provenance; source scan has a named falsifying plant; no deploy, drift gate or new key | Done at `aafb707` locally and re-verified at `7971299`; section 13 holds the development-side readings, section 15 the first platform run's failure and its lint fix |
 | 1d | X3: a page-level drift gate with a committed baseline and a falsifying plant; no deploy, new key or zero-literal-rule change | Done at `28727f4`: `198/198`, single-plant red/green and all readings in section 17; no platform reading because section 16 excludes a push |
-| 2 | I1 CLI provenance surface | 未完成 |
+| 1e | X4: G-A/G-B attribution gaps closed in the designated file; read-only provenance surface with a named falsifying plant; no CLI subcommand, deploy or new key | Done at `25aed30`: `199/199`, single-plant red/green and all readings in section 21; no platform reading because section 20 excludes a push |
+| 2 | I1 CLI provenance surface | Done as a `-m` module under X4 scope A: `python -m quantrisk.interface.provenance --list/--resolve` answers provenance offline with a guarded output; the literal `quantrisk` subcommand form was declined in X4 option B and stays outside the frozen four-subcommand contract; readings in section 21 |
 | 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | 未完成 |
-| 4 | I3 value and provenance returned together, refusals name the gap | 未完成 |
+| 4 | I3 value and provenance returned together, refusals name the gap | Done at `25aed30`: `resolve()` returns value + command + revision + digest together and refuses by name on any missing element; plant `provenance-erases-a-recorded-command` proves the guard fails; readings in section 21 |
 | 5 | H1–H4 measured, liveness filled, deliberately-not-done list | Partial: liveness filled as VOID, H1–H4 unmeasured, deliberately-not-done list below |
 
 ## 8. Deliberately not done
@@ -883,3 +884,82 @@ Two constraints are part of the scope because the readings that would break are 
 Known blast radius, from three prior units: a 199th plant moves the `198/198` annotation in
 `docs/interview_defense.md` and the derived-plant count behind `docs_rederivation`; both turn red
 until re-derived. X4 treats those as part of its own change, not as surprises.
+
+## 21. X4 phase report — the attribution gaps and the read-only provenance surface
+
+Section 20 holds the scope sentence and the approval original. A push is excluded there, so every
+reading in this section is development-side at the implementation tip `25aed30`. The commits that
+make the unit: `155b947` scope and approval; `25aed30` the update table, the module, the guard, the
+plant, the re-derived counts and the rebuilt report.
+
+### 21.1 The two attribution gaps, closed where the Check looks
+
+G-A was that `REFACTOR_PROMPT.md` §13's "Liveness at authoring" table still recorded L4 VOID and
+had no Phase-5-after update table, while `INTERFACE_ROADMAP.md` §3's Check names that file as the
+authority. G-B was that the matching `ACTIVE, satisfied` row lived in `REFACTOR_LEDGER.md` Phase 5
+instead. X4 appends a new "L4 after Phase 5 (updated)" table to §13 that records L4 ACTIVE with an
+executable reading — the dry-resolve guard `test_every_manifest_command_resolves_as_a_module_without_being_run`
+and its plant — and points to §10 for the run-side evidence. The authoring table is not edited; its
+VOID row is a reading at authoring time, and the section states explicitly that the two rows are
+readings at different times rather than a contradiction to be silently reconciled. Both gaps are
+closed by one act: the ACTIVE reading now exists in the file the Check designates, and the ledger's
+Phase 5 row is a report of the same fact, not the authority.
+
+### 21.2 The surface, and the sample that can break it
+
+`python -m quantrisk.interface.provenance --list` prints every registered task with the canonical
+command derived from its module path; `--resolve <artifact>` returns one record binding the
+artifact's headline value to the command, the manifest's recorded revision and the manifest's frozen
+digest. `--json` emits the same record as JSON. If any element cannot be resolved — the artifact is
+absent, its command blank, the revision missing, or its headline unreadable — `ProvenanceRefused`
+names the specific gap and no value is emitted; the CLI form prints `REFUSED: …` and exits non-zero.
+The module reads only; no socket, no write, no study execution. It carries no numeric literal,
+checked by its own test rather than by widening `site.py`'s guard (the X3 scope correction).
+
+| Element | Value |
+|---|---|
+| Plant | `provenance-erases-a-recorded-command` |
+| Target | `evidence/manifest.json`, the command `uv run python -m quantrisk.experiments.sixth_book_crossing_map` (unique in the file) |
+| Guard | `tests/python/test_interface_provenance.py::test_no_value_is_returned_without_its_command_digest_and_revision` |
+| Mechanism | blanking that one command leaves the sample artifact's value unresolvable; the guard, which requires every headline-bearing registered artifact to resolve with command/digest/revision intact, objects; restoring the manifest returns it to green |
+
+Manual red/green at `25aed30`: planted `1 failed` with the refusal naming the blanked
+`generated_by_command`; restored `Evidence is intact`, `0 CHANGED`, `0 MISSING`. The full census
+then recorded `ok caught` for the plant at revision `25aed30fe4c8b8db9bb7adbd236e08afda3af806`.
+
+### 21.3 Readings — all development-side at `25aed30`
+
+| Reading | Value |
+|---|---|
+| Full census | `199/199 planted defects were rejected by their guard`; verdict `declared 199 / ran 199 / caught 199`, `non_caught []`, `unmeasurable []`, `checkout_status_before` and `after` both empty |
+| Single plant | planted `1 failed` → restored `Evidence is intact`; `ok caught` in the full census |
+| `runner --list` | 199 plants; `docs_rederivation` `gap: 0` at 199 derived plants |
+| Ceilings | 15 keys, `14 ok / 1 SKIP` with the verdict supplied through `QUANTRISK_SWEEP_VERDICT` (`installed_user_identity_mismatch` precondition absent on this vantage), no `FAIL` |
+| Full pytest | `1 failed, 579 passed in 194.30s`; the one failure is the known sandbox bytecode-cache case, which needs `__pycache__` writes this shell does not make under `PYTHONDONTWRITEBYTECODE=1`; not a regression, and the eight new provenance tests all pass |
+| Static trio | `ruff check .` all checks passed; `ruff format --check .` 259 files already formatted; `uv run mypy python/quantrisk tools` `Success: no issues found in 79 source files` |
+| Evidence manifest | `95 OK`, `0 CHANGED`, `0 MISSING`, `0 on disk but not in the manifest` |
+| Drift CLI | `PASS: rebuilt site matches build/site.lock` |
+| Provenance CLI | `--resolve` on the sample returns value + command + revision + digest; `--list` enumerates the registry |
+
+The count cascade moved three published numbers and was re-derived, not bypassed: plants `198→199`,
+offline-collected tests `503→511`, with-oracles tests `568→572→580`. The living claims in
+`docs/interview_defense.md`, `docs/reproducibility.md`, `docs/limitations.md` and
+`paper/technical_report.tex`, the five plant anchors that key on those figures, the two gold tuples
+in `test_artifact_metadata.py` and the rebuilt report PDF and its sidecar were all updated in the
+same implementation commit. The four count guards were re-run green after the cascade; the
+committed PDF is bound to the sources that rendered it.
+
+The census again needed the local `PYTHONPATH` shim removed for that one child process: the shim's
+`rmdir` broker cannot delete the harness's empty probe directory. This is a machine-side file-system
+detail, not a project defect, and removing the injection changes no guard, plant or source byte.
+
+### 21.4 What X4 did not do
+
+No CLI subcommand — the CLI stays at four, and the literal `quantrisk provenance` form declined in
+option B remains a separate decision; no deploy or publish; no new ceiling key (the inventory stays
+at fifteen); no new dependency; no committed page; no edit to the authoring-time liveness table or
+to the V9 historical attestation. §3's four conditions are untouched. DoD item 3 stays 未完成
+because free-tier publish and a genuinely network-down offline build remain Phase 4; H1–H4 remain
+unmeasured; I-L2's provenance half is still a sentence about a surface whose value-level claim is
+now falsifiable but whose deployed-page value remains unmeasured. A push is a separate external
+action excluded by section 20; no platform reading is claimed here.
