@@ -81,14 +81,15 @@ def freeze(out: Path, lock: Path, root: Path | None = None) -> dict[str, dict[st
     """Build the current tree and write its page fingerprints as the new baseline."""
     base = checkout_root() if root is None else Path(root)
     pages = site.generate(out, base)
-    document = {
+    fingerprints = _fingerprint(sorted(pages, key=lambda path: path.name), base)
+    document: dict[str, object] = {
         "schema": LOCK_SCHEMA,
         "source": site.__name__,
-        "pages": _fingerprint(sorted(pages, key=lambda path: path.name), base),
+        "pages": fingerprints,
     }
     lock.parent.mkdir(parents=True, exist_ok=True)
     lock.write_text(json.dumps(document, sort_keys=True) + "\n", encoding="utf-8")
-    return document["pages"]
+    return fingerprints
 
 
 def check(out: Path, lock: Path, root: Path | None = None) -> list[str]:
