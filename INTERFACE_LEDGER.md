@@ -638,4 +638,55 @@ pytest `1 failed, 567 passed` with only the known sandbox bytecode-cache case fa
 The second ref update in this approval carries `7971299` together with this backfill commit. No
 platform success is claimed for `7cbcc7b`, and the run over the backfill tip is observed-only.
 
+## 16. Scope unit X3 — the drift gate, and nothing around it
+
+Approval original, verbatim: `方案 A（推荐）`, answering the three scope sentences put to the
+maintainer. The chosen sentence, recorded here in the same words it was shown:
+
+> 批准作用域单元 X3：只新增一个站点漂移门禁，以一份提交的 `build/site.lock`（记录每个已生成
+> 页面的 sha256 及其来源 artifact 的 sha256）为冻结基准；门禁命令从当前 artifact 重新生成
+> 站点到临时目录，逐页比对页面摘要与锁文件，任何不符即非零退出。新增一个 CI step 与一个
+> 受控植物——篡改某 artifact 的 headline 数字并同步 manifest 的 `sha256`/`content_sha256`，
+> 使摘要门禁不报 CHANGED——证明该门禁独立转红、恢复转绿，机制在阶段报告中具名。不新增
+> 天花板键、不改 CLI 子命令、不新增依赖、不做部署或发布。
+
+The two declined alternatives are kept so the boundary is a decision, not an omission. **B** would
+have had a reader extract each figure back out of the generated HTML and compare it with the
+artifact, with no frozen baseline — declined because the reverse parse is brittle and its plant is
+likely to be caught first by X2's zero-numeric-literal guard, so the new gate's own falsifiability
+would stay unproven. **C** would have used a plant on the existing `verify_evidence_manifest` —
+declined because byte-digest drift was already gated in CI before X3 and H3's page-level
+"figure equals artifact value" claim would remain unmeasured.
+
+One fact fixes the boundary: `verify_evidence_manifest` already re-hashes every listed artifact's
+bytes and result content in the lint job, and `test_an_artifact_whose_bytes_moved_stops_the_build`
+already proves the generator refuses an artifact whose bytes moved off the manifest. A gate that
+only re-checks the digest would duplicate both. X3's subject is the *page*: a committed baseline of
+what each page hashed to, and a command that rebuilds and compares, so a value can change in an
+artifact and in the manifest while the published page still carries the old figure — and the gate
+alone objects.
+
+Bounded effect, and nothing beyond it: one committed `build/site.lock` frozen at the current
+artifacts; one drift-check command reachable as a module-path invocation, printing a per-page
+comparison and exiting non-zero on any mismatch; one CI step calling it; one controlled plant that
+keeps the digest gate quiet while moving a figure, with a named red/green proof; the count claims
+that plant moves, re-derived in the same series. Excluded: any new ceiling key (the inventory stays
+at fifteen), any deployment or publishing configuration, any CLI subcommand, any new dependency,
+any committed page under `build/site/`, any change to the generator's zero-literal rule, and any
+README or front-page rewrite. A push remains a separate external action and is **not** covered
+here; the recursion limit from earlier push approvals is not carried forward by this one.
+
+Two constraints are in scope because the readings they would break are already measured:
+
+| Constraint | Reading it would break |
+|---|---|
+| The drift command is a module-path invocation, not a CLI subcommand | §3 condition 3 counts exactly four subcommands: `benchmark`, `demo`, `run`, `validate` |
+| No new ceiling key | the inventory is fifteen keys; every vantage narration prints that count |
+
+Known blast radius, inherited from two prior units: an additional plant moves the `197/197`
+annotation in `docs/interview_defense.md` and the anchor of
+`docs-command-comment-counts-superseded-plants`, and both must be re-derived in the same series.
+The lock file is committed build output but is not a page: it is a frozen reading, and the scope's
+exclusion of committed build output continues to mean the `build/site/` page directory.
+
 
