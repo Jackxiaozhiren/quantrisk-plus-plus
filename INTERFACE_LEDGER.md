@@ -758,4 +758,19 @@ surface to measure — the gate is proven able to fail, not yet measuring a depl
 a separate external action excluded by section 16; no platform reading is claimed here. DoD item 3
 stays 未完成 because free-tier publish and a genuinely network-down offline build remain Phase 4.
 
+## 18. Push approval for X3 and its bound
+
+Section 16 excluded a push, so section 17 could only be a development-side reading. The
+three-option question asked whether to push the four commits and backfill the platform readings,
+push without backfilling, or leave them local. Approval original, verbatim: `推送并回填（最推荐）`.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`; read the first run produced by the push and attribute each reading to the job
+that printed it; write those readings into a backfill commit in this ledger, including any failure
+as a failure rather than omitting it; carry that backfill commit in the second ref update. The
+recursion limit is the same one section 11 and section 14 used: the backfill commit's own run is
+observed-only, because a third ref update is outside this approval. No tag, release, deployment or
+publication is moved. The `site drift gate` step added in X3 is expected to run on the runner as a
+new CI step, and its reading belongs to whichever job carries it.
+
 
