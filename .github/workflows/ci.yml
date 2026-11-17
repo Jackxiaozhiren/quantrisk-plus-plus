@@ -357,3 +357,41 @@ jobs:
           name: mutation-census
           path: ${{ runner.temp }}/sweep_verdict.json
           if-no-files-found: warn
+
+  # X5. Publish the artifact-bound site from CI, never from a laptop. The bytes uploaded here are
+  # the very ones the drift gate rebuilt and compared: `drift --check --out` writes the same pages
+  # it verifies, so a figure that moved without its lock is refused before any upload. `needs: lint`
+  # makes the gate's own failure block publication; the job independently re-runs the check so the
+  # published bytes are named, not inherited. Permissions add only Pages write and the short-lived
+  # OIDC token - no stored secret. The tag v1.9.0 is never moved by a publish.
+  deploy:
+    name: Publish the evidence site
+    needs: [lint]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install dev environment
+        run: uv sync
+      - name: Rebuild and verify the published bytes
+        run: >-
+          uv run python -m quantrisk.interface.drift
+          --lock build/site.lock --check --out "${RUNNER_TEMP}/site-publish"
+      - name: Upload the verified site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ runner.temp }}/site-publish
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

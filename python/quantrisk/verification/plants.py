@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 511 tests collected offline",
+        anchor="# 516 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -419,7 +419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 580 pytest tests with the validation",
+        anchor="and 585 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 199/199 planted defects rejected",
+        anchor="# 200/200 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -693,7 +693,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 511 collected without them",
+        anchor="oracles installed, 516 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -818,7 +818,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 580 pytest tests with the `oracles` extra here",
+        anchor="# 585 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -2915,6 +2915,23 @@ MUTATIONS: tuple[Mutation, ...] = (
             "the guard that requires every published value to resolve with its full provenance, "
             "or DoD item 4 'a refusal names the gap, never a bare number' is a sentence nobody "
             "has falsified"
+        ),
+    ),
+    Mutation(
+        identifier="deploy-drops-the-lint-dependency",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor="needs: [lint]",
+        replacement="needs: []",
+        guard=(
+            "tests/python/test_interface_deploy.py::"
+            "test_publication_is_downstream_of_the_drift_gate"
+        ),
+        claim=(
+            "publication is safe only because it sits downstream of the gate that checks the "
+            "published pages; dropping the lint dependency lets a figure that drifted past the "
+            "digest gate reach the live site unchecked, so the guard that requires deploy to "
+            "need lint must redden, or Phase 4 'the drift gate fails the deploy' is a slogan"
         ),
     ),
 )

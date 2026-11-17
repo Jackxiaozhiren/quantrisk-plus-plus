@@ -50,6 +50,13 @@ tracked files" is a printed reading rather than a claim. `refactor ceilings` adj
 `SKIP` for the key, because it does not run the lane and a zero there would be a claim about a census
 it did not take.
 
+**The publication job.** X5's `deploy` job re-runs `quantrisk.interface.drift` (the same lane the
+`lint` job runs at `site drift gate`) into its upload directory, so the bytes published to GitHub
+Pages are the ones the check verified. It is a second execution point of an already-declared lane,
+not a new lane, and the contract's `ci_job` / `ci_step` pair still names the `lint` gate that must
+pass first — `deploy` declares `needs: [lint]`. Publication adds no stored secret: the job's only
+extra permissions are GitHub's per-deployment `pages: write` and short-lived `id-token: write`.
+
 ```json
 {
   "schema": "quantrisk-lane-contract/1",

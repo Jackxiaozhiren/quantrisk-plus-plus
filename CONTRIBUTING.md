@@ -41,6 +41,12 @@ uv run python -m tools.verify_evidence_manifest
 uv run python -m quantrisk.interface.drift --lock build/site.lock --check --out <dir>
 ```
 
+The last command's `--out` directory is the published site: `drift --check` rebuilds the pages and
+compares them to `build/site.lock` in the same pass, so CI's `deploy` job uploads the very bytes it
+verified. That job runs only on pushes to `main`, requires `lint` (and so the drift gate) to have
+passed, and adds no stored secret — only GitHub's per-deployment `pages: write` and short-lived
+`id-token: write`. Publication never moves a tag.
+
 `--require-all` on the suite is what makes the run mean something: without the `oracles` extra some
 members *skip*, and a green that skipped is a claim about a measurement that was not made.
 
