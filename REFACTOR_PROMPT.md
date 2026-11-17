@@ -586,6 +586,23 @@ document was written on (each `check:` executed, its exit code captured):
 | L2, L11 | **VOID** | L2 needs Phase 1 findings; L11 needs the §4 instruments — neither exists yet. They activate when their preconditions do. |
 | L1, L4, L5, L8, L9 | **VOID** | Each requires an architecture step from §5 (registry, canonical commands, wheel proof, coverage extension). Activating one before its step is a violation, not diligence. |
 
+### L4 after Phase 5 (updated)
+
+The table above stays exactly as written — it is the reading at authoring time, and rewriting a
+historical reading to match a later state is the failure this file's precedence rule forbids. This
+separate table records the one law whose precondition was subsequently met. `L4` is listed here
+and **not** removed from the VOID row above: the two rows are readings at different times, not a
+contradiction to be edited away.
+
+| Law | Status | The reading that decided it |
+|-----|--------|-----------------------------|
+| L4 | **ACTIVE, satisfied** | D4′ landed and the registry now derives every command from its module path. The check is executable and has a named falsifier: the guard `tests/python/test_artifact_metadata.py::test_every_manifest_command_resolves_as_a_module_without_being_run` dry-resolves each `generated_by_command` with `find_spec` (nothing is run), and the controlled plant `manifest-records-a-command-that-is-not-a-module-invocation` rewrites one manifest command into a bare path form, which the guard rejects. Re-derive the guard's verdict with `uv run python -m pytest -q <guard>` and the plant's red/green through `uv run python -m quantrisk.verification.runner`; runner-side readings, their runs and the plant's mechanism are recorded in `INTERFACE_LEDGER.md` §10. |
+
+This table is the record `INTERFACE_ROADMAP.md` §3's Check designates: that clause names *this* file
+as the authority for L4's status, while the matching Phase 5 row written in `REFACTOR_LEDGER.md`
+lives on a different rail. The ACTIVE reading now exists where the Check looks for it; the ledger
+entry remains a report of the same fact, not the authority itself.
+
 ---
 
 ## 14. Safety rails

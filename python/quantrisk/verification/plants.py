@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 503 tests collected offline",
+        anchor="# 511 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -419,7 +419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 572 pytest tests with the validation",
+        anchor="and 580 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 198/198 planted defects rejected",
+        anchor="# 199/199 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -693,7 +693,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 503 collected without them",
+        anchor="oracles installed, 511 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -818,7 +818,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 572 pytest tests with the `oracles` extra here",
+        anchor="# 580 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -2897,6 +2897,24 @@ MUTATIONS: tuple[Mutation, ...] = (
             "while the published page still renders the old value; changing one figure in a locked "
             "artifact without re-freezing the baseline must redden the lock guard, or H3's "
             "'the reading surface never drifts' is a slogan rather than a checked claim"
+        ),
+    ),
+    Mutation(
+        identifier="provenance-erases-a-recorded-command",
+        kind="prose",
+        path="evidence/manifest.json",
+        anchor="uv run python -m quantrisk.experiments.sixth_book_crossing_map",
+        replacement="",
+        guard=(
+            "tests/python/test_interface_provenance.py::"
+            "test_no_value_is_returned_without_its_command_digest_and_revision"
+        ),
+        claim=(
+            "the agent-facing surface exists to return a value together with the command, "
+            "revision and digest that make it checkable; erasing one recorded command must redden "
+            "the guard that requires every published value to resolve with its full provenance, "
+            "or DoD item 4 'a refusal names the gap, never a bare number' is a sentence nobody "
+            "has falsified"
         ),
     ),
 )
