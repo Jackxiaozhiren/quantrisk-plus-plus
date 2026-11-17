@@ -1,0 +1,106 @@
+{
+  "pages": {
+    "fifth_order_crossing_map.html": {
+      "artifact": "experiments/fifth_order_crossing_map/results/fifth_order_crossing_map.json",
+      "artifact_sha256": "37530b7fdf227a37186e8c654a4e66f305924fb08bf413e39e53bc1e39975b6b",
+      "page_sha256": "e905d5484b4da56557f7446ba725e6d74af1529a24a5743a9d6ac6e7fd07f642"
+    },
+    "fourth_order_crossing_map.html": {
+      "artifact": "experiments/fourth_order_crossing_map/results/fourth_order_crossing_map.json",
+      "artifact_sha256": "7a251a509edd9a7fff03d7fdd23ba296fb23a4cb01a5e3673bb6dc1a4c3fbf5a",
+      "page_sha256": "623f1db3883f3e56ecdedaf1cdb46f08a74bb8406b53e3370e0556f4d80481d9"
+    },
+    "index.html": {
+      "artifact": "",
+      "artifact_sha256": "",
+      "page_sha256": "692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4"
+    },
+    "linearisation_error_bound.html": {
+      "artifact": "experiments/linearisation_error_bound/results/linearisation_error_bound.json",
+      "artifact_sha256": "7262e4ac11c059941f74f71532a4d8df29cab24e9c186658ff8521a56f9d7005",
+      "page_sha256": "bce465ab5bc7ce6f19aaa20f331d9ab73ee8feb9160d9135af6299c97c12f77a"
+    },
+    "mc_convergence.html": {
+      "artifact": "experiments/monte_carlo_convergence/results/summary.json",
+      "artifact_sha256": "77e012f723747ed3957eb4a03d0581d78129ed36af4d84557b6aba3f4349f152",
+      "page_sha256": "d203a02bc50a6c98dcd5e6be16e0dccb2faa2a88d57e3b572c32f830a6a52496"
+    },
+    "mc_speed.html": {
+      "artifact": "benchmarks/performance/results/monte_carlo_speed.json",
+      "artifact_sha256": "8b4d83bd6d0c83a03cf7e06b045938d39e0d205eff9eadb286ed5a06343e8241",
+      "page_sha256": "1a72a2e1a026818a40408b63ab6488a8488a30576ed27fa5c643fb90b6dbe271"
+    },
+    "monte_carlo_vs_analytic.html": {
+      "artifact": "benchmarks/quantlib/results/monte_carlo_validation.json",
+      "artifact_sha256": "d2842cb1b6d841b08821fc2cbed9552310bcac6b84bfa768ce4d451545b3a078",
+      "page_sha256": "3cf63f56414bf04f8d711440bbe0b5d480cae3c15eb1392893d2bfef3b977fcf"
+    },
+    "optimisation_vs_oracles.html": {
+      "artifact": "benchmarks/pyportfolioopt/results/optimisation_vs_oracles.json",
+      "artifact_sha256": "0c1abbdbd92f3ccf16569c61cf0865dbfb5d519d8bd4cdab1653698518466446",
+      "page_sha256": "531cd7395a507afd477ad3efcf00dcbe430c36b29efe031892b5cd1ee03003be"
+    },
+    "path_dependent_vs_quantlib.html": {
+      "artifact": "benchmarks/quantlib/results/path_dependent_vs_quantlib.json",
+      "artifact_sha256": "4695ec5027c6470aec30e4659ec1d06c16c2d65893d3b382ca2ace2c30da41c6",
+      "page_sha256": "5081e5f62803a0f7cd956e235b6429edd1326d0d97dd5fd3034f0820082c3791"
+    },
+    "portfolio_estimation_cost.html": {
+      "artifact": "experiments/portfolio_optimization/results/portfolio_optimisation_study.json",
+      "artifact_sha256": "f498d5fb859ff45fc8b7cb5de9ce2a64c4ce152c98dcc6b1fa7b441926ea7caa",
+      "page_sha256": "409b27b8e17fb470825c6da0be42d5111cf1c2aef1604b6c3781bb7f07abb150"
+    },
+    "pricing_grid.html": {
+      "artifact": "experiments/pricing_validation/results/summary.json",
+      "artifact_sha256": "e1135bdc07f54d32466e29a7eebd7a0aee4af59f54f7308032e72bfe6fbc36e8",
+      "page_sha256": "61b222097ad9571b59bd2b9a40eb4dfabbe10e3dfad3f6b46c8bf851ea101985"
+    },
+    "pricing_vs_quantlib.html": {
+      "artifact": "benchmarks/quantlib/results/pricing_vs_quantlib.json",
+      "artifact_sha256": "1219b5ac51d759b9109c8263a9ba088a431817dfe7b606acc096bc2c323e648c",
+      "page_sha256": "3ceec3b07559f7e8bdc2c84d5c21598c6081407dfd5b39ca37679730d3d1f97c"
+    },
+    "real_data_risk_study.html": {
+      "artifact": "experiments/real_data_risk_study/results/real_data_risk_study.json",
+      "artifact_sha256": "c5686465f246dfecfa12dd638da8dbc85678d132f3587ef4ed14e4b5cdc7a0f8",
+      "page_sha256": "b8d28828ab92e504a7ff9d05e17752c258a956a49bd0fe9f50c0efa44225cec1"
+    },
+    "restrike_gamma_map.html": {
+      "artifact": "experiments/restrike_gamma_map/results/restrike_gamma_map.json",
+      "artifact_sha256": "c69b6b438124e898d63743adebe1080cd3c467923a1e3539f5faabb279c7143d",
+      "page_sha256": "06c94e1c6a40c8498672c3c12a831044dcba0e84214a51f950aa36416c07104e"
+    },
+    "second_book_crossing_map.html": {
+      "artifact": "experiments/second_book_crossing_map/results/second_book_crossing_map.json",
+      "artifact_sha256": "a72524d2d0c32fd382f9da19b59d65cc9dd7dc1983c98bc00ec02abc4d2a0def",
+      "page_sha256": "45ab9291d81850118f90f09711a24ab41dc10b5f15264ee9cd558e6f255246b8"
+    },
+    "sixth_book_crossing_map.html": {
+      "artifact": "experiments/sixth_book_crossing_map/results/sixth_book_crossing_map.json",
+      "artifact_sha256": "916912571fa7ba4e90a655ff4d2c38aee8b1c687f0bfab243ba62053130c69c9",
+      "page_sha256": "2e13195b47e6fde67c1f0677ed547246967f6d9b61bdee521e39480d3fa5ffcd"
+    },
+    "stress_testing.html": {
+      "artifact": "experiments/stress_testing/results/stress_testing_study.json",
+      "artifact_sha256": "51ae1a6848b9f31571c84c7f511006f8e3dac669d8cf98d4101b34abdd18519e",
+      "page_sha256": "5a9f55405c97e697667f8a4a5ee0ec6abfbb2e4bf844cd6d8d719660a557dbf6"
+    },
+    "two_factor_error_bound.html": {
+      "artifact": "experiments/two_factor_error_bound/results/two_factor_bound.json",
+      "artifact_sha256": "d8aac86b6c757ab5893acf0d0bf0d8f02eb5df244d20de229a1554849d34ffcf",
+      "page_sha256": "a7d372b12faf341136d8f27a18a675136132caa2e2a8bbfc7c8099dcc07bc6bf"
+    },
+    "var_backtesting.html": {
+      "artifact": "experiments/var_backtesting/results/var_backtesting_validation.json",
+      "artifact_sha256": "5748299de01c7c90592e06737b9386d4447668f970d90d08966a4d19f722e3a8",
+      "page_sha256": "c757cebe6e213c2b0f69434946c54551519977b30f1408fe046394897f523770"
+    },
+    "variance_reduction.html": {
+      "artifact": "experiments/variance_reduction/results/summary.json",
+      "artifact_sha256": "8cbac14ea5b6e47d9bfacc346bf305917a98491e64de87f6bf22baad4c26121d",
+      "page_sha256": "046db58248527480d7bee6e6a0ef5ab9c6c81f50b8132d285b606907defbf7c2"
+    }
+  },
+  "schema": "quantrisk-site-lock/1",
+  "source": "quantrisk.interface.site"
+}

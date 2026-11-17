@@ -84,6 +84,13 @@ jobs:
       # green. The step is the reading the document already promised, and a guard now compares the two.
       - name: evidence manifest
         run: uv run python -m tools.verify_evidence_manifest
+      # X3. The manifest gate above watches artifact bytes; this watches the published page. Both
+      # can stay green when a figure moves with its digests re-frozen, so the site lock is a second,
+      # independent baseline at a named revision. A planted figure change is proved to redden it.
+      - name: site drift gate
+        run: >-
+          uv run python -m quantrisk.interface.drift
+          --lock build/site.lock --check --out "${RUNNER_TEMP}/site-drift-rebuild"
 
   build-and-test:
     name: Configure, build, C++ tests, Python tests

@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 499 tests collected offline",
+        anchor="# 503 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -419,7 +419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 568 pytest tests with the validation",
+        anchor="and 572 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 197/197 planted defects rejected",
+        anchor="# 198/198 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -693,7 +693,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 499 collected without them",
+        anchor="oracles installed, 503 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -818,7 +818,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 568 pytest tests with the `oracles` extra here",
+        anchor="# 572 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -2879,6 +2879,24 @@ MUTATIONS: tuple[Mutation, ...] = (
             "the scan has to redden on any literal the module did not declare, or `I-L2` is a "
             "sentence about a surface nobody has checked — and this is the sample that makes the "
             "boundary mechanical rather than aspirational"
+        ),
+    ),
+    Mutation(
+        identifier="site-lock-catches-a-manifest-silent-figure-change",
+        kind="prose",
+        path="experiments/restrike_gamma_map/results/restrike_gamma_map.json",
+        anchor="0.6924",
+        replacement="0.6934",
+        guard=(
+            "tests/python/test_interface_drift.py::"
+            "test_the_committed_lock_detects_a_figure_that_drifted_in_an_artifact"
+        ),
+        claim=(
+            "the drift gate exists for the change the digest gate cannot see: a figure moves in an "
+            "artifact and its digests are re-frozen with it, so the evidence chain stays green "
+            "while the published page still renders the old value; changing one figure in a locked "
+            "artifact without re-freezing the baseline must redden the lock guard, or H3's "
+            "'the reading surface never drifts' is a slogan rather than a checked claim"
         ),
     ),
 )

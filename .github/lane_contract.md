@@ -100,6 +100,15 @@ it did not take.
       "reason": ""
     },
     {
+      "command": "quantrisk.interface.drift",
+      "status": "executed",
+      "claimed_by": ["docs/reproducibility.md", "CONTRIBUTING.md"],
+      "ci_job": "lint",
+      "ci_step": "site drift gate",
+      "environment": "ubuntu-latest",
+      "reason": ""
+    },
+    {
       "command": "quantrisk.verification.runner",
       "status": "executed",
       "claimed_by": ["CONTRIBUTING.md"],

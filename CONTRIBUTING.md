@@ -38,6 +38,7 @@ uv run python -m tools.run_benchmark_suite --require-all
 uv run quantrisk validate                # seven identities against the build you just made
 uv run quantrisk run --list              # the studies the registry owns, with their extras and artifacts
 uv run python -m tools.verify_evidence_manifest
+uv run python -m quantrisk.interface.drift --lock build/site.lock --check --out <dir>
 ```
 
 `--require-all` on the suite is what makes the run mean something: without the `oracles` extra some
