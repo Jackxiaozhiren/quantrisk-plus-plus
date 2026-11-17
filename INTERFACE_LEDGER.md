@@ -773,4 +773,70 @@ observed-only, because a third ref update is outside this approval. No tag, rele
 publication is moved. The `site drift gate` step added in X3 is expected to run on the runner as a
 new CI step, and its reading belongs to whichever job carries it.
 
+## 19. X3's first platform run: a MyPy-only failure, and the typed repair
 
+The first ref update moved the platform from `3ab651f` to `97cd793` with five commits (the four
+X3 commits plus the commit that recorded this approval), non-forced, every blob, tree and commit
+SHA verified, no tag moved. Run `44077370395`, attempt 1, head `97cd793d6635`, created
+`2026-11-17T11:48:50Z` and updated `12:04:10Z`, concluded **failure**: five of six jobs succeeded
+and "Format and static checks" failed. In that job `ruff`, `ruff format` and `clang-format`
+succeeded; `mypy` printed:
+
+> `python/quantrisk/interface/drift.py:91: error: Incompatible return value type (got "Collection[str]", expected "dict[str, dict[str, str]]")  [return-value]`
+> `Found 1 error in 1 file (checked 78 source files)`
+
+The job stops there. `Docs re-derivation`, `Artifact revision`, `refactor ceilings`,
+`evidence manifest` and the new `site drift gate` are `skipped` in this run; no reading is inferred
+for them from another job. In particular this run supplies **no runner-side site-drift reading** —
+the step never executed. That absence is the reason for the second ref update, not a claim that the
+step failed.
+
+The five successful jobs remain readings at `97cd793`, attributed to the job that printed them:
+
+| Job | Reading |
+|---|---|
+| Configure, build, C++ tests, Python tests | `100% tests passed out of 204`; `502 passed, 5 skipped in 132.37s`; `7/7 checks passed`; `PASS: V9_LEDGER.md attests 5ec3fabe4fa8c83584a50b3ab66b357ae13094e9 as a strict ancestor of 97cd793d6635, 195 caught of 195 declared` |
+| Mutation census | `198 declared = 197 measurable here + 1 environment-blind`; `197/197 planted defects were rejected by their guard`; `site-lock-catches-a-manifest-silent-figure-change` printed `ok caught`; verdict `declared 197 / ran 197 / caught 197` at revision `97cd793d6635`, both `git status --porcelain` readings empty |
+| Benchmark suite | `19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 246.3s total`; with-extras census `19/19`, `gap: 0` |
+| Installed wheel surface | clean venv outside the checkout, revision `97cd793d663547585b93a05b651d878c3565509b`, version `1.9.0`, `7/7` proved checks passed |
+| macOS native parity | `100% tests passed out of 204`; `98 passed in 2.08s` |
+
+The blind plant is the registered `report-source-edited-without-a-rebuild-seen-from-the-render`:
+this runner's pdfTeX was 1.40.28 against the sidecar's recorded 1.40.29, so it is declared
+environment-blind rather than counted as caught. The ceiling adjudication in both the
+installed-surface and mutation-census jobs printed 14 `ok` / 1 `SKIP` (`installed_user_identity_mismatch`
+precondition absent on each vantage), `docs_rederivation` `gap: 0` with 198 derived plants, and
+`lanes_documented_vs_executed` `gap: 0` with `quantrisk.interface.drift` already executed at
+`lint :: site drift gate` in the workflow text.
+
+Commit `c59cb62` fixes only the static finding: `freeze()` used to return `document["pages"]`,
+which MyPy widened from the declared `dict[str, dict[str, str]]` to `Collection[str]` because the
+surrounding document mixes string and dict values. It now binds the fingerprint dict to a typed
+local and returns that local. No runtime behaviour, test, plant pairing or lock byte changes, and
+the drift module's own zero-literal test still holds. The local gate lesson is repeated from
+section 15 with a different step: `ruff check .`, `ruff format --check .` and `mypy <targets>` are
+three separate CI steps, and only the first two had been run before the first push. The failed run
+is kept here as a failure rather than omitted.
+
+Local re-measurement at `c59cb62`:
+
+| Reading | Value |
+|---|---|
+| Static trio | `ruff check .` all checks passed; `ruff format --check .` 257 files already formatted; `uv run mypy python/quantrisk tools` `Success: no issues found in 78 source files` |
+| Drift-specific | `4 passed in 0.95s` for `tests/python/test_interface_drift.py`; `PASS: rebuilt site matches build/site.lock` |
+| Evidence and documents | `95 OK`, `0 CHANGED`, `0 MISSING`, `0 on disk but not in the manifest`; `docs_rederivation` `gap: 0` with 198 derived plants |
+| Full census | `198/198 planted defects were rejected by their guard`; verdict `declared 198 / ran 198 / caught 198`, `non_caught []`, `unmeasurable []`, watched checkout empty before and after |
+| Ceilings | 15 keys, 14 `ok` / 1 `SKIP` with the new verdict supplied through `QUANTRISK_SWEEP_VERDICT`, no `FAIL` |
+| Full pytest | `1 failed, 571 passed in 129.55s` — the known sandbox bytecode-cache plant, named and not silenced; CI reads the runner's result |
+| Scope | only `python/quantrisk/interface/drift.py`, four insertions and three deletions; no test, plant, artifact, lock or document changed |
+
+The local census needed its injected `PYTHONPATH` shim removed for that one child process: the
+shim's `rmdir` broker cannot delete the harness's empty probe directory, and the first attempt
+stopped at the first tree plant without producing a verdict. This is a machine-side file-system
+detail, not a project defect; removing the injection changes no guard, plant or source byte, and
+the re-run returned the verdict quoted above with the tree clean.
+
+The second ref update in this approval carries `c59cb62` together with this backfill commit. Its
+own run is observed-only under section 18's recursion limit — a third ref update is outside the
+approval — so its outcome belongs in the local work log and no reading in this section is a claim
+about that tip.
