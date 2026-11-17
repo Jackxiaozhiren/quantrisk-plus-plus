@@ -246,7 +246,7 @@ static publish, and read-only machine surface. No date is attached.
 | 1d | X3: a page-level drift gate with a committed baseline and a falsifying plant; no deploy, new key or zero-literal-rule change | Done at `28727f4`: `198/198`, single-plant red/green and all readings in section 17; no platform reading because section 16 excludes a push |
 | 1e | X4: G-A/G-B attribution gaps closed in the designated file; read-only provenance surface with a named falsifying plant; no CLI subcommand, deploy or new key | Done at `25aed30`: `199/199`, single-plant red/green and all readings in section 21; no platform reading because section 20 excludes a push |
 | 2 | I1 CLI provenance surface | Done as a `-m` module under X4 scope A: `python -m quantrisk.interface.provenance --list/--resolve` answers provenance offline with a guarded output; the literal `quantrisk` subcommand form was declined in X4 option B and stays outside the frozen four-subcommand contract; readings in section 21 |
-| 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | 未完成 |
+| 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | Partial: generator done at `aafb707` and drift gate proven falsifiable at `28727f4` (sections 13/17); X5 enables Pages and adds the gated CI `deploy` job at `0b2ae7a` (section 26), but section 24 excludes a push, so the publish has not run on a runner and no live-URL reading is claimed; the offline build stays partial (I-L5, section 2) |
 | 4 | I3 value and provenance returned together, refusals name the gap | Done at `25aed30`: `resolve()` returns value + command + revision + digest together and refuses by name on any missing element; plant `provenance-erases-a-recorded-command` proves the guard fails; readings in section 21 |
 | 5 | H1–H4 measured, liveness filled, deliberately-not-done list | Partial: liveness filled as VOID, H1–H4 unmeasured, deliberately-not-done list below |
 
@@ -1049,3 +1049,87 @@ attestation; any movement of tag `v1.9.0`; and any push (a separate approval, as
 H1–H4 measured values, I-L5's genuine network-down build, and I-L3/L4/L6's move from VOID to
 measured are consequences of having a published surface, not claims made by this scope unit. They
 are named here as subsequent units so that X5 does not assert a value it has not measured.
+
+## 26. X5 phase report — CI publication of the artifact-bound site
+
+Section 24 holds the scope sentence and the approval original. A push is excluded there, so every
+reading in this section is development-side at the implementation tip `fa68b7b`. The commits that
+make the unit: `59f2e82` scope and approval; `0b2ae7a` the Pages enablement record, the deploy job,
+its guard and plant, the lane/document registration and the re-derived counts; `fa68b7b` the claim-
+sample gold re-annotation that the document-byte change required.
+
+### 26.1 The site is published from the bytes the gate verified
+
+`build/site/` is generated from committed artifacts by `python -m quantrisk.interface.site`; the
+X3 gate freezes each page's SHA-256 and its source artifact's SHA-256 in `build/site.lock` and
+rebuilds to compare. X5 adds a `deploy` job that calls that same gate with
+`--out "${RUNNER_TEMP}/site-publish"`, then uploads that directory with
+`actions/upload-pages-artifact@v4` and publishes it with `actions/deploy-pages@v4`. Because the
+drift check writes the pages it verifies, the uploaded bytes are the checked bytes; there is no
+second build whose agreement is assumed. A figure that moved with its digests re-frozen still
+reddens the lock, so the gate fails and the job cannot publish.
+
+Three properties make the job a claim rather than a hope, each with a named test in
+`tests/python/test_interface_deploy.py`:
+
+| Property | Guard |
+|---|---|
+| Publication is downstream of the drift gate | `test_publication_is_downstream_of_the_drift_gate` — deploy `needs: [lint]`, and lint runs `site drift gate` |
+| The published bytes are the verified bytes | `test_publication_uploads_the_bytes_the_gate_verified` — one drift `--check --out site-publish`, one Pages upload of that path, one deploy |
+| No stored secret and a bounded event | `test_publication_adds_no_stored_secret` (permissions exactly contents:read / pages:write / id-token:write, no `secrets.`), `test_publication_runs_only_on_main_pushes`, `test_publication_never_moves_a_tag` |
+
+`permissions` adds only `pages: write` and the short-lived OIDC `id-token: write`; no account, key
+or secret is introduced into the repository, so K1 and IN2's "$0, no new secret, no account for a
+free tier" hold. The OIDC token is minted per deployment by GitHub, not stored. GitHub Pages was
+enabled through `POST /repos/{owner}/{repo}/pages` with `build_type: "workflow"` — the same external
+effect the option described as a manual Settings click, performed by API because the token carries
+`repo` scope and repository admin rights. The site is `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`,
+public, HTTPS-enforced, no CNAME. The `github-pages` environment exists and its branch policy
+admits `main`, matching the job's `if`.
+
+### 26.2 The sample that can break it
+
+| Element | Value |
+|---|---|
+| Plant | `deploy-drops-the-lint-dependency` |
+| Target | `.github/workflows/ci.yml`, the unique anchor `needs: [lint]` → `needs: []` |
+| Guard | `tests/python/test_interface_deploy.py::test_publication_is_downstream_of_the_drift_gate` |
+| Mechanism | dropping the edge makes publication independent of the lint job that runs the drift check; the guard reads the parsed workflow and refuses the disconnected job; restoring the edge returns it to green |
+
+Harness red/green at `fa68b7b`: planted guard `1 failed` with the refusal naming `needs=[]`;
+restored `1 passed`; the full census recorded `ok caught` for the plant.
+
+### 26.3 Readings — all development-side at `fa68b7b`
+
+| Reading | Value |
+|---|---|
+| Full census | `200/200 planted defects were rejected by their guard`; verdict `declared 200 / ran 200 / caught 200`, `non_caught []`, `unmeasurable []`, both `git status --porcelain` readings empty, revision `fa68b7b6e15e` |
+| Single plant | planted guard red, restored green; `ok caught` in the full census |
+| `runner --list` | 200 plants; `docs_rederivation` `gap: 0` at 200 derived plants |
+| Ceilings | 15 keys, `14 ok / 1 SKIP` with the verdict supplied through `QUANTRISK_SWEEP_VERDICT` (`installed_user_identity_mismatch` precondition absent on this vantage), no `FAIL` |
+| Full pytest | `585 passed in 151.41s` with `PYTHONDONTWRITEBYTECODE` unset; under this shell's default `PYTHONDONTWRITEBYTECODE=1` the known sandbox bytecode-cache case fails instead (X3/X4's same case) — not a regression |
+| Static trio | `ruff check .` all checks passed; `ruff format --check .` 260 files already formatted; `uv run mypy python/quantrisk tools` `Success: no issues found in 79 source files` |
+| Evidence manifest | `95 OK`, `0 CHANGED`, `0 MISSING`, `0 on disk but not in the manifest` |
+| Drift CLI | `PASS: rebuilt site matches build/site.lock` |
+| Deploy guards | `5 passed` in `test_interface_deploy.py` |
+| Pages | `build_type=workflow`, `public true`, `https_enforced true`, no cname, branch policy `main` |
+
+The count cascade moved plants `199→200`, offline-collected tests `511→516`, with-oracles tests
+`580→585`; the living claims, the five plant anchors, the gold tuples and the rebuilt report PDF
+and sidecar were updated in `0b2ae7a`. A new cascade kind appeared: editing document bytes changes
+the fixed-stride claim-sample units, so `_CLAIM_SAMPLE_GOLD`'s index 420 and the false-positive
+list were re-annotated in `fa68b7b` — the guard's own instruction ("re-annotate the gold, do not
+edit this assert") was followed, and neither the stride nor any assertion was changed. A concurrent
+census+pytest run was found to produce false failures in the restrike and mutation modules; the
+final readings above were taken with the two runs serialised.
+
+### 26.4 What X5 did not do
+
+No push: section 24 excludes it, so the deploy job has never executed on a runner and this section
+claims no live-URL reading. DoD item 3 is therefore **Partial**, not Done — the free-tier publish is
+enabled and gated in code, but not yet observed from the platform. Offline build stays partial
+(I-L5: the in-process no-socket test is narrower than a network-down build, and a subprocess making
+a network call escapes the probe). H1–H4 values, I-L3/L4/L6's move from VOID and the genuinely
+network-down build remain subsequent units — they are consequences of a published surface, not
+claims this unit makes. No new secret, account, dependency, ceiling key or CLI subcommand; no tag
+moved; no edit to the V9 historical attestation.
