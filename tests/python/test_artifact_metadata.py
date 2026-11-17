@@ -3095,13 +3095,18 @@ _CLAIM_SAMPLE_MISSES = (
     "210 docs/interview_defense.md :: 2 min",
     "336 docs/interview_defense.md :: two lattices",
     "378 docs/interview_defense.md :: 116 of 120",
+    "420 docs/interview_defense.md :: five books",
     "588 docs/validation_matrix.md :: two contributions",
     "588 docs/validation_matrix.md :: 132/132 swept shocks",
     "714 paper/technical_report.tex :: 500 days",
     "756 paper/technical_report.tex :: seven and a half orders of magnitude",
     "1008 paper/technical_report.tex :: one cross-language guarantee",
 )
-_CLAIM_SAMPLE_FALSE_POSITIVES: tuple[str, ...] = ()
+_CLAIM_SAMPLE_FALSE_POSITIVES: tuple[str, ...] = (
+    "588 docs/validation_matrix.md :: four rays",
+    "630 paper/technical_report.tex :: two definitions",
+    "756 paper/technical_report.tex :: six readings",
+)
 
 
 def _claim_sample() -> list[tuple[int, str, str]]:
