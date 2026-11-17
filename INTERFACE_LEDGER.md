@@ -840,3 +840,46 @@ The second ref update in this approval carries `c59cb62` together with this back
 own run is observed-only under section 18's recursion limit — a third ref update is outside the
 approval — so its outcome belongs in the local work log and no reading in this section is a claim
 about that tip.
+
+## 20. Scope unit X4 — the attribution gaps and the read-only provenance surface
+
+Scope unit X4, as put to the maintainer verbatim, with the alternatives that were declined beside it:
+
+> **方案 A（推荐）** 批准作用域单元 X4：只做两件事。(1) 修复两处文档归属缺口：在
+> `REFACTOR_PROMPT.md` §13 新增一张 Phase 5 后 liveness 更新表，把 L4 记为 ACTIVE 并附可复核
+> 读数，不改写 "Liveness at authoring" 历史表；(2) 新增一个包内只读模块
+> `python -m quantrisk.interface.provenance`，实现 I1/I3 的溯源语义——列举注册任务及其
+> canonical command、按 artifact 路径查 manifest 溯源条目、返回值并同时返回
+> command/revision/digest、缺任一溯源要素即具名拒绝而非返回裸值——并新增一株受控植物证明
+> 该拒绝守卫会转红、恢复转绿，机制在阶段报告中具名。不新增 CLI 子命令、不改冻结的输出
+> 指纹与子命令集合守卫、不新增天花板键、不改 CLI 输出或公开 API 名称、不新增依赖、不做
+> 部署或发布；入口为 `-m` 模块而非 `quantrisk` 子命令。
+
+Approval original, verbatim: `方案 A（推荐）`.
+
+The two declined alternatives are kept so the boundary is a decision, not an omission. **B** would
+have added real `quantrisk` subcommands (`provenance`/`list`/`findings`) and edited the frozen
+usage-set assertion and CI-lane guard to accept them — declined because it rewrites the E28/§3
+frozen CLI contract, with a larger blast radius. **C** would have repaired G-A/G-B only and left
+DoD items 2 and 4 open — declined because the maintainer chose to close the repository-provable
+items in this unit.
+
+Bounded effect, and nothing beyond it: one new update table in `REFACTOR_PROMPT.md` §13; one new
+in-package module reachable as `python -m quantrisk.interface.provenance`; one new pytest guard
+plus one controlled plant proving that guard can fail; the count claims that plant moves,
+re-derived in the same series. Excluded: any new CLI subcommand, any change to the frozen output
+fingerprints or the four-subcommand set assertion, any new ceiling key, any change to CLI output
+or to a frozen public API name, any new dependency, any deploy or publish, any edit to the
+"Liveness at authoring" historical table, and any change to the V9 historical attestation. A push
+is a separate external action and is **not** covered here.
+
+Two constraints are part of the scope because the readings that would break are already measured:
+
+| Constraint | Reading it would break |
+|---|---|
+| The provenance surface is a `-m` module, not a CLI subcommand | §3 condition 3 and `test_cli_pre_existing_command_outputs_kept_their_contracts_when_run_landed` count exactly four subcommands |
+| The L4 update is a new table, not an edit to the authoring table | section 1's rule that a reading silently edited to match a later state is the failure this ledger exists to prevent |
+
+Known blast radius, from three prior units: a 199th plant moves the `198/198` annotation in
+`docs/interview_defense.md` and the derived-plant count behind `docs_rederivation`; both turn red
+until re-derived. X4 treats those as part of its own change, not as surprises.
