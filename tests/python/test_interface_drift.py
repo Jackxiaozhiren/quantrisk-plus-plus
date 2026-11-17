@@ -23,7 +23,7 @@ from quantrisk.experiments.metadata import REPO_ROOT, sha256_file
 from quantrisk.experiments.registry import TASKS_BY_ID
 from quantrisk.interface import drift, site
 
-from tests.python.test_interface_site import _temp_root
+from tests.python.test_interface_site import _numeric_literals, _temp_root
 
 # A rendered study whose headline holds a figure unique inside its own artifact and absent from
 # every plant anchor and every claim the documents print, so the plant isolates this one gate.
@@ -132,3 +132,9 @@ def test_a_drifted_page_is_named_and_a_bad_lock_is_refused(tmp_path: Path) -> No
         pass
     else:
         raise AssertionError("a lock with the wrong schema was accepted as a baseline")
+
+
+def test_the_drift_module_carries_no_numeric_literal() -> None:
+    """The gate holds no figure of its own, on the same rule the generator obeys."""
+    source = Path(drift.__file__).resolve().read_text(encoding="utf-8")
+    assert _numeric_literals(source) == []

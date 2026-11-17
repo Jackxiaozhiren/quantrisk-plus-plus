@@ -16,8 +16,8 @@ Two commands, both module-path invocations so the CLI's four subcommands stay fo
 Freeze writes the lock from a build of the current tree. Check rebuilds and compares, printing one
 line per page and exiting non-zero if any page's digest, any artifact's digest, or the set of pages
 has moved. Both digests are read from the lock or recomputed from files; no figure is typed here.
-This module contains no numeric literal, like every module in the interface package, and the same
-source guard covers all of them.
+This module contains no numeric literal, as `site.py` does; each is checked by its own source
+guard, so adding one is a visible act rather than a quiet one.
 """
 
 from __future__ import annotations
@@ -39,8 +39,8 @@ LAYOUT_NUMBERS: frozenset[int] = frozenset()
 """The allowance is empty, as in `site.py`: this module carries no numeric literal at all.
 
 JSON is written compactly and a failing check exits with a message rather than a typed status, so
-neither formatting nor the exit path needs a figure. The guard reads this set over every interface
-module, so widening it anywhere is a visible act.
+neither formatting nor the exit path needs a figure. The guard in the drift test module reads this
+source, so widening the allowance is a visible act.
 """
 
 

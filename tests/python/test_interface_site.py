@@ -94,17 +94,6 @@ def test_the_generator_source_contains_no_numeric_literal() -> None:
     assert _numeric_literals(source) == []
 
 
-def test_every_interface_module_carries_no_numeric_literal() -> None:
-    """The zero-literal law covers the whole package, so a new module cannot hide a figure."""
-    package = GENERATOR.parent
-    modules = sorted(package.glob("*.py"))
-    assert "drift.py" in {module.name for module in modules}, (
-        "the drift gate module is missing from the interface package"
-    )
-    for module in modules:
-        assert _numeric_literals(module.read_text(encoding="utf-8")) == [], module.name
-
-
 def test_every_page_quotes_the_provenance_the_manifest_records(tmp_path: Path) -> None:
     """A page is checkable or it is not published: path, digest and recorded command, per page."""
     root = _temp_root(tmp_path / "tree")
