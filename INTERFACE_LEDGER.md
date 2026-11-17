@@ -171,7 +171,7 @@ not be cited to justify or block work.
 | # | State | Predicate or reason it is VOID |
 |---|---|---|
 | I-L1 | VOID | §3 condition 4 is named VOID; no resolvability reading with a named plant to bind a target to |
-| I-L2 | Filled for generation; drift half VOID | `python -m quantrisk.interface.site` builds pages from committed artifacts, and `test_the_generator_source_contains_no_numeric_literal` plus plant `site-source-carries-a-figure-of-its-own` make the source scan falsifiable at `aafb707`. No drift gate exists, so the drift half stays VOID |
+| I-L2 | Filled — both halves | `python -m quantrisk.interface.site` builds pages from committed artifacts, and `test_the_generator_source_contains_no_numeric_literal` plus plant `site-source-carries-a-figure-of-its-own` make the source scan falsifiable at `aafb707`. The drift half is filled at `28727f4` by `python -m quantrisk.interface.drift --check` against the committed `build/site.lock`, with guard `test_the_committed_lock_detects_a_figure_that_drifted_in_an_artifact` and plant `site-lock-catches-a-manifest-silent-figure-change` proving it reddens (section 17) |
 | I-L3 | VOID | No deployment exists; no build output to probe for request-execution paths |
 | I-L4 | VOID | No deployment configured; no cost diff over a real range |
 | I-L5 | Partial | `test_the_build_opens_no_socket` refuses `socket.socket`, `create_connection` and `getaddrinfo` for a full build; a build with the network actually down was not run, and a subprocess making a network call would escape this probe |
@@ -191,7 +191,7 @@ is not a measurement. No measurement was run under X1, which contains no measure
 |---|---|---|---|---|
 | H1 cold-start reproduction | 未测得 | 未取得 | 未取得 | 未测得 |
 | H2 provenance completeness | 未测得 | 未取得 | 未取得 | 未测得 |
-| H3 zero page drift | 未测得 | 未取得 | 未取得 | 未测得; the drift gate does not exist, so "not proven effective" applies |
+| H3 zero page drift | Mechanism proven at `28727f4`; value 未取得 | `python -m quantrisk.interface.drift --check` + committed `build/site.lock` | local and runner (see section 15's successor when pushed) | The gate exists and is proven falsifiable by a named plant; the zero-drift *value* over a published surface is still 未测得 because no deploy exists |
 | H4 zero cost | 未测得 | 未取得 | 未取得 | 未测得 |
 
 A hypothesis that later turns out false is a result and is recorded as one.
@@ -243,6 +243,7 @@ static publish, and read-only machine surface. No date is attached.
 | 1a | Platform verification of the X1 commits | Done: run `43718835599`, attempt 1, six of six jobs success; readings in section 1.1 |
 | 1b | X1b: one named plant proving the command-form guard fails, restore proving green, mechanism named in a phase report | Done: plant `manifest-records-a-command-that-is-not-a-module-invocation`; red `1 failed`, green `1 passed`, census `196/196` at `465735d`; runner-side `ok caught` in run `43732028206`; reports in sections 10 and 11.1 |
 | 1c | X2: generator emits artifact-bound pages with provenance; source scan has a named falsifying plant; no deploy, drift gate or new key | Done at `aafb707` locally and re-verified at `7971299`; section 13 holds the development-side readings, section 15 the first platform run's failure and its lint fix |
+| 1d | X3: a page-level drift gate with a committed baseline and a falsifying plant; no deploy, new key or zero-literal-rule change | Done at `28727f4`: `198/198`, single-plant red/green and all readings in section 17; no platform reading because section 16 excludes a push |
 | 2 | I1 CLI provenance surface | 未完成 |
 | 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | 未完成 |
 | 4 | I3 value and provenance returned together, refusals name the gap | 未完成 |
@@ -688,5 +689,73 @@ annotation in `docs/interview_defense.md` and the anchor of
 `docs-command-comment-counts-superseded-plants`, and both must be re-derived in the same series.
 The lock file is committed build output but is not a page: it is a frozen reading, and the scope's
 exclusion of committed build output continues to mean the `build/site/` page directory.
+
+## 17. X3 phase report — the page-level drift gate
+
+### 17.1 What the gate checks, and what it does not duplicate
+
+`python -m quantrisk.interface.drift --freeze --lock build/site.lock --out <dir>` froze a baseline of
+twenty pages at `4907057`: each page's SHA-256 beside the SHA-256 of the artifact that produced it.
+`--check` rebuilds into a temporary directory and compares both digests per page, plus the set of
+pages, exiting non-zero on any difference. The lock is committed; the rebuilt pages are not —
+`build/site/` stays ignored, so "no committed build output" still names the page directory, not the
+baseline.
+
+The subject is deliberately not the artifact bytes. `verify_evidence_manifest` already re-hashes
+every artifact's bytes and result content in CI, and the site build already refuses an artifact
+whose bytes disagree with the manifest. A figure can move in an artifact while both manifest
+digests are recomputed with it — the evidence chain is then internally consistent, so both of those
+guards stay green — and the published page still renders the old figure. Only a comparison against
+a frozen reading of the *page* sees that. This is H3's "every figure the site renders equals the
+value read from the artifact it claims", not a second opinion on the digest.
+
+### 17.2 The named falsification
+
+| Element | Value |
+|---|---|
+| Plant | `site-lock-catches-a-manifest-silent-figure-change` |
+| Target | `experiments/restrike_gamma_map/results/restrike_gamma_map.json`, the figure `0.6924` |
+| Guard | `tests/python/test_interface_drift.py::test_the_committed_lock_detects_a_figure_that_drifted_in_an_artifact` |
+| Mechanism | the guard reads the committed lock against the tree; changing a locked figure moves its artifact digest away from the frozen one, so the guard objects |
+
+Single-plant proof at `4907057`: planted `1 failed in 0.23s`, restored `1 passed in 0.22s`, verdict
+`caught`. The figure was chosen because `0.6924` occurs once in its artifact, is not a plant anchor
+elsewhere, and is not printed by any guarded document — so the plant isolates this gate rather
+than riding on another guard's objection.
+
+One scope correction is recorded rather than hidden. The first X3 commit widened the generator's
+zero-literal guard from `site.py` to the whole interface package; section 16 excludes any change to
+that rule, so `28727f4` restored the original guard byte for byte and gave `drift.py` its own
+zero-literal test instead. The swap is count-neutral (572/503 before and after) and leaves both
+plants' pairings intact. The final census revision is `28727f4`, not `4907057`.
+
+### 17.3 Readings — all development-side at `28727f4`
+
+| Reading | Value |
+|---|---|
+| Full census | `198/198 planted defects were rejected by their guard`; verdict `declared 198 / ran 198 / caught 198`, `non_caught []`, `unmeasurable []` |
+| Watch | checkout porcelain empty before and after the sweep |
+| Single plant | `1 failed in 0.23s` planted → `1 passed in 0.22s` restored, `caught` |
+| `runner --list` | 198 plants; `docs_rederivation` `gap: 0` at 198 derived plants |
+| Ceilings | 15 keys, `14 ok / 1 SKIP` with the verdict placed at `build/sweep_verdict.json` (the `installed_user_identity_mismatch` key reports its precondition absent on this vantage); no `FAIL` |
+| Full pytest | `1 failed, 571 passed`; the one failure is the known bytecode-cache plant, which needs `__pycache__` writes this shell does not make under `PYTHONDONTWRITEBYTECODE=1`; not a regression |
+| `ruff check .` / `ruff format --check .` | all checks passed / 257 files already formatted |
+| Evidence manifest | intact, `0 MISSING`, `0 CHANGED`, `0 on disk but not in the manifest` |
+| Drift CLI | `PASS: rebuilt site matches build/site.lock` |
+
+Two red censuses preceded the green one, both recorded as history rather than erased. An earlier
+`4907057` census was `198/198` but at a tip whose guard change exceeded the scope; the final
+`28727f4` census repeats `198/198` after that correction. Neither is treated as a claim about the
+other's revision — a verdict names the revision it measured.
+
+### 17.4 What X3 did not do
+
+No deployment, hosting or free-tier publish; no new ceiling key (the inventory stays at fifteen);
+no CLI subcommand (still four); no new dependency; no committed page; no change to the generator's
+zero-literal rule after the `28727f4` correction; no README or front-page rewrite. Liveness I-L2's
+drift half is now Filled, but H3's zero-drift *value* stays 未测得 because there is no published
+surface to measure — the gate is proven able to fail, not yet measuring a deployed page. A push is
+a separate external action excluded by section 16; no platform reading is claimed here. DoD item 3
+stays 未完成 because free-tier publish and a genuinely network-down offline build remain Phase 4.
 
 
