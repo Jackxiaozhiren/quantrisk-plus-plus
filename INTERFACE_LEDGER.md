@@ -979,3 +979,30 @@ ref update. The recursion limit is the one sections 11, 14 and 18 used: the back
 run is observed-only, because a third ref update is outside this approval. No tag, release,
 deployment or publication is moved; the `site drift gate` and the new provenance surface are expected
 to be exercised by the runner's existing jobs, and any reading belongs to the job that printed it.
+
+## 23. X4's first platform run: a clean six-job success
+
+The first ref update moved the platform from `11a7a50` to `c3db63e` with four commits (the three
+X4 commits plus the commit recording the approval), non-forced, every blob, tree and commit SHA
+verified, no tag moved. Run `44101295511`, attempt 1, head `c3db63ef7991`, created
+`2026-11-17T14:16:24Z` and updated `14:36:14Z`, concluded **success**: all six jobs succeeded.
+Unlike X3's first run, no repair was needed; the readings below are the runner's, each attributed
+to the job that printed it. This is the first X-series push that went green on its first run.
+
+| Job | Reading |
+|---|---|
+| Format and static checks | `ruff` `All checks passed!`; `ruff format` `259 files already formatted`; `clang-format` success; `mypy` `Success: no issues found in 79 source files`; `Docs re-derivation` `19/19 benchmark-suite members executed`, `199/199 planted defects rejected`; `Artifact revision` `gap 0` (shallow clone, pinned historical revision); `refactor ceilings` `14 ok / 1 SKIP` with no FAIL, `docs_rederivation_gap 0`, `lanes_documented_vs_executed_gap 0`, the SKIP being `installed_user_identity_mismatch` (precondition absent in the lint vantage); `evidence manifest` `95 OK`, `0 CHANGED`, `0 MISSING`; **`site drift gate`** `PASS: rebuilt site matches build/site.lock` |
+| Installed wheel surface in a clean environment | wheel built from the tree, installed into `$RUNNER_TEMP/installed-venv` only; probe identity module resolved under that venv at version `1.9.0`; `run --list` `tasks 19` / `tally 19`; `validate` `passed 7`, exit 0; offline study `mc_speed` produced `monte_carlo_speed.json`, exit 0; refusal on `pricing_grid` exit 1, `named true`, `empty_directories_left 0`; verdict uploaded, SHA `4baae3895552…` |
+| Configure, build, C++ tests, Python tests | `100% tests passed out of 204`; Python `510 passed, 5 skipped in 142.13s` fully offline (the five skips are the four oracle-gated modules and the latexmk re-typeset guard); `7/7 checks passed`; `PASS: V9_LEDGER.md attests 5ec3fabe4fa8 as a strict ancestor of c3db63ef7991, 195 caught of 195 declared` |
+| Mutation census in a detached worktree | `199 declared = 198 measurable here + 1 environment-blind`; `198/198 planted defects were rejected by their guard`; the new plant `provenance-erases-a-recorded-command` printed `ok caught`; the one environment-blind case is `report-source-edited-without-a-rebuild-seen-from-the-render` (runner pdfTeX `1.40.28` versus the build sidecar's `1.40.29`); verdict `declared 198 / ran 198 / caught 198` at revision `c3db63ef7991`, both `git status --porcelain` readings empty; `plant_liveness` probe `199`, `docs_rederivation derived plants 199`; ceilings `14 ok / 1 SKIP`, no FAIL |
+| macOS native C++ and Python parity | all native C++ tests and the C++/Python parity probe passed on the pinned wheel, success |
+| Benchmark suite against live oracles | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 407.9s total`; with-extras census `19/19`, `gap 0` |
+
+The runner's `198/198` and the development-side `199/199` in section 21 are not a disagreement:
+the runner's one environment-blind plant is the re-render guard whose pdfTeX version differs from
+the build sidecar, exactly the X3 condition, and the development vantage has the matching pdfTeX.
+Both vantages agree on every measurable plant, including the new provenance plant.
+
+This backfill commit is carried in the second and final ref update of the section 22 approval. Its
+own run is observed-only under the section 18/22 recursion limit; no third ref update is authorised
+and no reading in this section is a claim about that tip.
