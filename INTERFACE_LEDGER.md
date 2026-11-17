@@ -1006,3 +1006,46 @@ Both vantages agree on every measurable plant, including the new provenance plan
 This backfill commit is carried in the second and final ref update of the section 22 approval. Its
 own run is observed-only under the section 18/22 recursion limit; no third ref update is authorised
 and no reading in this section is a claim about that tip.
+
+## 24. Scope unit X5 — CI publication of the artifact-bound site
+
+Scope unit X5, as put to the maintainer verbatim, with the alternatives declined beside it:
+
+> **1. GitHub Pages + CI（推荐）** 在 CI 加 deploy job，用 `actions/upload-pages-artifact` +
+> `actions/deploy-pages`，`permissions: pages:write, id-token:write`（GitHub 内置 OIDC token，非
+> 新增 secret/账号），站点由 CI 生成并发布、漂移门禁失败即阻断部署——符合 Phase 4 "from CI,
+> never from a laptop" 和 "zero cost"。代价：启用 Pages Source。
+
+Approval original, verbatim: `1`.
+
+The declined alternatives are kept so the boundary is a decision, not an omission. **2** would have
+published `build/site/` through a hosted one-click link from this machine — declined because it is
+"from a laptop", is not bound to the CI drift gate, and so cannot close DoD item 3 even if a URL is
+obtained. **3** would have built the offline/H1 producers without any real deploy — declined because
+it leaves H3's published-surface value and I-L3/L4/L6 VOID. **4** would have maintained the status
+quo.
+
+One execution detail is recorded here rather than in the approval: the option described the Pages
+Source being enabled by the maintainer in Settings, but the GitHub REST API can set
+`build_type: "workflow"` with a classic token holding `repo` scope plus repository admin rights,
+both confirmed present. X5 therefore enables Pages through `POST /repos/{owner}/{repo}/pages`
+instead of asking for a manual click. This is the same external effect by a different hand; it is
+not a wider authorisation. The OIDC token minted per deployment by `actions/deploy-pages` is a
+GitHub-issued, short-lived credential, not a secret added to this repository, and the pre-existing
+GitHub account and repository are not a "new account" — so K1 and IN2's "no new secret, no new
+credential, no account for a free tier" remain satisfied by the same reasoning that admitted the
+CI lane.
+
+Bounded effect, and nothing beyond it: one Pages site enabled with `build_type: workflow`; one new
+CI deploy job whose only added permissions are `pages: write` and `id-token: write`, gated on the
+existing lint job so that a drift-gate failure blocks publication; one new pytest guard reading the
+committed workflow to prove the deploy job is downstream of the drift gate, plus one controlled
+plant that breaks that dependency and makes the guard fail; the count claims those additions move,
+re-derived in the same series. Excluded: any secret, key or credential stored in the repository; any
+paid service; any publish from a laptop; any new CLI subcommand; any new ceiling key; any new
+runtime dependency; any change to the frozen four-subcommand contract; any edit to the V9 historical
+attestation; any movement of tag `v1.9.0`; and any push (a separate approval, as in X4).
+
+H1–H4 measured values, I-L5's genuine network-down build, and I-L3/L4/L6's move from VOID to
+measured are consequences of having a published surface, not claims made by this scope unit. They
+are named here as subsequent units so that X5 does not assert a value it has not measured.
