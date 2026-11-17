@@ -963,3 +963,19 @@ because free-tier publish and a genuinely network-down offline build remain Phas
 unmeasured; I-L2's provenance half is still a sentence about a surface whose value-level claim is
 now falsifiable but whose deployed-page value remains unmeasured. A push is a separate external
 action excluded by section 20; no platform reading is claimed here.
+
+## 22. Push approval for X4 and its bound
+
+Section 20 excluded a push, so section 21 could only be a development-side reading. The closing
+question offered push-and-backfill, push-without-backfill, or leave-local. Approval original,
+verbatim: `推送并回填（最推荐）`.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the three X4 commits (`155b947`, `25aed30`, `8bb9caa`) together with
+the commit that records this approval; read the first run produced by the push and attribute each
+reading to the job that printed it; write those readings into a backfill commit in this ledger,
+including any failure as a failure rather than omitting it; carry that backfill commit in the second
+ref update. The recursion limit is the one sections 11, 14 and 18 used: the backfill commit's own
+run is observed-only, because a third ref update is outside this approval. No tag, release,
+deployment or publication is moved; the `site drift gate` and the new provenance surface are expected
+to be exercised by the runner's existing jobs, and any reading belongs to the job that printed it.
