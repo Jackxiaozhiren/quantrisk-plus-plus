@@ -1208,3 +1208,42 @@ CLI subcommand, tag, release, secret or account is introduced by this backfill.
 This backfill commit is carried in the second and final ref update of the section 27 approval. Its
 own run is observed-only under the section 11/14/18/22/27 recursion limit; no third ref update is
 authorised and no reading in this section is a claim about that tip.
+
+## 29. Scope unit X6 — fill I-L3/L4/L6 and measure H3 on the published surface
+
+Scope unit X6, as put to the maintainer verbatim, with the alternatives declined beside it. X5
+created a published surface; I-L3/L4/L6 stayed VOID and H3's value stayed 未测得 only because no
+such surface existed. This unit reads that surface. The question put to the maintainer was which
+scope sentence to open X6 under, with three options:
+
+- **A**: pure incremental probes — fill I-L3 (a guard scans the generated site for zero
+  request-execution paths, with a named plant), I-L4 (verify the CI + Pages free tier, no secret
+  and no new account, with the cost basis explicitly bounded to *excluding AI tokens*), and I-L6
+  (recognise `provenance --resolve --json` as the machine-readable surface, with a guard and a
+  named plant); register H3's zero-drift value from X5 section 28's already-measured live-SHA
+  equals locked-`index.html`. No HTTP service, no new CLI subcommand, ceiling key or dependency,
+  no lock re-freeze, no tag move.
+- **B**: additionally make I-L6 HTTP-reachable by having `site.py` emit a machine-readable JSON
+  file published with the Pages site (still a static file, no resident service); declined because
+  it rewrites the generator, re-freezes `build/site.lock`, enlarges the drift/PDF cascade and needs
+  another push — chosen only if "machine-readable response surface" must be HTTP-reachable.
+- **C**: minimal unit registering H3 and filling only I-L3, leaving I-L4 and I-L6 for later;
+  declined because it leaves DoD item 5 Partial and I-L4/L6 VOID.
+
+Approval original, verbatim: `方案 A（推荐）：纯增量探针，不建 HTTP 面、不碰 O11`.
+
+Bounded effect, and nothing beyond it: new read-only guard tests plus their named plants that make
+I-L3, I-L4 and I-L6 falsifiable from readings; the H3 value registered from the X5 section 28
+measurement (producer curl + SHA-256, environment the development machine over HTTPS) without a
+new network call in CI; the liveness and H1–H4 tables updated from those readings; and the plant,
+test and claim count cascade re-derived in the same series with the report PDF and sidecar rebuilt.
+Cost basis for I-L4 is bounded to the publish infrastructure (CI minutes and Pages free tier, no
+secret, no new account, no paid service) and explicitly excludes the AI-token cost question O11,
+which stays unadjudicated. I-L6 is recognised as the local `provenance --resolve --json` surface —
+a module-path invocation, not an HTTP endpoint — so no service layer is introduced (G5/K1).
+Excluded: any HTTP endpoint or resident service; any new CLI subcommand (the four-subcommand
+contract stays frozen) or ceiling key; any new runtime dependency; any re-freeze of
+`build/site.lock` or change to the generated page bytes; any H1/H2/H4 measurement; any tag,
+release, secret, account or push (a push needs its own verbatim approval, as in X5 section 27);
+any edit to the V9 historical attestation. The plant list, guards and count cascade move only as
+this unit's own readings require.
