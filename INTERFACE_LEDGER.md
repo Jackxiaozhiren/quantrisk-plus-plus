@@ -1280,7 +1280,15 @@ runner/deployment and the development machine's HTTPS fetch; X6 only records it 
   re-freeze or generated page byte changed.
 - Local readings: `ruff check` all passed; `ruff format --check` 261 files (the new guard file is
   the 261st); `mypy` no issues in 79 sources; `pytest` `589 passed in 112.80s`
-  (`env -u PYTHONDONTWRITEBYTECODE`, private basetemp). The full census is a separate producer and
-  is not claimed in this section until it is run.
+  (`env -u PYTHONDONTWRITEBYTECODE`, private basetemp); the drift gate printed
+  `PASS: rebuilt site matches build/site.lock` with the committed lock untouched; the evidence
+  verifier reported `95 OK`, `0 CHANGED`, `0 MISSING`.
+- Full census at the implementation tip `e85ca04` (after the commit, because the harness refuses
+  target files that differ from HEAD): `203/203 planted defects were rejected by their guard`;
+  verdict `declared 203 / ran 203 / caught 203`, `non_caught []`, `unmeasurable []`, revision
+  `e85ca043482fe956b352f51b4169c205efcd60e8`, both before/after `git status --porcelain` readings
+  empty. The three new plants each printed `ok caught` with their names. This is the development
+  vantage (`env -u PYTHONPATH`, detached worktree watching the checkout); no platform run is
+  claimed and X6 makes no push (section 29).
 
 H1, H2 and H4 stay 未测得 and I-L5 stays Partial: X6's scope (section 29) excluded them.
