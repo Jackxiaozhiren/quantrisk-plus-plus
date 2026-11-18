@@ -1292,3 +1292,25 @@ runner/deployment and the development machine's HTTPS fetch; X6 only records it 
   claimed and X6 makes no push (section 29).
 
 H1, H2 and H4 stay 未测得 and I-L5 stays Partial: X6's scope (section 29) excluded them.
+
+## 31. Push approval for X6 and its bound
+
+Section 29 excluded a push, so section 30's liveness readings and 203/203 census are development-side
+only; no platform run of the new guards or plants is claimed there. The closing question offered
+push-and-backfill, push-and-open-a-new-unit without pushing, and maintain-status-quo. Approval
+original, verbatim: `推送 X6 并回填（最推荐）` — the push-and-backfill branch, the same authorisation
+recorded verbatim as `推送并回填（最推荐）` in sections 11, 14, 18, 22 and 27.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the three X6 commits (`ebca49d`, `e85ca04`, `51e0029`) together with
+the commit that records this approval; read the first run produced by the push and attribute each
+reading to the job that printed it — including the deploy job, which re-publishes the same
+gate-verified site bytes (section 29 changed no page byte and re-froze no `build/site.lock`), so its
+publication is a consequence of the already-approved X5 surface and not a wider authorisation;
+write those readings into a backfill commit in this ledger, including any failure as a failure
+rather than omitting it; carry that backfill commit in the second ref update. The recursion limit is
+the one sections 11, 14, 18, 22 and 27 used: the backfill commit's own run is observed-only,
+because a third ref update is outside this approval. No tag, release, secret or account is moved or
+added; no new CLI subcommand, ceiling key, dependency or HTTP surface is introduced; the deploy job
+stays downstream of the lint job's `site drift gate` through `needs: [lint]`, so a gate failure
+blocks publication. H1/H2/H4, I-L5 and O11 stay out of scope.
