@@ -1133,3 +1133,24 @@ a network call escapes the probe). H1–H4 values, I-L3/L4/L6's move from VOID a
 network-down build remain subsequent units — they are consequences of a published surface, not
 claims this unit makes. No new secret, account, dependency, ceiling key or CLI subcommand; no tag
 moved; no edit to the V9 historical attestation.
+
+## 27. Push approval for X5 and its bound
+
+Section 24 excluded a push, so section 26 could only be a development-side reading: the deploy job
+has never executed on a runner and this ledger claims no live-URL reading. The closing question
+offered push-and-backfill, push-without-backfill, and leave-local/maintain-status-quo. Approval
+original, verbatim: `推送 X5 并回填（最推荐）` — the push-and-backfill branch, the same authorisation
+recorded verbatim as `推送并回填（最推荐）` in sections 11, 14, 18 and 22.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the four X5 commits (`59f2e82`, `0b2ae7a`, `fa68b7b`, `0e6347c`)
+together with the commit that records this approval; read the first run produced by the push —
+which for the first time in the X series includes a `deploy` job that publishes the gate-verified
+bytes to the already-enabled Pages site, an effect bounded inside section 24 and not a wider
+authorisation — and attribute each reading to the job that printed it; write those readings into a
+backfill commit in this ledger, including any failure as a failure rather than omitting it; carry
+that backfill commit in the second ref update. The recursion limit is the one sections 11, 14, 18
+and 22 used: the backfill commit's own run is observed-only, because a third ref update is outside
+this approval. No tag, release, secret or account is moved or added; the `deploy` job is downstream
+of the lint job's `site drift gate` through `needs: [lint]`, so a gate failure blocks publication,
+and any reading belongs to the job that printed it.
