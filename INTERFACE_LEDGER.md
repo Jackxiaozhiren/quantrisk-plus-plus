@@ -246,7 +246,7 @@ static publish, and read-only machine surface. No date is attached.
 | 1d | X3: a page-level drift gate with a committed baseline and a falsifying plant; no deploy, new key or zero-literal-rule change | Done at `28727f4`: `198/198`, single-plant red/green and all readings in section 17; no platform reading because section 16 excludes a push |
 | 1e | X4: G-A/G-B attribution gaps closed in the designated file; read-only provenance surface with a named falsifying plant; no CLI subcommand, deploy or new key | Done at `25aed30`: `199/199`, single-plant red/green and all readings in section 21; no platform reading because section 20 excludes a push |
 | 2 | I1 CLI provenance surface | Done as a `-m` module under X4 scope A: `python -m quantrisk.interface.provenance --list/--resolve` answers provenance offline with a guarded output; the literal `quantrisk` subcommand form was declined in X4 option B and stays outside the frozen four-subcommand contract; readings in section 21 |
-| 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | Partial: generator done at `aafb707` and drift gate proven falsifiable at `28727f4` (sections 13/17); X5 enables Pages and adds the gated CI `deploy` job at `0b2ae7a` (section 26), but section 24 excludes a push, so the publish has not run on a runner and no live-URL reading is claimed; the offline build stays partial (I-L5, section 2) |
+| 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | Partial (publish sub-item now Done): generator done at `aafb707` and drift gate proven falsifiable at `28727f4` (sections 13/17); X5's gated CI `deploy` job ran on the runner in run `44292891046` (seven-job success) and published the gate-verified bytes to `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`, with a live-URL reading whose SHA equals the locked `index.html` (section 28); the offline build stays partial (I-L5, section 2), which keeps item 3 Partial as a whole |
 | 4 | I3 value and provenance returned together, refusals name the gap | Done at `25aed30`: `resolve()` returns value + command + revision + digest together and refuses by name on any missing element; plant `provenance-erases-a-recorded-command` proves the guard fails; readings in section 21 |
 | 5 | H1–H4 measured, liveness filled, deliberately-not-done list | Partial: liveness filled as VOID, H1–H4 unmeasured, deliberately-not-done list below |
 
@@ -1154,3 +1154,57 @@ and 22 used: the backfill commit's own run is observed-only, because a third ref
 this approval. No tag, release, secret or account is moved or added; the `deploy` job is downstream
 of the lint job's `site drift gate` through `needs: [lint]`, so a gate failure blocks publication,
 and any reading belongs to the job that printed it.
+
+## 28. X5's first platform run: a seven-job success and a live published surface
+
+The first ref update moved the platform from `7caca79` to `d040872` with five commits (the four X5
+commits plus the commit recording the approval), non-forced, every blob, tree and commit SHA
+verified, no tag moved. Run `44292891046`, attempt 1, head `d040872923644b9ade515c0e14e3649ad484d563`,
+created `2026-11-18T11:14:37Z` and updated `11:40:41Z`, concluded **success**: all seven jobs
+succeeded, including `Publish the evidence site`, the first `deploy` job to execute on a runner in
+the X series. No repair was needed; this is the first X-series push that went green on its first
+run with a real publication attached. The readings below are the runner's, each attributed to the
+job that printed it.
+
+| Job | Reading |
+|---|---|
+| Format and static checks | `ruff` `All checks passed!`; `ruff format` `260 files already formatted`; `clang-format` success; `mypy` `Success: no issues found in 79 source files`; `Docs re-derivation` `200/200 planted defects rejected`, `19/19 benchmark-suite members executed`, `gap 0`; `Artifact revision` `gap 0` (shallow clone, pinned historical revision); `refactor ceilings` `14 ok / 1 SKIP`, no FAIL, `docs_rederivation_gap 0`, `lanes_documented_vs_executed_gap 0`, the SKIP being `installed_user_identity_mismatch` (precondition absent in the lint vantage); `evidence manifest` `95 OK, 0 CHANGED, 0 MISSING`; **`site drift gate`** `PASS: rebuilt site matches build/site.lock` |
+| Mutation census in a detached worktree | `200 declared = 199 measurable here + 1 environment-blind`; `199/199 planted defects were rejected by their guard`; the new plant `deploy-drops-the-lint-dependency` printed `ok caught`, as did `provenance-erases-a-recorded-command`, `site-lock-catches-a-manifest-silent-figure-change` and `site-source-carries-a-figure-of-its-own`; the one environment-blind case is `report-source-edited-without-a-rebuild-seen-from-the-render` (runner pdfTeX `1.40.28` versus build sidecar `1.40.29`, the X3/X4 condition); verdict `declared 199 / ran 199 / caught 199` at revision `d040872923644b9ade515c0e14e3649ad484d563`, both `git status --porcelain` readings empty; `plant_liveness` probe `200`, `docs_rederivation derived plants 200`; ceilings `14 ok / 1 SKIP`, no FAIL |
+| Configure, build, C++ tests, Python tests | `100% tests passed out of 204` C++; Python `515 passed, 5 skipped in 225.28s` fully offline (the five skips are the oracle-gated modules and the latexmk re-typeset guard, the same runner-only set as X4's `510 passed, 5 skipped`; the runner excludes the with-oracles cases that give the development-side `585`); `7/7 checks passed`; `PASS: V9_LEDGER.md attests 5ec3fabe4fa8c83584a50b3ab66b357ae13094e9 as a strict ancestor of d04087292364, 195 caught of 195 declared` |
+| Installed wheel surface in a clean environment | wheel built from the tree, installed into `$RUNNER_TEMP/installed-venv` only; probe identity module resolved under that venv at version `1.9.0`; `run --list` `tasks 19` / `tally 19`; `validate` `passed 7`, exit 0; offline study `mc_speed` produced output, exit 0; refusal on `pricing_grid` exit 1, `named true`, `empty_directories_left 0`; `installed_user_identity_mismatch` ceiling reads `ok ... 0` on this vantage; verdict uploaded, SHA `83e58e6a33b27...` |
+| Benchmark suite against live oracles | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 279.8s total`; with-extras census `19/19`, `gap 0` |
+| macOS native C++ and Python parity | `100% tests passed out of 204` native C++; Python parity `98 passed in 3.64s`, success |
+| **Publish the evidence site (deploy)** | `drift --check --out "${RUNNER_TEMP}/site-publish"` printed `PASS: rebuilt site matches build/site.lock`; `actions/upload-pages-artifact@v4` archived the two verified pages `two_factor_error_bound.html` and `linearisation_error_bound.html` into artifact `github-pages`, ID `14421859335`, final size `10429` bytes, uploaded ZIP SHA-256 `621d8515d2ad2a70a1de139f52e4f9afb54d3e3e586bc992d77cdf8a26311ee9`; `actions/deploy-pages@v4` created a Pages deployment with `pages_build_version` `d040872923644b9ade515c0e14e3649ad484d563`; evaluated environment URL `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`. The job is downstream of lint through `needs: [lint]`, so the drift gate ran before publication. |
+
+### 28.1 The live URL reading
+
+The published site was fetched independently of the runner, from this development machine, over
+HTTPS: `GET https://jackxiaozhiren.github.io/quantrisk-plus-plus/` returned HTTP `200`, TLS verify
+result `0`, body `5793` bytes, `<title>QuantRisk++ evidence</title>`, carrying the
+`linearisation_error_bound` and `two_factor_error_bound` page markers. The response body's SHA-256
+is `692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4`, which equals byte-for-byte
+the `page_sha256` of `index.html` in the committed `build/site.lock` that the drift gate verified.
+The live surface is therefore the checked bytes, not a second build whose agreement is assumed —
+this is the reading X5 section 24 was written to make possible and which section 26 could not claim
+before the push.
+
+The runner's `199/199` and the development-side `200/200` in section 26 are not a disagreement:
+the runner's one environment-blind plant is the re-render guard whose pdfTeX version differs from
+the build sidecar, exactly the X3/X4 condition, and the development vantage has the matching
+pdfTeX. Both vantages agree on every measurable plant, including the four newest ones. The runner's
+`515 passed` and the development-side `585` differ by the with-oracles cases that the offline
+runner skips, the same five-skip set recorded in X4's `510 passed, 5 skipped`.
+
+### 28.2 What this backfill does and does not close
+
+This run closes the free-tier CI publish part of DoD item 3: the site is published from the runner,
+the deploy is downstream of the drift gate, and a live-URL reading exists. DoD item 3 stays
+**Partial** as a whole because its offline-build part (I-L5) is still partial — the in-process
+no-socket test is narrower than a network-down build. I-L3/L4/L6 and the H1–H4 values remain VOID
+and 未测得 respectively: section 24 named them as subsequent units, and this backfill records the
+published surface they need without claiming their measurements. No new scope unit, ceiling key,
+CLI subcommand, tag, release, secret or account is introduced by this backfill.
+
+This backfill commit is carried in the second and final ref update of the section 27 approval. Its
+own run is observed-only under the section 11/14/18/22/27 recursion limit; no third ref update is
+authorised and no reading in this section is a claim about that tip.
