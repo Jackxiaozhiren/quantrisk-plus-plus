@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 516 tests collected offline",
+        anchor="# 520 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -419,7 +419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 585 pytest tests with the validation",
+        anchor="and 589 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 200/200 planted defects rejected",
+        anchor="# 203/203 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -693,7 +693,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 516 collected without them",
+        anchor="oracles installed, 520 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -818,7 +818,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 585 pytest tests with the `oracles` extra here",
+        anchor="# 589 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -2932,6 +2932,64 @@ MUTATIONS: tuple[Mutation, ...] = (
             "published pages; dropping the lint dependency lets a figure that drifted past the "
             "digest gate reach the live site unchecked, so the guard that requires deploy to "
             "need lint must redden, or Phase 4 'the drift gate fails the deploy' is a slogan"
+        ),
+    ),
+    Mutation(
+        identifier="site-page-gains-a-request-execution-path",
+        kind="prose",
+        path="python/quantrisk/interface/site.py",
+        anchor="  <title>{title}</title>\n</head>",
+        replacement="  <title>{title}</title>\n  <script>alert(1)</script>\n</head>",
+        guard=(
+            "tests/python/test_interface_liveness.py::"
+            "test_published_pages_carry_no_request_execution_path"
+        ),
+        claim=(
+            "I-L3 is only filled if the published surface has a request-execution path worth "
+            "measuring as absent; injecting a script into every page template must redden the "
+            "guard that reads the generated markup, or 'the page is a static rendition of the "
+            "artifact' is a promise about a surface nobody checked"
+        ),
+    ),
+    Mutation(
+        identifier="publish-chain-adds-a-paid-action",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor=(
+            "      - name: Deploy to GitHub Pages\n        id: deployment\n"
+            "        uses: actions/deploy-pages@v4"
+        ),
+        replacement=(
+            "      - name: Add a paid monitor\n        uses: vendor/paid-monitor@v1\n"
+            "      - name: Deploy to GitHub Pages\n        id: deployment\n"
+            "        uses: actions/deploy-pages@v4"
+        ),
+        guard="tests/python/test_interface_liveness.py::test_the_publish_chain_stays_on_the_free_tier",
+        claim=(
+            "I-L4's cost basis is the publish infrastructure on the free tier, with the "
+            "AI-token question explicitly excluded; adding a paid third-party action to the "
+            "deploy job must redden the guard that names the no-cost action set, or 'zero cost' "
+            "is an adjective rather than a checked property of the workflow"
+        ),
+    ),
+    Mutation(
+        identifier="machine-readable-surface-drops-a-provenance-field",
+        kind="prose",
+        path="python/quantrisk/interface/provenance.py",
+        anchor="        return json.dumps(record, ensure_ascii=False, sort_keys=True)",
+        replacement=(
+            '        return json.dumps({k: v for k, v in record.items() if k != "revision"}, '
+            "ensure_ascii=False, sort_keys=True)"
+        ),
+        guard=(
+            "tests/python/test_interface_liveness.py::"
+            "test_the_machine_readable_surface_is_module_path_and_keeps_provenance"
+        ),
+        claim=(
+            "I-L6's surface is only machine-readable in the useful sense if the JSON answer "
+            "keeps value together with command, revision and digest; dropping one field from "
+            "the rendered response must redden the guard that requires the whole tuple, or a "
+            "bare number could pass as a provenance answer"
         ),
     ),
 )

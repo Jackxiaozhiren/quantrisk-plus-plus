@@ -172,10 +172,10 @@ not be cited to justify or block work.
 |---|---|---|
 | I-L1 | VOID | §3 condition 4 is named VOID; no resolvability reading with a named plant to bind a target to |
 | I-L2 | Filled — both halves | `python -m quantrisk.interface.site` builds pages from committed artifacts, and `test_the_generator_source_contains_no_numeric_literal` plus plant `site-source-carries-a-figure-of-its-own` make the source scan falsifiable at `aafb707`. The drift half is filled at `28727f4` by `python -m quantrisk.interface.drift --check` against the committed `build/site.lock`, with guard `test_the_committed_lock_detects_a_figure_that_drifted_in_an_artifact` and plant `site-lock-catches-a-manifest-silent-figure-change` proving it reddens (section 17) |
-| I-L3 | VOID | No deployment exists; no build output to probe for request-execution paths |
-| I-L4 | VOID | No deployment configured; no cost diff over a real range |
+| I-L3 | Filled | X5 published a static surface; `test_published_pages_carry_no_request_execution_path` scans every generated page for scripts, handlers, fetch/XHR and external URLs (and `test_generated_markup_source_has_no_script_template` scans the source template), with plant `site-page-gains-a-request-execution-path` reddening both by injecting a `<script>` into `DOCUMENT_HEAD` (section 30) |
+| I-L4 | Filled (cost basis bounded) | X5 configured the free-tier publish; `test_the_publish_chain_stays_on_the_free_tier` names the no-cost first-party action set and refuses stored secrets, with plant `publish-chain-adds-a-paid-action` reddening on a third-party paid action. The cost basis is CI minutes and Pages free tier only — AI-token cost (O11) stays unadjudicated and out of scope (section 30) |
 | I-L5 | Partial | `test_the_build_opens_no_socket` refuses `socket.socket`, `create_connection` and `getaddrinfo` for a full build; a build with the network actually down was not run, and a subprocess making a network call would escape this probe |
-| I-L6 | VOID | Manifest and registry exist, but no machine-readable response surface exists to inspect |
+| I-L6 | Filled (module path, not HTTP) | `python -m quantrisk.interface.provenance --resolve --json` is the machine-readable surface: `test_the_machine_readable_surface_is_module_path_and_keeps_provenance` requires value + command + revision + digest together and an AST check that no HTTP/service framework is imported, with plant `machine-readable-surface-drops-a-provenance-field` reddening when a field is dropped. No service layer was added (section 30) |
 | I-L7 | VOID | Claim-inventory guards belong to the refactor lane; this lane has added no README or site claim, so no I-lane target exists |
 | I-L8 | VOID | No measured H1–H4 value exists to map to a recorded run |
 
@@ -191,7 +191,7 @@ is not a measurement. No measurement was run under X1, which contains no measure
 |---|---|---|---|---|
 | H1 cold-start reproduction | 未测得 | 未取得 | 未取得 | 未测得 |
 | H2 provenance completeness | 未测得 | 未取得 | 未取得 | 未测得 |
-| H3 zero page drift | Mechanism proven at `28727f4`; value 未取得 | `python -m quantrisk.interface.drift --check` + committed `build/site.lock` | local and runner (see section 15's successor when pushed) | The gate exists and is proven falsifiable by a named plant; the zero-drift *value* over a published surface is still 未测得 because no deploy exists |
+| H3 zero page drift | Zero: live index SHA-256 `692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4` == committed `build/site.lock` `index.html` `page_sha256`, byte-for-byte | X5 section 28's producer curl + SHA-256 of the live Pages response; `python -m quantrisk.interface.drift --check` + committed `build/site.lock` is the gate behind that URL | development machine over HTTPS (live URL read, not a CI network call); gate local and runner | Mechanism proven falsifiable at `28727f4`; the published-surface value registered from X5 section 28 at `d040872` (section 30) |
 | H4 zero cost | 未测得 | 未取得 | 未取得 | 未测得 |
 
 A hypothesis that later turns out false is a result and is recorded as one.
@@ -1247,3 +1247,40 @@ contract stays frozen) or ceiling key; any new runtime dependency; any re-freeze
 release, secret, account or push (a push needs its own verbatim approval, as in X5 section 27);
 any edit to the V9 historical attestation. The plant list, guards and count cascade move only as
 this unit's own readings require.
+
+## 30. X6 readings — the three liveness items and the H3 value
+
+All readings in this section belong to the X6 working tree and are attributed to this unit's local
+tip; none is a claim about a platform run. X6 makes no push (section 29). Each liveness item is
+filled by a guard that reads the published surface on disk and a named plant that turns it red:
+
+| Item | Guard | Plant | Red reading |
+|---|---|---|---|
+| I-L3 | `tests/python/test_interface_liveness.py::test_published_pages_carry_no_request_execution_path` (plus `test_generated_markup_source_has_no_script_template`) | `site-page-gains-a-request-execution-path` | a `<script>` injected into `DOCUMENT_HEAD` made all 20 generated pages report a request-execution path |
+| I-L4 | `...::test_the_publish_chain_stays_on_the_free_tier` | `publish-chain-adds-a-paid-action` | a `vendor/paid-monitor@v1` step in the deploy job was named as outside the no-cost first-party action set |
+| I-L6 | `...::test_the_machine_readable_surface_is_module_path_and_keeps_provenance` | `machine-readable-surface-drops-a-provenance-field` | dropping `revision` from the `--json` rendering made the four-field tuple guard refuse the answer |
+
+Each plant was applied by hand in isolation, its target guard observed red, and the source restored
+before the guard was re-run green; the manual readings are the mechanism, while the declared list
+and the census own the measured count. The attribution pin for I-L3 needed no new entry once the
+guard read `SITE_SOURCE` from disk, so the residual set stayed at its two previously named plants.
+
+The H3 value is registered from X5 section 28's live-URL reading, without a new network call: the
+live `index.html` SHA-256 `692db228...d25c4` equalled the committed lock's `page_sha256`
+byte-for-byte on the publisher commit `d040872`. That reading remains attributed to the X5
+runner/deployment and the development machine's HTTPS fetch; X6 only records it in the H table.
+
+### 30.1 Count cascade and verification
+
+- Plants `200 -> 203` (three new named plants), with the superseded-count plant's anchor moved with
+  the sweep annotation to `# 203/203 planted defects rejected`.
+- Python tests `516 -> 520` offline and `585 -> 589` with oracles (four new guard tests), with the
+  five plant anchors, the claim-sample gold tuples, the living documents and the report PDF plus
+  its sidecar re-derived from those producers. No CI job count, ceiling key, CLI subcommand, lock
+  re-freeze or generated page byte changed.
+- Local readings: `ruff check` all passed; `ruff format --check` 261 files (the new guard file is
+  the 261st); `mypy` no issues in 79 sources; `pytest` `589 passed in 112.80s`
+  (`env -u PYTHONDONTWRITEBYTECODE`, private basetemp). The full census is a separate producer and
+  is not claimed in this section until it is run.
+
+H1, H2 and H4 stay 未测得 and I-L5 stays Partial: X6's scope (section 29) excluded them.
