@@ -1450,3 +1450,27 @@ This is the development-side count; no platform census is claimed here.
 
 H1, H4, I-L5 and O11 stay 未测得 / Partial / unadjudicated: section 33 excluded them. I-L8 stays
 VOID because not all of H1–H4 have values.
+
+## 35. Push approval for X7 and its bound
+
+Section 33 excluded a push, so section 34's H2 reading (10/10 over the published-value set) and
+204/204 census are development-side only; no platform run of the new guard or plant is claimed
+there. The closing question offered push-and-backfill, push-and-open-a-new-unit without pushing,
+and maintain-status-quo. Approval original, verbatim: `推送 X7 并回填（推荐）` — the
+push-and-backfill branch, the same authorisation recorded as `推送 X5 并回填（最推荐）` and
+`推送 X6 并回填（最推荐）` in sections 27 and 31; it differs only in the word `（推荐）` versus
+`（最推荐）` and selects the identical branch.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the three X7 commits (`e48c4f8`, `e5440aa`, `29c878b`) together with
+the commit that records this approval; read the first run produced by the push and attribute each
+reading to the job that printed it — including the deploy job, which re-publishes the same
+gate-verified site bytes (section 33 changed no page byte and re-froze no `build/site.lock`), so its
+publication is a consequence of the already-approved X5 surface and not a wider authorisation;
+write those readings into a backfill commit in this ledger, including any failure as a failure
+rather than omitting it; carry that backfill commit in the second ref update. The recursion limit is
+the one sections 11, 14, 18, 22, 27 and 31 used: the backfill commit's own run is observed-only,
+because a third ref update is outside this approval. No tag, release, secret or account is moved or
+added; no new CLI subcommand, ceiling key, dependency or HTTP surface is introduced; the deploy job
+stays downstream of the lint job's `site drift gate` through `needs: [lint]`, so a gate failure
+blocks publication. H1/H4, I-L5 and O11 stay out of scope.
