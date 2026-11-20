@@ -1439,8 +1439,14 @@ site byte changed and no lock was re-frozen (drift gate still `PASS`).
 
 **Local readings.** Static three gates green (`ruff check`, `ruff format --check` 261 files,
 `mypy` 79 sources); full `pytest tests/python/` `590 passed`; drift gate `PASS: rebuilt site matches
-build/site.lock`; evidence manifest verified read-only with 0 CHANGED and 0 MISSING. The full
-census is a separate producer and its reading is backfilled below once run on a clean tree.
+build/site.lock`; evidence manifest verified read-only with 0 CHANGED and 0 MISSING.
+
+**Census (development vantage, clean tree at `e5440aa`).** The full sweep reports
+`204 declared / 204 ran / 204 caught`, `non_caught []`, `unmeasurable []`, both
+`git status --porcelain` readings empty, vantage "detached worktree; the checkout under evaluation
+is watched, never written". The new plant `a-published-value-loses-its-digest` printed `ok caught`
+on the sweep, so H2's falsification has a census-side reading as well as the hand red/green above.
+This is the development-side count; no platform census is claimed here.
 
 H1, H4, I-L5 and O11 stay 未测得 / Partial / unadjudicated: section 33 excluded them. I-L8 stays
 VOID because not all of H1–H4 have values.
