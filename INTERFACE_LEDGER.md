@@ -1365,3 +1365,40 @@ section 31 did not put them in scope. No tag, release, secret, account, ceiling 
 or dependency moved. This backfill commit is carried in the second and final ref update of the
 section 31 approval; its own run is observed-only under the same recursion limit, with no third ref
 update authorised.
+
+## 33. X7 scope unit — H2 provenance completeness, measured (ledger-first)
+
+Scope unit X7, as put to the maintainer verbatim (the selected option's label):
+
+> X7：H2 溯源完整性单点实测（最推荐）
+
+Approval original, verbatim: `X7：H2 溯源完整性单点实测（最推荐）`
+
+The option bound to that label defined the unit as: verify every registered record answers
+`--resolve --json` with its four provenance elements intact and zero named refusals misfiring, add
+a named plant that reddens the guarding test, move H2 from 未测得 to a recorded value, and
+synchronise the stale section 7 status row; accept the added guard, plant, count cascade and PDF
+rebuild; exclude O11, CI network calls and any re-freeze of the site lock.
+
+The measurement口径 is fixed here before code, from `INTERFACE_ROADMAP.md` §"measurement" line for
+H2 ("Collector computes the share of manifest artifacts whose recorded command resolves; ceiling is
+a policy number, and the metric must be able to fail") and from the measured surface: the manifest
+holds 95 artifacts, the registry 19 tasks, of which 10 carry a `headline` — the published values.
+The other 9 registry artifacts are benchmark/analysis results with no headline and are named-refused
+by `resolve()` by design ("records no headline"), which is not a provenance gap and must not be
+counted as one. The H2 denominator is therefore the headline-bearing published-value set (10), not
+19 or 95. The reading to be recorded is the share of that set whose `resolve()` returns value +
+command + revision + digest together: expected 10/10, zero bare values, zero missing fields. A
+named plant erasing one headline artifact's recorded digest must drop that share and redden the
+guard, so the metric can fail.
+
+Bounded effect, and nothing beyond it: add a read-only `completeness()` producer to the provenance
+module, one guarding test, one named plant, the H2 row value plus the section 7 status correction,
+and the mechanical count/PDF cascade those changes require. Excluded: any O11 adjudication, any
+AI-token cost basis, any CI network call, any re-freeze of `build/site.lock`, any change to page
+bytes, any tag, release, secret, account, ceiling key, CLI subcommand or dependency, and any H1/H4
+measurement. No push is authorised by this unit; a push needs its own verbatim approval.
+
+Recursion limit: if a later approval pushes X7, the backfill commit's own CI run is observed-only
+and no third ref update is authorised, as in sections 27 and 31. I-L5, H1, H4 and O11 stay out of
+scope.
