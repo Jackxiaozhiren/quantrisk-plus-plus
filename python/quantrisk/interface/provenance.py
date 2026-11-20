@@ -128,6 +128,52 @@ def list_tasks() -> list[dict[str, str]]:
     ]
 
 
+def completeness(root: Path | None = None) -> dict[str, Any]:
+    """Measure H2: the share of published values that resolve with a full provenance tuple.
+
+    The published-value set is the registry artifacts that carry a `headline` — the figures this
+    surface exists to hand back. Benchmark and analysis artifacts with no headline are named-refused
+    by `resolve()` by design and are not provenance gaps, so they are outside the denominator. For
+    each published value this returns whether it resolved, whether that answer kept all four
+    elements, and whether a refusal named a gap. The producer returns counts, not a ratio: the
+    ceiling is a policy number owned by the guarding test, and a dropped digest must make a count
+    move so the metric can fail. Read-only; like the rest of the module it carries no numeric
+    literal, so no figure in a response can have come from a constant typed here.
+    """
+    base = checkout_root() if root is None else Path(root)
+    published: list[str] = []
+    resolved: list[str] = []
+    refused: list[str] = []
+    incomplete: list[str] = []
+    for task in TASKS:
+        source = base / task.artifact
+        if source.suffix != ".json" or not source.is_file():
+            continue
+        try:
+            document = json.loads(source.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not (isinstance(document, dict) and isinstance(document.get("headline"), dict)):
+            continue
+        published.append(task.artifact)
+        try:
+            record = resolve(task.artifact, base)
+        except ProvenanceRefused:
+            refused.append(task.artifact)
+            continue
+        elements = ("value", "command", "revision", "sha256")
+        if all(str(record.get(field, "")).strip() for field in elements):
+            resolved.append(task.artifact)
+        else:
+            incomplete.append(task.artifact)
+    return {
+        "published": published,
+        "resolved": resolved,
+        "refused": refused,
+        "incomplete": incomplete,
+    }
+
+
 def _render(record: dict[str, Any], as_json: bool) -> str:
     if as_json:
         return json.dumps(record, ensure_ascii=False, sort_keys=True)

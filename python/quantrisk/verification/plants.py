@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 520 tests collected offline",
+        anchor="# 521 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -419,7 +419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 589 pytest tests with the validation",
+        anchor="and 590 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 203/203 planted defects rejected",
+        anchor="# 204/204 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -693,7 +693,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 520 collected without them",
+        anchor="oracles installed, 521 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -818,7 +818,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 589 pytest tests with the `oracles` extra here",
+        anchor="# 590 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -2990,6 +2990,23 @@ MUTATIONS: tuple[Mutation, ...] = (
             "keeps value together with command, revision and digest; dropping one field from "
             "the rendered response must redden the guard that requires the whole tuple, or a "
             "bare number could pass as a provenance answer"
+        ),
+    ),
+    Mutation(
+        identifier="a-published-value-loses-its-digest",
+        kind="prose",
+        path="evidence/manifest.json",
+        anchor='"sha256": "916912571fa7ba4e90a655ff4d2c38aee8b1c687f0bfab243ba62053130c69c9"',
+        replacement='"sha256": ""',
+        guard=(
+            "tests/python/test_interface_provenance.py::"
+            "test_the_published_value_set_resolves_with_full_provenance"
+        ),
+        claim=(
+            "H2's coverage is the share of published values that resolve with their full "
+            "provenance tuple; erasing one recorded digest makes that value name a gap and drop "
+            "out of the resolved set, so the guard over the completeness producer must redden, "
+            "or 'provenance is complete over the published set' is an unmeasured adjective"
         ),
     ),
 )

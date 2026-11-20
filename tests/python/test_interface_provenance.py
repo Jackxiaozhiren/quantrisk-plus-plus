@@ -90,6 +90,34 @@ def test_no_value_is_returned_without_its_command_digest_and_revision() -> None:
             assert record[field].strip(), f"{artifact} resolved with no {field}"
 
 
+def test_the_published_value_set_resolves_with_full_provenance() -> None:
+    """Guard behind plant `a-published-value-loses-its-digest`.
+
+    H2's coverage: every headline-bearing published value must resolve with its command, digest,
+    revision and value together, and no published value may be named-refused or come back without a
+    full tuple. The ceiling is declared here, not in the producer, so the metric can fail: erasing
+    one recorded digest moves `resolved` off `published` and reddens this guard.
+    """
+    # Read the manifest on disk here too, so a plant that erases a recorded digest is visible to
+    # this guard's own reading closure as well as through the producer's internal read. This also
+    # cross-checks that the sample's digest is present before coverage is claimed.
+    manifest = json.loads((REPO_ROOT / "evidence" / "manifest.json").read_text(encoding="utf-8"))
+    sample = next(e for e in manifest["artifacts"] if e["path"] == SAMPLE_ARTIFACT)
+    assert str(sample["sha256"]).strip(), "the sample published value has no recorded digest"
+
+    reading = provenance.completeness()
+    assert reading["published"], "no published value carries a headline, so H2 certifies nothing"
+    assert SAMPLE_ARTIFACT in reading["published"], "the plant's sample is no longer published"
+    assert not reading["refused"], f"published values were named-refused: {reading['refused']}"
+    assert not reading["incomplete"], (
+        f"published values lost a provenance field: {reading['incomplete']}"
+    )
+    assert len(reading["resolved"]) == len(reading["published"]), (
+        "not every published value resolved with a full tuple: "
+        f"{len(reading['resolved'])} of {len(reading['published'])}"
+    )
+
+
 def test_a_missing_command_is_refused_by_name(tmp_path: Path) -> None:
     """A value whose command was erased is refused, and the refusal does not leak the value."""
     root = _temp_root(tmp_path / "tree", blank=SAMPLE_ARTIFACT)

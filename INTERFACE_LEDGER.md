@@ -190,7 +190,7 @@ is not a measurement. No measurement was run under X1, which contains no measure
 | Hypothesis | Value | Producer | Environment | Status |
 |---|---|---|---|---|
 | H1 cold-start reproduction | 未测得 | 未取得 | 未取得 | 未测得 |
-| H2 provenance completeness | 未测得 | 未取得 | 未取得 | 未测得 |
+| H2 provenance completeness | Complete over the published-value set: 10/10 headline-bearing registry artifacts resolve with value + command + revision + digest together; 0 named refusals and 0 incomplete tuples (X7 §33–§34) | `provenance.completeness()` read-only producer over the committed manifest and registry (X7), guarded by `test_the_published_value_set_resolves_with_full_provenance`, which declares the ceiling and is reddened by plant `a-published-value-loses-its-digest` erasing one recorded digest; the denominator is the published-value set, not all 95 manifest artifacts — the 9 benchmark/analysis artifacts with no headline are named-refused by `resolve()` by design and are not provenance gaps | development machine, committed checkout at `e48c4f8` (producer reads no network, opens no socket); producer + guard local, plant falsification in the full census | Measured at X7: coverage 10/10, 0 refused, 0 incomplete; the metric is falsifiable (digest erase drops resolved off published). No runner reading claimed until a platform run observes it |
 | H3 zero page drift | Zero: live index SHA-256 `692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4` == committed `build/site.lock` `index.html` `page_sha256`, byte-for-byte | X5 section 28's producer curl + SHA-256 of the live Pages response; `python -m quantrisk.interface.drift --check` + committed `build/site.lock` is the gate behind that URL | development machine over HTTPS (live URL read, not a CI network call); gate local and runner | Mechanism proven falsifiable at `28727f4`; the published-surface value registered from X5 section 28 at `d040872` (section 30) |
 | H4 zero cost | 未测得 | 未取得 | 未取得 | 未测得 |
 
@@ -248,7 +248,7 @@ static publish, and read-only machine surface. No date is attached.
 | 2 | I1 CLI provenance surface | Done as a `-m` module under X4 scope A: `python -m quantrisk.interface.provenance --list/--resolve` answers provenance offline with a guarded output; the literal `quantrisk` subcommand form was declined in X4 option B and stays outside the frozen four-subcommand contract; readings in section 21 |
 | 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | Partial (publish sub-item now Done): generator done at `aafb707` and drift gate proven falsifiable at `28727f4` (sections 13/17); X5's gated CI `deploy` job ran on the runner in run `44292891046` (seven-job success) and published the gate-verified bytes to `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`, with a live-URL reading whose SHA equals the locked `index.html` (section 28); the offline build stays partial (I-L5, section 2), which keeps item 3 Partial as a whole |
 | 4 | I3 value and provenance returned together, refusals name the gap | Done at `25aed30`: `resolve()` returns value + command + revision + digest together and refuses by name on any missing element; plant `provenance-erases-a-recorded-command` proves the guard fails; readings in section 21 |
-| 5 | H1–H4 measured, liveness filled, deliberately-not-done list | Partial: liveness filled as VOID, H1–H4 unmeasured, deliberately-not-done list below |
+| 5 | H1–H4 measured, liveness filled, deliberately-not-done list | Partial: H3 registered with a platform live-SHA value (section 28/30) and H2 measured complete at X7 (10/10, section 33/34); H1 and H4 remain 未测得. Liveness I-L3/L4/L6 filled from the published surface (section 30), I-L5 Partial, I-L8 still VOID because not all of H1–H4 have values; deliberately-not-done list below |
 
 ## 8. Deliberately not done
 
@@ -1402,3 +1402,45 @@ measurement. No push is authorised by this unit; a push needs its own verbatim a
 Recursion limit: if a later approval pushes X7, the backfill commit's own CI run is observed-only
 and no third ref update is authorised, as in sections 27 and 31. I-L5, H1, H4 and O11 stay out of
 scope.
+
+## 34. X7 stage report — H2 measured from the published-value set
+
+**Producer.** `provenance.completeness(root)` is a read-only function over the committed manifest
+and registry. Its denominator is the published-value set: registry artifacts whose JSON carries a
+`headline` dict — the figures the provenance surface exists to hand back. For each it calls
+`resolve()` and counts four disjoint outcomes: `published` (in the set), `resolved` (returned value
++ command + revision + digest together), `refused` (a `ProvenanceRefused` named a gap), and
+`incomplete` (an answer missing one element). The 9 benchmark/analysis artifacts with no headline
+are named-refused by `resolve()` by design and are excluded from the denominator, so an artifact
+that never published a figure is not miscounted as a provenance failure. The producer returns
+counts, not a ratio, and carries no numeric literal: the ceiling belongs to the guard, so the
+metric can fail.
+
+**Reading (development vantage, committed checkout at `e48c4f8`).** published 10, resolved 10,
+refused 0, incomplete 0 — coverage 10/10 over the published-value set, zero bare values, zero named
+refusals misfiring. Recorded as H2's value in section 3. This is a development-side reading; a
+platform reading is not claimed here.
+
+**Guard and falsification.** `test_the_published_value_set_resolves_with_full_provenance` declares
+the ceiling (published non-empty, sample present, refused and incomplete empty, resolved count
+equal to published) and reads the manifest from disk directly, so the plant's target is inside the
+guard's own reading closure. Plant `a-published-value-loses-its-digest` erases the recorded digest
+of the sample headline artifact; the guard then reddens with a named refusal listing that artifact
+(verified red, restored green by hand before the plant was registered). The plant's anchor is the
+digest string, unique in the manifest. This makes H2's "complete over the published set" a
+falsifiable claim rather than an adjective.
+
+**Count cascade.** One new guard test and one new plant move the Python test count 589 → 590 (with
+oracles) and 520 → 521 (offline), and the plant count 203 → 204. Five plant count anchors, the
+claim-sample gold, four documents and the PDF + sidecar were re-derived from those producers. The
+C++ Catch2 count (203 cases, 204 CTest tests) is a different number and was deliberately not
+touched. No ceiling key, CLI subcommand, dependency, secret, account, tag or release moved; no
+site byte changed and no lock was re-frozen (drift gate still `PASS`).
+
+**Local readings.** Static three gates green (`ruff check`, `ruff format --check` 261 files,
+`mypy` 79 sources); full `pytest tests/python/` `590 passed`; drift gate `PASS: rebuilt site matches
+build/site.lock`; evidence manifest verified read-only with 0 CHANGED and 0 MISSING. The full
+census is a separate producer and its reading is backfilled below once run on a clean tree.
+
+H1, H4, I-L5 and O11 stay 未测得 / Partial / unadjudicated: section 33 excluded them. I-L8 stays
+VOID because not all of H1–H4 have values.
