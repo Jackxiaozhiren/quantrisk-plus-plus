@@ -1474,3 +1474,50 @@ because a third ref update is outside this approval. No tag, release, secret or 
 added; no new CLI subcommand, ceiling key, dependency or HTTP surface is introduced; the deploy job
 stays downstream of the lint job's `site drift gate` through `needs: [lint]`, so a gate failure
 blocks publication. H1/H4, I-L5 and O11 stay out of scope.
+
+## 36. X7's first platform run: seven jobs, the new H2 plant on the runner
+
+The first ref update moved the platform from `18ce9e6` to `c61e8d1` with four commits (the three
+X7 commits plus the section 35 approval record). A single `api_push.py` invocation succeeded with
+no network drop: every blob, tree and commit SHA matched its local object and the ref moved
+`18ce9e6 → c61e8d1` as a non-forced fast-forward.
+
+Run `44757857532` (head `c61e8d1`, push event, attempt 1, created `2026-11-20T14:53:47Z`, updated
+`2026-11-20T15:13:32Z`): **success, all seven jobs green on the first attempt**. Per-job readings,
+each attributed to the job that printed it:
+
+| Job | Reading |
+|---|---|
+| Format and static checks | `ruff check` `All checks passed!`; `ruff format --check` `261 files already formatted` (unchanged from X5/X6 — X7 added no new source file); `clang-format` over the C++ corpus; `mypy` `Success: no issues found in 79 source files`; `docs_rederivation` `gap 0` with `derived.plants = 204` (X6's was 203), `manifest_artifacts 95`, `registry_tasks 19`; `artifact_revision` `gap 0`, `with_extras_census` `gap 0`, `lanes_documented_vs_executed` `gap 0`; refactor ceilings `13 ok / 2 SKIP`, no FAIL — the two SKIPs are `installed_user_identity_mismatch` and `plants_not_rejected_by_their_guard`, the same two preconditions absent in the lint vantage as X5/X6, so this is not an X7 change; evidence manifest `95 OK, 0 CHANGED, 0 VOLATILE, 0 MISSING, 0 on disk but not in the manifest` (`Evidence is intact.`); `site drift gate` `PASS: rebuilt site matches build/site.lock` |
+| Mutation census in a detached worktree | `204 declared = 203 measurable here + 1 environment-blind`; `203/203 planted defects were rejected by their guard`; `plant_liveness declared_plants: 204`; the new plant `a-published-value-loses-its-digest` printed `ok caught` on the runner ("erasing one recorded digest makes that value name a gap and drop out of the resolved set, so the guard over the completeness producer must redden"). The one environment-blind plant is unchanged from X3/X4/X5/X6 (`report-source-edited-without-a-rebuild-seen-from-the-render`: runner pdfTeX 1.40.28 vs sidecar 1.40.29), so `203` here versus the development-side `204` is the known environment split, not a regression. Vantage "detached worktree; the checkout under evaluation is watched, never written" |
+| Configure, build, C++ tests, Python tests | `100% tests passed out of 204` C++; Python `520 passed, 5 skipped in 168.05s` fully offline (X6's runner figure was `519 passed, 5 skipped`; the one added is X7's H2 completeness guard, matching the development-side `589 → 590`); `7/7 checks passed`; `PASS: V9_LEDGER.md attests 5ec3fabe4fa8c83584a50b3ab66b357ae13094e9 as a strict ancestor of c61e8d137040, 195 caught of 195 declared` |
+| Benchmark suite against live oracles | `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped, 357.1s total` |
+| Installed wheel surface in a clean environment | wheel version `1.9.0`; `installed surface: identity holds, the list is the registry, one study ran, and the refusal named what it needed`; `tasks 19`, `validate passed 7`, `refusal.named true` (task `pricing_grid`, exit 1, no empty directories left), study `mc_speed` exit 0; `docs_rederivation` `derived.plants = 204`, `gap 0` |
+| macOS native C++ and Python parity | C++ `100% tests passed out of 204`; Python `98 passed in 2.47s` |
+| Publish the evidence site (deploy) | `drift --check --out "${RUNNER_TEMP}/site-publish"` printed `PASS: rebuilt site matches build/site.lock`; `actions/upload-pages-artifact@v4` archived the two verified pages into artifact `github-pages`, ID `14640400978`, final size `10268` bytes, ZIP SHA-256 `36e3ecf703fdd759712371667b3e396551f145a05e59425c6be621b6664e98ed`; `actions/deploy-pages@v4` created a deployment with `pages_build_version` `c61e8d137040401c33f309e40d50eebbf497c8f6` and evaluated environment URL `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`. The job stays downstream of lint through `needs: [lint]` |
+
+### 36.1 The live-URL reading after X7
+
+Fetched from this development machine over HTTPS, independently of the runner:
+`GET https://jackxiaozhiren.github.io/quantrisk-plus-plus/` returned HTTP `200`, TLS verify result
+`0`, body `5793` bytes and `<title>QuantRisk++ evidence</title>`. The body SHA-256 is
+`692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4`, equal byte-for-byte to the
+`page_sha256` of `index.html` in the committed `build/site.lock` — the value registered for H3 in
+section 30 and confirmed on the platform in sections 28 and 32. X7 changed no page byte and re-froze
+no lock, so this is a third platform confirmation of H3's zero-drift value. The deploy ZIP's size
+and digest differ from X6's (`10268`/`36e3ecf7…` here versus `10428`/`8cf7cd33…` in section 32)
+because the Pages artifact is a freshly built tar whose header metadata is not the published page
+bytes; the published `index.html` is byte-identical across X5, X6 and X7. No new network call was
+added to CI.
+
+### 36.2 What this run does and does not close
+
+The runner measured the new H2 plant `a-published-value-loses-its-digest` `ok caught`, so H2's
+completeness claim now has a platform-side falsification reading in addition to section 34's
+development-side one (10/10 resolved, plus the hand red/green). The plant count moved from 203 to
+204 in `docs_rederivation` and `plant_liveness`, and the offline Python count from 519 to 520 on the
+runner. The publish is a re-publication of the same X5 page bytes, not a new surface. H1/H4 remain
+未测得, I-L5 remains Partial, I-L8 remains VOID, and O11 stays unadjudicated; section 35 did not put
+them in scope. No tag, release, secret, account, ceiling key, CLI subcommand or dependency moved.
+This backfill commit is carried in the second and final ref update of the section 35 approval; its
+own run is observed-only under the same recursion limit, with no third ref update authorised.
