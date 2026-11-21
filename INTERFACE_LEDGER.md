@@ -190,9 +190,9 @@ is not a measurement. No measurement was run under X1, which contains no measure
 | Hypothesis | Value | Producer | Environment | Status |
 |---|---|---|---|---|
 | H1 cold-start reproduction | 未测得 | 未取得 | 未取得 | 未测得 |
-| H2 provenance completeness | Complete over the published-value set: 10/10 headline-bearing registry artifacts resolve with value + command + revision + digest together; 0 named refusals and 0 incomplete tuples (X7 §33–§34) | `provenance.completeness()` read-only producer over the committed manifest and registry (X7), guarded by `test_the_published_value_set_resolves_with_full_provenance`, which declares the ceiling and is reddened by plant `a-published-value-loses-its-digest` erasing one recorded digest; the denominator is the published-value set, not all 95 manifest artifacts — the 9 benchmark/analysis artifacts with no headline are named-refused by `resolve()` by design and are not provenance gaps | development machine, committed checkout at `e48c4f8` (producer reads no network, opens no socket); producer + guard local, plant falsification in the full census | Measured at X7: coverage 10/10, 0 refused, 0 incomplete; the metric is falsifiable (digest erase drops resolved off published). No runner reading claimed until a platform run observes it |
+| H2 provenance completeness | Complete over the published-value set: 10/10 headline-bearing registry artifacts resolve with value + command + revision + digest together; 0 named refusals and 0 incomplete tuples (X7 §33–§34) | `provenance.completeness()` read-only producer over the committed manifest and registry (X7), guarded by `test_the_published_value_set_resolves_with_full_provenance`, which declares the ceiling and is reddened by plant `a-published-value-loses-its-digest` erasing one recorded digest; the denominator is the published-value set, not all 95 manifest artifacts — the 9 benchmark/analysis artifacts with no headline are named-refused by `resolve()` by design and are not provenance gaps | development machine, committed checkout at `e48c4f8` (producer reads no network, opens no socket); producer + guard local, plant falsification in the full census | Measured at X7: coverage 10/10, 0 refused, 0 incomplete; the metric is falsifiable (digest erase drops resolved off published). The guard executed on the runner as plant `a-published-value-loses-its-digest`'s target and reddened there (`ok caught`, section 36); the producer's own output is printed by no CI step, so the values above remain development-side |
 | H3 zero page drift | Zero: live index SHA-256 `692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4` == committed `build/site.lock` `index.html` `page_sha256`, byte-for-byte | X5 section 28's producer curl + SHA-256 of the live Pages response; `python -m quantrisk.interface.drift --check` + committed `build/site.lock` is the gate behind that URL | development machine over HTTPS (live URL read, not a CI network call); gate local and runner | Mechanism proven falsifiable at `28727f4`; the published-surface value registered from X5 section 28 at `d040872` (section 30) |
-| H4 zero cost | Zero: every `uses:` reference across all seven jobs in `ci.yml` is inside the free first-party set (0 paid actions), 0 billed runners, 0 stored secrets; the host is GitHub Pages from `actions/deploy-pages` with `pages: write` / `id-token: write` / the `github-pages` environment and no `CNAME` file; the report asserts `Total monetary cost of building and validating it: $0.` exactly once (`README.md` line 31) (X8 §37–§38) | Read-only `cost.audit()` producer over the committed workflow and README (X8), guarded by `test_the_zero_cost_claim_is_read_from_the_publish_surface_and_the_report`, which declares the ceiling and is reddened by plant `report-drops-its-zero-cost-budget-line` editing the README sentence; the producer returns three evidence blocks, never a computed literal, so the reading cannot be satisfied by repeating the policy — the L12 shape `external_dependencies()` records | development machine, committed checkout (producer reads no network, opens no socket); guard local, plant falsification in the full census | Measured at X8: paid set empty, billed runners empty, stored secret false, free static tier true, custom domain false, budget line exactly once and carrying `$0`. No runner reading claimed until a platform run observes it |
+| H4 zero cost | Zero: every `uses:` reference across all seven jobs in `ci.yml` is inside the free first-party set (0 paid actions), 0 billed runners, 0 stored secrets; the host is GitHub Pages from `actions/deploy-pages` with `pages: write` / `id-token: write` / the `github-pages` environment and no `CNAME` file; the report asserts `Total monetary cost of building and validating it: $0.` exactly once (`README.md` line 31) (X8 §37–§38) | Read-only `cost.audit()` producer over the committed workflow and README (X8), guarded by `test_the_zero_cost_claim_is_read_from_the_publish_surface_and_the_report`, which declares the ceiling and is reddened by plant `report-drops-its-zero-cost-budget-line` editing the README sentence; the producer returns three evidence blocks, never a computed literal, so the reading cannot be satisfied by repeating the policy — the L12 shape `external_dependencies()` records | development machine, committed checkout (producer reads no network, opens no socket); guard local, plant falsification in the full census | Measured at X8: paid set empty, billed runners empty, stored secret false, free static tier true, custom domain false, budget line exactly once and carrying `$0`. The guard executed on the runner as plant `report-drops-its-zero-cost-budget-line`'s target and reddened there (`ok caught`, section 40); the producer's own output is printed by no CI step, so the values above remain development-side |
 
 A hypothesis that later turns out false is a result and is recorded as one.
 
@@ -1659,3 +1659,60 @@ observed-only, because a third ref update is outside this approval. No tag, rele
 account is moved or added; no new CLI subcommand, ceiling key, dependency or HTTP surface is
 introduced; the deploy job stays downstream of the lint job's `site drift gate` through
 `needs: [lint]`, so a gate failure blocks publication. H1, I-L5, I-L8 and O11 stay out of scope.
+
+## 40. X8's first platform run: seven jobs, the H4 plant on the runner
+
+**Run.** `44861172789`, `run_attempt` 1, `push` event, head `47c41a3`, created 03:26:55Z and
+finished 03:53:09Z — seven jobs, all `success`, no rerun. Each reading below is attributed to the
+job that printed it.
+
+- **Format and static checks.** `ruff` "All checks passed!", `ruff format` 263 files,
+  `clang-format` refusal gate green, `mypy` 80 source files; `refactor ceilings` 13 ok / 2 SKIP —
+  the same pair of SKIPs as sections 28, 30, 32 and 36, each reporting the installed-surface
+  precondition absent from a vantage that did not run that lane.
+- **Configure, build, C++ tests, Python tests.** CTest 204/204; pytest offline lane
+  `521 passed, 5 skipped` (X7's runner reading was 520, so the +1 is the H4 guard and nothing
+  else); `validate` 7/7. The runner lane's total is not the same number as the development-side
+  oracles count and is not made to look like it.
+- **macOS native parity.** C++ 204/204 and 98 passed.
+- **Installed wheel surface.** `quantrisk-1.9.0-cp312-cp312-linux_x86_64.whl`, identity version
+  `1.9.0`, registry parity of `run --list`, `validate` 7/7, one offline study ran, and the refusal
+  named what it needed; verdict artifact 580 bytes.
+- **Benchmark suite.** `19/19 executed and passed`, 0 aggregated from disk, 0 failed, 0 skipped,
+  362.1 s.
+- **Mutation census.** `204 measurable + 1 environment-blind` = the 205 declared plants; `204/204`
+  caught, `non_caught []`, and the single `unmeasurable` entry is
+  `report-source-edited-without-a-rebuild-seen-from-the-render` (runner pdfTeX 1.40.28 against the
+  1.40.29 recorded in `paper/technical_report.build.json`), the same environment-blind plant as
+  X6 and X7; `git status --porcelain` empty before and after; revision `47c41a3`; verdict artifact
+  `mutation-census`, 4361 bytes, ID 14690054593. The new plant
+  `report-drops-its-zero-cost-budget-line` printed `ok caught` on the runner, so H4's falsification
+  now has a runner-side reading in addition to the hand red/green in section 38. The census job is
+  the long pole on this run, which is why the run took 26 minutes against X7's 10.
+- **Publish the evidence site.** `python -m quantrisk.interface.drift --check` printed
+  `PASS: rebuilt site matches build/site.lock` inside the deploy job as well as in the lint job;
+  the verified bytes were uploaded as `github-pages` artifact ID 14688944568 (10265 bytes) and
+  deployed with `pages_build_version` = `47c41a3`, environment URL
+  `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`.
+
+**Live re-read.** HTTP 200, TLS verify 0, 5793 bytes, SHA-256
+`692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4` — byte-for-byte equal to
+`build/site.lock`'s `index.html` `page_sha256`. This is the fourth platform confirmation of H3's
+zero drift (sections 28, 30, 32 and here). The deploy artifact moved 10268 → 10265 bytes between
+X7 and X8 while the page bytes did not move at all: the difference is tar metadata, not content,
+which is why the lock check and not the ZIP size is the gate.
+
+**Recorded, not smoothed.** The deploy job emits a Node.js 20 deprecation warning for
+`actions/deploy-pages@v4` and `actions/upload-artifact`. It is a runner warning, not a failure, and
+it is written here rather than omitted because a warning is the shape of a future break.
+
+**Section 3 corrections carried in this backfill.** The closing clause of the H2 and H4 rows, "No
+runner reading claimed until a platform run observes it", is stale as of this section: the guards
+those rows name executed on the runner as the plant being falsified and reddened there
+(`a-published-value-loses-its-digest` in section 36, `report-drops-its-zero-cost-budget-line`
+here), while the producers' own output is printed by no CI step, so each row now says exactly that
+instead of claiming more or less.
+
+This backfill commit is carried in the second and final ref update of the section 39 approval; its
+own run is observed-only under the same recursion limit, and no third ref update is authorised. H1,
+I-L5, I-L8 and O11 stay out of scope.
