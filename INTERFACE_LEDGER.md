@@ -1634,3 +1634,28 @@ red/green above. This is the development-side count; no platform census is claim
 different cost basis that a workflow scan does not answer — and no paid service, account or secret
 was added or read, no CI network call was made, `build/site.lock` was not re-frozen, and no push is
 authorised by this unit. H1 and I-L5 stay 未测得 / Partial, so I-L8 stays VOID.
+
+## 39. Push approval for X8 and its bound
+
+Section 37 excluded a push, so section 38's H4 reading (paid set empty, free static tier, one
+budget line) and the 205/205 census are development-side only; no platform run of the new guard or
+plant is claimed there, and section 3's H4 row still carries "No runner reading claimed until a
+platform run observes it". The closing question offered push-and-backfill, opening a new unit
+without pushing, and maintaining the status quo. Approval original, verbatim:
+`推送 X8 并回填（最推荐）` — the push-and-backfill branch, the same authorisation recorded as
+`推送 X5 并回填（最推荐）`, `推送 X6 并回填（最推荐）` and `推送 X7 并回填（推荐）` in sections 27,
+31 and 35.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the three X8 commits (`71c56f9`, `f6b67b1`, `0dec968`) together with
+the commit that records this approval; read the first run produced by the push and attribute each
+reading to the job that printed it — including the deploy job, which re-publishes the same
+gate-verified site bytes (section 38 changed no page byte and re-froze no `build/site.lock`), so its
+publication is a consequence of the already-approved X5 surface and not a wider authorisation;
+write those readings into a backfill commit in this ledger, including any failure as a failure
+rather than omitting it; carry that backfill commit in the second ref update. The recursion limit
+is the one sections 11, 14, 18, 22, 27, 31 and 35 used: the backfill commit's own run is
+observed-only, because a third ref update is outside this approval. No tag, release, secret or
+account is moved or added; no new CLI subcommand, ceiling key, dependency or HTTP surface is
+introduced; the deploy job stays downstream of the lint job's `site drift gate` through
+`needs: [lint]`, so a gate failure blocks publication. H1, I-L5, I-L8 and O11 stay out of scope.
