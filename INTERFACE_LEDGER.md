@@ -1521,3 +1521,50 @@ runner. The publish is a re-publication of the same X5 page bytes, not a new sur
 them in scope. No tag, release, secret, account, ceiling key, CLI subcommand or dependency moved.
 This backfill commit is carried in the second and final ref update of the section 35 approval; its
 own run is observed-only under the same recursion limit, with no third ref update authorised.
+
+## 37. X8 scope unit — H4 zero cost, measured (ledger-first)
+
+Scope unit X8, as put to the maintainer verbatim (the selected option's label):
+
+> X8：H4 零成本实测（最推荐）
+
+Approval original, verbatim: `X8：H4 零成本实测（最推荐）`
+
+The option bound to that label defined the unit as: turn H4 from 未测得 into a recorded reading by
+binding each of ROADMAP line 146's three assertions to an executable target, add a named plant that
+reddens the guarding test, and synchronise the H4 row and the stale section 7 status line; accept
+the added producer, guard, plant, count cascade and PDF rebuild; exclude O11, any paid service or
+account, any CI network call and any re-freeze of the site lock.
+
+The measurement口径 is fixed here before code, from `INTERFACE_ROADMAP.md` line 146 ("H4 — Cost
+stays zero | CI log shows no paid service; hosting is the free static tier; the build's own budget
+line is asserted in the report") and from the lesson recorded in
+`tools/inventory_orphan_code.py`'s `external_dependencies()`: a policy file asserting a budget and a
+collector returning the number it was told to return is the exact shape this repository refuses
+(L12). The producer therefore returns evidence, not a zero:
+
+1. the set of `uses:` references across every job in `.github/workflows/ci.yml`, set-differenced
+   against the free first-party action set, together with the runners those jobs name and the
+   absence of `secrets.` anywhere in the workflow;
+2. the hosting verdict read from the deploy job — `actions/deploy-pages`,
+   `permissions: pages: write` plus `id-token: write`, the `github-pages` environment, and no
+   `CNAME` file in the repository, so the host is the free static tier with no custom domain;
+3. the report's budget line, located and returned verbatim from `README.md`
+   (`Total monetary cost of building and validating it: $0.`, line 31, unique in the repository).
+
+A reading is those three evidence blocks; `$0` is never returned as a computed number, so the
+reading cannot be satisfied by a literal that merely repeats the policy.
+
+Bounded effect, and nothing beyond it: add a read-only `cost.audit(root)` producer to the interface
+package (stdlib only, opens no socket, carries no numeric literal — the ceiling lives in the
+guard), one guarding test in `tests/python/test_interface_cost.py`, one named plant
+`report-drops-its-zero-cost-budget-line` editing the README budget line, the H4 row value plus the
+section 7 status correction, and the mechanical count/PDF cascade those changes require. Excluded:
+any O11 adjudication, any AI-token cost basis, any paid service, account or secret, any CI network
+call, any re-freeze of `build/site.lock`, any change to page bytes, any committed change to
+`ci.yml`, any tag, release, ceiling key, CLI subcommand or dependency, and any H1 or I-L5
+measurement. No push is authorised by this unit; a push needs its own verbatim approval.
+
+Recursion limit: if a later approval pushes X8, the backfill commit's own CI run is observed-only
+and no third ref update is authorised, as in sections 27, 31 and 35. H1, I-L5, I-L8 and O11 stay
+out of scope.
