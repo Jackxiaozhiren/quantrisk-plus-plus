@@ -1568,3 +1568,69 @@ measurement. No push is authorised by this unit; a push needs its own verbatim a
 Recursion limit: if a later approval pushes X8, the backfill commit's own CI run is observed-only
 and no third ref update is authorised, as in sections 27, 31 and 35. H1, I-L5, I-L8 and O11 stay
 out of scope.
+
+## 38. X8 stage report — H4 measured from the publish surface, the host and the report
+
+**Producer.** `cost.audit(root)` is a read-only, stdlib-only function over three committed
+surfaces — `.github/workflows/ci.yml`, the repository root (for a `CNAME` file) and `README.md` —
+returning three evidence blocks and never a computed zero:
+
+1. `actions` — every `uses:` reference in the workflow, set-differenced against the first-party
+   free action set, with the runners the jobs name, the runners outside the free set, and whether
+   any step can read a stored secret (`secrets.`);
+2. `hosting` — `platform` is `github-pages` only when the deploy job uses `actions/deploy-pages`;
+   `free_static_tier` is true only when that deploy also carries `pages: write`,
+   `id-token: write` and the `github-pages` environment; `custom_domain` is true iff a `CNAME`
+   file exists, so the default free host is asserted by the absence of one;
+3. `budget_line` — the report's own budget sentence located in `README.md`, returned verbatim with
+   its occurrence count, so a report that stopped asserting it makes the reading empty rather than
+   silently satisfied.
+
+The module carries no numeric literal and opens no socket: the ceiling ("paid set empty", "free
+static tier", "exactly one budget line") belongs to the guard, so the reading can fail.
+
+**Reading (development vantage, committed checkout at `f6b67b1`).** `actions.paid []`,
+`actions.billed []`, `actions.stored_secret false`, runners `["macos-15", "ubuntu-latest"]` (both
+GitHub-hosted free images), `hosting.platform github-pages` with `free_static_tier true` and
+`custom_domain false`, `budget_line` `README.md` — `Total monetary cost of building and validating
+it: $0.` — `occurrences 1`. Recorded as H4's value in section 3: the publish surface names no paid
+service, the host is the free static tier with no custom domain, and the build's budget line is
+asserted by a producer that reads it rather than by a policy file that declares it. `$0` is never
+returned as a number, so the reading cannot be satisfied by a literal that repeats the policy — the
+L12 shape this repository refuses.
+
+**Guard and falsification.**
+`test_the_zero_cost_claim_is_read_from_the_publish_surface_and_the_report` declares the ceiling
+(paid and billed empty, no stored secret, every runner inside the free set, free static tier true
+with no custom domain, the budget sentence present, unique and carrying the asserted value) and
+reads both `ci.yml` and `README.md` from disk itself, so the plant's target sits inside the guard's
+own reading closure. Plant `report-drops-its-zero-cost-budget-line` rewrites the README budget
+sentence; the guard reddens on the missing sentence (verified red, restored green by hand before
+the plant was registered). The plant's anchor is that sentence, unique in the repository — the
+producer's own `occurrences 1` reading is the evidence for the anchor's uniqueness.
+
+**Count cascade.** One new guard test and one new plant move the Python test count 590 → 591 (with
+the `oracles` extra) and 521 → 522 (offline), and the plant count 204 → 205. Five plant count
+anchors, the claim-sample gold, four documents (`interview_defense`, `limitations`,
+`reproducibility`, `technical_report.tex`) and the PDF + sidecar were re-derived from those
+producers. The C++ Catch2 count (203 cases, 204 CTest tests) is a different number and was
+deliberately not touched. `ruff format --check` now walks 263 files and `mypy` 80 sources — the
+mechanical consequence of the two new files, not a re-scoped gate. No ceiling key, CLI subcommand,
+dependency, secret, account, tag or release moved; `ci.yml` is unchanged as a file; no site byte
+changed and no lock was re-frozen (drift gate still `PASS`).
+
+**Local readings.** Static three gates green (`ruff check`, `ruff format --check` 263 files,
+`mypy` 80 sources); full `pytest tests/python/` `591 passed`; drift gate `PASS: rebuilt site
+matches build/site.lock`; evidence manifest verified read-only with 0 CHANGED and 0 MISSING.
+
+**Census (development vantage, clean tree at `f6b67b1`).** The full sweep reports
+`205 declared / 205 ran / 205 caught`, `non_caught []`, `unmeasurable []`, both
+`git status --porcelain` readings empty, vantage "detached worktree; the checkout under evaluation
+is watched, never written". The new plant `report-drops-its-zero-cost-budget-line` printed
+`ok caught` on the sweep, so H4's falsification has a census-side reading as well as the hand
+red/green above. This is the development-side count; no platform census is claimed here.
+
+**Excluded, as section 37 bounded it.** O11 stays unadjudicated — the AI-token question is a
+different cost basis that a workflow scan does not answer — and no paid service, account or secret
+was added or read, no CI network call was made, `build/site.lock` was not re-frozen, and no push is
+authorised by this unit. H1 and I-L5 stay 未测得 / Partial, so I-L8 stays VOID.
