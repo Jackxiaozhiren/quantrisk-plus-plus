@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 522 tests collected offline",
+        anchor="# 523 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -419,7 +419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 591 pytest tests with the validation",
+        anchor="and 592 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 205/205 planted defects rejected",
+        anchor="# 206/206 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -693,7 +693,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 522 collected without them",
+        anchor="oracles installed, 523 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -818,7 +818,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 591 pytest tests with the `oracles` extra here",
+        anchor="# 592 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -3023,6 +3023,23 @@ MUTATIONS: tuple[Mutation, ...] = (
             "H4's third assert is the report's own budget line; a report that stops asserting it "
             "leaves 'the cost stays zero' as an adjective with no producer, so the guard over the "
             "cost reading must redden rather than pass on a claim nobody makes"
+        ),
+    ),
+    Mutation(
+        identifier="cold-start-record-quotes-a-price-the-published-artifact-does-not-hold",
+        kind="prose",
+        path="tools/cold_start_record.json",
+        anchor='"analytic_reference_price": 11.123761928058133',
+        replacement='"analytic_reference_price": 11.1237619',
+        guard=(
+            "tests/python/test_interface_coldstart.py::"
+            "test_the_cold_start_records_one_command_from_an_empty_directory_outside_the_checkout"
+        ),
+        claim=(
+            "H1's claim is that a cold user reproduces a published number, and the record is only "
+            "evidence of that if the number in it is the artifact's own; a recorded price that "
+            "disagrees with the committed artifact must redden the guard, or 'reproduces a "
+            "published number' is an adjective the record asserts about itself"
         ),
     ),
 )

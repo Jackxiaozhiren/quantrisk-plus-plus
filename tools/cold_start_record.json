@@ -1,0 +1,109 @@
+{
+  "artifact": {
+    "bytes": 4219,
+    "relative_path": "cold-start-out/benchmarks/performance/results/monte_carlo_speed.json",
+    "sha256": "d22e24fc08f1b5715bee744178958964356ab154c463eecc7e15a23dd16ab974"
+  },
+  "build": {
+    "command": "uv build --wheel",
+    "wall_seconds": 15.174523374999808
+  },
+  "checkout": "/Users/jackson/QuantRisk++",
+  "environment": {
+    "identity": {
+      "module": "/private/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/venv/lib/python3.12/site-packages/quantrisk/__init__.py",
+      "prefix": "/private/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/venv",
+      "version": "1.9.0"
+    },
+    "machine": "arm64",
+    "platform": "macOS-27.2.1-arm64-arm-64bit",
+    "python": "3.12.14",
+    "venv_root": "/private/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/venv"
+  },
+  "install": {
+    "argv": [
+      "/Users/jackson/.local/bin/uv",
+      "pip",
+      "install",
+      "--python",
+      "/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/venv/bin/python",
+      "/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/dist/quantrisk-1.9.0-cp312-cp312-macosx_27_0_arm64.whl"
+    ],
+    "mode": "index",
+    "seed_reason": "",
+    "seeded": {},
+    "wall_seconds": 210.84034191699993
+  },
+  "kept": false,
+  "probe": {
+    "invocations": 2,
+    "tally": "19 registered tasks; the third column is the extra each one needs beyond the base install; run one with `quantrisk run <id> [--out DIR]`",
+    "task_listed": true
+  },
+  "reproduction": {
+    "equal": true,
+    "fields": [
+      "analytic_reference_price",
+      "measured_prices",
+      "reported_standard_errors",
+      "paths_per_run",
+      "option"
+    ],
+    "not_compared": [
+      "results_seconds",
+      "speedup_vs_numpy",
+      "speedup_vs_pure_python",
+      "speedup_vs_pure_python_using_min"
+    ],
+    "not_compared_because": "wall-clock columns move with machine load; two runs on the same machine disagree on every one of them, so claiming their equality would be the fabrication this record exists to prevent",
+    "produced": {
+      "analytic_reference_price": 11.123761928058133,
+      "measured_prices": {
+        "cpp": 11.145962385220646,
+        "numpy": 11.1142972425847,
+        "python": 11.112294411713327
+      },
+      "option": {
+        "dividend_yield": 0.02,
+        "maturity": 1.0,
+        "rate": 0.05,
+        "spot": 100.0,
+        "strike": 100.0,
+        "type": "european_call",
+        "volatility": 0.25
+      },
+      "paths_per_run": 200000,
+      "reported_standard_errors": {
+        "cpp": 0.04134017584701437,
+        "numpy": 0.0390898062915301,
+        "python": 0.03932724740150984
+      }
+    },
+    "published_artifact": "benchmarks/performance/results/monte_carlo_speed.json"
+  },
+  "revision": "e81bff3ccb71ef30d33237a5fda4079a5e970951",
+  "run": {
+    "argv": [
+      "quantrisk",
+      "run",
+      "mc_speed",
+      "--out",
+      "cold-start-out"
+    ],
+    "cwd": "/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/neutral",
+    "existing_paths_before": [],
+    "exit": 0,
+    "subprocess_invocations": 1,
+    "wall_seconds": 1.354327750000266
+  },
+  "schema": "quantrisk-cold-start/1",
+  "vantage": "a wheel built from this tree, installed into a fresh environment and run from an empty working directory, both outside the checkout",
+  "venv": {
+    "command": "uv venv",
+    "wall_seconds": 0.027556791999813868
+  },
+  "wheel": {
+    "file": "quantrisk-1.9.0-cp312-cp312-macosx_27_0_arm64.whl",
+    "sha256": "f99db6512a44a28b0adcda62ee6908d35c26dac9ec907deb1e6af91bcd40a7e3"
+  }
+}
