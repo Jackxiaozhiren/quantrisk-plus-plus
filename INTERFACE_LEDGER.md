@@ -1783,3 +1783,78 @@ verbatim approval.
 Recursion limit: if a later approval pushes X9, the backfill commit's own CI run is observed-only
 and no third ref update is authorised, as in sections 27, 31, 35 and 39. I-L5, I-L8 and O11 stay
 out of scope.
+
+## 42. X9 stage report — H1 measured from a wheel, one command, one empty directory
+
+**Tool.** `tools/cold_start.py` performs the run line 143 defines, in the order a reader would meet
+it: build a wheel from this tree (`uv build --wheel`, 17.5 s), create a venv on the same
+interpreter outside the checkout (`uv venv`, 0.03 s), install that wheel into it (`uv pip install`,
+210.8 s on a cold index cache and 0.1 s against a warm one), run two probes — an import-identity
+read and `run --list`, which prints `19 registered tasks` — and then execute exactly one command
+from an empty working directory. It writes `tools/cold_start_record.json` only after re-deriving
+the reproduction, so a run that failed to reproduce cannot produce a record claiming it did.
+
+**Reading (development vantage, clean tree at `485f91a`, record refreshed at `b19321a`).** The one
+command is `quantrisk run mc_speed --out cold-start-out`, executed in **0.611 s** (1.354 s on the
+first, cold-cache run) from an empty directory; `existing_paths_before []`, `subprocess_invocations
+1`, and both the venv root and the cwd lie outside the checkout by resolved path. The artifact
+written under that directory is 4218 bytes, SHA-256 `1feb1ee9abd5…`, and its five deterministic
+fields equal the committed `benchmarks/performance/results/monte_carlo_speed.json` exactly:
+`analytic_reference_price` 11.123761928058133, `measured_prices`, `reported_standard_errors`,
+`paths_per_run`, `option`. Recorded as H1's value in section 3.
+
+**What the reading does and does not claim.** It claims a wheel built from this tree, in an
+environment outside the checkout, reproduces a published number with one command and no prior file
+name. It does **not** compare `results_seconds`, `speedup_vs_numpy`, `speedup_vs_pure_python` or
+`speedup_vs_pure_python_using_min`: two runs on the same machine disagree on every one of them, and
+the record says so in `reproduction.not_compared_because` rather than leaving a reader to assume
+the whole artifact matched. The install was a real index install (`install.mode "index"`, nothing
+seeded); the tool also carries a seeded fallback for a machine whose index is unreachable, and
+would record that mode with its reason instead of silently passing.
+
+**Guard and falsification.**
+`test_the_cold_start_records_one_command_from_an_empty_directory_outside_the_checkout` re-derives
+the equality from the committed artifact instead of trusting the record's own `equal` flag, holds
+the invocation count to one, requires `existing_paths_before []`, requires both clocks positive,
+and requires the install mode to be one of the two named ones — with the seeded case required to
+name its reason and to prove `quantrisk` was not among the seeded distributions. Plant
+`cold-start-record-quotes-a-price-the-published-artifact-does-not-hold` truncates the recorded price
+to `11.1237619`; the guard reddens on the mismatch and greens when restored (verified by hand before
+the plant was registered).
+
+**A fact about the plant that is worth recording.** The first attempt moved the recorded price by
+one unit in the last decimal place (`…133` → `…134`) and the guard stayed **green**: at magnitude
+11.1 the two literals parse to the same float64, so the mutation changed the text without changing
+the value. The plant was rewritten to a truncation that is actually distinguishable. A plant whose
+edit does not move the parsed value tests nothing, and this is the only place in the repository
+where that trap has been observed and written down.
+
+**Count cascade.** One new guard test and one new plant move the Python test count 591 → 592 (with
+the `oracles` extra) and 522 → 523 (offline), and the plant count 205 → 206. Five plant count
+anchors, the claim-sample gold, four documents (`interview_defense`, `limitations`,
+`reproducibility`, `technical_report.tex`) and the PDF + sidecar were re-derived from those
+producers. `ruff format --check` now walks 266 files and `mypy` 82 sources — the three new modules.
+The C++ Catch2 count (203 cases, 204 CTest tests) is a different number and was deliberately not
+touched. No ceiling key, CLI subcommand, dependency, secret, account, tag or release moved; no site
+byte changed and no lock was re-frozen; `evidence/manifest.json` is unchanged, because the record is
+a reading and not a manifest artifact (asserted by the verifier still reading 95 artifacts, 0
+CHANGED, 0 MISSING).
+
+**Local readings.** Static three gates green (`ruff check`, `ruff format --check` 266 files, `mypy`
+82 sources); full `pytest tests/python/` `592 passed`; drift gate `PASS: rebuilt site matches
+build/site.lock`; evidence manifest verified read-only with 0 CHANGED and 0 MISSING.
+
+**Census (development vantage, clean tree at `b19321a`).** The full sweep reports
+`206 declared / 206 ran / 206 caught`, `non_caught []`, `unmeasurable []`, both
+`git status --porcelain` readings empty, vantage "detached worktree; the checkout under evaluation
+is watched, never written". The new plant
+`cold-start-record-quotes-a-price-the-published-artifact-does-not-hold` printed `ok caught`. This is
+the development-side count; no platform census is claimed here.
+
+**Two corrections carried, and why one of them is slightly wider than section 41's sentence.**
+Filling the H1 row is the first. The second: section 2's I-L8 row read `VOID` with the reason "no
+measured H1–H4 value exists to map to a recorded run", and section 7 item 5 said the same. This
+unit makes that reason false, so both now read `Partial` with the actual state — the precondition is
+met, but the report-wide audit that maps every value claim to a recorded run has not been run, so the
+law is not claimed as filled. Rewriting a row the unit itself falsified is a correction, not a scope
+expansion; leaving it would be the stale-sentence defect this ledger keeps recording in others.
