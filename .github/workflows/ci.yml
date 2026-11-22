@@ -91,6 +91,35 @@ jobs:
         run: >-
           uv run python -m quantrisk.interface.drift
           --lock build/site.lock --check --out "${RUNNER_TEMP}/site-drift-rebuild"
+      # X11 / I-L5. The guard `test_the_build_opens_no_socket` refused in-process sockets, but a
+      # build that reached the network through a subprocess could still pass it, and no build was
+      # ever run with the network actually down. This step is that build: `sudo unshare -n` enters a
+      # fresh network namespace with no interfaces but loopback, then rebuilds the site from the
+      # committed artifacts and compares it to build/site.lock. If any reader needed the network,
+      # the rebuild fails here rather than on a networked machine.
+      #
+      # The negative probe comes first and is load-bearing. It tries an outbound socket inside the
+      # namespace and requires it to fail; a namespace that silently failed to isolate (no CAP_SYS_ADMIN,
+      # a runner that ignored the flag) would otherwise let the offline build pass for the wrong
+      # reason. The probe prints a named marker the offline guard reads back from this workflow.
+      - name: offline build (network namespace)
+        run: |
+          set -euo pipefail
+          echo "OFFLINE PROBE: entering a network namespace with unshare -n"
+          sudo unshare -n bash -c '
+            set -euo pipefail
+            out="$1"
+            echo "OFFLINE PROBE: inside the namespace"
+            if python3 -c "import socket; socket.create_connection((\"198.51.100.1\", 9), 1)" 2>/dev/null; then
+              echo "OFFLINE PROBE FAILED: an outbound socket connected inside the namespace" >&2
+              exit 1
+            fi
+            echo "OFFLINE PROBE PASS: outbound socket refused inside the namespace"
+            echo "OFFLINE BUILD: rebuilding the site with the network down"
+            uv run python -m quantrisk.interface.drift \
+              --lock build/site.lock --check --out "$out"
+            echo "OFFLINE BUILD PASS: rebuilt site matches build/site.lock with no network"
+          ' _ "${RUNNER_TEMP}/offline-site-rebuild"
 
   build-and-test:
     name: Configure, build, C++ tests, Python tests

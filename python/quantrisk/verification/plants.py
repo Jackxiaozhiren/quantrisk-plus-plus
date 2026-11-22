@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 524 tests collected offline",
+        anchor="# 525 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -3059,6 +3059,23 @@ MUTATIONS: tuple[Mutation, ...] = (
             "the cold-start record actually holds from the published H1 claim leaves the claim "
             "quoting a number no record produced, so the report-level mapping guard must redden "
             "rather than certify a claim that no longer maps"
+        ),
+    ),
+    Mutation(
+        identifier="offline-step-drops-its-negative-probe",
+        kind="prose",
+        path=".github/workflows/ci.yml",
+        anchor="OFFLINE PROBE FAILED: an outbound socket connected inside the namespace",
+        replacement="offline probe: an outbound socket connected inside the namespace",
+        guard=(
+            "tests/python/test_interface_offline.py::"
+            "test_the_offline_build_facts_are_readable_and_falsifiable"
+        ),
+        claim=(
+            "I-L5's network-down build is only evidence of offline-ness if a namespace that failed "
+            "to isolate would be caught; erasing the negative probe's refusal marker leaves the "
+            "unshare step able to pass for the wrong reason, so the offline guard must redden "
+            "rather than certify a build whose isolation was never tested"
         ),
     ),
 )
