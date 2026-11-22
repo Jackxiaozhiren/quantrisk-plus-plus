@@ -2084,3 +2084,68 @@ update is outside this approval. No tag, release, secret or account is moved or 
 subcommand, ceiling key, dependency or HTTP surface is introduced; the deploy job stays downstream
 of the lint job's `site drift gate` through `needs: [lint]`, so a gate failure blocks publication.
 I-L5 and O11 stay out of scope; this push does not adjudicate either.
+
+## 48. X10 platform run and live re-publication (backfill)
+
+**Run identity** — `45011233588`, attempt 1, head `1a4fc69ad4671db83ca41b02aee7606534d0744e`,
+created `2026-11-22T10:11:48Z`, completed `2026-11-22T10:37:54Z`, conclusion `success`. Seven jobs,
+all `completed` / `success`, attributed below to the job that printed each reading. This is the
+first run of the section 47 push and the only one whose readings are backfilled here. The three
+SSL EOFs seen while moving the first ref were transport-level; each time the remote ref was re-read
+through the API and still read `e59ece8`, so no partial ref update existed, and the eventual ref
+move carried all four commits with local SHA equal to remote SHA.
+
+- **Format and static checks** — `ruff format --check`: 268 files already formatted; `ruff check`
+  all checks passed; `mypy python/quantrisk tools`: no issues in 83 source files. `site drift gate`:
+  `PASS: rebuilt site matches build/site.lock`. `evidence manifest`: 95 OK, 0 CHANGED, 0 MISSING.
+  Reflector ceilings report 13 `ok ... 0 against a ceiling of 0` lines and no unmet ceiling; the
+  `plants_not_rejected_by_their_guard` entry is a SKIP in this lint vantage (the census verdict is
+  not present there), matching X5–X9, and reads `ok ... 0 against a ceiling of 0 due P3.2` in the
+  census job below. `claim-gold` / `docs_rederivation_gap` / `lanes_documented_vs_executed_gap`
+  each close at 0, so the new count cascade is attested on the runner as well.
+- **Configure, build, C++ tests, Python tests** — CTest 100% of 204 passed; Python tests fully
+  offline: **523 passed, 5 skipped** (X9: 522 — the +1 is the new
+  `test_every_h_value_claim_maps_to_its_recorded_run`, which compiles and runs green in this lane).
+  `Validate installed CLI`: 7/7 checks passed. Final-tip attestation PASS: V9 attests
+  `5ec3fabe4fa8` as a strict ancestor of `1a4fc69ad467`, 195 caught of 195 declared (the fixed
+  historical reading, not today's).
+- **Mutation census in a detached worktree** — `207 declared = 206 measurable here + 1
+  environment-blind`, `206/206 planted defects were rejected by their guard`, `non_caught []`, the
+  single unmeasurable entry the recurring pdfTeX-version blind spot (`report-source-edited-
+  without-a-rebuild-seen-from-the-render`: runner pdfTeX 1.40.28 vs the 1.40.29 recorded in
+  `paper/technical_report.build.json`; on this runner the re-render guard is blind to its own
+  typesetter). Checkout porcelain empty before
+  and after, vantage a detached worktree watching the checkout without writing it. **The new plant
+  `claim-map-drops-a-recorded-figure-from-the-report` is `ok caught`** — I-L8's report-level mapping
+  has platform-side falsification: removing the figure the cold-start record holds from the H1 claim
+  reddens the guard on the runner. Census artifact ID `14750717474` (4400 bytes).
+- **Installed wheel surface in a clean environment** — wheel `quantrisk-1.9.0-cp312-cp312-
+  linux_x86_64`, installed from this tree outside the checkout; `"version": "1.9.0"`, `"tasks": 19`,
+  validate 7/7, `refusal.named: true`, identity holds, with-extras census 19/19. Artifact
+  `installed-surface` ID `14750116782` (580 bytes). No CI step runs `tools/cold_start.py`, so no
+  cold-start wall-clock number is a runner reading here.
+- **Benchmark suite against live oracles** — suite 19/19 executed and passed, 0 aggregated from
+  disk, 0 failed, 0 skipped, 247.1 s total. Artifact `benchmark-suite` ID `14750251457`
+  (170332 bytes).
+- **macOS native C++ and Python parity** — CTest 100% of 204 passed; Python 98 passed in 2.71 s.
+- **Publish the evidence site** — downstream of lint through `needs: [lint]`; drift PASS;
+  github-pages artifact ID `14750285536`, final size 10266 bytes, `pages_build_version`
+  `1a4fc69ad4671db83ca41b02aee7606534d0744e`, environment URL
+  `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`. Section 45 changed no page byte and
+  re-froze no `build/site.lock` or `evidence/manifest.json`, so this is the already-approved X5
+  surface rebuilding gate-verified bytes, not a wider authorisation.
+
+**Live URL, sixth platform confirmation of H3 zero drift** — measured from the development machine
+at reading time: HTTP 200, 5793 bytes, `<title>QuantRisk++ evidence</title>`, page SHA256
+`692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4` — byte-for-byte equal to the
+`index.html` `page_sha256` in the committed `build/site.lock`, unchanged from X5–X9. The deploy ZIP
+(10266 bytes here vs 10264 at X9) differs in tar metadata; the page bytes do not move.
+
+**What the platform confirms, and what it does not.** The two CI-side facts section 47 named are
+confirmed: the claim-map guard compiles and runs green in the lint lane (523 passed, +1 over X9),
+and its paired plant reddens under the mutation census (206/206). The producer's four mapped
+figures remain the development-side disk re-derivations of section 46, not runner-only readings.
+I-L8 is now `Filled` with both local and platform backing; I-L5 and O11 stay untouched and
+unadjudicated. This backfill commit is carried in the second and final ref update of the section 47
+approval; its own run is observed-only under the same recursion limit, and no third ref update is
+authorised.
