@@ -419,7 +419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 593 pytest tests with the validation",
+        anchor="and 594 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 207/207 planted defects rejected",
+        anchor="# 208/208 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -693,7 +693,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 524 collected without them",
+        anchor="oracles installed, 525 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -818,7 +818,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 593 pytest tests with the `oracles` extra here",
+        anchor="# 594 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
