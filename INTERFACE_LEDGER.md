@@ -2252,3 +2252,34 @@ can confirm two things and no more: that the offline step prints its PASS marker
 with the negative probe intact, and that its paired plant reddens under the mutation census. The
 machine-readable producer readings remain development-side disk re-derivations, not runner claims.
 O11 is untouched and unadjudicated; no ref was updated and no push is authorised by section 49.
+
+## 51. Push approval for X11 and its bound
+
+Section 49 excluded a push, so section 50's offline-step readings (step in place, local census
+208/208, I-L5 still `Partial`) are development-side only; no runner has executed the network-down
+build. The maintainer then approved the push. Approval original, verbatim: `批准推送 X11` — the
+push-and-backfill authorisation recorded as `推送 X5 并回填（最推荐）`, `推送 X6 并回填（最推荐）`,
+`推送 X7 并回填（推荐）`, `推送 X8 并回填（最推荐）`, `推送 X9 并回填（最推荐）` and
+`推送 X10 并回填（最推荐）` in sections 27, 31, 35, 39, 43 and 47.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the six X11 commits (`dcd5b13`, `9ef3bd1`, `2467ef0`, `9406397`,
+`c817d0f`, `37f0fe7`) together with the commit that records this approval; read the first run
+produced by the push and attribute each reading to the job that printed it, including the deploy
+job, which re-publishes the same gate-verified site bytes (section 50 changed no page byte and
+re-froze no `build/site.lock` and no `evidence/manifest.json`), so its publication is a consequence
+of the already-approved X5 surface and not a wider authorisation; write those readings into a
+backfill commit in this ledger, including any failure as a failure rather than omitting it. The
+platform-side facts this push can confirm, and no more: that the new `offline build (network
+namespace)` step runs in the lint lane and prints its named `OFFLINE PROBE PASS` and
+`OFFLINE BUILD PASS` markers with the negative probe intact and the rebuilt site matching the
+committed lock, and that its paired plant `offline-step-drops-its-negative-probe` reddens under
+the mutation census. Only once those readings exist does section 2's I-L5 row become `Filled` and
+DoD item 3 `Done`; if the step fails on the runner — for example if `unshare` is unavailable or
+denied — the failure is recorded as a failure, I-L5 stays `Partial`, and no offline claim is made.
+The producer's disk re-derivations remain development-side, not runner-only measurements. The
+recursion limit is the one sections 11, 14, 18, 22, 27, 31, 35, 39, 43 and 47 used: the backfill
+commit's own run is observed-only, because a third ref update is outside this approval. No tag,
+release, secret or account is moved or added; no new CLI subcommand, ceiling key, dependency or
+HTTP surface is introduced; the deploy job stays downstream of the lint lane through `needs:
+[lint]`, so a gate failure blocks publication. O11 is untouched and unadjudicated by this push.
