@@ -2149,3 +2149,50 @@ I-L8 is now `Filled` with both local and platform backing; I-L5 and O11 stay unt
 unadjudicated. This backfill commit is carried in the second and final ref update of the section 47
 approval; its own run is observed-only under the same recursion limit, and no third ref update is
 authorised.
+
+## 49. X11 scope unit — I-L5 true offline build (ledger-first)
+
+Scope unit X11, as put to the maintainer verbatim (the selected option's label):
+
+> X11：I-L5 真断网构建（最推荐）
+
+Approval original, verbatim: `X11：I-L5 真断网构建（最推荐）`
+
+The option bound to that label defined the unit as: turn I-L5 from `Partial` into `Filled` against
+the roadmap line 299 acceptance test — "A build executed with network disabled; a build that
+silently needs network is a High finding" — by running the site build once with the network truly
+down and recording the reading; if the build silently needed the network, record and remediate it
+as a High finding rather than waiving it. Doing so also closes DoD item 3, whose only remaining
+Partial sub-item is the offline build.
+
+**The maintainer was then shown a technical fork, because the offline mechanism is not portable to
+this machine.** Measured facts put to them: this macOS host refuses `sandbox-exec` (`sandbox_apply:
+Operation not permitted`), has no `unshare`, and its Docker daemon has no prebuilt compiled
+extension for the aarch64 site build; the GitHub Ubuntu runner has root and supports
+`unshare -n`. They selected the route verbatim:
+
+> CI runner 用 unshare -n（最推荐）
+
+Approval original, verbatim: `CI runner 用 unshare -n（最推荐）`
+
+**What this binds.** The network-down build runs in `.github/workflows/ci.yml`'s lint job, in a
+fresh network namespace entered with `sudo unshare -n`, rebuilding the site and comparing it to
+the committed `build/site.lock`. The step first proves the isolation is real with a negative
+probe — a socket connection that must fail inside the namespace — so a namespace that silently
+did not isolate cannot be reported as an offline reading. The reading is attributed to the job
+that prints it; no OS-level offline measurement is claimed from this macOS host, where the mechanism
+is unavailable. A read-only producer `offline.audit(root)` re-derives the liveness facts from disk
+(the CI step's presence and its negative probe, the site generator's network-free import closure,
+and the committed lock as the rebuild target); the guarding test re-derives them independently and
+is reddened by a named plant. The I-L5 row and the DoD item 3 status line are filled only once the
+platform reading exists; until then I-L5 stays `Partial` and this section is scope only.
+
+Bounded effect, and nothing beyond it: add the CI step, the producer module, the guarding test, the
+named plant, the I-L5 and DoD item 3 corrections, and the mechanical count/PDF cascade those
+require. Excluded: any O11 adjudication, any change to `build/site.lock`, to
+`tools/cold_start_record.json`, to `evidence/manifest.json`, to any published artifact, to any tag
+or release, any new CLI subcommand, dependency or ceiling key, and any push. The new CI step reads
+the same committed bytes as the existing `site drift gate` and re-frozes nothing.
+
+Recursion limit: if a later approval pushes X11, the backfill commit's own run is observed-only and
+no third ref update is authorised, as in sections 27, 31, 35, 39, 43 and 47. O11 stays out of scope.
