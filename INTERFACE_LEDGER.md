@@ -1949,3 +1949,62 @@ claim. I-L5, I-L8 and O11 stay out of scope.
 
 This backfill commit is carried in the second and final ref update of the section 43 approval; its
 own run is observed-only under the same recursion limit, and no third ref update is authorised.
+
+## 45. X10 scope unit — report-level claim-to-run mapping audit (ledger-first)
+
+Scope unit X10, as put to the maintainer verbatim (the selected option's label):
+
+> X10：报告级映射审计（最推荐）
+
+Approval original, verbatim: `X10：报告级映射审计（最推荐）`
+
+The option bound to that label defined the unit as: turn I-L8 from `Partial` into `Filled` by running
+the report-wide audit the roadmap line 302 acceptance test names — "Every value claim in the report
+maps to a recorded run; unmapped claims are deleted" — over the section 3 H1–H4 measurement ledger,
+add the read-only producer, the guarding test and a named plant, and fill the I-L8 row and the stale
+section 7 status line; accept the added producer module, guard, plant, I-L8 and section 7 corrections
+and the mechanical count/PDF cascade. Exclude O11, I-L5, any change to `.github/workflows/ci.yml`,
+to `build/site.lock`, to any committed record or artifact, and any push.
+
+**The report face is fixed here, before code.** "The report" for this law is the section 3
+H1–H4 measurement ledger's Value column — the four value claims the project publishes about its own
+measurements. The claim-inventory guards in `test_artifact_metadata.py` already police the
+`<number> <noun>` claims in README, the reproducibility doc and the paper, so this unit does not
+re-scan that corpus; it closes the different gap that section 3's four H values have no guard that
+binds each claim back to the committed run that produced it. Each of the four claims maps to the
+record already committed for it by the unit that measured it:
+
+1. **H1** — the claim's `analytic_reference_price` and the one-command timing map to
+   `tools/cold_start_record.json` (`reproduction.produced`, `run.wall_seconds`) and the published
+   artifact that record names (`reproduction.published_artifact`).
+2. **H2** — the claim's `10/10` coverage and zero refusals map to `provenance.completeness()` over
+   the committed manifest and registry.
+3. **H3** — the claim's live index SHA-256 maps to the committed `build/site.lock`
+   `index.html` `page_sha256`.
+4. **H4** — the claim's empty paid set, free static tier and one `$0` budget line map to
+   `cost.audit()` over the committed workflow and README.
+
+**The audit is read-only and derives every number.** A new read-only producer
+`claimmap.audit(root)`, in the interface package (stdlib, no numeric literal, no socket, no write),
+returns for each hypothesis the claim text, the record path it maps to, the reading re-derived from
+that committed record, and whether the claim's quoted figure is present in that reading; it returns
+the mapped and unmapped sets rather than a bare ratio, and names any claim whose record cannot be
+read. The guarding test re-derives those readings independently from the same committed records —
+it never trusts a `mapped` flag the producer typed — and declares the ceiling that all four claims
+are mapped and none unmapped. A named plant edits one quoted figure in the section 3 H table so the
+guard reddens; the guard reads the ledger file itself so the pairing audit's text-link check names
+the mutation. An unmapped claim is a defect to fix in the report, not a number to waive.
+
+Bounded effect, and nothing beyond it: add `python/quantrisk/interface/claimmap.py`, one guarding
+test module `tests/python/test_interface_claimmap.py`, one named plant, the I-L8 row filled with the
+producer/guard/plant triple and the section 7 status correction, and the mechanical count/PDF
+cascade those require. Excluded: any O11 adjudication, any I-L5 work, any change to
+`.github/workflows/ci.yml`, to `build/site.lock`, to `tools/cold_start_record.json`, to
+`evidence/manifest.json` or to any published artifact, any new CLI subcommand, dependency, ceiling
+key, tag or release, any re-freeze of the site, any live-URL fetch or socket open, and any push. The
+three producer readings reused here were taken by the units that measured H1/H2/H4 and X5's lock
+reading for H3; this unit re-reads them from disk and does not re-measure or re-assert them.
+
+Recursion limit: if a later approval pushes X10, the backfill commit's own CI run is observed-only
+and no third ref update is authorised, as in sections 27, 31, 35, 39 and 43. I-L5 and O11 stay out
+of scope.
