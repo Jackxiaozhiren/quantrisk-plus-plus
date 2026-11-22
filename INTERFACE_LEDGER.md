@@ -2008,3 +2008,50 @@ reading for H3; this unit re-reads them from disk and does not re-measure or re-
 Recursion limit: if a later approval pushes X10, the backfill commit's own CI run is observed-only
 and no third ref update is authorised, as in sections 27, 31, 35, 39 and 43. I-L5 and O11 stay out
 of scope.
+
+## 46. X10 local stage reading — all four H claims map to their records (no push)
+
+Scope section 45 was committed first (`0188239`), then the implementation (`df6ccee`, clean tree).
+This section records only readings taken at that commit; section 45 excluded any push, CI run,
+live-URL fetch, record rewrite or artifact re-freeze, so nothing below is a platform claim.
+
+**The producer and its four readings.** `claimmap.audit(root)` reads the section 3 H table and the
+four committed records afresh. At `df6ccee` it returned `mapped` with all four identifiers and empty
+`unmapped`/`refused`: H1's price `11.123761928058133` is present in the H1 claim and comes from
+`tools/cold_start_record.json`'s reproduced artifact; H2's `10/10` is rebuilt from
+`provenance.completeness()`'s resolved and published sets; H3's index SHA
+`692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4` is read from the committed
+`build/site.lock`; H4's budget sentence is the line returned by `cost.audit()` from `README.md`.
+No figure is typed into the producer: its source is scanned for numeric literals by the guard and
+contains none, and an unreadable record is a named refusal rather than a suppressed claim.
+
+**Guard and falsification.** `test_every_h_value_claim_maps_to_its_recorded_run` re-derives all four
+figures from disk independently of the producer's own `mapped` list, requires each to appear in the
+ledger value it re-reads, then compares the producer's per-claim figures and sets to that derivation.
+It names `INTERFACE_LEDGER.md` directly so the pairing audit binds a ledger mutation to this guard.
+The plant `claim-map-drops-a-recorded-figure-from-the-report` removes the cold-start price from the
+published H1 claim; a red-to-green hand check confirmed the guard reddens before the fix and passes
+after. The plant is therefore a falsification of the mapping law, not a restatement of it.
+
+**Mechanical cascade and local gates.** Plant count 206 → 207, collected pytest tests 523 → 524,
+generated pytest tests 592 → 593; Catch2's 204 cases do not move. The I-L8 row in section 2 and the
+section 7 item 5 status line were filled, the stale H1 wall-clock in section 7 corrected to this
+unit's recorded `0.611 s`, four documents and the paper were re-derived, the PDF and its build
+sidecar rebuilt, the five plant-count anchors and the claim-gold inventory updated to the new
+counts. Locally: `ruff check .`, `ruff format --check .` (268 files) and
+`mypy python/quantrisk tools` (83 sources) all pass; pytest reports 593 passed; the drift gate
+reports PASS against the unchanged frozen site; the evidence verifier reports 95 OK, 0 CHANGED,
+0 MISSING. No workflow, lock, record, manifest or published artifact was changed by this unit.
+
+**Full census at `df6ccee`.** `207 declared = 207 ran = 207 caught`, `non_caught []`,
+`unmeasurable []`, checkout porcelain empty before and after, vantage a detached worktree that
+watches the checkout without writing it; elapsed 13m58s. The new plant is `ok caught`, so the
+report-level mapping guard is falsifiable at the full-sweep vantage as well. Unlike the runner
+census in sections 28/32/36/40/44, this development-side sweep has no environment-blind entry:
+the pdfTeX version mismatch does not arise here.
+
+**Boundary.** I-L8 is `Filled` on this local reading: every one of the four published H values maps
+to the run that recorded it, and the mapping has a named, census-confirmed falsifier. This does not
+fill I-L5 (true offline build) and does not adjudicate O11. No CI run is claimed, no live URL was
+fetched, no ref was updated, and no push is authorised by section 45; a later push needs its own
+verbatim approval and remains subject to that section's recursion limit.
