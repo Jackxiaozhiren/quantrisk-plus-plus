@@ -1858,3 +1858,32 @@ unit makes that reason false, so both now read `Partial` with the actual state �
 met, but the report-wide audit that maps every value claim to a recorded run has not been run, so the
 law is not claimed as filled. Rewriting a row the unit itself falsified is a correction, not a scope
 expansion; leaving it would be the stale-sentence defect this ledger keeps recording in others.
+
+## 43. Push approval for X9 and its bound
+
+Section 41 excluded a push, so section 42's H1 reading (one command from an empty directory outside
+the checkout, five deterministic fields reproduced) and the 206/206 census are development-side
+only; no platform run of the new guard or plant is claimed there, section 3's H1 row carries "No
+runner reading claimed: no CI step runs this tool", and I-L8 reads `Partial` only because H1–H4 now
+all have values. The closing question offered push-and-backfill, opening a new unit without pushing,
+and maintaining the status quo. Approval original, verbatim:
+`推送 X9 并回填（最推荐）` — the push-and-backfill branch, the same authorisation recorded as
+`推送 X5 并回填（最推荐）`, `推送 X6 并回填（最推荐）`, `推送 X7 并回填（推荐）` and
+`推送 X8 并回填（最推荐）` in sections 27, 31, 35 and 39.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the four X9 commits (`e81bff3`, `485f91a`, `b19321a`, `244d544`)
+together with the commit that records this approval; read the first run produced by the push and
+attribute each reading to the job that printed it — including the deploy job, which re-publishes the
+same gate-verified site bytes (section 41 changed no page byte and re-froze no `build/site.lock`), so
+its publication is a consequence of the already-approved X5 surface and not a wider authorisation;
+write those readings into a backfill commit in this ledger, including any failure as a failure
+rather than omitting it; carry that backfill commit in the second ref update. The cold-start reading
+itself is a development-side measurement: no CI step runs `tools/cold_start.py`, and the two CI-side
+facts this push can confirm are that the H1 guard compiles and runs green in the lint lane and that
+its paired plant reddens under the mutation census; the producer's numeric reading is not claimed as
+a runner reading. The recursion limit is the one sections 11, 14, 18, 22, 27, 31, 35 and 39 used:
+the backfill commit's own run is observed-only, because a third ref update is outside this approval.
+No tag, release, secret or account is moved or added; no new CLI subcommand, ceiling key, dependency
+or HTTP surface is introduced; the deploy job stays downstream of the lint job's `site drift gate`
+through `needs: [lint]`, so a gate failure blocks publication. I-L5, I-L8 and O11 stay out of scope.
