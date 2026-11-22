@@ -2055,3 +2055,32 @@ to the run that recorded it, and the mapping has a named, census-confirmed falsi
 fill I-L5 (true offline build) and does not adjudicate O11. No CI run is claimed, no live URL was
 fetched, no ref was updated, and no push is authorised by section 45; a later push needs its own
 verbatim approval and remains subject to that section's recursion limit.
+
+## 47. Push approval for X10 and its bound
+
+Section 45 excluded a push, so section 46's claim-map readings (four H claims mapped to their
+records, I-L8 `Filled`, census 207/207) are development-side only; no platform run of the new
+guard or plant is claimed there. The closing question offered push-and-backfill, opening a new
+local unit without pushing, and maintaining the status quo. Approval original, verbatim:
+`推送 X10 并回填（最推荐）` — the push-and-backfill branch, the same authorisation recorded as
+`推送 X5 并回填（最推荐）`, `推送 X6 并回填（最推荐）`, `推送 X7 并回填（推荐）`,
+`推送 X8 并回填（最推荐）` and `推送 X9 并回填（最推荐）` in sections 27, 31, 35, 39 and 43.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the three X10 commits (`0188239`, `df6ccee`, `bbabef6`) together with
+the commit that records this approval; read the first run produced by the push and attribute each
+reading to the job that printed it, including the deploy job, which re-publishes the same
+gate-verified site bytes (section 45 changed no page byte and re-froze no `build/site.lock` and no
+`evidence/manifest.json`), so its publication is a consequence of the already-approved X5 surface
+and not a wider authorisation; write those readings into a backfill commit in this ledger, including
+any failure as a failure rather than omitting it; carry that backfill commit in the second ref
+update. The two CI-side facts this push can confirm are that the new claim-map guard compiles and
+runs green in the lint lane (one more pytest than X9) and that its paired plant
+`claim-map-drops-a-recorded-figure-from-the-report` reddens under the mutation census; the
+producer's four mapped readings themselves remain the development-side disk re-derivations of
+section 46, not runner-only measurements. The recursion limit is the one sections 11, 14, 18, 22,
+27, 31, 35, 39 and 43 used: the backfill commit's own run is observed-only, because a third ref
+update is outside this approval. No tag, release, secret or account is moved or added; no new CLI
+subcommand, ceiling key, dependency or HTTP surface is introduced; the deploy job stays downstream
+of the lint job's `site drift gate` through `needs: [lint]`, so a gate failure blocks publication.
+I-L5 and O11 stay out of scope; this push does not adjudicate either.
