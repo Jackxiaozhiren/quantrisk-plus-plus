@@ -184,7 +184,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="interview-doc-overcounts-the-offline-lane",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 523 tests collected offline",
+        anchor="# 524 tests collected offline",
         replacement="# 397 Python tests",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -419,7 +419,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-counts-stale-python-tests",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="and 592 pytest tests with the validation",
+        anchor="and 593 pytest tests with the validation",
         replacement="and 458 pytest tests with the validation",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -551,7 +551,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="docs-command-comment-counts-superseded-plants",
         kind="prose",
         path="docs/interview_defense.md",
-        anchor="# 206/206 planted defects rejected",
+        anchor="# 207/207 planted defects rejected",
         replacement="# 34/34 planted defects rejected",
         guard=(
             "tests/python/test_mutation_suite.py::"
@@ -693,7 +693,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="report-quotes-a-count-the-offline-probe-refutes",
         kind="prose",
         path="paper/technical_report.tex",
-        anchor="oracles installed, 523 collected without them",
+        anchor="oracles installed, 524 collected without them",
         replacement="oracles installed, 400 collected without them",
         # The other count guard sees only the environment it runs in, so with the oracles in
         # place it cannot tell whether an oracle-free quotation is stale. The probe guard can,
@@ -818,7 +818,7 @@ MUTATIONS: tuple[Mutation, ...] = (
         identifier="reproducibility-quotes-a-superseded-pytest-total",
         kind="prose",
         path="docs/reproducibility.md",
-        anchor="# 592 pytest tests with the `oracles` extra here",
+        anchor="# 593 pytest tests with the `oracles` extra here",
         replacement="# 494 pytest tests with the `oracles` extra here",
         guard=(
             "tests/python/test_artifact_metadata.py::"
@@ -3040,6 +3040,25 @@ MUTATIONS: tuple[Mutation, ...] = (
             "evidence of that if the number in it is the artifact's own; a recorded price that "
             "disagrees with the committed artifact must redden the guard, or 'reproduces a "
             "published number' is an adjective the record asserts about itself"
+        ),
+    ),
+    Mutation(
+        identifier="claim-map-drops-a-recorded-figure-from-the-report",
+        kind="prose",
+        path="INTERFACE_LEDGER.md",
+        anchor=(
+            "11.123761928058133, `measured_prices`, `reported_standard_errors`, `paths_per_run`"
+        ),
+        replacement="9.9999999, `measured_prices`, `reported_standard_errors`, `paths_per_run`",
+        guard=(
+            "tests/python/test_interface_claimmap.py::"
+            "test_every_h_value_claim_maps_to_its_recorded_run"
+        ),
+        claim=(
+            "I-L8 says every value claim in the report maps to a recorded run; dropping the figure "
+            "the cold-start record actually holds from the published H1 claim leaves the claim "
+            "quoting a number no record produced, so the report-level mapping guard must redden "
+            "rather than certify a claim that no longer maps"
         ),
     ),
 )

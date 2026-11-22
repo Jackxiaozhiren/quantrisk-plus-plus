@@ -1,8 +1,8 @@
 {
   "schema": "quantrisk-report-build/1",
   "command": "uv run python -m tools.build_report",
-  "generated_at_utc": "2026-11-22T04:03:47+00:00",
-  "engine": "This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.17)  22 NOV 2026 12:03",
+  "generated_at_utc": "2026-11-22T09:05:11+00:00",
+  "engine": "This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.17)  22 NOV 2026 17:05",
   "source_bundle": [
     {
       "path": "experiments/monte_carlo_convergence/results/convergence_slope.png",
@@ -32,12 +32,12 @@
     {
       "path": "paper/technical_report.tex",
       "bytes": 146778,
-      "sha256": "e16940d79ade183bc98f79889835a2d2e796c72566955a400b810d3036f3f6fd"
+      "sha256": "bd449028c9a5d595d92d96ae5c4bb0532b3d4e6c24ca104d96ed8268d91de391"
     }
   ],
-  "bundle_sha256": "d0dce5b4dbcfbcb0e7dd98af165c178fc8a3a0489f349558c9c042d67f198c4e",
-  "pdf_bytes": 1005924,
-  "pdf_sha256": "9ef68883c92fc4253120ebaadc962db543c24eaae24106ba4846a7fbaeff52c2",
-  "pdf_text_sha256": "9d419af85f2a5e4c40d0a8f33a1f54fc0b991873f6a3df3149c15504dacc392e",
+  "bundle_sha256": "459dacbb87d636a01ea8931d008ce366df8671e653c70fb9c8b6e8c92ffd4f29",
+  "pdf_bytes": 1005923,
+  "pdf_sha256": "3707bb984d73ca134484d5ed31bfc1ebdf2988bdd5e7f9b09e52b1644a6fae5a",
+  "pdf_text_sha256": "6e2aeea4ec5f5e64444f11325c28dec33b8a58ba24708edd184891f05c4ad869",
   "note": "pdf_sha256 changes on every rebuild because pdfTeX embeds the creation date, so it binds this record to these bytes rather than reproducing them. pdf_text_sha256 is the property that survives the stamp and is what a rebuild is compared against."
 }
