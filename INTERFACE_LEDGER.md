@@ -2196,3 +2196,59 @@ the same committed bytes as the existing `site drift gate` and re-frozes nothing
 
 Recursion limit: if a later approval pushes X11, the backfill commit's own run is observed-only and
 no third ref update is authorised, as in sections 27, 31, 35, 39, 43 and 47. O11 stays out of scope.
+
+## 50. X11 local stage reading — the offline step is in place, its platform reading is not yet taken
+
+Scope section 49 was committed first (`dcd5b13`); the implementation followed in `9ef3bd1`
+(CI step, producer, guard), `2467ef0` (plant-anchor cascade), `9406397` (explicit interpreter path),
+and `c817d0f` (a comment corrected after a path-shaped token tripped an existing CI guard). All
+five commits are local; section 49 excluded any push, so nothing here is a platform claim and I-L5
+remains `Partial` in section 2 until a runner actually executes the network-down build.
+
+**Why the build runs on the runner, not here.** Measured on this macOS host: `sandbox-exec` refuses
+with `sandbox_apply: Operation not permitted`; `unshare` is absent; Docker runs aarch64 with no
+prebuilt compiled extension for the site build and the PyPI `quantrisk` index returns 404. No
+OS-level offline measurement is therefore claimed from this host. The Linux GitHub runner has root
+and supports `unshare -n`, so section 49 bound the real build there and the local work below is the
+readable, falsifiable half of the law.
+
+**What was added.** The lint job gained a step `offline build (network namespace)`: it resolves the
+venv interpreter to an absolute path before elevation, enters `sudo unshare -n`, first runs a
+negative probe that must fail to connect an outbound socket (a namespace that silently failed to
+isolate cannot count as offline), then rebuilds the site with `quantrisk.interface.drift --check`
+against the committed `build/site.lock`, printing `OFFLINE PROBE PASS` and `OFFLINE BUILD PASS` as
+named markers. It reads the same committed bytes as the existing `site drift gate` and re-frozes
+nothing. `offline.audit(root)` (stdlib, read-only, no socket, no numeric literal) re-derives the
+step's markers, the site generator's relative-and-absolute import closure (four modules scanned;
+no network module), and the lock's index digest from disk. The guard
+`test_the_offline_build_facts_are_readable_and_falsifiable` re-derives each fact independently and
+compares the producer, and the plant `offline-step-drops-its-negative-probe` erases the probe's
+refusal marker; a red-to-green hand check confirmed the guard reddens before the fix and passes
+after.
+
+**A guard interaction found and fixed.** Re-running the full census after the interpreter-path
+correction gave `199/208`: nine CI-lane and living-document plants share the guard
+`test_the_ci_lane_that_runs_the_guards_fetches_what_they_read`, which reads every path-shaped token
+in a step's `run`. A comment phrase containing a slash was parsed as a nonexistent repository path
+and put that shared guard red at baseline, so the nine plants could not show a red-to-green delta.
+Rewording the comment removed the token; the guard and all nine plants returned to green, and a
+final clean-tree census at `c817d0f` reports `208 declared = 208 ran = 208 caught`, `non_caught []`,
+`unmeasurable []`, checkout porcelain empty before and after, vantage a detached worktree watching
+the checkout without writing it. This is recorded as a finding, not hidden: the guard that reads
+CI commands is itself sensitive to how a comment is worded.
+
+**Mechanical cascade and local gates.** Plant count 207 → 208, collected pytest tests 524 → 525,
+generated pytest tests 593 → 594; the claim-gold inventory, four living documents, the paper and its
+build sidecar, and five plant anchors that quote the old counts were re-derived; the PDF and sidecar
+were rebuilt. Locally: `ruff check .`, `ruff format --check .` (270 files) and
+`mypy python/quantrisk tools` (84 sources) pass; pytest reports 594 passed; the drift gate reports
+PASS; the evidence verifier reports 95 OK, 0 CHANGED, 0 MISSING; `docs_rederivation` reports gap 0
+with `derived.plants = 208`. No workflow, lock, record, manifest or published artifact outside the
+bounded CI step was changed, and no page byte moved.
+
+**Boundary.** The platform side of I-L5 is not yet a reading: no runner has executed the new step,
+so section 2's I-L5 row stays `Partial` and DoD item 3 stays Partial here. A later push, if approved,
+can confirm two things and no more: that the offline step prints its PASS markers in the lint lane
+with the negative probe intact, and that its paired plant reddens under the mutation census. The
+machine-readable producer readings remain development-side disk re-derivations, not runner claims.
+O11 is untouched and unadjudicated; no ref was updated and no push is authorised by section 49.
