@@ -1716,3 +1716,70 @@ instead of claiming more or less.
 This backfill commit is carried in the second and final ref update of the section 39 approval; its
 own run is observed-only under the same recursion limit, and no third ref update is authorised. H1,
 I-L5, I-L8 and O11 stay out of scope.
+
+## 41. X9 scope unit — H1 cold start, measured (ledger-first)
+
+Scope unit X9, as put to the maintainer verbatim (the selected option's label):
+
+> X9：H1 冷启动复现（最推荐）
+
+Approval original, verbatim: `X9：H1 冷启动复现（最推荐）`
+
+The option bound to that label defined the unit as: turn H1 from 未测得 into a recorded reading by
+scripting the run `INTERFACE_ROADMAP.md` line 143 defines, add the producer, the guarding test and
+a named plant, and synchronise the H1 row and the stale section 7 status line; accept the added
+tool, producer, guard, plant, record, count cascade and PDF rebuild; exclude O11, I-L5, any paid
+service or account, any CI change, and any push.
+
+**The measurement口径 is fixed here, before code, from line 143 verbatim** — "Scripted run: fresh
+venv, neutral cwd, one command from install-listing to artifact; assert the run needs zero repo
+checkout and zero prior file names; record wall clock" — and is discharged as follows:
+
+1. **fresh venv** — the environment root is created outside the checkout and its resolved path is
+   recorded; the installed package must import from inside that root, and neither the root nor the
+   import path may sit under the checkout (the editable-install failure `assert_identity` in
+   `tools/verify_installed_surface.py` already names).
+2. **neutral cwd** — the working directory is created outside the checkout, empty before the run,
+   and its resolved path is recorded.
+3. **one command from install-listing to artifact** — exactly one subprocess invocation between
+   "the environment is ready" and "the artifact exists": `quantrisk run mc_speed --out
+   cold-start-out`, with the CLI resolved inside the venv. The count is recorded and the guard
+   holds it to one; a second invocation would be a second command.
+4. **zero repo checkout** — no argv element names the checkout or any path inside it, the cwd and
+   venv roots lie outside it, and the run consumes no committed artifact from it. The tool refuses
+   to write a record if any of those is false.
+5. **zero prior file names** — every argv element that names a filesystem path must be absent
+   before the run; the record carries the list of argv elements that already existed, and the
+   guard requires it to be empty. The task id is the one the installed `run --list` prints, not a
+   name copied from a document.
+6. **wall clock** — `time.perf_counter` around that single command, recorded as `run.wall_seconds`,
+   with the install duration recorded separately as `install.wall_seconds`; the two are never
+   conflated, because only the first is "one command".
+
+**Reproduction of a published number, and its limit.** `mc_speed` is the only registered task that
+declares no extra, so it is the only one a bare wheel can serve. Its deterministic fields
+(`analytic_reference_price`, `measured_prices`) are compared for exact equality against the
+committed `benchmarks/performance/results/monte_carlo_speed.json`, and the tool refuses to write a
+record if they differ. Its wall-clock fields (`speedup_vs_*`, `results_seconds`) are **explicitly
+not compared and not claimed**: they move with machine load, and asserting otherwise would be the
+fabrication this ledger exists to prevent. The record states that exclusion rather than leaving it
+to be inferred.
+
+Bounded effect, and nothing beyond it: add `tools/cold_start.py` (the scripted run; stdlib plus
+`subprocess`, invoking `uv` and the venv's own binaries), a read-only
+`coldstart.audit(record)` producer in the interface package (stdlib, no numeric literal, no socket),
+one guarding test in `tests/python/test_interface_coldstart.py`, one committed record
+`tools/cold_start_record.json` written by an actual run on a clean tree, one named plant, the H1 row
+value plus the section 7 status correction, and the mechanical count/PDF cascade those require.
+The install step inside the fresh venv may fetch `numpy` and `pandas` from the package index — that
+is the user's own install cost and is recorded as such; it is not a CI network call and adds no
+service, account or secret. Excluded: any O11 adjudication, any I-L5 work, any change to
+`.github/workflows/ci.yml`, any new CLI subcommand, dependency, ceiling key, tag or release, any
+re-freeze of `build/site.lock`, any change to a published page byte, any membership change to
+`evidence/manifest.json` (the record is a reading, not a manifest artifact), and any assertion about
+the wall-clock fields of the benchmark. No push is authorised by this unit; a push needs its own
+verbatim approval.
+
+Recursion limit: if a later approval pushes X9, the backfill commit's own CI run is observed-only
+and no third ref update is authorised, as in sections 27, 31, 35 and 39. I-L5, I-L8 and O11 stay
+out of scope.
