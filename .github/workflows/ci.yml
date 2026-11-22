@@ -105,7 +105,7 @@ jobs:
       - name: offline build (network namespace)
         run: |
           set -euo pipefail
-          # `sudo` resets PATH, and setup-uv installs uv/python outside the secure path. Resolve the
+          # `sudo` resets PATH, and setup-uv installs the tool outside the secure path. Resolve the
           # venv interpreter here, before the elevation, and pass it in as an absolute path so the
           # namespace needs no PATH inheritance and cannot accidentally resolve a different python.
           py_path="$(uv run python -c 'import sys; print(sys.executable)')"
