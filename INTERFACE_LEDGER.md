@@ -174,7 +174,7 @@ not be cited to justify or block work.
 | I-L2 | Filled — both halves | `python -m quantrisk.interface.site` builds pages from committed artifacts, and `test_the_generator_source_contains_no_numeric_literal` plus plant `site-source-carries-a-figure-of-its-own` make the source scan falsifiable at `aafb707`. The drift half is filled at `28727f4` by `python -m quantrisk.interface.drift --check` against the committed `build/site.lock`, with guard `test_the_committed_lock_detects_a_figure_that_drifted_in_an_artifact` and plant `site-lock-catches-a-manifest-silent-figure-change` proving it reddens (section 17) |
 | I-L3 | Filled | X5 published a static surface; `test_published_pages_carry_no_request_execution_path` scans every generated page for scripts, handlers, fetch/XHR and external URLs (and `test_generated_markup_source_has_no_script_template` scans the source template), with plant `site-page-gains-a-request-execution-path` reddening both by injecting a `<script>` into `DOCUMENT_HEAD` (section 30) |
 | I-L4 | Filled (cost basis bounded) | X5 configured the free-tier publish; `test_the_publish_chain_stays_on_the_free_tier` names the no-cost first-party action set and refuses stored secrets, with plant `publish-chain-adds-a-paid-action` reddening on a third-party paid action. The cost basis is CI minutes and Pages free tier only — AI-token cost (O11) stays unadjudicated and out of scope (section 30) |
-| I-L5 | Partial | `test_the_build_opens_no_socket` refuses `socket.socket`, `create_connection` and `getaddrinfo` for a full build; a build with the network actually down was not run, and a subprocess making a network call would escape this probe |
+| I-L5 | Filled | X11 added a lint-job step that enters a fresh network namespace with `sudo unshare -n`, proves the isolation with a negative socket probe that must fail, then rebuilds the site with `quantrisk.interface.drift --check` against the committed `build/site.lock`. Platform run `45027396972` (attempt 1) printed `OFFLINE PROBE PASS` and `OFFLINE BUILD PASS` with the probe intact, so a build with the network actually down now exists; the in-process `test_the_build_opens_no_socket` remains as a second check. The read-only `offline.audit(root)` re-derives the step's markers, the site generator's network-free import closure and the lock digest, guarded by `test_the_offline_build_facts_are_readable_and_falsifiable` and reddened by the plant `offline-step-drops-its-negative-probe` (`ok caught` on the runner census). No OS-level offline claim is made from the macOS host, where the mechanism is unavailable (sections 49–52) |
 | I-L6 | Filled (module path, not HTTP) | `python -m quantrisk.interface.provenance --resolve --json` is the machine-readable surface: `test_the_machine_readable_surface_is_module_path_and_keeps_provenance` requires value + command + revision + digest together and an AST check that no HTTP/service framework is imported, with plant `machine-readable-surface-drops-a-provenance-field` reddening when a field is dropped. No service layer was added (section 30) |
 | I-L7 | VOID | Claim-inventory guards belong to the refactor lane; this lane has added no README or site claim, so no I-lane target exists |
 | I-L8 | Filled | X10 ran the report-wide audit the roadmap line 302 names: `claimmap.audit()` re-derives each H's quoted figure from its committed record (H1 price from the cold-start record, H2 coverage from `provenance.completeness()`, H3 digest from `build/site.lock`, H4 budget line from `cost.audit()`) and checks it is still present in that H's section 3 claim; all four map, none unmapped or refused. Guard `test_every_h_value_claim_maps_to_its_recorded_run` re-derives independently and is reddened by plant `claim-map-drops-a-recorded-figure-from-the-report` (sections 45–46) |
@@ -246,9 +246,9 @@ static publish, and read-only machine surface. No date is attached.
 | 1d | X3: a page-level drift gate with a committed baseline and a falsifying plant; no deploy, new key or zero-literal-rule change | Done at `28727f4`: `198/198`, single-plant red/green and all readings in section 17; no platform reading because section 16 excludes a push |
 | 1e | X4: G-A/G-B attribution gaps closed in the designated file; read-only provenance surface with a named falsifying plant; no CLI subcommand, deploy or new key | Done at `25aed30`: `199/199`, single-plant red/green and all readings in section 21; no platform reading because section 20 excludes a push |
 | 2 | I1 CLI provenance surface | Done as a `-m` module under X4 scope A: `python -m quantrisk.interface.provenance --list/--resolve` answers provenance offline with a guarded output; the literal `quantrisk` subcommand form was declined in X4 option B and stays outside the frozen four-subcommand contract; readings in section 21 |
-| 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | Partial (publish sub-item now Done): generator done at `aafb707` and drift gate proven falsifiable at `28727f4` (sections 13/17); X5's gated CI `deploy` job ran on the runner in run `44292891046` (seven-job success) and published the gate-verified bytes to `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`, with a live-URL reading whose SHA equals the locked `index.html` (section 28); the offline build stays partial (I-L5, section 2), which keeps item 3 Partial as a whole |
+| 3 | I2 generator, drift gate proven falsifiable, free-tier CI publish, offline build | Filled: generator done at `aafb707` and drift gate proven falsifiable at `28727f4` (sections 13/17); X5's gated CI `deploy` job ran on the runner in run `44292891046` (seven-job success) and published the gate-verified bytes to `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`, with a live-URL reading whose SHA equals the locked `index.html` (section 28); X11 executed the site build with the network actually down in run `45027396972`, printing `OFFLINE PROBE PASS` and `OFFLINE BUILD PASS` against the committed lock, closing the last sub-item (I-L5, section 2, sections 49–52) |
 | 4 | I3 value and provenance returned together, refusals name the gap | Done at `25aed30`: `resolve()` returns value + command + revision + digest together and refuses by name on any missing element; plant `provenance-erases-a-recorded-command` proves the guard fails; readings in section 21 |
-| 5 | H1–H4 measured, liveness filled, deliberately-not-done list | Filled for the H set and the value-mapping law: H3 registered with a platform live-SHA value (section 28/30), H2 measured complete at X7 (10/10, section 33/34), H4 measured zero at X8 (sections 37/38), H1 measured at X9 (one command, 0.611 s, five published fields reproduced, sections 41/42), so all four H values exist; X10 ran the report-wide claim-to-run audit and all four claims map to their committed records (section 45/46). Liveness I-L3/L4/L6 filled from the published surface (section 30), I-L8 filled at X10; I-L5 remains Partial (no true offline build); deliberately-not-done list below |
+| 5 | H1–H4 measured, liveness filled, deliberately-not-done list | Filled for the H set and the value-mapping law: H3 registered with a platform live-SHA value (section 28/30), H2 measured complete at X7 (10/10, section 33/34), H4 measured zero at X8 (sections 37/38), H1 measured at X9 (one command, 0.611 s, five published fields reproduced, sections 41/42), so all four H values exist; X10 ran the report-wide claim-to-run audit and all four claims map to their committed records (section 45/46). Liveness I-L3/L4/L6 filled from the published surface (section 30), I-L8 filled at X10, I-L5 filled at X11 with a true network-down build on the runner (sections 49–52); deliberately-not-done list below |
 
 ## 8. Deliberately not done
 
@@ -2283,3 +2283,53 @@ commit's own run is observed-only, because a third ref update is outside this ap
 release, secret or account is moved or added; no new CLI subcommand, ceiling key, dependency or
 HTTP surface is introduced; the deploy job stays downstream of the lint lane through `needs:
 [lint]`, so a gate failure blocks publication. O11 is untouched and unadjudicated by this push.
+
+## 52. X11 platform run, the network-down reading, and I-L5 filled (backfill)
+
+Run `45027396972` (attempt 1, head `c9df0e76a0a4a28b58e6d22a395e1ca4406da955`, created
+13:25:19Z, updated 13:45:54Z) returned `success` on the first attempt with all seven jobs green:
+Format and static checks; Benchmark suite against live oracles; Installed wheel surface in a clean
+environment; Configure/build/C++/Python tests; macOS native C++ and Python parity; Mutation census
+in a detached worktree; Publish the evidence site.
+
+**The I-L5 reading.** The `offline build (network namespace)` step ran in the lint lane and
+printed, in order, `OFFLINE PROBE: entering a network namespace with unshare -n`, `OFFLINE PROBE:
+inside the namespace`, `OFFLINE PROBE PASS: outbound socket refused inside the namespace`,
+`OFFLINE BUILD: rebuilding the site with the network down`, and `OFFLINE BUILD PASS: rebuilt site
+matches build/site.lock with no network`. The negative probe failed to connect as required, so the
+namespace demonstrably isolated the network; the site rebuilt from the committed bytes and matched
+the lock. This is the first site build in the project's history executed with the network actually
+down, so section 2's I-L5 row is now `Filled` and DoD item 3 `Filled`; the in-process
+`test_the_build_opens_no_socket` remains as a second, narrower check. No OS-level offline claim is
+made from the macOS host.
+
+**The paired falsifier.** The mutation census reports `208 declared = 207 measurable here + 1
+environment-blind`, verdict `caught 207 / declared 207 / ran 207`, revision
+`c9df0e76a0a4a28b58e6d22a395e1ca4406da955`, `checkout_status_before` and `checkout_status_after`
+both empty, `malformed` null. The new plant `offline-step-drops-its-negative-probe` is listed
+`ok caught`: erasing the probe's refusal marker reddens the guard, so the offline reading is not a
+self-certification. `plants_not_rejected_by_their_guard` is `0 against a ceiling of 0`. The single
+unmeasurable entry is the recurring pdfTeX-version blind spot
+(`report-source-edited-without-a-rebuild-seen-from-the-render`: runner pdfTeX 1.40.28 vs this
+build's recorded 1.40.29); it is unchanged by X11.
+
+**Other job readings.** lint lane: ruff 270 files formatted, mypy 84 sources clean, pytest
+524 passed + 5 skipped (one more than X10's 523), evidence verifier 95 OK / 0 CHANGED / 0 MISSING,
+`docs_rederivation` gap 0 with `derived.plants = 208`, `PASS: rebuilt site matches build/site.lock`
+at the existing drift gate. C++ tests 100% of 204 on Ubuntu and 100% of 204 on macOS (macOS lane
+also 98 Python tests passed); benchmark suite 19/19 executed and passed, 0 aggregated from disk;
+installed wheel reports version 1.9.0 with one study run and the refusal named what it needed.
+
+**Re-publication and live reading.** The `Publish the evidence site` job re-published the same
+gate-verified bytes (`pages_build_version=c9df0e76a0a4a28b58e6d22a395e1ca4406da955`, artifact
+14756266697, 10268 bytes). A direct read of
+`https://jackxiaozhiren.github.io/quantrisk-plus-plus/` returned HTTP 200, 5793 bytes, page
+SHA `692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4`, equal to the locked
+`index.html` digest — the seventh consecutive zero-drift live reading.
+
+**Boundary.** This backfill commit is carried in the second and final ref update of the section 51
+approval; its own run is observed-only and no third ref update is authorised. The platform confirms
+exactly two facts: the offline step prints its PASS markers with the negative probe intact, and its
+paired plant reddens under the census. All other producer readings remain development-side disk
+re-derivations. No page byte moved, no lock or manifest was re-frozen, no tag or release was moved,
+and O11 remains untouched and unadjudicated.
