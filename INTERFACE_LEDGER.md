@@ -1887,3 +1887,65 @@ the backfill commit's own run is observed-only, because a third ref update is ou
 No tag, release, secret or account is moved or added; no new CLI subcommand, ceiling key, dependency
 or HTTP surface is introduced; the deploy job stays downstream of the lint job's `site drift gate`
 through `needs: [lint]`, so a gate failure blocks publication. I-L5, I-L8 and O11 stay out of scope.
+
+## 44. X9 platform run and live re-publication (backfill)
+
+First run of the section 43 approval: `44999227131`, head `b202e765ca47`, push event, attempt 1,
+seven jobs all `success`, created `2026-11-22T07:39:34Z`, updated `08:04:22Z` (about 25 minutes;
+the mutation census is the long pole). Attribution below is to the job that printed each reading.
+
+- **Format and static checks** — `ruff check`: All checks passed; `ruff format --check`: 266 files
+  already formatted (X8 was 263, plus X9's three new Python files); `mypy python/quantrisk tools`:
+  no issues in 82 source files (X8 was 80). `refactor ceilings`: 13 ok / 2 SKIP, unchanged from
+  X5–X8, with `plants_not_rejected_by_their_guard` a deliberate SKIP in this lint vantage (the
+  census verdict is not present there) and later `ok ... 0 against a ceiling of 0 due P3.2` in the
+  census job. `evidence manifest`: 95 OK, 0 CHANGED, 0 MISSING. `site drift gate`: PASS — rebuilt
+  site matches `build/site.lock`. `revision b202e765c`.
+- **Configure, build, C++ tests, Python tests** — CTest 100% of 204 passed (X8: 204). Python tests
+  fully offline: **522 passed, 5 skipped** (X8: 521 — the +1 is the H1 cold-start guard,
+  `test_the_cold_start_records_one_command_from_an_empty_directory_outside_the_checkout`, which
+  compiles and runs green in this lane). `Validate installed CLI`: 7/7 checks passed. Final-tip
+  census attestation PASS: V9_LEDGER.md attests `5ec3fabe4fa8` as a strict ancestor of
+  `b202e765ca47`, 195 caught of 195 declared (the historical, fixed ancestor reading, not today's).
+- **Benchmark suite against live oracles** — suite 19/19 executed and passed, 0 aggregated from
+  disk, 0 failed, 0 skipped, 278.1 s total.
+- **Mutation census in a detached worktree** — `206 declared = 205 measurable here + 1
+  environment-blind`, `205/205 planted defects were rejected by their guard`, `non_caught []`,
+  the single unmeasurable entry being the recurring pdfTeX-version blind spot (`report-source-edited-
+  without-a-rebuild-seen-from-the-render`: this machine's pdfTeX 1.40.28 vs 1.40.29 recorded in
+  `paper/technical_report.build.json`). `checkout_status_before` and `after` both empty, verdict
+  revision `b202e765ca4735214812eb3570908764505cc03f`, vantage a detached worktree that watches
+  the checkout without writing it. **The new plant
+  `cold-start-record-quotes-a-price-the-published-artifact-does-not-hold` is `ok caught`** — H1's
+  falsifiability has platform-side backing: truncating the recorded price reddens the H1 guard on
+  the runner. This is the second of the two CI-side facts section 43 said this push could confirm.
+- **Installed wheel surface in a clean environment** — wheel `quantrisk-1.9.0-cp312-cp312-
+  linux_x86_64`, installed from this tree outside the checkout; `"version": "1.9.0"`, `"tasks": 19`,
+  `validate` passed 7/7, `refusal.named: true`, identity holds (module resolves under the installed
+  venv prefix), with-extras census 19/19. No CI step runs `tools/cold_start.py`, so none of the
+  cold-start reading's wall-clock numbers are runner readings here.
+- **macOS native C++ and Python parity** — CTest 100% of 204 passed; Python 98 passed in 2.84 s.
+- **Publish the evidence site** — downstream of lint through `needs: [lint]`; `Rebuild and verify
+  the published bytes`: PASS (drift check); github-pages artifact 10264 bytes (artifact ID
+  14745157434), `pages_build_version=b202e765ca4735214812eb3570908764505cc03f`, environment URL
+  `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`. Section 41 changed no page byte and
+  re-froze no `build/site.lock`, so this publication is the already-approved X5 surface rebuilding
+  the same gate-verified bytes, not a wider authorisation.
+
+**Live URL, fifth platform confirmation of H3 zero drift** — measured from the development machine
+at reading time: HTTP 200, TLS verify 0, 5793 bytes, `<title>QuantRisk++ evidence</title>`, page
+SHA256 `692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4` — byte-for-byte equal
+to the `index.html` `page_sha256` in the committed `build/site.lock`, unchanged from X5–X8. The
+deploy ZIP (10264 bytes here vs 10265 at X8) differs only in tar metadata; the page bytes do not
+move.
+
+**H1's own reading stays development-side, by construction.** No CI step runs
+`tools/cold_start.py` (section 41 excluded a `.github/workflows/ci.yml` change, and section 43
+carried that exclusion forward). What the platform confirms here is narrower and stated as such:
+the H1 guard runs green in the lint lane (522 passed, +1 over X8) and its paired plant reddens under
+the census (205/205). The producer's numbers — 0.611 s for one command from an empty directory,
+the five reproduced fields — remain the development-side reading of sections 41–42, not a runner
+claim. I-L5, I-L8 and O11 stay out of scope.
+
+This backfill commit is carried in the second and final ref update of the section 43 approval; its
+own run is observed-only under the same recursion limit, and no third ref update is authorised.
