@@ -1,24 +1,24 @@
 {
   "artifact": {
-    "bytes": 4219,
+    "bytes": 4218,
     "relative_path": "cold-start-out/benchmarks/performance/results/monte_carlo_speed.json",
-    "sha256": "d22e24fc08f1b5715bee744178958964356ab154c463eecc7e15a23dd16ab974"
+    "sha256": "1feb1ee9abd57bacebea959447d4d5f8412cf599e6dd08631b863e0a98056a7b"
   },
   "build": {
     "command": "uv build --wheel",
-    "wall_seconds": 15.174523374999808
+    "wall_seconds": 17.535707291999643
   },
   "checkout": "/Users/jackson/QuantRisk++",
   "environment": {
     "identity": {
-      "module": "/private/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/venv/lib/python3.12/site-packages/quantrisk/__init__.py",
-      "prefix": "/private/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/venv",
+      "module": "/private/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-m542l4fa/venv/lib/python3.12/site-packages/quantrisk/__init__.py",
+      "prefix": "/private/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-m542l4fa/venv",
       "version": "1.9.0"
     },
     "machine": "arm64",
     "platform": "macOS-27.2.1-arm64-arm-64bit",
     "python": "3.12.14",
-    "venv_root": "/private/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/venv"
+    "venv_root": "/private/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-m542l4fa/venv"
   },
   "install": {
     "argv": [
@@ -26,13 +26,13 @@
       "pip",
       "install",
       "--python",
-      "/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/venv/bin/python",
-      "/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/dist/quantrisk-1.9.0-cp312-cp312-macosx_27_0_arm64.whl"
+      "/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-m542l4fa/venv/bin/python",
+      "/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-m542l4fa/dist/quantrisk-1.9.0-cp312-cp312-macosx_27_0_arm64.whl"
     ],
     "mode": "index",
     "seed_reason": "",
     "seeded": {},
-    "wall_seconds": 210.84034191699993
+    "wall_seconds": 0.12578450000000885
   },
   "kept": false,
   "probe": {
@@ -81,7 +81,7 @@
     },
     "published_artifact": "benchmarks/performance/results/monte_carlo_speed.json"
   },
-  "revision": "e81bff3ccb71ef30d33237a5fda4079a5e970951",
+  "revision": "485f91a2afc11641a3078a23169007bd24b6ff2b",
   "run": {
     "argv": [
       "quantrisk",
@@ -90,20 +90,20 @@
       "--out",
       "cold-start-out"
     ],
-    "cwd": "/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-x058yf64/neutral",
+    "cwd": "/var/folders/5l/nltc5k_x7_s7gx6gcls5y5s40000gn/T/quantrisk-cold-start-m542l4fa/neutral",
     "existing_paths_before": [],
     "exit": 0,
     "subprocess_invocations": 1,
-    "wall_seconds": 1.354327750000266
+    "wall_seconds": 0.6110458749999452
   },
   "schema": "quantrisk-cold-start/1",
   "vantage": "a wheel built from this tree, installed into a fresh environment and run from an empty working directory, both outside the checkout",
   "venv": {
     "command": "uv venv",
-    "wall_seconds": 0.027556791999813868
+    "wall_seconds": 0.028413582999746723
   },
   "wheel": {
     "file": "quantrisk-1.9.0-cp312-cp312-macosx_27_0_arm64.whl",
-    "sha256": "f99db6512a44a28b0adcda62ee6908d35c26dac9ec907deb1e6af91bcd40a7e3"
+    "sha256": "6e769185d566b7b473fac3d716b3a8cacce33cad33c50a4a2544e030004d1f13"
   }
 }
