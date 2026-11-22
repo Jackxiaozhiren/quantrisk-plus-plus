@@ -105,21 +105,25 @@ jobs:
       - name: offline build (network namespace)
         run: |
           set -euo pipefail
+          # `sudo` resets PATH, and setup-uv installs uv/python outside the secure path. Resolve the
+          # venv interpreter here, before the elevation, and pass it in as an absolute path so the
+          # namespace needs no PATH inheritance and cannot accidentally resolve a different python.
+          py_path="$(uv run python -c 'import sys; print(sys.executable)')"
           echo "OFFLINE PROBE: entering a network namespace with unshare -n"
           sudo unshare -n bash -c '
             set -euo pipefail
-            out="$1"
+            py="$1"; out="$2"
             echo "OFFLINE PROBE: inside the namespace"
-            if python3 -c "import socket; socket.create_connection((\"198.51.100.1\", 9), 1)" 2>/dev/null; then
+            if "$py" -c "import socket; socket.create_connection((\"198.51.100.1\", 9), 1)" 2>/dev/null; then
               echo "OFFLINE PROBE FAILED: an outbound socket connected inside the namespace" >&2
               exit 1
             fi
             echo "OFFLINE PROBE PASS: outbound socket refused inside the namespace"
             echo "OFFLINE BUILD: rebuilding the site with the network down"
-            uv run python -m quantrisk.interface.drift \
+            "$py" -m quantrisk.interface.drift \
               --lock build/site.lock --check --out "$out"
             echo "OFFLINE BUILD PASS: rebuilt site matches build/site.lock with no network"
-          ' _ "${RUNNER_TEMP}/offline-site-rebuild"
+          ' _ "$py_path" "${RUNNER_TEMP}/offline-site-rebuild"
 
   build-and-test:
     name: Configure, build, C++ tests, Python tests
