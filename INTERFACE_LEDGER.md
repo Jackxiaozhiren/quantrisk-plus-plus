@@ -2397,3 +2397,38 @@ drifted, so no live-URL reading is re-taken here.
 
 **Bounded effect, and nothing beyond it:** this section only. No push is authorised and no platform
 reading is claimed; section 53 stays a local ruling record that the platform has not yet seen.
+
+## 55. Push approval for the O11 ruling and its bound
+
+Section 53 excluded a push and section 54 recorded the local stage readings, so the ruling exists
+only on this host. The maintainer then approved the push. Approval original, verbatim:
+`推送 §53/§54 并回填（最推荐）` — the push-and-backfill authorisation recorded the same way as
+`推送 X5 并回填（最推荐）`, `推送 X6 并回填（最推荐）`, `推送 X7 并回填（推荐）`,
+`推送 X8 并回填（最推荐）`, `推送 X9 并回填（最推荐）` and `推送 X10 并回填（最推荐）`
+in sections 27, 31, 35, 39, 43 and 47.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the two O11 commits (`0cd85c2`, `584a065`) together with the commit
+that records this approval; read the first run produced by the push and attribute each reading to
+the job that printed it, including the deploy job. Because sections 53 and 54 changed no page byte,
+no `build/site.lock`, no `evidence/manifest.json` and no workflow, the deploy re-publishes the same
+gate-verified bytes, and its publication is a consequence of the already-approved X5 surface rather
+than a wider authorisation. Write those readings into a backfill commit in this ledger, including
+any failure as a failure rather than omitting it.
+
+**What this push can and cannot confirm.** It can confirm that the seven jobs are green on a tree
+whose only change is a ruling record and one test docstring, that the census still declares 208
+plants and catches every measurable one, that the counted suite still collects the number the
+documents state, and that the published bytes and the live URL do not move. It cannot confirm any
+measured value, because none was added: no H reading, no I-L predicate and no O11-dependent quantity
+is re-measured here. Section 53's ruling is a decision record, and the only platform fact it needs is
+that the record does not break the gates it sits behind. If a job fails, the failure is recorded as
+a failure and the ruling stays a local record.
+
+Recursion limit: the one sections 11, 14, 18, 22, 27, 31, 35, 39, 43, 47 and 51 used — the backfill
+commit's own run is observed-only, because a third ref update is outside this approval. No tag,
+release, secret or account is moved or added; no new CLI subcommand, ceiling key, dependency or HTTP
+surface is introduced; the deploy job stays downstream of the lint lane through `needs: [lint]`, so a
+gate failure blocks publication. The out-of-tree report
+`QuantRisk_reports/QuantRisk++_future_direction_report_v1.1.md` is not touched by this approval or
+by this push, and updating it remains a separate unit with its own scope.
