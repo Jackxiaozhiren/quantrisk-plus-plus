@@ -2574,3 +2574,58 @@ backfill commit's own run is observed-only, because a third ref update is outsid
 tag, release, secret or account is moved or added; no new CLI subcommand, ceiling key, dependency
 or HTTP surface is introduced; the deploy job stays downstream of the lint lane through
 `needs: [lint]`, so a gate failure blocks publication.
+
+## 60. Report-unit ledger sections on the platform — seven green gates (backfill)
+
+Run `45165920196` (attempt 1, head `3978045b395a81d885cc9471ab86f0dbdf883af1`, created
+11:31:04Z, updated 11:51:57Z) returned `success` on the first attempt with all seven jobs green:
+Format and static checks (11:31:07→11:32:34); Configure, build, C++ tests, Python tests
+(11:31:08→11:37:31); Benchmark suite against live oracles (11:31:08→11:39:35); Installed wheel
+surface in a clean environment (11:31:07→11:32:49); macOS native C++ and Python parity
+(11:36:49→11:40:20); Mutation census in a detached worktree (11:31:07→11:51:57); Publish the
+evidence site (11:32:39→11:33:55).
+
+**What the run confirms.** The three ledger-only commits pass every gate they sit behind, so the
+report unit's bookkeeping is carried by a tree the platform has executed. The lint lane printed
+`All checks passed!` for ruff, `270 files already formatted`, `Success: no issues found in 84 source
+files`, four ceiling gaps at 0 (`artifact_revision`, `docs_rederivation`,
+`lanes_documented_vs_executed`, `runtime_reachability`; `with_extras_census` also 0), and
+`external_dependencies` 9 declared and 9 measured with none added or removed. The evidence manifest
+step printed `Evidence is intact.` over its 95 artifacts, the drift gate printed `PASS: rebuilt site
+matches build/site.lock`, and the offline step printed `OFFLINE PROBE PASS: outbound socket refused
+inside the namespace` followed by `OFFLINE BUILD PASS: rebuilt site matches build/site.lock with no
+network` — the I-L5 markers of section 52, re-printed rather than re-interpreted. The C++ suite
+reports `100% tests passed out of 204`, pytest `524 passed, 5 skipped in 168.61s`, the benchmark
+suite `suite: 19/19 executed and passed, 0 aggregated from disk, 0 failed, 0 skipped`, the macOS job
+`98 passed in 3.03s` with a `quantrisk-1.9.0-cp312-cp312-macosx_15_0_arm64.whl`, and the
+installed-surface job `identity holds, the list is the registry, one study ran, and the refusal
+named what it needed` at revision `3978045`.
+
+**The census.** `208 declared = 207 measurable here + 1 environment-blind`, `207/207 planted defects
+were rejected by their guard`, revision `3978045`, checkout status empty before and after. The
+environment-blind plant is the one sections 52 and 56 named: the re-render guard needs the pdfTeX
+that typeset the PDF, and the runner's is 1.40.28 against the recorded 1.40.29. Both plants that
+touch report claims were caught on the runner — `claim-map-drops-a-recorded-figure-from-the-report`
+and `offline-step-drops-its-negative-probe` each printed `ok caught` — so appending sections 57–59
+did not displace the H1 anchor either plant depends on. The census's `docs_rederivation` reading
+re-derived 208 plants, 95 manifest artifacts and 19 suite members from their artifacts with gap 0
+across the five living documents.
+
+**No page byte moved.** The deploy job re-verified the rebuilt site against the lock, then uploaded
+artifact `14814429085` (10267-byte zip container) and created a deployment with `pages_build_version`
+`3978045b395a81d885cc9471ab86f0dbdf883af1`, reporting success. The live URL returned HTTP 200 with
+5793 bytes and SHA-256 `692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4`, which is
+`build/site.lock`'s `page_sha256` — another zero-drift reading of the served bytes. Sections 57–59
+changed no repository artifact, so no new page content was available to publish.
+
+**What the run does not confirm.** No report content and no measured value. The v1.2 report is
+tree-external, has no CI lane and is not part of this ref; its SHA-256 remains
+`aa24947ab0a55acf8df601e9a1292559230c83420f375f4559c015bd20545984` and v1.1 remains byte-identical
+to its pre-unit SHA. The run's only claim about the report unit is that the three ledger sections do
+not break the gates they sit behind; no H1–H4 reading, I-L predicate or O11-dependent quantity was
+re-measured.
+
+Recursion limit: this backfill commit's own run is observed-only, and no third ref update is
+authorised, as in sections 11, 14, 18, 22, 27, 31, 35, 39, 43, 47, 51, 55 and 59. Bounded effect,
+and nothing beyond it: this section. No tag, release, secret, account, ceiling key, dependency,
+report byte or workflow step is moved or added by the backfill.
