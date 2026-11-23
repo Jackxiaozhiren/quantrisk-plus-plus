@@ -2515,3 +2515,32 @@ release or published byte moves, and no push is authorised. K2 and K3 are not tr
 rulings: only K1/O11 has an approval original on disk, and no capability is unlocked by an
 interpretation. No claim is made that S05 was adjudicated under X1 — later units added named plants
 under their own approvals instead.
+
+## 58. Out-of-tree report v1.2 local stage reading
+
+`/Users/jackson/QuantRisk_reports/QuantRisk++_future_direction_report_v1.2.md` now exists: 836 lines,
+165845 bytes, SHA-256 `aa24947ab0a55acf8df601e9a1292559230c83420f375f4559c015bd20545984`. The v1.1
+file is byte-identical to its pre-unit reading, SHA-256
+`da3a5b96e67696ef1f8e3ba5bcbde914ae4a72c60560100e03e262da3c9bfa57`, and was never written.
+
+**What v1.2 contains.** The v1.1 body is retained as the dated historical record at `e60bba5`; the
+header states the reading rule, so an unmarked "unmeasured / unadjudicated / VOID / not obtained"
+sentence is a 2026-11-15 reading and not a claim about the present. R0 was rewritten in place as
+eight current-state lines and R0.1 gives the four H values, the liveness state, the true
+network-down build, the O11 ruling and the current counts with run attribution. E63–E70 add the
+eight new evidence entries with run, attempt, date or revision; R1.5.1 registers C12–C18; R9.1 keeps
+its historical columns and adds a current-reading column; R9.2 marks the old "deliberately not done"
+list as historical; K1, eight R11.3 rows and fourteen R11.5 rows carry in-place v1.2 annotations.
+K2 and K3 remain interpretations, and S05 stays unadjudicated under X1.
+
+**Checks taken.** R0 has exactly eight content lines, satisfying the report's own Section 6 bound;
+all contiguous markdown tables have a single column count (zero inconsistent groups); no fenced code
+block was introduced; and every named insertion point, including E63–E70 and the O11 ruling text,
+was asserted present. No platform run is claimed by this unit: the report is tree-external and has
+no CI lane, and its readings are the runs already attributed in sections 30–56.
+
+**Bounded effect, and nothing beyond it:** this section and section 57 in this ledger, plus the new
+tree-external file. No repository artifact, count, PDF, lock, manifest, workflow, tag, release or
+published byte moved. No push is authorised; local HEAD `9f4b15b` carries sections 57–58 and the
+platform remains at `983b4a9`. If a later approval pushes these two bookkeeping commits, the usual
+recursion limit applies: that run is observed-only and no third ref update follows from it.
