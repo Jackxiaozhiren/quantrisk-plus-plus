@@ -2432,3 +2432,61 @@ surface is introduced; the deploy job stays downstream of the lint lane through 
 gate failure blocks publication. The out-of-tree report
 `QuantRisk_reports/QuantRisk++_future_direction_report_v1.1.md` is not touched by this approval or
 by this push, and updating it remains a separate unit with its own scope.
+
+## 56. O11 platform run — the ruling carried by seven green gates (backfill)
+
+Run `45143457529` (attempt 1, head `b8772216e54e681724b9ddfd640dcf02b53501cc`, created
+09:02:10Z, updated 09:27:55Z) returned `success` on the first attempt with all seven jobs green:
+Format and static checks (09:02:13→09:03:33); Configure, build, C++ tests, Python tests
+(09:02:13→09:08:12); Benchmark suite against live oracles (09:02:13→09:12:10); Installed wheel
+surface in a clean environment (09:02:14→09:04:29); macOS native C++ and Python parity
+(09:02:13→09:05:45); Mutation census in a detached worktree (09:02:13→09:27:54); Publish the
+evidence site (09:03:38→09:04:49).
+
+**What the run confirms.** The three O11 commits pass every gate they sit behind, so the ruling is
+carried by a tree the platform has executed rather than by a claim about one. The lint lane's
+`static_check_coverage` records `mypy_exit_code: 0` with two-sided agreement on 84 source files
+(70 under `python/quantrisk`, 14 under `tools`), `formatter_census` records 270 of 270 formattable
+files already formatted with 0 to reformat, and the four ceiling gaps read 0
+(`docs_rederivation`, `lanes_documented_vs_executed`, `runtime_reachability`, `with_extras_census`)
+with `external_dependencies` at 9 declared and 9 measured, none added or removed. The evidence
+manifest step printed `Evidence is intact.` over its 95 artifacts, the drift gate printed `PASS:
+rebuilt site matches build/site.lock`, and the offline step printed `OFFLINE PROBE PASS: outbound
+socket refused inside the namespace` followed by `OFFLINE BUILD PASS: rebuilt site matches
+build/site.lock with no network` — the same two markers section 52 attributed to I-L5, re-printed
+here rather than re-interpreted. The C++ suite reports `100% tests passed out of 204`, pytest
+`524 passed, 5 skipped in 170.82 s` (the count section 52 recorded, because no test was added), the
+benchmark suite `19/19 executed and passed`, the macOS job `98 passed in 3.40 s` with a
+`quantrisk-1.9.0-cp312-cp312-macosx_15_0_arm64.whl`, and the installed-surface job `identity holds,
+the list is the registry, one study ran, and the refusal named what it needed` at revision
+`b877221`.
+
+**The census.** `208 declared = 207 measurable here + 1 environment-blind`, `207/207 planted defects
+were rejected by their guard`, revision `b877221`, checkout status empty before and after. The
+environment-blind plant is the same one section 52 named: `report-source-edited-without-a-rebuild`'s
+guard needs the pdfTeX that typeset the PDF, and the runner's is 1.40.28 against the recorded
+1.40.29. Both plants that touch this unit's claims were caught on the runner —
+`claim-map-drops-a-recorded-figure-from-the-report` and
+`offline-step-drops-its-negative-probe` each printed `ok caught` — so appending sections 53–55 did
+not displace the H1 anchor either plant depends on. The local census at `0cd85c2` read 208/208
+measurable because this host's comparison set is not version-blind; the difference is the
+environment, not a regression, and it is the same difference section 52 recorded.
+
+**No page byte moved.** The deploy job re-verified the rebuilt site against the lock (`PASS`), then
+uploaded artifact `14803950214` and created deployment `b877221` with `pages_build_version`
+`b8772216e54e681724b9ddfd640dcf02b53501cc`, reporting success. The live URL returned HTTP 200 with
+5793 bytes and SHA-256 `692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4`, which is
+`build/site.lock`'s `page_sha256` — the eighth consecutive zero-drift reading. The uploaded zip's
+own size (10623 bytes here, 10268 in section 52) is the artifact container, not a page byte; the
+checkable reading is the served 5793 bytes and its digest, and those did not move.
+
+**What the run does not confirm.** No measured value. No H reading, no I-L predicate and no
+O11-dependent quantity was re-measured, because section 53 added none; its only claim is a decision
+and the split it names. O11 stays closed, section 2's I-L4 row keeps the cost-basis sentence section
+53 wrote, and no H1–H4 reading changes here.
+
+Recursion limit: this backfill commit's own run is observed-only, and no third ref update is
+authorised, as in sections 11, 14, 18, 22, 27, 31, 35, 39, 43, 47 and 51. Bounded effect, and
+nothing beyond it: this section. No tag, release, secret, account, ceiling key, dependency or
+workflow step is moved or added by the backfill, and the out-of-tree report remains untouched and
+still to be updated as its own unit.
