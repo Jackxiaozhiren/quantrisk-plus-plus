@@ -2490,3 +2490,28 @@ authorised, as in sections 11, 14, 18, 22, 27, 31, 35, 39, 43, 47 and 51. Bounde
 nothing beyond it: this section. No tag, release, secret, account, ceiling key, dependency or
 workflow step is moved or added by the backfill, and the out-of-tree report remains untouched and
 still to be updated as its own unit.
+
+## 57. Out-of-tree report v1.2 scope and approval
+
+Sections 53–56 closed O11 in the repository and on the runner, and section 55 explicitly left the
+out-of-tree report `QuantRisk_reports/QuantRisk++_future_direction_report_v1.1.md` as a separate
+unit. That report states, as its own 2026-11-15 reading at `e60bba5`, that H1–H4 are unmeasured,
+that I-L1…I-L8 are all VOID, that `INTERFACE_LEDGER.md` is untracked, that the three publication
+approvals are not obtained and that O11 is unadjudicated. Those were true then; they are false at
+`983b4a9`. The report is the last surface that would tell a reader the project has not been built.
+
+The maintainer approved this unit. Approval original, verbatim: `把报告更新到 v1.2（最推荐）`
+
+**Scope.** Write a new `QuantRisk++_future_direction_report_v1.2.md` under
+`/Users/jackson/QuantRisk_reports/`, leaving v1.1 byte-identical as the dated historical record.
+Retain v1.1's R/E/B/N/K numbering and its historical rows; add a current-state section whose
+platform readings carry run, attempt, date and producer, add evidence entries and a v1.2 revision
+registry, and mark each superseded conclusion where a reader would otherwise take it as current.
+No number is transcribed from this ledger without its source in that row.
+
+**Bounded effect, and nothing beyond it:** the tree-external v1.2 file, this scope section and the
+stage record that follows. No repository artifact, count, PDF, lock, manifest, workflow, tag,
+release or published byte moves, and no push is authorised. K2 and K3 are not treated as maintainer
+rulings: only K1/O11 has an approval original on disk, and no capability is unlocked by an
+interpretation. No claim is made that S05 was adjudicated under X1 — later units added named plants
+under their own approvals instead.
