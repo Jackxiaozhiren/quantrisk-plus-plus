@@ -173,7 +173,7 @@ not be cited to justify or block work.
 | I-L1 | VOID | §3 condition 4 is named VOID; no resolvability reading with a named plant to bind a target to |
 | I-L2 | Filled — both halves | `python -m quantrisk.interface.site` builds pages from committed artifacts, and `test_the_generator_source_contains_no_numeric_literal` plus plant `site-source-carries-a-figure-of-its-own` make the source scan falsifiable at `aafb707`. The drift half is filled at `28727f4` by `python -m quantrisk.interface.drift --check` against the committed `build/site.lock`, with guard `test_the_committed_lock_detects_a_figure_that_drifted_in_an_artifact` and plant `site-lock-catches-a-manifest-silent-figure-change` proving it reddens (section 17) |
 | I-L3 | Filled | X5 published a static surface; `test_published_pages_carry_no_request_execution_path` scans every generated page for scripts, handlers, fetch/XHR and external URLs (and `test_generated_markup_source_has_no_script_template` scans the source template), with plant `site-page-gains-a-request-execution-path` reddening both by injecting a `<script>` into `DOCUMENT_HEAD` (section 30) |
-| I-L4 | Filled (cost basis bounded) | X5 configured the free-tier publish; `test_the_publish_chain_stays_on_the_free_tier` names the no-cost first-party action set and refuses stored secrets, with plant `publish-chain-adds-a-paid-action` reddening on a third-party paid action. The cost basis is CI minutes and Pages free tier only — AI-token cost (O11) stays unadjudicated and out of scope (section 30) |
+| I-L4 | Filled (cost basis bounded) | X5 configured the free-tier publish; `test_the_publish_chain_stays_on_the_free_tier` names the no-cost first-party action set and refuses stored secrets, with plant `publish-chain-adds-a-paid-action` reddening on a third-party paid action. The cost basis is CI minutes and Pages free tier only; AI-token cost (O11) is adjudicated at section 53 as a task-side cost outside the project-side basis, so the project side stays at zero monetary and carrying cost with no account or secret (sections 30, 53) |
 | I-L5 | Filled | X11 added a lint-job step that enters a fresh network namespace with `sudo unshare -n`, proves the isolation with a negative socket probe that must fail, then rebuilds the site with `quantrisk.interface.drift --check` against the committed `build/site.lock`. Platform run `45027396972` (attempt 1) printed `OFFLINE PROBE PASS` and `OFFLINE BUILD PASS` with the probe intact, so a build with the network actually down now exists; the in-process `test_the_build_opens_no_socket` remains as a second check. The read-only `offline.audit(root)` re-derives the step's markers, the site generator's network-free import closure and the lock digest, guarded by `test_the_offline_build_facts_are_readable_and_falsifiable` and reddened by the plant `offline-step-drops-its-negative-probe` (`ok caught` on the runner census). No OS-level offline claim is made from the macOS host, where the mechanism is unavailable (sections 49–52) |
 | I-L6 | Filled (module path, not HTTP) | `python -m quantrisk.interface.provenance --resolve --json` is the machine-readable surface: `test_the_machine_readable_surface_is_module_path_and_keeps_provenance` requires value + command + revision + digest together and an AST check that no HTTP/service framework is imported, with plant `machine-readable-surface-drops-a-provenance-field` reddening when a field is dropped. No service layer was added (section 30) |
 | I-L7 | VOID | Claim-inventory guards belong to the refactor lane; this lane has added no README or site claim, so no I-lane target exists |
@@ -2333,3 +2333,36 @@ exactly two facts: the offline step prints its PASS markers with the negative pr
 paired plant reddens under the census. All other producer readings remain development-side disk
 re-derivations. No page byte moved, no lock or manifest was re-frozen, no tag or release was moved,
 and O11 remains untouched and unadjudicated.
+
+## 53. O11 adjudicated — AI-token cost is task-side, outside the project-side zero-cost basis
+
+O11's original form in the R0–R11 report is `AI token 消耗是否计入项目侧成本口径`, and the evidence
+it requires is a cost-basis ruling original whose owner is named as the developer themself. The
+report's entry K1 records the maintainer's words `成本上限「除了AI的token消耗以外，其余必须使用免费资源」`
+but declined to rewrite E09's `$0` claim from that alone, so the item stayed open while H1–H4 were
+being measured. Section 4's K1 row already states the same split as an interpretation; what was
+missing was the ruling original, not the position. With X11 closing I-L5, O11 was the last open item.
+
+The maintainer was offered the ruling and selected it. Approval original, verbatim — the option
+label they replied with: `裁定 O11：不计入（最推荐）`
+
+Ruling text carried by the selected option, verbatim:
+`O11 裁定：AI token 消耗单列为任务侧成本，不计入项目侧成本口径；项目侧 monetary cost 与持续携带成本仍为零，不引入账号或密钥。`
+
+**What this settles.** AI-token consumption is a task-side cost, recorded separately and excluded
+from the project-side basis. The project-side basis remains zero monetary cost and zero carrying
+cost, with no account or secret introduced. This is consistent with four statements already on
+disk: the report's K1 quoted maintainer words, Section 4's K1 ruling, `PROJECT_SPEC.md` §3's
+`除 AI token 外：` followed by the bolded `整个项目必须 $0 完成。`, and `docs/project_scope.md` §7
+`Cost constraint ($0 + AI tokens)`. It is also consistent with H4's measured reading rather than a
+replacement for it: `cost.audit()` still reports the paid action set empty, billed runners empty,
+stored secrets false, the free static tier true, no custom domain, and the `$0` budget line exactly
+once. The README's zero-cost sentence and E09/A5/C3.5 are not rewritten, because the ruling keeps
+the project side at zero and only names where the token cost sits.
+
+**Bounded effect, and nothing beyond it:** this section; the cost-basis sentence in Section 2's
+I-L4 row, which previously said O11 stays unadjudicated; and the docstring of
+`test_the_publish_chain_stays_on_the_free_tier`, which carried the same open-item sentence. No
+producer, guard, plant, count, document count, PDF, lock, manifest, workflow or published artifact
+is touched, and no H1–H4 reading changes. No push is authorised by this section; it is a local
+ruling record. O11 is now closed, and no open item remains in Section 2.

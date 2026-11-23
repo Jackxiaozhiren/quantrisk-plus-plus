@@ -95,8 +95,9 @@ def test_the_publish_chain_stays_on_the_free_tier() -> None:
     """Guard behind plant `publish-chain-adds-a-paid-action`.
 
     The publish chain uses only first-party, no-cost actions and the short-lived OIDC token; it
-    stores no secret and needs no paid account. The cost basis is the publish infrastructure and
-    explicitly excludes the AI-token question O11, which stays unadjudicated.
+    stores no secret and needs no paid account. The cost basis is the publish infrastructure; the
+    AI-token question O11 is adjudicated at section 53 as a task-side cost outside the project-side
+    basis, so the project side stays at zero monetary and carrying cost.
     """
     workflow = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
     publish_jobs = {
