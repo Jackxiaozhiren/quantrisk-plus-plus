@@ -2544,3 +2544,33 @@ tree-external file. No repository artifact, count, PDF, lock, manifest, workflow
 published byte moved. No push is authorised; local HEAD `9f4b15b` carries sections 57–58 and the
 platform remains at `983b4a9`. If a later approval pushes these two bookkeeping commits, the usual
 recursion limit applies: that run is observed-only and no third ref update follows from it.
+
+## 59. Push approval for the report unit's ledger sections
+
+Sections 57 and 58 recorded the out-of-tree report v1.2 scope, approval and local stage reading,
+and section 58 explicitly excluded a push. The maintainer then approved that push. Approval
+original, verbatim: `推送 §57/§58 并回填（推荐）` — the same bounded push-and-backfill form as
+`推送 §53/§54 并回填（最推荐）` in section 55 and its earlier counterparts in sections 27, 31,
+35, 39, 43, 47 and 51.
+
+Bounded effect, and nothing beyond it: at most two non-forced ref updates through
+`build/api_push.py`, carrying the two report-unit ledger commits (`9f4b15b`, `ea02ed7`) together
+with the commit recording this approval; read the first run produced by the push and attribute each
+reading to the job that printed it, including the deploy job; write those readings into a backfill
+commit in this ledger. Because sections 57–59 changed no repository artifact, count, PDF, lock,
+manifest, workflow or published byte — the report itself is tree-external and outside the ref —
+the deploy re-publishes the same gate-verified bytes, and its publication is a consequence of the
+already-approved X5 surface rather than a wider authorisation.
+
+**What this push can and cannot confirm.** It can confirm that the seven jobs stay green on a tree
+whose only change is three ledger sections, that the census still declares 208 plants and catches
+every measurable one, that the counted suite still collects the number the documents state, and
+that the live page keeps the locked SHA. It cannot confirm the report's contents: the report has no
+CI lane, and its v1.2 readings are the runs already attributed in sections 30–56. A failure is
+recorded as a failure, not omitted.
+
+Recursion limit: the one used in sections 11, 14, 18, 22, 27, 31, 35, 39, 43, 47, 51 and 55 — the
+backfill commit's own run is observed-only, because a third ref update is outside this approval. No
+tag, release, secret or account is moved or added; no new CLI subcommand, ceiling key, dependency
+or HTTP surface is introduced; the deploy job stays downstream of the lint lane through
+`needs: [lint]`, so a gate failure blocks publication.
