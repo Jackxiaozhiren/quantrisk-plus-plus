@@ -2366,3 +2366,34 @@ I-L4 row, which previously said O11 stays unadjudicated; and the docstring of
 producer, guard, plant, count, document count, PDF, lock, manifest, workflow or published artifact
 is touched, and no H1–H4 reading changes. No push is authorised by this section; it is a local
 ruling record. O11 is now closed, and no open item remains in Section 2.
+
+## 54. O11 ruling local stage reading — prose only, so no count moved
+
+Section 53's bounded effect is prose: the ruling record, Section 2's I-L4 cost sentence and the
+docstring of `test_the_publish_chain_stays_on_the_free_tier`. No producer, guard, plant, counted
+artifact or document figure is touched, so the mechanical cascade is empty. This stage reading
+exists to show that rather than assert it, and to leave the ruling attached to a revision a reader
+can check out.
+
+Readings at `0cd85c2`, development machine, committed checkout:
+
+- `ruff check .` — `All checks passed!`; `ruff format --check .` — 270 files already formatted;
+  `mypy python/quantrisk tools` — no issues in 84 source files. All three through `uv run`, the same
+  commands the lint job runs.
+- pytest — 594 passed in 126.20 s, with a private `--basetemp` and bytecode writing unset. Because
+  the last prose edits landed after that run, the modules that read the ledger's sections or the
+  counted documents were rerun: 83 passed in 31.53 s across `test_interface_offline`,
+  `test_interface_claimmap`, `test_interface_liveness` and `test_artifact_metadata`.
+- `uv run python tools/verify_evidence_manifest.py` — 95 OK, 0 CHANGED, 0 VOLATILE, 0 MISSING,
+  0 unlisted; `Evidence is intact.` The manifest is verified read-only, not rebuilt.
+- Full census — `208 declared = 208 ran = 208 caught`, `non_caught []`, `unmeasurable []`,
+  porcelain empty before and after, revision `0cd85c2`, from the detached worktree that watches
+  the checkout and never writes it. No plant lost its anchor and no new plant was needed.
+
+**What did not move.** The plant count stays 208, the pytest count stays 594, and the four
+documents, the PDF and its sidecar, `build/site.lock`, `evidence/manifest.json`, the workflow and
+every published byte are untouched. No cascade commit is pending and the published site cannot have
+drifted, so no live-URL reading is re-taken here.
+
+**Bounded effect, and nothing beyond it:** this section only. No push is authorised and no platform
+reading is claimed; section 53 stays a local ruling record that the platform has not yet seen.
