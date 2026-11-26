@@ -2713,3 +2713,78 @@ tag, release or published byte is authorised by section 61. The stage establishe
 plant now anchors on both versions and that the local gates behind the repair are green. The next
 section, if any, must carry the verbatim approval for a ref update before the fix can reach the
 PR.
+
+## 64. Anchor repair on the platform — main seven green, PR #14 green after a rebase
+
+The maintainer chose the rebase-and-verify option offered for the next step. Choice, verbatim:
+`触发 PR #14 rebase 验证（推荐）`
+
+**Bounded effect of that choice, and nothing beyond it:** exactly one comment on pull request #14
+carrying the single line `@dependabot rebase`, posted 2026-11-26T03:42:40Z as issue comment
+`7181956421` by `Jackxiaozhiren`. It is not a merge, not a close, not a review, not a ref update,
+not a tag or release, and it changes no workflow byte and no dependency version on `main`. The
+comment asks the bot to move its own branch; the bot, not this session, writes that branch.
+
+**What `main` shows after the repair.** Run `45745373335` (`run_number` 334, attempt 1, head
+`c5f330bbec40c649fce75ff9b3462cee468b3505`, push, created 02:53:21Z, updated 03:12:18Z) returned
+`success` with all seven jobs green: Format and static checks (02:53:25→02:54:40); Configure, build,
+C++ tests, Python tests (02:53:24→03:01:24); Benchmark suite against live oracles
+(02:53:25→03:03:33); Installed wheel surface in a clean environment (02:53:24→02:55:14); macOS
+native C++ and Python parity (02:53:26→02:57:24); Mutation census in a detached worktree
+(02:53:25→03:12:18); Publish the evidence site (02:54:45→02:56:27).
+
+Readings inside that run: ruff `reported_already_formatted: 270` of `reported_total: 270` with
+`reported_would_reformat: 0` against `tracked_formattable: 270`; `external_dependencies` 9 declared
+and 9 measured with none added or removed; `Evidence is intact.`; `PASS: rebuilt site matches
+build/site.lock` printed by the drift step, again by the deploy job and again inside the offline
+namespace; `OFFLINE PROBE PASS` and `OFFLINE BUILD PASS`; C++ `100% tests passed out of 204`; pytest
+`524 passed, 5 skipped in 224.41s`; macOS `98 passed`; the pages artifact `15083655687` with
+`pages_build_version: c5f330bbec40c649fce75ff9b3462cee468b3505`. The census printed
+`208 declared = 207 measurable here + 1 environment-blind` and `207/207 planted defects were
+rejected by their guard` at revision `c5f330b` with checkout status empty before and after, and the
+repaired plant `publish-chain-adds-a-paid-action` appears in that list as `ok caught` — so the
+version-independent anchor is exercised by the platform's own sweep, not only by the two local
+single-plant runs of section 62.
+
+**What the PR shows after the bot moved it.** The branch head moved from
+`828f10932e385e40ea1bea46b670c3bfbbfd02e4` to `a27bc73adb7da0b0fa543d7aedb53882424022f7` with base
+`c5f330b`, i.e. exactly the one commit that carries sections 61–63 and the two anchor literals. Run
+`45750725114` (`run_number` 335, attempt 1, `pull_request`, created 03:43:29Z, updated 04:04:14Z)
+returned `success` on its first attempt: the two jobs that were red on `828f1093` — Mutation census
+and Configure/build/C++/Python — are green, and Publish the evidence site is `skipped` because a
+pull-request event does not deploy. The census on the `@v5` bytes printed
+`208 declared = 207 measurable here + 1 environment-blind`, `207/207`, and
+`ok   caught   publish-chain-adds-a-paid-action`; pytest printed `524 passed, 5 skipped in 223.87s`
+and macOS `98 passed in 4.46s`. The anchor test that failed before
+(`test_every_declared_mutation_names_one_unique_anchor_and_a_guard_that_exists`, reporting `its
+anchor occurs 0 times in .github/workflows/ci.yml`) is green on this tree without being edited.
+
+**An observation that is not a conclusion.** The deploy step on `main` prints a deprecation warning
+naming `actions/deploy-pages@v4` among the actions "forced to run on Node.js 24" because they target
+Node.js 20. That is one reason the bump has value independent of the anchor defect, and it is
+recorded here as an observation. Merging PR #14 would change the version of the action that
+publishes the site, so it is left to its own unit, with its own approval and its own post-merge
+reading of the pages artifact and the live digest. Nothing in this section merges, closes or
+approves it.
+
+## 65. Backfill approval for the anchor-repair unit and its bound
+
+The maintainer delegated the remaining steps. Delegation, verbatim:
+`我都听你的，请按照你的思路建议进行`
+
+**How that sentence is read, narrowly.** It is read as approval for exactly one thing: a single
+non-forced update of `refs/heads/main` carrying sections 64–65 of this ledger, so that the platform
+readings above and the approval that produced them sit in the tree the platform executed. It is
+**not** read as approval to merge or close PR #14, to move or add a tag, to publish a release, to
+change any workflow byte, dependency version or published byte, or to make a second ref update
+after this one. The run this update produces is observed only, as in sections 55, 59 and 60; its
+readings wait for whichever later unit is separately approved.
+
+**Bounded effect, and nothing beyond it:** one ref update, one commit carrying only
+`INTERFACE_LEDGER.md` sections 64–65, verified against the remote's current SHA and refused if that
+SHA has moved, with `force` false. The anchor literals in
+`python/quantrisk/verification/plants.py` are already on `main` from `c5f330b` and are not touched
+here. No tag, release, secret, account, ceiling key, dependency, workflow step, version number or
+published byte moves. The repair's evidence chain now has three independent readings — the local
+single-plant pair of section 62, the platform census on `main`, and the platform census on the
+PR's `@v5` bytes — and none of them is inferred from another.
