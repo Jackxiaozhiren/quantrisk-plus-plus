@@ -2629,3 +2629,87 @@ Recursion limit: this backfill commit's own run is observed-only, and no third r
 authorised, as in sections 11, 14, 18, 22, 27, 31, 35, 39, 43, 47, 51, 55 and 59. Bounded effect,
 and nothing beyond it: this section. No tag, release, secret, account, ceiling key, dependency,
 report byte or workflow step is moved or added by the backfill.
+
+## 61. Dependabot PR anchor repair — scope and verbatim approval
+
+The maintainer approved this unit. Approval original, verbatim: `授权处理 dependabot PR 45358818696 的 anchor 非唯一问题`
+
+Run `45358818696` (PR #14, head `828f10932e385e40ea1bea46b670c3bfbbfd02e4`, branch
+`dependabot/github_actions/actions/deploy-pages-5`) failed its mutation-census job: the plant
+`publish-chain-adds-a-paid-action` returned `anchor-not-unique` because its anchor and replacement
+hard-code `uses: actions/deploy-pages@v4` while the PR bumps that step to `@v5`. On the PR's
+workflow the anchor occurs zero times, so `apply_mutation` refuses to guess and the plant cannot be
+planted. This is an anchor-versioning defect in the plant declaration, not a defect in the guard
+`test_the_publish_chain_stays_on_the_free_tier`, whose `FREE_ACTIONS` already matches the action
+name without its `@` suffix.
+
+**Scope.** Diagnose the mismatch from the PR's own workflow bytes; make the plant's anchor and
+replacement version-independent so they match both `actions/deploy-pages@v4` on `main` and `@v5` on
+the PR, while still inserting the named paid action immediately before the deploy step; verify
+locally that the anchor occurs exactly once on both workflow versions and that the guard reddens
+on the mutated tree and greens on the restored one. Record the reading in the section that follows.
+
+**Bounded effect, and nothing beyond it:** this scope section, the plant declaration in
+`python/quantrisk/verification/plants.py`, and the local stage reading. The user's sentence
+authorises handling the problem; it does **not** name a push, a PR comment, a tag, a release, a
+secret, an account, a ceiling key, a dependency, a workflow step or a published byte. Any ref
+update needs its own verbatim approval recorded here first, as in sections 55 and 59. No action
+version in `.github/workflows/ci.yml` is changed by this repair, and no guard or `FREE_ACTIONS`
+entry is widened to make the defect pass.
+
+## 62. Anchor repair local stage reading — v4 and v5 both planted
+
+The repair changes only the two text literals in
+`python/quantrisk/verification/plants.py` for plant `publish-chain-adds-a-paid-action`: anchor and
+replacement now end at `uses: actions/deploy-pages@`, so the declaration names the step without
+freezing its `@v4` or `@v5` suffix. The guard is untouched:
+`test_the_publish_chain_stays_on_the_free_tier` already compares action names with the `@` suffix
+removed, so a paid third-party action is refused on either workflow version. The anchor was
+measured to occur exactly once in both the `main` workflow (`@v4`, line 430) and PR #14's workflow
+bytes (`@v5`, line 430) before any run.
+
+**Local readings, 2026-11-26T10:44–10:49+08:00, macOS, uv 0.11.7, CPython 3.12.14, worktree at
+`4e64c5e1316a20a912ae9c6554ca7bb00eee9133`:** `ruff check` all passed; `ruff format --check` 270
+files already formatted; `mypy python/quantrisk tools` success on 84 source files; full
+`pytest -q` with a private basetemp `594 passed in 238.78s`. The single plant was run twice: once in
+the main worktree against `@v4` and once in a detached worktree whose workflow bytes were replaced
+with PR #14's `@v5` version (the runner's `target-already-modified` guard forbids injecting those
+bytes into the main worktree, so the second run used an isolated checkout with the repaired plant
+file and the main tree's virtual environment linked in). Both printed `ok caught` and
+`1/1 planted defects were rejected by their guard`. The detached worktree was removed afterwards
+and `git worktree list` shows only the two pre-existing worktrees.
+
+**The ceiling reading and its vantage.** `tools.inventory_orphan_code --check-ceilings` printed 13
+`ok` keys at gap 0, one `SKIP` (`installed_user_identity_mismatch`, precondition absent because the
+installed-surface lane did not run on this vantage), and one `VIOLATION`
+(`plants_not_rejected_by_their_guard: 1`). That violation reads the local
+`build/sweep_verdict.json`, whose revision is `28727f46d286f0da3c225812f81a7c6c73d74663` with
+`198 declared = 198 caught` — an earlier revision, not this tree. It is the same dev-vantage
+reading already recorded in the planning baseline (EV-M9), not a regression from this repair: the
+platform's own sweep at run `45170337984` revision `4e64c5e` reported `208 declared = 207 measurable
+here + 1 environment-blind` and `207/207` caught. No full sweep was re-run locally; the repair's
+plant-level claim rests on the two single-plant readings above.
+
+## 63. Push approval for the anchor repair and its bound
+
+The maintainer approved one ref update. Approval original, verbatim: `授权推送 main（推荐）`
+
+**Bounded effect, and nothing beyond it:** exactly one non-forced update of `refs/heads/main`,
+carrying sections 61–63 of this ledger and the two anchor literals in
+`python/quantrisk/verification/plants.py` for `publish-chain-adds-a-paid-action`. The update is
+verified against the remote's current SHA before it is sent and is refused if that SHA has moved.
+No tag, release, secret, account, ceiling key, dependency, workflow step, version number or
+published byte moves; `.github/workflows/ci.yml` is untouched by this push and still pins
+`actions/deploy-pages@v4` on `main` — PR #14 carries the `@v5` bump on its own branch. The
+maintainer's sentence authorises this one ref update and no backfill: a second update to record the
+resulting platform run is **not** authorised here. The backfill commit, if any, would need its own
+verbatim approval and its own run would be observed-only, as in sections 55, 59 and 60. Reading the
+jobs and logs of the run this update produces is within scope; commenting on, merging or closing
+PR #14 is not.
+
+**What this stage does not establish.** It does not establish that PR #14 is green: the PR's own
+CI run must re-execute the mutation-census job on its `@v5` tree, and no ref update, PR comment,
+tag, release or published byte is authorised by section 61. The stage establishes only that the
+plant now anchors on both versions and that the local gates behind the repair are green. The next
+section, if any, must carry the verbatim approval for a ref update before the fix can reach the
+PR.

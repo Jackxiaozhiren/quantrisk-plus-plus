@@ -2957,12 +2957,12 @@ MUTATIONS: tuple[Mutation, ...] = (
         path=".github/workflows/ci.yml",
         anchor=(
             "      - name: Deploy to GitHub Pages\n        id: deployment\n"
-            "        uses: actions/deploy-pages@v4"
+            "        uses: actions/deploy-pages@"
         ),
         replacement=(
             "      - name: Add a paid monitor\n        uses: vendor/paid-monitor@v1\n"
             "      - name: Deploy to GitHub Pages\n        id: deployment\n"
-            "        uses: actions/deploy-pages@v4"
+            "        uses: actions/deploy-pages@"
         ),
         guard="tests/python/test_interface_liveness.py::test_the_publish_chain_stays_on_the_free_tier",
         claim=(
