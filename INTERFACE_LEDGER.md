@@ -2788,3 +2788,56 @@ here. No tag, release, secret, account, ceiling key, dependency, workflow step, 
 published byte moves. The repair's evidence chain now has three independent readings — the local
 single-plant pair of section 62, the platform census on `main`, and the platform census on the
 PR's `@v5` bytes — and none of them is inferred from another.
+
+## 66. PR #14 merged to `@v5` — first real deploy of the bumped action (backfill)
+
+After the anchor repair the maintainer chose to land the dependency bump. Option, verbatim:
+`合并 PR #14 并观察（推荐）`
+
+**What was checked before the merge, and from where.** The official release page for
+`actions/deploy-pages` (github.com/actions/deploy-pages/releases, read 2026-11-28) states that
+v5.0.0 (25 Mar) mainly updates Node.js to 24.x, with rebuild, dependency and maintenance changes,
+and that v5.0.1 (01 Sep) adds backoff and jitter to deployment polling plus test coverage. The
+official v5 README states the deploy job still needs `pages: write` and `id-token: write`, deploys
+an artifact uploaded by `actions/upload-pages-artifact`, and targets the `github-pages`
+environment. This repository's `deploy` job already had both permissions, the upload step and the
+environment, so no workflow change beyond the version token was required. The one thing the PR
+could not show was the deploy job itself: pull-request events `skip` it, so the bumped action had
+to be exercised on `main`.
+
+**The merge and its reading.** PR #14 became `merged` at 2026-11-28T08:10:56Z, merge commit
+`4853ec61fd12e0b10b76f25269c2e784965be8e2`, and the local checkout was fast-forwarded to it. The
+only diff on `main` is one line in `.github/workflows/ci.yml`: `actions/deploy-pages@v4` became
+`@v5`. The version-independent anchor of section 61 remains intact and is printed unchanged in
+`python/quantrisk/verification/plants.py`.
+
+Run `46124603352` (`run_number` 337, attempt 1, push, created 08:10:59Z, updated 08:36:11Z)
+returned `success` on its first attempt with all seven jobs green. The deploy job at 08:13:31Z
+resolved `actions/deploy-pages@v5` to SHA `368f82528645a54fb793d4d04e342629a3f51346` — the v5.0.1
+commit — uploaded artifact `15255137158` with `pages_build_version:
+4853ec61fd12e0b10b76f25269c2e784965be8e2`, printed `PASS: rebuilt site matches build/site.lock`,
+and evaluated the environment URL `https://jackxiaozhiren.github.io/quantrisk-plus-plus/`. The
+Node.js 20 deprecation warning that previously named `actions/deploy-pages@v4` is gone; the only
+remaining warning names the commit-pinned `actions/upload-artifact`, which this PR did not touch.
+A read-back of the live site returned HTTP 200, 5,793 bytes and SHA-256
+`692db228336617a0663446bf4181d47a4b63204d9ff156d92d852b25715d25c4`, identical to the lock and
+to every earlier reading in this series.
+
+The other gates in the same run: the census printed
+`208 declared = 207 measurable here + 1 environment-blind` and `207/207 planted defects were
+rejected by their guard` at revision `4853ec6`, with `publish-chain-adds-a-paid-action` recorded as
+`ok caught` on the now-`@v5` workflow; pytest `524 passed, 5 skipped in 223.81s`; C++
+`100% tests passed out of 204` on both runners; the benchmark suite `19/19 executed and passed, 0
+aggregated from disk, 0 failed, 0 skipped`; ruff `270` of `270` already formatted; the offline
+step printed `OFFLINE PROBE PASS` and `OFFLINE BUILD PASS`; the evidence verifier printed
+`Evidence is intact.`. Locally, after the fast-forward, ruff, format, mypy, the 29 workflow-related
+guards, drift and the evidence verifier were also green.
+
+**Approval for this backfill, verbatim:** `回填账本 §66（推荐）`
+
+**Bounded effect, and nothing beyond it:** exactly one non-forced update of `refs/heads/main`
+carrying this section alone, verified against the remote's current SHA and refused if it has
+moved. No tag, release, secret, account, ceiling key, dependency, workflow byte, published byte or
+pull request is moved by the update; the `@v5` bump is already on `main` from `4853ec6`. The run
+this update produces is observed only, as in sections 55, 59, 60 and 65 — no third ref update is
+authorised by this section.
